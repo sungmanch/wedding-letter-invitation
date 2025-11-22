@@ -1,15 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft,
   Users,
   Share2,
   Utensils,
   Mail,
-  Settings,
   ChevronRight,
   LogOut,
 } from 'lucide-react'
@@ -25,22 +24,135 @@ import {
   TabsContent,
 } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
+import { createClient } from '@/lib/supabase/client'
 
-// Mock data (실제로는 DB에서 가져옴)
-const mockResponses = [
-  { id: '1', guestName: '김민지', createdAt: new Date() },
-  { id: '2', guestName: '이수진', createdAt: new Date() },
-  { id: '3', guestName: '박지현', createdAt: new Date() },
-]
+interface EventData {
+  id: string
+  groupName: string
+  status: string
+  expectedMembers: string | null
+  createdAt: string
+}
+
+interface SurveyResponse {
+  id: string
+  guestName: string
+  createdAt: string
+}
+
+interface LetterData {
+  id: string
+  guestName: string
+}
 
 export default function EventDashboardPage() {
   const params = useParams()
+  const router = useRouter()
   const eventId = params.eventId as string
   const [activeTab, setActiveTab] = useState('overview')
-  const { user, isLoading, logout } = useAuth(true) // 인증 필요
+  const { user, isLoading, logout } = useAuth(true)
+
+  const [eventData, setEventData] = useState<EventData | null>(null)
+  const [responses, setResponses] = useState<SurveyResponse[]>([])
+  const [letters, setLetters] = useState<LetterData[]>([])
+  const [isLoadingData, setIsLoadingData] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // 이벤트 데이터 로드
+  useEffect(() => {
+    async function fetchEventData() {
+      if (!user || !eventId) return
+
+      const supabase = createClient()
+
+      // 이벤트 정보 조회
+      const { data: event, error: eventError } = await supabase
+        .from('events')
+        .select('id, group_name, status, expected_members, created_at, user_id')
+        .eq('id', eventId)
+        .single()
+
+      if (eventError || !event) {
+        setError('청모장을 찾을 수 없습니다.')
+        setIsLoadingData(false)
+        return
+      }
+
+      // 소유권 확인
+      if (event.user_id !== user.id) {
+        setError('이 청모장에 접근할 권한이 없습니다.')
+        setIsLoadingData(false)
+        return
+      }
+
+      setEventData({
+        id: event.id,
+        groupName: event.group_name,
+        status: event.status,
+        expectedMembers: event.expected_members,
+        createdAt: event.created_at,
+      })
+
+      // 설문 응답 조회
+      const { data: responsesData } = await supabase
+        .from('survey_responses')
+        .select('id, guest_name, created_at')
+        .eq('event_id', eventId)
+        .order('created_at', { ascending: false })
+
+      if (responsesData) {
+        setResponses(responsesData.map(r => ({
+          id: r.id,
+          guestName: r.guest_name,
+          createdAt: r.created_at,
+        })))
+      }
+
+      // 편지 수 조회
+      const { data: lettersData } = await supabase
+        .from('letters')
+        .select('id, guest_name')
+        .eq('event_id', eventId)
+
+      if (lettersData) {
+        setLetters(lettersData.map(l => ({
+          id: l.id,
+          guestName: l.guest_name,
+        })))
+      }
+
+      setIsLoadingData(false)
+    }
+
+    if (user) {
+      fetchEventData()
+    }
+  }, [user, eventId])
+
+  // 시간 포맷팅
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return '방금 전'
+    if (diffMins < 60) return `${diffMins}분 전`
+    if (diffHours < 24) return `${diffHours}시간 전`
+    return `${diffDays}일 전`
+  }
+
+  // 예상 인원 파싱
+  const getExpectedCount = (expectedMembers: string | null): number => {
+    if (!expectedMembers) return 10
+    const match = expectedMembers.match(/(\d+)/)
+    return match ? parseInt(match[1], 10) : 10
+  }
 
   // 로딩 중이면 로딩 표시
-  if (isLoading) {
+  if (isLoading || isLoadingData) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -56,15 +168,23 @@ export default function EventDashboardPage() {
     return null
   }
 
-  // Mock data
-  const eventData = {
-    groupName: '민지의 대학친구들',
-    status: 'collecting',
-    responseCount: mockResponses.length,
-    expectedCount: 10,
-    letterCount: 2,
-    createdAt: new Date(),
+  // 에러 표시
+  if (error || !eventData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="mb-4 text-charcoal/60">{error || '데이터를 불러올 수 없습니다.'}</p>
+          <Link href="/my">
+            <Button variant="outline">내 청모장으로 돌아가기</Button>
+          </Link>
+        </div>
+      </div>
+    )
   }
+
+  const expectedCount = getExpectedCount(eventData.expectedMembers)
+  const responseCount = responses.length
+  const letterCount = letters.length
 
   return (
     <main className="min-h-screen pb-20">
@@ -102,20 +222,21 @@ export default function EventDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <Badge className="mb-2 bg-white/20 text-white border-white/30">
-              설문 수집 중
+              {eventData.status === 'collecting' ? '설문 수집 중' :
+               eventData.status === 'completed' ? '완료됨' : eventData.status}
             </Badge>
             <p className="text-2xl font-bold">
-              {eventData.responseCount}명 응답
+              {responseCount}명 응답
             </p>
           </div>
           <div className="text-right">
             <p className="text-sm opacity-80">목표</p>
-            <p className="text-lg font-semibold">{eventData.expectedCount}명</p>
+            <p className="text-lg font-semibold">{expectedCount}명</p>
           </div>
         </div>
         <ProgressBar
-          value={eventData.responseCount}
-          max={eventData.expectedCount}
+          value={responseCount}
+          max={expectedCount}
           className="mt-3"
           size="lg"
         />
@@ -146,7 +267,7 @@ export default function EventDashboardPage() {
                     <Utensils className="mb-2 h-6 w-6 text-soft-gold" />
                     <p className="font-medium text-charcoal">식당 추천</p>
                     <p className="text-xs text-charcoal/60">
-                      {eventData.responseCount >= 3 ? '추천 받기' : '3명 이상 필요'}
+                      {responseCount >= 3 ? '추천 받기' : '3명 이상 필요'}
                     </p>
                   </Card>
                 </Link>
@@ -163,7 +284,7 @@ export default function EventDashboardPage() {
                       <div>
                         <p className="text-sm text-charcoal/60">응답자</p>
                         <p className="font-semibold text-charcoal">
-                          {eventData.responseCount}명
+                          {responseCount}명
                         </p>
                       </div>
                     </div>
@@ -182,7 +303,7 @@ export default function EventDashboardPage() {
                       <div>
                         <p className="text-sm text-charcoal/60">받은 편지</p>
                         <p className="font-semibold text-charcoal">
-                          {eventData.letterCount}통
+                          {letterCount}통
                         </p>
                       </div>
                     </div>
@@ -198,7 +319,7 @@ export default function EventDashboardPage() {
           {/* Responses Tab */}
           <TabsContent value="responses">
             <div className="space-y-3">
-              {mockResponses.length === 0 ? (
+              {responses.length === 0 ? (
                 <div className="py-12 text-center">
                   <Users className="mx-auto mb-4 h-12 w-12 text-charcoal/20" />
                   <p className="text-charcoal/60">아직 응답이 없어요</p>
@@ -207,7 +328,7 @@ export default function EventDashboardPage() {
                   </p>
                 </div>
               ) : (
-                mockResponses.map((response) => (
+                responses.map((response) => (
                   <Card key={response.id}>
                     <CardContent className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
@@ -221,7 +342,7 @@ export default function EventDashboardPage() {
                             {response.guestName}
                           </p>
                           <p className="text-xs text-charcoal/50">
-                            방금 전
+                            {formatTimeAgo(response.createdAt)}
                           </p>
                         </div>
                       </div>
@@ -238,7 +359,7 @@ export default function EventDashboardPage() {
       {/* Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-cream bg-white p-4">
         <div className="mx-auto max-w-[480px]">
-          {eventData.responseCount >= 3 ? (
+          {responseCount >= 3 ? (
             <Link href={`/${eventId}/recommend`}>
               <Button size="lg" fullWidth>
                 <Utensils className="mr-2 h-5 w-5" />

@@ -1,21 +1,9 @@
 'use server'
 
 import { nanoid } from 'nanoid'
+import { createClient } from '@/lib/supabase/server'
 import { createEventSchema, type CreateEventInput } from '@/lib/validations/event'
 import type { ApiResponse } from '@/types'
-
-// 임시 저장소 (Supabase 연결 전까지 사용)
-// 실제로는 DB에 저장하지만, 환경 변수 없이도 테스트할 수 있도록 함
-const tempEvents = new Map<string, {
-  id: string
-  groupName: string
-  expectedMembers: string | null
-  preferredLocation: string | null
-  budgetRange: string | null
-  surveyUrl: string
-  status: string
-  createdAt: Date
-}>()
 
 export interface CreateEventResult {
   id: string
@@ -37,29 +25,45 @@ export async function createEvent(
   }
 
   try {
-    // 2. 고유 ID 생성
-    const eventId = nanoid(12)
+    const supabase = await createClient()
+
+    // 현재 로그인한 사용자 확인 (선택적)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // 2. 고유 survey URL 생성
     const surveyUrl = nanoid(10)
 
-    // 3. 이벤트 생성 (임시 저장소에 저장)
-    // TODO: Supabase 연결 후 실제 DB에 저장
-    const newEvent = {
-      id: eventId,
-      groupName: parsed.data.groupName,
-      expectedMembers: parsed.data.expectedMembers || null,
-      preferredLocation: parsed.data.preferredLocation || null,
-      budgetRange: parsed.data.budgetRange || null,
-      surveyUrl,
-      status: 'collecting',
-      createdAt: new Date(),
-    }
+    // 3. 이벤트 생성 (Supabase에 저장)
+    // id는 DB에서 자동 생성 (uuid)
+    // user_id는 Supabase Auth user.id를 직접 사용 (users 테이블 FK 제거 필요하거나 null 사용)
+    const { data: insertedEvent, error: insertError } = await supabase
+      .from('events')
+      .insert({
+        // user_id: 로그인 시 auth.users의 id를 저장하려면 FK 제약 해제 필요
+        // 일단 null로 저장하고 나중에 claim 방식으로 연결
+        user_id: null,
+        group_name: parsed.data.groupName,
+        expected_members: parsed.data.expectedMembers || null,
+        preferred_location: parsed.data.preferredLocation || null,
+        budget_range: parsed.data.budgetRange || null,
+        survey_url: surveyUrl,
+        status: 'collecting',
+      })
+      .select('id')
+      .single()
 
-    tempEvents.set(eventId, newEvent)
+    if (insertError) {
+      console.error('Insert error:', insertError)
+      return {
+        data: null,
+        error: { message: '청모장 생성에 실패했습니다. 다시 시도해주세요.' },
+      }
+    }
 
     // 4. 결과 반환
     return {
       data: {
-        id: eventId,
+        id: insertedEvent.id,
         surveyUrl,
       },
       error: null,
@@ -74,6 +78,58 @@ export async function createEvent(
 }
 
 export async function getEvent(eventId: string) {
-  // TODO: Supabase 연결 후 실제 DB에서 조회
-  return tempEvents.get(eventId) || null
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', eventId)
+    .single()
+
+  if (error) {
+    console.error('getEvent error:', error)
+    return null
+  }
+
+  return data
+}
+
+// 이벤트 소유권 연결 (비회원으로 생성 후 로그인 시 연결)
+export async function claimEvent(eventId: string): Promise<ApiResponse<boolean>> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return {
+        data: null,
+        error: { message: '로그인이 필요합니다.' },
+      }
+    }
+
+    const { error } = await supabase
+      .from('events')
+      .update({ user_id: user.id })
+      .eq('id', eventId)
+      .is('user_id', null) // user_id가 null인 경우에만 업데이트
+
+    if (error) {
+      console.error('claimEvent error:', error)
+      return {
+        data: null,
+        error: { message: '청모장 연결에 실패했습니다.' },
+      }
+    }
+
+    return {
+      data: true,
+      error: null,
+    }
+  } catch (error) {
+    console.error('claimEvent error:', error)
+    return {
+      data: null,
+      error: { message: '청모장 연결에 실패했습니다.' },
+    }
+  }
 }

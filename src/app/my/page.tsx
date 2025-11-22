@@ -1,44 +1,93 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Plus, Calendar, Users, ArrowRight, LogOut, MoreVertical, Trash2 } from 'lucide-react'
+import { Plus, Calendar, Users, ArrowRight, LogOut, Trash2 } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth'
 import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
-// 임시 더미 데이터 - 추후 Supabase에서 가져옴
-const mockEvents = [
-  {
-    id: 'event-1',
-    title: '민지의 결혼을 축하해',
-    eventType: 'wedding',
-    responseCount: 8,
-    createdAt: '2025-11-20',
-    status: 'active',
-  },
-  {
-    id: 'event-2',
-    title: '수현이 생일파티',
-    eventType: 'birthday',
-    responseCount: 5,
-    createdAt: '2025-11-15',
-    status: 'active',
-  },
-]
-
-const eventTypeLabels: Record<string, string> = {
-  wedding: '결혼',
-  birthday: '생일',
-  baby_shower: '베이비샤워',
-  housewarming: '집들이',
-  party: '파티',
+interface EventWithCount {
+  id: string
+  groupName: string
+  status: string
+  createdAt: string
+  responseCount: number
 }
 
 export default function MyEventsPage() {
   const { user, isLoading, logout } = useAuth(true)
-  const router = useRouter()
-  const [events, setEvents] = useState(mockEvents)
+  const [events, setEvents] = useState<EventWithCount[]>([])
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true)
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
+
+  // 사용자의 이벤트 목록 가져오기
+  useEffect(() => {
+    async function fetchEvents() {
+      if (!user) return
+
+      const supabase = createClient()
+
+      // 사용자의 이벤트 목록 조회
+      const { data: eventsData, error } = await supabase
+        .from('events')
+        .select(`
+          id,
+          group_name,
+          status,
+          created_at,
+          survey_responses (count)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching events:', error)
+        setIsLoadingEvents(false)
+        return
+      }
+
+      // 데이터 변환
+      const formattedEvents: EventWithCount[] = (eventsData || []).map((event: any) => ({
+        id: event.id,
+        groupName: event.group_name,
+        status: event.status,
+        createdAt: new Date(event.created_at).toLocaleDateString('ko-KR'),
+        responseCount: event.survey_responses?.[0]?.count || 0,
+      }))
+
+      setEvents(formattedEvents)
+      setIsLoadingEvents(false)
+    }
+
+    if (user) {
+      fetchEvents()
+    }
+  }, [user])
+
+  // 이벤트 삭제
+  const handleDelete = async (eventId: string) => {
+    if (!confirm('정말 이 청모장을 삭제하시겠어요? 모든 응답과 편지도 함께 삭제됩니다.')) {
+      return
+    }
+
+    setIsDeleting(eventId)
+    const supabase = createClient()
+
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', eventId)
+
+    if (error) {
+      console.error('Error deleting event:', error)
+      alert('삭제에 실패했습니다. 다시 시도해주세요.')
+    } else {
+      setEvents(events.filter(e => e.id !== eventId))
+    }
+
+    setIsDeleting(null)
+  }
 
   // 로딩 중이거나 인증되지 않은 경우 로딩 표시
   if (isLoading) {
@@ -56,11 +105,6 @@ export default function MyEventsPage() {
 
   if (!user) {
     return null // useAuth가 리다이렉트 처리함
-  }
-
-  const handleDelete = (eventId: string) => {
-    // 임시로 클라이언트에서만 삭제
-    setEvents(events.filter(e => e.id !== eventId))
   }
 
   return (
@@ -105,7 +149,14 @@ export default function MyEventsPage() {
 
         {/* Events List */}
         <div className="space-y-3">
-          {events.length === 0 ? (
+          {isLoadingEvents ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-4 border-blush-pink border-t-transparent" />
+                <p className="text-sm text-charcoal/60">청모장을 불러오는 중...</p>
+              </div>
+            </div>
+          ) : events.length === 0 ? (
             <div className="rounded-xl bg-cream/30 p-8 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-cream">
                 <Calendar className="h-8 w-8 text-charcoal/40" />
@@ -123,15 +174,22 @@ export default function MyEventsPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                          <span className="rounded-full bg-blush-pink/10 px-2 py-0.5 text-xs font-medium text-blush-pink">
-                            {eventTypeLabels[event.eventType] || event.eventType}
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            event.status === 'collecting'
+                              ? 'bg-green-100 text-green-700'
+                              : event.status === 'completed'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {event.status === 'collecting' ? '수집중' :
+                             event.status === 'completed' ? '완료' : event.status}
                           </span>
                           <span className="text-xs text-charcoal/40">
                             {event.createdAt}
                           </span>
                         </div>
                         <h3 className="font-semibold text-charcoal">
-                          {event.title}
+                          {event.groupName}
                         </h3>
                         <div className="mt-2 flex items-center gap-3 text-sm text-charcoal/60">
                           <span className="flex items-center gap-1">
@@ -149,10 +207,11 @@ export default function MyEventsPage() {
                         e.preventDefault()
                         handleDelete(event.id)
                       }}
-                      className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
+                      disabled={isDeleting === event.id}
+                      className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600 disabled:opacity-50"
                     >
                       <Trash2 className="h-3 w-3" />
-                      삭제
+                      {isDeleting === event.id ? '삭제 중...' : '삭제'}
                     </button>
                   </div>
                 </CardContent>

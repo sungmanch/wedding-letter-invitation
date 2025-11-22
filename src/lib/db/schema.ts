@@ -10,18 +10,11 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
-// Users (Supabase Auth 연동)
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  name: varchar('name', { length: 100 }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
-
 // Events (청모장)
+// user_id는 auth.users를 참조 (Supabase Auth) - FK는 DB에서 직접 설정
 export const events = pgTable('events', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id),
+  userId: uuid('user_id'), // auth.users 참조
   groupName: varchar('group_name', { length: 100 }).notNull(),
   expectedMembers: varchar('expected_members', { length: 20 }),
   preferredLocation: varchar('preferred_location', { length: 100 }),
@@ -36,7 +29,7 @@ export const events = pgTable('events', {
   additionalMessage: text('additional_message'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}).enableRLS()
 
 // Survey Responses (설문 응답)
 export const surveyResponses = pgTable('survey_responses', {
@@ -53,7 +46,7 @@ export const surveyResponses = pgTable('survey_responses', {
   dislikedFoods: text('disliked_foods'),
   preferredLocation: varchar('preferred_location', { length: 100 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+}).enableRLS()
 
 // Letters (편지)
 export const letters = pgTable('letters', {
@@ -61,15 +54,13 @@ export const letters = pgTable('letters', {
   eventId: uuid('event_id')
     .references(() => events.id, { onDelete: 'cascade' })
     .notNull(),
-  surveyResponseId: uuid('survey_response_id').references(
-    () => surveyResponses.id
-  ),
+  surveyResponseId: uuid('survey_response_id').references(() => surveyResponses.id),
   guestName: varchar('guest_name', { length: 100 }).notNull(),
   content: text('content'),
   stickers: jsonb('stickers').$type<string[]>(),
   isRead: boolean('is_read').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+}).enableRLS()
 
 // Restaurant Recommendations (식당 추천)
 export const restaurantRecommendations = pgTable('restaurant_recommendations', {
@@ -85,7 +76,7 @@ export const restaurantRecommendations = pgTable('restaurant_recommendations', {
   matchScore: integer('match_score'),
   matchReasons: jsonb('match_reasons').$type<string[]>(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+}).enableRLS()
 
 // Payment Requests (결제 요청)
 export const paymentRequests = pgTable('payment_requests', {
@@ -96,19 +87,11 @@ export const paymentRequests = pgTable('payment_requests', {
   status: varchar('status', { length: 20 }).default('pending').notNull(),
   requestedAt: timestamp('requested_at').defaultNow().notNull(),
   approvedAt: timestamp('approved_at'),
-  approvedBy: uuid('approved_by').references(() => users.id),
-})
+  approvedBy: uuid('approved_by'), // auth.users 참조 - FK는 DB에서 직접 설정
+}).enableRLS()
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  events: many(events),
-}))
-
-export const eventsRelations = relations(events, ({ one, many }) => ({
-  user: one(users, {
-    fields: [events.userId],
-    references: [users.id],
-  }),
+export const eventsRelations = relations(events, ({ many, one }) => ({
   surveyResponses: many(surveyResponses),
   letters: many(letters),
   restaurantRecommendations: many(restaurantRecommendations),
@@ -119,19 +102,16 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
   }),
 }))
 
-export const surveyResponsesRelations = relations(
-  surveyResponses,
-  ({ one }) => ({
-    event: one(events, {
-      fields: [surveyResponses.eventId],
-      references: [events.id],
-    }),
-    letter: one(letters, {
-      fields: [surveyResponses.id],
-      references: [letters.surveyResponseId],
-    }),
-  })
-)
+export const surveyResponsesRelations = relations(surveyResponses, ({ one }) => ({
+  event: one(events, {
+    fields: [surveyResponses.eventId],
+    references: [events.id],
+  }),
+  letter: one(letters, {
+    fields: [surveyResponses.id],
+    references: [letters.surveyResponseId],
+  }),
+}))
 
 export const lettersRelations = relations(letters, ({ one }) => ({
   event: one(events, {
@@ -154,24 +134,14 @@ export const restaurantRecommendationsRelations = relations(
   })
 )
 
-export const paymentRequestsRelations = relations(
-  paymentRequests,
-  ({ one }) => ({
-    event: one(events, {
-      fields: [paymentRequests.eventId],
-      references: [events.id],
-    }),
-    approver: one(users, {
-      fields: [paymentRequests.approvedBy],
-      references: [users.id],
-    }),
-  })
-)
+export const paymentRequestsRelations = relations(paymentRequests, ({ one }) => ({
+  event: one(events, {
+    fields: [paymentRequests.eventId],
+    references: [events.id],
+  }),
+}))
 
 // Type exports for use throughout the app
-export type User = typeof users.$inferSelect
-export type NewUser = typeof users.$inferInsert
-
 export type Event = typeof events.$inferSelect
 export type NewEvent = typeof events.$inferInsert
 
@@ -181,10 +151,8 @@ export type NewSurveyResponse = typeof surveyResponses.$inferInsert
 export type Letter = typeof letters.$inferSelect
 export type NewLetter = typeof letters.$inferInsert
 
-export type RestaurantRecommendation =
-  typeof restaurantRecommendations.$inferSelect
-export type NewRestaurantRecommendation =
-  typeof restaurantRecommendations.$inferInsert
+export type RestaurantRecommendation = typeof restaurantRecommendations.$inferSelect
+export type NewRestaurantRecommendation = typeof restaurantRecommendations.$inferInsert
 
 export type PaymentRequest = typeof paymentRequests.$inferSelect
 export type NewPaymentRequest = typeof paymentRequests.$inferInsert

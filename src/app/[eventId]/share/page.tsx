@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Copy, Check, Share2, MessageCircle, LayoutDashboard } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function SharePage() {
   const params = useParams()
   const eventId = params.eventId as string
   const [copied, setCopied] = useState(false)
+  const { user, isLoading } = useAuth()
 
   // 임시 설문 URL (실제로는 DB에서 가져옴)
   const surveyUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/survey/${eventId}`
@@ -137,34 +139,54 @@ export default function SharePage() {
           <ul className="space-y-1 text-sm text-charcoal/60">
             <li>- 친구들에게 링크를 보내면 바로 설문에 참여할 수 있어요</li>
             <li>- 친구들은 회원가입 없이 이름만 입력하면 참여 가능해요</li>
-            <li>- 응답 현황은 로그인 후 대시보드에서 확인할 수 있어요</li>
+            <li>- 응답 현황은 대시보드에서 확인할 수 있어요</li>
           </ul>
         </div>
 
-        {/* Dashboard Access */}
-        <div className="mt-6 rounded-xl border-2 border-blush-pink bg-blush-pink/5 p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5 text-blush-pink" />
-            <h3 className="font-semibold text-charcoal">
-              응답 현황 확인하기
-            </h3>
+        {/* Dashboard Access - 로그인 상태에 따라 다르게 표시 */}
+        {!isLoading && (
+          <div className="mt-6 rounded-xl border-2 border-blush-pink bg-blush-pink/5 p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <LayoutDashboard className="h-5 w-5 text-blush-pink" />
+              <h3 className="font-semibold text-charcoal">
+                응답 현황 확인하기
+              </h3>
+            </div>
+            {user ? (
+              // 로그인된 상태
+              <>
+                <p className="mb-4 text-sm text-charcoal/60">
+                  대시보드에서 친구들의 응답 현황을 확인하고, 식당 추천을 받고, 최종 청모장을 공유할 수 있어요.
+                </p>
+                <Link href={`/${eventId}`}>
+                  <Button fullWidth>
+                    <LayoutDashboard className="mr-2 h-5 w-5" />
+                    대시보드로 이동하기
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              // 비로그인 상태
+              <>
+                <p className="mb-4 text-sm text-charcoal/60">
+                  로그인하면 친구들의 응답 현황을 확인하고, 식당 추천을 받고, 최종 청모장을 공유할 수 있어요.
+                </p>
+                <Link href={`/login?redirect=/${eventId}`}>
+                  <Button fullWidth>
+                    <LayoutDashboard className="mr-2 h-5 w-5" />
+                    로그인하고 대시보드 확인하기
+                  </Button>
+                </Link>
+                <p className="mt-3 text-center text-xs text-charcoal/40">
+                  아직 계정이 없으신가요?{' '}
+                  <Link href={`/signup?redirect=/${eventId}`} className="text-blush-pink underline">
+                    회원가입
+                  </Link>
+                </p>
+              </>
+            )}
           </div>
-          <p className="mb-4 text-sm text-charcoal/60">
-            로그인하면 친구들의 응답 현황을 확인하고, 식당 추천을 받고, 최종 청모장을 공유할 수 있어요.
-          </p>
-          <Link href={`/login?redirect=/${eventId}`}>
-            <Button fullWidth>
-              <LayoutDashboard className="mr-2 h-5 w-5" />
-              로그인하고 대시보드 확인하기
-            </Button>
-          </Link>
-          <p className="mt-3 text-center text-xs text-charcoal/40">
-            아직 계정이 없으신가요?{' '}
-            <Link href={`/signup?redirect=/${eventId}`} className="text-blush-pink underline">
-              회원가입
-            </Link>
-          </p>
-        </div>
+        )}
       </div>
     </main>
   )
