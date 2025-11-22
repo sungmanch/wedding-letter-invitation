@@ -1,10 +1,37 @@
+'use client'
+
 import Link from 'next/link'
-import { Heart, Users, Utensils, Mail, ArrowRight, Sparkles } from 'lucide-react'
+import { Heart, Users, Utensils, Mail, ArrowRight, Sparkles, User, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function HomePage() {
+  const { user, isLoading } = useAuth()
+
   return (
     <main className="flex min-h-screen flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+        <div className="flex h-14 items-center justify-between px-4">
+          <Link href="/" className="font-bold text-blush-pink">
+            청모장
+          </Link>
+          {!isLoading && (
+            user ? (
+              <Link href="/my" className="flex items-center gap-1 text-sm text-charcoal/60 hover:text-charcoal">
+                <User className="h-4 w-4" />
+                내 청모장
+              </Link>
+            ) : (
+              <Link href="/login" className="flex items-center gap-1 text-sm text-charcoal/60 hover:text-charcoal">
+                <LogIn className="h-4 w-4" />
+                로그인
+              </Link>
+            )
+          )}
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="flex flex-1 flex-col items-center justify-center px-4 py-12 text-center">
         <div className="mb-6 flex items-center gap-2 rounded-full bg-blush-pink-50 px-4 py-2">

@@ -72,7 +72,7 @@ export default function EventDashboardPage() {
       <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
         <div className="flex h-14 items-center px-4">
           <Link
-            href="/"
+            href="/my"
             className="flex items-center text-charcoal/60 hover:text-charcoal"
           >
             <ArrowLeft className="h-5 w-5" />

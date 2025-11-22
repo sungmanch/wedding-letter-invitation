@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Copy, Check, Share2, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Share2, MessageCircle, LayoutDashboard } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
 
 export default function SharePage() {
@@ -136,44 +136,34 @@ export default function SharePage() {
           </h3>
           <ul className="space-y-1 text-sm text-charcoal/60">
             <li>- 친구들에게 링크를 보내면 바로 설문에 참여할 수 있어요</li>
-            <li>- 회원가입 없이 이름만 입력하면 참여 가능해요</li>
-            <li>- 응답 현황은 대시보드에서 실시간으로 확인할 수 있어요</li>
+            <li>- 친구들은 회원가입 없이 이름만 입력하면 참여 가능해요</li>
+            <li>- 응답 현황은 로그인 후 대시보드에서 확인할 수 있어요</li>
           </ul>
         </div>
 
-        {/* Auth Prompt */}
+        {/* Dashboard Access */}
         <div className="mt-6 rounded-xl border-2 border-blush-pink bg-blush-pink/5 p-4">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-xl">🔐</span>
+            <LayoutDashboard className="h-5 w-5 text-blush-pink" />
             <h3 className="font-semibold text-charcoal">
-              계속 관리하려면 가입하세요
+              응답 현황 확인하기
             </h3>
           </div>
           <p className="mb-4 text-sm text-charcoal/60">
-            회원가입하면 응답 현황을 확인하고, 식당 추천을 받고, 청모장을 공유할 수 있어요.
-            지금 가입하지 않으면 이 청모장에 다시 접근할 수 없어요!
+            로그인하면 친구들의 응답 현황을 확인하고, 식당 추천을 받고, 최종 청모장을 공유할 수 있어요.
           </p>
-          <div className="space-y-2">
-            <Link href={`/signup?redirect=/${eventId}`}>
-              <Button fullWidth>
-                회원가입하고 계속하기
-              </Button>
-            </Link>
-            <Link href={`/login?redirect=/${eventId}`}>
-              <Button variant="outline" fullWidth>
-                이미 계정이 있어요
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Skip for now (임시 - 개발 중에만) */}
-        <div className="mt-4">
-          <Link href={`/${eventId}`}>
-            <Button variant="ghost" fullWidth className="text-charcoal/40">
-              나중에 가입할게요 (대시보드 미리보기)
+          <Link href={`/login?redirect=/${eventId}`}>
+            <Button fullWidth>
+              <LayoutDashboard className="mr-2 h-5 w-5" />
+              로그인하고 대시보드 확인하기
             </Button>
           </Link>
+          <p className="mt-3 text-center text-xs text-charcoal/40">
+            아직 계정이 없으신가요?{' '}
+            <Link href={`/signup?redirect=/${eventId}`} className="text-blush-pink underline">
+              회원가입
+            </Link>
+          </p>
         </div>
       </div>
     </main>
