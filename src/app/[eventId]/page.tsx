@@ -11,6 +11,7 @@ import {
   Mail,
   Settings,
   ChevronRight,
+  LogOut,
 } from 'lucide-react'
 import {
   Button,
@@ -23,6 +24,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@/components/ui'
+import { useAuth } from '@/hooks/useAuth'
 
 // Mock data (실제로는 DB에서 가져옴)
 const mockResponses = [
@@ -35,6 +37,24 @@ export default function EventDashboardPage() {
   const params = useParams()
   const eventId = params.eventId as string
   const [activeTab, setActiveTab] = useState('overview')
+  const { user, isLoading, logout } = useAuth(true) // 인증 필요
+
+  // 로딩 중이면 로딩 표시
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blush-pink border-t-transparent" />
+          <p className="text-charcoal/60">로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 인증 안 됐으면 로그인 페이지로 리다이렉트 (useAuth에서 처리)
+  if (!user) {
+    return null
+  }
 
   // Mock data
   const eventData = {
@@ -60,12 +80,20 @@ export default function EventDashboardPage() {
           <h1 className="flex-1 text-center font-semibold text-charcoal">
             {eventData.groupName}
           </h1>
-          <Link
-            href={`/${eventId}/settings`}
-            className="flex items-center text-charcoal/60 hover:text-charcoal"
-          >
-            <Settings className="h-5 w-5" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={logout}
+              className="flex items-center text-charcoal/60 hover:text-charcoal"
+              title="로그아웃"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+        {/* User info bar */}
+        <div className="flex items-center justify-between border-t border-cream/50 bg-cream/20 px-4 py-1.5 text-xs">
+          <span className="text-charcoal/60">{user.email}</span>
+          <span className="text-charcoal/40">로그인됨</span>
         </div>
       </header>
 

@@ -141,11 +141,37 @@ export default function SharePage() {
           </ul>
         </div>
 
-        {/* Dashboard Link */}
-        <div className="mt-6">
+        {/* Auth Prompt */}
+        <div className="mt-6 rounded-xl border-2 border-blush-pink bg-blush-pink/5 p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-xl">🔐</span>
+            <h3 className="font-semibold text-charcoal">
+              계속 관리하려면 가입하세요
+            </h3>
+          </div>
+          <p className="mb-4 text-sm text-charcoal/60">
+            회원가입하면 응답 현황을 확인하고, 식당 추천을 받고, 청모장을 공유할 수 있어요.
+            지금 가입하지 않으면 이 청모장에 다시 접근할 수 없어요!
+          </p>
+          <div className="space-y-2">
+            <Link href={`/signup?redirect=/${eventId}`}>
+              <Button fullWidth>
+                회원가입하고 계속하기
+              </Button>
+            </Link>
+            <Link href={`/login?redirect=/${eventId}`}>
+              <Button variant="outline" fullWidth>
+                이미 계정이 있어요
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Skip for now (임시 - 개발 중에만) */}
+        <div className="mt-4">
           <Link href={`/${eventId}`}>
-            <Button variant="outline" fullWidth>
-              대시보드로 이동
+            <Button variant="ghost" fullWidth className="text-charcoal/40">
+              나중에 가입할게요 (대시보드 미리보기)
             </Button>
           </Link>
         </div>
