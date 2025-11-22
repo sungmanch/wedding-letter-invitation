@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설문</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Noto Sans KR', sans-serif; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B9D',
+                        secondary: '#FFE5EC',
+                        accent: '#8B5CF6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-pink-50 to-purple-50">
+
+<!-- Header -->
+<header id="header" class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="flex items-center justify-between p-4">
+        <button class="p-2 -ml-2">
+            <i class="fa-solid fa-arrow-left text-gray-600 text-xl"></i>
+        </button>
+        <h1 class="text-lg font-semibold text-gray-800">설문 참여</h1>
+        <div class="w-10"></div>
+    </div>
+</header>
+
+<!-- Landing Section -->
+<div id="landing-section" class="px-4 py-8 text-center">
+    <div class="w-20 h-20 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fa-solid fa-heart text-white text-2xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-3">민지의 청첩장 모임을 위한 설문이에요</h2>
+    <p class="text-gray-600 mb-2">소중한 의견을 들려주세요</p>
+    <div class="flex items-center justify-center text-sm text-gray-500">
+        <i class="fa-solid fa-clock mr-1"></i>
+        <span>약 3분 소요</span>
+    </div>
+</div>
+
+<!-- Survey Form -->
+<main id="survey-form" class="px-4 space-y-6">
+
+    <!-- Question 1 -->
+    <div id="question-1" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
+                <span class="text-white font-bold text-sm">1</span>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">선호하는 음식 종류는?</label>
+            <span class="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">필수</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">복수선택 가능해요</p>
+        <div class="grid grid-cols-2 gap-3">
+            <button class="food-option p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🍚</div>
+                <div class="font-medium text-gray-800">한식</div>
+            </button>
+            <button class="food-option p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🍝</div>
+                <div class="font-medium text-gray-800">양식</div>
+            </button>
+            <button class="food-option p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🍣</div>
+                <div class="font-medium text-gray-800">일식</div>
+            </button>
+            <button class="food-option p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🥟</div>
+                <div class="font-medium text-gray-800">중식</div>
+            </button>
+            <button class="food-option p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🍜</div>
+                <div class="font-medium text-gray-800">아시안</div>
+            </button>
+            <button class="food-option p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🍴</div>
+                <div class="font-medium text-gray-800">기타</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Question 2 -->
+    <div id="question-2" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
+                <span class="text-white font-bold text-sm">2</span>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">선호하는 분위기는?</label>
+            <span class="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">필수</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">복수선택 가능해요</p>
+        <div class="space-y-3">
+            <button class="atmosphere-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🤫</span>
+                    <div class="font-medium text-gray-800">조용하고 프라이빗한</div>
+                </div>
+            </button>
+            <button class="atmosphere-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🎉</span>
+                    <div class="font-medium text-gray-800">활기찬 분위기</div>
+                </div>
+            </button>
+            <button class="atmosphere-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">✨</span>
+                    <div class="font-medium text-gray-800">트렌디하고 세련된</div>
+                </div>
+            </button>
+            <button class="atmosphere-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🏠</span>
+                    <div class="font-medium text-gray-800">아늑하고 따뜻한</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Question 3 -->
+    <div id="question-3" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center mr-3">
+                <span class="text-white font-bold text-sm">3</span>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">식이 제한 사항이 있나요?</label>
+            <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">선택</span>
+        </div>
+        <div class="space-y-3">
+            <button class="dietary-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">😊</span>
+                    <div class="font-medium text-gray-800">없음</div>
+                </div>
+            </button>
+            <button class="dietary-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🥗</span>
+                    <div class="font-medium text-gray-800">채식</div>
+                </div>
+            </button>
+            <button class="dietary-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🌱</span>
+                    <div class="font-medium text-gray-800">비건</div>
+                </div>
+            </button>
+            <button class="dietary-option w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🕌</span>
+                    <div class="font-medium text-gray-800">할랄</div>
+                </div>
+            </button>
+            <div class="dietary-option border-2 border-gray-200 rounded-xl p-4 hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center mb-3">
+                    <span class="text-xl mr-3">⚠️</span>
+                    <div class="font-medium text-gray-800">알러지</div>
+                </div>
+                <input type="text" placeholder="알러지가 있는 음식을 입력해주세요" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+            </div>
+        </div>
+    </div>
+
+    <!-- Question 4 -->
+    <div id="question-4" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center mr-3">
+                <span class="text-white font-bold text-sm">4</span>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">선호하지 않는 음식 종류는?</label>
+            <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">선택</span>
+        </div>
+        <textarea placeholder="회, 돈까스" class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none h-24 resize-none"></textarea>
+        <div class="mt-2 text-xs text-gray-500">
+            <i class="fa-solid fa-lightbulb mr-1"></i>
+            <span>예: 매운음식, 해산물, 돼지고기 등</span>
+        </div>
+    </div>
+
+    <!-- Letter Section -->
+    <div id="letter-section" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center mr-3">
+                <i class="fa-solid fa-envelope text-white text-sm"></i>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">민지에게 하고 싶은 말이 있나요?</label>
+            <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">선택</span>
+        </div>
+        
+        <!-- Template Option -->
+        <div class="mb-4 p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-dashed border-pink-200">
+            <div class="flex items-center mb-3">
+                <i class="fa-solid fa-magic-wand-sparkles text-pink-500 mr-2"></i>
+                <span class="font-medium text-gray-800">템플릿 사용하기</span>
+            </div>
+            <button class="w-full p-3 bg-white border border-pink-200 rounded-lg text-left hover:bg-pink-50 transition-all">
+                <div class="text-sm text-gray-700">"민지야, 결혼을 진심으로 축하해! 🎉 맛있는 음식과 함께 즐거운 시간 보내자 💕"</div>
+            </button>
+        </div>
+
+        <!-- Free Writing -->
+        <div class="mb-4">
+            <div class="flex items-center mb-3">
+                <i class="fa-solid fa-pen text-accent mr-2"></i>
+                <span class="font-medium text-gray-800">자유 작성</span>
+            </div>
+            <textarea placeholder="민지에게 전하고 싶은 마음을 적어보세요..." class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none h-32 resize-none"></textarea>
+            <div class="flex justify-between items-center mt-2">
+                <div class="text-xs text-gray-500">
+                    <i class="fa-solid fa-lightbulb mr-1"></i>
+                    <span>진심이 담긴 메시지가 가장 아름다워요</span>
+                </div>
+                <div class="text-xs text-gray-500">0/300</div>
+            </div>
+        </div>
+
+        <!-- Stickers -->
+        <div>
+            <div class="flex items-center mb-3">
+                <i class="fa-solid fa-face-smile text-yellow-500 mr-2"></i>
+                <span class="font-medium text-gray-800">스티커 추가</span>
+            </div>
+            <div class="flex space-x-2 overflow-x-auto pb-2">
+                <button class="flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center text-2xl hover:bg-yellow-200 transition-all">💕</button>
+                <button class="flex-shrink-0 w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center text-2xl hover:bg-pink-200 transition-all">🎉</button>
+                <button class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl hover:bg-purple-200 transition-all">✨</button>
+                <button class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl hover:bg-green-200 transition-all">🌸</button>
+                <button class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl hover:bg-blue-200 transition-all">🥳</button>
+                <button class="flex-shrink-0 w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-2xl hover:bg-red-200 transition-all">❤️</button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Bottom CTA -->
+<div id="bottom-cta" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+    <button id="submit-button" class="w-full bg-gradient-to-r from-primary to-accent text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        소중한 의견 제출하기
+        <i class="fa-solid fa-heart ml-2"></i>
+    </button>
+    <p class="text-center text-xs text-gray-500 mt-2">결과가 나오면 민지가 공유해줄 거예요</p>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center">
+        <div class="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-check text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">소중한 의견 감사합니다 💕</h3>
+        <p class="text-gray-600 mb-6">결과가 나오면 민지가 공유해줄 거예요</p>
+        <button id="close-modal" class="w-full bg-gradient-to-r from-primary to-accent text-white font-semibold py-3 rounded-xl">
+            완료
+        </button>
+    </div>
+</div>
+
+<!-- Bottom Padding -->
+<div class="h-24"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Multi-select functionality for food options
+    const foodOptions = document.querySelectorAll('.food-option');
+    foodOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            this.classList.toggle('border-primary');
+            this.classList.toggle('bg-secondary');
+            this.classList.toggle('border-gray-200');
+        });
+    });
+
+    // Multi-select functionality for atmosphere options
+    const atmosphereOptions = document.querySelectorAll('.atmosphere-option');
+    atmosphereOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            this.classList.toggle('border-primary');
+            this.classList.toggle('bg-secondary');
+            this.classList.toggle('border-gray-200');
+        });
+    });
+
+    // Single select for dietary options
+    const dietaryOptions = document.querySelectorAll('.dietary-option');
+    dietaryOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            dietaryOptions.forEach(opt => {
+                opt.classList.remove('border-primary', 'bg-secondary');
+                opt.classList.add('border-gray-200');
+            });
+            this.classList.remove('border-gray-200');
+            this.classList.add('border-primary', 'bg-secondary');
+        });
+    });
+
+    // Character counter for letter
+    const letterTextarea = document.querySelector('#letter-section textarea');
+    const charCounter = document.querySelector('#letter-section .text-xs.text-gray-500:last-child');
+    
+    if (letterTextarea && charCounter) {
+        letterTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCounter.textContent = `${count}/300`;
+            if (count > 300) {
+                charCounter.classList.add('text-red-500');
+                this.value = this.value.substring(0, 300);
+            } else {
+                charCounter.classList.remove('text-red-500');
+            }
+        });
+    }
+
+    // Template selection
+    const templateButton = document.querySelector('#letter-section button');
+    templateButton.addEventListener('click', function() {
+        letterTextarea.value = "민지야, 결혼을 진심으로 축하해! 🎉 맛있는 음식과 함께 즐거운 시간 보내자 💕";
+        letterTextarea.dispatchEvent(new Event('input'));
+    });
+
+    // Sticker functionality
+    const stickerButtons = document.querySelectorAll('#letter-section button[class*="w-12"]');
+    stickerButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const sticker = this.textContent;
+            const currentText = letterTextarea.value;
+            if (currentText.length + sticker.length <= 300) {
+                letterTextarea.value = currentText + sticker;
+                letterTextarea.dispatchEvent(new Event('input'));
+            }
+        });
+    });
+
+    // Form validation
+    const submitButton = document.getElementById('submit-button');
+    
+    function validateForm() {
+        const selectedFoods = document.querySelectorAll('.food-option.border-primary');
+        const selectedAtmospheres = document.querySelectorAll('.atmosphere-option.border-primary');
+        
+        if (selectedFoods.length > 0 && selectedAtmospheres.length > 0) {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
+    // Add event listeners for validation
+    [...foodOptions, ...atmosphereOptions].forEach(option => {
+        option.addEventListener('click', validateForm);
+    });
+
+    // Submit functionality
+    const modal = document.getElementById('success-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    submitButton.addEventListener('click', function() {
+        if (!this.disabled) {
+            modal.classList.remove('hidden');
+        }
+    });
+
+    closeModal.addEventListener('click', function() {
+        modal.classList.add('hidden');
+    });
+
+    // Initial validation
+    validateForm();
+});
+</script>
+
+</body>
+</html>

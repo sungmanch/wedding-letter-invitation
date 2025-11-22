@@ -1,0 +1,79 @@
+@import 'tailwindcss';
+
+:root {
+  /* Wedding Theme Colors */
+  --blush-pink: #ffb6c1;
+  --soft-gold: #d4af37;
+  --cream: #fffdd0;
+  --warm-white: #faf9f6;
+  --charcoal: #36454f;
+
+  /* Base Colors */
+  --background: var(--warm-white);
+  --foreground: var(--charcoal);
+}
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Wedding Theme */
+  --color-blush-pink: var(--blush-pink);
+  --color-soft-gold: var(--soft-gold);
+  --color-cream: var(--cream);
+  --color-warm-white: var(--warm-white);
+  --color-charcoal: var(--charcoal);
+
+  /* Extended Palette */
+  --color-blush-pink-50: #fff5f7;
+  --color-blush-pink-100: #ffebee;
+  --color-blush-pink-200: #ffd1d8;
+  --color-blush-pink-300: #ffb6c1;
+  --color-blush-pink-400: #ff9bab;
+  --color-blush-pink-500: #ff8095;
+
+  --color-soft-gold-50: #faf6e8;
+  --color-soft-gold-100: #f5edd1;
+  --color-soft-gold-200: #ebdba3;
+  --color-soft-gold-300: #d4af37;
+  --color-soft-gold-400: #c9a227;
+  --color-soft-gold-500: #b8941f;
+
+  /* Fonts */
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
+    'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile-first Container */
+.mobile-container {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Utility Classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--blush-pink), var(--soft-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-gradient-wedding {
+  background: linear-gradient(135deg, var(--blush-pink-50), var(--soft-gold-50));
+}

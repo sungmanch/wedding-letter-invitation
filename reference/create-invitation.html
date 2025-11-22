@@ -1,0 +1,285 @@
+<!-- Header -->
+<header id="header" class="bg-white shadow-sm sticky top-0 z-50">
+<div class="flex items-center justify-between p-4">
+<button class="p-2 -ml-2">
+<i class="fa-solid fa-arrow-left text-gray-600 text-xl"></i>
+</button>
+<h1 class="text-lg font-semibold text-gray-800">청모장 만들기</h1>
+<div class="w-10"></div>
+</div>
+</header>
+
+<!-- Progress Bar -->
+<div id="progress-section" class="bg-white px-4 pb-4">
+<div class="flex items-center justify-between mb-2">
+<span class="text-sm text-gray-500">1/5 단계</span>
+<span class="text-sm text-primary font-medium">20%</span>
+</div>
+<div class="w-full bg-gray-200 rounded-full h-2">
+<div class="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+</div>
+</div>
+
+<!-- Main Content -->
+<main id="main-content" class="px-4 py-6 space-y-6">
+
+```
+<!-- Step Title -->
+<div id="step-title" class="text-center">
+    <div class="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-users text-white text-xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">청모 기본 정보를 알려주세요</h2>
+    <p class="text-gray-600">친구들과의 특별한 모임을 위한 첫 번째 단계예요</p>
+</div>
+
+<!-- Form -->
+<div id="survey-form" class="space-y-6">
+
+    <!-- Group Name -->
+    <div id="group-name-section" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
+                <i class="fa-solid fa-heart text-white text-sm"></i>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">그룹 이름</label>
+            <span class="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">필수</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">친구들이 알아볼 수 있는 그룹 이름을 지어주세요</p>
+        <input type="text" placeholder="예: 민지의 대학 친구들 청모" class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+        <div class="mt-2 flex items-center text-xs text-gray-500">
+            <i class="fa-solid fa-lightbulb mr-1"></i>
+            <span>💡 "○○의 △△ 청모" 형태로 지으면 더 친근해요!</span>
+        </div>
+    </div>
+
+    <!-- Expected Members -->
+    <div id="members-section" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center mr-3">
+                <i class="fa-solid fa-user-group text-white text-sm"></i>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">예상 인원</label>
+            <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">선택</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">대략 몇 명 정도 참석할 예정인가요?</p>
+        <div class="grid grid-cols-2 gap-3">
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">👥</div>
+                <div class="font-medium text-gray-800">5명 이하</div>
+            </button>
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">👫</div>
+                <div class="font-medium text-gray-800">6-10명</div>
+            </button>
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🎉</div>
+                <div class="font-medium text-gray-800">11-15명</div>
+            </button>
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-primary hover:bg-secondary transition-all">
+                <div class="text-2xl mb-2">🎊</div>
+                <div class="font-medium text-gray-800">16명 이상</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Preferred Location -->
+    <div id="location-section" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
+                <i class="fa-solid fa-map-marker-alt text-white text-sm"></i>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">선호 지역</label>
+            <span class="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">필수</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">어느 지역에서 모임을 갖고 싶으신가요?</p>
+        <div class="space-y-3">
+            <button class="w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🏙️</span>
+                    <div>
+                        <div class="font-medium text-gray-800">강남구</div>
+                        <div class="text-sm text-gray-500">역삼, 신사, 청담, 압구정</div>
+                    </div>
+                </div>
+            </button>
+            <button class="w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🌸</span>
+                    <div>
+                        <div class="font-medium text-gray-800">홍대/합정</div>
+                        <div class="text-sm text-gray-500">홍익대, 합정역, 상수역</div>
+                    </div>
+                </div>
+            </button>
+            <button class="w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🎨</span>
+                    <div>
+                        <div class="font-medium text-gray-800">이태원/한남</div>
+                        <div class="text-sm text-gray-500">이태원역, 한남동, 경리단길</div>
+                    </div>
+                </div>
+            </button>
+            <button class="w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center">
+                    <span class="text-xl mr-3">🏢</span>
+                    <div>
+                        <div class="font-medium text-gray-800">기타 지역</div>
+                        <div class="text-sm text-gray-500">직접 입력하기</div>
+                    </div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Budget Range -->
+    <div id="budget-section" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center mr-3">
+                <i class="fa-solid fa-won-sign text-white text-sm"></i>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">예산 범위</label>
+            <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">선택</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">1인당 예상 예산은 어느 정도인가요?</p>
+        <div class="grid grid-cols-1 gap-3">
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3">💰</span>
+                        <div>
+                            <div class="font-medium text-gray-800">3만원 이하</div>
+                            <div class="text-sm text-gray-500">캐주얼한 분위기</div>
+                        </div>
+                    </div>
+                </div>
+            </button>
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3">✨</span>
+                        <div>
+                            <div class="font-medium text-gray-800">3-5만원</div>
+                            <div class="text-sm text-gray-500">적당한 분위기</div>
+                        </div>
+                    </div>
+                </div>
+            </button>
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3">🌟</span>
+                        <div>
+                            <div class="font-medium text-gray-800">5-8만원</div>
+                            <div class="text-sm text-gray-500">특별한 분위기</div>
+                        </div>
+                    </div>
+                </div>
+            </button>
+            <button class="p-4 border-2 border-gray-200 rounded-xl text-left hover:border-primary hover:bg-secondary transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3">👑</span>
+                        <div>
+                            <div class="font-medium text-gray-800">8만원 이상</div>
+                            <div class="text-sm text-gray-500">프리미엄 분위기</div>
+                        </div>
+                    </div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mother Meeting Link -->
+    <div id="mother-meeting-section" class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center mr-3">
+                <i class="fa-solid fa-link text-white text-sm"></i>
+            </div>
+            <label class="text-lg font-semibold text-gray-800">모청 링크</label>
+            <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">선택</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-4">모임 참석자들이 볼 수 있는 모청 링크가 있나요?</p>
+        <input type="url" placeholder="https://..." class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+        <div class="mt-3 p-3 bg-purple-50 rounded-lg">
+            <div class="flex items-start">
+                <i class="fa-solid fa-info-circle text-purple-500 mt-1 mr-2"></i>
+                <div class="text-sm text-purple-700">
+                    <div class="font-medium mb-1">💜 왜 모청 링크가 필요한가요?</div>
+                    <div>모청을 통해 참석자들의 취향을 더 정확하게 파악하고, 모두가 만족하는 맞춤 추천을 받을 수 있어요!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+```
+
+</main>
+
+<!-- Bottom CTA -->
+<div id="bottom-cta" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+<button class="w-full bg-gradient-to-r from-primary to-accent text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
+다음 단계로
+<i class="fa-solid fa-arrow-right ml-2"></i>
+</button>
+<p class="text-center text-xs text-gray-500 mt-2">3분이면 완성! 친구들의 취향을 알아볼게요</p>
+</div>
+
+<!-- Bottom Padding -->
+<div class="h-24"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Button selection functionality
+const buttonGroups = document.querySelectorAll('#members-section .grid, #location-section .space-y-3, #budget-section .grid');
+
+```
+buttonGroups.forEach(group => {
+    const buttons = group.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove selected state from siblings
+            buttons.forEach(btn => {
+                btn.classList.remove('border-primary', 'bg-secondary');
+                btn.classList.add('border-gray-200');
+            });
+
+            // Add selected state to clicked button
+            this.classList.remove('border-gray-200');
+            this.classList.add('border-primary', 'bg-secondary');
+        });
+    });
+});
+
+// Form validation
+const nextButton = document.querySelector('#bottom-cta button');
+const groupNameInput = document.querySelector('#group-name-section input');
+
+function validateForm() {
+    const groupName = groupNameInput.value.trim();
+    const selectedLocation = document.querySelector('#location-section button.border-primary');
+
+    if (groupName && selectedLocation) {
+        nextButton.disabled = false;
+        nextButton.classList.remove('opacity-50');
+    } else {
+        nextButton.disabled = true;
+        nextButton.classList.add('opacity-50');
+    }
+}
+
+groupNameInput.addEventListener('input', validateForm);
+
+// Initial validation
+validateForm();
+
+```
+
+});
+</script>
+
+</body>
+</html>
