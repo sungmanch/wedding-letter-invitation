@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-
-interface User {
-  name?: string
-  email: string
-  loggedIn: boolean
-}
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 export function useAuth(requireAuth = false) {
   const [user, setUser] = useState<User | null>(null)
@@ -16,23 +12,30 @@ export function useAuth(requireAuth = false) {
   const pathname = usePathname()
 
   useEffect(() => {
-    // TODO: Supabase 인증으로 교체
-    const checkAuth = () => {
+    const supabase = createClient()
+
+    // 현재 세션 확인
+    const checkAuth = async () => {
       try {
-        const stored = localStorage.getItem('user')
-        if (stored) {
-          const userData = JSON.parse(stored)
-          if (userData.loggedIn) {
-            setUser(userData)
-          }
-        }
-      } catch {
-        // 파싱 에러 무시
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+      } catch (error) {
+        setUser(null)
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     checkAuth()
+
+    // 인증 상태 변경 리스너
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
@@ -41,8 +44,9 @@ export function useAuth(requireAuth = false) {
     }
   }, [isLoading, requireAuth, user, router, pathname])
 
-  const logout = () => {
-    localStorage.removeItem('user')
+  const logout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
     setUser(null)
     router.push('/')
   }

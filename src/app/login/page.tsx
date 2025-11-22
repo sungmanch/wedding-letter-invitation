@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button, Input, Card } from '@/components/ui'
+import { createClient } from '@/lib/supabase/client'
 
 function LoginForm() {
   const router = useRouter()
@@ -23,9 +24,21 @@ function LoginForm() {
     setError(null)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      localStorage.setItem('user', JSON.stringify({ email, loggedIn: true }))
-      router.push(redirectTo)
+      const supabase = createClient()
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        return
+      }
+
+      if (data.user) {
+        // 로그인 성공 - 리다이렉트
+        router.push(redirectTo)
+      }
     } catch {
       setError('로그인에 실패했습니다. 다시 시도해주세요.')
     } finally {
