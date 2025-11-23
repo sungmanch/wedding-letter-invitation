@@ -197,7 +197,7 @@ export default function AdminPaymentsPage() {
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-5 w-5 text-accent-pink" />
                       <h3 className="font-semibold text-charcoal">
-                        {payment.eventName || '이벤트명 없음'}
+                        {payment.userEmail || '사용자 이메일 없음'}
                       </h3>
                     </div>
                     <Badge variant="secondary">
@@ -225,7 +225,7 @@ export default function AdminPaymentsPage() {
                             })
                       }
                     />
-                    <InfoRow label="이벤트 ID" value={payment.eventId.slice(0, 8)} />
+                    <InfoRow label="사용자 ID" value={payment.userId.slice(0, 8)} />
                   </div>
 
                   {/* Action Buttons */}
@@ -248,14 +248,6 @@ export default function AdminPaymentsPage() {
                       거절
                     </Button>
                   </div>
-
-                  {/* Event Link */}
-                  <Link
-                    href={`/admin/${payment.eventId}`}
-                    className="mt-3 block text-center text-sm text-accent-pink hover:underline"
-                  >
-                    이벤트 상세 보기 →
-                  </Link>
                 </div>
               </Card>
             ))}
