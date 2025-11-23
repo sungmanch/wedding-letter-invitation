@@ -9,7 +9,7 @@ export async function sendRecommendationCompleteEmail(
   eventId: string,
   groupName: string
 ): Promise<boolean> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
   const recommendUrl = `${baseUrl}/${eventId}/recommend`
 
   try {

@@ -47,7 +47,7 @@ export async function notifyRecommendationRequest(
   groupName: string,
   responseCount: number
 ): Promise<boolean> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
   const adminUrl = `${baseUrl}/admin/${eventId}`
   const now = new Date().toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
