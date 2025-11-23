@@ -23,6 +23,7 @@ import {
 import { useAuth } from '@/providers/AuthProvider'
 import { getInvitationData, updateInvitation } from '@/lib/actions/invitation'
 import type { InvitationData } from '@/lib/actions/invitation'
+import { shareToKakao } from '@/lib/kakao'
 
 export default function InvitationEditPage() {
   const params = useParams()
@@ -119,8 +120,19 @@ export default function InvitationEditPage() {
   }
 
   const handleKakaoShare = () => {
-    const kakaoUrl = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(invitationUrl)}`
-    window.open(kakaoUrl, '_blank')
+    const restaurantName = invitation?.selectedRestaurant?.name || '식당'
+    const dateText = meetingDate ? meetingDate.replace(/-/g, '.') : ''
+    const timeText = meetingTime || ''
+    const scheduleText = dateText && timeText ? `${dateText} ${timeText}` : dateText || timeText
+
+    shareToKakao({
+      title: `${invitation?.groupName || '청모장'} 모임 초대`,
+      description: scheduleText
+        ? `📍 ${restaurantName}\n📅 ${scheduleText}`
+        : `📍 ${restaurantName}에서 만나요!`,
+      url: invitationUrl,
+      buttonText: '초대장 보기',
+    })
   }
 
   const handlePreview = async () => {

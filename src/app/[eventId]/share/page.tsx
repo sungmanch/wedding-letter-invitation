@@ -7,6 +7,7 @@ import { ArrowLeft, Copy, Check, Share2, MessageCircle, LayoutDashboard } from '
 import { Button, Card, CardContent } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
 import { getEvent } from '@/lib/actions/event'
+import { shareToKakao } from '@/lib/kakao'
 
 export default function SharePage() {
   const params = useParams()
@@ -41,10 +42,12 @@ export default function SharePage() {
   }
 
   const handleKakaoShare = () => {
-    // TODO: Kakao SDK 연동
-    // 지금은 카카오톡 공유 URL scheme 사용
-    const kakaoUrl = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(surveyUrl)}`
-    window.open(kakaoUrl, '_blank')
+    shareToKakao({
+      title: '청모장 - 취향 설문에 참여해주세요!',
+      description: '친구의 청첩장 모임을 위해 식당 취향을 알려주세요.',
+      url: surveyUrl,
+      buttonText: '설문 참여하기',
+    })
   }
 
   return (

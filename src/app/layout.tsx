@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/providers/AuthProvider'
+import { KakaoScript } from '@/components/KakaoScript'
 
 export const metadata: Metadata = {
   title: {
@@ -45,6 +46,7 @@ export default function RootLayout({
         <AuthProvider>
           <div className="mobile-container min-h-screen">{children}</div>
         </AuthProvider>
+        <KakaoScript />
       </body>
     </html>
   )
