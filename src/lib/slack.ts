@@ -42,6 +42,60 @@ export async function sendSlackNotification(message: SlackMessage): Promise<bool
   }
 }
 
+export async function notifyNewKakaoSignup(
+  userId: string,
+  userEmail: string | undefined,
+  createdAt: string
+): Promise<boolean> {
+  const now = new Date(createdAt).toLocaleString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  const message: SlackMessage = {
+    text: `🎉 새로운 카카오 회원가입`,
+    blocks: [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: '🎉 새로운 카카오 회원가입',
+        },
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: `*👤 사용자 ID:*\n\`${userId}\``,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📧 이메일:*\n${userEmail || 'N/A'}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*⏰ 가입 시간:*\n${now}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*🔐 Provider:*\nKakao OAuth`,
+          },
+        ],
+      },
+      {
+        type: 'divider',
+      },
+    ],
+  }
+
+  return await sendSlackNotification(message)
+}
+
 export async function notifyRecommendationRequest(
   eventId: string,
   groupName: string,

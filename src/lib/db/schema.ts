@@ -83,10 +83,14 @@ export const paymentRequests = pgTable('payment_requests', {
   eventId: uuid('event_id')
     .references(() => events.id, { onDelete: 'cascade' })
     .notNull(),
+  amount: integer('amount').default(9900).notNull(),
+  depositName: varchar('deposit_name', { length: 100 }), // 입금자명 (예: WL-12345-홍길동)
+  depositAt: timestamp('deposit_at'), // 사용자가 "입금 완료" 버튼 클릭한 시간
   status: varchar('status', { length: 20 }).default('pending').notNull(),
   requestedAt: timestamp('requested_at').defaultNow().notNull(),
   approvedAt: timestamp('approved_at'),
   approvedBy: uuid('approved_by'), // auth.users 참조 - FK는 DB에서 직접 설정
+  notificationSent: boolean('notification_sent').default(false).notNull(),
 }).enableRLS()
 
 // Relations

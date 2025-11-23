@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Lock, Clock, CreditCard, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
 import { Button, Card, Badge } from '@/components/ui'
+import { PaymentModal } from '@/components/payment/payment-modal'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/AuthProvider'
 import { getLetters } from '@/lib/actions/survey'
+import { getPaymentStatus } from '@/lib/actions/payment'
 import { createClient } from '@/lib/supabase/client'
 
 interface Letter {
@@ -30,6 +32,8 @@ export default function LettersPage() {
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [daysUntilUnlock, setDaysUntilUnlock] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [paymentPending, setPaymentPending] = useState(false)
+  const [guestName, setGuestName] = useState('')
 
   useEffect(() => {
     async function fetchData() {
@@ -84,6 +88,29 @@ export default function LettersPage() {
 
     fetchData()
   }, [eventId, user])
+
+  // Poll payment status when payment is pending
+  useEffect(() => {
+    if (!paymentPending || !eventId) return
+
+    const pollInterval = setInterval(async () => {
+      const result = await getPaymentStatus(eventId)
+      if (result.data) {
+        if (result.data.isUnlocked) {
+          setIsUnlocked(true)
+          setPaymentPending(false)
+          // Refresh the page to show letters
+          window.location.reload()
+        }
+      }
+    }, 5000) // Poll every 5 seconds
+
+    return () => clearInterval(pollInterval)
+  }, [paymentPending, eventId])
+
+  const handlePaymentRequested = useCallback(() => {
+    setPaymentPending(true)
+  }, [])
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : letters.length - 1))
@@ -216,14 +243,29 @@ export default function LettersPage() {
                 <div className="flex-1 text-left">
                   <p className="font-medium text-charcoal">즉시 열람</p>
                   <p className="text-sm text-charcoal/60">
-                    결제 후 바로 열람 가능
+                    {paymentPending ? '입금 확인 중...' : '결제 후 바로 열람 가능'}
                   </p>
                 </div>
                 <Badge>9,900원</Badge>
               </div>
-              <Button size="lg" fullWidth className="mt-4">
-                결제하고 바로 보기
-              </Button>
+              <div className="relative z-20 mt-4">
+                {paymentPending ? (
+                  <div className="rounded-lg bg-pink-50 p-4 text-center">
+                    <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-pink-200 border-t-accent-pink" />
+                    <p className="text-sm text-charcoal/60">
+                      입금 확인 중입니다...
+                      <br />
+                      <span className="text-xs">확인 즉시 자동으로 열립니다</span>
+                    </p>
+                  </div>
+                ) : (
+                  <PaymentModal
+                    eventId={eventId}
+                    userName={user?.email?.split('@')[0] || '사용자'}
+                    onPaymentRequested={handlePaymentRequested}
+                  />
+                )}
+              </div>
             </Card>
           </div>
         </div>
