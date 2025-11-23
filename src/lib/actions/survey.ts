@@ -90,7 +90,6 @@ export async function submitSurvey(
         guest_name: surveyParsed.data.guestName,
         food_types: surveyParsed.data.foodTypes,
         atmospheres: surveyParsed.data.atmospheres,
-        price_range: surveyParsed.data.priceRange || null,
         dietary_restriction: surveyParsed.data.dietaryRestriction || null,
         allergy_info: surveyParsed.data.allergyInfo || null,
         disliked_foods: surveyParsed.data.dislikedFoods || null,

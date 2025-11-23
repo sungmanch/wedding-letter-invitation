@@ -352,7 +352,6 @@ export async function getEventDetails(eventId: string): Promise<
       guestName: string
       foodTypes: string[]
       atmospheres: string[]
-      priceRange: string | null
       dietaryRestriction: string | null
       allergyInfo: string | null
       dislikedFoods: string | null
@@ -402,7 +401,6 @@ export async function getEventDetails(eventId: string): Promise<
           guestName: r.guest_name,
           foodTypes: r.food_types || [],
           atmospheres: r.atmospheres || [],
-          priceRange: r.price_range,
           dietaryRestriction: r.dietary_restriction,
           allergyInfo: r.allergy_info,
           dislikedFoods: r.disliked_foods,

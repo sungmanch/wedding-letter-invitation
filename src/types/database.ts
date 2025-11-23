@@ -32,7 +32,6 @@ export interface SurveyFormData {
   guestName: string
   foodTypes: string[]
   atmospheres: string[]
-  priceRange?: string
   dietaryRestriction?: string
   allergyInfo?: string
   dislikedFoods?: string
@@ -87,7 +86,6 @@ export interface SurveyResponseWithLetter {
   guestName: string
   foodTypes: string[] | null
   atmospheres: string[] | null
-  priceRange: string | null
   dietaryRestriction: string | null
   allergyInfo: string | null
   dislikedFoods: string | null

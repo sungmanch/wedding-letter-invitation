@@ -36,7 +36,6 @@ export default function AdminEventDetailPage() {
     guestName: string
     foodTypes: string[]
     atmospheres: string[]
-    priceRange: string | null
     dietaryRestriction: string | null
     allergyInfo: string | null
     dislikedFoods: string | null
@@ -263,7 +262,6 @@ export default function AdminEventDetailPage() {
                   <th className="p-3 text-left text-sm font-medium">이름</th>
                   <th className="p-3 text-left text-sm font-medium">선호 음식</th>
                   <th className="p-3 text-left text-sm font-medium">분위기</th>
-                  <th className="p-3 text-left text-sm font-medium">가격대</th>
                   <th className="p-3 text-left text-sm font-medium">식이제한</th>
                   <th className="p-3 text-left text-sm font-medium">알레르기</th>
                   <th className="p-3 text-left text-sm font-medium">싫어하는 음식</th>
@@ -279,7 +277,6 @@ export default function AdminEventDetailPage() {
                     <td className="p-3 text-sm">
                       {response.atmospheres.join(', ') || '-'}
                     </td>
-                    <td className="p-3 text-sm">{response.priceRange || '-'}</td>
                     <td className="p-3 text-sm">{response.dietaryRestriction || '-'}</td>
                     <td className="p-3 text-sm">{response.allergyInfo || '-'}</td>
                     <td className="p-3 text-sm">{response.dislikedFoods || '-'}</td>

@@ -11,7 +11,6 @@ export const surveyResponseSchema = z.object({
   atmospheres: z
     .array(z.string())
     .min(1, '분위기를 1개 이상 선택해주세요'),
-  priceRange: z.string().optional(),
   dietaryRestriction: z.string().optional(),
   allergyInfo: z.string().optional(),
   dislikedFoods: z.string().optional(),
@@ -49,15 +48,6 @@ export const atmosphereOptions = [
   { value: '트렌디', label: '트렌디', emoji: '✨' },
   { value: '전통적', label: '전통적', emoji: '🏮' },
   { value: '뷰맛집', label: '뷰맛집', emoji: '🌃' },
-]
-
-// 가격대 옵션
-export const priceRangeOptions = [
-  { value: '1만원 이하', label: '1만원 이하' },
-  { value: '1-2만원', label: '1-2만원' },
-  { value: '2-3만원', label: '2-3만원' },
-  { value: '3-5만원', label: '3-5만원' },
-  { value: '5만원 이상', label: '5만원 이상' },
 ]
 
 // 식이 제한 옵션

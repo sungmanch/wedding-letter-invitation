@@ -58,7 +58,7 @@ export function EventForm() {
         <div className="mb-3 flex items-center gap-2">
           <span className="text-lg">💜</span>
           <span className="font-semibold text-charcoal">그룹 이름</span>
-          <Badge variant="default" className="bg-blush-pink text-white text-xs">필수</Badge>
+          <Badge variant="required" className="text-xs">필수</Badge>
         </div>
         <p className="mb-3 text-sm text-charcoal/60">
           친구들이 알아볼 수 있는 그룹 이름을 지어주세요
@@ -78,7 +78,7 @@ export function EventForm() {
         <div className="mb-3 flex items-center gap-2">
           <span className="text-lg">👥</span>
           <span className="font-semibold text-charcoal">예상 인원</span>
-          <Badge variant="outline" className="text-xs">선택</Badge>
+          <Badge variant="optional" className="text-xs">선택</Badge>
         </div>
         <p className="mb-4 text-sm text-charcoal/60">
           대략 몇 명 정도 참석할 예정인가요?
@@ -113,7 +113,7 @@ export function EventForm() {
         <div className="mb-3 flex items-center gap-2">
           <span className="text-lg">📍</span>
           <span className="font-semibold text-charcoal">선호 지역</span>
-          <Badge variant="default" className="bg-blush-pink text-white text-xs">필수</Badge>
+          <Badge variant="required" className="text-xs">필수</Badge>
         </div>
         <p className="mb-4 text-sm text-charcoal/60">
           어느 지역에서 모임을 갖고 싶으신가요?
@@ -158,7 +158,7 @@ export function EventForm() {
         <div className="mb-3 flex items-center gap-2">
           <span className="text-lg">💰</span>
           <span className="font-semibold text-charcoal">예산 범위</span>
-          <Badge variant="outline" className="text-xs">선택</Badge>
+          <Badge variant="optional" className="text-xs">선택</Badge>
         </div>
         <p className="mb-4 text-sm text-charcoal/60">
           1인당 예상 예산은 어느 정도인가요?
@@ -203,7 +203,7 @@ export function EventForm() {
         <div className="mb-3 flex items-center gap-2">
           <span className="text-lg">🔗</span>
           <span className="font-semibold text-charcoal">모청 링크</span>
-          <Badge variant="outline" className="text-xs">선택</Badge>
+          <Badge variant="optional" className="text-xs">선택</Badge>
         </div>
         <p className="mb-3 text-sm text-charcoal/60">
           모임 참석자들이 볼 수 있는 모청 링크가 있나요?
@@ -239,7 +239,7 @@ export function EventForm() {
           disabled={!form.watch('groupName')}
           className="bg-blush-pink hover:bg-blush-pink/90"
         >
-          다음 단계로
+          청모장 만들기
           <ChevronRight className="ml-1 h-5 w-5" />
         </Button>
         <p className="mt-3 text-center text-xs text-charcoal/50">

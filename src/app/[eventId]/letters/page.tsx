@@ -127,7 +127,7 @@ export default function LettersPage() {
   if (letters.length === 0) {
     return (
       <main className="min-h-screen">
-        <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
           <div className="flex h-14 items-center px-4">
             <Link
               href={`/${eventId}`}
@@ -143,7 +143,7 @@ export default function LettersPage() {
         </header>
 
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-cream">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-purple-100">
             <Heart className="h-10 w-10 text-charcoal/30" />
           </div>
           <h2 className="mb-2 text-xl font-bold text-charcoal">
@@ -165,7 +165,7 @@ export default function LettersPage() {
     return (
       <main className="min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
           <div className="flex h-14 items-center px-4">
             <Link
               href={`/${eventId}`}
@@ -182,7 +182,7 @@ export default function LettersPage() {
 
         {/* Locked State */}
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-cream">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-purple-100">
             <Lock className="h-10 w-10 text-charcoal/30" />
           </div>
           <h2 className="mb-2 text-xl font-bold text-charcoal">
@@ -196,8 +196,8 @@ export default function LettersPage() {
           <div className="w-full max-w-sm space-y-4">
             <Card className="p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blush-pink-50">
-                  <Clock className="h-5 w-5 text-blush-pink" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50">
+                  <Clock className="h-5 w-5 text-primary-purple" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-charcoal">무료 열람</p>
@@ -208,9 +208,9 @@ export default function LettersPage() {
               </div>
             </Card>
 
-            <Card className="border-blush-pink p-4">
+            <Card className="border-primary-purple p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blush-pink">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-purple">
                   <CreditCard className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1 text-left">
@@ -234,9 +234,9 @@ export default function LettersPage() {
   const currentLetter = letters[currentIndex]
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blush-pink-50 to-white">
+    <main className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
         <div className="flex h-14 items-center px-4">
           <Link
             href={`/${eventId}`}
@@ -253,7 +253,7 @@ export default function LettersPage() {
 
       {/* Letter Counter */}
       <div className="flex items-center justify-center gap-2 py-4">
-        <Heart className="h-4 w-4 text-blush-pink" />
+        <Heart className="h-4 w-4 text-primary-purple" />
         <span className="text-sm text-charcoal/60">
           {currentIndex + 1} / {letters.length}
         </span>
@@ -263,7 +263,7 @@ export default function LettersPage() {
       <div className="relative px-4">
         <Card className="mx-auto max-w-sm overflow-hidden">
           {/* Letter Header */}
-          <div className="bg-gradient-to-r from-blush-pink to-soft-gold p-4 text-white">
+          <div className="bg-gradient-to-r from-primary-purple to-accent-pink p-4 text-white">
             <p className="text-lg font-semibold">
               From. {currentLetter.guest_name}
             </p>
@@ -316,7 +316,7 @@ export default function LettersPage() {
               onClick={() => setCurrentIndex(i)}
               className={cn(
                 'h-2 w-2 rounded-full transition-all',
-                i === currentIndex ? 'w-6 bg-blush-pink' : 'bg-cream'
+                i === currentIndex ? 'w-6 bg-primary-purple' : 'bg-purple-100'
               )}
             />
           ))}
