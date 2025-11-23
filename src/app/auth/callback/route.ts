@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { notifyNewKakaoSignup } from '@/lib/slack'
+import { claimEvent } from '@/lib/actions/event'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -52,6 +53,14 @@ export async function GET(request: Request) {
       if (isNewUser && isKakaoSignup) {
         // Don't await - don't block user redirect
         notifyNewKakaoSignup(user.id, user.email, user.created_at).catch(console.error)
+      }
+
+      // Auto-claim event if eventId is in the redirect URL
+      const eventIdMatch = next.match(/\/([a-f0-9-]{36})/)
+      if (eventIdMatch) {
+        const eventId = eventIdMatch[1]
+        // Silent claim - don't block redirect if it fails
+        claimEvent(eventId).catch(console.error)
       }
 
       return response
