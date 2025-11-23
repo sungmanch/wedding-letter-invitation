@@ -72,6 +72,7 @@ export const restaurantRecommendations = pgTable('restaurant_recommendations', {
   location: varchar('location', { length: 255 }),
   priceRange: varchar('price_range', { length: 50 }),
   imageUrl: varchar('image_url', { length: 500 }),
+  mapUrl: varchar('map_url', { length: 500 }),
   matchScore: integer('match_score'),
   matchReasons: jsonb('match_reasons').$type<string[]>(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

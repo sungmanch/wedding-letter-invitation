@@ -12,6 +12,7 @@ export interface RestaurantInput {
   location: string
   priceRange: string
   imageUrl?: string
+  mapUrl?: string
   matchScore: number
   matchReasons: string[]
 }
@@ -171,6 +172,7 @@ export async function addRestaurantRecommendations(
           location: r.location,
           price_range: r.priceRange,
           image_url: r.imageUrl || null,
+          map_url: r.mapUrl || null,
           match_score: r.matchScore,
           match_reasons: r.matchReasons,
         }))
@@ -262,6 +264,7 @@ export async function getRecommendations(
       location: r.location,
       priceRange: r.price_range,
       imageUrl: r.image_url,
+      mapUrl: r.map_url,
       matchScore: r.match_score,
       matchReasons: r.match_reasons,
       createdAt: new Date(r.created_at),
