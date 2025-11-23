@@ -196,10 +196,10 @@ export default function RestaurantRecommendPage() {
               <Check className="h-10 w-10 text-green-600" />
             </div>
             <h2 className="mb-2 text-xl font-bold text-charcoal">
-              AI 분석이 시작되었어요!
+              쩝쩝박사 조성만의 식당 분석이 시작되었어요!
             </h2>
             <p className="mb-2 text-charcoal/60">
-              추천이 완료되면 이메일로 알려드릴게요
+              참여자들의 취향에 딱 맞는 식당을 찾으면 이메일로 알려드릴게요
             </p>
             <div className="mb-6 flex items-center justify-center gap-2 rounded-xl bg-blush-pink-50 px-4 py-3">
               <Mail className="h-5 w-5 text-blush-pink" />

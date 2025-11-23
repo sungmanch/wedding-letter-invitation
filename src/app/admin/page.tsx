@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Users, Calendar } from 'lucide-react'
+import { Users, Calendar, CreditCard } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
 import { getPendingRequests } from '@/lib/actions/recommendation'
+import { getPendingPayments } from '@/lib/actions/payment'
 import { verifyAdminPassword } from '@/lib/actions/admin'
 
 export default function AdminPage() {
@@ -19,6 +20,7 @@ export default function AdminPage() {
     responseCount: number
     createdAt: string
   }>>([])
+  const [pendingPaymentsCount, setPendingPaymentsCount] = useState(0)
 
   const handleLogin = async () => {
     setError('')
@@ -43,6 +45,13 @@ export default function AdminPage() {
     if (result.data) {
       setRequests(result.data)
     }
+
+    // Fetch pending payments count
+    const paymentsResult = await getPendingPayments()
+    if (paymentsResult.data) {
+      setPendingPaymentsCount(paymentsResult.data.length)
+    }
+
     setIsLoading(false)
   }
 
@@ -111,6 +120,43 @@ export default function AdminPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* Quick Menu */}
+        <div className="mb-8 grid grid-cols-2 gap-4">
+          <Link href="/admin/payments">
+            <Card className="transition-shadow hover:shadow-lg cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100">
+                    <CreditCard className="h-6 w-6 text-accent-pink" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-charcoal">결제 승인</p>
+                    <p className="text-sm text-charcoal/60">
+                      대기 {pendingPaymentsCount}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Card className="bg-gray-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
+                  <Users className="h-6 w-6 text-primary-purple" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-charcoal">추천 요청</p>
+                  <p className="text-sm text-charcoal/60">
+                    대기 {requests.length}건
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-charcoal">
             대기 중인 추천 요청
