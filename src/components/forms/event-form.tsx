@@ -49,6 +49,11 @@ export function EventForm() {
       return
     }
 
+    // 비로그인 상태에서 생성한 청모장 ID를 sessionStorage에 저장
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('pendingEventId', result.data.id)
+    }
+
     router.push(`/${result.data.id}/share`)
   }
 

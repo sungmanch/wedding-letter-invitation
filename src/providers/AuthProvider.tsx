@@ -25,6 +25,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
+
+        // 로그인 후 sessionStorage에 pendingEventId가 있으면 자동 claim
+        if (user && typeof window !== 'undefined') {
+          const pendingEventId = sessionStorage.getItem('pendingEventId')
+          if (pendingEventId) {
+            // claimEvent 호출 (client-side)
+            fetch('/api/claim-event', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ eventId: pendingEventId }),
+            })
+              .then(() => {
+                // 성공하면 sessionStorage 삭제
+                sessionStorage.removeItem('pendingEventId')
+              })
+              .catch(console.error)
+          }
+        }
       } catch (error) {
         setUser(null)
       } finally {
@@ -37,6 +55,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 인증 상태 변경 리스너 (전역에서 1개만)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+
+      // 로그인 상태 변경 시에도 pendingEventId 체크
+      if (session?.user && typeof window !== 'undefined') {
+        const pendingEventId = sessionStorage.getItem('pendingEventId')
+        if (pendingEventId) {
+          fetch('/api/claim-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: pendingEventId }),
+          })
+            .then(() => {
+              sessionStorage.removeItem('pendingEventId')
+            })
+            .catch(console.error)
+        }
+      }
     })
 
     return () => {
