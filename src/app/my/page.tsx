@@ -6,7 +6,7 @@ import { Card, CardContent, Calendar } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
 import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isSameDay, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 
 interface EventWithCount {
   id: string
@@ -35,7 +35,8 @@ export default function MyEventsPage() {
       // 사용자의 이벤트 목록 조회 (편지 카운트 포함)
       const { data: eventsData, error } = await supabase
         .from('events')
-        .select(`
+        .select(
+          `
           id,
           group_name,
           status,
@@ -43,7 +44,8 @@ export default function MyEventsPage() {
           meeting_date,
           survey_responses (count),
           letters (id, is_read)
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -73,20 +75,37 @@ export default function MyEventsPage() {
     }
   }, [user])
 
-  // 이벤트가 있는 날짜들
+  // UTC 날짜 문자열을 KST Date 객체로 변환
+  const toKSTDate = (dateString: string): Date => {
+    const date = new Date(dateString)
+    // KST는 UTC+9
+    return new Date(date.getTime() + 9 * 60 * 60 * 1000)
+  }
+
+  // KST 기준 날짜 문자열 (YYYY-MM-DD) 추출
+  const getKSTDateString = (dateString: string): string => {
+    const kstDate = toKSTDate(dateString)
+    return format(kstDate, 'yyyy-MM-dd')
+  }
+
+  // 이벤트가 있는 날짜들 (KST 기준)
   const eventDates = useMemo(() => {
-    return events
-      .filter((e) => e.meetingDate)
-      .map((e) => parseISO(e.meetingDate!))
+    return events.filter((e) => e.meetingDate).map((e) => toKSTDate(e.meetingDate!))
   }, [events])
 
-  // 선택된 날짜의 이벤트들
+  // 선택된 날짜의 이벤트들 (KST 기준)
   const selectedDateEvents = useMemo(() => {
     if (!selectedDate) return []
+    const selectedDateString = format(selectedDate, 'yyyy-MM-dd')
     return events.filter(
-      (e) => e.meetingDate && isSameDay(parseISO(e.meetingDate), selectedDate)
+      (e) => e.meetingDate && getKSTDateString(e.meetingDate) === selectedDateString
     )
   }, [events, selectedDate])
+
+  // 날짜 미선택 이벤트들
+  const undatedEvents = useMemo(() => {
+    return events.filter((e) => !e.meetingDate)
+  }, [events])
 
   // 이벤트 삭제
   const handleDelete = async (eventId: string) => {
@@ -176,7 +195,7 @@ export default function MyEventsPage() {
                   modifiers={{ hasEvent: eventDates }}
                   modifiersClassNames={{
                     hasEvent:
-                      'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-blush-pink',
+                      'relative after:absolute after:top-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-blush-pink',
                   }}
                 />
               </CardContent>
@@ -209,7 +228,31 @@ export default function MyEventsPage() {
               )}
             </div>
 
-            {/* 전체 이벤트 리스트 */}
+            {/* 날짜 픽스 필요 섹션 */}
+            {undatedEvents.length > 0 && (
+              <div className="mb-4">
+                <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-amber-600">
+                  <span>📅</span>
+                  날짜 픽스 필요
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs">
+                    {undatedEvents.length}
+                  </span>
+                </h2>
+                <div className="space-y-2">
+                  {undatedEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isDeleting={isDeleting === event.id}
+                      onDelete={() => handleDelete(event.id)}
+                      showDateNeeded
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 전체 이벤트 리스트 (날짜 있는 것만) */}
             <div>
               <h2 className="mb-2 text-sm font-medium text-charcoal/60">전체 청모장</h2>
               {events.length === 0 ? (
@@ -221,14 +264,16 @@ export default function MyEventsPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {events.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      isDeleting={isDeleting === event.id}
-                      onDelete={() => handleDelete(event.id)}
-                    />
-                  ))}
+                  {events
+                    .filter((e) => e.meetingDate)
+                    .map((event) => (
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        isDeleting={isDeleting === event.id}
+                        onDelete={() => handleDelete(event.id)}
+                      />
+                    ))}
                 </div>
               )}
             </div>
@@ -252,10 +297,12 @@ function EventCard({
   event,
   isDeleting,
   onDelete,
+  showDateNeeded = false,
 }: {
   event: EventWithCount
   isDeleting: boolean
   onDelete: () => void
+  showDateNeeded?: boolean
 }) {
   // 공유 필요 여부 (응답이 0명인 경우)
   const needsShare = event.responseCount === 0
@@ -296,6 +343,12 @@ function EventCard({
                   <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
                     <Mail className="h-3 w-3" />
                     편지 {event.unreadLetterCount}통
+                  </span>
+                )}
+                {/* 날짜 픽스 필요 뱃지 */}
+                {showDateNeeded && (
+                  <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                    📅 날짜 미정
                   </span>
                 )}
                 <span className="text-xs text-charcoal/40">{event.createdAt}</span>

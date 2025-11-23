@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link2, ChevronRight } from 'lucide-react'
+import { ChevronRight, CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
+import { ko } from 'date-fns/locale'
 import {
   createEventSchema,
   type CreateEventInput,
@@ -13,7 +15,7 @@ import {
   locationOptions,
 } from '@/lib/validations/event'
 import { createEvent } from '@/lib/actions/event'
-import { Button, Input, Badge, Card } from '@/components/ui'
+import { Button, Input, Badge, Card, Calendar } from '@/components/ui'
 import { cn } from '@/lib/utils'
 
 export function EventForm() {
@@ -28,9 +30,12 @@ export function EventForm() {
       expectedMembers: '',
       preferredLocation: '',
       budgetRange: '',
+      meetingDate: '',
       invitationLink: '',
     },
   })
+
+  const [showCalendar, setShowCalendar] = useState(false)
 
   const onSubmit = async (data: CreateEventInput) => {
     setIsLoading(true)
@@ -50,6 +55,7 @@ export function EventForm() {
   const selectedMembers = form.watch('expectedMembers')
   const selectedLocation = form.watch('preferredLocation')
   const selectedBudget = form.watch('budgetRange')
+  const selectedDate = form.watch('meetingDate')
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -106,6 +112,77 @@ export function EventForm() {
             </button>
           ))}
         </div>
+      </Card>
+
+      {/* 모임 날짜 (선택) */}
+      <Card className="p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-lg">📅</span>
+          <span className="font-semibold text-charcoal">모임 날짜</span>
+          <Badge variant="outline" className="text-xs">선택</Badge>
+        </div>
+        <p className="mb-4 text-sm text-charcoal/60">
+          모임 예정일이 있다면 선택해주세요
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowCalendar(!showCalendar)}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all',
+            selectedDate
+              ? 'border-blush-pink bg-blush-pink/5'
+              : 'border-gray-200 hover:border-blush-pink/50'
+          )}
+        >
+          <CalendarIcon className={cn(
+            'h-5 w-5',
+            selectedDate ? 'text-blush-pink' : 'text-charcoal/40'
+          )} />
+          <span className={cn(
+            'flex-1',
+            selectedDate ? 'text-charcoal font-medium' : 'text-charcoal/40'
+          )}>
+            {selectedDate
+              ? format(new Date(selectedDate), 'yyyy년 M월 d일 (EEE)', { locale: ko })
+              : '날짜를 선택해주세요'}
+          </span>
+          {selectedDate && (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation()
+                form.setValue('meetingDate', '')
+                setShowCalendar(false)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation()
+                  form.setValue('meetingDate', '')
+                  setShowCalendar(false)
+                }
+              }}
+              className="text-charcoal/40 hover:text-charcoal cursor-pointer"
+            >
+              ✕
+            </span>
+          )}
+        </button>
+        {showCalendar && (
+          <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden">
+            <Calendar
+              mode="single"
+              selected={selectedDate ? new Date(selectedDate) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  form.setValue('meetingDate', format(date, 'yyyy-MM-dd'))
+                }
+                setShowCalendar(false)
+              }}
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+            />
+          </div>
+        )}
       </Card>
 
       {/* 선호 지역 (필수) - 리스트형 */}
