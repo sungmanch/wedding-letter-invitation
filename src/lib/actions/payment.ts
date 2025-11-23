@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 import type { ApiResponse } from '@/types'
 
@@ -230,19 +230,8 @@ export async function approvePayment(
   paymentId: string
 ): Promise<ApiResponse<{ success: boolean }>> {
   try {
-    const supabase = await createClient()
-
-    // 현재 로그인한 사용자 확인 (관리자 확인)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return {
-        data: null,
-        error: { message: '로그인이 필요합니다.' },
-      }
-    }
+    // Use admin client for admin-only operations
+    const supabase = createAdminClient()
 
     // 결제 요청 정보 가져오기
     const { data: paymentRequest, error: fetchError } = await supabase
@@ -273,7 +262,7 @@ export async function approvePayment(
       .update({
         status: 'approved',
         approved_at: now,
-        approved_by: user.id,
+        approved_by: null, // Admin password auth, no user session
       })
       .eq('id', paymentId)
 
@@ -308,19 +297,8 @@ export async function getPendingPayments(): Promise<
   ApiResponse<PaymentRequestData[]>
 > {
   try {
-    const supabase = await createClient()
-
-    // 현재 로그인한 사용자 확인 (관리자 확인)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return {
-        data: null,
-        error: { message: '로그인이 필요합니다.' },
-      }
-    }
+    // Use admin client for admin-only operations
+    const supabase = createAdminClient()
 
     // pending 상태인 결제 요청 가져오기
     const { data: payments, error: fetchError } = await supabase
@@ -375,7 +353,8 @@ export async function getPendingPayments(): Promise<
  */
 async function sendPaymentApprovalNotification(userId: string) {
   try {
-    const supabase = await createClient()
+    // Use admin client for admin API calls
+    const supabase = createAdminClient()
 
     // 사용자 정보 가져오기
     const { data: { user } } = await supabase.auth.admin.getUserById(userId)
@@ -447,7 +426,8 @@ export async function rejectPayment(
   reason?: string
 ): Promise<ApiResponse<{ success: boolean }>> {
   try {
-    const supabase = await createClient()
+    // Use admin client for admin-only operations
+    const supabase = createAdminClient()
 
     const { error } = await supabase
       .from('payment_requests')
