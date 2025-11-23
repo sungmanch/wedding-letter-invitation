@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { Calendar, Clock, MapPin, Heart } from 'lucide-react'
+import { Calendar, Clock, MapPin, Heart, ExternalLink } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 import { getInvitationData } from '@/lib/actions/invitation'
 
@@ -55,9 +55,22 @@ export default async function PublicInvitationPage({ params }: PageProps) {
                 <p className="font-semibold text-charcoal">
                   {invitation.selectedRestaurant.name}
                 </p>
-                <div className="mt-2 flex items-center gap-1 text-sm text-charcoal/60">
-                  <MapPin className="h-4 w-4" />
-                  {invitation.selectedRestaurant.location}
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-sm text-charcoal/60">
+                    <MapPin className="h-4 w-4" />
+                    {invitation.selectedRestaurant.location}
+                  </div>
+                  {invitation.selectedRestaurant.mapUrl && (
+                    <a
+                      href={invitation.selectedRestaurant.mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm font-medium text-primary-purple hover:underline"
+                    >
+                      지도 보기
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
                 </div>
               </div>
             ) : (
