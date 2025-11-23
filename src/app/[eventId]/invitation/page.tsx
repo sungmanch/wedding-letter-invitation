@@ -33,7 +33,7 @@ export default function InvitationEditPage() {
   const { user, isLoading: isAuthLoading } = useAuth(true)
 
   const [copied, setCopied] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
+  const [showPreview, setShowPreview] = useState(true) // 바로 공유 화면 표시
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -188,16 +188,21 @@ export default function InvitationEditPage() {
         {/* Preview Header */}
         <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
           <div className="flex h-14 items-center px-4">
-            <button
-              onClick={() => setShowPreview(false)}
+            <Link
+              href={`/${eventId}`}
               className="flex items-center text-charcoal/60 hover:text-charcoal"
             >
               <ArrowLeft className="h-5 w-5" />
-            </button>
+            </Link>
             <h1 className="flex-1 text-center font-semibold text-charcoal">
-              미리보기
+              청모장 공유
             </h1>
-            <div className="w-5" />
+            <button
+              onClick={() => setShowPreview(false)}
+              className="text-sm font-medium text-primary-purple hover:underline"
+            >
+              수정
+            </button>
           </div>
         </header>
 

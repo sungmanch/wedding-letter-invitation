@@ -322,14 +322,20 @@ function EventCard({
                       ? 'bg-green-100 text-green-700'
                       : event.status === 'completed'
                         ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-700'
+                        : event.status === 'restaurant_selected'
+                          ? 'bg-pink-100 text-gray-700'
+                          : 'bg-gray-100 text-gray-700'
                   }`}
                 >
                   {event.status === 'collecting'
                     ? '수집중'
                     : event.status === 'completed'
                       ? '완료'
-                      : event.status}
+                      : event.status === 'restaurant_selected'
+                        ? '청모 준비 완료 🎉'
+                        : event.status === 'pending'
+                          ? '식당 추천 진행중'
+                          : event.status}
                 </span>
                 {/* 공유하기 뱃지 */}
                 {needsShare && (

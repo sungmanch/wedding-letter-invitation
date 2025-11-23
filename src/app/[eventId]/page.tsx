@@ -30,6 +30,13 @@ import {
 import { useAuth } from '@/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 
+interface SelectedRestaurant {
+  id: string
+  name: string
+  location: string
+  category: string
+}
+
 interface EventData {
   id: string
   groupName: string
@@ -37,6 +44,7 @@ interface EventData {
   expectedMembers: string | null
   meetingDate: string | null
   createdAt: string
+  selectedRestaurant: SelectedRestaurant | null
 }
 
 interface SurveyResponse {
@@ -75,7 +83,7 @@ export default function EventDashboardPage() {
       // 이벤트 정보 조회
       const { data: event, error: eventError } = await supabase
         .from('events')
-        .select('id, group_name, status, expected_members, meeting_date, created_at, user_id')
+        .select('id, group_name, status, expected_members, meeting_date, created_at, user_id, selected_restaurant_id')
         .eq('id', eventId)
         .single()
 
@@ -92,6 +100,25 @@ export default function EventDashboardPage() {
         return
       }
 
+      // 선택된 식당 정보 조회
+      let selectedRestaurant: SelectedRestaurant | null = null
+      if (event.selected_restaurant_id) {
+        const { data: restaurant } = await supabase
+          .from('restaurant_recommendations')
+          .select('id, name, location, category')
+          .eq('id', event.selected_restaurant_id)
+          .single()
+
+        if (restaurant) {
+          selectedRestaurant = {
+            id: restaurant.id,
+            name: restaurant.name,
+            location: restaurant.location || '',
+            category: restaurant.category || '',
+          }
+        }
+      }
+
       setEventData({
         id: event.id,
         groupName: event.group_name,
@@ -99,6 +126,7 @@ export default function EventDashboardPage() {
         expectedMembers: event.expected_members,
         meetingDate: event.meeting_date,
         createdAt: event.created_at,
+        selectedRestaurant,
       })
 
       // 설문 응답 조회
@@ -255,11 +283,13 @@ export default function EventDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <Badge className="mb-2 bg-white/20 text-white border-white/30">
-              {eventData.status === 'collecting' ? '설문 수집 중' :
-               eventData.status === 'pending' ? 'AI 분석 중' :
-               eventData.status === 'completed' ? '추천 완료' :
-               eventData.status === 'restaurant_selected' ? '식당 선택 완료' :
-               eventData.status === 'shared' ? '공유 완료' : eventData.status}
+              {eventData.status === 'collecting'
+                ? (responseCount >= 3 ? '설문 완료 ✅' : '설문 수집 중 📝')
+                : eventData.status === 'pending' ? 'AI 분석 중 🤖'
+                : eventData.status === 'completed' ? '추천 완료 🍽️'
+                : eventData.status === 'restaurant_selected' ? '청모 준비 완료 🎉'
+                : eventData.status === 'shared' ? '공유 완료 💌'
+                : eventData.status}
             </Badge>
             <p className="text-2xl font-bold">
               {responseCount}명 응답
@@ -289,25 +319,80 @@ export default function EventDashboardPage() {
           {/* Overview Tab */}
           <TabsContent value="overview">
             <div className="space-y-4">
-              {/* Quick Actions */}
-              <div className="grid grid-cols-2 gap-3">
-                <Link href={`/${eventId}/share`}>
-                  <Card className="p-4 hover:shadow-md transition-shadow">
-                    <Share2 className="mb-2 h-6 w-6 text-blush-pink" />
-                    <p className="font-medium text-charcoal">링크 공유</p>
-                    <p className="text-xs text-charcoal/60">친구들에게 전달</p>
-                  </Card>
-                </Link>
+              {/* Quick Actions - 상태별 동적 렌더링 */}
+              {eventData.status === 'restaurant_selected' ? (
+                // 식당 선택 완료: 선택된 식당 카드 + 청모장 확인
+                <div className="space-y-3">
+                  {eventData.selectedRestaurant && (
+                    <Card className="border-primary-purple/30 bg-primary-purple/5">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-purple/10">
+                            <Utensils className="h-6 w-6 text-primary-purple" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-charcoal/60">선택된 식당</p>
+                            <p className="font-semibold text-charcoal">{eventData.selectedRestaurant.name}</p>
+                            <p className="text-xs text-charcoal/50">{eventData.selectedRestaurant.category} · {eventData.selectedRestaurant.location}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  <Link href={`/${eventId}/invitation`}>
+                    <Card className="p-4 hover:shadow-md transition-shadow border-primary-purple/20">
+                      <Mail className="mb-2 h-6 w-6 text-primary-purple" />
+                      <p className="font-medium text-charcoal">청모장 확인</p>
+                      <p className="text-xs text-charcoal/60">초대장 확인 및 공유</p>
+                    </Card>
+                  </Link>
+                </div>
+              ) : eventData.status === 'completed' ? (
+                // 추천 완료: 식당 추천 확인
                 <Link href={`/${eventId}/recommend`}>
                   <Card className="p-4 hover:shadow-md transition-shadow">
                     <Utensils className="mb-2 h-6 w-6 text-soft-gold" />
-                    <p className="font-medium text-charcoal">식당 추천</p>
-                    <p className="text-xs text-charcoal/60">
-                      {responseCount >= 3 ? '추천 받기' : '3명 이상 필요'}
-                    </p>
+                    <p className="font-medium text-charcoal">식당 추천 확인</p>
+                    <p className="text-xs text-charcoal/60">AI 추천 결과 보기</p>
                   </Card>
                 </Link>
-              </div>
+              ) : eventData.status === 'pending' ? (
+                // AI 분석 중: 로딩 상태
+                <Card className="p-4 opacity-70">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Utensils className="h-6 w-6 text-soft-gold" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-soft-gold border-t-transparent" />
+                  </div>
+                  <p className="font-medium text-charcoal">식당 추천 진행중</p>
+                  <p className="text-xs text-charcoal/60">AI가 분석하고 있어요</p>
+                </Card>
+              ) : (
+                // 설문 수집 중
+                <div className="grid grid-cols-2 gap-3">
+                  <Link href={`/${eventId}/share`}>
+                    <Card className="p-4 hover:shadow-md transition-shadow">
+                      <Share2 className="mb-2 h-6 w-6 text-blush-pink" />
+                      <p className="font-medium text-charcoal">설문 공유</p>
+                      <p className="text-xs text-charcoal/60">친구들에게 전달</p>
+                    </Card>
+                  </Link>
+                  {responseCount >= 3 ? (
+                    <Link href={`/${eventId}/recommend`}>
+                      <Card className="p-4 hover:shadow-md transition-shadow">
+                        <Utensils className="mb-2 h-6 w-6 text-soft-gold" />
+                        <p className="font-medium text-charcoal">식당 추천</p>
+                        <p className="text-xs text-charcoal/60">추천 받기</p>
+                      </Card>
+                    </Link>
+                  ) : (
+                    <Card className="p-4 opacity-50 cursor-not-allowed">
+                      <Utensils className="mb-2 h-6 w-6 text-charcoal/30" />
+                      <p className="font-medium text-charcoal/50">식당 추천</p>
+                      <p className="text-xs text-charcoal/40">3명 이상부터 가능</p>
+                    </Card>
+                  )}
+                </div>
+              )}
 
               {/* 모임 날짜 카드 */}
               <Card className={!eventData.meetingDate ? 'border-amber-200 bg-amber-50/50' : ''}>
@@ -446,10 +531,33 @@ export default function EventDashboardPage() {
         </Tabs>
       </div>
 
-      {/* Bottom CTA */}
+      {/* Bottom CTA - 상태별 분기 */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-cream bg-white p-4">
         <div className="mx-auto max-w-[480px]">
-          {responseCount >= 3 ? (
+          {eventData.status === 'restaurant_selected' ? (
+            // 식당 선택 완료: 청모장 확인
+            <Link href={`/${eventId}/invitation`}>
+              <Button size="lg" fullWidth>
+                <Mail className="mr-2 h-5 w-5" />
+                청모장 확인하기
+              </Button>
+            </Link>
+          ) : eventData.status === 'completed' ? (
+            // 추천 완료: 식당 추천 확인
+            <Link href={`/${eventId}/recommend`}>
+              <Button size="lg" fullWidth>
+                <Utensils className="mr-2 h-5 w-5" />
+                식당 추천 확인하기
+              </Button>
+            </Link>
+          ) : eventData.status === 'pending' ? (
+            // AI 분석 중: 비활성
+            <Button size="lg" fullWidth disabled className="opacity-70">
+              <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              식당 추천 진행중...
+            </Button>
+          ) : responseCount >= 3 ? (
+            // 설문 수집 중 (3명 이상): 식당 추천
             <Link href={`/${eventId}/recommend`}>
               <Button size="lg" fullWidth>
                 <Utensils className="mr-2 h-5 w-5" />
@@ -457,10 +565,11 @@ export default function EventDashboardPage() {
               </Button>
             </Link>
           ) : (
+            // 설문 수집 중 (3명 미만): 설문 공유
             <Link href={`/${eventId}/share`}>
               <Button size="lg" fullWidth>
                 <Share2 className="mr-2 h-5 w-5" />
-                링크 공유하기
+                설문 공유하기
               </Button>
             </Link>
           )}
