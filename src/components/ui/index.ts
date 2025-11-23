@@ -56,3 +56,7 @@ export {
   SelectItem,
   SelectSeparator,
 } from './select'
+
+// Calendar
+export { Calendar } from './calendar'
+export type { CalendarProps } from './calendar'
