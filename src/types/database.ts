@@ -1,7 +1,5 @@
 // Re-export all database types from schema
 export type {
-  User,
-  NewUser,
   Event,
   NewEvent,
   SurveyResponse,
