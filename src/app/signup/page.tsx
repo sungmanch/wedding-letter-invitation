@@ -18,6 +18,7 @@ function SignupForm() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +68,29 @@ function SignupForm() {
       setError('회원가입에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleKakaoLogin = async () => {
+    setIsKakaoLoading(true)
+    setError(null)
+
+    try {
+      const supabase = createClient()
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        },
+      })
+
+      if (oauthError) {
+        setError('카카오 로그인에 실패했습니다.')
+      }
+    } catch {
+      setError('카카오 로그인에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsKakaoLoading(false)
     }
   }
 
@@ -184,6 +208,9 @@ function SignupForm() {
           variant="outline"
           fullWidth
           className="bg-[#FEE500] border-[#FEE500] text-[#3C1E1E] hover:bg-[#FEE500]/90"
+          onClick={handleKakaoLogin}
+          disabled={isKakaoLoading}
+          isLoading={isKakaoLoading}
         >
           <span className="mr-2">💬</span>
           카카오로 계속하기
