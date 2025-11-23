@@ -211,14 +211,14 @@ export default function EventDashboardPage() {
           </div>
         </div>
         {/* User info bar */}
-        <div className="flex items-center justify-between border-t border-cream/50 bg-cream/20 px-4 py-1.5 text-xs">
+        <div className="flex items-center justify-between border-t border-purple-100/50 bg-purple-50 px-4 py-1.5 text-xs">
           <span className="text-charcoal/60">{user.email}</span>
           <span className="text-charcoal/40">로그인됨</span>
         </div>
       </header>
 
       {/* Status Banner */}
-      <div className="bg-gradient-to-r from-blush-pink to-soft-gold p-4 text-white">
+      <div className="bg-gradient-to-r from-primary-purple to-accent-pink p-4 text-white">
         <div className="flex items-center justify-between">
           <div>
             <Badge className="mb-2 bg-white/20 text-white border-white/30">

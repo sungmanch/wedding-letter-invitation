@@ -10,11 +10,17 @@ import {
   addRestaurantRecommendations,
   type RestaurantInput,
 } from '@/lib/actions/recommendation'
+import { verifyAdminPassword } from '@/lib/actions/admin'
 
 export default function AdminEventDetailPage() {
   const params = useParams()
   const router = useRouter()
   const eventId = params.eventId as string
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -30,7 +36,6 @@ export default function AdminEventDetailPage() {
     guestName: string
     foodTypes: string[]
     atmospheres: string[]
-    priceRange: string | null
     dietaryRestriction: string | null
     allergyInfo: string | null
     dislikedFoods: string | null
@@ -50,8 +55,27 @@ export default function AdminEventDetailPage() {
 
   const [currentReasonInputs, setCurrentReasonInputs] = useState<string[]>([''])
 
+  const handleLogin = async () => {
+    setAuthError('')
+    setIsAuthenticating(true)
+
+    const result = await verifyAdminPassword(password)
+
+    if (result.success) {
+      setIsAuthenticated(true)
+    } else {
+      setAuthError(result.error || '비밀번호가 올바르지 않습니다.')
+    }
+
+    setIsAuthenticating(false)
+  }
+
   useEffect(() => {
     async function fetchData() {
+      if (!isAuthenticated) {
+        setIsLoading(false)
+        return
+      }
       setIsLoading(true)
       const result = await getEventDetails(eventId)
 
@@ -67,7 +91,7 @@ export default function AdminEventDetailPage() {
     }
 
     fetchData()
-  }, [eventId])
+  }, [eventId, isAuthenticated])
 
   const addRestaurant = () => {
     setRestaurants([
@@ -148,6 +172,37 @@ export default function AdminEventDetailPage() {
     router.push('/admin')
   }
 
+  if (!isAuthenticated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8">
+            <h1 className="mb-6 text-center text-2xl font-bold text-charcoal">
+              어드민 로그인
+            </h1>
+            <div className="space-y-4">
+              <Input
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleLogin()
+                }}
+              />
+              {authError && (
+                <p className="text-sm text-red-600">{authError}</p>
+              )}
+              <Button fullWidth onClick={handleLogin} isLoading={isAuthenticating}>
+                로그인
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
+
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
@@ -207,7 +262,6 @@ export default function AdminEventDetailPage() {
                   <th className="p-3 text-left text-sm font-medium">이름</th>
                   <th className="p-3 text-left text-sm font-medium">선호 음식</th>
                   <th className="p-3 text-left text-sm font-medium">분위기</th>
-                  <th className="p-3 text-left text-sm font-medium">가격대</th>
                   <th className="p-3 text-left text-sm font-medium">식이제한</th>
                   <th className="p-3 text-left text-sm font-medium">알레르기</th>
                   <th className="p-3 text-left text-sm font-medium">싫어하는 음식</th>
@@ -223,7 +277,6 @@ export default function AdminEventDetailPage() {
                     <td className="p-3 text-sm">
                       {response.atmospheres.join(', ') || '-'}
                     </td>
-                    <td className="p-3 text-sm">{response.priceRange || '-'}</td>
                     <td className="p-3 text-sm">{response.dietaryRestriction || '-'}</td>
                     <td className="p-3 text-sm">{response.allergyInfo || '-'}</td>
                     <td className="p-3 text-sm">{response.dislikedFoods || '-'}</td>

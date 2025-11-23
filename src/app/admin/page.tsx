@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Users, Calendar } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
 import { getPendingRequests } from '@/lib/actions/recommendation'
+import { verifyAdminPassword } from '@/lib/actions/admin'
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -19,16 +20,20 @@ export default function AdminPage() {
     createdAt: string
   }>>([])
 
-  const handleLogin = () => {
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+  const handleLogin = async () => {
+    setError('')
+    setIsLoading(true)
 
-    if (password === adminPassword) {
+    const result = await verifyAdminPassword(password)
+
+    if (result.success) {
       setIsAuthenticated(true)
-      setError('')
       fetchRequests()
     } else {
-      setError('비밀번호가 올바르지 않습니다.')
+      setError(result.error || '비밀번호가 올바르지 않습니다.')
     }
+
+    setIsLoading(false)
   }
 
   const fetchRequests = async () => {
@@ -73,7 +78,7 @@ export default function AdminPage() {
               {error && (
                 <p className="text-sm text-red-600">{error}</p>
               )}
-              <Button fullWidth onClick={handleLogin}>
+              <Button fullWidth onClick={handleLogin} isLoading={isLoading}>
                 로그인
               </Button>
             </div>

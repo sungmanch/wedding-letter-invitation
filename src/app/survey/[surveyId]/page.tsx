@@ -11,7 +11,6 @@ import {
   type LetterInput,
   foodTypeOptions,
   atmosphereOptions,
-  priceRangeOptions,
   dietaryOptions,
   stickerOptions,
 } from '@/lib/validations/survey'
@@ -71,7 +70,6 @@ export default function SurveyPage() {
       guestName: '',
       foodTypes: [],
       atmospheres: [],
-      priceRange: '',
       dietaryRestriction: '',
       allergyInfo: '',
       dislikedFoods: '',
@@ -335,22 +333,6 @@ export default function SurveyPage() {
                 선택 사항이에요
               </p>
             </div>
-
-            <Select
-              value={form.watch('priceRange')}
-              onValueChange={(value) => form.setValue('priceRange', value)}
-            >
-              <SelectTrigger label="선호 가격대">
-                <SelectValue placeholder="선택해주세요" />
-              </SelectTrigger>
-              <SelectContent>
-                {priceRangeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
             <Select
               value={form.watch('dietaryRestriction')}

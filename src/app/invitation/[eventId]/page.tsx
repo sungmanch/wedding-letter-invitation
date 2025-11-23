@@ -30,18 +30,18 @@ export default async function PublicInvitationPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blush-pink-50 to-white py-8">
+    <main className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-8">
       <div className="mx-auto max-w-sm px-4">
         {/* Header */}
         <div className="mb-6 text-center">
-          <Heart className="mx-auto mb-2 h-8 w-8 text-blush-pink" />
+          <Heart className="mx-auto mb-2 h-8 w-8 text-primary-purple" />
           <p className="text-sm text-charcoal/60">청모장 초대</p>
         </div>
 
         {/* Invitation Card */}
         <Card className="overflow-hidden">
           {/* Banner */}
-          <div className="bg-gradient-to-r from-blush-pink to-soft-gold p-6 text-center text-white">
+          <div className="bg-gradient-to-r from-primary-purple to-accent-pink p-6 text-center text-white">
             <p className="mb-1 text-sm opacity-80">청첩장 모임</p>
             <h1 className="text-2xl font-bold">{invitation.groupName}</h1>
           </div>
@@ -50,7 +50,7 @@ export default async function PublicInvitationPage({ params }: PageProps) {
           <CardContent className="space-y-4 p-6">
             {/* Restaurant */}
             {invitation.selectedRestaurant ? (
-              <div className="rounded-xl bg-cream/50 p-4">
+              <div className="rounded-xl bg-purple-50 p-4">
                 <p className="mb-1 text-sm text-charcoal/60">만나는 곳</p>
                 <p className="font-semibold text-charcoal">
                   {invitation.selectedRestaurant.name}
@@ -61,7 +61,7 @@ export default async function PublicInvitationPage({ params }: PageProps) {
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl bg-cream/50 p-4 text-center">
+              <div className="rounded-xl bg-purple-50 p-4 text-center">
                 <p className="text-sm text-charcoal/60">
                   아직 식당이 선택되지 않았습니다
                 </p>
@@ -72,10 +72,10 @@ export default async function PublicInvitationPage({ params }: PageProps) {
             {(invitation.meetingDate || invitation.meetingTime) && (
               <div className="flex gap-4">
                 {invitation.meetingDate && (
-                  <div className="flex-1 rounded-xl bg-cream/50 p-4">
+                  <div className="flex-1 rounded-xl bg-purple-50 p-4">
                     <p className="mb-1 text-sm text-charcoal/60">날짜</p>
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-blush-pink" />
+                      <Calendar className="h-5 w-5 text-primary-purple" />
                       <p className="font-semibold text-charcoal">
                         {formatDate(invitation.meetingDate)}
                       </p>
@@ -83,10 +83,10 @@ export default async function PublicInvitationPage({ params }: PageProps) {
                   </div>
                 )}
                 {invitation.meetingTime && (
-                  <div className="flex-1 rounded-xl bg-cream/50 p-4">
+                  <div className="flex-1 rounded-xl bg-purple-50 p-4">
                     <p className="mb-1 text-sm text-charcoal/60">시간</p>
                     <div className="flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-soft-gold" />
+                      <Clock className="h-5 w-5 text-accent-pink" />
                       <p className="font-semibold text-charcoal">
                         {invitation.meetingTime}
                       </p>
@@ -98,7 +98,7 @@ export default async function PublicInvitationPage({ params }: PageProps) {
 
             {/* Message */}
             {invitation.additionalMessage && (
-              <div className="rounded-xl border border-cream p-4 text-center">
+              <div className="rounded-xl border border-purple-100 p-4 text-center">
                 <p className="whitespace-pre-wrap text-charcoal">
                   {invitation.additionalMessage}
                 </p>

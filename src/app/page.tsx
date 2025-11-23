@@ -11,9 +11,9 @@ export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
         <div className="flex h-14 items-center justify-between px-4">
-          <Link href="/" className="font-bold text-blush-pink">
+          <Link href="/" className="font-bold text-primary-purple">
             청모장
           </Link>
           {!isLoading && (
@@ -34,9 +34,9 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="flex flex-1 flex-col items-center justify-center px-4 py-12 text-center">
-        <div className="mb-6 flex items-center gap-2 rounded-full bg-blush-pink-50 px-4 py-2">
-          <Sparkles className="h-4 w-4 text-blush-pink" />
-          <span className="text-sm font-medium text-blush-pink">
+        <div className="mb-6 flex items-center gap-2 rounded-full bg-purple-50 px-4 py-2">
+          <Sparkles className="h-4 w-4 text-primary-purple" />
+          <span className="text-sm font-medium text-primary-purple">
             예비 신부를 위한 서비스
           </span>
         </div>
@@ -68,7 +68,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-cream/50 px-4 py-10">
+      <section className="bg-purple-50 px-4 py-10">
         <h2 className="mb-8 text-center text-lg font-semibold text-charcoal">
           이렇게 사용해요
         </h2>
@@ -76,7 +76,7 @@ export default function HomePage() {
         <div className="space-y-6">
           {/* Step 1 */}
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blush-pink text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-purple text-white">
               <Users className="h-5 w-5" />
             </div>
             <div>
@@ -91,7 +91,7 @@ export default function HomePage() {
 
           {/* Step 2 */}
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-soft-gold text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-pink text-white">
               <Utensils className="h-5 w-5" />
             </div>
             <div>
@@ -106,7 +106,7 @@ export default function HomePage() {
 
           {/* Step 3 */}
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blush-pink text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-purple text-white">
               <Mail className="h-5 w-5" />
             </div>
             <div>
@@ -128,21 +128,21 @@ export default function HomePage() {
         </h2>
 
         <div className="grid gap-4">
-          <div className="rounded-xl border border-cream bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-sm">
             <p className="mb-1 font-medium text-charcoal">취향 기반 식당 추천</p>
             <p className="text-sm text-charcoal/60">
               모든 친구의 음식 취향, 알레르기, 가격대를 분석해 최적의 식당을 찾아드려요
             </p>
           </div>
 
-          <div className="rounded-xl border border-cream bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-sm">
             <p className="mb-1 font-medium text-charcoal">축하 편지 보관함</p>
             <p className="text-sm text-charcoal/60">
               설문과 함께 작성된 진심 어린 축하 메시지를 영구적으로 보관해요
             </p>
           </div>
 
-          <div className="rounded-xl border border-cream bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-sm">
             <p className="mb-1 font-medium text-charcoal">예쁜 청모장 공유</p>
             <p className="text-sm text-charcoal/60">
               확정된 모임 정보를 예쁜 디자인으로 친구들에게 공유할 수 있어요
@@ -153,7 +153,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="px-4 pb-8">
-        <div className="rounded-2xl bg-gradient-to-r from-blush-pink to-soft-gold p-6 text-center text-white">
+        <div className="rounded-2xl bg-gradient-to-r from-primary-purple to-accent-pink p-6 text-center text-white">
           <h2 className="mb-2 text-lg font-semibold">
             지금 바로 시작하세요
           </h2>
@@ -163,7 +163,7 @@ export default function HomePage() {
           <Link href="/create">
             <Button
               variant="outline"
-              className="border-white bg-white text-blush-pink hover:bg-white/90"
+              className="border-white bg-white text-primary-purple hover:bg-white/90"
             >
               시작하기
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -173,7 +173,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-cream px-4 py-6 text-center">
+      <footer className="border-t border-purple-100 px-4 py-6 text-center">
         <p className="text-xs text-charcoal/40">
           2025 청모장. Made with love for brides-to-be
         </p>

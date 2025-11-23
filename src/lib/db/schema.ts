@@ -40,7 +40,6 @@ export const surveyResponses = pgTable('survey_responses', {
   guestName: varchar('guest_name', { length: 100 }).notNull(),
   foodTypes: jsonb('food_types').$type<string[]>(),
   atmospheres: jsonb('atmospheres').$type<string[]>(),
-  priceRange: varchar('price_range', { length: 50 }),
   dietaryRestriction: varchar('dietary_restriction', { length: 50 }),
   allergyInfo: varchar('allergy_info', { length: 255 }),
   dislikedFoods: text('disliked_foods'),

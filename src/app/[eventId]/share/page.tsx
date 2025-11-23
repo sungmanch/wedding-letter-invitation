@@ -56,7 +56,7 @@ export default function SharePage() {
       <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
         <div className="flex h-14 items-center px-4">
           <Link
-            href="/create"
+            href={`/${eventId}`}
             className="flex items-center text-charcoal/60 hover:text-charcoal"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -181,7 +181,7 @@ export default function SharePage() {
               </h3>
             </div>
             {user ? (
-              // 로그인된 상태
+              // 로그인된 상태 - 대시보드로 직접 이동
               <>
                 <p className="mb-4 text-sm text-charcoal/60">
                   대시보드에서 친구들의 응답 현황을 확인하고, 식당 추천을 받고, 최종 청모장을 공유할 수 있어요.
@@ -194,7 +194,7 @@ export default function SharePage() {
                 </Link>
               </>
             ) : (
-              // 비로그인 상태
+              // 비로그인 상태 - 로그인 페이지로 이동
               <>
                 <p className="mb-4 text-sm text-charcoal/60">
                   로그인하면 친구들의 응답 현황을 확인하고, 식당 추천을 받고, 최종 청모장을 공유할 수 있어요.
@@ -202,7 +202,7 @@ export default function SharePage() {
                 <Link href={`/login?redirect=/${eventId}`}>
                   <Button fullWidth>
                     <LayoutDashboard className="mr-2 h-5 w-5" />
-                    로그인하고 대시보드 확인하기
+                    로그인하고 대시보드 보기
                   </Button>
                 </Link>
                 <p className="mt-3 text-center text-xs text-charcoal/40">

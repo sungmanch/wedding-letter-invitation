@@ -175,9 +175,9 @@ export default function InvitationEditPage() {
 
   if (showPreview) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-blush-pink-50 to-white">
+      <main className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
         {/* Preview Header */}
-        <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
           <div className="flex h-14 items-center px-4">
             <button
               onClick={() => setShowPreview(false)}
@@ -196,7 +196,7 @@ export default function InvitationEditPage() {
         <div className="p-4">
           <Card className="mx-auto max-w-sm overflow-hidden">
             {/* Header Banner */}
-            <div className="bg-gradient-to-r from-blush-pink to-soft-gold p-6 text-center text-white">
+            <div className="bg-gradient-to-r from-primary-purple to-accent-pink p-6 text-center text-white">
               <p className="mb-1 text-sm opacity-80">청첩장 모임</p>
               <h2 className="text-2xl font-bold">{invitation?.groupName}</h2>
             </div>
@@ -205,7 +205,7 @@ export default function InvitationEditPage() {
             <CardContent className="space-y-4 p-6">
               {/* Restaurant Info */}
               {invitation?.selectedRestaurant ? (
-                <div className="rounded-xl bg-cream/50 p-4">
+                <div className="rounded-xl bg-purple-50 p-4">
                   <p className="mb-1 text-sm text-charcoal/60">만나는 곳</p>
                   <p className="font-semibold text-charcoal">
                     {invitation.selectedRestaurant.name}
@@ -216,7 +216,7 @@ export default function InvitationEditPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl bg-cream/50 p-4 text-center">
+                <div className="rounded-xl bg-purple-50 p-4 text-center">
                   <p className="text-sm text-charcoal/60">
                     아직 식당이 선택되지 않았습니다
                   </p>
@@ -227,10 +227,10 @@ export default function InvitationEditPage() {
               {(meetingDate || meetingTime) && (
                 <div className="flex gap-4">
                   {meetingDate && (
-                    <div className="flex-1 rounded-xl bg-cream/50 p-4">
+                    <div className="flex-1 rounded-xl bg-purple-50 p-4">
                       <p className="mb-1 text-sm text-charcoal/60">날짜</p>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-blush-pink" />
+                        <Calendar className="h-5 w-5 text-primary-purple" />
                         <p className="font-semibold text-charcoal">
                           {meetingDate.replace(/-/g, '.')}
                         </p>
@@ -238,10 +238,10 @@ export default function InvitationEditPage() {
                     </div>
                   )}
                   {meetingTime && (
-                    <div className="flex-1 rounded-xl bg-cream/50 p-4">
+                    <div className="flex-1 rounded-xl bg-purple-50 p-4">
                       <p className="mb-1 text-sm text-charcoal/60">시간</p>
                       <div className="flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-soft-gold" />
+                        <Clock className="h-5 w-5 text-accent-pink" />
                         <p className="font-semibold text-charcoal">
                           {meetingTime}
                         </p>
@@ -253,7 +253,7 @@ export default function InvitationEditPage() {
 
               {/* Message */}
               {additionalMessage && (
-                <div className="rounded-xl border border-cream p-4">
+                <div className="rounded-xl border border-purple-100 p-4">
                   <p className="whitespace-pre-wrap text-charcoal">
                     {additionalMessage}
                   </p>
@@ -300,7 +300,7 @@ export default function InvitationEditPage() {
   return (
     <main className="min-h-screen pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-purple-100 bg-white/80 backdrop-blur-sm">
         <div className="flex h-14 items-center px-4">
           <Link
             href={`/${eventId}`}
@@ -378,7 +378,7 @@ export default function InvitationEditPage() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-cream bg-white p-4">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-purple-100 bg-white p-4">
         <div className="mx-auto flex max-w-[480px] gap-3">
           <Button
             size="lg"

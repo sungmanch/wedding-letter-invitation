@@ -1,15 +1,30 @@
 @import 'tailwindcss';
 
 :root {
-  /* Wedding Theme Colors */
-  --blush-pink: #ffb6c1;
-  --soft-gold: #d4af37;
-  --cream: #fffdd0;
-  --warm-white: #faf9f6;
+  /* Wedding Theme Colors - Purple/Lavender Palette */
+  --primary-purple: #8b5cf6;
+  --accent-pink: #ec4899;
+  --lavender-bg: #fdf4ff;
+  --lavender-light: #f3e8ff;
   --charcoal: #36454f;
 
+  /* Blush Pink (alias for accent-pink) */
+  --blush-pink: #ec4899;
+  --blush-pink-50: #fdf2f8;
+  --blush-pink-100: #fce7f3;
+  --blush-pink-200: #fbcfe8;
+
+  /* Cream/Beige Tones */
+  --cream: #fef3f7;
+
+  /* Badge Colors */
+  --badge-required-bg: #fee2e2;
+  --badge-required-text: #dc2626;
+  --badge-optional-bg: #f3f4f6;
+  --badge-optional-text: #6b7280;
+
   /* Base Colors */
-  --background: var(--warm-white);
+  --background: var(--lavender-bg);
   --foreground: var(--charcoal);
 }
 
@@ -18,27 +33,43 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Wedding Theme */
-  --color-blush-pink: var(--blush-pink);
-  --color-soft-gold: var(--soft-gold);
-  --color-cream: var(--cream);
-  --color-warm-white: var(--warm-white);
+  /* Wedding Theme - Purple/Lavender */
+  --color-primary-purple: var(--primary-purple);
+  --color-accent-pink: var(--accent-pink);
+  --color-lavender-bg: var(--lavender-bg);
+  --color-lavender-light: var(--lavender-light);
   --color-charcoal: var(--charcoal);
 
-  /* Extended Palette */
-  --color-blush-pink-50: #fff5f7;
-  --color-blush-pink-100: #ffebee;
-  --color-blush-pink-200: #ffd1d8;
-  --color-blush-pink-300: #ffb6c1;
-  --color-blush-pink-400: #ff9bab;
-  --color-blush-pink-500: #ff8095;
+  /* Blush Pink */
+  --color-blush-pink: var(--blush-pink);
+  --color-blush-pink-50: var(--blush-pink-50);
+  --color-blush-pink-100: var(--blush-pink-100);
+  --color-blush-pink-200: var(--blush-pink-200);
 
-  --color-soft-gold-50: #faf6e8;
-  --color-soft-gold-100: #f5edd1;
-  --color-soft-gold-200: #ebdba3;
-  --color-soft-gold-300: #d4af37;
-  --color-soft-gold-400: #c9a227;
-  --color-soft-gold-500: #b8941f;
+  /* Cream */
+  --color-cream: var(--cream);
+
+  /* Badge Colors */
+  --color-badge-required-bg: var(--badge-required-bg);
+  --color-badge-required-text: var(--badge-required-text);
+  --color-badge-optional-bg: var(--badge-optional-bg);
+  --color-badge-optional-text: var(--badge-optional-text);
+
+  /* Extended Purple Palette */
+  --color-purple-50: #faf5ff;
+  --color-purple-100: #f3e8ff;
+  --color-purple-200: #e9d5ff;
+  --color-purple-300: #d8b4fe;
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+
+  /* Extended Pink Palette */
+  --color-pink-50: #fdf2f8;
+  --color-pink-100: #fce7f3;
+  --color-pink-200: #fbcfe8;
+  --color-pink-300: #f9a8d4;
+  --color-pink-400: #f472b6;
+  --color-pink-500: #ec4899;
 
   /* Fonts */
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
@@ -68,12 +99,12 @@ body {
 
 /* Utility Classes */
 .text-gradient {
-  background: linear-gradient(135deg, var(--blush-pink), var(--soft-gold));
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-pink));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .bg-gradient-wedding {
-  background: linear-gradient(135deg, var(--blush-pink-50), var(--soft-gold-50));
+  background: linear-gradient(135deg, var(--lavender-light), var(--lavender-bg));
 }

@@ -13,9 +13,9 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100)
 
     const sizeClasses = {
-      sm: 'h-1',
-      default: 'h-2',
-      lg: 'h-3',
+      sm: 'h-0.5',
+      default: 'h-1',
+      lg: 'h-2',
     }
 
     return (
@@ -23,12 +23,12 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
         <div
           ref={ref}
           className={cn(
-            'w-full overflow-hidden rounded-full bg-cream',
+            'w-full overflow-hidden rounded-full bg-pink-50',
             sizeClasses[size]
           )}
         >
           <div
-            className="h-full rounded-full bg-gradient-to-r from-blush-pink to-soft-gold transition-all duration-300 ease-out"
+            className="h-full rounded-full bg-gradient-to-r from-primary-purple to-accent-pink transition-all duration-300 ease-out"
             style={{ width: `${percentage}%` }}
           />
         </div>

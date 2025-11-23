@@ -3,26 +3,26 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
-          'bg-blush-pink text-white hover:bg-blush-pink-400 focus-visible:ring-blush-pink',
+          'bg-accent-pink text-white hover:opacity-90 focus-visible:ring-accent-pink',
         secondary:
-          'bg-soft-gold text-white hover:bg-soft-gold/90 focus-visible:ring-soft-gold',
+          'bg-primary-purple text-white hover:opacity-90 focus-visible:ring-primary-purple',
         outline:
-          'border border-blush-pink text-blush-pink bg-transparent hover:bg-blush-pink-50 focus-visible:ring-blush-pink',
+          'border border-accent-pink text-accent-pink bg-transparent hover:bg-pink-50 focus-visible:ring-accent-pink',
         ghost:
-          'text-charcoal hover:bg-cream focus-visible:ring-blush-pink',
-        link: 'text-blush-pink underline-offset-4 hover:underline',
+          'text-charcoal hover:bg-pink-50 focus-visible:ring-accent-pink',
+        link: 'text-accent-pink underline-offset-4 hover:underline',
         destructive:
           'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500',
       },
       size: {
-        default: 'h-12 px-6 py-3',
+        default: 'h-14 px-6 py-3',
         sm: 'h-9 rounded-md px-3',
-        lg: 'h-14 rounded-lg px-8 text-base',
+        lg: 'h-16 rounded-xl px-8 text-base',
         icon: 'h-10 w-10',
       },
       fullWidth: {
