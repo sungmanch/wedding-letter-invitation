@@ -45,6 +45,7 @@ export async function createEvent(
         expected_members: parsed.data.expectedMembers || null,
         preferred_location: parsed.data.preferredLocation || null,
         budget_range: parsed.data.budgetRange || null,
+        meeting_date: parsed.data.meetingDate || null,
         survey_url: surveyUrl,
         status: 'collecting',
       })

@@ -8,6 +8,7 @@ export const createEventSchema = z.object({
   expectedMembers: z.string().optional(),
   preferredLocation: z.string().optional(),
   budgetRange: z.string().optional(),
+  meetingDate: z.string().optional(), // ISO date string (YYYY-MM-DD)
   invitationLink: z.string().url().optional().or(z.literal('')),
 })
 

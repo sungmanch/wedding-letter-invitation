@@ -11,7 +11,10 @@ import {
   Mail,
   ChevronRight,
   LogOut,
+  CalendarIcon,
 } from 'lucide-react'
+import { format } from 'date-fns'
+import { ko } from 'date-fns/locale'
 import {
   Button,
   Card,
@@ -22,6 +25,7 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
+  Calendar,
 } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -31,6 +35,7 @@ interface EventData {
   groupName: string
   status: string
   expectedMembers: string | null
+  meetingDate: string | null
   createdAt: string
 }
 
@@ -57,6 +62,8 @@ export default function EventDashboardPage() {
   const [letters, setLetters] = useState<LetterData[]>([])
   const [isLoadingData, setIsLoadingData] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [isUpdatingDate, setIsUpdatingDate] = useState(false)
 
   // 이벤트 데이터 로드
   useEffect(() => {
@@ -68,7 +75,7 @@ export default function EventDashboardPage() {
       // 이벤트 정보 조회
       const { data: event, error: eventError } = await supabase
         .from('events')
-        .select('id, group_name, status, expected_members, created_at, user_id')
+        .select('id, group_name, status, expected_members, meeting_date, created_at, user_id')
         .eq('id', eventId)
         .single()
 
@@ -90,6 +97,7 @@ export default function EventDashboardPage() {
         groupName: event.group_name,
         status: event.status,
         expectedMembers: event.expected_members,
+        meetingDate: event.meeting_date,
         createdAt: event.created_at,
       })
 
@@ -149,6 +157,31 @@ export default function EventDashboardPage() {
     if (!expectedMembers) return 10
     const match = expectedMembers.match(/(\d+)/)
     return match ? parseInt(match[1], 10) : 10
+  }
+
+  // 모임 날짜 업데이트
+  const handleUpdateMeetingDate = async (date: Date | undefined) => {
+    if (!eventData) return
+
+    setIsUpdatingDate(true)
+    const supabase = createClient()
+
+    const meetingDate = date ? format(date, 'yyyy-MM-dd') : null
+
+    const { error: updateError } = await supabase
+      .from('events')
+      .update({ meeting_date: meetingDate })
+      .eq('id', eventData.id)
+
+    if (updateError) {
+      console.error('Error updating meeting date:', updateError)
+      alert('날짜 업데이트에 실패했습니다.')
+    } else {
+      setEventData({ ...eventData, meetingDate })
+    }
+
+    setIsUpdatingDate(false)
+    setShowDatePicker(false)
   }
 
   // 로딩 중이면 로딩 표시
@@ -275,6 +308,60 @@ export default function EventDashboardPage() {
                   </Card>
                 </Link>
               </div>
+
+              {/* 모임 날짜 카드 */}
+              <Card className={!eventData.meetingDate ? 'border-amber-200 bg-amber-50/50' : ''}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                        eventData.meetingDate ? 'bg-blush-pink-50' : 'bg-amber-100'
+                      }`}>
+                        <CalendarIcon className={`h-5 w-5 ${
+                          eventData.meetingDate ? 'text-blush-pink' : 'text-amber-600'
+                        }`} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-charcoal/60">모임 날짜</p>
+                        <p className={`font-semibold ${
+                          eventData.meetingDate ? 'text-charcoal' : 'text-amber-600'
+                        }`}>
+                          {eventData.meetingDate
+                            ? format(new Date(eventData.meetingDate), 'M월 d일 (EEE)', { locale: ko })
+                            : '날짜 미정'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowDatePicker(!showDatePicker)}
+                      className="rounded-lg border border-blush-pink/30 px-3 py-1.5 text-sm font-medium text-blush-pink hover:bg-blush-pink/5"
+                    >
+                      {eventData.meetingDate ? '변경' : '설정'}
+                    </button>
+                  </div>
+                  {showDatePicker && (
+                    <div className="mt-4 rounded-xl border border-gray-200 overflow-hidden">
+                      <Calendar
+                        mode="single"
+                        selected={eventData.meetingDate ? new Date(eventData.meetingDate) : undefined}
+                        onSelect={handleUpdateMeetingDate}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      />
+                      {eventData.meetingDate && (
+                        <div className="border-t border-gray-200 p-3">
+                          <button
+                            onClick={() => handleUpdateMeetingDate(undefined)}
+                            className="w-full rounded-lg border border-red-200 py-2 text-sm font-medium text-red-500 hover:bg-red-50"
+                            disabled={isUpdatingDate}
+                          >
+                            날짜 삭제
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Stats Cards */}
               <Card>
