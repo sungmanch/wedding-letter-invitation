@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyRecommendationRequest } from '@/lib/slack'
 import { sendRecommendationCompleteEmail } from '@/lib/email-notification'
 import type { ApiResponse } from '@/types'
@@ -17,9 +17,7 @@ export interface RestaurantInput {
   matchReasons: string[]
 }
 
-export async function requestRecommendation(
-  eventId: string
-): Promise<ApiResponse<boolean>> {
+export async function requestRecommendation(eventId: string): Promise<ApiResponse<boolean>> {
   try {
     const supabase = await createClient()
 
@@ -76,11 +74,7 @@ export async function requestRecommendation(
     }
 
     // Send Slack notification (quietly, user doesn't know)
-    await notifyRecommendationRequest(
-      eventId,
-      event.group_name,
-      responseCount
-    )
+    await notifyRecommendationRequest(eventId, event.group_name, responseCount)
 
     return {
       data: true,
@@ -96,12 +90,14 @@ export async function requestRecommendation(
 }
 
 export async function getPendingRequests(): Promise<
-  ApiResponse<Array<{
-    id: string
-    groupName: string
-    responseCount: number
-    createdAt: string
-  }>>
+  ApiResponse<
+    Array<{
+      id: string
+      groupName: string
+      responseCount: number
+      createdAt: string
+    }>
+  >
 > {
   try {
     const supabase = await createClient()
@@ -156,27 +152,23 @@ export async function addRestaurantRecommendations(
   restaurants: RestaurantInput[]
 ): Promise<ApiResponse<boolean>> {
   try {
-    const supabase = await createClient()
-
-    // Verify admin authentication (optional, add if needed)
-    // For now, we'll rely on ADMIN_PASSWORD in the admin page
+    // Use admin client for admin-only operations (no user session required)
+    const supabase = createAdminClient()
 
     // Insert recommendations
-    const { error: insertError } = await supabase
-      .from('restaurant_recommendations')
-      .insert(
-        restaurants.map((r) => ({
-          event_id: eventId,
-          name: r.name,
-          category: r.category,
-          location: r.location,
-          price_range: r.priceRange,
-          image_url: r.imageUrl || null,
-          map_url: r.mapUrl || null,
-          match_score: r.matchScore,
-          match_reasons: r.matchReasons,
-        }))
-      )
+    const { error: insertError } = await supabase.from('restaurant_recommendations').insert(
+      restaurants.map((r) => ({
+        event_id: eventId,
+        name: r.name,
+        category: r.category,
+        location: r.location,
+        price_range: r.priceRange,
+        image_url: r.imageUrl || null,
+        map_url: r.mapUrl || null,
+        match_score: r.matchScore,
+        match_reasons: r.matchReasons,
+      }))
+    )
 
     if (insertError) {
       console.error('Failed to insert recommendations:', insertError)
@@ -209,17 +201,17 @@ export async function addRestaurantRecommendations(
 
     if (event?.user_id) {
       // Get user email from auth
-      const { data: { user } } = await supabase.auth.admin.getUserById(event.user_id)
+      const {
+        data: { user },
+      } = await supabase.auth.admin.getUserById(event.user_id)
 
       if (user?.email) {
         // Send email notification (don't wait for it)
-        sendRecommendationCompleteEmail(
-          user.email,
-          eventId,
-          event.group_name
-        ).catch((error) => {
-          console.error('Failed to send email notification:', error)
-        })
+        await sendRecommendationCompleteEmail(user.email, eventId, event.group_name).catch(
+          (error) => {
+            console.error('Failed to send email notification:', error)
+          }
+        )
       }
     }
 
@@ -236,9 +228,7 @@ export async function addRestaurantRecommendations(
   }
 }
 
-export async function getRecommendations(
-  eventId: string
-): Promise<ApiResponse<RestaurantData[]>> {
+export async function getRecommendations(eventId: string): Promise<ApiResponse<RestaurantData[]>> {
   try {
     const supabase = await createClient()
 
@@ -291,7 +281,9 @@ export async function selectRestaurant(
     const supabase = await createClient()
 
     // Verify ownership
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     if (!user) {
       return {
         data: null,

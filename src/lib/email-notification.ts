@@ -13,8 +13,8 @@ export async function sendRecommendationCompleteEmail(
   const recommendUrl = `${baseUrl}/${eventId}/recommend`
 
   try {
-    await resend.emails.send({
-      from: '청모장 <onboarding@resend.dev>',
+    const res = await resend.emails.send({
+      from: '청모장 <no-reply@cheongmojang.xyz>',
       to: userEmail,
       subject: `🍽️ ${groupName} 맞춤 식당 추천이 완료되었습니다!`,
       html: `
@@ -83,7 +83,7 @@ export async function sendRecommendationCompleteEmail(
         </html>
       `,
     })
-
+    console.log('success to send', res)
     return true
   } catch (error) {
     console.error('Failed to send recommendation complete email:', error)
