@@ -30,7 +30,7 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
   const bankInfo = {
     bank: '하나은행',
     account: '620-241758-811',
-    holder: '웨딩레터',
+    holder: '조성만',
     amount: '9,900원',
   }
 
@@ -200,7 +200,7 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
           <div className="rounded-lg bg-cream p-3 text-xs text-charcoal/60">
             💡 입금 후 24시간 이내 환불 요청 가능 (전액 환불)
             <br />
-            문의: support@weddingletter.com
+            문의: sungman.cho@tbdlabs.team
           </div>
 
           {error && (
