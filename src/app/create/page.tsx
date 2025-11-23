@@ -24,11 +24,6 @@ export default function CreatePage() {
           </h1>
           <div className="w-5" />
         </div>
-        {/* Progress Bar */}
-        <div className="flex items-center justify-between px-4 pb-2">
-          <span className="text-sm text-charcoal/60">1/5 단계</span>
-          <span className="text-sm font-medium text-blush-pink">20%</span>
-        </div>
       </header>
 
       {/* Gradient Hero Section */}

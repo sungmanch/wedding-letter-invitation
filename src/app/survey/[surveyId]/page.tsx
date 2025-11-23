@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,7 +15,7 @@ import {
   dietaryOptions,
   stickerOptions,
 } from '@/lib/validations/survey'
-import { submitSurvey } from '@/lib/actions/survey'
+import { submitSurvey, getEventBySurveyUrl } from '@/lib/actions/survey'
 import {
   Button,
   Input,
@@ -34,13 +34,36 @@ type Step = 'info' | 'food' | 'atmosphere' | 'details' | 'letter' | 'complete'
 export default function SurveyPage() {
   const params = useParams()
   const router = useRouter()
-  const surveyId = params.surveyId as string
+  const surveyUrl = params.surveyId as string
 
+  const [eventId, setEventId] = useState<string | null>(null)
+  const [groupName, setGroupName] = useState<string>('')
+  const [isLoadingEvent, setIsLoadingEvent] = useState(true)
   const [step, setStep] = useState<Step>('info')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [letterContent, setLetterContent] = useState('')
   const [selectedStickers, setSelectedStickers] = useState<string[]>([])
+
+  // Event 조회 (survey_url로 event_id 가져오기)
+  useEffect(() => {
+    const loadEvent = async () => {
+      setIsLoadingEvent(true)
+      const result = await getEventBySurveyUrl(surveyUrl)
+
+      if (result.error || !result.data) {
+        setError(result.error?.message || '청모장을 찾을 수 없습니다.')
+        setIsLoadingEvent(false)
+        return
+      }
+
+      setEventId(result.data.id)
+      setGroupName(result.data.groupName)
+      setIsLoadingEvent(false)
+    }
+
+    loadEvent()
+  }, [surveyUrl])
 
   const form = useForm<SurveyResponseInput>({
     resolver: zodResolver(surveyResponseSchema),
@@ -102,6 +125,11 @@ export default function SurveyPage() {
   }
 
   const handleSubmit = async () => {
+    if (!eventId) {
+      setError('청모장 정보를 불러올 수 없습니다.')
+      return
+    }
+
     const values = form.getValues()
     const validation = surveyResponseSchema.safeParse(values)
 
@@ -117,7 +145,7 @@ export default function SurveyPage() {
       ? { content: letterContent, stickers: selectedStickers }
       : undefined
 
-    const result = await submitSurvey(surveyId, values, letterInput)
+    const result = await submitSurvey(eventId, values, letterInput)
 
     if (result.error) {
       setError(result.error.message)
@@ -127,6 +155,36 @@ export default function SurveyPage() {
 
     setStep('complete')
     setIsLoading(false)
+  }
+
+  // Loading state
+  if (isLoadingEvent) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blush-pink border-t-transparent" />
+          <p className="text-charcoal/60">청모장 정보를 불러오는 중...</p>
+        </div>
+      </main>
+    )
+  }
+
+  // Error state (event not found)
+  if (!eventId && error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
+          <span className="text-3xl">😢</span>
+        </div>
+        <h1 className="mb-2 text-2xl font-bold text-charcoal">
+          청모장을 찾을 수 없습니다
+        </h1>
+        <p className="mb-6 text-charcoal/60">{error}</p>
+        <Button variant="outline" onClick={() => router.push('/')}>
+          홈으로 돌아가기
+        </Button>
+      </main>
+    )
   }
 
   if (step === 'complete') {
@@ -161,7 +219,7 @@ export default function SurveyPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-cream bg-white/80 backdrop-blur-sm">
         <div className="flex h-14 items-center justify-center px-4">
-          <h1 className="font-semibold text-charcoal">설문 참여</h1>
+          <h1 className="font-semibold text-charcoal">{groupName} 설문</h1>
         </div>
       </header>
 

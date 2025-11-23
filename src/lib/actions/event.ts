@@ -35,13 +35,12 @@ export async function createEvent(
 
     // 3. 이벤트 생성 (Supabase에 저장)
     // id는 DB에서 자동 생성 (uuid)
-    // user_id는 Supabase Auth user.id를 직접 사용 (users 테이블 FK 제거 필요하거나 null 사용)
+    // user_id는 로그인 시 자동 할당, 비로그인 시 null
     const { data: insertedEvent, error: insertError } = await supabase
       .from('events')
       .insert({
-        // user_id: 로그인 시 auth.users의 id를 저장하려면 FK 제약 해제 필요
-        // 일단 null로 저장하고 나중에 claim 방식으로 연결
-        user_id: null,
+        // 로그인 상태면 user.id 저장, 아니면 null (향후 claim 가능)
+        user_id: user?.id || null,
         group_name: parsed.data.groupName,
         expected_members: parsed.data.expectedMembers || null,
         preferred_location: parsed.data.preferredLocation || null,

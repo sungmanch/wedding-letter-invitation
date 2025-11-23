@@ -1,20 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Copy, Check, Share2, MessageCircle, LayoutDashboard } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
+import { getEvent } from '@/lib/actions/event'
 
 export default function SharePage() {
   const params = useParams()
   const eventId = params.eventId as string
   const [copied, setCopied] = useState(false)
+  const [surveyUrlPath, setSurveyUrlPath] = useState<string>('')
+  const [isLoadingEvent, setIsLoadingEvent] = useState(true)
   const { user, isLoading } = useAuth()
 
-  // 임시 설문 URL (실제로는 DB에서 가져옴)
-  const surveyUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/survey/${eventId}`
+  // Event 정보 가져오기 (survey_url 필요)
+  useEffect(() => {
+    const loadEvent = async () => {
+      const event = await getEvent(eventId)
+      if (event && event.survey_url) {
+        setSurveyUrlPath(event.survey_url)
+      }
+      setIsLoadingEvent(false)
+    }
+    loadEvent()
+  }, [eventId])
+
+  const surveyUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/survey/${surveyUrlPath}`
 
   const handleCopyLink = async () => {
     try {
@@ -81,27 +95,36 @@ export default function SharePage() {
         <Card className="mb-6">
           <CardContent className="p-4">
             <p className="mb-2 text-sm font-medium text-charcoal">설문 링크</p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 overflow-hidden rounded-lg bg-cream/50 px-3 py-2">
-                <p className="truncate text-sm text-charcoal/80">{surveyUrl}</p>
+            {isLoadingEvent ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-blush-pink border-t-transparent" />
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleCopyLink}
-                className="shrink-0"
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <Copy className="h-4 w-4" />
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 overflow-hidden rounded-lg bg-cream/50 px-3 py-2">
+                    <p className="truncate text-sm text-charcoal/80">{surveyUrl}</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopyLink}
+                    className="shrink-0"
+                    disabled={!surveyUrlPath}
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {copied && (
+                  <p className="mt-2 text-xs text-green-600">
+                    링크가 복사되었어요!
+                  </p>
                 )}
-              </Button>
-            </div>
-            {copied && (
-              <p className="mt-2 text-xs text-green-600">
-                링크가 복사되었어요!
-              </p>
+              </>
             )}
           </CardContent>
         </Card>
@@ -113,6 +136,7 @@ export default function SharePage() {
             fullWidth
             onClick={handleCopyLink}
             className="bg-charcoal hover:bg-charcoal/90"
+            disabled={isLoadingEvent || !surveyUrlPath}
           >
             <Copy className="mr-2 h-5 w-5" />
             링크 복사하기
@@ -124,6 +148,7 @@ export default function SharePage() {
             variant="secondary"
             onClick={handleKakaoShare}
             className="bg-[#FEE500] text-[#3C1E1E] hover:bg-[#FEE500]/90"
+            disabled={isLoadingEvent || !surveyUrlPath}
           >
             <MessageCircle className="mr-2 h-5 w-5" />
             카카오톡으로 공유
