@@ -48,6 +48,7 @@ export default function AdminEventDetailPage() {
       location: '',
       priceRange: '',
       imageUrl: '',
+      mapUrl: '',
       matchScore: 90,
       matchReasons: [],
     },
@@ -102,6 +103,7 @@ export default function AdminEventDetailPage() {
         location: '',
         priceRange: '',
         imageUrl: '',
+        mapUrl: '',
         matchScore: 90,
         matchReasons: [],
       },
@@ -348,6 +350,12 @@ export default function AdminEventDetailPage() {
                       placeholder="https://..."
                       value={restaurant.imageUrl}
                       onChange={(e) => updateRestaurant(index, 'imageUrl', e.target.value)}
+                    />
+                    <Input
+                      label="네이버 지도 URL (선택)"
+                      placeholder="https://naver.me/..."
+                      value={restaurant.mapUrl}
+                      onChange={(e) => updateRestaurant(index, 'mapUrl', e.target.value)}
                     />
                     <Input
                       label="매칭 점수 (%)"

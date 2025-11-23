@@ -113,6 +113,7 @@ export interface RestaurantData {
   location: string | null
   priceRange: string | null
   imageUrl: string | null
+  mapUrl: string | null
   matchScore: number | null
   matchReasons: string[] | null
   createdAt: Date

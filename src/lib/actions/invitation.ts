@@ -14,6 +14,8 @@ export interface InvitationData {
     name: string
     location: string
     category: string
+    imageUrl: string | null
+    mapUrl: string | null
   } | null
 }
 
@@ -55,7 +57,7 @@ export async function getInvitationData(
     if (event.selected_restaurant_id) {
       const { data: restaurant } = await supabase
         .from('restaurant_recommendations')
-        .select('id, name, location, category')
+        .select('id, name, location, category, image_url, map_url')
         .eq('id', event.selected_restaurant_id)
         .single()
 
@@ -65,6 +67,8 @@ export async function getInvitationData(
           name: restaurant.name,
           location: restaurant.location || '',
           category: restaurant.category || '',
+          imageUrl: restaurant.image_url || null,
+          mapUrl: restaurant.map_url || null,
         }
       }
     }

@@ -12,6 +12,7 @@ import {
   Check,
   MessageCircle,
   Eye,
+  ExternalLink,
 } from 'lucide-react'
 import {
   Button,
@@ -132,7 +133,15 @@ export default function InvitationEditPage() {
         : `📍 ${restaurantName}에서 만나요!`,
       url: invitationUrl,
       buttonText: '초대장 보기',
+      imageUrl: invitation?.selectedRestaurant?.imageUrl || undefined,
     })
+  }
+
+  const handleOpenMap = () => {
+    const mapUrl = invitation?.selectedRestaurant?.mapUrl
+    if (mapUrl) {
+      window.open(mapUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   const handlePreview = async () => {
@@ -210,9 +219,20 @@ export default function InvitationEditPage() {
                   <p className="font-semibold text-charcoal">
                     {invitation.selectedRestaurant.name}
                   </p>
-                  <div className="mt-2 flex items-center gap-1 text-sm text-charcoal/60">
-                    <MapPin className="h-4 w-4" />
-                    {invitation.selectedRestaurant.location}
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm text-charcoal/60">
+                      <MapPin className="h-4 w-4" />
+                      {invitation.selectedRestaurant.location}
+                    </div>
+                    {invitation.selectedRestaurant.mapUrl && (
+                      <button
+                        onClick={handleOpenMap}
+                        className="flex items-center gap-1 text-sm font-medium text-primary-purple hover:underline"
+                      >
+                        지도 보기
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (
