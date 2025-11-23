@@ -10,11 +10,17 @@ import {
   addRestaurantRecommendations,
   type RestaurantInput,
 } from '@/lib/actions/recommendation'
+import { verifyAdminPassword } from '@/lib/actions/admin'
 
 export default function AdminEventDetailPage() {
   const params = useParams()
   const router = useRouter()
   const eventId = params.eventId as string
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -50,8 +56,27 @@ export default function AdminEventDetailPage() {
 
   const [currentReasonInputs, setCurrentReasonInputs] = useState<string[]>([''])
 
+  const handleLogin = async () => {
+    setAuthError('')
+    setIsAuthenticating(true)
+
+    const result = await verifyAdminPassword(password)
+
+    if (result.success) {
+      setIsAuthenticated(true)
+    } else {
+      setAuthError(result.error || '비밀번호가 올바르지 않습니다.')
+    }
+
+    setIsAuthenticating(false)
+  }
+
   useEffect(() => {
     async function fetchData() {
+      if (!isAuthenticated) {
+        setIsLoading(false)
+        return
+      }
       setIsLoading(true)
       const result = await getEventDetails(eventId)
 
@@ -67,7 +92,7 @@ export default function AdminEventDetailPage() {
     }
 
     fetchData()
-  }, [eventId])
+  }, [eventId, isAuthenticated])
 
   const addRestaurant = () => {
     setRestaurants([
@@ -146,6 +171,37 @@ export default function AdminEventDetailPage() {
     // Success - redirect to admin list
     alert('추천이 성공적으로 저장되었습니다!')
     router.push('/admin')
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8">
+            <h1 className="mb-6 text-center text-2xl font-bold text-charcoal">
+              어드민 로그인
+            </h1>
+            <div className="space-y-4">
+              <Input
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleLogin()
+                }}
+              />
+              {authError && (
+                <p className="text-sm text-red-600">{authError}</p>
+              )}
+              <Button fullWidth onClick={handleLogin} isLoading={isAuthenticating}>
+                로그인
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    )
   }
 
   if (isLoading) {
