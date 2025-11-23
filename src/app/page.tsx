@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Heart, Users, Utensils, Mail, ArrowRight, Sparkles, User, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/providers/AuthProvider'
 
 export default function HomePage() {
   const { user, isLoading } = useAuth()

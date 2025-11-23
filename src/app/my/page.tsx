@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Plus, Calendar, Users, ArrowRight, LogOut, Trash2 } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/providers/AuthProvider'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 

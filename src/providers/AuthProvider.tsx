@@ -1,0 +1,78 @@
+'use client'
+
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
+
+interface AuthContextType {
+  user: User | null
+  isLoading: boolean
+  logout: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    // 초기 세션 확인 (전역에서 1회만)
+    const checkAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+      } catch (error) {
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuth()
+
+    // 인증 상태 변경 리스너 (전역에서 1개만)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const logout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setUser(null)
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, isLoading, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth(requireAuth = false) {
+  const context = useContext(AuthContext)
+  const router = useRouter()
+  const pathname = usePathname()
+
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
+
+  const { user, isLoading, logout } = context
+
+  useEffect(() => {
+    if (!isLoading && requireAuth && !user) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`)
+    }
+  }, [isLoading, requireAuth, user, router, pathname])
+
+  return { user, isLoading, logout }
+}

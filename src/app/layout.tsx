@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { AuthProvider } from '@/providers/AuthProvider'
 
 export const metadata: Metadata = {
   title: {
@@ -41,7 +42,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <div className="mobile-container min-h-screen">{children}</div>
+        <AuthProvider>
+          <div className="mobile-container min-h-screen">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   )

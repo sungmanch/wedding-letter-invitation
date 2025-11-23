@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Copy, Check, Share2, MessageCircle, LayoutDashboard } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/providers/AuthProvider'
 
 export default function SharePage() {
   const params = useParams()

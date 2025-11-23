@@ -23,7 +23,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@/components/ui'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 
 interface EventData {
