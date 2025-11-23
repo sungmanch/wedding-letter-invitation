@@ -17,18 +17,18 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       showOutsideDays={showOutsideDays}
       className={cn('w-full', className)}
       classNames={{
-        months: 'flex flex-col w-full',
+        months: 'flex flex-col w-full relative',
         month: 'w-full space-y-4',
-        month_caption: 'flex justify-center py-2 relative items-center',
+        month_caption: 'flex justify-center py-2 items-center w-full',
         caption_label: 'text-base font-semibold text-charcoal',
-        nav: 'relative space-x-1 pt-2 flex items-center justify-between',
+        nav: 'absolute left-0 right-0 top-0 flex justify-between px-2 py-2',
         button_previous: cn(
           buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'absolute left-1 top-3 h-8 w-8'
+          'h-8 w-8 z-10'
         ),
         button_next: cn(
           buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'absolute right-1 top-3 h-8 w-8'
+          'h-8 w-8 z-10'
         ),
         month_grid: 'w-full border-collapse',
         weekdays: 'flex w-full',
