@@ -15,6 +15,7 @@ export type {
 // Event status types
 export type EventStatus =
   | 'collecting' // 설문 수집 중
+  | 'pending' // AI 추천 대기 중
   | 'completed' // 설문 수집 완료
   | 'restaurant_selected' // 식당 선택 완료
   | 'shared' // 청모장 공유 완료

@@ -223,7 +223,10 @@ export default function EventDashboardPage() {
           <div>
             <Badge className="mb-2 bg-white/20 text-white border-white/30">
               {eventData.status === 'collecting' ? '설문 수집 중' :
-               eventData.status === 'completed' ? '완료됨' : eventData.status}
+               eventData.status === 'pending' ? 'AI 분석 중' :
+               eventData.status === 'completed' ? '추천 완료' :
+               eventData.status === 'restaurant_selected' ? '식당 선택 완료' :
+               eventData.status === 'shared' ? '공유 완료' : eventData.status}
             </Badge>
             <p className="text-2xl font-bold">
               {responseCount}명 응답
