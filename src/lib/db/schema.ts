@@ -79,13 +79,12 @@ export const restaurantRecommendations = pgTable('restaurant_recommendations', {
 }).enableRLS()
 
 // Payment Requests (결제 요청)
+// 사용자별로 한 번만 결제하면 모든 모임의 편지 열람 가능
 export const paymentRequests = pgTable('payment_requests', {
   id: uuid('id').primaryKey().defaultRandom(),
-  eventId: uuid('event_id')
-    .references(() => events.id, { onDelete: 'cascade' })
-    .notNull(),
+  userId: uuid('user_id').notNull(), // auth.users 참조 - FK는 DB에서 직접 설정
   amount: integer('amount').default(9900).notNull(),
-  depositName: varchar('deposit_name', { length: 100 }), // 입금자명 (예: WL-12345-홍길동)
+  depositName: varchar('deposit_name', { length: 100 }), // 입금자명 (예: WL-{userId 앞 5자}-{userName})
   depositAt: timestamp('deposit_at'), // 사용자가 "입금 완료" 버튼 클릭한 시간
   status: varchar('status', { length: 20 }).default('pending').notNull(),
   requestedAt: timestamp('requested_at').defaultNow().notNull(),
@@ -99,7 +98,6 @@ export const eventsRelations = relations(events, ({ many, one }) => ({
   surveyResponses: many(surveyResponses),
   letters: many(letters),
   restaurantRecommendations: many(restaurantRecommendations),
-  paymentRequests: many(paymentRequests),
   selectedRestaurant: one(restaurantRecommendations, {
     fields: [events.selectedRestaurantId],
     references: [restaurantRecommendations.id],
@@ -138,12 +136,8 @@ export const restaurantRecommendationsRelations = relations(
   })
 )
 
-export const paymentRequestsRelations = relations(paymentRequests, ({ one }) => ({
-  event: one(events, {
-    fields: [paymentRequests.eventId],
-    references: [events.id],
-  }),
-}))
+// paymentRequests는 이제 user 기반이므로 event와 직접 relation 없음
+// userId는 auth.users를 참조하지만 Drizzle ORM에서는 외부 테이블 relation 불가
 
 // Type exports for use throughout the app
 export type Event = typeof events.$inferSelect

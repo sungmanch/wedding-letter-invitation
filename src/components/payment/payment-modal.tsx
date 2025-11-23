@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Copy, CreditCard, Check, X } from 'lucide-react'
 import {
   Modal,
@@ -15,24 +15,37 @@ import { Button } from '@/components/ui/button'
 import { createPaymentRequest } from '@/lib/actions/payment'
 
 interface PaymentModalProps {
-  eventId: string
   userName: string
   onPaymentRequested?: () => void
 }
 
-export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentModalProps) {
+export function PaymentModal({ userName, onPaymentRequested }: PaymentModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [depositName, setDepositName] = useState('')
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [paymentPending, setPaymentPending] = useState(false)
+  const [depositName, setDepositName] = useState<string>('')
 
   const bankInfo = {
     bank: '하나은행',
     account: '620-241758-811',
-    holder: '웨딩레터',
+    holder: '조성만',
     amount: '9,900원',
   }
+
+  // 입금자명 생성 함수: userName + 3자리 랜덤 숫자 (100-999)
+  const generateDepositName = () => {
+    const randomNum = Math.floor(Math.random() * 900) + 100 // 100-999
+    return `${userName}${randomNum}`
+  }
+
+  // 모달이 열릴 때 입금자명 자동 생성
+  useEffect(() => {
+    if (isOpen && !depositName && !paymentPending) {
+      setDepositName(generateDepositName())
+    }
+  }, [isOpen, depositName, paymentPending, userName])
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -49,7 +62,8 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
     setError(null)
 
     try {
-      const result = await createPaymentRequest(eventId, userName)
+      // 생성된 입금자명과 함께 결제 요청
+      const result = await createPaymentRequest(userName, depositName)
 
       if (result.error) {
         setError(result.error.message)
@@ -58,7 +72,7 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
       }
 
       if (result.data) {
-        setDepositName(result.data.depositName)
+        setPaymentPending(true)
         onPaymentRequested?.()
         // 모달은 열어두고 대기 상태 표시
       }
@@ -67,18 +81,6 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
       setError('결제 요청 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const openBankApp = () => {
-    // 모바일에서 은행 앱 열기 (딥링크)
-    // 각 은행별로 딥링크 형식이 다르므로, 범용적으로 클립보드 복사 후 안내
-    copyToClipboard(bankInfo.account, 'account')
-
-    // iOS Safari에서 앱 열기 시도
-    if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-      // 하나은행 앱 딥링크 (실제 형식은 하나은행 개발자 문서 참고 필요)
-      window.location.href = 'hanabank://'
     }
   }
 
@@ -105,6 +107,70 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
         </ModalHeader>
 
         <div className="space-y-4 py-4">
+          {/* 입금자명 강조 섹션 - depositName이 있을 때만 표시 */}
+          {depositName && (
+            <div className="animate-pulse-slow rounded-xl border-2 border-red-500 bg-yellow-50 p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500">
+                  <span className="text-lg font-bold text-white">!</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-red-700">필수: 입금자명 확인</h3>
+                    <span className="rounded bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                      매우 중요
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-red-600">
+                    반드시 아래 이름으로 송금해주세요
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-white p-4 shadow-sm">
+                <div className="mb-2 text-sm font-semibold text-charcoal">
+                  입금자명 (복사해서 사용하세요)
+                </div>
+                <div className="flex items-center gap-3">
+                  <code className="flex-1 rounded bg-gray-100 px-3 py-2 text-lg font-bold text-red-600">
+                    {depositName}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(depositName, 'depositName')}
+                    className="flex items-center gap-2 rounded-lg bg-accent-pink px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  >
+                    {copiedField === 'depositName' ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        복사됨
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        복사
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-1 text-sm">
+                <div className="flex items-start gap-2 text-red-700">
+                  <span className="mt-0.5">⚠️</span>
+                  <span className="font-semibold">
+                    입금자명이 다르면 확인이 지연되거나 불가능합니다
+                  </span>
+                </div>
+                <div className="flex items-start gap-2 text-red-600">
+                  <span className="mt-0.5">⚠️</span>
+                  <span>
+                    은행 앱에서 위 입금자명을 <strong>정확히 복사하여</strong> 입력해주세요
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 입금 정보 카드 */}
           <div className="rounded-xl border-2 border-pink-100 bg-pink-50/30 p-4">
             <div className="mb-3 flex items-center gap-2">
@@ -140,32 +206,6 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
                 highlight
               />
             </div>
-
-            {depositName && (
-              <div className="mt-3 rounded-lg bg-white p-3">
-                <div className="mb-1 text-xs text-charcoal/60">
-                  입금자명 (필수)
-                </div>
-                <div className="flex items-center justify-between">
-                  <code className="text-sm font-semibold text-accent-pink">
-                    {depositName}
-                  </code>
-                  <button
-                    onClick={() => copyToClipboard(depositName, 'depositName')}
-                    className="rounded p-1 hover:bg-pink-50"
-                  >
-                    {copiedField === 'depositName' ? (
-                      <Check className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <Copy className="h-4 w-4 text-charcoal/40" />
-                    )}
-                  </button>
-                </div>
-                <p className="mt-1 text-xs text-charcoal/60">
-                  ※ 입금자명을 정확히 입력해주셔야 빠른 확인이 가능합니다
-                </p>
-              </div>
-            )}
           </div>
 
           {/* 처리 시간 안내 */}
@@ -200,7 +240,7 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
           <div className="rounded-lg bg-cream p-3 text-xs text-charcoal/60">
             💡 입금 후 24시간 이내 환불 요청 가능 (전액 환불)
             <br />
-            문의: support@weddingletter.com
+            문의: sungman.cho@tbdlabs.team
           </div>
 
           {error && (
@@ -212,7 +252,11 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
         </div>
 
         <ModalFooter className="flex-col gap-2">
-          {!depositName ? (
+          {paymentPending ? (
+            <div className="w-full rounded-lg bg-pink-50 p-3 text-center text-sm text-charcoal/60">
+              입금 확인 중입니다. 확인되는 즉시 알려드릴게요!
+            </div>
+          ) : (
             <>
               <Button
                 size="lg"
@@ -231,19 +275,6 @@ export function PaymentModal({ eventId, userName, onPaymentRequested }: PaymentM
               >
                 나중에 할게요
               </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                size="lg"
-                fullWidth
-                onClick={openBankApp}
-              >
-                은행 앱으로 이동
-              </Button>
-              <div className="w-full rounded-lg bg-pink-50 p-3 text-center text-sm text-charcoal/60">
-                입금 확인 중입니다. 확인되는 즉시 알려드릴게요!
-              </div>
             </>
           )}
         </ModalFooter>

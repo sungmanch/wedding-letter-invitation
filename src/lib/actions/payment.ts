@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export interface PaymentRequestData {
   id: string
-  eventId: string
+  userId: string
   amount: number
   depositName: string | null
   depositAt: string | null
@@ -16,39 +16,37 @@ export interface PaymentRequestData {
   requestedAt: string
   approvedAt: string | null
   notificationSent: boolean
-  eventName?: string
-  userName?: string
+  userEmail?: string
 }
 
 /**
  * 사용자가 "입금 완료" 버튼을 클릭했을 때 결제 요청 생성
+ * 사용자별로 한 번만 결제하면 모든 모임의 편지 열람 가능
  */
 export async function createPaymentRequest(
-  eventId: string,
-  userName: string
+  userName: string,
+  depositName: string
 ): Promise<ApiResponse<{ id: string; depositName: string }>> {
   try {
     const supabase = await createClient()
 
-    // 이벤트 존재 확인
-    const { data: event, error: eventError } = await supabase
-      .from('events')
-      .select('id, group_name')
-      .eq('id', eventId)
-      .single()
+    // 현재 로그인한 사용자 확인
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (eventError || !event) {
+    if (!user) {
       return {
         data: null,
-        error: { message: '이벤트를 찾을 수 없습니다.' },
+        error: { message: '로그인이 필요합니다.' },
       }
     }
 
-    // 이미 결제 요청이 있는지 확인
+    // 이미 결제 요청이 있는지 확인 (사용자별)
     const { data: existingRequest } = await supabase
       .from('payment_requests')
-      .select('id, status')
-      .eq('event_id', eventId)
+      .select('id, status, deposit_name')
+      .eq('user_id', user.id)
       .in('status', ['pending', 'approved'])
       .single()
 
@@ -56,35 +54,56 @@ export async function createPaymentRequest(
       if (existingRequest.status === 'approved') {
         return {
           data: null,
-          error: { message: '이미 결제가 승인된 이벤트입니다.' },
+          error: { message: '이미 결제가 승인되었습니다.' },
         }
       }
       // pending 상태인 경우 기존 요청 정보 반환
-      const { data: pendingRequest } = await supabase
-        .from('payment_requests')
-        .select('id, deposit_name')
-        .eq('id', existingRequest.id)
-        .single()
-
       return {
         data: {
           id: existingRequest.id,
-          depositName: pendingRequest?.deposit_name || '',
+          depositName: existingRequest.deposit_name || '',
         },
         error: null,
       }
     }
 
-    // 입금자명 생성: WL-{eventId 앞 5자}-{userName}
-    const depositName = `WL-${eventId.slice(0, 5)}-${userName}`
+    // 입금자명 중복 체크 및 재생성 (최대 5번 시도)
+    let finalDepositName = depositName
+    let attempts = 0
+    const maxAttempts = 5
+
+    while (attempts < maxAttempts) {
+      const { data: duplicate } = await supabase
+        .from('payment_requests')
+        .select('id')
+        .eq('deposit_name', finalDepositName)
+        .single()
+
+      if (!duplicate) {
+        // 중복 없음 - 사용 가능
+        break
+      }
+
+      // 중복 발견 - 새로운 번호로 재생성
+      attempts++
+      const randomNum = Math.floor(Math.random() * 900) + 100 // 100-999
+      finalDepositName = `${userName}${randomNum}`
+    }
+
+    if (attempts === maxAttempts) {
+      return {
+        data: null,
+        error: { message: '입금자명 생성에 실패했습니다. 다시 시도해주세요.' },
+      }
+    }
 
     // 결제 요청 생성
     const { data: paymentRequest, error: insertError } = await supabase
       .from('payment_requests')
       .insert({
-        event_id: eventId,
+        user_id: user.id,
         amount: 9900,
-        deposit_name: depositName,
+        deposit_name: finalDepositName,
         deposit_at: new Date().toISOString(),
         status: 'pending',
       })
@@ -102,7 +121,7 @@ export async function createPaymentRequest(
     return {
       data: {
         id: paymentRequest.id,
-        depositName: paymentRequest.deposit_name || depositName,
+        depositName: paymentRequest.deposit_name || finalDepositName,
       },
       error: null,
     }
@@ -116,33 +135,31 @@ export async function createPaymentRequest(
 }
 
 /**
- * 결제 상태 확인 (폴링용)
+ * 결제 상태 확인 (폴링용) - 사용자별로 확인
  */
-export async function getPaymentStatus(
-  eventId: string
-): Promise<ApiResponse<{ status: string; isUnlocked: boolean }>> {
+export async function getPaymentStatus(): Promise<
+  ApiResponse<{ status: string; isApproved: boolean }>
+> {
   try {
     const supabase = await createClient()
 
-    // 이벤트의 letter_unlocked 상태 확인
-    const { data: event, error: eventError } = await supabase
-      .from('events')
-      .select('letter_unlocked')
-      .eq('id', eventId)
-      .single()
+    // 현재 로그인한 사용자 확인
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (eventError || !event) {
+    if (!user) {
       return {
         data: null,
-        error: { message: '이벤트를 찾을 수 없습니다.' },
+        error: { message: '로그인이 필요합니다.' },
       }
     }
 
-    // 결제 요청 상태 확인
+    // 사용자의 결제 요청 상태 확인
     const { data: paymentRequest } = await supabase
       .from('payment_requests')
       .select('status')
-      .eq('event_id', eventId)
+      .eq('user_id', user.id)
       .order('requested_at', { ascending: false })
       .limit(1)
       .single()
@@ -150,7 +167,7 @@ export async function getPaymentStatus(
     return {
       data: {
         status: paymentRequest?.status || 'none',
-        isUnlocked: event.letter_unlocked,
+        isApproved: paymentRequest?.status === 'approved',
       },
       error: null,
     }
@@ -164,7 +181,50 @@ export async function getPaymentStatus(
 }
 
 /**
- * 관리자가 결제를 승인하고 편지를 열람 가능하게 함
+ * 사용자의 결제 승인 여부 확인 (편지함 접근 시)
+ */
+export async function checkUserPaymentApproved(): Promise<
+  ApiResponse<{ isApproved: boolean }>
+> {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return {
+        data: { isApproved: false },
+        error: null,
+      }
+    }
+
+    const { data: paymentRequest } = await supabase
+      .from('payment_requests')
+      .select('status')
+      .eq('user_id', user.id)
+      .eq('status', 'approved')
+      .single()
+
+    return {
+      data: {
+        isApproved: !!paymentRequest,
+      },
+      error: null,
+    }
+  } catch (error) {
+    console.error('Check user payment error:', error)
+    return {
+      data: { isApproved: false },
+      error: null,
+    }
+  }
+}
+
+/**
+ * 관리자가 결제를 승인
+ * 승인되면 해당 사용자가 만든 모든 모임의 편지 열람 가능
  */
 export async function approvePayment(
   paymentId: string
@@ -187,7 +247,7 @@ export async function approvePayment(
     // 결제 요청 정보 가져오기
     const { data: paymentRequest, error: fetchError } = await supabase
       .from('payment_requests')
-      .select('id, event_id, status')
+      .select('id, user_id, status')
       .eq('id', paymentId)
       .single()
 
@@ -205,10 +265,9 @@ export async function approvePayment(
       }
     }
 
-    // 트랜잭션: payment_requests 승인 + events.letter_unlocked = true
     const now = new Date().toISOString()
 
-    // 1. 결제 승인
+    // 결제 승인
     const { error: approveError } = await supabase
       .from('payment_requests')
       .update({
@@ -226,25 +285,8 @@ export async function approvePayment(
       }
     }
 
-    // 2. 편지 열람 활성화
-    const { error: unlockError } = await supabase
-      .from('events')
-      .update({
-        letter_unlocked: true,
-        updated_at: now,
-      })
-      .eq('id', paymentRequest.event_id)
-
-    if (unlockError) {
-      console.error('Letter unlock error:', unlockError)
-      return {
-        data: null,
-        error: { message: '편지 잠금 해제에 실패했습니다.' },
-      }
-    }
-
-    // 3. 사용자에게 알림 발송
-    await sendPaymentApprovalNotification(paymentRequest.event_id)
+    // 사용자에게 알림 발송
+    await sendPaymentApprovalNotification(paymentRequest.user_id)
 
     return {
       data: { success: true },
@@ -280,26 +322,10 @@ export async function getPendingPayments(): Promise<
       }
     }
 
-    // pending 상태인 결제 요청 가져오기 (이벤트 정보 포함)
+    // pending 상태인 결제 요청 가져오기
     const { data: payments, error: fetchError } = await supabase
       .from('payment_requests')
-      .select(
-        `
-        id,
-        event_id,
-        amount,
-        deposit_name,
-        deposit_at,
-        status,
-        requested_at,
-        approved_at,
-        notification_sent,
-        events (
-          group_name,
-          user_id
-        )
-      `
-      )
+      .select('*')
       .eq('status', 'pending')
       .order('requested_at', { ascending: false })
 
@@ -311,19 +337,25 @@ export async function getPendingPayments(): Promise<
       }
     }
 
-    // 데이터 매핑
-    const paymentData: PaymentRequestData[] = (payments || []).map((payment: any) => ({
-      id: payment.id,
-      eventId: payment.event_id,
-      amount: payment.amount,
-      depositName: payment.deposit_name,
-      depositAt: payment.deposit_at,
-      status: payment.status,
-      requestedAt: payment.requested_at,
-      approvedAt: payment.approved_at,
-      notificationSent: payment.notification_sent,
-      eventName: payment.events?.group_name,
-    }))
+    // 각 결제 요청에 대해 사용자 이메일 가져오기
+    const paymentData: PaymentRequestData[] = []
+
+    for (const payment of payments || []) {
+      const { data: { user: requestUser } } = await supabase.auth.admin.getUserById(payment.user_id)
+
+      paymentData.push({
+        id: payment.id,
+        userId: payment.user_id,
+        amount: payment.amount,
+        depositName: payment.deposit_name,
+        depositAt: payment.deposit_at,
+        status: payment.status,
+        requestedAt: payment.requested_at,
+        approvedAt: payment.approved_at,
+        notificationSent: payment.notification_sent,
+        userEmail: requestUser?.email,
+      })
+    }
 
     return {
       data: paymentData,
@@ -341,35 +373,23 @@ export async function getPendingPayments(): Promise<
 /**
  * 승인 완료 알림 발송
  */
-async function sendPaymentApprovalNotification(eventId: string) {
+async function sendPaymentApprovalNotification(userId: string) {
   try {
     const supabase = await createClient()
 
-    // 이벤트 정보와 사용자 이메일 가져오기
-    const { data: event } = await supabase
-      .from('events')
-      .select(
-        `
-        id,
-        group_name,
-        user_id
-      `
-      )
-      .eq('id', eventId)
-      .single()
-
-    if (!event || !event.user_id) {
-      console.log('No user email for notification')
-      return
-    }
-
-    // 사용자 이메일 가져오기
-    const { data: { user } } = await supabase.auth.admin.getUserById(event.user_id)
+    // 사용자 정보 가져오기
+    const { data: { user } } = await supabase.auth.admin.getUserById(userId)
 
     if (!user?.email) {
       console.log('No user email found')
       return
     }
+
+    // 사용자가 만든 모임 목록 가져오기
+    const { data: events } = await supabase
+      .from('events')
+      .select('id, group_name')
+      .eq('user_id', userId)
 
     // 이메일 발송
     await resend.emails.send({
@@ -380,10 +400,20 @@ async function sendPaymentApprovalNotification(eventId: string) {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ec4899;">결제가 승인되었습니다!</h2>
           <p>안녕하세요,</p>
-          <p><strong>${event.group_name}</strong> 청모장의 편지함이 열렸습니다.</p>
+          <p>결제가 승인되어 모든 청모장의 편지함이 열렸습니다.</p>
+          ${
+            events && events.length > 0
+              ? `
+          <p><strong>열람 가능한 모임:</strong></p>
+          <ul>
+            ${events.map((event) => `<li>${event.group_name}</li>`).join('')}
+          </ul>
+          `
+              : ''
+          }
           <p>이제 친구들이 보낸 따뜻한 편지를 읽어보실 수 있습니다.</p>
           <p style="margin-top: 30px;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/${eventId}/letters"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}"
                style="background: #ec4899; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
               편지 읽으러 가기
             </a>
@@ -400,7 +430,7 @@ async function sendPaymentApprovalNotification(eventId: string) {
     await supabase
       .from('payment_requests')
       .update({ notification_sent: true })
-      .eq('event_id', eventId)
+      .eq('user_id', userId)
 
     console.log('Payment approval notification sent to:', user.email)
   } catch (error) {

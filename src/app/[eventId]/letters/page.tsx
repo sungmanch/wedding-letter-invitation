@@ -9,7 +9,7 @@ import { PaymentModal } from '@/components/payment/payment-modal'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/AuthProvider'
 import { getLetters } from '@/lib/actions/survey'
-import { getPaymentStatus } from '@/lib/actions/payment'
+import { getPaymentStatus, checkUserPaymentApproved } from '@/lib/actions/payment'
 import { createClient } from '@/lib/supabase/client'
 
 interface Letter {
@@ -42,10 +42,10 @@ export default function LettersPage() {
       try {
         const supabase = createClient()
 
-        // Check event ownership and unlock status
+        // Check event ownership
         const { data: event, error: eventError } = await supabase
           .from('events')
-          .select('user_id, letter_unlocked, letter_unlock_at')
+          .select('user_id, letter_unlock_at')
           .eq('id', eventId)
           .single()
 
@@ -63,17 +63,25 @@ export default function LettersPage() {
           return
         }
 
-        // Set unlock status
-        setIsUnlocked(event.letter_unlocked)
+        // Check if user has paid (user-based unlock, not event-based)
+        const paymentResult = await checkUserPaymentApproved()
+        const isUserPaid = paymentResult.data?.isApproved || false
 
-        // Calculate days until unlock
-        if (event.letter_unlock_at && !event.letter_unlocked) {
+        // Calculate days until free unlock
+        let daysTilFreeUnlock = 0
+        if (event.letter_unlock_at) {
           const unlockDate = new Date(event.letter_unlock_at)
           const now = new Date()
           const diffTime = unlockDate.getTime() - now.getTime()
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-          setDaysUntilUnlock(Math.max(0, diffDays))
+          daysTilFreeUnlock = Math.max(0, diffDays)
         }
+
+        // User can unlock if: paid OR free unlock date passed
+        const canUnlock = isUserPaid || (daysTilFreeUnlock === 0 && event.letter_unlock_at)
+
+        setIsUnlocked(canUnlock)
+        setDaysUntilUnlock(daysTilFreeUnlock)
 
         // Fetch letters
         const lettersData = await getLetters(eventId)
@@ -89,14 +97,14 @@ export default function LettersPage() {
     fetchData()
   }, [eventId, user])
 
-  // Poll payment status when payment is pending
+  // Poll payment status when payment is pending (user-based)
   useEffect(() => {
-    if (!paymentPending || !eventId) return
+    if (!paymentPending) return
 
     const pollInterval = setInterval(async () => {
-      const result = await getPaymentStatus(eventId)
+      const result = await getPaymentStatus()
       if (result.data) {
-        if (result.data.isUnlocked) {
+        if (result.data.isApproved) {
           setIsUnlocked(true)
           setPaymentPending(false)
           // Refresh the page to show letters
@@ -106,7 +114,7 @@ export default function LettersPage() {
     }, 5000) // Poll every 5 seconds
 
     return () => clearInterval(pollInterval)
-  }, [paymentPending, eventId])
+  }, [paymentPending])
 
   const handlePaymentRequested = useCallback(() => {
     setPaymentPending(true)
@@ -260,7 +268,6 @@ export default function LettersPage() {
                   </div>
                 ) : (
                   <PaymentModal
-                    eventId={eventId}
                     userName={user?.email?.split('@')[0] || '사용자'}
                     onPaymentRequested={handlePaymentRequested}
                   />
