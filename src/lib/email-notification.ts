@@ -14,7 +14,7 @@ export async function sendRecommendationCompleteEmail(
 
   try {
     await resend.emails.send({
-      from: '청모장 <noreply@resend.dev>',
+      from: '청모장 <onboarding@resend.dev>',
       to: userEmail,
       subject: `🍽️ ${groupName} 맞춤 식당 추천이 완료되었습니다!`,
       html: `
