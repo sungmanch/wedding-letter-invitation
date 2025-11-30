@@ -68,9 +68,9 @@ export default async function PreviewPage({ params }: PageProps) {
       </header>
 
       {/* Preview Content */}
-      <main className="flex-1 pb-24 bg-gray-100 lg:py-8">
+      <main className="flex-1 pb-24 bg-gray-100 lg:py-8 isolate">
         {/* Desktop: centered mobile preview */}
-        <div className="lg:max-w-md lg:mx-auto lg:shadow-2xl lg:rounded-3xl lg:overflow-hidden lg:bg-white">
+        <div className="lg:max-w-md lg:mx-auto lg:shadow-2xl lg:rounded-3xl overflow-hidden lg:bg-white isolate">
           <InvitationViewer
             invitation={invitation}
             design={invitation.selectedDesign}
