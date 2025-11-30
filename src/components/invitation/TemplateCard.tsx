@@ -4,6 +4,8 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import type { ThemePreview } from '@/lib/themes'
+import { getTemplateById } from '@/lib/themes'
+import { IntroPreview } from './intros/IntroPreview'
 
 interface TemplateCardProps {
   template: ThemePreview
@@ -20,6 +22,9 @@ export function TemplateCard({
   userImageUrl,
   className,
 }: TemplateCardProps) {
+  // Get full template data for intro config
+  const fullTemplate = React.useMemo(() => getTemplateById(template.id), [template.id])
+
   return (
     <button
       type="button"
@@ -33,76 +38,75 @@ export function TemplateCard({
         className
       )}
     >
-      {/* Template Preview */}
+      {/* Template Preview with Intro */}
       <div
         className="aspect-[3/4] relative overflow-hidden"
         style={{ backgroundColor: template.colors.background }}
       >
-        {/* User Image Overlay (Intro Section) */}
-        {userImageUrl && (
-          <div className="absolute inset-0 z-0">
-            <img
-              src={userImageUrl}
-              alt="Preview"
-              className="w-full h-full object-cover opacity-30"
-            />
+        {/* Render actual intro component as preview */}
+        {fullTemplate && (
+          <IntroPreview
+            intro={fullTemplate.intro}
+            colors={fullTemplate.defaultColors}
+            fonts={fullTemplate.defaultFonts}
+            groomName="민수"
+            brideName="수진"
+            weddingDate="2025-05-24"
+            venueName="더채플 청담"
+            userImageUrl={userImageUrl}
+          />
+        )}
+
+        {/* Fallback if no template data */}
+        {!fullTemplate && (
+          <div className="relative z-10 h-full p-4 flex flex-col items-center justify-center text-center gap-2">
+            {/* Mood Tags */}
+            <div className="flex flex-wrap justify-center gap-1">
+              {template.mood.slice(0, 2).map((mood) => (
+                <span
+                  key={mood}
+                  className="text-[10px] px-2 py-0.5 rounded-full"
+                  style={{
+                    backgroundColor: `${template.colors.accent}20`,
+                    color: template.colors.text,
+                  }}
+                >
+                  {mood}
+                </span>
+              ))}
+            </div>
+
+            {/* Template Name */}
             <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(to bottom, ${template.colors.background}80, ${template.colors.background})`,
-              }}
+              className="text-sm font-medium"
+              style={{ color: template.colors.text }}
+            >
+              {template.nameKo}
+            </div>
+
+            {/* Sample Names */}
+            <div
+              className="text-lg font-semibold"
+              style={{ color: template.colors.text }}
+            >
+              민수 ♥ 수진
+            </div>
+
+            {/* Date placeholder */}
+            <div
+              className="text-xs"
+              style={{ color: template.colors.text, opacity: 0.6 }}
+            >
+              2025.05.24
+            </div>
+
+            {/* Accent Line */}
+            <div
+              className="w-10 h-0.5 mt-1"
+              style={{ backgroundColor: template.colors.accent }}
             />
           </div>
         )}
-
-        {/* Mock Wedding Card Content */}
-        <div className="relative z-10 h-full p-4 flex flex-col items-center justify-center text-center gap-2">
-          {/* Mood Tags */}
-          <div className="flex flex-wrap justify-center gap-1">
-            {template.mood.slice(0, 2).map((mood) => (
-              <span
-                key={mood}
-                className="text-[10px] px-2 py-0.5 rounded-full"
-                style={{
-                  backgroundColor: `${template.colors.accent}20`,
-                  color: template.colors.text,
-                }}
-              >
-                {mood}
-              </span>
-            ))}
-          </div>
-
-          {/* Template Name */}
-          <div
-            className="text-sm font-medium"
-            style={{ color: template.colors.text }}
-          >
-            {template.nameKo}
-          </div>
-
-          {/* Sample Names */}
-          <div
-            className="text-lg font-semibold"
-            style={{ color: template.colors.text }}
-          >
-            민수 ♥ 수진
-          </div>
-
-          {/* Date placeholder */}
-          <div
-            className="text-xs"
-            style={{ color: template.colors.text, opacity: 0.6 }}
-          >
-            2025.05.24
-          </div>
-
-          {/* Accent Line */}
-          <div
-            className="w-10 h-0.5 mt-1"
-            style={{ backgroundColor: template.colors.accent }}
-          />
-        </div>
       </div>
 
       {/* Template Info */}
@@ -115,7 +119,7 @@ export function TemplateCard({
 
       {/* Selected Indicator */}
       {isSelected && (
-        <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-[#D4768A] flex items-center justify-center">
+        <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-[#D4768A] flex items-center justify-center z-50">
           <Check className="h-4 w-4 text-white" />
         </div>
       )}

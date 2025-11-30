@@ -1,5 +1,6 @@
 // Intro Components
 export { IntroRenderer } from './IntroRenderer'
+export { IntroPreview } from './IntroPreview'
 export { KeynoteIntro } from './KeynoteIntro'
 export { CinematicIntro } from './CinematicIntro'
 export { ExhibitionIntro } from './ExhibitionIntro'
