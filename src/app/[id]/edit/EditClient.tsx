@@ -185,7 +185,7 @@ function PreviewFrame({ invitation, design, photos }: PreviewFrameProps) {
             {/* Notch */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-full z-10" />
             {/* Content */}
-            <div className="w-full h-full overflow-y-auto scrollbar-hide pt-8">
+            <div className="w-full h-full overflow-y-auto scrollbar-mobile pt-8">
               <InvitationViewer
                 invitation={invitation}
                 design={design}
