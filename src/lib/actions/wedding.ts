@@ -343,6 +343,8 @@ export async function createDraftInvitation(
     }).returning()
 
     // 2. Create theme data from template
+    // Note: designData can be either legacy format or new InvitationThemeData format
+    // InvitationViewer supports both formats
     let designData: InvitationDesign['designData']
 
     if (isCustomTemplate) {
@@ -363,7 +365,9 @@ export async function createDraftInvitation(
       })
 
       if (themeData) {
-        designData = themeData
+        // Cast to any since InvitationThemeData is a superset of the legacy schema
+        // and InvitationViewer handles both formats
+        designData = themeData as unknown as InvitationDesign['designData']
       } else {
         // Fallback if template not found
         designData = {
