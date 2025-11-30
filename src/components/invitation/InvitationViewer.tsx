@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils'
 import { Phone, Copy, Check, MapPin, Calendar, Clock } from 'lucide-react'
 import type { Invitation, InvitationDesign, InvitationPhoto } from '@/lib/db/invitation-schema'
 import type { ScreenStructure, ScreenSection } from '@/lib/actions/ai-design'
+import type { InvitationThemeData, ColorPalette, FontSet, IntroConfig } from '@/lib/themes/schema'
+import { IntroRenderer } from './intros'
 
 interface InvitationViewerProps {
   invitation: Invitation
@@ -26,6 +28,17 @@ function isScreenStructure(data: unknown): data is ScreenStructure {
   )
 }
 
+// InvitationThemeData 여부 확인 (템플릿 기반 테마)
+function isThemeData(data: unknown): data is InvitationThemeData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'templateId' in data &&
+    'intro' in data &&
+    'colors' in data
+  )
+}
+
 export function InvitationViewer({
   invitation,
   design,
@@ -33,14 +46,20 @@ export function InvitationViewer({
   isPreview = false,
   className,
 }: InvitationViewerProps) {
+  // 인트로 완료 상태
+  const [introCompleted, setIntroCompleted] = React.useState(false)
+
   // 새로운 ScreenStructure 형식인지 확인
   const designData = design?.designData
   const isNewFormat = isScreenStructure(designData)
+  const hasThemeData = isThemeData(designData)
 
   // 새 형식이면 ScreenStructure 사용, 아니면 레거시 형식 사용
   const screenStructure = isNewFormat ? (designData as ScreenStructure) : null
+  const themeData = hasThemeData ? (designData as InvitationThemeData) : null
 
-  const colors = screenStructure?.theme.colors ?? {
+  // 색상 추출 (우선순위: themeData > screenStructure > legacy > default)
+  const colors: ColorPalette = themeData?.colors ?? screenStructure?.theme.colors ?? {
     primary: (designData as { colors?: { primary?: string } })?.colors?.primary ?? '#D4768A',
     secondary: (designData as { colors?: { secondary?: string } })?.colors?.secondary ?? '#D4AF37',
     background: (designData as { colors?: { background?: string } })?.colors?.background ?? '#FFFBFC',
@@ -48,10 +67,23 @@ export function InvitationViewer({
     accent: '#D4768A',
   }
 
-  const fonts = screenStructure?.theme.fonts ?? {
-    title: (designData as { fonts?: { title?: string } })?.fonts?.title ?? 'Noto Serif KR',
-    body: (designData as { fonts?: { body?: string } })?.fonts?.body ?? 'Pretendard',
+  // 폰트 추출
+  const fonts: FontSet = themeData?.fonts ?? {
+    title: {
+      family: screenStructure?.theme.fonts?.title ?? (designData as { fonts?: { title?: string } })?.fonts?.title ?? 'Noto Serif KR',
+      weight: 600,
+    },
+    body: {
+      family: screenStructure?.theme.fonts?.body ?? (designData as { fonts?: { body?: string } })?.fonts?.body ?? 'Pretendard',
+      weight: 400,
+    },
   }
+
+  // 인트로 설정 추출
+  const introConfig: IntroConfig | null = themeData?.intro ?? null
+
+  // 인트로용 이미지 URL 목록
+  const introImages = themeData?.images?.intro ?? photos.slice(0, 3).map(p => p.url)
 
   const globalEffects = screenStructure?.globalEffects ?? {
     useMagicScroll: false,
@@ -60,6 +92,11 @@ export function InvitationViewer({
     snowEffect: false,
     petalEffect: false,
   }
+
+  // 인트로 완료 핸들러
+  const handleIntroComplete = React.useCallback(() => {
+    setIntroCompleted(true)
+  }, [])
 
   // 레거시 decorations
   const decorations = !isNewFormat
@@ -145,7 +182,7 @@ export function InvitationViewer({
                 section.content?.titleSize === 'large' ? 'text-3xl' :
                 section.content?.titleSize === 'small' ? 'text-xl' : 'text-2xl'
               )}
-              style={{ fontFamily: fonts.title }}
+              style={{ fontFamily: fonts.title.family }}
             >
               {invitation.groomName}
               <span className="mx-3" style={{ color: colors.primary }}>♥</span>
@@ -170,7 +207,7 @@ export function InvitationViewer({
             className={cn(getPadding(), getLayoutClass(), getAnimation())}
             style={sectionStyle}
           >
-            <p className="text-lg leading-relaxed" style={{ fontFamily: fonts.body }}>
+            <p className="text-lg leading-relaxed" style={{ fontFamily: fonts.body.family }}>
               서로를 향한 사랑과 믿음으로<br />
               새로운 인생을 시작하려 합니다.<br /><br />
               소중한 분들을 모시고<br />
@@ -213,7 +250,7 @@ export function InvitationViewer({
             className={cn(getPadding(), getAnimation())}
             style={sectionStyle}
           >
-            <h2 className="text-lg font-medium mb-6 text-center" style={{ fontFamily: fonts.title }}>
+            <h2 className="text-lg font-medium mb-6 text-center" style={{ fontFamily: fonts.title.family }}>
               오시는 길
             </h2>
             <div className="bg-white rounded-2xl p-4 shadow-sm">
@@ -255,7 +292,7 @@ export function InvitationViewer({
             className={cn(getPadding(), 'text-center', getAnimation())}
             style={sectionStyle}
           >
-            <h2 className="text-lg font-medium mb-6" style={{ fontFamily: fonts.title }}>
+            <h2 className="text-lg font-medium mb-6" style={{ fontFamily: fonts.title.family }}>
               혼주 소개
             </h2>
             <div className="grid grid-cols-2 gap-8">
@@ -291,7 +328,7 @@ export function InvitationViewer({
             className={cn(getPadding(), 'text-center', getAnimation())}
             style={sectionStyle}
           >
-            <h2 className="text-lg font-medium mb-6" style={{ fontFamily: fonts.title }}>
+            <h2 className="text-lg font-medium mb-6" style={{ fontFamily: fonts.title.family }}>
               축하 메시지
             </h2>
             <p className="text-sm text-gray-500">
@@ -314,6 +351,22 @@ export function InvitationViewer({
       default:
         return null
     }
+  }
+
+  // 인트로가 있고 아직 완료되지 않은 경우 인트로만 렌더링
+  if (introConfig && !introCompleted && !isPreview) {
+    return (
+      <IntroRenderer
+        intro={introConfig}
+        colors={colors}
+        fonts={fonts}
+        groomName={invitation.groomName}
+        brideName={invitation.brideName}
+        weddingDate={invitation.weddingDate}
+        images={introImages}
+        onComplete={handleIntroComplete}
+      />
+    )
   }
 
   // 새 형식이면 sections 기반 렌더링
@@ -349,7 +402,7 @@ export function InvitationViewer({
         {/* Names */}
         <h1
           className="text-3xl font-semibold mb-2"
-          style={{ color: colors.text, fontFamily: fonts.title }}
+          style={{ color: colors.text, fontFamily: fonts.title.family }}
         >
           {invitation.groomName}
           <span className="mx-3" style={{ color: colors.primary }}>
@@ -398,7 +451,7 @@ export function InvitationViewer({
       <section className="py-8 px-6 text-center">
         <h2
           className="text-lg font-medium mb-6"
-          style={{ color: colors.text, fontFamily: fonts.title }}
+          style={{ color: colors.text, fontFamily: fonts.title.family }}
         >
           혼주 소개
         </h2>
@@ -430,7 +483,7 @@ export function InvitationViewer({
       <section className="py-8 px-6">
         <h2
           className="text-lg font-medium mb-6 text-center"
-          style={{ color: colors.text, fontFamily: fonts.title }}
+          style={{ color: colors.text, fontFamily: fonts.title.family }}
         >
           오시는 길
         </h2>
@@ -550,8 +603,8 @@ function ContactSection({
   fonts,
 }: {
   invitation: Invitation
-  colors: { primary: string; secondary: string; background: string; text: string }
-  fonts: { title: string; body: string }
+  colors: ColorPalette
+  fonts: FontSet
 }) {
   const hasGroomContact = invitation.groomPhone || invitation.groomFatherPhone || invitation.groomMotherPhone
   const hasBrideContact = invitation.bridePhone || invitation.brideFatherPhone || invitation.brideMotherPhone
@@ -562,7 +615,7 @@ function ContactSection({
     <section className="py-8 px-6">
       <h2
         className="text-lg font-medium mb-6 text-center"
-        style={{ color: colors.text, fontFamily: fonts.title }}
+        style={{ color: colors.text, fontFamily: fonts.title.family }}
       >
         연락처
       </h2>
@@ -657,8 +710,8 @@ function AccountSection({
   fonts,
 }: {
   invitation: Invitation
-  colors: { primary: string; secondary: string; background: string; text: string }
-  fonts: { title: string; body: string }
+  colors: ColorPalette
+  fonts: FontSet
 }) {
   const hasGroomAccount = invitation.groomBank && invitation.groomAccount
   const hasBrideAccount = invitation.brideBank && invitation.brideAccount
@@ -669,7 +722,7 @@ function AccountSection({
     <section className="py-8 px-6">
       <h2
         className="text-lg font-medium mb-6 text-center"
-        style={{ color: colors.text, fontFamily: fonts.title }}
+        style={{ color: colors.text, fontFamily: fonts.title.family }}
       >
         마음 전하실 곳
       </h2>
