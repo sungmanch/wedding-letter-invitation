@@ -171,9 +171,9 @@ function PreviewFrame({ invitation, design, photos }: PreviewFrameProps) {
     <div className="flex flex-col items-center">
       <div className="text-sm text-gray-500 mb-4">미리보기</div>
       {/* Phone Frame */}
-      <div className="relative">
+      <div className="relative isolate">
         {/* Phone bezel */}
-        <div className="w-[375px] h-[667px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+        <div className="w-[375px] h-[667px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl overflow-hidden">
           {/* Screen */}
           <div className="w-full h-full bg-white rounded-[2.25rem] overflow-hidden">
             {/* Content - CSS variable for intro height */}
