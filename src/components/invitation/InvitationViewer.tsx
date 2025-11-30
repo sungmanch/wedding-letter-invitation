@@ -363,6 +363,7 @@ export function InvitationViewer({
         groomName={invitation.groomName}
         brideName={invitation.brideName}
         weddingDate={invitation.weddingDate}
+        venueName={invitation.venueName}
         images={introImages}
         onComplete={handleIntroComplete}
       />

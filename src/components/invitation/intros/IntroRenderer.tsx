@@ -21,6 +21,7 @@ interface IntroRendererProps {
   groomName: string
   brideName: string
   weddingDate: string
+  venueName?: string
   images?: string[]
   onComplete: () => void
 }
@@ -32,6 +33,7 @@ export function IntroRenderer({
   groomName,
   brideName,
   weddingDate,
+  venueName,
   images,
   onComplete,
 }: IntroRendererProps) {
@@ -78,6 +80,7 @@ export function IntroRenderer({
     groomName,
     brideName,
     weddingDate,
+    venueName,
     images,
     onComplete: handleComplete,
     onSkip: handleSkip,

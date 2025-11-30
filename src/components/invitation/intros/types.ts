@@ -7,6 +7,7 @@ export interface IntroProps {
   groomName: string
   brideName: string
   weddingDate: string
+  venueName?: string
   images?: string[]
   onComplete: () => void
   onSkip: () => void
