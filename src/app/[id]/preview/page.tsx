@@ -115,6 +115,16 @@ export default async function PreviewPage({ params }: PageProps) {
           </div>
         </div>
       )}
+
+      {/* FAB Edit Button (visible when not published) */}
+      {!isPublished && (
+        <Link
+          href={`/${id}/edit`}
+          className="fixed bottom-24 right-4 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors lg:hidden"
+        >
+          <Edit className="h-6 w-6 text-[#D4768A]" />
+        </Link>
+      )}
     </div>
   )
 }
