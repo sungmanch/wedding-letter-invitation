@@ -5,6 +5,7 @@ import { invitations, invitationDesigns, invitationPhotos, type NewInvitation, t
 import { eq, and, desc } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getTemplateById, createInvitationThemeData } from '@/lib/themes'
 
 // Create a new invitation (draft)
 export async function createInvitation(data: Partial<NewInvitation>): Promise<{ success: boolean; data?: Invitation; error?: string }> {
@@ -304,5 +305,132 @@ export async function selectDesign(
   } catch (error) {
     console.error('Failed to select design:', error)
     return { success: false, error: '디자인 선택에 실패했습니다' }
+  }
+}
+
+// Create a draft invitation with template (simplified flow)
+export async function createDraftInvitation(
+  templateId: string,
+  imageBase64?: string
+): Promise<{ success: boolean; data?: { invitationId: string }; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // Check if this is a custom AI-generated template
+    const isCustomTemplate = templateId.startsWith('custom-')
+    const actualTemplateId = isCustomTemplate ? templateId.replace('custom-', '') : templateId
+
+    // Get default date (3 months from now)
+    const defaultDate = new Date()
+    defaultDate.setMonth(defaultDate.getMonth() + 3)
+    const formattedDate = defaultDate.toISOString().split('T')[0]
+
+    // 1. Create the invitation with default values
+    const [invitation] = await db.insert(invitations).values({
+      userId: user.id,
+      groomName: '신랑',
+      brideName: '신부',
+      weddingDate: formattedDate,
+      weddingTime: '12:00',
+      venueName: '',
+      venueAddress: '',
+      status: 'draft',
+    }).returning()
+
+    // 2. Create theme data from template
+    let designData: InvitationDesign['designData']
+
+    if (isCustomTemplate) {
+      // For custom templates, we'll use a basic structure
+      // The actual custom design should have been passed through the flow
+      designData = {
+        theme: actualTemplateId,
+        colors: { primary: '#D4768A', secondary: '#FFB6C1', background: '#FFFFFF', text: '#333333' },
+        layout: 'modern',
+        fonts: { title: 'Pretendard', body: 'Pretendard' },
+        decorations: [],
+        styleDescription: 'AI 생성 커스텀 테마',
+      }
+    } else {
+      // For static templates, use createInvitationThemeData
+      const themeData = createInvitationThemeData(templateId, {
+        images: imageBase64 ? { intro: [imageBase64], gallery: [] } : undefined,
+      })
+
+      if (themeData) {
+        designData = themeData
+      } else {
+        // Fallback if template not found
+        designData = {
+          theme: templateId,
+          colors: { primary: '#D4768A', secondary: '#FFB6C1', background: '#FFFFFF', text: '#333333' },
+          layout: 'modern',
+          fonts: { title: 'Pretendard', body: 'Pretendard' },
+          decorations: [],
+          styleDescription: '기본 테마',
+        }
+      }
+    }
+
+    // 3. Create the design
+    const [design] = await db.insert(invitationDesigns).values({
+      invitationId: invitation.id,
+      designData,
+      generationBatch: 1,
+      isSelected: true,
+    }).returning()
+
+    // 4. Update invitation with selected design ID
+    await db.update(invitations)
+      .set({
+        selectedDesignId: design.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(invitations.id, invitation.id))
+
+    // 5. If image was provided, save it as a photo
+    if (imageBase64) {
+      try {
+        // Upload to Supabase Storage
+        const fileName = `${invitation.id}/${Date.now()}.jpg`
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '')
+        const buffer = Buffer.from(base64Data, 'base64')
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('invitation-photos')
+          .upload(fileName, buffer, {
+            contentType: 'image/jpeg',
+            upsert: true,
+          })
+
+        if (!uploadError && uploadData) {
+          const { data: urlData } = supabase.storage
+            .from('invitation-photos')
+            .getPublicUrl(fileName)
+
+          await db.insert(invitationPhotos).values({
+            invitationId: invitation.id,
+            storagePath: fileName,
+            url: urlData.publicUrl,
+            displayOrder: 0,
+          })
+        }
+      } catch (photoError) {
+        // Photo upload failed, but invitation is created - continue
+        console.error('Failed to upload photo:', photoError)
+      }
+    }
+
+    revalidatePath('/my/invitations')
+
+    return { success: true, data: { invitationId: invitation.id } }
+  } catch (error) {
+    console.error('Failed to create draft invitation:', error)
+    return { success: false, error: '청첩장 생성에 실패했습니다' }
   }
 }
