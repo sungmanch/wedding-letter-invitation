@@ -66,10 +66,7 @@ function EditLayout({ shareUrl, invitationId }: EditLayoutProps) {
           <div className="flex items-center justify-between h-16">
             {/* Left: Back button */}
             <div className="flex items-center gap-3">
-              <Link
-                href="/my/invitations"
-                className="p-2 -ml-2 rounded-full hover:bg-gray-100"
-              >
+              <Link href="/my/invitations" className="p-2 -ml-2 rounded-full hover:bg-gray-100">
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </Link>
               <h1 className="text-lg font-semibold text-gray-900">청첩장 편집</h1>
@@ -79,9 +76,7 @@ function EditLayout({ shareUrl, invitationId }: EditLayoutProps) {
                   저장 중...
                 </span>
               )}
-              {!isSaving && hasChanges && (
-                <span className="text-sm text-green-600">저장됨</span>
-              )}
+              {!isSaving && hasChanges && <span className="text-sm text-green-600">저장됨</span>}
             </div>
 
             {/* Right: Actions */}
@@ -141,12 +136,8 @@ function EditLayout({ shareUrl, invitationId }: EditLayoutProps) {
 
           {/* Right Panel - Preview (Desktop only) */}
           <div className="hidden lg:block lg:flex-1">
-            <div className="sticky top-36">
-              <PreviewFrame
-                invitation={invitation}
-                design={design}
-                photos={photos}
-              />
+            <div className="sticky top-20">
+              <PreviewFrame invitation={invitation} design={design} photos={photos} />
             </div>
           </div>
         </div>
@@ -173,8 +164,8 @@ interface PreviewFrameProps {
 }
 
 function PreviewFrame({ invitation, design, photos }: PreviewFrameProps) {
-  // 프레임 내부 스크린 높이 계산: 667px - padding(24px) - notch area(32px) = 611px
-  const screenHeight = 611
+  // 프레임 내부 스크린 높이 계산: 667px - padding(24px) = 643px
+  const screenHeight = 643
 
   return (
     <div className="flex flex-col items-center">
@@ -185,11 +176,9 @@ function PreviewFrame({ invitation, design, photos }: PreviewFrameProps) {
         <div className="w-[375px] h-[667px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
           {/* Screen */}
           <div className="w-full h-full bg-white rounded-[2.25rem] overflow-hidden">
-            {/* Notch */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-full z-10" />
             {/* Content - CSS variable for intro height */}
             <div
-              className="w-full h-full overflow-y-auto scrollbar-mobile pt-8"
+              className="w-full h-full overflow-y-auto scrollbar-mobile"
               style={{ '--preview-screen-height': `${screenHeight}px` } as React.CSSProperties}
             >
               <InvitationViewer
