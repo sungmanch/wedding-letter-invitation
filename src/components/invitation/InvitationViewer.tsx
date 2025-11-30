@@ -371,8 +371,12 @@ export function InvitationViewer({
   }
 
   // 프리뷰용 Intro 섹션 컴포넌트
+  // CSS 변수 --preview-screen-height가 있으면 사용, 없으면 100vh 사용
   const PreviewIntroSection = introConfig ? (
-    <div className="relative w-full" style={{ height: '100vh', minHeight: '600px' }}>
+    <div
+      className="relative w-full"
+      style={{ height: 'var(--preview-screen-height, 100vh)' }}
+    >
       <IntroPreview
         intro={introConfig}
         colors={colors}

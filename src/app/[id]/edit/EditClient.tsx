@@ -173,6 +173,9 @@ interface PreviewFrameProps {
 }
 
 function PreviewFrame({ invitation, design, photos }: PreviewFrameProps) {
+  // 프레임 내부 스크린 높이 계산: 667px - padding(24px) - notch area(32px) = 611px
+  const screenHeight = 611
+
   return (
     <div className="flex flex-col items-center">
       <div className="text-sm text-gray-500 mb-4">미리보기</div>
@@ -184,8 +187,11 @@ function PreviewFrame({ invitation, design, photos }: PreviewFrameProps) {
           <div className="w-full h-full bg-white rounded-[2.25rem] overflow-hidden">
             {/* Notch */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-full z-10" />
-            {/* Content */}
-            <div className="w-full h-full overflow-y-auto scrollbar-mobile pt-8">
+            {/* Content - CSS variable for intro height */}
+            <div
+              className="w-full h-full overflow-y-auto scrollbar-mobile pt-8"
+              style={{ '--preview-screen-height': `${screenHeight}px` } as React.CSSProperties}
+            >
               <InvitationViewer
                 invitation={invitation}
                 design={design}
