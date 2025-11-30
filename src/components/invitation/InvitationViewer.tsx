@@ -353,27 +353,8 @@ export function InvitationViewer({
     }
   }
 
-  // 인트로가 있고 아직 완료되지 않은 경우 인트로만 렌더링
-  if (introConfig && !introCompleted) {
-    // 프리뷰 모드에서는 정적 IntroPreview 표시
-    if (isPreview) {
-      return (
-        <div className="h-full w-full">
-          <IntroPreview
-            intro={introConfig}
-            colors={colors}
-            fonts={fonts}
-            groomName={invitation.groomName}
-            brideName={invitation.brideName}
-            weddingDate={invitation.weddingDate}
-            venueName={invitation.venueName}
-            userImageUrl={introImages[0]}
-          />
-        </div>
-      )
-    }
-
-    // 실제 뷰어에서는 애니메이션 인트로 표시
+  // 인트로가 있고 아직 완료되지 않은 경우 (실제 뷰어에서만 인트로만 렌더링)
+  if (introConfig && !introCompleted && !isPreview) {
     return (
       <IntroRenderer
         intro={introConfig}
@@ -389,6 +370,22 @@ export function InvitationViewer({
     )
   }
 
+  // 프리뷰용 Intro 섹션 컴포넌트
+  const PreviewIntroSection = introConfig ? (
+    <div className="relative w-full" style={{ height: '100vh', minHeight: '600px' }}>
+      <IntroPreview
+        intro={introConfig}
+        colors={colors}
+        fonts={fonts}
+        groomName={invitation.groomName}
+        brideName={invitation.brideName}
+        weddingDate={invitation.weddingDate}
+        venueName={invitation.venueName}
+        userImageUrl={introImages[0]}
+      />
+    </div>
+  ) : null
+
   // 새 형식이면 sections 기반 렌더링
   if (isNewFormat && screenStructure) {
     return (
@@ -401,6 +398,8 @@ export function InvitationViewer({
             {/* 꽃잎 효과 - CSS 애니메이션으로 구현 가능 */}
           </div>
         )}
+        {/* 프리뷰 모드에서는 Intro를 첫 섹션으로 표시 */}
+        {isPreview && PreviewIntroSection}
         {screenStructure.sections.map(renderSection)}
       </div>
     )
@@ -412,6 +411,9 @@ export function InvitationViewer({
       className={cn('min-h-screen', className)}
       style={{ backgroundColor: colors.background }}
     >
+      {/* 프리뷰 모드에서는 Intro를 첫 섹션으로 표시 */}
+      {isPreview && PreviewIntroSection}
+
       {/* Hero Section */}
       <section className="relative py-16 px-6 text-center">
         {/* Top Decoration */}
