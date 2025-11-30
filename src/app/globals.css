@@ -97,6 +97,27 @@ body {
   padding-right: 1rem;
 }
 
+/* Desktop-enabled Container for invitation editing pages */
+.wedding-desktop-container {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1024px) {
+  .wedding-desktop-container {
+    background: linear-gradient(135deg, #f8f4ff 0%, #fff5f7 100%);
+    min-height: 100vh;
+  }
+}
+
+/* Mobile-only Container for shared invitation viewer */
+.invitation-mobile-only {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Utility Classes */
 .text-gradient {
   background: linear-gradient(135deg, var(--primary-purple), var(--accent-pink));

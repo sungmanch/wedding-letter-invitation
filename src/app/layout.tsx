@@ -5,21 +5,21 @@ import { KakaoScript } from '@/components/KakaoScript'
 
 export const metadata: Metadata = {
   title: {
-    default: '청모장 - 청첩장 모임 준비 서비스',
-    template: '%s | 청모장',
+    default: '모바일 청첩장 - AI가 만들어주는 나만의 청첩장',
+    template: '%s | 모바일 청첩장',
   },
   description:
-    '예비 신부를 위한 청첩장 모임 준비 서비스. URL 하나로 친구들의 취향을 수집하고 AI가 최적의 식당을 추천합니다.',
-  keywords: ['청첩장 모임', '결혼 전 친구 모임', '신부 친구 모임 식당', '청모', '웨딩'],
+    'AI가 당신만의 특별한 청첩장을 디자인해드립니다. 대화하듯 쉽게 만들고, 카카오톡으로 바로 공유하세요.',
+  keywords: ['모바일 청첩장', '청첩장 만들기', 'AI 청첩장', '웨딩 초대장', '결혼 청첩장'],
   authors: [{ name: '청모장' }],
   creator: '청모장',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    siteName: '청모장',
-    title: '청모장 - 청첩장 모임 준비 서비스',
+    siteName: '모바일 청첩장',
+    title: '모바일 청첩장 - AI가 만들어주는 나만의 청첩장',
     description:
-      '예비 신부를 위한 청첩장 모임 준비 서비스. URL 하나로 친구들의 취향을 수집하고 AI가 최적의 식당을 추천합니다.',
+      'AI가 당신만의 특별한 청첩장을 디자인해드립니다. 대화하듯 쉽게 만들고, 카카오톡으로 바로 공유하세요.',
   },
   robots: {
     index: true,
@@ -44,7 +44,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className="min-h-screen bg-background text-foreground antialiased">
         <AuthProvider>
-          <div className="mobile-container min-h-screen">{children}</div>
+          <div className="wedding-desktop-container min-h-screen">{children}</div>
         </AuthProvider>
         <KakaoScript />
       </body>

@@ -1,15 +1,25 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema'
+import * as invitationSchema from './invitation-schema'
 
 // Create postgres connection
 const connectionString = process.env.DATABASE_URL!
 
 // For query purposes
-const queryClient = postgres(connectionString)
+const queryClient = postgres(connectionString, {
+  prepare: false, // 로컬에서는 prepared statements 활성화로 성능 향상
+  ssl: false,
+  max: 20, // 연결 풀 크기
+  idle_timeout: 20,
+})
+
+// Combine all schemas
+const allSchemas = { ...schema, ...invitationSchema }
 
 // Create drizzle database instance with schema
-export const db = drizzle(queryClient, { schema })
+export const db = drizzle(queryClient, { schema: allSchemas })
 
 // Export schema for convenience
 export * from './schema'
+export * from './invitation-schema'

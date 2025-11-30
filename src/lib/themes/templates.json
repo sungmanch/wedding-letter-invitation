@@ -1,0 +1,2249 @@
+{
+  "version": "1.0.0",
+  "templates": [
+    {
+      "id": "keynote",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "The Keynote",
+      "nameKo": "키노트",
+      "category": "modern",
+      "description": "Apple product launch style with sticky scroll, dynamic text reveals, and cinematic zoom effects",
+      "descriptionKo": "애플 제품 공개처럼 스크롤에 따라 텍스트가 서서히 떠오르고 이미지가 줌인/줌아웃되는 스타일",
+      "matchKeywords": ["애플", "키노트", "모던", "세련된", "깔끔한", "프리미엄", "미니멀", "테크", "스티키", "다이나믹"],
+      "recommendedFor": "Couples who prefer clean, sophisticated design and have high-quality wedding photos",
+      "recommendedForKo": "깔끔하고 세련된 것을 선호하며, 웨딩 사진 퀄리티가 높은 커플",
+      "preview": {
+        "colors": {
+          "primary": "#000000",
+          "secondary": "#86868B",
+          "background": "#FFFFFF",
+          "surface": "#F5F5F7",
+          "text": "#1D1D1F",
+          "textMuted": "#86868B",
+          "accent": "#0071E3"
+        },
+        "mood": ["세련된", "프리미엄", "다이나믹"]
+      },
+      "intro": {
+        "type": "keynote",
+        "duration": 4000,
+        "skipEnabled": true,
+        "skipDelay": 2000,
+        "settings": {
+          "stickyTexts": [
+            "우리의 사랑",
+            "그 완전히 새로운 시작"
+          ]
+        }
+      },
+      "interaction": "sticky-scroll",
+      "defaultColors": {
+        "primary": "#000000",
+        "secondary": "#86868B",
+        "background": "#FFFFFF",
+        "surface": "#F5F5F7",
+        "text": "#1D1D1F",
+        "textMuted": "#86868B",
+        "accent": "#0071E3"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "SF Pro Display, Pretendard",
+          "weight": 700,
+          "letterSpacing": "-0.02em"
+        },
+        "body": {
+          "family": "SF Pro Text, Pretendard",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "sticky-reveal",
+            "trigger": "on-scroll",
+            "duration": 1000
+          },
+          "style": {
+            "backgroundColor": "#000000",
+            "textColor": "#FFFFFF",
+            "padding": "none"
+          },
+          "content": {
+            "titleSize": "hero",
+            "titleAnimation": "zoom-in"
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 1,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll",
+            "duration": 800
+          },
+          "style": {
+            "padding": "xlarge"
+          },
+          "content": {
+            "titleSize": "large"
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "parallax",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "none"
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large",
+            "backgroundColor": "#000000",
+            "textColor": "#FFFFFF"
+          }
+        }
+      ],
+      "effects": {
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": true,
+          "indicatorStyle": "progress",
+          "snapToSection": false
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 300
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": false,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "cinematic",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "Cinematic Mood",
+      "nameKo": "시네마틱 무드",
+      "category": "cinematic",
+      "description": "Film noir / In the Mood for Love style with letterbox format, film grain, and subtitle-like captions",
+      "descriptionKo": "화양연화처럼 영화의 한 장면 같은 분위기, 필름 그레인 효과와 자막 스타일 연출",
+      "matchKeywords": ["영화", "시네마틱", "화양연화", "필름", "빈티지", "감성", "레트로", "누아르", "자막", "그레인"],
+      "recommendedFor": "Couples who love emotional, vintage moods and cinematic aesthetics",
+      "recommendedForKo": "감성적이고 빈티지한 무드를 사랑하는 커플",
+      "preview": {
+        "colors": {
+          "primary": "#C9A962",
+          "secondary": "#8B7355",
+          "background": "#1A1A1A",
+          "surface": "#2D2D2D",
+          "text": "#F5F5DC",
+          "textMuted": "#A0A0A0",
+          "accent": "#E6C068",
+          "overlay": "rgba(0,0,0,0.6)"
+        },
+        "mood": ["감성적인", "빈티지", "영화같은"]
+      },
+      "intro": {
+        "type": "cinematic",
+        "duration": 5000,
+        "skipEnabled": true,
+        "skipDelay": 3000,
+        "bgm": {
+          "trackId": "romantic-piano",
+          "volume": 0.3,
+          "fadeIn": 2000,
+          "syncWithScroll": true
+        },
+        "settings": {
+          "filmGrain": true,
+          "aspectRatio": "21:9",
+          "subtitleStyle": "korean"
+        }
+      },
+      "interaction": "scroll",
+      "defaultColors": {
+        "primary": "#C9A962",
+        "secondary": "#8B7355",
+        "background": "#1A1A1A",
+        "surface": "#2D2D2D",
+        "text": "#F5F5DC",
+        "textMuted": "#A0A0A0",
+        "accent": "#E6C068",
+        "overlay": "rgba(0,0,0,0.6)"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Nanum Myeongjo, serif",
+          "weight": 400,
+          "letterSpacing": "0.1em"
+        },
+        "body": {
+          "family": "Noto Sans KR, sans-serif",
+          "weight": 300
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-enter",
+            "duration": 2000
+          },
+          "style": {
+            "padding": "none",
+            "backgroundEffect": "grain"
+          },
+          "content": {
+            "titleSize": "large",
+            "themeSpecific": {
+              "letterbox": true,
+              "showSubtitle": true
+            }
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 1,
+          "layout": "centered",
+          "animation": {
+            "type": "typewriter",
+            "trigger": "on-scroll",
+            "duration": 1500
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "film-grain",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "none"
+          },
+          "content": {
+            "themeSpecific": {
+              "subtitleCaptions": true
+            }
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 7,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll",
+            "duration": 2000
+          },
+          "style": {
+            "padding": "xlarge"
+          },
+          "content": {
+            "themeSpecific": {
+              "creditRoll": true
+            }
+          }
+        }
+      ],
+      "effects": {
+        "background": {
+          "type": "solid",
+          "value": "#1A1A1A"
+        },
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": false
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "exhibition",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "Virtual Exhibition",
+      "nameKo": "버추얼 갤러리",
+      "category": "artistic",
+      "description": "Online art museum experience with horizontal scroll, framed photos, and docent audio feature",
+      "descriptionKo": "성수동 팝업 갤러리처럼 온라인 미술관에 입장한 듯한 경험, 가로 스크롤과 액자 구성",
+      "matchKeywords": ["갤러리", "전시회", "미술관", "성수동", "팝업", "예술", "액자", "도슨트", "아트"],
+      "recommendedFor": "Couples who value artistic sensibility and prefer static elegance",
+      "recommendedForKo": "예술적 감각을 중시하고, 정적인 우아함을 원하는 커플",
+      "preview": {
+        "colors": {
+          "primary": "#2C2C2C",
+          "secondary": "#707070",
+          "background": "#FAFAFA",
+          "surface": "#FFFFFF",
+          "text": "#1A1A1A",
+          "textMuted": "#888888",
+          "accent": "#000000"
+        },
+        "mood": ["예술적인", "정적인", "우아한"]
+      },
+      "intro": {
+        "type": "exhibition",
+        "duration": 3000,
+        "skipEnabled": true,
+        "skipDelay": 1500,
+        "settings": {
+          "frameStyle": "minimal",
+          "navigationStyle": "horizontal"
+        }
+      },
+      "interaction": "horizontal",
+      "defaultColors": {
+        "primary": "#2C2C2C",
+        "secondary": "#707070",
+        "background": "#FAFAFA",
+        "surface": "#FFFFFF",
+        "text": "#1A1A1A",
+        "textMuted": "#888888",
+        "accent": "#000000"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Cormorant Garamond, serif",
+          "weight": 300,
+          "style": "italic"
+        },
+        "body": {
+          "family": "Pretendard, sans-serif",
+          "weight": 300
+        },
+        "accent": {
+          "family": "Pretendard, sans-serif",
+          "weight": 500
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-enter",
+            "duration": 1500
+          },
+          "style": {
+            "padding": "xlarge"
+          },
+          "content": {
+            "titleSize": "medium",
+            "themeSpecific": {
+              "exhibitionTitle": true
+            }
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 1,
+          "layout": "frame",
+          "animation": {
+            "type": "slide-left",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "frameStyle": "minimal",
+              "docentEnabled": true
+            }
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 2,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "rsvp",
+          "type": "rsvp",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "ticketStyle": true
+            }
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 8,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        }
+      ],
+      "effects": {
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": true,
+          "indicatorStyle": "dot"
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "magazine",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "The Magazine",
+      "nameKo": "매거진",
+      "category": "modern",
+      "description": "Vogue/Kinfolk editorial style with bold typography overlays, page-flip transitions, and interview format",
+      "descriptionKo": "보그/킨포크처럼 패션 잡지를 넘겨보는 듯한 레이아웃, 과감한 타이포그래피와 페이지 넘김 효과",
+      "matchKeywords": ["매거진", "보그", "킨포크", "패션", "에디토리얼", "잡지", "화보", "인터뷰", "스타일"],
+      "recommendedFor": "Couples who are fashion-conscious and have studio photos that look like editorials",
+      "recommendedForKo": "패션에 관심이 많고 스튜디오 촬영본이 화보처럼 잘 나온 커플",
+      "preview": {
+        "colors": {
+          "primary": "#000000",
+          "secondary": "#E8E4DF",
+          "background": "#F8F6F3",
+          "surface": "#FFFFFF",
+          "text": "#1A1A1A",
+          "textMuted": "#6B6B6B",
+          "accent": "#C4A77D"
+        },
+        "mood": ["트렌디한", "감각적인", "에디토리얼"]
+      },
+      "intro": {
+        "type": "magazine",
+        "duration": 2500,
+        "skipEnabled": true,
+        "skipDelay": 1000,
+        "settings": {
+          "coverStyle": "vogue",
+          "pageTransition": "flip"
+        }
+      },
+      "interaction": "swipe",
+      "defaultColors": {
+        "primary": "#000000",
+        "secondary": "#E8E4DF",
+        "background": "#F8F6F3",
+        "surface": "#FFFFFF",
+        "text": "#1A1A1A",
+        "textMuted": "#6B6B6B",
+        "accent": "#C4A77D"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Playfair Display, serif",
+          "weight": 700,
+          "style": "italic"
+        },
+        "body": {
+          "family": "Pretendard, sans-serif",
+          "weight": 300
+        },
+        "accent": {
+          "family": "Cormorant Garamond, serif",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "overlay-text",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-enter"
+          },
+          "style": {
+            "padding": "none"
+          },
+          "content": {
+            "titleSize": "hero",
+            "themeSpecific": {
+              "magazineCover": true
+            }
+          }
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "enabled": true,
+          "order": 1,
+          "layout": "split",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "interviewFormat": true
+            }
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "masonry",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 3,
+          "layout": "overlay-text",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 5,
+          "layout": "split",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 8,
+          "layout": "centered",
+          "animation": {
+            "type": "page-turn",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        }
+      ],
+      "effects": {
+        "scrollBehavior": {
+          "smooth": true,
+          "snapToSection": true
+        },
+        "transition": {
+          "type": "slide",
+          "duration": 500
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "vinyl",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "Vinyl Record",
+      "nameKo": "바이닐 레코드",
+      "category": "retro",
+      "description": "LP player aesthetic with spinning vinyl, track list navigation, and retro audio interactions",
+      "descriptionKo": "LP판이 돌아가는 인터랙티브 인트로, 앨범 트랙리스트처럼 구성된 스토리",
+      "matchKeywords": ["LP", "바이닐", "레코드", "음악", "레트로", "Y2K", "CD", "카세트", "힙", "앨범"],
+      "recommendedFor": "Couples with strong music taste who prefer hip, retro aesthetics",
+      "recommendedForKo": "음악 취향이 확고하거나 힙(Hip)한 감성을 선호하는 커플",
+      "preview": {
+        "colors": {
+          "primary": "#1A1A1A",
+          "secondary": "#F5E6D3",
+          "background": "#2D2D2D",
+          "surface": "#3D3D3D",
+          "text": "#F5E6D3",
+          "textMuted": "#A0A0A0",
+          "accent": "#E85D04"
+        },
+        "mood": ["힙한", "레트로", "음악적인"]
+      },
+      "intro": {
+        "type": "vinyl",
+        "duration": 4000,
+        "skipEnabled": true,
+        "skipDelay": 2000,
+        "bgm": {
+          "trackId": "lo-fi-love",
+          "volume": 0.4,
+          "fadeIn": 1000,
+          "loop": true
+        },
+        "settings": {
+          "vinylColor": "#1A1A1A",
+          "albumArtStyle": "photo",
+          "era": "80s"
+        }
+      },
+      "interaction": "track-list",
+      "defaultColors": {
+        "primary": "#1A1A1A",
+        "secondary": "#F5E6D3",
+        "background": "#2D2D2D",
+        "surface": "#3D3D3D",
+        "text": "#F5E6D3",
+        "textMuted": "#A0A0A0",
+        "accent": "#E85D04"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Space Grotesk, sans-serif",
+          "weight": 700
+        },
+        "body": {
+          "family": "IBM Plex Mono, monospace",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "centered",
+          "animation": {
+            "type": "rotate",
+            "trigger": "on-enter",
+            "duration": 3000
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "titleSize": "large",
+            "themeSpecific": {
+              "vinylSpinner": true,
+              "albumCover": true
+            }
+          }
+        },
+        {
+          "id": "story",
+          "type": "story",
+          "enabled": true,
+          "order": 1,
+          "layout": "stack",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll",
+            "stagger": 100
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "trackListFormat": true,
+              "tracks": ["만남", "연애", "프러포즈", "결혼"]
+            }
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "carousel",
+          "animation": {
+            "type": "slide-left",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "fadeOutVinyl": true
+            }
+          }
+        }
+      ],
+      "effects": {
+        "background": {
+          "type": "pattern",
+          "value": "vinyl-texture"
+        },
+        "soundEffects": {
+          "enabled": true,
+          "onClick": "vinyl-scratch"
+        },
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": true,
+          "indicatorStyle": "progress"
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "chat",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "Interactive Chat",
+      "nameKo": "인터랙티브 채팅",
+      "category": "playful",
+      "description": "Messenger-style invitation with chat bot interactions, dynamic photo loading, and location sharing UI",
+      "descriptionKo": "커플과 1:1 채팅하는 듯한 화면, 대화형 인터랙션과 친근한 분위기",
+      "matchKeywords": ["채팅", "메신저", "카톡", "대화", "유쾌한", "친근한", "재미있는", "봇", "인터랙티브"],
+      "recommendedFor": "Witty couples who prefer intimacy over formality",
+      "recommendedForKo": "위트 있고 유쾌하며, 격식보다는 친밀함을 전하고 싶은 커플",
+      "preview": {
+        "colors": {
+          "primary": "#FEE500",
+          "secondary": "#3C1E1E",
+          "background": "#B2C7D9",
+          "surface": "#FFFFFF",
+          "text": "#1A1A1A",
+          "textMuted": "#6B6B6B",
+          "accent": "#FEE500"
+        },
+        "mood": ["친근한", "유쾌한", "인터랙티브"]
+      },
+      "intro": {
+        "type": "chat",
+        "duration": 3000,
+        "skipEnabled": true,
+        "skipDelay": 1500,
+        "settings": {
+          "platform": "kakao",
+          "botPersonality": "friendly"
+        }
+      },
+      "interaction": "chat-flow",
+      "defaultColors": {
+        "primary": "#FEE500",
+        "secondary": "#3C1E1E",
+        "background": "#B2C7D9",
+        "surface": "#FFFFFF",
+        "text": "#1A1A1A",
+        "textMuted": "#6B6B6B",
+        "accent": "#FEE500"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Pretendard, sans-serif",
+          "weight": 700
+        },
+        "body": {
+          "family": "Pretendard, sans-serif",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-enter",
+            "stagger": 300
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "themeSpecific": {
+              "chatHeader": true,
+              "profileImages": true
+            }
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 1,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll",
+            "stagger": 200
+          },
+          "style": {
+            "padding": "medium"
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "themeSpecific": {
+              "photoAsMessage": true
+            }
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-click"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "themeSpecific": {
+              "questionButton": "결혼식 날짜가 언제야?"
+            }
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-click"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "themeSpecific": {
+              "locationShareUI": true,
+              "questionButton": "결혼식장 어디야?"
+            }
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 5,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-click"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "themeSpecific": {
+              "questionButton": "축의금은 어디로 보내?"
+            }
+          }
+        },
+        {
+          "id": "rsvp",
+          "type": "rsvp",
+          "enabled": true,
+          "order": 6,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "themeSpecific": {
+              "quickReplyButtons": true
+            }
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 7,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 8,
+          "layout": "chat-bubble",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        }
+      ],
+      "effects": {
+        "soundEffects": {
+          "enabled": true,
+          "onClick": "message-send"
+        },
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": false
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": false,
+        "sectionOrder": false,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "glassmorphism",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "Glassmorphism",
+      "nameKo": "글래스모피즘",
+      "category": "modern",
+      "description": "Framer-style 3D objects with glass-like textures, aurora gradients, and fluid motion",
+      "descriptionKo": "유리 같은 질감과 3D 오브젝트가 둥둥 떠다니는 몽환적인 스타일, 오로라 그라데이션",
+      "matchKeywords": ["글래스", "3D", "프레이머", "모던", "테크", "오로라", "투명", "몽환적", "부드러운"],
+      "recommendedFor": "Young, tech-savvy couples who love trendy design",
+      "recommendedForKo": "트렌디한 디자인과 IT/테크에 친숙한 젊은 커플",
+      "preview": {
+        "colors": {
+          "primary": "#A855F7",
+          "secondary": "#3B82F6",
+          "background": "#0F0F23",
+          "surface": "rgba(255,255,255,0.1)",
+          "text": "#FFFFFF",
+          "textMuted": "rgba(255,255,255,0.6)",
+          "accent": "#EC4899",
+          "overlay": "rgba(255,255,255,0.05)"
+        },
+        "mood": ["몽환적인", "트렌디한", "미래적인"]
+      },
+      "intro": {
+        "type": "glassmorphism",
+        "duration": 4000,
+        "skipEnabled": true,
+        "skipDelay": 2000,
+        "settings": {
+          "glassOpacity": 0.1,
+          "gradientColors": ["#A855F7", "#3B82F6", "#EC4899"],
+          "floatingObjects": ["heart", "ring", "star"]
+        }
+      },
+      "interaction": "scroll",
+      "defaultColors": {
+        "primary": "#A855F7",
+        "secondary": "#3B82F6",
+        "background": "#0F0F23",
+        "surface": "rgba(255,255,255,0.1)",
+        "text": "#FFFFFF",
+        "textMuted": "rgba(255,255,255,0.6)",
+        "accent": "#EC4899",
+        "overlay": "rgba(255,255,255,0.05)"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Outfit, sans-serif",
+          "weight": 600
+        },
+        "body": {
+          "family": "Inter, sans-serif",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "scale",
+            "trigger": "on-enter",
+            "duration": 1500
+          },
+          "style": {
+            "padding": "xlarge",
+            "glassmorphism": true,
+            "backgroundEffect": "aurora"
+          },
+          "content": {
+            "titleSize": "xlarge"
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 1,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge",
+            "glassmorphism": true
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "grid",
+          "animation": {
+            "type": "scale",
+            "trigger": "on-scroll",
+            "stagger": 100
+          },
+          "style": {
+            "padding": "large",
+            "glassmorphism": true
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large",
+            "glassmorphism": true
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large",
+            "glassmorphism": true
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large",
+            "glassmorphism": true
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large",
+            "glassmorphism": true
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        }
+      ],
+      "effects": {
+        "background": {
+          "type": "aurora",
+          "value": "linear-gradient(135deg, #A855F7, #3B82F6, #EC4899)",
+          "animation": "aurora-flow"
+        },
+        "particles": {
+          "enabled": true,
+          "type": "sparkle",
+          "density": "low"
+        },
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": true,
+          "indicatorStyle": "line"
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "passport",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "The Passport",
+      "nameKo": "패스포트",
+      "category": "classic",
+      "description": "Travel-themed with passport opening animation, stamp effects, and journey map timeline",
+      "descriptionKo": "인생이라는 긴 여행을 함께 떠나는 컨셉, 여권 애니메이션과 입국 도장 효과",
+      "matchKeywords": ["여행", "여권", "패스포트", "비행기", "도장", "스탬프", "지도", "어드벤처", "장거리연애"],
+      "recommendedFor": "Couples who love travel or met through long-distance relationship",
+      "recommendedForKo": "여행을 좋아하거나, 장거리 연애를 끝내고 결혼하는 커플",
+      "preview": {
+        "colors": {
+          "primary": "#1E3A5F",
+          "secondary": "#C9A962",
+          "background": "#F5F1E8",
+          "surface": "#FFFFFF",
+          "text": "#1E3A5F",
+          "textMuted": "#6B7B8C",
+          "accent": "#B8860B"
+        },
+        "mood": ["여행", "모험적인", "클래식"]
+      },
+      "intro": {
+        "type": "passport",
+        "duration": 4000,
+        "skipEnabled": true,
+        "skipDelay": 2000,
+        "settings": {
+          "passportColor": "navy",
+          "stampStyle": "vintage",
+          "showMap": true
+        }
+      },
+      "interaction": "scroll",
+      "defaultColors": {
+        "primary": "#1E3A5F",
+        "secondary": "#C9A962",
+        "background": "#F5F1E8",
+        "surface": "#FFFFFF",
+        "text": "#1E3A5F",
+        "textMuted": "#6B7B8C",
+        "accent": "#B8860B"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Courier Prime, monospace",
+          "weight": 700
+        },
+        "body": {
+          "family": "Pretendard, sans-serif",
+          "weight": 400
+        },
+        "accent": {
+          "family": "Special Elite, cursive",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "centered",
+          "animation": {
+            "type": "flip",
+            "trigger": "on-enter",
+            "duration": 1500
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "titleSize": "large",
+            "themeSpecific": {
+              "passportCover": true,
+              "stampAnimation": true
+            }
+          }
+        },
+        {
+          "id": "story",
+          "type": "story",
+          "enabled": true,
+          "order": 1,
+          "layout": "stack",
+          "animation": {
+            "type": "stamp",
+            "trigger": "on-scroll",
+            "stagger": 300
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "mapTimeline": true,
+              "locationStamps": true
+            }
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "carousel",
+          "animation": {
+            "type": "slide-left",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "decorationType": "stamp"
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "stamp",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "boardingPassStyle": true
+            }
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "zoom-in",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "earthZoomIn": true
+            }
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "stamp",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "guestbookStamps": true
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 8,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        }
+      ],
+      "effects": {
+        "background": {
+          "type": "pattern",
+          "value": "passport-texture"
+        },
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": true,
+          "indicatorStyle": "dot"
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "pixel",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "8-Bit Pixel Love",
+      "nameKo": "픽셀 러브",
+      "category": "playful",
+      "description": "Retro game style with pixel art characters, mini-game elements, and quest-style RSVP",
+      "descriptionKo": "귀엽고 키치한 픽셀 아트, 게임 캐릭터가 되어 결혼식장으로 향하는 여정",
+      "matchKeywords": ["게임", "픽셀", "8비트", "레트로", "아케이드", "귀여운", "키치", "퀘스트", "RPG"],
+      "recommendedFor": "Game-loving couples who want something completely unique and cute",
+      "recommendedForKo": "게임을 좋아하거나, 남들과 완전히 다른 귀여움을 원하는 커플",
+      "preview": {
+        "colors": {
+          "primary": "#5B8A3D",
+          "secondary": "#E6B84F",
+          "background": "#2D1B2E",
+          "surface": "#442A45",
+          "text": "#FFFFFF",
+          "textMuted": "#B8A9B9",
+          "accent": "#E85D75"
+        },
+        "mood": ["귀여운", "유쾌한", "게임같은"]
+      },
+      "intro": {
+        "type": "pixel",
+        "duration": 5000,
+        "skipEnabled": true,
+        "skipDelay": 2000,
+        "bgm": {
+          "trackId": "8bit-love",
+          "volume": 0.3,
+          "loop": true
+        },
+        "settings": {
+          "pixelSize": 4,
+          "characterStyle": "rpg",
+          "gameTitle": "WEDDING QUEST"
+        }
+      },
+      "interaction": "game-progress",
+      "defaultColors": {
+        "primary": "#5B8A3D",
+        "secondary": "#E6B84F",
+        "background": "#2D1B2E",
+        "surface": "#442A45",
+        "text": "#FFFFFF",
+        "textMuted": "#B8A9B9",
+        "accent": "#E85D75"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Press Start 2P, monospace",
+          "weight": 400
+        },
+        "body": {
+          "family": "VT323, monospace",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "pixel-appear",
+            "trigger": "on-enter",
+            "duration": 2000
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "titleSize": "large",
+            "themeSpecific": {
+              "gameTitleScreen": true,
+              "pressStartPrompt": true
+            }
+          }
+        },
+        {
+          "id": "story",
+          "type": "story",
+          "enabled": true,
+          "order": 1,
+          "layout": "stack",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "levelProgress": true,
+              "characterWalking": true
+            }
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "carousel",
+          "animation": {
+            "type": "pixel-appear",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "medium"
+          },
+          "content": {
+            "decorationType": "pixel"
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 3,
+          "layout": "centered",
+          "animation": {
+            "type": "typewriter",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "dialogBox": true
+            }
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "bounce",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "pixelMap": true
+            }
+          }
+        },
+        {
+          "id": "quest",
+          "type": "quest",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "bounce",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "questAccept": true,
+              "questText": "결혼식에 참석하시겠습니까?"
+            }
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 7,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "treasureChest": true
+            }
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 8,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 9,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          },
+          "content": {
+            "themeSpecific": {
+              "endCredits": true,
+              "characterCelebration": true
+            }
+          }
+        }
+      ],
+      "effects": {
+        "background": {
+          "type": "pattern",
+          "value": "pixel-stars"
+        },
+        "soundEffects": {
+          "enabled": true,
+          "onClick": "8bit-click",
+          "onScroll": "8bit-step"
+        },
+        "scrollBehavior": {
+          "smooth": false,
+          "indicator": true,
+          "indicatorStyle": "progress"
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": false,
+        "sectionOrder": false,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    },
+    {
+      "id": "typography",
+      "version": "1.0.0",
+      "source": "static",
+      "name": "Minimalist Typo",
+      "nameKo": "미니멀 타이포",
+      "category": "artistic",
+      "description": "Typography-focused design with kinetic text, bold contrasts, and hidden photo reveals",
+      "descriptionKo": "사진보다 글자의 미학을 강조, 키네틱 타이포그래피와 강렬한 블랙&화이트",
+      "matchKeywords": ["타이포", "글자", "미니멀", "흑백", "네온", "디자이너", "시크", "모던", "포스터"],
+      "recommendedFor": "Designer couples or those who prefer minimal photo exposure",
+      "recommendedForKo": "디자이너 커플, 혹은 사진 공개를 최소화하고 싶은 시크한 커플",
+      "preview": {
+        "colors": {
+          "primary": "#FFFFFF",
+          "secondary": "#333333",
+          "background": "#000000",
+          "surface": "#111111",
+          "text": "#FFFFFF",
+          "textMuted": "#666666",
+          "accent": "#FFFFFF"
+        },
+        "mood": ["시크한", "미니멀", "아티스틱"]
+      },
+      "intro": {
+        "type": "typography",
+        "duration": 4000,
+        "skipEnabled": true,
+        "skipDelay": 2000,
+        "settings": {
+          "colorScheme": "bw",
+          "motionIntensity": "dynamic",
+          "hiddenPhotos": true
+        }
+      },
+      "interaction": "scroll",
+      "defaultColors": {
+        "primary": "#FFFFFF",
+        "secondary": "#333333",
+        "background": "#000000",
+        "surface": "#111111",
+        "text": "#FFFFFF",
+        "textMuted": "#666666",
+        "accent": "#FFFFFF"
+      },
+      "defaultFonts": {
+        "title": {
+          "family": "Bebas Neue, sans-serif",
+          "weight": 400,
+          "letterSpacing": "0.05em"
+        },
+        "body": {
+          "family": "Inter, sans-serif",
+          "weight": 300
+        },
+        "accent": {
+          "family": "Space Mono, monospace",
+          "weight": 400
+        }
+      },
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "enabled": true,
+          "order": 0,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "kinetic-text",
+            "trigger": "on-enter",
+            "duration": 3000
+          },
+          "style": {
+            "padding": "none"
+          },
+          "content": {
+            "titleSize": "hero",
+            "titleAnimation": "kinetic-text"
+          }
+        },
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "enabled": true,
+          "order": 1,
+          "layout": "centered",
+          "animation": {
+            "type": "kinetic-text",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        },
+        {
+          "id": "gallery",
+          "type": "gallery",
+          "enabled": true,
+          "order": 2,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-click"
+          },
+          "style": {
+            "padding": "large"
+          },
+          "content": {
+            "themeSpecific": {
+              "hiddenOnPress": true,
+              "revealHint": "길게 눌러 사진 보기"
+            }
+          }
+        },
+        {
+          "id": "calendar",
+          "type": "calendar",
+          "enabled": true,
+          "order": 3,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "kinetic-text",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          },
+          "content": {
+            "titleSize": "hero"
+          }
+        },
+        {
+          "id": "location",
+          "type": "location",
+          "enabled": true,
+          "order": 4,
+          "layout": "centered",
+          "animation": {
+            "type": "slide-up",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "account",
+          "type": "account",
+          "enabled": true,
+          "order": 5,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "message",
+          "type": "message",
+          "enabled": true,
+          "order": 6,
+          "layout": "centered",
+          "animation": {
+            "type": "fade",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "large"
+          }
+        },
+        {
+          "id": "closing",
+          "type": "closing",
+          "enabled": true,
+          "order": 7,
+          "layout": "fullscreen",
+          "animation": {
+            "type": "kinetic-text",
+            "trigger": "on-scroll"
+          },
+          "style": {
+            "padding": "xlarge"
+          }
+        }
+      ],
+      "effects": {
+        "cursor": {
+          "type": "custom",
+          "asset": "crosshair"
+        },
+        "scrollBehavior": {
+          "smooth": true,
+          "indicator": true,
+          "indicatorStyle": "line"
+        }
+      },
+      "customizable": {
+        "colors": true,
+        "fonts": true,
+        "sectionOrder": true,
+        "sectionToggle": true,
+        "introSettings": true,
+        "effects": true
+      }
+    }
+  ]
+}
