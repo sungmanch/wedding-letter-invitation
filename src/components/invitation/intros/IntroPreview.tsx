@@ -172,9 +172,9 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
 
   return (
     <div className="absolute inset-0 bg-black overflow-hidden">
-      {/* Background Image */}
+      {/* Background Image with flicker effect */}
       {userImageUrl && (
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 cinematic-flicker">
           <Image
             src={userImageUrl}
             alt="Preview"
@@ -194,6 +194,15 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
         }}
       />
 
+      {/* Gold Highlight Layer */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at 30% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 50%)`,
+          mixBlendMode: 'overlay',
+        }}
+      />
+
       {/* Vignette */}
       <div
         className="absolute inset-0"
@@ -201,6 +210,9 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
           background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)',
         }}
       />
+
+      {/* Film Grain Overlay */}
+      <div className="absolute inset-0 cinematic-grain pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-between px-3 py-4">
@@ -231,14 +243,14 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
             style={{ background: `linear-gradient(to bottom, transparent, ${wkwColors.gold}99, transparent)` }}
           />
           <h1
-            className="text-lg font-light tracking-[0.15em]"
+            className="text-lg font-light tracking-[0.15em] cinematic-text-glow"
             style={{ color: wkwColors.cream, fontFamily: fonts.title.family }}
           >
             {groomName}
           </h1>
           <p className="text-xs my-1" style={{ color: `${wkwColors.gold}cc` }}>&</p>
           <h1
-            className="text-lg font-light tracking-[0.15em]"
+            className="text-lg font-light tracking-[0.15em] cinematic-text-glow"
             style={{ color: wkwColors.cream, fontFamily: fonts.title.family }}
           >
             {brideName}
@@ -265,6 +277,64 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
           )}
         </div>
       </div>
+
+      {/* Film frame edges */}
+      <div
+        className="absolute top-0 left-0 right-0 h-0.5 z-20"
+        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.5), transparent)' }}
+      />
+      <div
+        className="absolute bottom-0 left-0 right-0 h-0.5 z-20"
+        style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)' }}
+      />
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes cinematicGrain {
+          0%, 100% { transform: translate(0, 0); }
+          10% { transform: translate(-5%, -10%); }
+          20% { transform: translate(-15%, 5%); }
+          30% { transform: translate(7%, -25%); }
+          40% { transform: translate(-5%, 25%); }
+          50% { transform: translate(-15%, 10%); }
+          60% { transform: translate(15%, 0%); }
+          70% { transform: translate(0%, 15%); }
+          80% { transform: translate(3%, 35%); }
+          90% { transform: translate(-10%, 10%); }
+        }
+
+        .cinematic-grain::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          right: -50%;
+          bottom: -50%;
+          width: 200%;
+          height: 200%;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.15;
+          pointer-events: none;
+          animation: cinematicGrain 0.5s steps(10) infinite;
+          z-index: 50;
+        }
+
+        @keyframes cinematicFlicker {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.98; }
+          75% { opacity: 0.99; }
+        }
+
+        .cinematic-flicker {
+          animation: cinematicFlicker 0.15s infinite;
+        }
+
+        .cinematic-text-glow {
+          text-shadow:
+            0 0 40px rgba(220, 38, 38, 0.3),
+            0 0 80px rgba(220, 38, 38, 0.2);
+        }
+      `}</style>
     </div>
   )
 }
