@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { CreateInvitationFlow } from './CreateInvitationFlow'
+import { CreateFlow } from './CreateFlow'
 
 export const metadata = {
   title: '청첩장 만들기 - 모바일 청첩장',
-  description: 'AI와 대화하며 나만의 특별한 청첩장을 만들어보세요',
+  description: '사진을 업로드하고 테마를 선택해 나만의 특별한 청첩장을 만들어보세요',
 }
 
 export default async function CreateInvitationPage() {
@@ -13,8 +13,8 @@ export default async function CreateInvitationPage() {
 
   // Redirect to login if not authenticated
   if (!user) {
-    redirect('/login?redirect=/wedding/create')
+    redirect('/login?redirect=/create')
   }
 
-  return <CreateInvitationFlow />
+  return <CreateFlow />
 }
