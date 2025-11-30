@@ -7,7 +7,7 @@ import { Phone, Copy, Check, MapPin, Calendar, Clock } from 'lucide-react'
 import type { Invitation, InvitationDesign, InvitationPhoto } from '@/lib/db/invitation-schema'
 import type { ScreenStructure, ScreenSection } from '@/lib/actions/ai-design'
 import type { InvitationThemeData, ColorPalette, FontSet, IntroConfig } from '@/lib/themes/schema'
-import { IntroRenderer } from './intros'
+import { IntroRenderer, IntroPreview } from './intros'
 
 interface InvitationViewerProps {
   invitation: Invitation
@@ -354,7 +354,26 @@ export function InvitationViewer({
   }
 
   // 인트로가 있고 아직 완료되지 않은 경우 인트로만 렌더링
-  if (introConfig && !introCompleted && !isPreview) {
+  if (introConfig && !introCompleted) {
+    // 프리뷰 모드에서는 정적 IntroPreview 표시
+    if (isPreview) {
+      return (
+        <div className="h-full w-full">
+          <IntroPreview
+            intro={introConfig}
+            colors={colors}
+            fonts={fonts}
+            groomName={invitation.groomName}
+            brideName={invitation.brideName}
+            weddingDate={invitation.weddingDate}
+            venueName={invitation.venueName}
+            userImageUrl={introImages[0]}
+          />
+        </div>
+      )
+    }
+
+    // 실제 뷰어에서는 애니메이션 인트로 표시
     return (
       <IntroRenderer
         intro={introConfig}
