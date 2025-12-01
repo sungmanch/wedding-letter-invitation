@@ -38,9 +38,21 @@
   - `src/app/[id]/edit/components/` - 편집 UI 컴포넌트 (SectionEditor, StyleEditor, TemplateSelector)
 - **계획**: [AI 디자인 플랫폼 설계](./.claude/plans/streamed-percolating-wave.md)
 
+### 2025-12-02: 마이그레이션 구조 재정비
+- **이유**: `updated_at` 컬럼 누락 에러 해결, 스키마와 DB 동기화
+- **변경**:
+  - `drizzle-kit introspect`로 현재 DB 상태를 기준선으로 설정
+  - `foreignKey()` 헬퍼로 FK 명시적 이름 지정 (`_fkey` 컨벤션)
+  - 인덱스, RLS 정책을 스키마에 명시하여 불필요한 DROP 방지
+- **파일**: `src/lib/db/invitation-schema.ts`, `drizzle/migrations/`
+
 ### 2025-12-01: 인트로를 인라인 섹션으로 변경
 - **이유**: Intro → Content 순서로 스크롤 가능한 단일 페이지 UX 요구
 - **변경**:
   - IntroRenderer 오버레이 방식 제거, IntroPreview를 인라인 섹션으로 사용
   - 모든 인트로 컴포넌트 fixed → absolute 변경 (모바일 퍼스트)
 - **파일**: `src/components/invitation/InvitationViewer.tsx`, `src/components/invitation/intros/*.tsx`
+
+## 마이그레이션 규칙
+- 절대로 마이그레이션 파일을 직접 생성하지 말것 `drizzle-kit generate`를 활용한 생성만 할것
+- 스키마 변경 시 `drizzle-kit generate` → `drizzle-kit migrate` 순서로 진행
