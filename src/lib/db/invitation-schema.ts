@@ -11,6 +11,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
+import { designTemplates } from './template-schema'
 
 // ============================================
 // 청첩장 (Invitations)
@@ -54,6 +55,13 @@ export const invitations = pgTable('invitations', {
   // AI 프롬프트 및 디자인
   stylePrompt: text('style_prompt'),
   selectedDesignId: uuid('selected_design_id'),
+
+  // 템플릿 참조 (재사용 가능한 디자인 템플릿)
+  templateId: uuid('template_id'), // design_templates 참조
+  isTemplateReuse: boolean('is_template_reuse').default(false), // 이미지만 교체한 재사용 여부
+
+  // 배포 URL (S3 정적 배포 시)
+  publishedUrl: varchar('published_url', { length: 500 }),
 
   // 상태
   status: varchar('status', { length: 20 }).default('draft').notNull(), // draft, published, deleted
@@ -168,6 +176,10 @@ export const invitationsRelations = relations(invitations, ({ many, one }) => ({
     fields: [invitations.selectedDesignId],
     references: [invitationDesigns.id],
   }),
+  template: one(designTemplates, {
+    fields: [invitations.templateId],
+    references: [designTemplates.id],
+  }),
 }))
 
 export const invitationDesignsRelations = relations(invitationDesigns, ({ one }) => ({
@@ -196,6 +208,10 @@ export const invitationPaymentsRelations = relations(invitationPayments, ({ one 
     fields: [invitationPayments.invitationId],
     references: [invitations.id],
   }),
+}))
+
+export const designTemplatesRelations = relations(designTemplates, ({ many }) => ({
+  invitations: many(invitations),
 }))
 
 // ============================================
