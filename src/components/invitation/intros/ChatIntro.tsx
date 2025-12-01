@@ -67,7 +67,7 @@ export function ChatIntro({
 
   return (
     <div
-      className="fixed inset-0 flex flex-col overflow-hidden"
+      className="absolute inset-0 flex flex-col overflow-hidden"
       style={{ backgroundColor: colors.background }}
     >
       {/* Chat Header */}

@@ -39,7 +39,7 @@ export function PassportIntro({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center overflow-hidden"
+      className="absolute inset-0 flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: colors.background }}
     >
       {/* Passport Book */}

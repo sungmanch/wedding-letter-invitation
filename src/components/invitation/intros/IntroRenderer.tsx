@@ -116,23 +116,26 @@ export function IntroRenderer({
   }
 
   return (
-    <div className="fixed inset-0 z-50">
-      {renderIntro()}
+    <div className="fixed inset-0 z-50 flex justify-center bg-black/50">
+      {/* Mobile-first container */}
+      <div className="relative w-full max-w-[480px] h-full overflow-hidden">
+        {renderIntro()}
 
-      {/* Skip Button */}
-      {canSkip && (
-        <button
-          onClick={handleSkip}
-          className="fixed bottom-8 right-8 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 opacity-70 hover:opacity-100"
-          style={{
-            backgroundColor: `${colors.text}20`,
-            color: colors.text,
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          건너뛰기
-        </button>
-      )}
+        {/* Skip Button */}
+        {canSkip && (
+          <button
+            onClick={handleSkip}
+            className="absolute bottom-8 right-4 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 opacity-70 hover:opacity-100"
+            style={{
+              backgroundColor: `${colors.text}20`,
+              color: colors.text,
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            건너뛰기
+          </button>
+        )}
+      </div>
     </div>
   )
 }

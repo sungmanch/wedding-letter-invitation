@@ -41,7 +41,7 @@ export function TypographyIntro({
 
   return (
     <div
-      className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden"
+      className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
       style={{ backgroundColor: colors.background }}
     >
       {/* Main Typography */}

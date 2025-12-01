@@ -54,7 +54,7 @@ export function CinematicIntro({
   const { formatted: dateFormatted, weekday } = formatDate(weddingDate)
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden">
+    <div className="absolute inset-0 bg-black overflow-hidden">
       {/* Background Image Layer with flicker effect */}
       {images?.[0] && (
         <div className="absolute inset-0 film-flicker">
