@@ -29,11 +29,13 @@
   - Sprint 0: `design_templates` 테이블 추가, 큐레이션/강화학습 데이터 구조
   - Sprint 1: `InvitationDesignData` v2 타입, 25개 ExtendedSectionType, 마이그레이션 유틸
   - Sprint 2: 신규 섹션 컴포넌트 (VideoSection, InterviewSection, TimelineSection, DdaySection)
+  - Sprint 3: 편집 UI - 섹션 관리, 스타일 설정, 템플릿 재사용
 - **파일**:
   - `src/lib/db/template-schema.ts` - 템플릿 DB 스키마
   - `src/lib/types/invitation-design.ts` - v2 데이터 타입
   - `src/lib/utils/design-migration.ts` - 레거시 → v2 마이그레이션
   - `src/components/invitation/sections/` - 신규 섹션 컴포넌트
+  - `src/app/[id]/edit/components/` - 편집 UI 컴포넌트 (SectionEditor, StyleEditor, TemplateSelector)
 - **계획**: [AI 디자인 플랫폼 설계](./.claude/plans/streamed-percolating-wave.md)
 
 ### 2025-12-01: 인트로를 인라인 섹션으로 변경
