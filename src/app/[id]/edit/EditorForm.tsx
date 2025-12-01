@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { useEditContext } from './EditContext'
 import { SectionEditor } from './components/SectionEditor'
 import { StyleEditor } from './components/StyleEditor'
+import { TemplateSelector } from './components/TemplateSelector'
 import {
   User,
   Calendar,
@@ -14,6 +15,7 @@ import {
   CreditCard,
   Palette,
   Layers,
+  LayoutTemplate,
 } from 'lucide-react'
 
 export function EditorForm() {
@@ -25,6 +27,7 @@ export function EditorForm() {
       <ParentsSection />
       <ContactSection />
       <AccountSection />
+      <TemplateSelectorSection />
       <StyleSettingsSection />
       <SectionManagementSection />
     </div>
@@ -306,6 +309,24 @@ function AccountSection() {
           </div>
         </div>
       </div>
+    </section>
+  )
+}
+
+// Template Selector Section (템플릿 선택)
+function TemplateSelectorSection() {
+  const { designData, applyTemplate } = useEditContext()
+
+  return (
+    <section className="p-6">
+      <SectionHeader icon={LayoutTemplate} title="템플릿 변경" />
+      <p className="text-sm text-gray-500 mb-4">
+        다른 템플릿을 선택하여 스타일을 변경할 수 있습니다.
+      </p>
+      <TemplateSelector
+        currentTemplateId={designData.template.id}
+        onSelect={applyTemplate}
+      />
     </section>
   )
 }

@@ -6,7 +6,7 @@ import type { Invitation, InvitationDesign, InvitationPhoto, NewInvitation } fro
 import type { SectionSetting } from '@/lib/types/invitation-design'
 import { createDefaultDesignData, migrateDesignData } from '@/lib/utils/design-migration'
 import type { InvitationDesignData } from '@/lib/types/invitation-design'
-import type { ColorPalette, FontSet } from '@/lib/themes/schema'
+import type { ColorPalette, FontSet, ThemeTemplate } from '@/lib/themes/schema'
 
 interface EditContextType {
   invitation: Invitation
@@ -27,6 +27,8 @@ interface EditContextType {
   fonts: FontSet
   updateColors: (colors: ColorPalette) => void
   updateFonts: (fonts: FontSet) => void
+  // 템플릿 적용
+  applyTemplate: (template: ThemeTemplate, options: { applyColors: boolean; applyFonts: boolean; applySections: boolean }) => void
 }
 
 const EditContext = React.createContext<EditContextType | null>(null)
@@ -175,6 +177,50 @@ export function EditContextProvider({
     })
   }, [])
 
+  // 템플릿 적용
+  const applyTemplate = React.useCallback((
+    template: ThemeTemplate,
+    options: { applyColors: boolean; applyFonts: boolean; applySections: boolean }
+  ) => {
+    setDesignData((prev) => {
+      // 섹션 변환 (SectionType -> ExtendedSectionType)
+      const convertedSections: SectionSetting[] = options.applySections
+        ? template.sections.map((s, index) => ({
+            id: s.id,
+            type: s.type as SectionSetting['type'], // SectionType is subset of ExtendedSectionType
+            enabled: s.enabled,
+            order: index,
+            label: {},
+            layout: {
+              type: s.layout,
+              padding: (s.style.padding || 'medium') as SectionSetting['layout']['padding'],
+              alignment: 'center' as const,
+            },
+            animation: s.animation,
+            settings: s.content?.themeSpecific || {},
+          }))
+        : prev.sections
+
+      const updated: InvitationDesignData = {
+        ...prev,
+        template: {
+          id: template.id,
+          source: template.source,
+          name: template.nameKo,
+        },
+        globalStyles: {
+          ...prev.globalStyles,
+          ...(options.applyColors && { colors: template.defaultColors }),
+          ...(options.applyFonts && { fonts: template.defaultFonts }),
+        },
+        sections: convertedSections,
+        meta: { ...prev.meta, updatedAt: new Date().toISOString() },
+      }
+      setPendingDesignChanges(updated)
+      return updated
+    })
+  }, [])
+
   const value: EditContextType = {
     invitation,
     design,
@@ -192,6 +238,7 @@ export function EditContextProvider({
     fonts: designData.globalStyles.fonts,
     updateColors,
     updateFonts,
+    applyTemplate,
   }
 
   return (
