@@ -1,0 +1,2 @@
+-- Baseline migration: introspected from existing database
+-- No changes needed as this is the initial state

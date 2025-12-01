@@ -9,7 +9,11 @@ import {
   boolean,
   integer,
   jsonb,
+  index,
+  pgPolicy,
+  foreignKey,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import { relations } from 'drizzle-orm'
 import { designTemplates } from './template-schema'
 
@@ -70,16 +74,19 @@ export const invitations = pgTable('invitations', {
   // 메타
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}).enableRLS()
+}, (table) => [
+  index('idx_invitations_user_id').on(table.userId),
+  index('idx_invitations_status').on(table.status),
+  pgPolicy('Anyone can view published invitations', { as: 'permissive', for: 'select', to: ['public'], using: sql`((status)::text = 'published'::text)` }),
+  pgPolicy('Users can manage their own invitations', { as: 'permissive', for: 'all', to: ['public'] }),
+]).enableRLS()
 
 // ============================================
 // AI 생성 디자인 (Invitation Designs)
 // ============================================
 export const invitationDesigns = pgTable('invitation_designs', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invitationId: uuid('invitation_id')
-    .references(() => invitations.id, { onDelete: 'cascade' })
-    .notNull(),
+  invitationId: uuid('invitation_id').notNull(),
 
   // 디자인 데이터 (JSON)
   // {
@@ -100,48 +107,80 @@ export const invitationDesigns = pgTable('invitation_designs', {
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}).enableRLS()
+}, (table) => [
+  index('idx_invitation_designs_invitation_id').on(table.invitationId),
+  foreignKey({
+    columns: [table.invitationId],
+    foreignColumns: [invitations.id],
+    name: 'invitation_designs_invitation_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Anyone can view designs of published invitations', {
+    as: 'permissive',
+    for: 'select',
+    to: ['public'],
+    using: sql`(invitation_id IN ( SELECT invitations.id FROM invitations WHERE ((invitations.status)::text = 'published'::text)))`
+  }),
+  pgPolicy('Users can manage designs of their invitations', { as: 'permissive', for: 'all', to: ['public'] }),
+]).enableRLS()
 
 // ============================================
 // 사진 (Invitation Photos)
 // ============================================
 export const invitationPhotos = pgTable('invitation_photos', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invitationId: uuid('invitation_id')
-    .references(() => invitations.id, { onDelete: 'cascade' })
-    .notNull(),
+  invitationId: uuid('invitation_id').notNull(),
 
   storagePath: varchar('storage_path', { length: 500 }).notNull(),
   url: varchar('url', { length: 500 }).notNull(),
   displayOrder: integer('display_order').notNull(),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
-}).enableRLS()
+}, (table) => [
+  index('idx_invitation_photos_invitation_id').on(table.invitationId),
+  foreignKey({
+    columns: [table.invitationId],
+    foreignColumns: [invitations.id],
+    name: 'invitation_photos_invitation_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Anyone can view photos of published invitations', {
+    as: 'permissive',
+    for: 'select',
+    to: ['public'],
+    using: sql`(invitation_id IN ( SELECT invitations.id FROM invitations WHERE ((invitations.status)::text = 'published'::text)))`
+  }),
+  pgPolicy('Users can manage photos of their invitations', { as: 'permissive', for: 'all', to: ['public'] }),
+]).enableRLS()
 
 // ============================================
 // 축하 메시지 (Invitation Messages)
 // ============================================
 export const invitationMessages = pgTable('invitation_messages', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invitationId: uuid('invitation_id')
-    .references(() => invitations.id, { onDelete: 'cascade' })
-    .notNull(),
+  invitationId: uuid('invitation_id').notNull(),
 
   guestName: varchar('guest_name', { length: 50 }).notNull(),
   content: text('content').notNull(), // 300자 제한 (앱에서 검증)
 
   isRead: boolean('is_read').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-}).enableRLS()
+}, (table) => [
+  index('idx_invitation_messages_invitation_id').on(table.invitationId),
+  foreignKey({
+    columns: [table.invitationId],
+    foreignColumns: [invitations.id],
+    name: 'invitation_messages_invitation_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Anyone can create messages', { as: 'permissive', for: 'insert', to: ['public'], withCheck: sql`true` }),
+  pgPolicy('Owners can view messages', { as: 'permissive', for: 'select', to: ['public'] }),
+  pgPolicy('Owners can update messages', { as: 'permissive', for: 'update', to: ['public'] }),
+]).enableRLS()
 
 // ============================================
 // 결제 (Invitation Payments)
 // ============================================
 export const invitationPayments = pgTable('invitation_payments', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invitationId: uuid('invitation_id')
-    .references(() => invitations.id, { onDelete: 'cascade' })
-    .notNull(),
+  invitationId: uuid('invitation_id').notNull(),
   userId: uuid('user_id').notNull(), // auth.users 참조
 
   polarCheckoutId: varchar('polar_checkout_id', { length: 100 }),
@@ -151,7 +190,22 @@ export const invitationPayments = pgTable('invitation_payments', {
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
-}).enableRLS()
+}, (table) => [
+  index('idx_invitation_payments_invitation_id').on(table.invitationId),
+  index('idx_invitation_payments_user_id').on(table.userId),
+  foreignKey({
+    columns: [table.invitationId],
+    foreignColumns: [invitations.id],
+    name: 'invitation_payments_invitation_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Users can manage their own payments', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public'],
+    using: sql`(auth.uid() = user_id)`,
+    withCheck: sql`(auth.uid() = user_id)`
+  }),
+]).enableRLS()
 
 // ============================================
 // Relations
