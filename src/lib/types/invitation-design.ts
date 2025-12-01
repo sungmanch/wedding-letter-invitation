@@ -177,6 +177,8 @@ export interface VideoSettings {
   showControls: boolean
   aspectRatio: '16:9' | '4:3' | '1:1' | '9:16'
   thumbnail?: string
+  title?: string
+  caption?: string
 }
 
 /** 웨딩 인터뷰 섹션 설정 */
@@ -197,7 +199,7 @@ export interface InterviewQuestion {
 
 /** 타임라인 섹션 설정 */
 export interface TimelineSettings {
-  displayMode: 'vertical' | 'horizontal' | 'alternate'
+  displayMode: 'vertical' | 'horizontal' | 'alternate' | 'cards'
   showConnectors: boolean
   connectorStyle: 'line' | 'dotted' | 'dashed'
   events: TimelineEvent[]
@@ -208,7 +210,7 @@ export interface TimelineEvent {
   date: string
   title: string
   description?: string
-  image?: string
+  imageUrl?: string
   enabled: boolean
   order: number
 }
