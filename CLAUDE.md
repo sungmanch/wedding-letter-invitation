@@ -23,13 +23,17 @@
 
 ## 변경 이력
 
-### 2025-12-02: AI 템플릿 시스템 데이터 구조 추가
-- **이유**: AI가 동적으로 생성하는 템플릿 저장, S3 정적 배포, 강화학습 파이프라인 구축
+### 2025-12-02: AI 템플릿 시스템 + 확장 섹션 컴포넌트
+- **이유**: Salon de Letter 수준의 30+ 섹션 지원, AI 동적 템플릿 저장, S3 정적 배포
 - **변경**:
-  - `design_templates` 테이블 추가 (AI 생성 템플릿 + 큐레이션 데이터)
-  - `invitations` 테이블에 `template_id`, `is_template_reuse`, `published_url` 추가
-  - `TemplateLabel`, `TrainingDataPoint` 타입 정의
-- **파일**: `src/lib/db/template-schema.ts`, `src/lib/db/invitation-schema.ts`
+  - Sprint 0: `design_templates` 테이블 추가, 큐레이션/강화학습 데이터 구조
+  - Sprint 1: `InvitationDesignData` v2 타입, 25개 ExtendedSectionType, 마이그레이션 유틸
+  - Sprint 2: 신규 섹션 컴포넌트 (VideoSection, InterviewSection, TimelineSection, DdaySection)
+- **파일**:
+  - `src/lib/db/template-schema.ts` - 템플릿 DB 스키마
+  - `src/lib/types/invitation-design.ts` - v2 데이터 타입
+  - `src/lib/utils/design-migration.ts` - 레거시 → v2 마이그레이션
+  - `src/components/invitation/sections/` - 신규 섹션 컴포넌트
 - **계획**: [AI 디자인 플랫폼 설계](./.claude/plans/streamed-percolating-wave.md)
 
 ### 2025-12-01: 인트로를 인라인 섹션으로 변경
