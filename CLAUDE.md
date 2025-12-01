@@ -20,3 +20,21 @@
 ## 참고 문서
 
 - [테마 시스템](./src/lib/themes/CLAUDE.md) - 청첩장 테마 템플릿
+
+## 변경 이력
+
+### 2025-12-02: AI 템플릿 시스템 데이터 구조 추가
+- **이유**: AI가 동적으로 생성하는 템플릿 저장, S3 정적 배포, 강화학습 파이프라인 구축
+- **변경**:
+  - `design_templates` 테이블 추가 (AI 생성 템플릿 + 큐레이션 데이터)
+  - `invitations` 테이블에 `template_id`, `is_template_reuse`, `published_url` 추가
+  - `TemplateLabel`, `TrainingDataPoint` 타입 정의
+- **파일**: `src/lib/db/template-schema.ts`, `src/lib/db/invitation-schema.ts`
+- **계획**: [AI 디자인 플랫폼 설계](./.claude/plans/streamed-percolating-wave.md)
+
+### 2025-12-01: 인트로를 인라인 섹션으로 변경
+- **이유**: Intro → Content 순서로 스크롤 가능한 단일 페이지 UX 요구
+- **변경**:
+  - IntroRenderer 오버레이 방식 제거, IntroPreview를 인라인 섹션으로 사용
+  - 모든 인트로 컴포넌트 fixed → absolute 변경 (모바일 퍼스트)
+- **파일**: `src/components/invitation/InvitationViewer.tsx`, `src/components/invitation/intros/*.tsx`
