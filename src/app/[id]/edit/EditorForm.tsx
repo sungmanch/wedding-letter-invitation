@@ -4,6 +4,7 @@ import * as React from 'react'
 import { Input } from '@/components/ui/input'
 import { useEditContext } from './EditContext'
 import { SectionEditor } from './components/SectionEditor'
+import { StyleEditor } from './components/StyleEditor'
 import {
   User,
   Calendar,
@@ -24,6 +25,7 @@ export function EditorForm() {
       <ParentsSection />
       <ContactSection />
       <AccountSection />
+      <StyleSettingsSection />
       <SectionManagementSection />
     </div>
   )
@@ -304,6 +306,26 @@ function AccountSection() {
           </div>
         </div>
       </div>
+    </section>
+  )
+}
+
+// Style Settings Section (스타일 설정)
+function StyleSettingsSection() {
+  const { colors, fonts, updateColors, updateFonts } = useEditContext()
+
+  return (
+    <section className="p-6">
+      <SectionHeader icon={Palette} title="스타일 설정" />
+      <p className="text-sm text-gray-500 mb-4">
+        청첩장의 색상과 폰트를 설정합니다.
+      </p>
+      <StyleEditor
+        colors={colors}
+        fonts={fonts}
+        onColorsChange={updateColors}
+        onFontsChange={updateFonts}
+      />
     </section>
   )
 }

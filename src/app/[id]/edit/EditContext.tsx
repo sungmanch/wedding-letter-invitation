@@ -6,6 +6,7 @@ import type { Invitation, InvitationDesign, InvitationPhoto, NewInvitation } fro
 import type { SectionSetting } from '@/lib/types/invitation-design'
 import { createDefaultDesignData, migrateDesignData } from '@/lib/utils/design-migration'
 import type { InvitationDesignData } from '@/lib/types/invitation-design'
+import type { ColorPalette, FontSet } from '@/lib/themes/schema'
 
 interface EditContextType {
   invitation: Invitation
@@ -21,6 +22,11 @@ interface EditContextType {
   sections: SectionSetting[]
   updateSections: (sections: SectionSetting[]) => void
   updateDesignData: (data: Partial<InvitationDesignData>) => void
+  // 스타일 관련
+  colors: ColorPalette
+  fonts: FontSet
+  updateColors: (colors: ColorPalette) => void
+  updateFonts: (fonts: FontSet) => void
 }
 
 const EditContext = React.createContext<EditContextType | null>(null)
@@ -143,6 +149,32 @@ export function EditContextProvider({
     })
   }, [])
 
+  // 색상 업데이트
+  const updateColors = React.useCallback((colors: ColorPalette) => {
+    setDesignData((prev) => {
+      const updated = {
+        ...prev,
+        globalStyles: { ...prev.globalStyles, colors },
+        meta: { ...prev.meta, updatedAt: new Date().toISOString() },
+      }
+      setPendingDesignChanges(updated)
+      return updated
+    })
+  }, [])
+
+  // 폰트 업데이트
+  const updateFonts = React.useCallback((fonts: FontSet) => {
+    setDesignData((prev) => {
+      const updated = {
+        ...prev,
+        globalStyles: { ...prev.globalStyles, fonts },
+        meta: { ...prev.meta, updatedAt: new Date().toISOString() },
+      }
+      setPendingDesignChanges(updated)
+      return updated
+    })
+  }, [])
+
   const value: EditContextType = {
     invitation,
     design,
@@ -156,6 +188,10 @@ export function EditContextProvider({
     sections: designData.sections,
     updateSections,
     updateDesignData,
+    colors: designData.globalStyles.colors,
+    fonts: designData.globalStyles.fonts,
+    updateColors,
+    updateFonts,
   }
 
   return (
