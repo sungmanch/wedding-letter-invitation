@@ -43,6 +43,7 @@ export type InteractionType =
 
 /** 섹션 타입 */
 export type SectionType =
+  // 기존 섹션
   | 'hero'
   | 'greeting'
   | 'calendar'
@@ -57,6 +58,21 @@ export type SectionType =
   | 'story'             // 스토리/타임라인
   | 'interview'         // 인터뷰 형식
   | 'quest'             // 게임 퀘스트
+  // 신규 섹션 (Salon de Letter 수준)
+  | 'loading'           // 로딩 화면
+  | 'quote'             // 글귀
+  | 'profile'           // 프로필형 소개
+  | 'parents-contact'   // 혼주 연락처
+  | 'timeline'          // 타임라인
+  | 'video'             // 영상
+  | 'transport'         // 교통수단
+  | 'notice'            // 안내사항
+  | 'announcement'      // 안내문
+  | 'flower-gift'       // 화환 보내기
+  | 'together-time'     // 함께한 시간
+  | 'dday'              // D-DAY 카운트다운
+  | 'guest-snap'        // 게스트스냅
+  | 'ending'            // 엔딩 크레딧
 
 /** 애니메이션 타입 */
 export type AnimationType =
