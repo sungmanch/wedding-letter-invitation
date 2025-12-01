@@ -1,8 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { updateInvitation } from '@/lib/actions/wedding'
+import { updateInvitation, updateInvitationDesign } from '@/lib/actions/wedding'
 import type { Invitation, InvitationDesign, InvitationPhoto, NewInvitation } from '@/lib/db/invitation-schema'
+import type { SectionSetting } from '@/lib/types/invitation-design'
+import { createDefaultDesignData, migrateDesignData } from '@/lib/utils/design-migration'
+import type { InvitationDesignData } from '@/lib/types/invitation-design'
 
 interface EditContextType {
   invitation: Invitation
@@ -13,6 +16,11 @@ interface EditContextType {
   isSaving: boolean
   hasChanges: boolean
   lastSaved: Date | null
+  // Design 관련 추가
+  designData: InvitationDesignData
+  sections: SectionSetting[]
+  updateSections: (sections: SectionSetting[]) => void
+  updateDesignData: (data: Partial<InvitationDesignData>) => void
 }
 
 const EditContext = React.createContext<EditContextType | null>(null)
@@ -31,12 +39,18 @@ export function EditContextProvider({
   children,
 }: EditContextProviderProps) {
   const [invitation, setInvitation] = React.useState<Invitation>(initialInvitation)
-  const [design] = React.useState<InvitationDesign | null | undefined>(initialDesign)
+  const [design, setDesign] = React.useState<InvitationDesign | null | undefined>(initialDesign)
   const [photos] = React.useState<InvitationPhoto[]>(initialPhotos)
   const [isSaving, setIsSaving] = React.useState(false)
   const [hasChanges, setHasChanges] = React.useState(false)
   const [lastSaved, setLastSaved] = React.useState<Date | null>(null)
   const [pendingChanges, setPendingChanges] = React.useState<Partial<NewInvitation>>({})
+
+  // Design data 상태 (v2 형식으로 마이그레이션)
+  const [designData, setDesignData] = React.useState<InvitationDesignData>(() =>
+    migrateDesignData(initialDesign?.designData)
+  )
+  const [pendingDesignChanges, setPendingDesignChanges] = React.useState<Partial<InvitationDesignData> | null>(null)
 
   // Debounced save effect
   React.useEffect(() => {
@@ -79,6 +93,56 @@ export function EditContextProvider({
     setPendingChanges((prev) => ({ ...prev, ...fields }))
   }, [])
 
+  // Design data 저장 effect
+  React.useEffect(() => {
+    if (!pendingDesignChanges || !design?.id) return
+
+    const timeoutId = setTimeout(async () => {
+      setIsSaving(true)
+      try {
+        const result = await updateInvitationDesign(design.id, { designData })
+        if (result.success && result.data) {
+          setDesign(result.data)
+          setLastSaved(new Date())
+          setHasChanges(true)
+        }
+      } catch (error) {
+        console.error('Failed to save design:', error)
+      } finally {
+        setIsSaving(false)
+        setPendingDesignChanges(null)
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [pendingDesignChanges, design?.id, designData])
+
+  // 섹션 업데이트
+  const updateSections = React.useCallback((sections: SectionSetting[]) => {
+    setDesignData((prev) => {
+      const updated = {
+        ...prev,
+        sections,
+        meta: { ...prev.meta, updatedAt: new Date().toISOString() },
+      }
+      setPendingDesignChanges(updated)
+      return updated
+    })
+  }, [])
+
+  // 디자인 데이터 부분 업데이트
+  const updateDesignData = React.useCallback((data: Partial<InvitationDesignData>) => {
+    setDesignData((prev) => {
+      const updated = {
+        ...prev,
+        ...data,
+        meta: { ...prev.meta, updatedAt: new Date().toISOString() },
+      }
+      setPendingDesignChanges(updated)
+      return updated
+    })
+  }, [])
+
   const value: EditContextType = {
     invitation,
     design,
@@ -88,6 +152,10 @@ export function EditContextProvider({
     isSaving,
     hasChanges,
     lastSaved,
+    designData,
+    sections: designData.sections,
+    updateSections,
+    updateDesignData,
   }
 
   return (

@@ -90,27 +90,16 @@ export const invitationDesigns = pgTable('invitation_designs', {
   //   decorations: ['floral_top', 'gold_border'],
   //   styleDescription: '디자인 설명 (한글)'
   // }
-  designData: jsonb('design_data').$type<{
-    theme: string
-    colors: {
-      primary: string
-      secondary: string
-      background: string
-      text: string
-    }
-    layout: 'classic' | 'modern' | 'minimal' | 'romantic' | 'traditional'
-    fonts: {
-      title: string
-      body: string
-    }
-    decorations: string[]
-    styleDescription: string
-  }>().notNull(),
+  // designData는 레거시 형식 또는 v2 형식 모두 지원
+  // - 레거시: { theme, colors, layout, fonts, decorations, styleDescription }
+  // - v2 (InvitationDesignData): { version: '2.0', template, globalStyles, sections, ... }
+  designData: jsonb('design_data').$type<Record<string, unknown>>().notNull(),
 
   generationBatch: integer('generation_batch').notNull(), // 1, 2, 3... (재생성 배치)
   isSelected: boolean('is_selected').default(false).notNull(),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }).enableRLS()
 
 // ============================================

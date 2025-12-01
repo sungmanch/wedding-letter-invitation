@@ -5,6 +5,24 @@ import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import type { InvitationDesign } from '@/lib/db/invitation-schema'
 
+// 레거시 디자인 데이터 타입
+interface LegacyDesignData {
+  theme: string
+  colors: {
+    primary: string
+    secondary: string
+    background: string
+    text: string
+  }
+  layout: string
+  fonts: {
+    title: string
+    body: string
+  }
+  decorations: string[]
+  styleDescription: string
+}
+
 interface DesignCardProps {
   design: InvitationDesign
   isSelected: boolean
@@ -13,7 +31,7 @@ interface DesignCardProps {
 }
 
 export function DesignCard({ design, isSelected, onSelect, className }: DesignCardProps) {
-  const { designData } = design
+  const designData = design.designData as unknown as LegacyDesignData
   const colors = designData.colors
 
   return (

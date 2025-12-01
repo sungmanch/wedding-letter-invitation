@@ -81,6 +81,48 @@ export async function updateInvitation(
   }
 }
 
+// Update invitation design
+export async function updateInvitationDesign(
+  designId: string,
+  data: { designData: unknown }
+): Promise<{ success: boolean; data?: InvitationDesign; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // Verify ownership through invitation
+    const existing = await db.query.invitationDesigns.findFirst({
+      where: eq(invitationDesigns.id, designId),
+      with: {
+        invitation: true,
+      },
+    })
+
+    if (!existing || existing.invitation?.userId !== user.id) {
+      return { success: false, error: '디자인을 찾을 수 없습니다' }
+    }
+
+    const [updated] = await db.update(invitationDesigns)
+      .set({
+        designData: data.designData as Record<string, unknown>,
+        updatedAt: new Date(),
+      })
+      .where(eq(invitationDesigns.id, designId))
+      .returning()
+
+    revalidatePath(`/${existing.invitationId}`)
+
+    return { success: true, data: updated }
+  } catch (error) {
+    console.error('Failed to update design:', error)
+    return { success: false, error: '디자인 수정에 실패했습니다' }
+  }
+}
+
 // Get an invitation by ID
 export async function getInvitation(
   invitationId: string

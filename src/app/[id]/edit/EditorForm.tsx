@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Input } from '@/components/ui/input'
 import { useEditContext } from './EditContext'
+import { SectionEditor } from './components/SectionEditor'
 import {
   User,
   Calendar,
@@ -11,6 +12,7 @@ import {
   Phone,
   CreditCard,
   Palette,
+  Layers,
 } from 'lucide-react'
 
 export function EditorForm() {
@@ -22,6 +24,7 @@ export function EditorForm() {
       <ParentsSection />
       <ContactSection />
       <AccountSection />
+      <SectionManagementSection />
     </div>
   )
 }
@@ -301,6 +304,21 @@ function AccountSection() {
           </div>
         </div>
       </div>
+    </section>
+  )
+}
+
+// Section Management Section (섹션 관리)
+function SectionManagementSection() {
+  const { sections, updateSections } = useEditContext()
+
+  return (
+    <section className="p-6">
+      <SectionHeader icon={Layers} title="섹션 관리" />
+      <p className="text-sm text-gray-500 mb-4">
+        드래그하여 순서를 변경하고, 토글로 표시/숨기기를 설정할 수 있습니다.
+      </p>
+      <SectionEditor sections={sections} onSectionsChange={updateSections} />
     </section>
   )
 }

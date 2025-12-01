@@ -632,7 +632,7 @@ export async function generateDesigns(
         .insert(invitationDesigns)
         .values({
           invitationId,
-          designData,
+          designData: designData as unknown as Record<string, unknown>,
           generationBatch: newBatch,
           isSelected: false,
         })
