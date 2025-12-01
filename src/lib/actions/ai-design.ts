@@ -46,6 +46,17 @@ export interface ScreenSection {
     | 'message' // 축하 메시지
     | 'rsvp' // 참석 여부
     | 'closing' // 마무리
+    // 확장 섹션
+    | 'video' // 영상
+    | 'interview' // 웨딩 인터뷰
+    | 'timeline' // 타임라인
+    | 'story' // 스토리 (timeline 별칭)
+    | 'dday' // D-DAY 카운트다운
+    | 'quote' // 글귀
+    | 'transport' // 교통수단
+    | 'notice' // 안내사항
+    | 'guest-snap' // 게스트스냅
+    | 'ending' // 엔딩 크레딧
   layout: 'fullscreen' | 'centered' | 'left-aligned' | 'right-aligned' | 'split'
   animation?: {
     type: 'fade' | 'slide-up' | 'slide-left' | 'scale' | 'parallax' | 'magic-scroll'
@@ -62,6 +73,7 @@ export interface ScreenSection {
     titleSize?: 'small' | 'medium' | 'large' | 'xlarge'
     showDecorations?: boolean
     decorationType?: 'floral' | 'botanical' | 'gold-frame' | 'minimal-line' | 'none'
+    themeSpecific?: Record<string, unknown>  // 섹션별 상세 설정
   }
 }
 

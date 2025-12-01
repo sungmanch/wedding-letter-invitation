@@ -7,7 +7,14 @@ import { Phone, Copy, Check, MapPin, Calendar, Clock } from 'lucide-react'
 import type { Invitation, InvitationDesign, InvitationPhoto } from '@/lib/db/invitation-schema'
 import type { ScreenStructure, ScreenSection } from '@/lib/actions/ai-design'
 import type { InvitationThemeData, ColorPalette, FontSet, IntroConfig } from '@/lib/themes/schema'
+import type {
+  VideoSettings,
+  InterviewSettings,
+  TimelineSettings,
+  DdaySettings,
+} from '@/lib/types/invitation-design'
 import { IntroPreview } from './intros'
+import { VideoSection, InterviewSection, TimelineSection, DdaySection } from './sections'
 
 interface InvitationViewerProps {
   invitation: Invitation
@@ -338,6 +345,82 @@ export function InvitationViewer({
           >
             <p className="text-xs text-gray-400">Made with 청모장</p>
           </footer>
+        )
+
+      case 'video':
+        return (
+          <VideoSection
+            key={section.id}
+            settings={{
+              source: 'youtube',
+              autoPlay: false,
+              muted: true,
+              loop: false,
+              showControls: true,
+              aspectRatio: '16:9',
+              ...(section.content?.themeSpecific as Partial<VideoSettings>),
+            }}
+            colors={colors}
+            fonts={fonts}
+            className={getAnimation()}
+          />
+        )
+
+      case 'interview':
+        return (
+          <InterviewSection
+            key={section.id}
+            settings={{
+              displayMode: 'card',
+              questions: [],
+              showBothAnswers: true,
+              ...(section.content?.themeSpecific as Partial<InterviewSettings>),
+            }}
+            groomName={invitation.groomName}
+            brideName={invitation.brideName}
+            colors={colors}
+            fonts={fonts}
+            className={getAnimation()}
+          />
+        )
+
+      case 'timeline':
+      case 'story':
+        return (
+          <TimelineSection
+            key={section.id}
+            settings={{
+              displayMode: 'vertical',
+              showConnectors: true,
+              connectorStyle: 'line',
+              events: [],
+              ...(section.content?.themeSpecific as Partial<TimelineSettings>),
+            }}
+            colors={colors}
+            fonts={fonts}
+            className={getAnimation()}
+          />
+        )
+
+      case 'dday':
+        return (
+          <DdaySection
+            key={section.id}
+            settings={{
+              displayMode: 'countdown',
+              showDays: true,
+              showHours: true,
+              showMinutes: true,
+              showSeconds: false,
+              style: 'flip',
+              ...(section.content?.themeSpecific as Partial<DdaySettings>),
+            }}
+            weddingDate={invitation.weddingDate}
+            weddingTime={invitation.weddingTime}
+            colors={colors}
+            fonts={fonts}
+            className={getAnimation()}
+          />
         )
 
       default:
