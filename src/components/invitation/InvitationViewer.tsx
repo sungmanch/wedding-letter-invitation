@@ -7,7 +7,7 @@ import { Phone, Copy, Check, MapPin, Calendar, Clock } from 'lucide-react'
 import type { Invitation, InvitationDesign, InvitationPhoto } from '@/lib/db/invitation-schema'
 import type { ScreenStructure, ScreenSection } from '@/lib/actions/ai-design'
 import type { InvitationThemeData, ColorPalette, FontSet, IntroConfig } from '@/lib/themes/schema'
-import { IntroRenderer, IntroPreview } from './intros'
+import { IntroPreview } from './intros'
 
 interface InvitationViewerProps {
   invitation: Invitation
@@ -46,9 +46,6 @@ export function InvitationViewer({
   isPreview = false,
   className,
 }: InvitationViewerProps) {
-  // 인트로 완료 상태
-  const [introCompleted, setIntroCompleted] = React.useState(false)
-
   // 새로운 ScreenStructure 형식인지 확인
   const designData = design?.designData
   const isNewFormat = isScreenStructure(designData)
@@ -92,11 +89,6 @@ export function InvitationViewer({
     snowEffect: false,
     petalEffect: false,
   }
-
-  // 인트로 완료 핸들러
-  const handleIntroComplete = React.useCallback(() => {
-    setIntroCompleted(true)
-  }, [])
 
   // 레거시 decorations
   const decorations = !isNewFormat
@@ -353,29 +345,12 @@ export function InvitationViewer({
     }
   }
 
-  // 인트로가 있고 아직 완료되지 않은 경우 (실제 뷰어에서만 인트로만 렌더링)
-  if (introConfig && !introCompleted && !isPreview) {
-    return (
-      <IntroRenderer
-        intro={introConfig}
-        colors={colors}
-        fonts={fonts}
-        groomName={invitation.groomName}
-        brideName={invitation.brideName}
-        weddingDate={invitation.weddingDate}
-        venueName={invitation.venueName}
-        images={introImages}
-        onComplete={handleIntroComplete}
-      />
-    )
-  }
-
-  // 프리뷰용 Intro 섹션 컴포넌트
-  // CSS 변수 --preview-screen-height가 있으면 사용, 없으면 100vh 사용
-  const PreviewIntroSection = introConfig ? (
+  // Intro 섹션 컴포넌트 (프리뷰/실제 뷰어 공통)
+  // 스크롤 가능한 인라인 섹션으로 표시
+  const IntroSection = introConfig ? (
     <div
       className="relative w-full"
-      style={{ height: 'var(--preview-screen-height, 100vh)' }}
+      style={{ height: 'var(--preview-screen-height, 100vh)', minHeight: '100vh' }}
     >
       <IntroPreview
         intro={introConfig}
@@ -402,8 +377,8 @@ export function InvitationViewer({
             {/* 꽃잎 효과 - CSS 애니메이션으로 구현 가능 */}
           </div>
         )}
-        {/* 프리뷰 모드에서는 Intro를 첫 섹션으로 표시 */}
-        {isPreview && PreviewIntroSection}
+        {/* Intro를 첫 섹션으로 표시 */}
+        {IntroSection}
         {screenStructure.sections.map(renderSection)}
       </div>
     )
@@ -415,8 +390,8 @@ export function InvitationViewer({
       className={cn('min-h-screen', className)}
       style={{ backgroundColor: colors.background }}
     >
-      {/* 프리뷰 모드에서는 Intro를 첫 섹션으로 표시 */}
-      {isPreview && PreviewIntroSection}
+      {/* Intro를 첫 섹션으로 표시 */}
+      {IntroSection}
 
       {/* Hero Section */}
       <section className="relative py-16 px-6 text-center">
