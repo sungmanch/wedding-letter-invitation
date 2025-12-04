@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { SUPER_EDITOR_SYSTEM_PROMPT } from '@/lib/super-editor/prompts'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
@@ -40,10 +40,11 @@ interface ChatResponse {
 }
 
 // ============================================
-// Anthropic Client
+// Google AI Client
 // ============================================
 
-const anthropic = new Anthropic()
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
+const MODEL = 'gemini-3-pro-preview'
 
 // ============================================
 // Helper Functions
@@ -149,52 +150,55 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 대화 히스토리 구성
-    const messages: Anthropic.MessageParam[] = []
+    // Gemini 모델 초기화
+    const model = genAI.getGenerativeModel({ model: MODEL })
+
+    // 대화 히스토리 구성 (Gemini 형식)
+    const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = []
 
     // 이전 대화 히스토리 추가
     if (body.history && body.history.length > 0) {
       for (const msg of body.history) {
-        messages.push({
-          role: msg.role,
-          content: msg.content,
+        contents.push({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }],
         })
       }
     }
 
-    // 현재 사용자 메시지 추가
-    messages.push({
+    // 현재 사용자 메시지 추가 (시스템 프롬프트 포함)
+    const userMessage = buildUserMessage(body)
+    const fullPrompt = contents.length === 0
+      ? `${SUPER_EDITOR_SYSTEM_PROMPT}\n\n${userMessage}`
+      : userMessage
+
+    contents.push({
       role: 'user',
-      content: buildUserMessage(body),
+      parts: [{ text: fullPrompt }],
     })
 
-    // Anthropic API 호출
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      system: SUPER_EDITOR_SYSTEM_PROMPT,
-      messages,
+    // Gemini API 호출
+    const result = await model.generateContent({
+      contents,
+      generationConfig: {
+        maxOutputTokens: 8192,
+        temperature: 0.7,
+      },
     })
 
-    // 응답 파싱
-    const textContent = response.content.find((c): c is Anthropic.TextBlock => c.type === 'text')
-    if (!textContent) {
+    const response = await result.response
+    const text = response.text()
+
+    if (!text) {
       throw new Error('AI 응답을 처리할 수 없습니다.')
     }
 
-    const parsed = parseAIResponse(textContent.text)
+    const parsed = parseAIResponse(text)
 
     return NextResponse.json(parsed)
 
   } catch (error: unknown) {
     console.error('Super Editor Chat API Error:', error)
-
-    if (error instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: `AI 서비스 오류: ${error.message}` },
-        { status: error.status || 500 }
-      )
-    }
 
     return NextResponse.json(
       { error: '요청을 처리하는 중 오류가 발생했습니다.' },

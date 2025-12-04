@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { EditorSchema } from '@/lib/super-editor/schema/editor'
@@ -25,10 +25,11 @@ interface Suggestion {
 }
 
 // ============================================
-// Anthropic Client
+// Google AI Client
 // ============================================
 
-const anthropic = new Anthropic()
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
+const MODEL = 'gemini-3-pro-preview'
 
 // ============================================
 // System Prompt for Suggestions
@@ -185,38 +186,36 @@ export async function POST(request: NextRequest) {
   try {
     const body: SuggestionsRequest = await request.json()
 
-    // Anthropic API 호출
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2048,
-      system: SUGGESTIONS_SYSTEM_PROMPT,
-      messages: [
+    // Gemini 모델 초기화
+    const model = genAI.getGenerativeModel({ model: MODEL })
+
+    // Gemini API 호출
+    const result = await model.generateContent({
+      contents: [
         {
           role: 'user',
-          content: buildAnalysisMessage(body),
+          parts: [{ text: `${SUGGESTIONS_SYSTEM_PROMPT}\n\n${buildAnalysisMessage(body)}` }],
         },
       ],
+      generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.7,
+      },
     })
 
-    // 응답 파싱
-    const textContent = response.content.find((c): c is Anthropic.TextBlock => c.type === 'text')
-    if (!textContent) {
+    const response = await result.response
+    const text = response.text()
+
+    if (!text) {
       throw new Error('AI 응답을 처리할 수 없습니다.')
     }
 
-    const suggestions = parseResponse(textContent.text)
+    const suggestions = parseResponse(text)
 
     return NextResponse.json({ suggestions })
 
   } catch (error: unknown) {
     console.error('Super Editor Suggestions API Error:', error)
-
-    if (error instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: `AI 서비스 오류: ${error.message}`, suggestions: [] },
-        { status: error.status || 500 }
-      )
-    }
 
     return NextResponse.json(
       { error: '요청을 처리하는 중 오류가 발생했습니다.', suggestions: [] },
