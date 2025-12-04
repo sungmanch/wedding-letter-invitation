@@ -220,9 +220,9 @@ function TestPageContent() {
                   </span>
                 )}
               </div>
-              {state.layout && (
+              {state.layout?.meta && (
                 <span className="text-xs text-gray-400">
-                  {state.layout.meta.category} · {state.layout.meta.name}
+                  {state.layout.meta.category || '미지정'} · {state.layout.meta.name || '새 템플릿'}
                 </span>
               )}
             </div>

@@ -62,6 +62,42 @@ export interface UseAIChatReturn {
 }
 
 // ============================================
+// Schema Validation Helpers
+// ============================================
+
+function isValidLayout(layout: unknown): layout is LayoutSchema {
+  if (!layout || typeof layout !== 'object') return false
+  const l = layout as Record<string, unknown>
+  return (
+    l.meta !== undefined &&
+    typeof l.meta === 'object' &&
+    (l.meta as Record<string, unknown>).name !== undefined &&
+    Array.isArray(l.screens)
+  )
+}
+
+function isValidStyle(style: unknown): style is StyleSchema {
+  if (!style || typeof style !== 'object') return false
+  const s = style as Record<string, unknown>
+  return (
+    s.meta !== undefined &&
+    typeof s.meta === 'object' &&
+    s.theme !== undefined &&
+    typeof s.theme === 'object'
+  )
+}
+
+function isValidEditor(editor: unknown): editor is EditorSchema {
+  if (!editor || typeof editor !== 'object') return false
+  const e = editor as Record<string, unknown>
+  return (
+    e.meta !== undefined &&
+    typeof e.meta === 'object' &&
+    Array.isArray(e.sections)
+  )
+}
+
+// ============================================
 // Hook Implementation
 // ============================================
 
@@ -149,6 +185,28 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
 
     const changes = message.changes
 
+    // 변경사항 적용할 새 스키마 결정
+    const newLayout = changes.layout || state.layout
+    const newStyle = changes.style || state.style
+    const newEditor = changes.editor || state.editor
+
+    // 스키마 유효성 검증
+    if (newLayout && !isValidLayout(newLayout)) {
+      console.error('Invalid layout schema from AI:', newLayout)
+      options.onError?.(new Error('AI가 생성한 레이아웃 스키마가 유효하지 않습니다.'))
+      return
+    }
+    if (newStyle && !isValidStyle(newStyle)) {
+      console.error('Invalid style schema from AI:', newStyle)
+      options.onError?.(new Error('AI가 생성한 스타일 스키마가 유효하지 않습니다.'))
+      return
+    }
+    if (newEditor && !isValidEditor(newEditor)) {
+      console.error('Invalid editor schema from AI:', newEditor)
+      options.onError?.(new Error('AI가 생성한 에디터 스키마가 유효하지 않습니다.'))
+      return
+    }
+
     // 현재 상태 저장 (되돌리기용)
     previousStates.current.set(messageId, {
       layout: state.layout ?? undefined,
@@ -157,10 +215,6 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
     })
 
     // 변경사항 적용
-    const newLayout = changes.layout || state.layout
-    const newStyle = changes.style || state.style
-    const newEditor = changes.editor || state.editor
-
     if (newLayout && newStyle && newEditor) {
       setTemplate(newLayout, newStyle, newEditor)
     }
