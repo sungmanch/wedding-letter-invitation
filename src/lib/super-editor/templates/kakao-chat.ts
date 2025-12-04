@@ -852,12 +852,12 @@ export const kakaoEditorSchema: EditorSchema = {
     updatedAt: '2024-01-01T00:00:00Z',
   },
   sections: [
-    // 커플 정보
+    // 1. 신랑 정보 + 메시지 (화면 순서: 헤더 → 신랑 메시지)
     {
-      id: 'couple',
-      title: '신랑·신부 정보',
-      description: '결혼하시는 두 분의 정보를 입력해주세요',
-      icon: '💑',
+      id: 'groom',
+      title: '신랑 정보',
+      description: '신랑 이름과 프로필, 인사 메시지를 입력해주세요',
+      icon: '🤵',
       order: 0,
       fields: [
         {
@@ -872,11 +872,31 @@ export const kakaoEditorSchema: EditorSchema = {
         {
           id: 'groom-profile',
           type: 'image',
-          label: '신랑 프로필 사진',
+          label: '프로필 사진',
           dataPath: 'photos.groomProfile',
           description: '카카오톡 프로필처럼 보이는 사진',
           order: 1,
         },
+        {
+          id: 'groom-message',
+          type: 'textarea',
+          label: '인사 메시지',
+          dataPath: 'greeting.groomMessage',
+          placeholder: '안녕하세요! 드디어 저희가 결혼합니다 😊',
+          description: '신랑이 보내는 첫 번째 메시지',
+          order: 2,
+        },
+      ],
+    },
+
+    // 2. 신부 정보 + 메시지 (화면 순서: 신부 메시지)
+    {
+      id: 'bride',
+      title: '신부 정보',
+      description: '신부 이름과 프로필, 인사 메시지를 입력해주세요',
+      icon: '👰',
+      order: 1,
+      fields: [
         {
           id: 'bride-name',
           type: 'text',
@@ -884,26 +904,55 @@ export const kakaoEditorSchema: EditorSchema = {
           dataPath: 'couple.bride.name',
           placeholder: '김영희',
           required: true,
-          order: 2,
+          order: 0,
         },
         {
           id: 'bride-profile',
           type: 'image',
-          label: '신부 프로필 사진',
+          label: '프로필 사진',
           dataPath: 'photos.brideProfile',
           description: '카카오톡 프로필처럼 보이는 사진',
-          order: 3,
+          order: 1,
+        },
+        {
+          id: 'bride-message',
+          type: 'textarea',
+          label: '인사 메시지',
+          dataPath: 'greeting.brideMessage',
+          placeholder: '오랜 시간 함께해온 우리, 이제 평생을 약속하려 합니다 💕',
+          description: '신부가 보내는 답장 메시지',
+          order: 2,
         },
       ],
     },
 
-    // 예식 정보
+    // 3. 메인 사진 (화면 순서: 공유된 이미지)
+    {
+      id: 'main-photo',
+      title: '메인 사진',
+      description: '채팅방에서 공유되는 대표 웨딩 사진',
+      icon: '📷',
+      order: 2,
+      fields: [
+        {
+          id: 'main-photo',
+          type: 'image',
+          label: '메인 사진',
+          dataPath: 'photos.main',
+          description: '세로 비율(3:4) 사진을 권장합니다',
+          required: true,
+          order: 0,
+        },
+      ],
+    },
+
+    // 4. 예식 정보 (화면 순서: 결혼해요 메시지 → 일시/장소)
     {
       id: 'wedding',
-      title: '예식 정보',
-      description: '예식 일시와 장소를 입력해주세요',
+      title: '예식 일시',
+      description: '예식 날짜와 시간을 입력해주세요',
       icon: '💒',
-      order: 1,
+      order: 3,
       fields: [
         {
           id: 'wedding-date',
@@ -942,13 +991,13 @@ export const kakaoEditorSchema: EditorSchema = {
       ],
     },
 
-    // 장소 정보
+    // 5. 예식장 정보 (화면 순서: 지도 카드)
     {
       id: 'venue',
       title: '예식장 정보',
-      description: '예식장 정보를 입력해주세요',
+      description: '예식장 위치 정보를 입력해주세요',
       icon: '📍',
-      order: 2,
+      order: 4,
       fields: [
         {
           id: 'venue-name',
@@ -1013,72 +1062,34 @@ export const kakaoEditorSchema: EditorSchema = {
       ],
     },
 
-    // 인사말 (채팅 메시지)
+    // 6. 갤러리 (화면 순서: 우리의 사진)
     {
-      id: 'greeting',
-      title: '채팅 메시지',
-      description: '카카오톡 메시지처럼 보이는 인사말을 작성해주세요',
-      icon: '💬',
-      order: 3,
-      fields: [
-        {
-          id: 'groom-message',
-          type: 'textarea',
-          label: '신랑 메시지',
-          dataPath: 'greeting.groomMessage',
-          placeholder: '안녕하세요! 드디어 저희가 결혼합니다 😊',
-          description: '신랑이 보내는 첫 번째 메시지',
-          order: 0,
-        },
-        {
-          id: 'bride-message',
-          type: 'textarea',
-          label: '신부 메시지',
-          dataPath: 'greeting.brideMessage',
-          placeholder: '오랜 시간 함께해온 우리, 이제 평생을 약속하려 합니다 💕',
-          description: '신부가 보내는 답장 메시지',
-          order: 1,
-        },
-      ],
-    },
-
-    // 사진
-    {
-      id: 'photos',
-      title: '사진',
-      description: '청첩장에 들어갈 사진을 등록해주세요',
+      id: 'gallery',
+      title: '갤러리',
+      description: '더 많은 웨딩 사진을 추가해주세요',
       icon: '📸',
-      order: 4,
+      order: 5,
       fields: [
-        {
-          id: 'main-photo',
-          type: 'image',
-          label: '메인 사진',
-          dataPath: 'photos.main',
-          description: '채팅방에서 공유되는 메인 웨딩 사진',
-          required: true,
-          order: 0,
-        },
         {
           id: 'gallery',
           type: 'imageList',
-          label: '갤러리',
+          label: '갤러리 사진',
           dataPath: 'photos.gallery',
-          description: '더 많은 사진들 (최대 9장 권장)',
+          description: '최대 9장 권장',
           maxItems: 9,
           sortable: true,
-          order: 1,
+          order: 0,
         },
       ],
     },
 
-    // 계좌 정보
+    // 7. 계좌 정보 (화면 순서: 마음 전하기 버튼)
     {
       id: 'accounts',
       title: '마음 전하기',
       description: '축의금 계좌 정보를 입력해주세요',
       icon: '💰',
-      order: 5,
+      order: 6,
       collapsed: true,
       fields: [
         {
