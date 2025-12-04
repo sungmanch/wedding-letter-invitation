@@ -69,12 +69,27 @@ function getByPath(obj: Record<string, unknown>, path: string): unknown {
 function toCssString(styles: CSSProperties | undefined): string {
   if (!styles) return ''
 
+  const unitlessProps = [
+    'opacity',
+    'z-index',
+    'flex',
+    'flex-grow',
+    'flex-shrink',
+    'order',
+    'line-height',
+    'font-weight',
+    'columns',
+    'column-count',
+    'fill-opacity',
+    'stroke-opacity',
+    'stroke-width',
+  ]
+
   return Object.entries(styles)
     .map(([key, value]) => {
       const kebabKey = key.replace(/([A-Z])/g, '-$1').toLowerCase()
       const cssValue =
-        typeof value === 'number' &&
-        !['opacity', 'z-index', 'flex', 'flex-grow', 'flex-shrink', 'order', 'line-height'].includes(kebabKey)
+        typeof value === 'number' && !unitlessProps.includes(kebabKey)
           ? `${value}px`
           : value
       return `${kebabKey}: ${cssValue}`

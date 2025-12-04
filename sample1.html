@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#B2C7D9" />
+    <title>카카오톡 채팅 청첩장</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Reset & Base */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        line-height: 1.5;
+        color: #1f2937;
+        background-color: #b2c7d9;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+
+      /* 모바일 컨테이너 - 최대 너비 제한 */
+      .mobile-container {
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* 전체 화면 섹션 (인트로용) */
+      .fullscreen-section {
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* 이미지 */
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* 버튼 */
+      button {
+        font-family: inherit;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      /* 스크롤바 숨김 */
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* 텍스트 줄바꿈 */
+      .preserve-whitespace {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mobile-container">
+      <section id="chat-main" class="" data-screen-type="content">
+        <div style="display: flex; flex-direction: column; height: 100%; background-color: #b2c7d9">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              padding: 12px 16px;
+              background-color: #b2c7d9;
+              border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            "
+          >
+            <span style="font-size: 20px; margin-right: 16px; color: #333">←</span>
+            <h1 style="font-size: 17px; font-weight: 600px; color: #333; flex: 1">
+              김민준 ♥ 이서연
+            </h1>
+            <span style="font-size: 14px; color: #888; margin-right: 12px">2</span
+            ><span style="font-size: 20px; color: #333">☰</span>
+          </div>
+          <div
+            style="
+              overflow-x: hidden;
+              overflow-y: auto;
+              -webkit-overflow-scrolling: touch;
+              flex: 1;
+              padding: 16px;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+            "
+          >
+            <div style="display: flex; justify-content: center; margin-bottom: 8px">
+              <span
+                style="
+                  font-size: 12px;
+                  color: #fff;
+                  background-color: rgba(0, 0, 0, 0.25);
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                "
+                >2025년 5월 15일 토요일</span
+              >
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px">
+              <img
+                src="https://picsum.photos/seed/groom/200/200"
+                alt=""
+                style="
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 8px;
+                  object-fit: cover;
+                  flex-shrink: 0;
+                "
+              />
+              <div style="display: flex; flex-direction: column; gap: 4px; max-width: 70%">
+                <span style="font-size: 12px; color: #333; margin-bottom: 2px">김민준</span>
+                <div
+                  style="
+                    background-color: #fff;
+                    padding: 10px 14px;
+                    border-radius: 4px 16px 16px 16px;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                  "
+                >
+                  <p style="font-size: 14px; line-height: 1.5; color: #333; white-space: pre-wrap">
+                    안녕하세요! 드디어 저희가 결혼합니다 😊 오랫동안 함께해온 저희의 새로운 시작을
+                    함께해주세요.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px">
+              <img
+                src="https://picsum.photos/seed/bride/200/200"
+                alt=""
+                style="
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 8px;
+                  object-fit: cover;
+                  flex-shrink: 0;
+                "
+              />
+              <div style="display: flex; flex-direction: column; gap: 4px; max-width: 70%">
+                <span style="font-size: 12px; color: #333; margin-bottom: 2px">이서연</span>
+                <div
+                  style="
+                    background-color: #fff;
+                    padding: 10px 14px;
+                    border-radius: 4px 16px 16px 16px;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                  "
+                >
+                  <p style="font-size: 14px; line-height: 1.5; color: #333; white-space: pre-wrap">
+                    소중한 분들을 모시고 저희의 사랑을 약속하려 합니다 💕 바쁘시더라도 와주시면 정말
+                    감사하겠습니다!
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              style="display: flex; justify-content: center; margin-top: 8px; margin-bottom: 8px"
+            >
+              <div
+                style="
+                  background-color: #fff;
+                  padding: 4px;
+                  border-radius: 16px;
+                  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                  max-width: 80%;
+                "
+              >
+                <img
+                  src="https://picsum.photos/seed/wedding-main/400/533"
+                  alt=""
+                  style="width: 100%; object-fit: cover; border-radius: 12px"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end">
+              <div
+                style="
+                  background-color: #fee500;
+                  padding: 10px 14px;
+                  border-radius: 16px 16px 4px 16px;
+                  max-width: 70%;
+                "
+              >
+                <p style="font-size: 14px; line-height: 1.5; color: #333; font-weight: 500px">
+                  우리 결혼해요! 💍
+                </p>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end">
+              <div
+                style="
+                  background-color: #fee500;
+                  padding: 10px 14px;
+                  border-radius: 16px 16px 4px 16px;
+                  max-width: 70%;
+                "
+              >
+                <p style="font-size: 14px; line-height: 1.5; color: #333">
+                  2025년 5월 15일 토요일 오후 2시
+                </p>
+                <p style="font-size: 14px; line-height: 1.5; color: #333; margin-top: 4px">
+                  더채플 앳 청담 그랜드볼룸
+                </p>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 4px">
+              <div
+                style="
+                  background-color: #fff;
+                  border-radius: 16px;
+                  overflow: hidden;
+                  max-width: 80%;
+                  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                "
+              >
+                <div
+                  style="
+                    height: 100px;
+                    background-color: #f3f4f6;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <span style="font-size: 32px">📍</span>
+                </div>
+                <div style="padding: 12px 14px">
+                  <p style="font-size: 14px; font-weight: 600px; color: #333">더채플 앳 청담</p>
+                  <p style="font-size: 13px; color: #555; margin-top: 2px">그랜드볼룸</p>
+                  <p style="font-size: 12px; color: #888; margin-top: 4px; white-space: pre-wrap">
+                    서울시 강남구 청담동 123-45
+                  </p>
+                </div>
+                <div style="display: flex; border-top: 1px solid #e5e7eb">
+                  <button
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 12px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                      border: none;
+                      flex: 1;
+                      font-size: 13px;
+                      font-weight: 500px;
+                      color: #333;
+                      background-color: #fff;
+                      border-right: 1px solid #e5e7eb;
+                    "
+                    onclick=""
+                  >
+                    카카오맵</button
+                  ><button
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 12px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                      border: none;
+                      flex: 1;
+                      font-size: 13px;
+                      font-weight: 500px;
+                      color: #333;
+                      background-color: #fff;
+                    "
+                    onclick=""
+                  >
+                    네이버지도
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 16px">
+              <div style="display: flex; justify-content: center; margin-bottom: 8px">
+                <span
+                  style="
+                    font-size: 12px;
+                    color: #fff;
+                    background-color: rgba(0, 0, 0, 0.25);
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                  "
+                  >📸 우리의 사진</span
+                >
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(3, 1fr);
+                  gap: 4px;
+                  border-radius: 12px;
+                  overflow: hidden;
+                "
+              >
+                <img
+                  src="https://picsum.photos/seed/w1/300/300"
+                  alt=""
+                  style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px"
+                  loading="lazy"
+                /><img
+                  src="https://picsum.photos/seed/w2/300/300"
+                  alt=""
+                  style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px"
+                  loading="lazy"
+                /><img
+                  src="https://picsum.photos/seed/w3/300/300"
+                  alt=""
+                  style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px"
+                  loading="lazy"
+                /><img
+                  src="https://picsum.photos/seed/w4/300/300"
+                  alt=""
+                  style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px"
+                  loading="lazy"
+                /><img
+                  src="https://picsum.photos/seed/w5/300/300"
+                  alt=""
+                  style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px"
+                  loading="lazy"
+                /><img
+                  src="https://picsum.photos/seed/w6/300/300"
+                  alt=""
+                  style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px">
+              <button
+                style="
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 14px;
+                  border-radius: 12px;
+                  cursor: pointer;
+                  border: none;
+                  width: 100%;
+                  background-color: #fff;
+                  font-size: 14px;
+                  font-weight: 500px;
+                  color: #333;
+                  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                "
+                onclick=""
+              >
+                💰 신랑측 마음 전하기</button
+              ><button
+                style="
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 14px;
+                  border-radius: 12px;
+                  cursor: pointer;
+                  border: none;
+                  width: 100%;
+                  background-color: #fff;
+                  font-size: 14px;
+                  font-weight: 500px;
+                  color: #333;
+                  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                "
+                onclick=""
+              >
+                💰 신부측 마음 전하기
+              </button>
+            </div>
+            <div style="margin-top: 16px">
+              <button
+                style="
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 14px;
+                  border-radius: 12px;
+                  cursor: pointer;
+                  border: none;
+                  width: 100%;
+                  background-color: #fee500;
+                  font-size: 14px;
+                  font-weight: 600px;
+                  color: #333;
+                "
+                onclick=""
+              >
+                ✅ 참석 여부 전달하기
+              </button>
+            </div>
+            <div style="height: 40px; flex-shrink: 0"></div>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              padding: 8px 12px;
+              background-color: #fff;
+              border-top: 1px solid #e5e7eb;
+              gap: 8px;
+            "
+          >
+            <span
+              style="
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #f3f4f6;
+                border-radius: 50%;
+                font-size: 20px;
+                color: #666;
+              "
+              >+</span
+            >
+            <div
+              style="flex: 1; padding: 10px 16px; background-color: #f3f4f6; border-radius: 20px"
+            >
+              <span style="font-size: 14px; color: #9ca3af">축하 메시지를 남겨주세요</span>
+            </div>
+            <span
+              style="
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #fee500;
+                border-radius: 50%;
+                font-size: 16px;
+                color: #333;
+              "
+              >➤</span
+            >
+          </div>
+        </div>
+      </section>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // 이미지 지연 로딩
+        if ('loading' in HTMLImageElement.prototype) {
+          document.querySelectorAll('img[loading="lazy"]').forEach((img) => {
+            img.src = img.dataset.src || img.src
+          })
+        }
+      })
+    </script>
+  </body>
+</html>
