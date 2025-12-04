@@ -171,7 +171,7 @@ function TestPageContent() {
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
