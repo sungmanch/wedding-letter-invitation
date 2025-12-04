@@ -125,16 +125,13 @@ export const kakaoLayoutSchema: LayoutSchema = {
                 children: [
                   {
                     id: 'groom-avatar',
-                    type: 'image',
+                    type: 'avatar',
                     props: {
                       src: '{{photos.groomProfile}}',
-                      aspectRatio: '1:1',
-                      objectFit: 'cover',
+                      size: 40,
+                      shape: 'rounded',
                     },
                     style: {
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
                       flexShrink: 0,
                     },
                   },
@@ -168,7 +165,7 @@ export const kakaoLayoutSchema: LayoutSchema = {
                             id: 'groom-text-1',
                             type: 'text',
                             props: { content: '{{greeting.groomMessage}}', as: 'p' },
-                            style: { fontSize: 14, lineHeight: 1.5, color: '#333' },
+                            style: { fontSize: 14, lineHeight: 1.5, color: '#333', whiteSpace: 'pre-wrap' },
                           },
                         ],
                       },
@@ -189,16 +186,13 @@ export const kakaoLayoutSchema: LayoutSchema = {
                 children: [
                   {
                     id: 'bride-avatar',
-                    type: 'image',
+                    type: 'avatar',
                     props: {
                       src: '{{photos.brideProfile}}',
-                      aspectRatio: '1:1',
-                      objectFit: 'cover',
+                      size: 40,
+                      shape: 'rounded',
                     },
                     style: {
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
                       flexShrink: 0,
                     },
                   },
@@ -232,7 +226,7 @@ export const kakaoLayoutSchema: LayoutSchema = {
                             id: 'bride-text-1',
                             type: 'text',
                             props: { content: '{{greeting.brideMessage}}', as: 'p' },
-                            style: { fontSize: 14, lineHeight: 1.5, color: '#333' },
+                            style: { fontSize: 14, lineHeight: 1.5, color: '#333', whiteSpace: 'pre-wrap' },
                           },
                         ],
                       },
@@ -364,7 +358,7 @@ export const kakaoLayoutSchema: LayoutSchema = {
                       backgroundColor: '#fff',
                       borderRadius: 16,
                       overflow: 'hidden',
-                      maxWidth: '70%',
+                      maxWidth: '80%',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                     },
                     children: [
@@ -372,8 +366,8 @@ export const kakaoLayoutSchema: LayoutSchema = {
                         id: 'map-preview',
                         type: 'container',
                         style: {
-                          height: 120,
-                          backgroundColor: '#e5e7eb',
+                          height: 100,
+                          backgroundColor: '#f3f4f6',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -382,8 +376,8 @@ export const kakaoLayoutSchema: LayoutSchema = {
                           {
                             id: 'map-icon',
                             type: 'text',
-                            props: { content: '📍 지도 보기', as: 'span' },
-                            style: { fontSize: 14, color: '#666' },
+                            props: { content: '📍', as: 'span' },
+                            style: { fontSize: 32 },
                           },
                         ],
                       },
@@ -391,7 +385,7 @@ export const kakaoLayoutSchema: LayoutSchema = {
                         id: 'map-info',
                         type: 'container',
                         style: {
-                          padding: '10px 14px',
+                          padding: '12px 14px',
                         },
                         children: [
                           {
@@ -401,10 +395,64 @@ export const kakaoLayoutSchema: LayoutSchema = {
                             style: { fontSize: 14, fontWeight: 600, color: '#333' },
                           },
                           {
+                            id: 'venue-hall',
+                            type: 'text',
+                            props: { content: '{{venue.hall}}', as: 'p' },
+                            style: { fontSize: 13, color: '#555', marginTop: 2 },
+                          },
+                          {
                             id: 'venue-address',
                             type: 'text',
                             props: { content: '{{venue.address}}', as: 'p' },
-                            style: { fontSize: 12, color: '#888', marginTop: 2 },
+                            style: { fontSize: 12, color: '#888', marginTop: 4, whiteSpace: 'pre-wrap' },
+                          },
+                        ],
+                      },
+                      // 지도 버튼들
+                      {
+                        id: 'map-buttons',
+                        type: 'container',
+                        style: {
+                          display: 'flex',
+                          borderTop: '1px solid #e5e7eb',
+                        },
+                        children: [
+                          {
+                            id: 'kakao-map-btn',
+                            type: 'button',
+                            props: {
+                              label: '카카오맵',
+                              href: '{{venue.kakaoMapUrl}}',
+                            },
+                            style: {
+                              flex: 1,
+                              padding: '12px',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: '#333',
+                              backgroundColor: '#fff',
+                              border: 'none',
+                              borderRight: '1px solid #e5e7eb',
+                              cursor: 'pointer',
+                            },
+                          },
+                          {
+                            id: 'naver-map-btn',
+                            type: 'button',
+                            props: {
+                              label: '네이버지도',
+                              href: '{{venue.naverMapUrl}}',
+                            },
+                            style: {
+                              flex: 1,
+                              padding: '12px',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: '#333',
+                              backgroundColor: '#fff',
+                              border: 'none',
+                              cursor: 'pointer',
+                            },
                           },
                         ],
                       },
@@ -944,6 +992,24 @@ export const kakaoEditorSchema: EditorSchema = {
           placeholder: '126.9780',
           order: 4,
         },
+        {
+          id: 'kakao-map-url',
+          type: 'text',
+          label: '카카오맵 URL',
+          dataPath: 'venue.kakaoMapUrl',
+          placeholder: 'https://map.kakao.com/...',
+          description: '카카오맵에서 장소 검색 후 공유 링크를 복사해주세요',
+          order: 5,
+        },
+        {
+          id: 'naver-map-url',
+          type: 'text',
+          label: '네이버지도 URL',
+          dataPath: 'venue.naverMapUrl',
+          placeholder: 'https://map.naver.com/...',
+          description: '네이버지도에서 장소 검색 후 공유 링크를 복사해주세요',
+          order: 6,
+        },
       ],
     },
 
@@ -1089,6 +1155,8 @@ export const kakaoSampleData = {
     address: '서울시 강남구 청담동 123-45',
     lat: 37.5234,
     lng: 127.0456,
+    kakaoMapUrl: 'https://map.kakao.com/link/map/더채플앳청담,37.5234,127.0456',
+    naverMapUrl: 'https://map.naver.com/v5/search/더채플앳청담',
   },
   greeting: {
     groomMessage: '안녕하세요! 드디어 저희가 결혼합니다 😊\n오랫동안 함께해온 저희의 새로운 시작을 함께해주세요.',
