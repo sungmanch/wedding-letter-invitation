@@ -13,6 +13,7 @@ import type { EditorSchema } from '../schema/editor'
 // ============================================
 
 export type MessageRole = 'user' | 'assistant' | 'system'
+export type EditMode = 'style' | 'layout' | 'editor' | 'all'
 
 export interface ChatMessage {
   id: string
@@ -53,6 +54,8 @@ export interface UseAIChatReturn {
   messages: ChatMessage[]
   isLoading: boolean
   suggestions: AISuggestion[]
+  editMode: EditMode
+  setEditMode: (mode: EditMode) => void
   sendMessage: (content: string) => Promise<void>
   applyChanges: (messageId: string) => void
   revertChanges: (messageId: string) => void
@@ -106,6 +109,7 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([])
+  const [editMode, setEditMode] = useState<EditMode>('style')
 
   // 변경 전 상태 저장 (되돌리기용)
   const previousStates = useRef<Map<string, {
@@ -129,17 +133,29 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
     setIsLoading(true)
 
     try {
+      // editMode에 따라 필요한 컨텍스트만 전송
+      const requestBody: Record<string, unknown> = {
+        message: content,
+        editMode,
+        history: messages.slice(-6), // 최근 6개 메시지만 (컨텍스트 절약)
+      }
+
+      // 모드별로 필요한 스키마만 포함
+      if (editMode === 'style' || editMode === 'all') {
+        requestBody.currentStyle = state.style
+      }
+      if (editMode === 'layout' || editMode === 'all') {
+        requestBody.currentLayout = state.layout
+      }
+      if (editMode === 'editor' || editMode === 'all') {
+        requestBody.currentEditor = state.editor
+      }
+
       // AI API 호출
       const response = await fetch('/api/super-editor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: content,
-          currentLayout: state.layout,
-          currentStyle: state.style,
-          currentEditor: state.editor,
-          history: messages.slice(-10), // 최근 10개 메시지만
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
@@ -176,7 +192,7 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [state, messages, options])
+  }, [state, messages, options, editMode])
 
   // 변경사항 적용
   const applyChanges = useCallback((messageId: string) => {
@@ -293,6 +309,8 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
     messages,
     isLoading,
     suggestions,
+    editMode,
+    setEditMode,
     sendMessage,
     applyChanges,
     revertChanges,

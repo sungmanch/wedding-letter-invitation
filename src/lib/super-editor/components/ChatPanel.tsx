@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react'
-import { useAIChat, type ChatMessage, type AISuggestion } from '../hooks/useAIChat'
+import { useAIChat, type ChatMessage, type AISuggestion, type EditMode } from '../hooks/useAIChat'
 
 // ============================================
 // Props Types
@@ -16,6 +16,17 @@ interface ChatPanelProps {
   placeholder?: string
   welcomeMessage?: string
 }
+
+// ============================================
+// Edit Mode Config
+// ============================================
+
+const EDIT_MODES: { mode: EditMode; label: string; icon: string; description: string }[] = [
+  { mode: 'style', label: '스타일', icon: '🎨', description: '색상, 폰트, 테마' },
+  { mode: 'layout', label: '레이아웃', icon: '📐', description: '섹션 구조, 순서' },
+  { mode: 'editor', label: '입력필드', icon: '✏️', description: '편집 가능 항목' },
+  { mode: 'all', label: '전체', icon: '🔧', description: '모든 항목 수정' },
+]
 
 // ============================================
 // Sub Components
@@ -155,6 +166,8 @@ export function ChatPanel({
     messages,
     isLoading,
     suggestions,
+    editMode,
+    setEditMode,
     sendMessage,
     applyChanges,
     revertChanges,
@@ -165,6 +178,7 @@ export function ChatPanel({
 
   const [input, setInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(true)
+  const [showModeSelector, setShowModeSelector] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -316,6 +330,48 @@ export function ChatPanel({
 
       {/* 입력 영역 */}
       <form onSubmit={handleSubmit} className="border-t border-gray-200 p-3">
+        {/* 수정 모드 선택 */}
+        <div className="mb-2">
+          <button
+            type="button"
+            onClick={() => setShowModeSelector(!showModeSelector)}
+            className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <span>{EDIT_MODES.find(m => m.mode === editMode)?.icon}</span>
+            <span className="font-medium">{EDIT_MODES.find(m => m.mode === editMode)?.label}</span>
+            <span className="text-gray-400">모드</span>
+            <svg className={`w-3 h-3 transition-transform ${showModeSelector ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showModeSelector && (
+            <div className="mt-2 p-2 bg-gray-50 rounded-lg grid grid-cols-2 gap-1.5">
+              {EDIT_MODES.map(({ mode, label, icon, description }) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => {
+                    setEditMode(mode)
+                    setShowModeSelector(false)
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
+                    editMode === mode
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  <span className="text-base">{icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium truncate">{label}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="flex items-end gap-2">
           <div className="flex-1 relative">
             <textarea
