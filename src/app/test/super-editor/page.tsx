@@ -152,11 +152,11 @@ function TestPageContent() {
                 welcomeMessage="안녕하세요! 청첩장 디자인을 도와드릴게요. 어떤 스타일의 청첩장을 만들고 싶으신가요? 예를 들어 '로맨틱한 핑크톤', '모던하고 미니멀한', '따뜻한 가을 느낌' 등을 말씀해주세요."
               />
             ) : (
-              <>
+              <div className="flex flex-col h-full overflow-hidden">
                 {state.editor ? (
                   <>
                     <EditorToolbar />
-                    <EditorPanel className="flex-1" />
+                    <EditorPanel className="flex-1 overflow-y-auto" />
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-gray-500">

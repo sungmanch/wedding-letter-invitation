@@ -135,10 +135,22 @@ export function toInlineStyle(
     ) as keyof React.CSSProperties
 
     // 숫자 값에 px 단위 추가 (특정 속성 제외)
-    if (
-      typeof value === 'number' &&
-      !['opacity', 'zIndex', 'flex', 'flexGrow', 'flexShrink', 'order'].includes(key)
-    ) {
+    const unitlessProps = [
+      'opacity',
+      'zIndex',
+      'flex',
+      'flexGrow',
+      'flexShrink',
+      'order',
+      'lineHeight',
+      'fontWeight',
+      'columns',
+      'columnCount',
+      'fillOpacity',
+      'strokeOpacity',
+      'strokeWidth',
+    ]
+    if (typeof value === 'number' && !unitlessProps.includes(key)) {
       (result as Record<string, unknown>)[camelKey] = `${value}px`
     } else {
       (result as Record<string, unknown>)[camelKey] = value
@@ -154,14 +166,29 @@ export function toInlineStyle(
 export function toCssString(styles: CSSProperties | undefined): string {
   if (!styles) return ''
 
+  const unitlessProps = [
+    'opacity',
+    'z-index',
+    'flex',
+    'flex-grow',
+    'flex-shrink',
+    'order',
+    'line-height',
+    'font-weight',
+    'columns',
+    'column-count',
+    'fill-opacity',
+    'stroke-opacity',
+    'stroke-width',
+  ]
+
   return Object.entries(styles)
     .map(([key, value]) => {
       // camelCase를 kebab-case로 변환
       const kebabKey = key.replace(/([A-Z])/g, '-$1').toLowerCase()
-      // 숫자 값에 px 단위 추가
+      // 숫자 값에 px 단위 추가 (특정 속성 제외)
       const cssValue =
-        typeof value === 'number' &&
-        !['opacity', 'z-index', 'flex', 'flex-grow', 'flex-shrink', 'order'].includes(kebabKey)
+        typeof value === 'number' && !unitlessProps.includes(kebabKey)
           ? `${value}px`
           : value
       return `${kebabKey}: ${cssValue};`
