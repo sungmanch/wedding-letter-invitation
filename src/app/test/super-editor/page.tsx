@@ -1,46 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import { EditorPanel, EditorToolbar, PreviewFrame } from '@/lib/super-editor/components'
 import { generateTemplateWithLLM, createTemplate } from '@/lib/super-editor/actions'
-import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
-import type { StyleSchema } from '@/lib/super-editor/schema/style'
-import type { EditorSchema } from '@/lib/super-editor/schema/editor'
+import { kakaoTemplate, kakaoSampleData } from '@/lib/super-editor/templates/kakao-chat'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 
-// 샘플 사용자 데이터
-const sampleUserData: UserData = {
+// 카카오톡 템플릿 기반 사용자 데이터
+const createUserData = (data: typeof kakaoSampleData): UserData => ({
   version: '1.0',
   meta: {
-    id: 'sample-user-data',
-    templateId: 'sample-template',
-    layoutId: 'sample-layout',
-    styleId: 'sample-style',
-    editorId: 'sample-editor',
+    id: 'kakao-user-data',
+    templateId: 'kakao-chat-v1',
+    layoutId: 'kakao-chat-v1',
+    styleId: 'kakao-style-v1',
+    editorId: 'kakao-editor-v1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-  data: {
-    couple: {
-      groom: { name: '김철수' },
-      bride: { name: '이영희' },
-    },
-    wedding: {
-      date: '2025-05-15',
-      time: '14:00',
-      dateDisplay: '2025년 5월 15일 토요일 오후 2시',
-    },
-    photos: {
-      main: 'https://picsum.photos/seed/wedding1/400/600',
-      gallery: [
-        'https://picsum.photos/seed/wedding2/400/400',
-        'https://picsum.photos/seed/wedding3/400/400',
-        'https://picsum.photos/seed/wedding4/400/400',
-      ],
-    },
-  },
-}
+  data,
+})
 
 function TestPageContent() {
   const { state, setTemplate, setUserData } = useSuperEditor()
@@ -48,12 +28,18 @@ function TestPageContent() {
   const [prompt, setPrompt] = useState('로맨틱한 핑크톤의 청첩장을 만들어주세요')
   const [buildResult, setBuildResult] = useState<string | null>(null)
 
+  // 카카오톡 템플릿 자동 로드
+  const handleLoadKakao = () => {
+    setTemplate(kakaoTemplate.layout, kakaoTemplate.style, kakaoTemplate.editor)
+    setUserData(createUserData(kakaoSampleData))
+  }
+
   const handleGenerate = async () => {
     setGenerating(true)
     try {
       const result = await generateTemplateWithLLM(prompt)
       setTemplate(result.layout, result.style, result.editor)
-      setUserData(sampleUserData)
+      setUserData(createUserData(kakaoSampleData))
     } catch (error) {
       console.error('템플릿 생성 실패:', error)
       alert('템플릿 생성에 실패했습니다.')
@@ -125,9 +111,23 @@ function TestPageContent() {
         </div>
       </header>
 
-      {/* LLM 생성 패널 */}
+      {/* 템플릿 선택 패널 */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center gap-3">
+          {/* 사전 정의 템플릿 */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">템플릿:</span>
+            <button
+              onClick={handleLoadKakao}
+              className="px-4 py-2 bg-[#FEE500] text-gray-900 rounded-lg hover:bg-yellow-400 font-medium flex items-center gap-2"
+            >
+              💬 카카오톡 스타일
+            </button>
+          </div>
+
+          <div className="w-px h-8 bg-gray-300" />
+
+          {/* AI 생성 */}
           <input
             type="text"
             value={prompt}
