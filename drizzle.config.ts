@@ -6,6 +6,7 @@ export default defineConfig({
     './src/lib/db/schema.ts',
     './src/lib/db/invitation-schema.ts',
     './src/lib/db/template-schema.ts',
+    './src/lib/db/super-editor-schema.ts',
   ],
   out: './drizzle/migrations',
   dialect: 'postgresql',
