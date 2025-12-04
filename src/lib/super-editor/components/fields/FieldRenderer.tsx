@@ -1,0 +1,142 @@
+'use client'
+
+import type { EditorField } from '../../schema/editor'
+import { TextField } from './TextField'
+import { TextareaField } from './TextareaField'
+import { DateField } from './DateField'
+import { TimeField } from './TimeField'
+import { SelectField } from './SelectField'
+import { SwitchField } from './SwitchField'
+import { ImageField } from './ImageField'
+import { ImageListField } from './ImageListField'
+import { useSuperEditor } from '../../context'
+
+interface FieldRendererProps {
+  field: EditorField
+}
+
+export function FieldRenderer({ field }: FieldRendererProps) {
+  const { getFieldValue } = useSuperEditor()
+
+  // 조건부 렌더링 체크
+  if (field.conditions && field.conditions.length > 0) {
+    const shouldRender = field.conditions.every((condition) => {
+      const value = getFieldValue(condition.field)
+
+      switch (condition.operator) {
+        case 'equals':
+          return value === condition.value
+        case 'notEquals':
+          return value !== condition.value
+        case 'contains':
+          return String(value).includes(String(condition.value))
+        case 'notContains':
+          return !String(value).includes(String(condition.value))
+        case 'gt':
+          return Number(value) > Number(condition.value)
+        case 'gte':
+          return Number(value) >= Number(condition.value)
+        case 'lt':
+          return Number(value) < Number(condition.value)
+        case 'lte':
+          return Number(value) <= Number(condition.value)
+        case 'empty':
+          return !value || (Array.isArray(value) && value.length === 0)
+        case 'notEmpty':
+          return !!value && (!Array.isArray(value) || value.length > 0)
+        default:
+          return true
+      }
+    })
+
+    if (!shouldRender) return null
+  }
+
+  // hidden 필드
+  if (field.hidden) return null
+
+  switch (field.type) {
+    case 'text':
+      return <TextField field={field} />
+
+    case 'textarea':
+      return <TextareaField field={field} />
+
+    case 'date':
+      return <DateField field={field} />
+
+    case 'time':
+      return <TimeField field={field} />
+
+    case 'select':
+      return <SelectField field={field} />
+
+    case 'switch':
+      return <SwitchField field={field} />
+
+    case 'image':
+      return <ImageField field={field} />
+
+    case 'imageList':
+      return <ImageListField field={field} />
+
+    // TODO: 더 많은 필드 타입 추가
+    case 'number':
+    case 'datetime':
+    case 'multiselect':
+    case 'radio':
+    case 'checkbox':
+    case 'color':
+    case 'icon':
+    case 'location':
+    case 'person':
+    case 'personList':
+    case 'account':
+    case 'accountList':
+    case 'phone':
+    case 'url':
+    case 'richtext':
+    case 'group':
+    case 'repeater':
+      return (
+        <div className="p-3 bg-gray-100 rounded-lg text-sm text-gray-500">
+          [{field.type}] {field.label || field.id} - 미구현
+        </div>
+      )
+
+    default:
+      return null
+  }
+}
+
+// 섹션 렌더러
+interface SectionRendererProps {
+  section: {
+    id: string
+    title: string
+    description?: string
+    fields: EditorField[]
+    collapsed?: boolean
+  }
+}
+
+export function SectionRenderer({ section }: SectionRendererProps) {
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <h3 className="font-medium text-gray-900">{section.title}</h3>
+        {section.description && (
+          <p className="text-sm text-gray-500 mt-0.5">{section.description}</p>
+        )}
+      </div>
+
+      <div className="p-4 space-y-4">
+        {section.fields
+          .sort((a, b) => a.order - b.order)
+          .map((field) => (
+            <FieldRenderer key={field.id} field={field} />
+          ))}
+      </div>
+    </div>
+  )
+}

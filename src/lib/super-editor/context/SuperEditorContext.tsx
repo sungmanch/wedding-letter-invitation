@@ -1,0 +1,452 @@
+'use client'
+
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+  useMemo,
+  type ReactNode,
+} from 'react'
+import type { LayoutSchema } from '../schema/layout'
+import type { StyleSchema } from '../schema/style'
+import type { EditorSchema } from '../schema/editor'
+import type { UserData } from '../schema/user-data'
+import type { PrimitiveNode } from '../schema/primitives'
+
+// ============================================
+// State Types
+// ============================================
+
+export interface SuperEditorState {
+  // 스키마 데이터
+  layout: LayoutSchema | null
+  style: StyleSchema | null
+  editor: EditorSchema | null
+  userData: UserData | null
+
+  // UI 상태
+  selectedNodeId: string | null
+  selectedFieldId: string | null
+  activeScreenIndex: number
+  mode: 'edit' | 'preview'
+
+  // 히스토리
+  history: HistoryEntry[]
+  historyIndex: number
+
+  // 로딩/에러 상태
+  loading: boolean
+  error: string | null
+  dirty: boolean
+}
+
+export interface HistoryEntry {
+  userData: UserData
+  timestamp: number
+  description: string
+}
+
+// ============================================
+// Action Types
+// ============================================
+
+export type SuperEditorAction =
+  | { type: 'SET_TEMPLATE'; layout: LayoutSchema; style: StyleSchema; editor: EditorSchema }
+  | { type: 'SET_USER_DATA'; userData: UserData }
+  | { type: 'UPDATE_FIELD'; fieldPath: string; value: unknown }
+  | { type: 'SELECT_NODE'; nodeId: string | null }
+  | { type: 'SELECT_FIELD'; fieldId: string | null }
+  | { type: 'SET_ACTIVE_SCREEN'; index: number }
+  | { type: 'SET_MODE'; mode: 'edit' | 'preview' }
+  | { type: 'UNDO' }
+  | { type: 'REDO' }
+  | { type: 'SET_LOADING'; loading: boolean }
+  | { type: 'SET_ERROR'; error: string | null }
+  | { type: 'RESET' }
+
+// ============================================
+// Initial State
+// ============================================
+
+const initialState: SuperEditorState = {
+  layout: null,
+  style: null,
+  editor: null,
+  userData: null,
+  selectedNodeId: null,
+  selectedFieldId: null,
+  activeScreenIndex: 0,
+  mode: 'edit',
+  history: [],
+  historyIndex: -1,
+  loading: false,
+  error: null,
+  dirty: false,
+}
+
+// ============================================
+// Reducer
+// ============================================
+
+function setValueByPath(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown
+): Record<string, unknown> {
+  const parts = path.split('.')
+  const result = { ...obj }
+  let current: Record<string, unknown> = result
+
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i]
+    current[part] = { ...(current[part] as Record<string, unknown> || {}) }
+    current = current[part] as Record<string, unknown>
+  }
+
+  current[parts[parts.length - 1]] = value
+  return result
+}
+
+function superEditorReducer(
+  state: SuperEditorState,
+  action: SuperEditorAction
+): SuperEditorState {
+  switch (action.type) {
+    case 'SET_TEMPLATE':
+      return {
+        ...state,
+        layout: action.layout,
+        style: action.style,
+        editor: action.editor,
+        loading: false,
+        error: null,
+      }
+
+    case 'SET_USER_DATA':
+      return {
+        ...state,
+        userData: action.userData,
+        history: [
+          {
+            userData: action.userData,
+            timestamp: Date.now(),
+            description: 'Initial load',
+          },
+        ],
+        historyIndex: 0,
+        dirty: false,
+      }
+
+    case 'UPDATE_FIELD': {
+      if (!state.userData) return state
+
+      const newData = setValueByPath(
+        state.userData.data as Record<string, unknown>,
+        action.fieldPath,
+        action.value
+      )
+
+      const newUserData: UserData = {
+        ...state.userData,
+        data: newData,
+      }
+
+      // 히스토리에 추가 (현재 위치 이후 삭제)
+      const newHistory = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        {
+          userData: newUserData,
+          timestamp: Date.now(),
+          description: `Update ${action.fieldPath}`,
+        },
+      ]
+
+      return {
+        ...state,
+        userData: newUserData,
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
+        dirty: true,
+      }
+    }
+
+    case 'SELECT_NODE':
+      return {
+        ...state,
+        selectedNodeId: action.nodeId,
+      }
+
+    case 'SELECT_FIELD':
+      return {
+        ...state,
+        selectedFieldId: action.fieldId,
+      }
+
+    case 'SET_ACTIVE_SCREEN':
+      return {
+        ...state,
+        activeScreenIndex: action.index,
+      }
+
+    case 'SET_MODE':
+      return {
+        ...state,
+        mode: action.mode,
+        selectedNodeId: action.mode === 'preview' ? null : state.selectedNodeId,
+      }
+
+    case 'UNDO':
+      if (state.historyIndex <= 0) return state
+      return {
+        ...state,
+        userData: state.history[state.historyIndex - 1].userData,
+        historyIndex: state.historyIndex - 1,
+        dirty: true,
+      }
+
+    case 'REDO':
+      if (state.historyIndex >= state.history.length - 1) return state
+      return {
+        ...state,
+        userData: state.history[state.historyIndex + 1].userData,
+        historyIndex: state.historyIndex + 1,
+        dirty: true,
+      }
+
+    case 'SET_LOADING':
+      return {
+        ...state,
+        loading: action.loading,
+      }
+
+    case 'SET_ERROR':
+      return {
+        ...state,
+        error: action.error,
+        loading: false,
+      }
+
+    case 'RESET':
+      return initialState
+
+    default:
+      return state
+  }
+}
+
+// ============================================
+// Context
+// ============================================
+
+interface SuperEditorContextValue {
+  state: SuperEditorState
+  dispatch: React.Dispatch<SuperEditorAction>
+  // 편의 함수들
+  setTemplate: (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => void
+  setUserData: (userData: UserData) => void
+  updateField: (fieldPath: string, value: unknown) => void
+  selectNode: (nodeId: string | null) => void
+  selectField: (fieldId: string | null) => void
+  setActiveScreen: (index: number) => void
+  setMode: (mode: 'edit' | 'preview') => void
+  undo: () => void
+  redo: () => void
+  canUndo: boolean
+  canRedo: boolean
+  // 데이터 접근
+  getFieldValue: (fieldPath: string) => unknown
+  getCurrentScreen: () => PrimitiveNode | null
+}
+
+const SuperEditorContext = createContext<SuperEditorContextValue | null>(null)
+
+// ============================================
+// Provider
+// ============================================
+
+interface SuperEditorProviderProps {
+  children: ReactNode
+  initialTemplate?: {
+    layout: LayoutSchema
+    style: StyleSchema
+    editor: EditorSchema
+  }
+  initialUserData?: UserData
+}
+
+export function SuperEditorProvider({
+  children,
+  initialTemplate,
+  initialUserData,
+}: SuperEditorProviderProps) {
+  const [state, dispatch] = useReducer(superEditorReducer, {
+    ...initialState,
+    layout: initialTemplate?.layout || null,
+    style: initialTemplate?.style || null,
+    editor: initialTemplate?.editor || null,
+    userData: initialUserData || null,
+    history: initialUserData
+      ? [{ userData: initialUserData, timestamp: Date.now(), description: 'Initial' }]
+      : [],
+    historyIndex: initialUserData ? 0 : -1,
+  })
+
+  // 편의 함수들
+  const setTemplate = useCallback(
+    (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => {
+      dispatch({ type: 'SET_TEMPLATE', layout, style, editor })
+    },
+    []
+  )
+
+  const setUserData = useCallback((userData: UserData) => {
+    dispatch({ type: 'SET_USER_DATA', userData })
+  }, [])
+
+  const updateField = useCallback((fieldPath: string, value: unknown) => {
+    dispatch({ type: 'UPDATE_FIELD', fieldPath, value })
+  }, [])
+
+  const selectNode = useCallback((nodeId: string | null) => {
+    dispatch({ type: 'SELECT_NODE', nodeId })
+  }, [])
+
+  const selectField = useCallback((fieldId: string | null) => {
+    dispatch({ type: 'SELECT_FIELD', fieldId })
+  }, [])
+
+  const setActiveScreen = useCallback((index: number) => {
+    dispatch({ type: 'SET_ACTIVE_SCREEN', index })
+  }, [])
+
+  const setMode = useCallback((mode: 'edit' | 'preview') => {
+    dispatch({ type: 'SET_MODE', mode })
+  }, [])
+
+  const undo = useCallback(() => {
+    dispatch({ type: 'UNDO' })
+  }, [])
+
+  const redo = useCallback(() => {
+    dispatch({ type: 'REDO' })
+  }, [])
+
+  const getFieldValue = useCallback(
+    (fieldPath: string): unknown => {
+      if (!state.userData?.data) return undefined
+
+      const parts = fieldPath.split('.')
+      let current: unknown = state.userData.data
+
+      for (const part of parts) {
+        if (current === null || current === undefined) return undefined
+        if (typeof current === 'object') {
+          current = (current as Record<string, unknown>)[part]
+        } else {
+          return undefined
+        }
+      }
+
+      return current
+    },
+    [state.userData]
+  )
+
+  const getCurrentScreen = useCallback((): PrimitiveNode | null => {
+    if (!state.layout?.screens) return null
+    const screen = state.layout.screens[state.activeScreenIndex]
+    return screen?.root || null
+  }, [state.layout, state.activeScreenIndex])
+
+  const value = useMemo(
+    () => ({
+      state,
+      dispatch,
+      setTemplate,
+      setUserData,
+      updateField,
+      selectNode,
+      selectField,
+      setActiveScreen,
+      setMode,
+      undo,
+      redo,
+      canUndo: state.historyIndex > 0,
+      canRedo: state.historyIndex < state.history.length - 1,
+      getFieldValue,
+      getCurrentScreen,
+    }),
+    [
+      state,
+      setTemplate,
+      setUserData,
+      updateField,
+      selectNode,
+      selectField,
+      setActiveScreen,
+      setMode,
+      undo,
+      redo,
+      getFieldValue,
+      getCurrentScreen,
+    ]
+  )
+
+  return (
+    <SuperEditorContext.Provider value={value}>
+      {children}
+    </SuperEditorContext.Provider>
+  )
+}
+
+// ============================================
+// Hook
+// ============================================
+
+export function useSuperEditor() {
+  const context = useContext(SuperEditorContext)
+  if (!context) {
+    throw new Error('useSuperEditor must be used within a SuperEditorProvider')
+  }
+  return context
+}
+
+// ============================================
+// Selector Hooks
+// ============================================
+
+export function useSuperEditorState() {
+  const { state } = useSuperEditor()
+  return state
+}
+
+export function useSuperEditorLayout() {
+  const { state } = useSuperEditor()
+  return state.layout
+}
+
+export function useSuperEditorStyle() {
+  const { state } = useSuperEditor()
+  return state.style
+}
+
+export function useSuperEditorEditor() {
+  const { state } = useSuperEditor()
+  return state.editor
+}
+
+export function useSuperEditorUserData() {
+  const { state } = useSuperEditor()
+  return state.userData
+}
+
+export function useSelectedNode() {
+  const { state } = useSuperEditor()
+  return state.selectedNodeId
+}
+
+export function useEditorMode() {
+  const { state, setMode } = useSuperEditor()
+  return { mode: state.mode, setMode }
+}

@@ -18,6 +18,33 @@ export * from './animations'
 // Primitive Renderers
 export * from './primitives'
 
+// Context & State Management
+export * from './context'
+
+// Components (explicit exports to avoid naming conflicts with schema types)
+export {
+  EditorPanel,
+  EditorToolbar,
+  PreviewFrame,
+  SectionRenderer,
+  FieldRenderer,
+  // Field components exported with explicit names
+  TextField as TextFieldComponent,
+  TextareaField as TextareaFieldComponent,
+  DateField as DateFieldComponent,
+  TimeField as TimeFieldComponent,
+  SelectField as SelectFieldComponent,
+  SwitchField as SwitchFieldComponent,
+  ImageField as ImageFieldComponent,
+  ImageListField as ImageListFieldComponent,
+} from './components'
+
+// Builder
+export * from './builder'
+
+// Server Actions
+export * from './actions'
+
 // Re-export key types for convenience
 export type {
   PrimitiveType,
