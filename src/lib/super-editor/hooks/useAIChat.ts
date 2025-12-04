@@ -151,9 +151,9 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
 
     // 현재 상태 저장 (되돌리기용)
     previousStates.current.set(messageId, {
-      layout: state.layout,
-      style: state.style,
-      editor: state.editor,
+      layout: state.layout ?? undefined,
+      style: state.style ?? undefined,
+      editor: state.editor ?? undefined,
     })
 
     // 변경사항 적용

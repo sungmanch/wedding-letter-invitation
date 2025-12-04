@@ -10,6 +10,7 @@
     "migrate": "npx tsx scripts/run-migration.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.1",
     "@google/generative-ai": "^0.21.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",

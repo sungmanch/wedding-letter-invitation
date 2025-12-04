@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
-import { EditorPanel, EditorToolbar, PreviewFrame } from '@/lib/super-editor/components'
-import { generateTemplateWithLLM, createTemplate } from '@/lib/super-editor/actions'
+import { EditorPanel, EditorToolbar, PreviewFrame, ChatPanel } from '@/lib/super-editor/components'
+import { createTemplate } from '@/lib/super-editor/actions'
 import { kakaoTemplate, kakaoSampleData } from '@/lib/super-editor/templates/kakao-chat'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 
@@ -24,28 +24,13 @@ const createUserData = (data: typeof kakaoSampleData): UserData => ({
 
 function TestPageContent() {
   const { state, setTemplate, setUserData } = useSuperEditor()
-  const [generating, setGenerating] = useState(false)
-  const [prompt, setPrompt] = useState('로맨틱한 핑크톤의 청첩장을 만들어주세요')
   const [buildResult, setBuildResult] = useState<string | null>(null)
+  const [activePanel, setActivePanel] = useState<'editor' | 'chat'>('chat')
 
   // 카카오톡 템플릿 자동 로드
   const handleLoadKakao = () => {
     setTemplate(kakaoTemplate.layout, kakaoTemplate.style, kakaoTemplate.editor)
     setUserData(createUserData(kakaoSampleData))
-  }
-
-  const handleGenerate = async () => {
-    setGenerating(true)
-    try {
-      const result = await generateTemplateWithLLM(prompt)
-      setTemplate(result.layout, result.style, result.editor)
-      setUserData(createUserData(kakaoSampleData))
-    } catch (error) {
-      console.error('템플릿 생성 실패:', error)
-      alert('템플릿 생성에 실패했습니다.')
-    } finally {
-      setGenerating(false)
-    }
   }
 
   const handleSaveTemplate = async () => {
@@ -57,8 +42,8 @@ function TestPageContent() {
     try {
       const template = await createTemplate({
         name: 'AI 생성 템플릿',
-        description: prompt,
-        category: 'chat',
+        description: 'AI와 대화하며 만든 청첩장',
+        category: state.layout.meta.category,
         layout: state.layout,
         style: state.style,
         editor: state.editor,
@@ -89,21 +74,31 @@ function TestPageContent() {
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       {/* 헤더 */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
+      <header className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Super Editor 테스트</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-gray-900">Super Editor</h1>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleLoadKakao}
+                className="px-3 py-1.5 bg-[#FEE500] text-gray-900 rounded-lg hover:bg-yellow-400 text-sm font-medium flex items-center gap-1"
+              >
+                💬 카카오톡 템플릿
+              </button>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleSaveTemplate}
               disabled={!state.layout}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
-              템플릿 저장
+              저장
             </button>
             <button
               onClick={handleBuildPreview}
               disabled={!state.layout}
-              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               HTML 빌드
             </button>
@@ -111,91 +106,125 @@ function TestPageContent() {
         </div>
       </header>
 
-      {/* 템플릿 선택 패널 */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center gap-3">
-          {/* 사전 정의 템플릿 */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">템플릿:</span>
+      {/* 메인 콘텐츠 - 3패널 레이아웃 */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* 왼쪽: 에디터/채팅 탭 */}
+        <div className="w-[400px] flex flex-col bg-white border-r border-gray-200 flex-shrink-0">
+          {/* 탭 헤더 */}
+          <div className="flex border-b border-gray-200">
             <button
-              onClick={handleLoadKakao}
-              className="px-4 py-2 bg-[#FEE500] text-gray-900 rounded-lg hover:bg-yellow-400 font-medium flex items-center gap-2"
+              onClick={() => setActivePanel('chat')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activePanel === 'chat'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
             >
-              💬 카카오톡 스타일
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                AI 채팅
+              </span>
+            </button>
+            <button
+              onClick={() => setActivePanel('editor')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activePanel === 'editor'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                데이터 편집
+              </span>
             </button>
           </div>
 
-          <div className="w-px h-8 bg-gray-300" />
-
-          {/* AI 생성 */}
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="AI에게 청첩장 스타일을 설명해주세요..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button
-            onClick={handleGenerate}
-            disabled={generating || !prompt.trim()}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {generating ? (
+          {/* 탭 콘텐츠 */}
+          <div className="flex-1 overflow-hidden">
+            {activePanel === 'chat' ? (
+              <ChatPanel
+                className="h-full"
+                welcomeMessage="안녕하세요! 청첩장 디자인을 도와드릴게요. 어떤 스타일의 청첩장을 만들고 싶으신가요? 예를 들어 '로맨틱한 핑크톤', '모던하고 미니멀한', '따뜻한 가을 느낌' 등을 말씀해주세요."
+              />
+            ) : (
               <>
-                <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                생성 중...
+                {state.editor ? (
+                  <>
+                    <EditorToolbar />
+                    <EditorPanel className="flex-1" />
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-gray-500">
+                    <div className="text-center p-8">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </div>
+                      <p className="text-lg font-medium">템플릿이 없습니다</p>
+                      <p className="text-sm mt-1">AI 채팅에서 템플릿을 생성해주세요</p>
+                    </div>
+                  </div>
+                )}
               </>
-            ) : (
-              'AI 생성'
             )}
-          </button>
-        </div>
-      </div>
-
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* 왼쪽: 에디터 패널 */}
-        <div className="w-[400px] flex flex-col bg-white border-r border-gray-200">
-          {state.editor ? (
-            <>
-              <EditorToolbar />
-              <EditorPanel className="flex-1" />
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <p className="text-lg font-medium">템플릿이 없습니다</p>
-                <p className="text-sm mt-1">AI 생성 버튼을 클릭하여 시작하세요</p>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
 
-        {/* 오른쪽: 미리보기 */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 flex items-center justify-center p-8 bg-gray-100">
+        {/* 중앙: 미리보기 */}
+        <div className="flex-1 flex flex-col bg-gray-200">
+          <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
             {state.layout ? (
-              <PreviewFrame className="shadow-2xl" />
+              <div className="relative">
+                {/* 모바일 프레임 */}
+                <div className="relative bg-black rounded-[3rem] p-3 shadow-2xl">
+                  {/* 노치 */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-10" />
+                  {/* 화면 */}
+                  <div className="bg-white rounded-[2.5rem] overflow-hidden" style={{ width: 375, height: 667 }}>
+                    <PreviewFrame className="w-full h-full" />
+                  </div>
+                </div>
+              </div>
             ) : (
-              <div className="text-gray-500 text-center">
+              <div className="text-center text-gray-500">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
                 <p className="text-lg font-medium">미리보기 영역</p>
-                <p className="text-sm mt-1">템플릿 생성 후 미리보기가 표시됩니다</p>
+                <p className="text-sm mt-1">AI와 대화하여 청첩장을 만들어보세요</p>
               </div>
             )}
           </div>
 
           {/* 상태 표시 */}
-          <div className="bg-white border-t border-gray-200 px-4 py-2 text-sm text-gray-600">
-            <div className="flex items-center gap-4">
-              <span>
-                모드: <strong>{state.mode}</strong>
-              </span>
-              <span>
-                수정됨: <strong>{state.dirty ? '예' : '아니오'}</strong>
-              </span>
-              <span>
-                히스토리: <strong>{state.historyIndex + 1} / {state.history.length}</strong>
-              </span>
+          <div className="bg-white border-t border-gray-200 px-4 py-2 text-sm text-gray-600 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span>
+                  모드: <strong>{state.mode}</strong>
+                </span>
+                <span>
+                  수정됨: <strong>{state.dirty ? '예' : '아니오'}</strong>
+                </span>
+                {state.history.length > 0 && (
+                  <span>
+                    히스토리: <strong>{state.historyIndex + 1} / {state.history.length}</strong>
+                  </span>
+                )}
+              </div>
+              {state.layout && (
+                <span className="text-xs text-gray-400">
+                  {state.layout.meta.category} · {state.layout.meta.name}
+                </span>
+              )}
             </div>
           </div>
         </div>
