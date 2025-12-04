@@ -552,7 +552,9 @@ export function buildHtml(
   const screensHtml = layout.screens
     .map((screen) => {
       const content = buildNode(screen.root, ctx)
-      return `<section id="${screen.id}" data-screen-type="${screen.type}">${content}</section>`
+      // intro 타입이면 전체화면 섹션 클래스 추가
+      const sectionClass = screen.type === 'intro' ? 'fullscreen-section' : ''
+      return `<section id="${screen.id}" class="${sectionClass}" data-screen-type="${screen.type}">${content}</section>`
     })
     .join('\n')
 
@@ -561,12 +563,66 @@ export function buildHtml(
     .map(([className, style]) => `.${className} { ${style} }`)
     .join('\n')
 
-  // 기본 CSS
+  // 기본 CSS (모바일 최적화)
   const baseCss = `
+/* Reset & Base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { font-family: ${style.theme?.typography?.fonts?.body?.family || 'system-ui, sans-serif'}; }
-img { max-width: 100%; height: auto; }
-button { font-family: inherit; }
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  font-family: ${style.theme?.typography?.fonts?.body?.family || '"Pretendard", "Apple SD Gothic Neo", sans-serif'};
+  line-height: 1.5;
+  color: ${style.theme?.colors?.text?.primary || '#1F2937'};
+  background-color: ${style.theme?.colors?.background?.default || '#FFFBFC'};
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* 모바일 컨테이너 - 최대 너비 제한 */
+.mobile-container {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 전체 화면 섹션 (인트로용) */
+.fullscreen-section {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 이미지 */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 버튼 */
+button {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* 스크롤바 숨김 */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* 텍스트 줄바꿈 */
+.preserve-whitespace { white-space: pre-wrap; }
+
 ${customStyles}
   `.trim()
 
@@ -582,18 +638,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
   `.trim()
 
-  // 최종 HTML
+  // 최종 HTML (모바일 최적화)
   const html = `
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="${style.theme?.colors?.background?.default || '#FFFBFC'}">
   <title>${layout.meta?.name || '청첩장'}</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
   <style>${baseCss}</style>
 </head>
 <body>
+  <div class="mobile-container">
 ${screensHtml}
+  </div>
 <script>${baseJs}</script>
 </body>
 </html>
