@@ -155,24 +155,40 @@ body {
 }
 
 /* Mobile-style thin scrollbar for preview frame */
-.scrollbar-mobile {
+.scrollbar-mobile,
+.mobile-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: transparent transparent;
 }
 
-.scrollbar-mobile::-webkit-scrollbar {
-  width: 3px;
+.scrollbar-mobile:hover,
+.mobile-scrollbar:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
-.scrollbar-mobile::-webkit-scrollbar-track {
+.scrollbar-mobile::-webkit-scrollbar,
+.mobile-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-mobile::-webkit-scrollbar-track,
+.mobile-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-mobile::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+.scrollbar-mobile::-webkit-scrollbar-thumb,
+.mobile-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
-.scrollbar-mobile::-webkit-scrollbar-thumb:hover {
+.scrollbar-mobile:hover::-webkit-scrollbar-thumb,
+.mobile-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+.scrollbar-mobile::-webkit-scrollbar-thumb:hover,
+.mobile-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.5);
 }
