@@ -65,6 +65,39 @@ export interface UseAIChatReturn {
 }
 
 // ============================================
+// Helper Functions
+// ============================================
+
+/**
+ * 깊은 객체 병합 - AI 부분 업데이트를 기존 스키마와 병합
+ */
+function deepMerge<T extends object>(target: T, source: Partial<T>): T {
+  const result = { ...target }
+
+  for (const key of Object.keys(source) as (keyof T)[]) {
+    const sourceValue = source[key]
+    const targetValue = target[key]
+
+    if (
+      sourceValue &&
+      typeof sourceValue === 'object' &&
+      !Array.isArray(sourceValue) &&
+      targetValue &&
+      typeof targetValue === 'object' &&
+      !Array.isArray(targetValue)
+    ) {
+      // 둘 다 객체인 경우 재귀적 병합
+      result[key] = deepMerge(targetValue as object, sourceValue as object) as T[keyof T]
+    } else if (sourceValue !== undefined) {
+      // 그 외의 경우 source 값으로 덮어쓰기
+      result[key] = sourceValue as T[keyof T]
+    }
+  }
+
+  return result
+}
+
+// ============================================
 // Schema Validation Helpers
 // ============================================
 
@@ -82,12 +115,13 @@ function isValidLayout(layout: unknown): layout is LayoutSchema {
 function isValidStyle(style: unknown): style is StyleSchema {
   if (!style || typeof style !== 'object') return false
   const s = style as Record<string, unknown>
-  return (
-    s.meta !== undefined &&
-    typeof s.meta === 'object' &&
-    s.theme !== undefined &&
-    typeof s.theme === 'object'
-  )
+  // 빈 객체 체크 - AI가 빈 style을 반환한 경우
+  if (Object.keys(s).length === 0) return false
+  // 부분 업데이트 허용: meta 또는 theme 중 하나만 있어도 유효
+  // 전체 스키마는 meta + theme 모두 필요
+  const hasMeta = s.meta !== undefined && typeof s.meta === 'object'
+  const hasTheme = s.theme !== undefined && typeof s.theme === 'object'
+  return hasMeta || hasTheme
 }
 
 function isValidEditor(editor: unknown): editor is EditorSchema {
@@ -201,12 +235,29 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
 
     const changes = message.changes
 
-    // 변경사항 적용할 새 스키마 결정
-    const newLayout = changes.layout || state.layout
-    const newStyle = changes.style || state.style
-    const newEditor = changes.editor || state.editor
+    // 빈 객체 체크 헬퍼
+    const isEmptyObject = (obj: unknown) =>
+      obj && typeof obj === 'object' && Object.keys(obj).length === 0
 
-    // 스키마 유효성 검증
+    // AI 변경사항이 빈 객체인 경우 무시
+    const hasValidLayout = changes.layout && !isEmptyObject(changes.layout)
+    const hasValidStyle = changes.style && !isEmptyObject(changes.style)
+    const hasValidEditor = changes.editor && !isEmptyObject(changes.editor)
+
+    // 변경사항 적용할 새 스키마 결정 (부분 업데이트 병합)
+    const newLayout = hasValidLayout ? changes.layout : state.layout
+    const newStyle = hasValidStyle
+      ? deepMerge(state.style || {}, changes.style!) as StyleSchema
+      : state.style
+    const newEditor = hasValidEditor ? changes.editor : state.editor
+
+    // 변경사항이 없으면 종료
+    if (!hasValidLayout && !hasValidStyle && !hasValidEditor) {
+      console.warn('No valid changes from AI to apply')
+      return
+    }
+
+    // 스키마 유효성 검증 (병합 후)
     if (newLayout && !isValidLayout(newLayout)) {
       console.error('Invalid layout schema from AI:', newLayout)
       options.onError?.(new Error('AI가 생성한 레이아웃 스키마가 유효하지 않습니다.'))

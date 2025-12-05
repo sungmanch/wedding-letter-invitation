@@ -74,7 +74,7 @@ function buildUserMessage(request: ChatRequest): string {
       // 레이아웃은 구조만 요약
       const layoutSummary = {
         meta: request.currentLayout.meta,
-        screens: request.currentLayout.screens?.map(s => ({
+        screens: request.currentLayout.screens?.map((s) => ({
           id: s.id,
           type: s.type,
           name: s.name,
@@ -86,7 +86,7 @@ function buildUserMessage(request: ChatRequest): string {
     if (request.currentEditor && (mode === 'editor' || mode === 'all')) {
       // 에디터는 섹션 목록만 요약
       const editorSummary = {
-        sections: request.currentEditor.sections?.map(s => ({
+        sections: request.currentEditor.sections?.map((s) => ({
           id: s.id,
           title: s.title,
           fieldCount: s.fields?.length || 0,
@@ -133,14 +133,18 @@ export async function POST(request: NextRequest) {
     const body: ChatRequest = await request.json()
 
     if (!body.message) {
-      return NextResponse.json(
-        { error: '메시지가 필요합니다.' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '메시지가 필요합니다.' }, { status: 400 })
     }
 
-    // Gemini 모델 초기화
-    const model = genAI.getGenerativeModel({ model: MODEL })
+    // 모드별 시스템 프롬프트 선택
+    const editMode = body.editMode || 'style'
+    const systemPrompt = getPromptForMode(editMode)
+
+    // Gemini 모델 초기화 (시스템 프롬프트 포함)
+    const model = genAI.getGenerativeModel({
+      model: MODEL,
+      systemInstruction: systemPrompt,
+    })
 
     // 모드별 시스템 프롬프트 선택
     const editMode = body.editMode || 'style'
@@ -151,7 +155,8 @@ export async function POST(request: NextRequest) {
 
     // 이전 대화 히스토리 추가 (최근 것만)
     if (body.history && body.history.length > 0) {
-      for (const msg of body.history.slice(-4)) { // 최근 4개만
+      for (const msg of body.history.slice(-4)) {
+        // 최근 4개만
         contents.push({
           role: msg.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: msg.content }],
@@ -159,17 +164,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 현재 사용자 메시지 추가 (시스템 프롬프트 포함)
+    // 현재 사용자 메시지 추가
     const userMessage = buildUserMessage(body)
-    const fullPrompt = contents.length === 0
-      ? `${systemPrompt}\n\n${userMessage}`
-      : userMessage
+    const fullPrompt = contents.length === 0 ? `${systemPrompt}\n\n${userMessage}` : userMessage
 
     contents.push({
       role: 'user',
-      parts: [{ text: fullPrompt }],
+      parts: [{ text: userMessage }],
     })
-
+    console.log(contents)
     // Gemini API 호출
     const result = await model.generateContent({
       contents,
@@ -189,13 +192,9 @@ export async function POST(request: NextRequest) {
     const parsed = parseAIResponse(text)
 
     return NextResponse.json(parsed)
-
   } catch (error: unknown) {
     console.error('Super Editor Chat API Error:', error)
 
-    return NextResponse.json(
-      { error: '요청을 처리하는 중 오류가 발생했습니다.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '요청을 처리하는 중 오류가 발생했습니다.' }, { status: 500 })
   }
 }
