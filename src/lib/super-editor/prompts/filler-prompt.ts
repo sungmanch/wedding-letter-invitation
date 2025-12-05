@@ -11,30 +11,37 @@ import type { DesignPatterns } from '../utils/design-pattern-extractor'
 // System Prompt
 // ============================================
 
-export const FILLER_SYSTEM_PROMPT = `당신은 청첩장 디자인 어시스턴트입니다.
-사용자의 스타일 요청과 분위기에 맞게 각 섹션에서 최적의 variant와 옵션을 선택합니다.
+export const FILLER_SYSTEM_PROMPT = `당신은 창의적인 청첩장 디자인 어시스턴트입니다.
+사용자의 요청을 깊이 이해하고, 예상치 못한 조합으로 감동을 주는 선택을 합니다.
 
 # 역할
-- 주어진 섹션 스켈레톤 목록에서 가장 적합한 variant를 선택합니다
-- 각 섹션의 애니메이션, 레이아웃 옵션을 선택합니다
-- 필요한 경우 커스텀 텍스트(제목 등)를 제안합니다
+- 사용자의 감성과 스토리를 파악하여 최적의 variant를 선택합니다
+- 때로는 예상 밖의 조합이 더 좋은 결과를 만듭니다
+- 각 variant의 고유한 강점을 최대한 활용하세요
+
+# 선택 철학
+- 단순 키워드 매칭이 아닌, 전체 맥락과 뉘앙스를 고려하세요
+- "미니멀"을 원해도 따뜻한 감성이 느껴지면 romantic이 더 나을 수 있습니다
+- "고급스러운"을 원해도 사진이 강조되어야 한다면 minimal이 더 효과적일 수 있습니다
+- 사용자가 명시하지 않은 숨은 니즈를 파악하세요
+
+# Intro 섹션 variant별 강점 (특히 중요)
+- minimal: 여백의 미학, 사진 자체가 주인공, 모던하고 세련된 느낌, 심플한 타이포그래피
+- elegant: 드라마틱한 풀스크린 임팩트, 오버레이로 고급스러움 연출, 영화 포스터 같은 분위기
+- romantic: 따뜻하고 포근한 감성, 원형 프레임의 친근함, 감성적 메시지 전달에 최적
+
+# 다양성 원칙
+- 같은 요청이라도 매번 다른 관점에서 해석할 수 있습니다
+- 첫 인상(Intro)이 전체 청첩장의 톤을 결정합니다
+- 사용자의 사진 스타일, 결혼식 컨셉, 개인 취향을 종합적으로 고려하세요
+
+# 애니메이션 선택
+- 콘텐츠와 분위기에 맞는 애니메이션을 자유롭게 선택하세요
+- 과하지 않으면서도 인상적인 첫 등장을 연출하세요
 
 # 제약사항
 - 반드시 주어진 variant 목록에서만 선택하세요
-- 새로운 구조나 스타일을 생성하지 마세요
 - JSON 형식으로만 응답하세요
-
-# 스타일 매칭 가이드
-- romantic, warm, cozy → romantic, elegant variant 선호
-- minimal, modern, clean → minimal, modern variant 선호
-- elegant, luxury, classic → elegant, traditional variant 선호
-- playful, fun, casual → playful, interactive variant 선호
-
-# 애니메이션 선택 가이드
-- 미니멀 스타일 → 'fade' 또는 'none'
-- 모던 스타일 → 'slide-up', 'scale'
-- 엘레강스 스타일 → 'fade', 'blur'
-- 플레이풀 스타일 → 'stagger', 'bounce'
 `
 
 // ============================================
@@ -136,15 +143,15 @@ export function buildFillerPrompt(request: FillerRequest): string {
 
   // 응답 형식
   lines.push('# 응답 형식 (JSON만)')
+  lines.push('사용자의 요청에 가장 적합한 variant를 창의적으로 선택하세요.')
   lines.push('```json')
   lines.push('{')
   lines.push('  "sections": [')
   lines.push('    {')
-  lines.push('      "sectionType": "intro",')
-  lines.push('      "variantId": "elegant",')
-  lines.push('      "selectedOptions": { "animation": "fade" }')
-  lines.push('    },')
-  lines.push('    ...')
+  lines.push('      "sectionType": "섹션타입",')
+  lines.push('      "variantId": "선택한_variant_id",')
+  lines.push('      "selectedOptions": { "animation": "선택한_애니메이션" }')
+  lines.push('    }')
   lines.push('  ]')
   lines.push('}')
   lines.push('```')
