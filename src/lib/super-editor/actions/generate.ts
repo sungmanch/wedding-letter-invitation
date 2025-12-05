@@ -16,10 +16,12 @@ import {
 import { createGeminiProvider } from '../services/gemini-provider'
 import type { StyleSchema } from '../schema/style'
 import { db } from '@/lib/db'
-import { invitations, invitationDesigns, invitationPhotos } from '@/lib/db/invitation-schema'
+import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
 import { eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import type { UserData, WeddingInvitationData } from '../schema/user-data'
+import type { EditorSchema } from '../schema/editor'
 
 // ============================================
 // AI Template Generation
@@ -232,7 +234,7 @@ export interface SaveInvitationInput {
     brideName: string
     weddingDate: string // YYYY-MM-DD
     weddingTime: string // HH:mm
-    mainImage?: string // base64 data URL
+    mainImage?: string // base64 data URL 또는 URL
   }
   // 레거시 프리셋 사용 시
   legacyPresetId?: string
@@ -246,6 +248,7 @@ export interface SaveInvitationOutput {
 
 /**
  * Stage 3: 생성된 템플릿을 DB에 저장하고 invitation 생성
+ * superEditorTemplates + superEditorInvitations 사용
  */
 export async function saveInvitationAction(
   input: SaveInvitationInput
@@ -260,77 +263,81 @@ export async function saveInvitationAction(
 
     const { generationResult, previewData, legacyPresetId } = input
 
-    // 1. Invitation 생성
-    const [invitation] = await db.insert(invitations).values({
-      userId: user.id,
-      groomName: previewData.groomName || '신랑',
-      brideName: previewData.brideName || '신부',
-      weddingDate: previewData.weddingDate || new Date().toISOString().split('T')[0],
-      weddingTime: previewData.weddingTime || '12:00',
-      venueName: '',
-      venueAddress: '',
+    // 1. Template 생성 (레이아웃, 스타일, 에디터 스키마 저장)
+    const editorSchema: EditorSchema = {
+      version: '1.0',
+      meta: {
+        id: 'default',
+        name: '기본 에디터',
+        layoutId: 'default',
+        styleId: 'default',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      sections: [],
+    }
+
+    const [template] = await db.insert(superEditorTemplates).values({
+      name: legacyPresetId ? `레거시: ${legacyPresetId}` : 'AI 생성 템플릿',
+      description: legacyPresetId ? `레거시 프리셋 ${legacyPresetId} 기반` : 'AI가 생성한 템플릿',
+      category: 'wedding',
+      layoutSchema: generationResult.layout,
+      styleSchema: generationResult.style,
+      editorSchema,
       status: 'draft',
-      templateId: legacyPresetId || 'super-editor',
+      generationContext: {
+        prompt: legacyPresetId || 'super-editor',
+        model: 'gemini',
+        generatedAt: new Date().toISOString(),
+      },
     }).returning()
 
-    // 2. Design 데이터 구성 (SuperEditor 전용 포맷)
-    const designData = {
-      version: 'super-editor-v1' as const,
-      style: generationResult.style,
-      tokens: generationResult.tokens,
-      cssVariables: generationResult.cssVariables,
-      layout: generationResult.layout,
-      screens: generationResult.screens,
-      legacyPresetId,
+    // 2. UserData 구성
+    const weddingData: WeddingInvitationData = {
+      couple: {
+        groom: { name: previewData.groomName || '신랑' },
+        bride: { name: previewData.brideName || '신부' },
+      },
+      wedding: {
+        date: previewData.weddingDate || new Date().toISOString().split('T')[0],
+        time: previewData.weddingTime || '12:00',
+      },
+      venue: {
+        name: '',
+        address: '',
+        lat: 0,
+        lng: 0,
+      },
+      photos: {
+        main: previewData.mainImage || '',
+        gallery: previewData.mainImage ? [previewData.mainImage] : [],
+      },
+      greeting: {
+        content: '',
+      },
     }
 
-    // 3. InvitationDesign 생성
-    const [design] = await db.insert(invitationDesigns).values({
-      invitationId: invitation.id,
-      designData: designData as unknown as Record<string, unknown>,
-      generationBatch: 1,
-      isSelected: true,
+    const userData: UserData = {
+      version: '1.0',
+      meta: {
+        id: template.id,
+        templateId: template.id,
+        layoutId: 'default',
+        styleId: 'default',
+        editorId: 'default',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      data: weddingData as unknown as Record<string, unknown>,
+    }
+
+    // 3. Invitation 생성
+    const [invitation] = await db.insert(superEditorInvitations).values({
+      templateId: template.id,
+      userId: user.id,
+      userData,
+      status: 'draft',
     }).returning()
-
-    // 4. Invitation에 선택된 디자인 연결
-    await db.update(invitations)
-      .set({
-        selectedDesignId: design.id,
-        updatedAt: new Date(),
-      })
-      .where(eq(invitations.id, invitation.id))
-
-    // 5. 이미지가 있으면 저장
-    if (previewData.mainImage && previewData.mainImage.startsWith('data:')) {
-      try {
-        const fileName = `${invitation.id}/${Date.now()}.jpg`
-        const base64Data = previewData.mainImage.replace(/^data:image\/\w+;base64,/, '')
-        const buffer = Buffer.from(base64Data, 'base64')
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('invitation-photos')
-          .upload(fileName, buffer, {
-            contentType: 'image/jpeg',
-            upsert: true,
-          })
-
-        if (!uploadError && uploadData) {
-          const { data: urlData } = supabase.storage
-            .from('invitation-photos')
-            .getPublicUrl(fileName)
-
-          await db.insert(invitationPhotos).values({
-            invitationId: invitation.id,
-            storagePath: fileName,
-            url: urlData.publicUrl,
-            displayOrder: 0,
-          })
-        }
-      } catch (photoError) {
-        console.error('Failed to upload photo:', photoError)
-        // 사진 업로드 실패해도 계속 진행
-      }
-    }
 
     revalidatePath('/my/invitations')
 
