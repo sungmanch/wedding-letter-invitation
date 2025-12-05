@@ -146,6 +146,10 @@ export async function POST(request: NextRequest) {
       systemInstruction: systemPrompt,
     })
 
+    // 모드별 시스템 프롬프트 선택
+    const editMode = body.editMode || 'style'
+    const systemPrompt = getPromptForMode(editMode)
+
     // 대화 히스토리 구성 (Gemini 형식)
     const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = []
 
@@ -172,6 +176,7 @@ export async function POST(request: NextRequest) {
       contents,
       generationConfig: {
         maxOutputTokens: 4096,
+        maxOutputTokens: 4096, // 컨텍스트 절약
         temperature: 0.7,
       },
     })
