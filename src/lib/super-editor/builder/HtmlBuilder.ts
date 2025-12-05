@@ -11,6 +11,8 @@ import { getAnimationPreset } from '../animations/presets'
 import { getTransitionPreset } from '../animations/transitions'
 import { getScrollPreset, type ScrollKeyframe } from '../animations/scroll-presets'
 import { getBgmById } from '../audio/bgm-presets'
+import { resolveTokens } from '../tokens/resolver'
+import { generateCssVariables } from '../tokens/css-generator'
 
 // ============================================
 // Build Context
@@ -722,6 +724,10 @@ export function buildHtml(
   const startTime = Date.now()
   const ctx = createBuildContext(userData.data as Record<string, unknown>)
 
+  // Design Tokens 해석 및 CSS Variables 생성
+  const tokens = resolveTokens(style)
+  const cssVariables = generateCssVariables(tokens)
+
   // 모든 화면 빌드
   const screensHtml = layout.screens
     .map((screen) => {
@@ -739,6 +745,9 @@ export function buildHtml(
 
   // 기본 CSS (모바일 최적화)
   const baseCss = `
+/* Design Tokens (CSS Variables) */
+${cssVariables}
+
 /* Reset & Base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html {
@@ -746,10 +755,11 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 body {
-  font-family: ${style.theme?.typography?.fonts?.body?.family || '"Pretendard", "Apple SD Gothic Neo", sans-serif'};
-  line-height: 1.5;
-  color: ${style.theme?.colors?.text?.primary || '#1F2937'};
-  background-color: ${style.theme?.colors?.background?.default || '#FFFBFC'};
+  font-family: var(--typo-body-font-family, "Pretendard", "Apple SD Gothic Neo", sans-serif);
+  font-size: var(--typo-body-font-size, 16px);
+  line-height: var(--typo-body-line-height, 1.5);
+  color: var(--color-text-primary, #1F2937);
+  background-color: var(--color-background, #FFFBFC);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;

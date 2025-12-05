@@ -45,14 +45,83 @@ AI(LLM)가 JSON 스키마를 생성하고, 이를 정적 HTML로 빌드하는 �
 {{couple.groom.name}}, {{wedding.date}}, {{photos.gallery}}
 ```
 
+## Design Token System (v2)
+
+StyleSchema → SemanticDesignTokens → CSS Variables 자동 변환 시스템
+
+### 토큰 구조
+- **colors**: brand, accent, background, surface, text (primary/secondary/muted), border, divider
+- **typography**: displayLg/Md, headingLg/Md/Sm, body, caption (fontFamily, fontSize, fontWeight, lineHeight, letterSpacing)
+- **spacing**: xs(4px) ~ xxl(48px), section(64px), component(24px)
+- **borders**: radiusSm(4px) ~ radiusFull(9999px)
+- **shadows**: sm, md, lg
+- **animation**: durationFast(150ms)/Normal(300ms)/Slow(500ms), easing, staggerDelay(100ms)
+
+### CSS Variables 사용
+```css
+color: var(--color-text-primary);
+font-family: var(--typo-body-font-family);
+padding: var(--spacing-md);
+border-radius: var(--radius-md);
+```
+
+## Section Skeletons (8개 섹션)
+
+AI 일관성을 위한 사전 정의된 섹션 구조 + Variant 시스템
+
+| 섹션 | Variants | 설명 |
+|------|----------|------|
+| **intro** | minimal, elegant, romantic | 인트로 화면 |
+| **venue** | minimal, detailed, elegant | 예식장 정보 |
+| **date** | minimal, countdown, elegant | 날짜/시간 |
+| **gallery** | grid, carousel, masonry | 갤러리 |
+| **parents** | minimal, detailed, elegant | 혼주 정보 |
+| **accounts** | simple, tabbed, accordion | 계좌 정보 |
+| **guestbook** | simple, card, timeline | 방명록 |
+| **music** | fab, minimal | BGM 플레이어 |
+
+### SkeletonNode 토큰 참조
+```typescript
+tokenStyle: {
+  backgroundColor: '$token.colors.background',
+  color: '$token.colors.text.primary',
+  padding: '$token.spacing.section'
+}
+```
+
+## 2단계 AI 생성 파이프라인
+
+### Stage 1: StyleSchema + Intro
+1. `generateStyle(prompt, mood)` → StyleSchema
+2. `resolveTokens(style)` → SemanticDesignTokens
+3. `generateIntroSection()` → Intro 먼저 생성
+4. `extractPatternsFromSkeleton()` → 디자인 패턴 추출
+
+### Stage 2: 나머지 섹션 병렬 생성
+5. `generateSectionsInParallel()` → 7개 섹션 (Intro 패턴 참조)
+6. `resolveSkeletonToScreen()` → Screen 변환
+7. `buildHtml()` → HTML/CSS/JS 빌드 (CSS Variables 포함)
+
+### AIProvider 인터페이스
+```typescript
+interface AIProvider {
+  generateStyle(prompt: string, mood?: string[]): Promise<StyleSchema>
+  selectVariants(prompt: string, systemPrompt: string): Promise<FillerResponse>
+}
+```
+
 ## 폴더 구조
 
 ```
 super-editor/
 ├── schema/          # 타입 정의 (primitives, layout, style, editor, user-data)
+├── tokens/          # Design Token 시스템 (schema, resolver, css-generator)
+├── skeletons/       # Section Skeletons (types, registry, sections/*)
+├── services/        # Generation Pipeline (generation-service)
+├── builder/         # HtmlBuilder + skeleton-resolver
+├── prompts/         # AI 프롬프트 (mode-prompts, filler-prompt)
+├── utils/           # design-pattern-extractor
 ├── primitives/      # Primitive 렌더러 (layout, content, animation, logic, audio)
-├── builder/         # HtmlBuilder - JSON → 정적 HTML 빌드 (스크롤 모션/BGM 런타임 JS 포함)
-├── prompts/         # AI 프롬프트 템플릿
 ├── animations/      # 30+ 애니메이션 프리셋, 15+ 전환 프리셋, 15개 스크롤 모션 프리셋
 ├── audio/           # BGM 프리셋 라이브러리 (16개)
 ├── components/      # 에디터 UI 컴포넌트
