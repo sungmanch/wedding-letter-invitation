@@ -28,21 +28,16 @@ export function SectionRenderer({
   onSelectNode,
   className,
 }: SectionRendererProps) {
-  // 렌더 컨텍스트 생성
-  const context = React.useMemo<RenderContext>(() => {
-    const baseContext = {
-      data: userData.data as Record<string, unknown>,
-      mode,
-      selectedNodeId,
-      onSelectNode,
-    }
-    return createNodeRenderer(baseContext)
-  }, [userData.data, mode, selectedNodeId, onSelectNode])
+  // 렌더 컨텍스트 생성 - userData가 변경될 때마다 새로 생성
+  const context: RenderContext = createNodeRenderer({
+    data: userData.data as Record<string, unknown>,
+    mode,
+    selectedNodeId,
+    onSelectNode,
+  })
 
   // Screen의 root 노드 렌더링
-  const rendered = React.useMemo(() => {
-    return renderPrimitiveNode(screen.root, context)
-  }, [screen.root, context])
+  const rendered = renderPrimitiveNode(screen.root, context)
 
   return (
     <section
