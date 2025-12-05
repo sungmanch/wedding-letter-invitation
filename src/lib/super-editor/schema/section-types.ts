@@ -10,6 +10,7 @@
 /**
  * 청첩장 섹션 타입
  * - intro: 인트로 (순서 고정: 1번)
+ * - greeting: 인사말
  * - venue: 예식장 위치
  * - date: 예식 날짜/시간
  * - gallery: 갤러리
@@ -20,6 +21,7 @@
  */
 export type SectionType =
   | 'intro'
+  | 'greeting'
   | 'venue'
   | 'date'
   | 'gallery'
@@ -51,6 +53,15 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
     description: '청첩장 첫 화면',
     icon: 'sparkles',
     isFixed: true,
+    isFloating: false,
+    defaultEnabled: true,
+  },
+  greeting: {
+    type: 'greeting',
+    label: '인사말',
+    description: '신랑/신부 인사말',
+    icon: 'message-square',
+    isFixed: false,
     isFloating: false,
     defaultEnabled: true,
   },
@@ -123,6 +134,7 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
  * 기본 섹션 순서 (intro, music 제외)
  */
 export const DEFAULT_SECTION_ORDER: SectionType[] = [
+  'greeting',
   'date',
   'parents',
   'gallery',
@@ -135,6 +147,7 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
  * 순서 변경 가능한 섹션들
  */
 export const REORDERABLE_SECTIONS: SectionType[] = [
+  'greeting',
   'venue',
   'date',
   'gallery',
@@ -148,6 +161,7 @@ export const REORDERABLE_SECTIONS: SectionType[] = [
  */
 export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   intro: true,
+  greeting: true,
   venue: true,
   date: true,
   gallery: true,
@@ -172,7 +186,14 @@ export const SECTION_DATA_BINDINGS: Record<SectionType, string[]> = {
     'photos.main',
     'photos.intro',
     'video.intro',
+    'intro.message',
     // ... AI가 동적으로 추가 가능
+  ],
+  greeting: [
+    'greeting.title',
+    'greeting.content',
+    'couple.groom.name',
+    'couple.bride.name',
   ],
   venue: [
     'venue.name',

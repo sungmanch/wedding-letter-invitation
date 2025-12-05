@@ -398,7 +398,7 @@ export const introSkeleton: SectionSkeleton = {
                       textAlign: 'center',
                     },
                     props: {
-                      content: '저희 두 사람이 사랑으로 하나가 됩니다',
+                      content: '{{intro.message}}',
                       as: 'p',
                     },
                   },
@@ -453,6 +453,14 @@ export const introSkeleton: SectionSkeleton = {
           type: 'date',
           required: true,
           description: '결혼 날짜',
+        },
+        {
+          id: 'intro-message',
+          path: 'intro.message',
+          type: 'text',
+          required: false,
+          description: '인트로 문구',
+          defaultValue: '저희 두 사람이 사랑으로 하나가 됩니다',
         },
       ],
       options: {

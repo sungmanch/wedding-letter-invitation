@@ -3,6 +3,7 @@
  */
 
 export { introSkeleton } from './intro'
+export { greetingSkeleton } from './greeting'
 export { venueSkeleton } from './venue'
 export { dateSkeleton } from './date'
 export { gallerySkeleton } from './gallery'
