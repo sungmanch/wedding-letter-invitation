@@ -17,6 +17,7 @@ import { createGeminiProvider } from '../services/gemini-provider'
 import type { StyleSchema } from '../schema/style'
 import { db } from '@/lib/db'
 import { invitations, invitationDesigns, invitationPhotos } from '@/lib/db/invitation-schema'
+import { eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -297,9 +298,7 @@ export async function saveInvitationAction(
         selectedDesignId: design.id,
         updatedAt: new Date(),
       })
-      .where(
-        (await import('drizzle-orm')).eq(invitations.id, invitation.id)
-      )
+      .where(eq(invitations.id, invitation.id))
 
     // 5. 이미지가 있으면 저장
     if (previewData.mainImage && previewData.mainImage.startsWith('data:')) {
@@ -338,6 +337,7 @@ export async function saveInvitationAction(
     return { success: true, data: { invitationId: invitation.id } }
   } catch (error) {
     console.error('Failed to save invitation:', error)
-    return { success: false, error: '청첩장 저장에 실패했습니다' }
+    const errorMessage = error instanceof Error ? error.message : '청첩장 저장에 실패했습니다'
+    return { success: false, error: errorMessage }
   }
 }
