@@ -1,0 +1,128 @@
+# Wedding Letter Invitation - Sprint Status
+# Updated: 2025-12-05
+
+project: wedding-letter-invitation
+tracking_system: file-system
+current_phase: MVP Complete
+
+# =============================================================================
+# Epic Status Overview
+# =============================================================================
+
+epics:
+  epic-1:
+    name: "청첩장 인프라 구축"
+    status: done
+    stories:
+      1-1-db-schema: done
+      1-2-intro-components: done
+      1-3-section-components: done
+      1-4-invitation-viewer: done
+
+  epic-2:
+    name: "청첩장 생성 플로우"
+    status: done
+    stories:
+      2-1-landing-page: done
+      2-2-image-upload: done
+      2-3-theme-selection: done
+      2-4-ai-design-generation: done
+
+  epic-3:
+    name: "2패널 편집 시스템"
+    status: done
+    stories:
+      3-1-two-panel-layout: done
+      3-2-section-editor: done
+      3-3-style-editor: done
+      3-4-photo-upload: done
+
+  epic-4:
+    name: "결제 및 공유"
+    status: done
+    stories:
+      4-1-preview-page: done
+      4-2-polar-payment: done
+      4-3-kakao-share: done
+      4-4-my-invitations: done
+
+  epic-5:
+    name: "게스트 경험"
+    status: done
+    stories:
+      5-1-guest-viewer: done
+      5-2-message-form: done
+      5-3-account-copy: done
+      5-4-host-messages: done
+
+  epic-6:
+    name: "확장 섹션 시스템"
+    status: done
+    stories:
+      6-1-video-section: done
+      6-2-dday-section: done
+      6-3-timeline-section: done
+      6-4-interview-section: done
+
+# =============================================================================
+# Summary
+# =============================================================================
+
+summary:
+  total_epics: 6
+  completed_epics: 6
+  total_stories: 24
+  completed_stories: 24
+  progress: "100%"
+
+# =============================================================================
+# Key Milestones
+# =============================================================================
+
+milestones:
+  - name: "DB Schema & Components"
+    date: "2025-11-30"
+    status: done
+
+  - name: "Create Flow (Image → Theme → AI)"
+    date: "2025-12-01"
+    status: done
+
+  - name: "2-Panel Edit System"
+    date: "2025-12-02"
+    status: done
+
+  - name: "Payment & Share"
+    date: "2025-12-03"
+    status: done
+
+  - name: "Guest Experience"
+    date: "2025-12-04"
+    status: done
+
+  - name: "Extended Sections"
+    date: "2025-12-05"
+    status: done
+
+# =============================================================================
+# Tech Stack
+# =============================================================================
+
+tech_stack:
+  framework: "Next.js 16 + React 19 + TypeScript 5"
+  styling: "Tailwind CSS v4 + shadcn/ui + Radix UI"
+  database: "Supabase (PostgreSQL + Auth + Storage)"
+  orm: "Drizzle ORM 0.44.7"
+  ai: "Google Gemini 2.0 Flash"
+  payment: "Polar.sh"
+  share: "Kakao JavaScript SDK"
+
+# =============================================================================
+# Related Documents
+# =============================================================================
+
+related_docs:
+  prd: "docs/prd.md"
+  architecture: "docs/architecture-invitation.md"
+  ux_design: "docs/ux-design-specification.md"
+  epics: "docs/epics.md"
