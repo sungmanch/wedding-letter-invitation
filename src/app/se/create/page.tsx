@@ -15,7 +15,12 @@ import {
   completeTemplateAction,
 } from '@/lib/super-editor/actions/generate'
 import type { IntroGenerationResult } from '@/lib/super-editor/services'
-import { DEFAULT_USER_DATA } from './default-style'
+import {
+  PreviewDataForm,
+  formDataToUserData,
+  DEFAULT_PREVIEW_FORM_DATA,
+  type PreviewFormData,
+} from './PreviewDataForm'
 
 // 레거시 템플릿
 import { legacyPresets, categoryLabels } from '@/lib/super-editor/presets/legacy'
@@ -23,6 +28,7 @@ import {
   buildLegacyIntro,
   getLegacyPresetPreviews,
   collectAllIntroStyles,
+  convertLegacyToIntroResult,
   type LegacyIntroResult,
 } from '@/lib/super-editor/presets/legacy/intro-builders'
 import type { IntroBuilderData } from '@/lib/super-editor/presets/legacy/intro-builders'
@@ -31,13 +37,7 @@ import type { RenderContext } from '@/lib/super-editor/primitives/types'
 
 type CreateMode = 'template' | 'chat'
 
-const SAMPLE_DATA: IntroBuilderData = {
-  groomName: '김민준',
-  brideName: '이서연',
-  weddingDate: '2025-03-15',
-  venueName: '그랜드 웨딩홀',
-  mainImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800',
-}
+const SAMPLE_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
 
 // ============================================
 // Types
@@ -228,14 +228,14 @@ function EmptyPreview() {
 // Legacy Preview
 // ============================================
 
-function LegacyPreview({ result }: { result: LegacyIntroResult }) {
+function LegacyPreview({ result, data }: { result: LegacyIntroResult; data: IntroBuilderData }) {
   const renderContext: RenderContext = useMemo(
     () => ({
       mode: 'preview' as const,
-      data: SAMPLE_DATA as unknown as Record<string, unknown>,
+      data: data as unknown as Record<string, unknown>,
       renderNode: (node) => renderPrimitiveNode(node, renderContext),
     }),
-    []
+    [data]
   )
 
   return (
@@ -278,9 +278,22 @@ export default function SuperEditorCreatePage() {
   // Stage 1 결과: Style + Intro (AI 생성용)
   const [introResult, setIntroResult] = useState<IntroGenerationResult | null>(null)
 
+  // 프리뷰 데이터 폼
+  const [previewFormData, setPreviewFormData] = useState<PreviewFormData>(DEFAULT_PREVIEW_FORM_DATA)
+  const previewUserData = useMemo(() => formDataToUserData(previewFormData), [previewFormData])
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // previewFormData를 IntroBuilderData로 변환
+  const legacyBuilderData = useMemo<IntroBuilderData>(() => ({
+    groomName: previewFormData.groomName || '신랑',
+    brideName: previewFormData.brideName || '신부',
+    weddingDate: previewFormData.weddingDate || '2025년 3월 15일',
+    venueName: '웨딩홀',
+    mainImage: SAMPLE_IMAGE,
+  }), [previewFormData])
 
   // 템플릿 선택 핸들러
   const handleTemplateSelect = useCallback((presetId: string) => {
@@ -288,10 +301,21 @@ export default function SuperEditorCreatePage() {
     setIntroResult(null) // AI 결과 초기화
     const preset = legacyPresets[presetId]
     if (preset) {
-      const result = buildLegacyIntro(preset, SAMPLE_DATA)
+      const result = buildLegacyIntro(preset, legacyBuilderData)
       setLegacyResult(result)
     }
-  }, [])
+  }, [legacyBuilderData])
+
+  // 레거시 템플릿 선택 시 폼 데이터 변경에 따라 결과 업데이트
+  useEffect(() => {
+    if (selectedTemplateId) {
+      const preset = legacyPresets[selectedTemplateId]
+      if (preset) {
+        const result = buildLegacyIntro(preset, legacyBuilderData)
+        setLegacyResult(result)
+      }
+    }
+  }, [selectedTemplateId, legacyBuilderData])
 
   // Auto scroll
   useEffect(() => {
@@ -399,26 +423,33 @@ export default function SuperEditorCreatePage() {
     setIsLoading(true)
 
     try {
-      if (legacyResult) {
-        // 레거시 템플릿 선택 시 - TODO: 레거시 템플릿 기반 생성
-        console.log('Legacy template selected:', legacyResult)
-        alert('레거시 템플릿 기반 생성 기능은 준비 중입니다.\n\n콘솔에서 결과를 확인하세요.')
-      } else if (introResult) {
-        // AI 생성 결과로 시작
-        const response = await completeTemplateAction({
-          introResult,
-        })
-
-        if (!response.success || !response.data) {
-          throw new Error(response.error ?? '템플릿 완성에 실패했습니다')
+      // 레거시 결과를 IntroGenerationResult로 변환 (통합 처리)
+      let targetIntroResult = introResult
+      if (legacyResult && selectedTemplateId) {
+        const preset = legacyPresets[selectedTemplateId]
+        if (preset) {
+          targetIntroResult = convertLegacyToIntroResult(legacyResult, preset)
         }
-
-        // TODO: Stage 3 - DB 저장 후 편집 페이지로 이동
-        console.log('Complete template:', response.data)
-        alert('저장 기능은 준비 중입니다.\n\n콘솔에서 생성 결과를 확인하세요.')
-
-        // router.push(`/se/${invitationId}/edit`)
       }
+
+      if (!targetIntroResult) {
+        throw new Error('인트로 결과가 없습니다')
+      }
+
+      // AI 생성 결과로 시작 (레거시도 변환되어 동일하게 처리)
+      const response = await completeTemplateAction({
+        introResult: targetIntroResult,
+      })
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error ?? '템플릿 완성에 실패했습니다')
+      }
+
+      // TODO: Stage 3 - DB 저장 후 편집 페이지로 이동
+      console.log('Complete template:', response.data)
+      alert('저장 기능은 준비 중입니다.\n\n콘솔에서 생성 결과를 확인하세요.')
+
+      // router.push(`/se/${invitationId}/edit`)
     } catch (err) {
       console.error('Template completion failed:', err)
       alert('템플릿 완성에 실패했습니다. 다시 시도해주세요.')
@@ -574,18 +605,27 @@ export default function SuperEditorCreatePage() {
           </div>
 
           {/* Right Panel - Preview (Intro Only) */}
-          <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-gray-50">
-            <div className="flex flex-col items-center">
+          <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-8 bg-gray-50 overflow-y-auto">
+            <div className="flex flex-col items-center w-full max-w-md">
+              {/* 프리뷰 데이터 입력 폼 */}
+              <div className="w-full mb-6">
+                <PreviewDataForm
+                  data={previewFormData}
+                  onChange={setPreviewFormData}
+                  supportsOverlay={false} // TODO: 템플릿별 오버레이 지원 여부 확인
+                />
+              </div>
+
               <div className="text-sm text-gray-500 mb-4">인트로 미리보기</div>
               <PhoneFrame>
                 {legacyResult ? (
                   // 레거시 템플릿 선택 시 - PrimitiveNode 직접 렌더링
-                  <LegacyPreview result={legacyResult} />
+                  <LegacyPreview result={legacyResult} data={legacyBuilderData} />
                 ) : introResult ? (
                   <TokenStyleProvider style={introResult.style}>
                     <SectionRenderer
                       screen={introResult.introScreen}
-                      userData={DEFAULT_USER_DATA}
+                      userData={previewUserData}
                       mode="preview"
                     />
                   </TokenStyleProvider>

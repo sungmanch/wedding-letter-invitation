@@ -66,6 +66,7 @@ export const introSkeleton: SectionSkeleton = {
                 },
                 style: {
                   textAlign: 'center',
+                  whiteSpace: 'nowrap',
                 },
                 props: {
                   content: '{{couple.groom.name}} & {{couple.bride.name}}',
@@ -216,6 +217,7 @@ export const introSkeleton: SectionSkeleton = {
                       color: '#FFFFFF',
                       textAlign: 'center',
                       textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                      whiteSpace: 'nowrap',
                     },
                     props: {
                       content: '{{couple.groom.name}} & {{couple.bride.name}}',
@@ -377,6 +379,7 @@ export const introSkeleton: SectionSkeleton = {
                     },
                     style: {
                       textAlign: 'center',
+                      whiteSpace: 'nowrap',
                     },
                     props: {
                       content: '{{couple.groom.name}} ♥ {{couple.bride.name}}',
@@ -695,6 +698,7 @@ export const introSkeleton: SectionSkeleton = {
                       textAlign: 'center',
                       marginTop: '12px',
                       fontSize: '14px',
+                      whiteSpace: 'nowrap',
                     },
                     props: {
                       content: '{{couple.groom.name}} & {{couple.bride.name}}',
@@ -1098,6 +1102,7 @@ export const introSkeleton: SectionSkeleton = {
                       fontWeight: '700',
                       lineHeight: '1.1',
                       textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                      whiteSpace: 'nowrap',
                     },
                     props: {
                       content: '{{couple.groom.name}} & {{couple.bride.name}}',
@@ -1247,6 +1252,7 @@ export const introSkeleton: SectionSkeleton = {
                           color: '#333333',
                           textAlign: 'center',
                           letterSpacing: '0.05em',
+                          whiteSpace: 'nowrap',
                         },
                         props: {
                           content: '{{couple.groom.name}} & {{couple.bride.name}}',
@@ -1429,6 +1435,7 @@ export const introSkeleton: SectionSkeleton = {
                             },
                             style: {
                               textAlign: 'center',
+                              whiteSpace: 'nowrap',
                             },
                             props: {
                               content: '{{couple.groom.name}} & {{couple.bride.name}}',
