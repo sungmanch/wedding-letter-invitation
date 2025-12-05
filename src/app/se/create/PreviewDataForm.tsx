@@ -5,8 +5,8 @@
  * 신랑/신부 이름, 예식 날짜, 오버레이 문구를 입력받아 프리뷰에 반영
  */
 
-import { useState } from 'react'
-import { ChevronDown, ChevronUp, Info } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { ChevronDown, ChevronUp, Info, ImagePlus, X } from 'lucide-react'
 
 export interface PreviewFormData {
   groomName: string
@@ -14,6 +14,7 @@ export interface PreviewFormData {
   weddingDate: string // YYYY-MM-DD 형식
   weddingTime: string // HH:mm 형식
   overlayText?: string // 일부 템플릿에서만 사용 가능
+  mainImage?: string // 배경 이미지 URL 또는 data URL
 }
 
 interface PreviewDataFormProps {
@@ -22,14 +23,38 @@ interface PreviewDataFormProps {
   supportsOverlay?: boolean // 오버레이 문구 지원 여부
 }
 
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
+
 export function PreviewDataForm({ data, onChange, supportsOverlay = false }: PreviewDataFormProps) {
   const [isExpanded, setIsExpanded] = useState(true)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (field: keyof PreviewFormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     onChange({ ...data, [field]: e.target.value })
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string
+      onChange({ ...data, mainImage: dataUrl })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveImage = () => {
+    onChange({ ...data, mainImage: undefined })
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const currentImage = data.mainImage || DEFAULT_IMAGE
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -49,6 +74,48 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
       {/* Form Fields */}
       {isExpanded && (
         <div className="p-4 space-y-4">
+          {/* 배경 이미지 */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">배경 사진</label>
+            <div className="flex items-center gap-3">
+              {/* 이미지 미리보기 */}
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                <img
+                  src={currentImage}
+                  alt="배경 미리보기"
+                  className="w-full h-full object-cover"
+                />
+                {data.mainImage && (
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                )}
+              </div>
+              {/* 업로드 버튼 */}
+              <div className="flex-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="preview-image-upload"
+                />
+                <label
+                  htmlFor="preview-image-upload"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <ImagePlus className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">사진 변경</span>
+                </label>
+                <p className="text-xs text-gray-400 mt-1">프리뷰 확인용 (저장되지 않음)</p>
+              </div>
+            </div>
+          </div>
+
           {/* 신랑/신부 이름 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -157,10 +224,14 @@ function formatTimeKorean(timeStr: string): string {
   return `${period} ${displayHour}시${minutePart}`
 }
 
+const DEFAULT_SAMPLE_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
+
 /**
  * PreviewFormData를 DEFAULT_USER_DATA 형식으로 변환
  */
 export function formDataToUserData(formData: PreviewFormData) {
+  const mainImage = formData.mainImage || DEFAULT_SAMPLE_IMAGE
+
   return {
     version: '1.0' as const,
     meta: {
@@ -191,8 +262,8 @@ export function formDataToUserData(formData: PreviewFormData) {
         content: '서로의 마음을 확인하고\n평생을 함께 하고자 합니다.',
       },
       photos: {
-        main: '/samples/couple-1.jpg',
-        gallery: ['/samples/couple-1.jpg', '/samples/couple-2.jpg'],
+        main: mainImage,
+        gallery: [mainImage],
       },
     },
   }
