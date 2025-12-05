@@ -126,7 +126,13 @@ export const introSkeleton: SectionSkeleton = {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'mount', duration: 800 },
-          { id: 'slide-up', name: '슬라이드 업', preset: 'slide-up', trigger: 'mount', duration: 600 },
+          {
+            id: 'slide-up',
+            name: '슬라이드 업',
+            preset: 'slide-up',
+            trigger: 'mount',
+            duration: 600,
+          },
         ],
       },
     },
@@ -620,7 +626,13 @@ export const introSkeleton: SectionSkeleton = {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'mount', duration: 1200 },
-          { id: 'stagger', name: '순차 등장', preset: 'stagger-fade', trigger: 'mount', duration: 1500 },
+          {
+            id: 'stagger',
+            name: '순차 등장',
+            preset: 'stagger',
+            trigger: 'mount',
+            duration: 1500,
+          },
         ],
       },
     },
@@ -966,8 +978,20 @@ export const introSkeleton: SectionSkeleton = {
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
-          { id: 'slide', name: '슬라이드', preset: 'slide-in-left', trigger: 'mount', duration: 800 },
-          { id: 'reveal', name: '순차 공개', preset: 'clip-reveal', trigger: 'mount', duration: 1000 },
+          {
+            id: 'slide',
+            name: '슬라이드',
+            preset: 'slide-left',
+            trigger: 'mount',
+            duration: 800,
+          },
+          {
+            id: 'reveal',
+            name: '순차 공개',
+            preset: 'stagger',
+            trigger: 'mount',
+            duration: 1000,
+          },
         ],
       },
     },
@@ -1297,7 +1321,13 @@ export const introSkeleton: SectionSkeleton = {
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
-          { id: 'typewriter', name: '타이핑', preset: 'typewriter', trigger: 'mount', duration: 2000 },
+          {
+            id: 'typewriter',
+            name: '타이핑',
+            preset: 'typewriter',
+            trigger: 'mount',
+            duration: 2000,
+          },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'mount', duration: 800 },
         ],
       },
@@ -1480,7 +1510,7 @@ export const introSkeleton: SectionSkeleton = {
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
-          { id: 'float', name: '떠오르기', preset: 'float-up', trigger: 'mount', duration: 800 },
+          { id: 'float', name: '떠오르기', preset: 'float', trigger: 'mount', duration: 800 },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'mount', duration: 600 },
         ],
       },

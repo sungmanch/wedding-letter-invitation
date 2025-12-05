@@ -6,6 +6,14 @@
 import type { SectionType, SkeletonVariant } from '../skeletons/types'
 import type { SemanticDesignTokens } from '../tokens/schema'
 import type { DesignPatterns } from '../utils/design-pattern-extractor'
+import type { IntroBlockComposition } from '../skeletons/intro-blocks'
+import {
+  IMAGE_LAYOUT_DESCRIPTIONS,
+  TEXT_LAYOUT_DESCRIPTIONS,
+  TEXT_STYLE_DESCRIPTIONS,
+  DECORATION_DESCRIPTIONS,
+  COLOR_THEME_DESCRIPTIONS,
+} from '../skeletons/intro-blocks'
 
 // ============================================
 // System Prompt
@@ -185,4 +193,142 @@ export function variantToSummary(variant: SkeletonVariant): VariantSummary {
     animationOptions: variant.options?.animations?.map((a) => a.id),
     layoutOptions: variant.options?.layouts?.map((l) => l.id),
   }
+}
+
+// ============================================
+// Block-based Prompt (Step 3)
+// ============================================
+
+/**
+ * 블록 기반 시스템 프롬프트
+ */
+export const BLOCK_FILLER_SYSTEM_PROMPT = `당신은 창의적인 청첩장 디자인 어시스턴트입니다.
+사용자의 요청을 분석하여 빌딩 블록을 조합해 독창적인 인트로 디자인을 만듭니다.
+
+# 역할
+- 사용자의 감성과 스토리를 파악합니다
+- 5가지 빌딩 블록을 조합하여 인트로를 구성합니다
+- 기존 9가지 프리셋 외에도 새로운 조합을 시도할 수 있습니다
+
+# 빌딩 블록 시스템
+
+## 1. 이미지 레이아웃 (imageLayout)
+사진을 어떻게 배치할지 결정합니다.
+
+## 2. 텍스트 레이아웃 (textLayout)
+이름과 날짜를 어디에 배치할지 결정합니다.
+
+## 3. 텍스트 스타일 (textStyle)
+폰트와 타이포그래피 스타일을 결정합니다.
+
+## 4. 장식 요소 (decoration)
+추가적인 장식 요소를 선택합니다. 여러 개 선택 가능합니다.
+
+## 5. 색상 테마 (colorTheme)
+전체 색상 분위기를 결정합니다.
+
+# 조합 규칙
+- fullscreen-bg → bottom-overlay, center, stacked-vertical과 호환
+- circular → below-image와 가장 잘 어울림
+- split-left → side-right와 반드시 함께 사용
+- card → inside-card와 함께 사용
+- dark 테마 → fullscreen-bg와 함께 사용할 때 효과적
+- overlay 테마 → fullscreen-bg 필수
+
+# 제약사항
+- 반드시 주어진 블록 옵션에서만 선택하세요
+- JSON 형식으로만 응답하세요
+`
+
+/**
+ * 블록 기반 응답 타입
+ */
+export interface BlockFillerResponse {
+  composition: IntroBlockComposition
+  reasoning?: string // AI가 왜 이 조합을 선택했는지 설명
+}
+
+/**
+ * 블록 기반 요청 타입
+ */
+export interface BlockFillerRequest {
+  prompt: string
+  mood?: string[]
+  referencePatterns?: DesignPatterns
+}
+
+/**
+ * 블록 기반 프롬프트 생성
+ */
+export function buildBlockFillerPrompt(request: BlockFillerRequest): string {
+  const lines: string[] = []
+
+  // 사용자 요청
+  lines.push('# 사용자 스타일 요청')
+  lines.push(`"${request.prompt}"`)
+  lines.push('')
+
+  // 분위기 키워드
+  if (request.mood && request.mood.length > 0) {
+    lines.push('# 분위기 키워드')
+    lines.push(request.mood.join(', '))
+    lines.push('')
+  }
+
+  // 참조 패턴
+  if (request.referencePatterns) {
+    lines.push('# 참조 디자인 패턴')
+    lines.push(`- 분위기: ${request.referencePatterns.mood.join(', ')}`)
+    lines.push(`- 선호 애니메이션: ${request.referencePatterns.animation.preferredPreset}`)
+    lines.push('')
+  }
+
+  // 블록 옵션들
+  lines.push('# 이미지 레이아웃 옵션 (imageLayout)')
+  for (const [key, desc] of Object.entries(IMAGE_LAYOUT_DESCRIPTIONS)) {
+    lines.push(`- ${key}: ${desc}`)
+  }
+  lines.push('')
+
+  lines.push('# 텍스트 레이아웃 옵션 (textLayout)')
+  for (const [key, desc] of Object.entries(TEXT_LAYOUT_DESCRIPTIONS)) {
+    lines.push(`- ${key}: ${desc}`)
+  }
+  lines.push('')
+
+  lines.push('# 텍스트 스타일 옵션 (textStyle)')
+  for (const [key, desc] of Object.entries(TEXT_STYLE_DESCRIPTIONS)) {
+    lines.push(`- ${key}: ${desc}`)
+  }
+  lines.push('')
+
+  lines.push('# 장식 요소 옵션 (decoration) - 여러 개 선택 가능')
+  for (const [key, desc] of Object.entries(DECORATION_DESCRIPTIONS)) {
+    lines.push(`- ${key}: ${desc}`)
+  }
+  lines.push('')
+
+  lines.push('# 색상 테마 옵션 (colorTheme)')
+  for (const [key, desc] of Object.entries(COLOR_THEME_DESCRIPTIONS)) {
+    lines.push(`- ${key}: ${desc}`)
+  }
+  lines.push('')
+
+  // 응답 형식
+  lines.push('# 응답 형식 (JSON만)')
+  lines.push('사용자의 요청에 맞게 블록을 조합하세요.')
+  lines.push('```json')
+  lines.push('{')
+  lines.push('  "composition": {')
+  lines.push('    "imageLayout": "이미지 레이아웃 선택",')
+  lines.push('    "textLayout": "텍스트 레이아웃 선택",')
+  lines.push('    "textStyle": "텍스트 스타일 선택",')
+  lines.push('    "decoration": ["장식1", "장식2"],')
+  lines.push('    "colorTheme": "색상 테마 선택"')
+  lines.push('  },')
+  lines.push('  "reasoning": "이 조합을 선택한 이유 (선택사항)"')
+  lines.push('}')
+  lines.push('```')
+
+  return lines.join('\n')
 }
