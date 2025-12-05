@@ -16,9 +16,12 @@ export function Fullscreen({
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
+  // 프리뷰 모드에서는 CSS 변수(--preview-screen-height)를 사용, 없으면 100vh
+  const defaultHeight = 'var(--preview-screen-height, 100vh)'
+
   const style: React.CSSProperties = {
     width: '100%',
-    minHeight: props.minHeight || '100vh',
+    minHeight: props.minHeight || defaultHeight,
     maxHeight: props.maxHeight,
     position: 'relative',
     ...baseStyle,

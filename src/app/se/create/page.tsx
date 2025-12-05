@@ -84,6 +84,9 @@ function LoadingDots() {
   )
 }
 
+const PHONE_SCREEN_WIDTH = 320
+const PHONE_SCREEN_HEIGHT = 580
+
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative">
@@ -91,10 +94,14 @@ function PhoneFrame({ children }: { children: React.ReactNode }) {
       <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
         {/* Notch */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-10" />
-        {/* Screen */}
+        {/* Screen - CSS 변수로 높이 전달 */}
         <div
           className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto"
-          style={{ width: 320, height: 580 }}
+          style={{
+            width: PHONE_SCREEN_WIDTH,
+            height: PHONE_SCREEN_HEIGHT,
+            '--preview-screen-height': `${PHONE_SCREEN_HEIGHT}px`,
+          } as React.CSSProperties}
         >
           {children}
         </div>
