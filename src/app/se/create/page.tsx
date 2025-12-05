@@ -267,7 +267,7 @@ export default function SuperEditorCreatePage() {
   const router = useRouter()
 
   // Mode: template or chat
-  const [mode, setMode] = useState<CreateMode>('template')
+  const [mode, setMode] = useState<CreateMode>('chat')
 
   // Template selection
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
@@ -510,6 +510,17 @@ export default function SuperEditorCreatePage() {
             {/* Tab Navigation */}
             <div className="flex border-b border-gray-200">
               <button
+                onClick={() => setMode('chat')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+                  mode === 'chat'
+                    ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                AI 생성
+              </button>
+              <button
                 onClick={() => setMode('template')}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
                   mode === 'template'
@@ -520,23 +531,7 @@ export default function SuperEditorCreatePage() {
                 <Grid className="w-4 h-4" />
                 템플릿 선택
               </button>
-              <button
-                onClick={() => setMode('chat')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  mode === 'chat'
-                    ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <MessageSquare className="w-4 h-4" />
-                AI 생성
-              </button>
             </div>
-
-            {/* Template Mode */}
-            {mode === 'template' && (
-              <TemplateGallery onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
-            )}
 
             {/* Chat Mode */}
             {mode === 'chat' && (
@@ -610,6 +605,11 @@ export default function SuperEditorCreatePage() {
                   <p className="text-xs text-gray-400 mt-2 text-center">Shift + Enter로 줄바꿈</p>
                 </div>
               </>
+            )}
+
+            {/* Template Mode */}
+            {mode === 'template' && (
+              <TemplateGallery onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
             )}
           </div>
 
