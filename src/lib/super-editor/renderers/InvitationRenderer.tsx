@@ -9,7 +9,7 @@ import React from 'react'
 import type { LayoutSchema, Screen } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
-import type { SectionType } from '../schema/section-types'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, type SectionType } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
 import { MusicPlayer } from './MusicPlayer'
 
@@ -17,8 +17,8 @@ interface InvitationRendererProps {
   layout: LayoutSchema
   style: StyleSchema
   userData: UserData
-  sectionOrder: SectionType[]
-  sectionEnabled: Record<SectionType, boolean>
+  sectionOrder?: SectionType[]
+  sectionEnabled?: Record<SectionType, boolean>
   mode?: 'preview' | 'edit' | 'build'
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
@@ -83,8 +83,8 @@ export function InvitationRenderer({
   layout,
   style,
   userData,
-  sectionOrder,
-  sectionEnabled,
+  sectionOrder = DEFAULT_SECTION_ORDER,
+  sectionEnabled = DEFAULT_SECTION_ENABLED,
   mode = 'preview',
   selectedNodeId,
   onSelectNode,
