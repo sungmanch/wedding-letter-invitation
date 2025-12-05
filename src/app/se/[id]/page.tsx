@@ -3,26 +3,35 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { getPublishedInvitation } from '@/lib/super-editor/actions'
-import type { SuperEditorInvitation } from '@/lib/db/super-editor-schema'
+import { InvitationRenderer } from '@/lib/super-editor/renderers'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
+import type { SuperEditorInvitation, SuperEditorTemplate } from '@/lib/db/super-editor-schema'
+import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
+import type { StyleSchema } from '@/lib/super-editor/schema/style'
+import type { UserData } from '@/lib/super-editor/schema/user-data'
+import type { SectionType } from '@/lib/super-editor/schema/section-types'
 
 export default function SuperEditorViewerPage() {
   const params = useParams()
   const invitationId = params.id as string
 
-  const [invitation, setInvitation] = useState<SuperEditorInvitation | null>(null)
+  const [data, setData] = useState<{
+    invitation: SuperEditorInvitation
+    template: SuperEditorTemplate
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadInvitation() {
       try {
-        const data = await getPublishedInvitation(invitationId)
-        if (!data) {
+        const result = await getPublishedInvitation(invitationId)
+        if (!result) {
           setError('청첩장을 찾을 수 없습니다.')
-        } else if (!data.isPaid) {
+        } else if (!result.invitation.isPaid) {
           setError('아직 공개되지 않은 청첩장입니다.')
         } else {
-          setInvitation(data)
+          setData(result)
         }
       } catch (err) {
         console.error('Failed to load invitation:', err)
@@ -46,7 +55,7 @@ export default function SuperEditorViewerPage() {
     )
   }
 
-  if (error) {
+  if (error || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center p-8">
@@ -61,24 +70,20 @@ export default function SuperEditorViewerPage() {
     )
   }
 
-  if (!invitation?.buildResult) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8">
-          <p className="text-lg font-medium text-gray-900">청첩장이 아직 빌드되지 않았습니다.</p>
-        </div>
-      </div>
-    )
-  }
+  const { invitation, template } = data
 
-  // 빌드된 HTML 렌더링
+  // 섹션 순서/활성화 상태 (DB에서 가져오거나 기본값 사용)
+  const sectionOrder = (invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER
+  const sectionEnabled = (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
+
   return (
-    <div className="min-h-screen">
-      <iframe
-        srcDoc={invitation.buildResult.html}
-        className="w-full h-screen border-0"
-        title="청첩장"
-      />
-    </div>
+    <InvitationRenderer
+      layout={template.layoutSchema as LayoutSchema}
+      style={template.styleSchema as StyleSchema}
+      userData={invitation.userData as UserData}
+      sectionOrder={sectionOrder}
+      sectionEnabled={sectionEnabled}
+      mode="preview"
+    />
   )
 }

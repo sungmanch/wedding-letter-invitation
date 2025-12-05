@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { getInvitationForPreview } from '@/lib/super-editor/actions'
+import { getInvitationForPreview, getInvitationWithTemplate } from '@/lib/super-editor/actions'
+import { InvitationRenderer } from '@/lib/super-editor/renderers'
 import { verifyPreviewToken } from '@/lib/utils/preview-token'
-import type { SuperEditorInvitation } from '@/lib/db/super-editor-schema'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
+import type { SuperEditorInvitation, SuperEditorTemplate } from '@/lib/db/super-editor-schema'
+import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
+import type { StyleSchema } from '@/lib/super-editor/schema/style'
+import type { UserData } from '@/lib/super-editor/schema/user-data'
+import type { SectionType } from '@/lib/super-editor/schema/section-types'
 
 export default function SuperEditorPreviewPage() {
   const params = useParams()
@@ -13,7 +19,10 @@ export default function SuperEditorPreviewPage() {
   const invitationId = params.id as string
   const token = searchParams.get('token')
 
-  const [invitation, setInvitation] = useState<SuperEditorInvitation | null>(null)
+  const [data, setData] = useState<{
+    invitation: SuperEditorInvitation
+    template: SuperEditorTemplate
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,16 +45,32 @@ export default function SuperEditorPreviewPage() {
             setError('잘못된 미리보기 링크입니다.')
             return
           }
+
+          // 토큰 유효 → 청첩장 데이터 로드 (인증 없이)
+          const invitation = await getInvitationForPreview(invitationId, true)
+          if (!invitation) {
+            setError('청첩장을 찾을 수 없습니다.')
+            return
+          }
+
+          // 템플릿도 함께 가져오기 위해 getInvitationWithTemplate 대신 별도 처리
+          const result = await getInvitationWithTemplate(invitationId).catch(() => null)
+          if (result) {
+            setData(result)
+          } else {
+            setError('템플릿을 찾을 수 없습니다.')
+          }
+          return
         }
 
-        // 청첩장 데이터 로드
-        const data = await getInvitationForPreview(invitationId, !!token)
-        if (!data) {
+        // 토큰 없음 → 인증된 사용자만 (자신의 청첩장)
+        const result = await getInvitationWithTemplate(invitationId)
+        if (!result) {
           setError('청첩장을 찾을 수 없습니다.')
           return
         }
 
-        setInvitation(data)
+        setData(result)
       } catch (err) {
         console.error('Failed to load preview:', err)
         setError('미리보기를 불러오는데 실패했습니다.')
@@ -68,7 +93,7 @@ export default function SuperEditorPreviewPage() {
     )
   }
 
-  if (error) {
+  if (error || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center p-8">
@@ -91,34 +116,16 @@ export default function SuperEditorPreviewPage() {
     )
   }
 
-  if (!invitation?.buildResult) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </div>
-          <p className="text-lg font-medium text-gray-900">청첩장이 아직 빌드되지 않았습니다.</p>
-          <p className="text-sm text-gray-500 mt-2">편집 페이지에서 빌드를 완료해주세요.</p>
-          {!token && (
-            <button
-              onClick={() => router.push(`/se/${invitationId}/edit`)}
-              className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600"
-            >
-              편집 페이지로 이동
-            </button>
-          )}
-        </div>
-      </div>
-    )
-  }
+  const { invitation, template } = data
+
+  // 섹션 순서/활성화 상태
+  const sectionOrder = (invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER
+  const sectionEnabled = (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
 
   // 미리보기 배너 (공유된 링크인 경우)
   const PreviewBanner = token ? (
     <div className="fixed top-0 left-0 right-0 bg-blue-600 text-white text-center py-2 text-sm z-50">
-      미리보기 모드 · 이 링크는 1시간 동안 유효합니다
+      미리보기 모드 - 이 링크는 1시간 동안 유효합니다
     </div>
   ) : (
     <div className="fixed top-0 left-0 right-0 bg-rose-600 text-white text-center py-2 text-sm z-50 flex items-center justify-center gap-4">
@@ -132,15 +139,17 @@ export default function SuperEditorPreviewPage() {
     </div>
   )
 
-  // 빌드된 HTML 렌더링
   return (
     <div className="min-h-screen">
       {PreviewBanner}
       <div className={token ? 'pt-8' : 'pt-10'}>
-        <iframe
-          srcDoc={invitation.buildResult.html}
-          className="w-full h-screen border-0"
-          title="청첩장 미리보기"
+        <InvitationRenderer
+          layout={template.layoutSchema as LayoutSchema}
+          style={template.styleSchema as StyleSchema}
+          userData={invitation.userData as UserData}
+          sectionOrder={sectionOrder}
+          sectionEnabled={sectionEnabled}
+          mode="preview"
         />
       </div>
     </div>

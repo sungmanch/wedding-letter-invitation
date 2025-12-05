@@ -132,6 +132,7 @@ export async function getInvitationForPreview(invitationId: string, hasValidToke
 
 /**
  * 공개된 청첩장 조회 (결제 완료된 것만)
+ * 템플릿 정보도 함께 반환
  */
 export async function getPublishedInvitation(invitationId: string) {
   const invitation = await db.query.superEditorInvitations.findFirst({
@@ -141,7 +142,19 @@ export async function getPublishedInvitation(invitationId: string) {
     ),
   })
 
-  return invitation
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
 }
 
 export async function createInvitation(data: {

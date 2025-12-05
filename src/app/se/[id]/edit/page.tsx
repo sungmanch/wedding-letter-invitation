@@ -1,15 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getInvitationWithTemplate, updateInvitationData } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
-import { EditorPanel, EditorToolbar, PreviewFrame } from '@/lib/super-editor/components'
+import { InvitationRenderer } from '@/lib/super-editor/renderers'
+import { EditorPanel, EditorToolbar } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { EditorSchema } from '@/lib/super-editor/schema/editor'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
+import type { SectionType } from '@/lib/super-editor/schema/section-types'
 
 function EditPageContent() {
   const params = useParams()
@@ -22,6 +25,9 @@ function EditPageContent() {
   const [error, setError] = useState<string | null>(null)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [copySuccess, setCopySuccess] = useState(false)
+  const [sectionOrder, setSectionOrder] = useState<SectionType[]>(DEFAULT_SECTION_ORDER)
+  const [sectionEnabled, setSectionEnabled] = useState<Record<SectionType, boolean>>(DEFAULT_SECTION_ENABLED)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>()
 
   useEffect(() => {
     async function loadData() {
@@ -39,6 +45,8 @@ function EditPageContent() {
           template.editorSchema as EditorSchema
         )
         setUserData(invitation.userData as UserData)
+        setSectionOrder((invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER)
+        setSectionEnabled((invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED)
       } catch (err) {
         console.error('Failed to load invitation:', err)
         setError('청첩장을 불러오는데 실패했습니다.')
@@ -50,7 +58,7 @@ function EditPageContent() {
     loadData()
   }, [invitationId, setTemplate, setUserData])
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!state.userData) return
 
     setSaving(true)
@@ -62,9 +70,9 @@ function EditPageContent() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [invitationId, state.userData])
 
-  const handleGenerateShareUrl = async () => {
+  const handleGenerateShareUrl = useCallback(async () => {
     try {
       const token = await generatePreviewToken(invitationId, 'owner')
       const url = getShareablePreviewUrl(invitationId, token)
@@ -73,9 +81,9 @@ function EditPageContent() {
       console.error('Failed to generate share URL:', err)
       alert('공유 링크 생성에 실패했습니다.')
     }
-  }
+  }, [invitationId])
 
-  const handleCopyShareUrl = async () => {
+  const handleCopyShareUrl = useCallback(async () => {
     if (!shareUrl) return
 
     try {
@@ -85,11 +93,15 @@ function EditPageContent() {
     } catch (err) {
       console.error('Failed to copy:', err)
     }
-  }
+  }, [shareUrl])
 
-  const handlePreview = () => {
+  const handlePreview = useCallback(() => {
     router.push(`/se/${invitationId}/preview`)
-  }
+  }, [router, invitationId])
+
+  const handleSelectNode = useCallback((id: string) => {
+    setSelectedNodeId(id)
+  }, [])
 
   if (loading) {
     return (
@@ -185,16 +197,28 @@ function EditPageContent() {
           )}
         </div>
 
-        {/* 중앙: 미리보기 */}
+        {/* 중앙: 미리보기 (React 렌더러 사용) */}
         <div className="flex-1 flex flex-col bg-gray-200">
           <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-            {state.layout ? (
+            {state.layout && state.style && state.userData ? (
               <div className="relative">
                 {/* 모바일 프레임 */}
                 <div className="relative bg-black rounded-[3rem] p-3 shadow-2xl">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-10" />
-                  <div className="bg-white rounded-[2.5rem] overflow-hidden" style={{ width: 375, height: 667 }}>
-                    <PreviewFrame className="w-full h-full" />
+                  <div
+                    className="bg-white rounded-[2.5rem] overflow-hidden overflow-y-auto"
+                    style={{ width: 375, height: 667 }}
+                  >
+                    <InvitationRenderer
+                      layout={state.layout}
+                      style={state.style}
+                      userData={state.userData}
+                      sectionOrder={sectionOrder}
+                      sectionEnabled={sectionEnabled}
+                      mode="edit"
+                      selectedNodeId={selectedNodeId}
+                      onSelectNode={handleSelectNode}
+                    />
                   </div>
                 </div>
               </div>
