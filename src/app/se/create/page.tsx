@@ -1,309 +1,384 @@
 'use client'
 
 /**
- * Super Editor - Create Page
- * 새 청첩장 생성 (토큰/스켈레톤 시스템 사용)
+ * Super Editor - Create Page (Chat-based)
+ * AI 채팅으로 인트로 + 테마 생성 후 나머지 컴포넌트 병렬 생성
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { generateQuickTemplate } from '@/lib/super-editor/services'
-import { generateTemplateAction } from '@/lib/super-editor/actions/generate'
+import { ArrowLeft, Send, Loader2, Sparkles, RefreshCw } from 'lucide-react'
 import { TokenStyleProvider } from '@/lib/super-editor/context'
 import { InvitationRenderer } from '@/lib/super-editor/renderers'
+import { generateTemplateAction } from '@/lib/super-editor/actions/generate'
 import type { GenerationResult } from '@/lib/super-editor/services'
-import { createDefaultStyle, DEFAULT_USER_DATA } from './default-style'
+import { DEFAULT_USER_DATA } from './default-style'
 
-// 예시 프롬프트
-const EXAMPLE_PROMPTS = [
-  '모던하고 미니멀한',
-  '따뜻하고 로맨틱한',
-  '우아하고 클래식한',
-  '봄꽃이 가득한',
-  '영화같은 감성',
+// ============================================
+// Types
+// ============================================
+
+interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+  styleResult?: GenerationResult
+}
+
+
+// ============================================
+// Constants
+// ============================================
+
+const QUICK_PROMPTS = [
+  { label: '모던 미니멀', prompt: '모던하고 미니멀한 스타일로 만들어주세요' },
+  { label: '로맨틱 플라워', prompt: '꽃과 함께 로맨틱한 분위기로 만들어주세요' },
+  { label: '우아한 클래식', prompt: '우아하고 클래식한 스타일이 좋아요' },
+  { label: '따뜻한 감성', prompt: '따뜻하고 포근한 느낌으로 부탁해요' },
 ]
 
-// 분위기 태그
-const MOOD_TAGS = [
-  { id: 'romantic', label: '로맨틱', emoji: '💕' },
-  { id: 'elegant', label: '우아한', emoji: '✨' },
-  { id: 'minimal', label: '미니멀', emoji: '⬜' },
-  { id: 'modern', label: '모던', emoji: '🔷' },
-  { id: 'warm', label: '따뜻한', emoji: '🧡' },
-  { id: 'playful', label: '발랄한', emoji: '🎈' },
-]
+const INITIAL_MESSAGE: ChatMessage = {
+  id: 'welcome',
+  role: 'assistant',
+  content: '안녕하세요! 청첩장 디자인을 도와드릴게요.\n\n어떤 분위기의 청첩장을 원하시나요? 색상, 스타일, 느낌 등 자유롭게 말씀해주세요.',
+  timestamp: new Date(),
+}
 
-type GenerationStatus = 'idle' | 'generating' | 'success' | 'error'
+// ============================================
+// Components
+// ============================================
+
+function MessageBubble({ message }: { message: ChatMessage }) {
+  const isUser = message.role === 'user'
+
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+          isUser
+            ? 'bg-rose-500 text-white rounded-br-sm'
+            : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+        }`}
+      >
+        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+      </div>
+    </div>
+  )
+}
+
+function LoadingDots() {
+  return (
+    <div className="flex justify-start">
+      <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
+        <div className="flex gap-1.5">
+          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PhoneFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      {/* Phone bezel */}
+      <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
+        {/* Notch */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-10" />
+        {/* Screen */}
+        <div
+          className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto"
+          style={{ width: 320, height: 580 }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function EmptyPreview() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full text-gray-400 px-8">
+      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+        <Sparkles className="w-10 h-10 text-gray-300" />
+      </div>
+      <p className="text-center text-sm font-medium">채팅으로 원하는 스타일을 알려주시면</p>
+      <p className="text-center text-sm font-medium">AI가 청첩장을 디자인해드려요</p>
+    </div>
+  )
+}
+
+// ============================================
+// Main Component
+// ============================================
 
 export default function SuperEditorCreatePage() {
   const router = useRouter()
 
-  // 입력 상태
-  const [prompt, setPrompt] = useState('')
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([])
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  // 생성 상태
-  const [status, setStatus] = useState<GenerationStatus>('idle')
-  const [error, setError] = useState<string | null>(null)
+  // Generation state
   const [result, setResult] = useState<GenerationResult | null>(null)
 
-  // 분위기 태그 토글
-  const toggleMood = (moodId: string) => {
-    setSelectedMoods(prev =>
-      prev.includes(moodId)
-        ? prev.filter(m => m !== moodId)
-        : [...prev, moodId]
-    )
-  }
+  // Refs
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // 예시 프롬프트 클릭
-  const handleExampleClick = (example: string) => {
-    setPrompt(prev => prev ? `${prev}, ${example}` : example)
-  }
+  // Auto scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
-  // 빠른 생성 (AI 없이)
-  const handleQuickGenerate = useCallback(() => {
-    setStatus('generating')
-    setError(null)
+  // Auto resize textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 100)}px`
+    }
+  }, [input])
+
+  // Send message
+  const handleSend = useCallback(async (messageText?: string) => {
+    const text = messageText ?? input.trim()
+    if (!text || isLoading) return
+
+    // Add user message
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: text,
+      timestamp: new Date(),
+    }
+    setMessages(prev => [...prev, userMessage])
+    setInput('')
+    setIsLoading(true)
 
     try {
-      const defaultStyle = createDefaultStyle()
-      const generatedResult = generateQuickTemplate(defaultStyle)
-      setResult(generatedResult)
-      setStatus('success')
-    } catch (err) {
-      console.error('Quick generation failed:', err)
-      setError('생성에 실패했습니다')
-      setStatus('error')
-    }
-  }, [])
-
-  // AI 생성
-  const handleAIGenerate = useCallback(async () => {
-    if (!prompt.trim() && selectedMoods.length === 0) {
-      setError('스타일을 설명하거나 분위기를 선택해주세요')
-      return
-    }
-
-    setStatus('generating')
-    setError(null)
-
-    try {
-      // 서버 액션을 통해 AI 생성 호출
+      // Generate with AI
       const response = await generateTemplateAction({
-        prompt: prompt || selectedMoods.map(m => {
-          const tag = MOOD_TAGS.find(t => t.id === m)
-          return tag?.label ?? m
-        }).join(', '),
-        mood: selectedMoods,
+        prompt: text,
+        mood: [],
       })
 
       if (!response.success || !response.data) {
         throw new Error(response.error ?? 'AI 생성에 실패했습니다')
       }
 
+      // Update result
       setResult(response.data)
-      setStatus('success')
-    } catch (err) {
-      console.error('AI generation failed:', err)
-      setError(err instanceof Error ? err.message : 'AI 생성에 실패했습니다')
-      setStatus('error')
-    }
-  }, [prompt, selectedMoods])
 
-  // 다시 생성
-  const handleRegenerate = () => {
-    setResult(null)
-    setStatus('idle')
+      // Add assistant message
+      const assistantMessage: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: '청첩장 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요. 다른 스타일을 원하시면 다시 말씀해주세요.',
+        timestamp: new Date(),
+        styleResult: response.data,
+      }
+      setMessages(prev => [...prev, assistantMessage])
+
+    } catch (err) {
+      console.error('Generation failed:', err)
+
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: '죄송해요, 디자인 생성 중 문제가 발생했어요. 다시 시도해주시겠어요?',
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [input, isLoading])
+
+  // Handle key down
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
   }
 
-  // 저장 및 편집으로 이동
+  // Regenerate
+  const handleRegenerate = () => {
+    setResult(null)
+    setMessages([
+      INITIAL_MESSAGE,
+      {
+        id: `regen-${Date.now()}`,
+        role: 'assistant',
+        content: '새로운 디자인을 만들어볼까요? 원하는 스타일을 알려주세요!',
+        timestamp: new Date(),
+      },
+    ])
+  }
+
+  // Save and continue
   const handleSaveAndEdit = async () => {
     if (!result) return
 
-    // TODO: DB에 저장 후 편집 페이지로 이동
-    // 현재는 콘솔에 출력
+    // TODO: DB 저장 후 편집 페이지로 이동
     console.log('Generated result:', result)
     alert('저장 기능은 준비 중입니다.\n\n콘솔에서 생성 결과를 확인하세요.')
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">새 청첩장 만들기</h1>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900"
-          >
-            취소
-          </button>
+      {/* Header */}
+      <header className="sticky top-0 z-20 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.back()}
+                className="p-2 -ml-2 rounded-full hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <h1 className="text-lg font-semibold text-gray-900">새 청첩장 만들기</h1>
+            </div>
+            {result && (
+              <button
+                onClick={handleSaveAndEdit}
+                className="px-4 py-2 bg-rose-500 text-white text-sm font-medium rounded-lg hover:bg-rose-600 transition-colors"
+              >
+                이 디자인으로 시작
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-4 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 왼쪽: 입력 패널 */}
-          <div className="space-y-6">
-            {/* 프롬프트 입력 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                어떤 스타일의 청첩장을 만들까요?
-              </h2>
-
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="원하는 분위기를 자유롭게 설명해주세요..."
-                className="w-full h-32 px-4 py-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                disabled={status === 'generating'}
-              />
-
-              {/* 예시 프롬프트 */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {EXAMPLE_PROMPTS.map((example) => (
-                  <button
-                    key={example}
-                    onClick={() => handleExampleClick(example)}
-                    className="px-3 py-1.5 text-sm bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
-                    disabled={status === 'generating'}
-                  >
-                    {example}
-                  </button>
-                ))}
+      {/* Main Content - 2 Panel Layout */}
+      <main className="max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)]">
+          {/* Left Panel - Chat */}
+          <div className="flex-1 lg:max-w-xl flex flex-col bg-white border-r border-gray-200">
+            {/* Chat Header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <div className="w-10 h-10 bg-gradient-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">디자인 어시스턴트</h3>
+                <p className="text-xs text-gray-500">AI가 청첩장을 디자인해드려요</p>
               </div>
             </div>
 
-            {/* 분위기 선택 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                분위기 선택
-              </h2>
-
-              <div className="grid grid-cols-3 gap-3">
-                {MOOD_TAGS.map((mood) => (
-                  <button
-                    key={mood.id}
-                    onClick={() => toggleMood(mood.id)}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                      selectedMoods.includes(mood.id)
-                        ? 'border-rose-500 bg-rose-50 text-rose-700'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                    }`}
-                    disabled={status === 'generating'}
-                  >
-                    <span>{mood.emoji}</span>
-                    <span className="font-medium">{mood.label}</span>
-                  </button>
-                ))}
-              </div>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))}
+              {isLoading && <LoadingDots />}
+              <div ref={messagesEndRef} />
             </div>
 
-            {/* 에러 메시지 */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-                {error}
+            {/* Quick Prompts */}
+            {messages.length === 1 && (
+              <div className="px-4 pb-2">
+                <p className="text-xs text-gray-500 mb-2">빠른 시작:</p>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_PROMPTS.map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => handleSend(item.prompt)}
+                      className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* 버튼 */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleQuickGenerate}
-                disabled={status === 'generating'}
-                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
-              >
-                빠른 생성
-              </button>
-              <button
-                onClick={handleAIGenerate}
-                disabled={status === 'generating'}
-                className="flex-1 px-6 py-3 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 disabled:opacity-50 transition-colors"
-              >
-                {status === 'generating' ? '생성 중...' : 'AI로 생성'}
-              </button>
+            {/* Input */}
+            <div className="p-4 border-t border-gray-100">
+              <div className="flex items-end gap-2">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="원하는 스타일을 설명해주세요..."
+                    rows={1}
+                    disabled={isLoading}
+                    className="w-full px-4 py-3 bg-gray-100 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-colors text-sm disabled:opacity-50"
+                    style={{ maxHeight: '100px' }}
+                  />
+                </div>
+                <button
+                  onClick={() => handleSend()}
+                  disabled={!input.trim() || isLoading}
+                  className="p-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-2 text-center">
+                Shift + Enter로 줄바꿈
+              </p>
             </div>
           </div>
 
-          {/* 오른쪽: 프리뷰 패널 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">미리보기</h2>
+          {/* Right Panel - Preview */}
+          <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-gray-50">
+            <div className="flex flex-col items-center">
+              <div className="text-sm text-gray-500 mb-4">미리보기</div>
+              <PhoneFrame>
+                {result ? (
+                  <TokenStyleProvider style={result.style}>
+                    <InvitationRenderer
+                      layout={result.layout}
+                      style={result.style}
+                      userData={DEFAULT_USER_DATA}
+                      mode="preview"
+                    />
+                  </TokenStyleProvider>
+                ) : (
+                  <EmptyPreview />
+                )}
+              </PhoneFrame>
+
+              {/* Regenerate button */}
               {result && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleRegenerate}
-                    className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
-                  >
-                    다시 생성
-                  </button>
-                  <button
-                    onClick={handleSaveAndEdit}
-                    className="px-4 py-1.5 text-sm bg-rose-500 text-white rounded-lg hover:bg-rose-600"
-                  >
-                    이 디자인으로 시작
-                  </button>
-                </div>
+                <button
+                  onClick={handleRegenerate}
+                  className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  다시 생성하기
+                </button>
               )}
             </div>
-
-            {/* 프리뷰 영역 */}
-            <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4 min-h-[600px]">
-              {status === 'generating' ? (
-                <div className="text-center">
-                  <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-gray-600">청첩장을 생성하고 있습니다...</p>
-                  <p className="text-sm text-gray-400 mt-2">잠시만 기다려주세요</p>
-                </div>
-              ) : result ? (
-                <div className="relative bg-black rounded-[2.5rem] p-2 shadow-xl">
-                  {/* 노치 */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-10" />
-                  {/* 스크린 */}
-                  <div
-                    className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto"
-                    style={{ width: 320, height: 580 }}
-                  >
-                    <TokenStyleProvider style={result.style}>
-                      <InvitationRenderer
-                        layout={result.layout}
-                        style={result.style}
-                        userData={DEFAULT_USER_DATA}
-                        mode="preview"
-                      />
-                    </TokenStyleProvider>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-gray-400">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-200 flex items-center justify-center">
-                    <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <p className="font-medium">스타일을 선택하고</p>
-                  <p className="font-medium">생성 버튼을 눌러주세요</p>
-                </div>
-              )}
-            </div>
-
-            {/* 생성 정보 */}
-            {result && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>섹션 수</span>
-                  <span>{result.screens.length}개</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span>CSS Variables</span>
-                  <span>{result.cssVariables.split('\n').length}개</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Mobile Preview FAB */}
+      {result && (
+        <div className="fixed bottom-20 right-4 lg:hidden">
+          <button
+            onClick={() => {/* TODO: 모바일 프리뷰 모달 */}}
+            className="w-14 h-14 bg-rose-500 text-white rounded-full shadow-lg flex items-center justify-center"
+          >
+            <Sparkles className="w-6 h-6" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
