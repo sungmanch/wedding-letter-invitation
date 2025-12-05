@@ -1,15 +1,35 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useSuperEditor } from '../context'
 import { SectionRenderer } from './fields/FieldRenderer'
+import { generateEditorSections } from '../utils/dynamic-editor'
+import type { SectionType } from '../skeletons/types'
+import type { EditorSection } from '../schema/editor'
 
 interface EditorPanelProps {
   className?: string
+  /** 활성화된 섹션 목록 - 제공되면 동적으로 에디터 필드 생성 */
+  enabledSections?: SectionType[]
+  /** 커스텀 섹션 (동적 생성 대신 직접 제공) */
+  customSections?: EditorSection[]
 }
 
-export function EditorPanel({ className = '' }: EditorPanelProps) {
+export function EditorPanel({ className = '', enabledSections, customSections }: EditorPanelProps) {
   const { state } = useSuperEditor()
   const { editor, loading, error } = state
+
+  // 동적으로 에디터 섹션 생성 (enabledSections가 제공된 경우)
+  const dynamicSections = useMemo(() => {
+    if (customSections) return customSections
+    if (enabledSections && enabledSections.length > 0) {
+      return generateEditorSections(enabledSections)
+    }
+    return null
+  }, [enabledSections, customSections])
+
+  // 사용할 섹션 결정: 동적 > editor.sections
+  const sections = dynamicSections || editor?.sections || []
 
   if (loading) {
     return (
@@ -30,10 +50,10 @@ export function EditorPanel({ className = '' }: EditorPanelProps) {
     )
   }
 
-  if (!editor) {
+  if (sections.length === 0) {
     return (
       <div className={`flex items-center justify-center p-8 text-gray-500 ${className}`}>
-        <p>에디터를 불러오는 중...</p>
+        <p>편집할 필드가 없습니다</p>
       </div>
     )
   }
@@ -41,20 +61,8 @@ export function EditorPanel({ className = '' }: EditorPanelProps) {
   return (
     <div className={`overflow-auto ${className}`}>
       <div className="p-4 space-y-4">
-        {/* 에디터 헤더 */}
-        <div className="pb-3 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {editor.meta.name}
-          </h2>
-          {editor.meta.description && (
-            <p className="text-sm text-gray-500 mt-1">
-              {editor.meta.description}
-            </p>
-          )}
-        </div>
-
         {/* 섹션들 */}
-        {editor.sections
+        {sections
           .sort((a, b) => a.order - b.order)
           .map((section) => (
             <SectionRenderer key={section.id} section={section} />

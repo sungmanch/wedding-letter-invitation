@@ -251,16 +251,15 @@ function EditPageContent() {
 
           {/* 탭 콘텐츠 */}
           {activeTab === 'fields' && (
-            state.editor ? (
-              <>
-                <EditorToolbar />
-                <EditorPanel className="flex-1 overflow-y-auto" />
-              </>
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
-                <p>편집기를 불러오는 중...</p>
-              </div>
-            )
+            <>
+              <EditorToolbar />
+              <EditorPanel
+                className="flex-1 overflow-y-auto"
+                enabledSections={
+                  ['intro', ...sectionOrder.filter(s => sectionEnabled[s])] as SectionType[]
+                }
+              />
+            </>
           )}
           {activeTab === 'style' && state.style && (
             <StyleEditor
