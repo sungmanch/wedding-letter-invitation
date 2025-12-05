@@ -2,16 +2,21 @@
 
 /**
  * Super Editor - Create Page (Chat-based)
- * AI 채팅으로 인트로 + 테마 생성 후 나머지 컴포넌트 병렬 생성
+ * Stage 1: AI 채팅으로 Style + Intro 생성
+ * Stage 2: 기본 컴포넌트로 나머지 섹션 채우기
+ * Stage 3: 편집 화면으로 이동
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Send, Loader2, Sparkles, RefreshCw } from 'lucide-react'
 import { TokenStyleProvider } from '@/lib/super-editor/context'
-import { InvitationRenderer } from '@/lib/super-editor/renderers'
-import { generateTemplateAction } from '@/lib/super-editor/actions/generate'
-import type { GenerationResult } from '@/lib/super-editor/services'
+import { SectionRenderer } from '@/lib/super-editor/renderers'
+import {
+  generateIntroOnlyAction,
+  completeTemplateAction,
+} from '@/lib/super-editor/actions/generate'
+import type { IntroGenerationResult } from '@/lib/super-editor/services'
 import { DEFAULT_USER_DATA } from './default-style'
 
 // ============================================
@@ -23,9 +28,7 @@ interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
-  styleResult?: GenerationResult
 }
-
 
 // ============================================
 // Constants
@@ -107,7 +110,7 @@ function EmptyPreview() {
         <Sparkles className="w-10 h-10 text-gray-300" />
       </div>
       <p className="text-center text-sm font-medium">채팅으로 원하는 스타일을 알려주시면</p>
-      <p className="text-center text-sm font-medium">AI가 청첩장을 디자인해드려요</p>
+      <p className="text-center text-sm font-medium">AI가 인트로를 디자인해드려요</p>
     </div>
   )
 }
@@ -124,8 +127,8 @@ export default function SuperEditorCreatePage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Generation state
-  const [result, setResult] = useState<GenerationResult | null>(null)
+  // Stage 1 결과: Style + Intro
+  const [introResult, setIntroResult] = useState<IntroGenerationResult | null>(null)
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -144,7 +147,7 @@ export default function SuperEditorCreatePage() {
     }
   }, [input])
 
-  // Send message
+  // Send message - Stage 1: Intro 생성
   const handleSend = useCallback(async (messageText?: string) => {
     const text = messageText ?? input.trim()
     if (!text || isLoading) return
@@ -161,8 +164,8 @@ export default function SuperEditorCreatePage() {
     setIsLoading(true)
 
     try {
-      // Generate with AI
-      const response = await generateTemplateAction({
+      // Stage 1: Style + Intro만 생성
+      const response = await generateIntroOnlyAction({
         prompt: text,
         mood: [],
       })
@@ -171,16 +174,15 @@ export default function SuperEditorCreatePage() {
         throw new Error(response.error ?? 'AI 생성에 실패했습니다')
       }
 
-      // Update result
-      setResult(response.data)
+      // Update intro result
+      setIntroResult(response.data)
 
       // Add assistant message
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: '청첩장 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요. 다른 스타일을 원하시면 다시 말씀해주세요.',
+        content: '인트로 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요.\n다른 스타일을 원하시면 다시 말씀해주세요.',
         timestamp: new Date(),
-        styleResult: response.data,
       }
       setMessages(prev => [...prev, assistantMessage])
 
@@ -209,7 +211,7 @@ export default function SuperEditorCreatePage() {
 
   // Regenerate
   const handleRegenerate = () => {
-    setResult(null)
+    setIntroResult(null)
     setMessages([
       INITIAL_MESSAGE,
       {
@@ -221,13 +223,33 @@ export default function SuperEditorCreatePage() {
     ])
   }
 
-  // Save and continue
-  const handleSaveAndEdit = async () => {
-    if (!result) return
+  // Stage 2 & 3: 기본 섹션 추가 후 편집 화면으로 이동
+  const handleStartEditing = async () => {
+    if (!introResult) return
 
-    // TODO: DB 저장 후 편집 페이지로 이동
-    console.log('Generated result:', result)
-    alert('저장 기능은 준비 중입니다.\n\n콘솔에서 생성 결과를 확인하세요.')
+    setIsLoading(true)
+
+    try {
+      // Stage 2: 나머지 섹션을 기본 컴포넌트로 채우기
+      const response = await completeTemplateAction({
+        introResult,
+      })
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error ?? '템플릿 완성에 실패했습니다')
+      }
+
+      // TODO: Stage 3 - DB 저장 후 편집 페이지로 이동
+      console.log('Complete template:', response.data)
+      alert('저장 기능은 준비 중입니다.\n\n콘솔에서 생성 결과를 확인하세요.')
+
+      // router.push(`/se/${invitationId}/edit`)
+    } catch (err) {
+      console.error('Template completion failed:', err)
+      alert('템플릿 완성에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -245,12 +267,20 @@ export default function SuperEditorCreatePage() {
               </button>
               <h1 className="text-lg font-semibold text-gray-900">새 청첩장 만들기</h1>
             </div>
-            {result && (
+            {introResult && (
               <button
-                onClick={handleSaveAndEdit}
-                className="px-4 py-2 bg-rose-500 text-white text-sm font-medium rounded-lg hover:bg-rose-600 transition-colors"
+                onClick={handleStartEditing}
+                disabled={isLoading}
+                className="px-4 py-2 bg-rose-500 text-white text-sm font-medium rounded-lg hover:bg-rose-600 disabled:opacity-50 transition-colors"
               >
-                이 디자인으로 시작
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    준비 중...
+                  </span>
+                ) : (
+                  '이 디자인으로 시작'
+                )}
               </button>
             )}
           </div>
@@ -269,7 +299,7 @@ export default function SuperEditorCreatePage() {
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-gray-900">디자인 어시스턴트</h3>
-                <p className="text-xs text-gray-500">AI가 청첩장을 디자인해드려요</p>
+                <p className="text-xs text-gray-500">AI가 인트로를 디자인해드려요</p>
               </div>
             </div>
 
@@ -334,16 +364,15 @@ export default function SuperEditorCreatePage() {
             </div>
           </div>
 
-          {/* Right Panel - Preview */}
+          {/* Right Panel - Preview (Intro Only) */}
           <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-gray-50">
             <div className="flex flex-col items-center">
-              <div className="text-sm text-gray-500 mb-4">미리보기</div>
+              <div className="text-sm text-gray-500 mb-4">인트로 미리보기</div>
               <PhoneFrame>
-                {result ? (
-                  <TokenStyleProvider style={result.style}>
-                    <InvitationRenderer
-                      layout={result.layout}
-                      style={result.style}
+                {introResult ? (
+                  <TokenStyleProvider style={introResult.style}>
+                    <SectionRenderer
+                      screen={introResult.introScreen}
                       userData={DEFAULT_USER_DATA}
                       mode="preview"
                     />
@@ -354,7 +383,7 @@ export default function SuperEditorCreatePage() {
               </PhoneFrame>
 
               {/* Regenerate button */}
-              {result && (
+              {introResult && (
                 <button
                   onClick={handleRegenerate}
                   className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
@@ -369,7 +398,7 @@ export default function SuperEditorCreatePage() {
       </main>
 
       {/* Mobile Preview FAB */}
-      {result && (
+      {introResult && (
         <div className="fixed bottom-20 right-4 lg:hidden">
           <button
             onClick={() => {/* TODO: 모바일 프리뷰 모달 */}}
