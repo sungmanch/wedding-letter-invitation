@@ -283,6 +283,120 @@ async function generateMusicSection(
 }
 
 // ============================================
+// Intro-Only Generation (Stage 1)
+// ============================================
+
+/**
+ * Stage 1 결과: Style + Intro만 포함
+ */
+export interface IntroGenerationResult {
+  style: StyleSchema
+  tokens: SemanticDesignTokens
+  cssVariables: string
+  introScreen: SectionScreen
+}
+
+/**
+ * Stage 1: Style + Intro만 생성
+ * 채팅을 통해 인트로를 완성한 후 나머지 섹션은 기본값으로 채움
+ */
+export async function generateIntroOnly(
+  options: GenerationOptions,
+  aiProvider: AIProvider
+): Promise<IntroGenerationResult> {
+  const { prompt, mood } = options
+
+  // Style 생성
+  const style = options.existingStyle ?? (await aiProvider.generateStyle(prompt, mood))
+  const tokens = resolveTokens(style)
+  const cssVariables = generateCssVariables(tokens)
+
+  // Intro 섹션만 생성
+  const introResult = await generateIntroSection(prompt, mood, tokens, aiProvider)
+  const introScreen = resolveSkeletonToScreen('intro', tokens, introResult)
+
+  if (!introScreen) {
+    throw new Error('Intro 섹션 생성에 실패했습니다')
+  }
+
+  return {
+    style,
+    tokens,
+    cssVariables,
+    introScreen,
+  }
+}
+
+/**
+ * Stage 2: Intro 결과에 기본 섹션들을 추가하여 전체 템플릿 완성
+ */
+export function completeTemplateWithDefaults(
+  introResult: IntroGenerationResult,
+  enabledSections?: SectionType[]
+): GenerationResult {
+  const { style, tokens, cssVariables, introScreen } = introResult
+
+  // 기본 섹션들 생성 (intro 제외)
+  const sectionTypes = (enabledSections ?? DEFAULT_SECTION_ORDER).filter(
+    (type) => type !== 'intro'
+  )
+
+  const screens: SectionScreen[] = [introScreen]
+
+  for (const type of sectionTypes) {
+    const defaultVariant = getDefaultVariant(type)
+    if (!defaultVariant) continue
+
+    const screen = resolveSkeletonToScreen(type, tokens, {
+      sectionType: type,
+      variantId: defaultVariant.id,
+    })
+
+    if (screen) {
+      screens.push(screen)
+    }
+  }
+
+  // Music 섹션 추가
+  const musicVariant = getDefaultVariant('music')
+  if (musicVariant) {
+    const musicScreen = resolveSkeletonToScreen('music', tokens, {
+      sectionType: 'music',
+      variantId: musicVariant.id,
+    })
+    if (musicScreen) {
+      screens.push(musicScreen)
+    }
+  }
+
+  const layout: LayoutSchema = {
+    version: '1.0',
+    meta: {
+      id: `layout-${Date.now()}`,
+      name: '생성된 청첩장',
+      category: 'scroll' as LayoutCategory,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    screens: screens.map((screen) => ({
+      id: screen.id,
+      name: screen.name,
+      type: screen.type,
+      sectionType: screen.sectionType,
+      root: screen.root,
+    })),
+  }
+
+  return {
+    style,
+    tokens,
+    cssVariables,
+    layout,
+    screens,
+  }
+}
+
+// ============================================
 // Quick Generation (폴백용)
 // ============================================
 

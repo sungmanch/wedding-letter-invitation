@@ -4,7 +4,15 @@
  * Super Editor - Server Actions for Template Generation
  */
 
-import { generateFullTemplate, generateQuickTemplate, type GenerationOptions, type GenerationResult } from '../services/generation-service'
+import {
+  generateFullTemplate,
+  generateQuickTemplate,
+  generateIntroOnly,
+  completeTemplateWithDefaults,
+  type GenerationOptions,
+  type GenerationResult,
+  type IntroGenerationResult,
+} from '../services/generation-service'
 import { createGeminiProvider } from '../services/gemini-provider'
 import type { StyleSchema } from '../schema/style'
 
@@ -118,6 +126,90 @@ export async function generateStyleAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : '스타일 생성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Stage 1: Intro Only Generation
+// ============================================
+
+export interface GenerateIntroInput {
+  prompt: string
+  mood?: string[]
+}
+
+export interface GenerateIntroOutput {
+  success: boolean
+  data?: IntroGenerationResult
+  error?: string
+}
+
+/**
+ * Stage 1: Style + Intro만 생성
+ */
+export async function generateIntroOnlyAction(
+  input: GenerateIntroInput
+): Promise<GenerateIntroOutput> {
+  try {
+    const aiProvider = createGeminiProvider()
+
+    const options: GenerationOptions = {
+      prompt: input.prompt,
+      mood: input.mood,
+    }
+
+    const result = await generateIntroOnly(options, aiProvider)
+
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    console.error('Intro generation failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Intro 생성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Stage 2: Complete Template with Defaults
+// ============================================
+
+export interface CompleteTemplateInput {
+  introResult: IntroGenerationResult
+  enabledSections?: string[]
+}
+
+export interface CompleteTemplateOutput {
+  success: boolean
+  data?: GenerationResult
+  error?: string
+}
+
+/**
+ * Stage 2: Intro 결과 + 기본 섹션들로 전체 템플릿 완성
+ */
+export async function completeTemplateAction(
+  input: CompleteTemplateInput
+): Promise<CompleteTemplateOutput> {
+  try {
+    const result = completeTemplateWithDefaults(
+      input.introResult,
+      input.enabledSections as import('../skeletons/types').SectionType[] | undefined
+    )
+
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    console.error('Template completion failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '템플릿 완성에 실패했습니다',
     }
   }
 }
