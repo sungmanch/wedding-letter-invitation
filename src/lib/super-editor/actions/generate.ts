@@ -268,13 +268,14 @@ export async function saveInvitationAction(
       version: '1.0',
       meta: {
         id: 'default',
-        name: '기본 에디터',
+        name: '청첩장 편집',
+        description: '청첩장의 모든 내용을 편집할 수 있습니다.',
         layoutId: 'default',
         styleId: 'default',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      sections: [],
+      sections: getDefaultEditorSections(),
     }
 
     const [template] = await db.insert(superEditorTemplates).values({
@@ -347,4 +348,153 @@ export async function saveInvitationAction(
     const errorMessage = error instanceof Error ? error.message : '청첩장 저장에 실패했습니다'
     return { success: false, error: errorMessage }
   }
+}
+
+// ============================================
+// Default Editor Sections
+// ============================================
+
+/**
+ * 청첩장 기본 에디터 섹션 생성
+ */
+function getDefaultEditorSections(): EditorSchema['sections'] {
+  return [
+    {
+      id: 'couple',
+      title: '신랑/신부 정보',
+      icon: 'heart',
+      order: 1,
+      fields: [
+        {
+          id: 'groom-name',
+          type: 'text',
+          label: '신랑 이름',
+          dataPath: 'couple.groom.name',
+          required: true,
+          order: 1,
+          placeholder: '신랑 이름을 입력하세요',
+        },
+        {
+          id: 'bride-name',
+          type: 'text',
+          label: '신부 이름',
+          dataPath: 'couple.bride.name',
+          required: true,
+          order: 2,
+          placeholder: '신부 이름을 입력하세요',
+        },
+      ],
+    },
+    {
+      id: 'wedding',
+      title: '예식 정보',
+      icon: 'calendar',
+      order: 2,
+      fields: [
+        {
+          id: 'wedding-date',
+          type: 'date',
+          label: '예식 날짜',
+          dataPath: 'wedding.date',
+          required: true,
+          order: 1,
+        },
+        {
+          id: 'wedding-time',
+          type: 'time',
+          label: '예식 시간',
+          dataPath: 'wedding.time',
+          required: true,
+          order: 2,
+        },
+      ],
+    },
+    {
+      id: 'venue',
+      title: '예식장 정보',
+      icon: 'map-pin',
+      order: 3,
+      fields: [
+        {
+          id: 'venue-name',
+          type: 'text',
+          label: '예식장 이름',
+          dataPath: 'venue.name',
+          required: true,
+          order: 1,
+          placeholder: '예: 그랜드 웨딩홀',
+        },
+        {
+          id: 'venue-hall',
+          type: 'text',
+          label: '홀 이름',
+          dataPath: 'venue.hall',
+          required: false,
+          order: 2,
+          placeholder: '예: 3층 그랜드볼룸',
+        },
+        {
+          id: 'venue-address',
+          type: 'text',
+          label: '주소',
+          dataPath: 'venue.address',
+          required: true,
+          order: 3,
+          placeholder: '예: 서울특별시 강남구...',
+        },
+        {
+          id: 'venue-tel',
+          type: 'phone',
+          label: '전화번호',
+          dataPath: 'venue.tel',
+          required: false,
+          order: 4,
+        },
+      ],
+    },
+    {
+      id: 'photos',
+      title: '사진',
+      icon: 'image',
+      order: 4,
+      fields: [
+        {
+          id: 'main-photo',
+          type: 'image',
+          label: '대표 사진',
+          dataPath: 'photos.main',
+          required: false,
+          order: 1,
+          aspectRatio: '3:4',
+        },
+        {
+          id: 'gallery-photos',
+          type: 'imageList',
+          label: '갤러리',
+          dataPath: 'photos.gallery',
+          required: false,
+          order: 2,
+          maxItems: 20,
+        },
+      ],
+    },
+    {
+      id: 'greeting',
+      title: '인사말',
+      icon: 'message-square',
+      order: 5,
+      fields: [
+        {
+          id: 'greeting-content',
+          type: 'textarea',
+          label: '인사말',
+          dataPath: 'greeting.content',
+          required: false,
+          order: 1,
+          rows: 5,
+          placeholder: '하객들에게 전할 인사말을 작성해주세요.',
+        },
+      ],
+    },
+  ]
 }

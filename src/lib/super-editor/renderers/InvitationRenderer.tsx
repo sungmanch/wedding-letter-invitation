@@ -12,6 +12,8 @@ import type { UserData } from '../schema/user-data'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, type SectionType } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
 import { MusicPlayer } from './MusicPlayer'
+import { resolveTokens } from '../tokens/resolver'
+import type { SemanticDesignTokens, TypoToken } from '../tokens/schema'
 
 interface InvitationRendererProps {
   layout: LayoutSchema
@@ -49,34 +51,101 @@ function getSortedSections(
 }
 
 /**
- * StyleSchema에서 CSS 변수 추출
+ * camelCase를 kebab-case로 변환
+ */
+function toKebabCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
+/**
+ * 타이포그래피 토큰을 CSS Variables 객체로 변환
+ */
+function generateTypoVariables(prefix: string, typo: TypoToken): Record<string, string> {
+  const baseVar = `--typo-${toKebabCase(prefix)}`
+  const vars: Record<string, string> = {}
+
+  vars[`${baseVar}-font-family`] = typo.fontFamily
+  vars[`${baseVar}-font-size`] = typo.fontSize
+  vars[`${baseVar}-font-weight`] = String(typo.fontWeight)
+  vars[`${baseVar}-line-height`] = String(typo.lineHeight)
+
+  if (typo.letterSpacing) {
+    vars[`${baseVar}-letter-spacing`] = typo.letterSpacing
+  }
+
+  return vars
+}
+
+/**
+ * SemanticDesignTokens를 CSS Variables 객체로 변환
+ */
+function tokensToCssVariables(tokens: SemanticDesignTokens): Record<string, string> {
+  const vars: Record<string, string> = {}
+
+  // Colors
+  vars['--color-brand'] = tokens.colors.brand
+  vars['--color-accent'] = tokens.colors.accent
+  vars['--color-background'] = tokens.colors.background
+  vars['--color-surface'] = tokens.colors.surface
+  vars['--color-text-primary'] = tokens.colors.text.primary
+  vars['--color-text-secondary'] = tokens.colors.text.secondary
+  vars['--color-text-muted'] = tokens.colors.text.muted
+  vars['--color-text-on-brand'] = tokens.colors.text.onBrand
+  vars['--color-border'] = tokens.colors.border
+  vars['--color-divider'] = tokens.colors.divider
+
+  // Typography
+  Object.assign(vars, generateTypoVariables('display-lg', tokens.typography.displayLg))
+  Object.assign(vars, generateTypoVariables('display-md', tokens.typography.displayMd))
+  Object.assign(vars, generateTypoVariables('heading-lg', tokens.typography.headingLg))
+  Object.assign(vars, generateTypoVariables('heading-md', tokens.typography.headingMd))
+  Object.assign(vars, generateTypoVariables('heading-sm', tokens.typography.headingSm))
+  Object.assign(vars, generateTypoVariables('body-lg', tokens.typography.bodyLg))
+  Object.assign(vars, generateTypoVariables('body-md', tokens.typography.bodyMd))
+  Object.assign(vars, generateTypoVariables('body-sm', tokens.typography.bodySm))
+  Object.assign(vars, generateTypoVariables('caption', tokens.typography.caption))
+
+  // Spacing
+  vars['--spacing-xs'] = tokens.spacing.xs
+  vars['--spacing-sm'] = tokens.spacing.sm
+  vars['--spacing-md'] = tokens.spacing.md
+  vars['--spacing-lg'] = tokens.spacing.lg
+  vars['--spacing-xl'] = tokens.spacing.xl
+  vars['--spacing-xxl'] = tokens.spacing.xxl
+  vars['--spacing-section'] = tokens.spacing.section
+  vars['--spacing-component'] = tokens.spacing.component
+
+  // Borders
+  vars['--radius-sm'] = tokens.borders.radiusSm
+  vars['--radius-md'] = tokens.borders.radiusMd
+  vars['--radius-lg'] = tokens.borders.radiusLg
+  vars['--radius-full'] = tokens.borders.radiusFull
+
+  // Shadows
+  vars['--shadow-sm'] = tokens.shadows.sm
+  vars['--shadow-md'] = tokens.shadows.md
+  vars['--shadow-lg'] = tokens.shadows.lg
+
+  // Animation
+  vars['--duration-fast'] = `${tokens.animation.durationFast}ms`
+  vars['--duration-normal'] = `${tokens.animation.durationNormal}ms`
+  vars['--duration-slow'] = `${tokens.animation.durationSlow}ms`
+  vars['--easing-default'] = tokens.animation.easing
+  vars['--stagger-delay'] = `${tokens.animation.staggerDelay}ms`
+
+  return vars
+}
+
+/**
+ * StyleSchema에서 CSS 변수 추출 (토큰 시스템 호환)
  */
 function getStyleVariables(style: StyleSchema): React.CSSProperties {
-  const { theme } = style
+  // StyleSchema를 SemanticDesignTokens로 변환
+  const tokens = resolveTokens(style)
+  // 토큰을 CSS 변수로 변환
+  const cssVars = tokensToCssVariables(tokens)
 
-  return {
-    // Colors
-    '--color-primary': theme.colors?.primary?.[500] ?? '#e11d48',
-    '--color-neutral': theme.colors?.neutral?.[500] ?? '#6b7280',
-    '--color-background': theme.colors?.background?.default ?? '#ffffff',
-    '--color-text': theme.colors?.text?.primary ?? '#1f2937',
-
-    // Typography
-    '--font-heading': theme.typography?.fonts?.heading?.family ?? 'inherit',
-    '--font-body': theme.typography?.fonts?.body?.family ?? 'inherit',
-
-    // Spacing
-    '--spacing-unit': `${theme.spacing?.unit ?? 4}px`,
-
-    // Border radius
-    '--radius-sm': theme.borders?.radius?.sm ?? '4px',
-    '--radius-md': theme.borders?.radius?.md ?? '8px',
-    '--radius-lg': theme.borders?.radius?.lg ?? '12px',
-
-    // Animation
-    '--animation-duration': `${theme.animation?.duration?.normal ?? 300}ms`,
-    '--animation-easing': theme.animation?.easing?.default ?? 'ease',
-  } as React.CSSProperties
+  return cssVars as unknown as React.CSSProperties
 }
 
 export function InvitationRenderer({
@@ -109,8 +178,8 @@ export function InvitationRenderer({
         ...styleVariables,
         minHeight: '100vh',
         backgroundColor: 'var(--color-background)',
-        color: 'var(--color-text)',
-        fontFamily: 'var(--font-body)',
+        color: 'var(--color-text-primary)',
+        fontFamily: 'var(--typo-body-md-font-family)',
       }}
     >
       {/* Intro Section (항상 첫번째) */}
