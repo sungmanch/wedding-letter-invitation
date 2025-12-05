@@ -25,10 +25,22 @@ export const FILLER_SYSTEM_PROMPT = `당신은 창의적인 청첩장 디자인 
 - "고급스러운"을 원해도 사진이 강조되어야 한다면 minimal이 더 효과적일 수 있습니다
 - 사용자가 명시하지 않은 숨은 니즈를 파악하세요
 
-# Intro 섹션 variant별 강점 (특히 중요)
-- minimal: 여백의 미학, 사진 자체가 주인공, 모던하고 세련된 느낌, 심플한 타이포그래피
-- elegant: 드라마틱한 풀스크린 임팩트, 오버레이로 고급스러움 연출, 영화 포스터 같은 분위기
-- romantic: 따뜻하고 포근한 감성, 원형 프레임의 친근함, 감성적 메시지 전달에 최적
+# Intro 섹션 variant별 강점 (9가지 선택지)
+
+## 기본 스타일
+- minimal: 여백의 미학, 사진 자체가 주인공, 모던하고 세련된 느낌
+- elegant: 풀스크린 배경 + 오버레이, 고급스럽고 드라마틱한 첫인상
+- romantic: 원형 프레임, 따뜻하고 포근한 감성, 감성적 메시지
+
+## 특별한 스타일
+- cinematic: 영화 오프닝 스타일, 어두운 배경에 이름이 세로로 등장, 드라마틱
+- polaroid: 폴라로이드 사진처럼 약간 기울어진 프레임, 레트로하고 캐주얼한 느낌
+- split: 화면 좌우 분할 (사진 | 텍스트), 모던하고 독특한 레이아웃
+
+## 감성 스타일
+- magazine: 잡지 커버 스타일, 큰 타이포그래피, 패셔너블하고 트렌디
+- typewriter: 타자기 폰트, 빈티지 종이 느낌, 문학적이고 향수를 자극
+- floating: 떠있는 카드 느낌, 가볍고 몽환적인 분위기, 스크롤 유도
 
 # 다양성 원칙
 - 같은 요청이라도 매번 다른 관점에서 해석할 수 있습니다
@@ -144,13 +156,15 @@ export function buildFillerPrompt(request: FillerRequest): string {
   // 응답 형식
   lines.push('# 응답 형식 (JSON만)')
   lines.push('사용자의 요청에 가장 적합한 variant를 창의적으로 선택하세요.')
-  lines.push('minimal, elegant, romantic 중 사용자 맥락에 맞는 것을 골라주세요.')
+  lines.push(
+    '9가지 중 선택: minimal, elegant, romantic, cinematic, polaroid, split, magazine, typewriter, floating'
+  )
   lines.push('```json')
   lines.push('{')
   lines.push('  "sections": [')
   lines.push('    {')
   lines.push('      "sectionType": "intro",')
-  lines.push('      "variantId": "minimal 또는 elegant 또는 romantic",')
+  lines.push('      "variantId": "9가지 variant 중 하나 선택",')
   lines.push('      "selectedOptions": { "animation": "해당 variant의 애니메이션 옵션 중 선택" }')
   lines.push('    }')
   lines.push('  ]')
