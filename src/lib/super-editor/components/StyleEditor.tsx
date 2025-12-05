@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { StyleSchema } from '../schema/style'
 
 interface StyleEditorProps {
@@ -23,43 +23,74 @@ const COLOR_PRESETS = [
 
 export function StyleEditor({ style, onStyleChange, className = '' }: StyleEditorProps) {
   const [activeSection, setActiveSection] = useState<'colors' | 'typography' | 'presets'>('presets')
+  // 로컬 상태로 스타일 관리 (실시간 변경용)
+  const [localStyle, setLocalStyle] = useState<StyleSchema>(style)
+  const [isDirty, setIsDirty] = useState(false)
+  const localStyleRef = useRef(localStyle)
+  const isDirtyRef = useRef(isDirty)
+
+  // ref 업데이트
+  useEffect(() => {
+    localStyleRef.current = localStyle
+    isDirtyRef.current = isDirty
+  }, [localStyle, isDirty])
+
+  // 외부 style이 변경되면 로컬 상태 동기화
+  useEffect(() => {
+    setLocalStyle(style)
+  }, [style])
+
+  // 컴포넌트 언마운트 시 변경사항 저장
+  useEffect(() => {
+    return () => {
+      if (isDirtyRef.current) {
+        onStyleChange(localStyleRef.current)
+      }
+    }
+  }, [onStyleChange])
 
   const updateColor = useCallback((path: string, value: string) => {
-    const newStyle = JSON.parse(JSON.stringify(style)) as StyleSchema
-    const parts = path.split('.')
+    setLocalStyle(prev => {
+      const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+      const parts = path.split('.')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let current: any = newStyle.theme.colors
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]]
-    }
-    current[parts[parts.length - 1]] = value
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let current: any = newStyle.theme.colors
+      for (let i = 0; i < parts.length - 1; i++) {
+        current = current[parts[i]]
+      }
+      current[parts[parts.length - 1]] = value
 
-    onStyleChange(newStyle)
-  }, [style, onStyleChange])
+      return newStyle
+    })
+    setIsDirty(true)
+  }, [])
 
   const applyPreset = useCallback((preset: typeof COLOR_PRESETS[0]) => {
-    const newStyle = JSON.parse(JSON.stringify(style)) as StyleSchema
+    setLocalStyle(prev => {
+      const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
 
-    // Primary 색상 스케일 업데이트
-    if (newStyle.theme.colors.primary) {
-      newStyle.theme.colors.primary[500] = preset.primary
-      newStyle.theme.colors.primary[400] = lightenColor(preset.primary, 0.2)
-      newStyle.theme.colors.primary[600] = darkenColor(preset.primary, 0.2)
-    }
+      // Primary 색상 스케일 업데이트
+      if (newStyle.theme.colors.primary) {
+        newStyle.theme.colors.primary[500] = preset.primary
+        newStyle.theme.colors.primary[400] = lightenColor(preset.primary, 0.2)
+        newStyle.theme.colors.primary[600] = darkenColor(preset.primary, 0.2)
+      }
 
-    // Accent 색상
-    if (newStyle.theme.colors.accent) {
-      newStyle.theme.colors.accent[500] = preset.accent
-    } else if (newStyle.theme.colors.secondary) {
-      newStyle.theme.colors.secondary[500] = preset.accent
-    }
+      // Accent 색상
+      if (newStyle.theme.colors.accent) {
+        newStyle.theme.colors.accent[500] = preset.accent
+      } else if (newStyle.theme.colors.secondary) {
+        newStyle.theme.colors.secondary[500] = preset.accent
+      }
 
-    // 배경 색상
-    newStyle.theme.colors.background.default = preset.background
+      // 배경 색상
+      newStyle.theme.colors.background.default = preset.background
 
-    onStyleChange(newStyle)
-  }, [style, onStyleChange])
+      return newStyle
+    })
+    setIsDirty(true)
+  }, [])
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
@@ -139,20 +170,20 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
               <h4 className="text-sm font-medium text-gray-700">메인 색상</h4>
               <ColorPicker
                 label="기본 색상"
-                value={style.theme.colors.primary?.[500] ?? '#e11d48'}
+                value={localStyle.theme.colors.primary?.[500] ?? '#e11d48'}
                 onChange={(v) => updateColor('primary.500', v)}
               />
-              {style.theme.colors.accent && (
+              {localStyle.theme.colors.accent && (
                 <ColorPicker
                   label="강조 색상"
-                  value={style.theme.colors.accent?.[500] ?? '#f43f5e'}
+                  value={localStyle.theme.colors.accent?.[500] ?? '#f43f5e'}
                   onChange={(v) => updateColor('accent.500', v)}
                 />
               )}
-              {style.theme.colors.secondary && !style.theme.colors.accent && (
+              {localStyle.theme.colors.secondary && !localStyle.theme.colors.accent && (
                 <ColorPicker
                   label="보조 색상"
-                  value={style.theme.colors.secondary?.[500] ?? '#6b7280'}
+                  value={localStyle.theme.colors.secondary?.[500] ?? '#6b7280'}
                   onChange={(v) => updateColor('secondary.500', v)}
                 />
               )}
@@ -163,13 +194,13 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
               <h4 className="text-sm font-medium text-gray-700">배경</h4>
               <ColorPicker
                 label="기본 배경"
-                value={style.theme.colors.background?.default ?? '#ffffff'}
+                value={localStyle.theme.colors.background?.default ?? '#ffffff'}
                 onChange={(v) => updateColor('background.default', v)}
               />
-              {style.theme.colors.background?.paper && (
+              {localStyle.theme.colors.background?.paper && (
                 <ColorPicker
                   label="카드 배경"
-                  value={style.theme.colors.background.paper}
+                  value={localStyle.theme.colors.background.paper}
                   onChange={(v) => updateColor('background.paper', v)}
                 />
               )}
@@ -180,13 +211,13 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
               <h4 className="text-sm font-medium text-gray-700">텍스트</h4>
               <ColorPicker
                 label="기본 텍스트"
-                value={style.theme.colors.text?.primary ?? '#1f2937'}
+                value={localStyle.theme.colors.text?.primary ?? '#1f2937'}
                 onChange={(v) => updateColor('text.primary', v)}
               />
-              {style.theme.colors.text?.secondary && (
+              {localStyle.theme.colors.text?.secondary && (
                 <ColorPicker
                   label="보조 텍스트"
-                  value={style.theme.colors.text.secondary}
+                  value={localStyle.theme.colors.text.secondary}
                   onChange={(v) => updateColor('text.secondary', v)}
                 />
               )}
@@ -199,26 +230,32 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-700">제목 글꼴</h4>
               <FontSelector
-                value={style.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
+                value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
                 onChange={(family) => {
-                  const newStyle = JSON.parse(JSON.stringify(style)) as StyleSchema
-                  if (newStyle.theme.typography?.fonts?.heading) {
-                    newStyle.theme.typography.fonts.heading.family = family
-                  }
-                  onStyleChange(newStyle)
+                  setLocalStyle(prev => {
+                    const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+                    if (newStyle.theme.typography?.fonts?.heading) {
+                      newStyle.theme.typography.fonts.heading.family = family
+                    }
+                    return newStyle
+                  })
+                  setIsDirty(true)
                 }}
               />
             </div>
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-700">본문 글꼴</h4>
               <FontSelector
-                value={style.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
+                value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
                 onChange={(family) => {
-                  const newStyle = JSON.parse(JSON.stringify(style)) as StyleSchema
-                  if (newStyle.theme.typography?.fonts?.body) {
-                    newStyle.theme.typography.fonts.body.family = family
-                  }
-                  onStyleChange(newStyle)
+                  setLocalStyle(prev => {
+                    const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+                    if (newStyle.theme.typography?.fonts?.body) {
+                      newStyle.theme.typography.fonts.body.family = family
+                    }
+                    return newStyle
+                  })
+                  setIsDirty(true)
                 }}
               />
             </div>
