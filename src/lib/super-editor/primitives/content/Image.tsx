@@ -47,17 +47,20 @@ export function Image({
     }
   }
 
+  // node.style에서 height가 지정되어 있으면 aspectRatio보다 우선
+  const hasExplicitHeight = style.height != null
+
   const containerStyle: React.CSSProperties = {
     position: 'relative',
     width: '100%',
-    paddingBottom: aspectRatio !== 'auto' ? paddingBottom : undefined,
+    paddingBottom: aspectRatio !== 'auto' && !hasExplicitHeight ? paddingBottom : undefined,
     overflow: 'hidden',
     ...style,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
   }
 
   const imgStyle: React.CSSProperties = {
-    ...(aspectRatio !== 'auto'
+    ...(aspectRatio !== 'auto' || hasExplicitHeight
       ? {
           position: 'absolute',
           top: 0,
@@ -66,7 +69,8 @@ export function Image({
           height: '100%',
         }
       : { width: '100%' }),
-    objectFit: props.objectFit || 'cover',
+    objectFit: props.objectFit || style.objectFit as React.CSSProperties['objectFit'] || 'cover',
+    filter: style.filter as string,
     cursor: props.onClick !== 'none' ? 'pointer' : undefined,
   }
 

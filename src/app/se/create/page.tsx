@@ -44,7 +44,8 @@ const QUICK_PROMPTS = [
 const INITIAL_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
-  content: '안녕하세요! 청첩장 디자인을 도와드릴게요.\n\n어떤 분위기의 청첩장을 원하시나요? 색상, 스타일, 느낌 등 자유롭게 말씀해주세요.',
+  content:
+    '안녕하세요! 청첩장 디자인을 도와드릴게요.\n\n어떤 분위기의 청첩장을 원하시나요? 색상, 스타일, 느낌 등 자유롭게 말씀해주세요.',
   timestamp: new Date(),
 }
 
@@ -75,9 +76,18 @@ function LoadingDots() {
     <div className="flex justify-start">
       <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
         <div className="flex gap-1.5">
-          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span
+            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '0ms' }}
+          />
+          <span
+            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '150ms' }}
+          />
+          <span
+            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '300ms' }}
+          />
         </div>
       </div>
     </div>
@@ -96,12 +106,14 @@ function PhoneFrame({ children }: { children: React.ReactNode }) {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-10" />
         {/* Screen - CSS 변수로 높이 전달 */}
         <div
-          className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto"
-          style={{
-            width: PHONE_SCREEN_WIDTH,
-            height: PHONE_SCREEN_HEIGHT,
-            '--preview-screen-height': `${PHONE_SCREEN_HEIGHT}px`,
-          } as React.CSSProperties}
+          className="bg-white rounded-4xl overflow-hidden overflow-y-auto"
+          style={
+            {
+              width: PHONE_SCREEN_WIDTH,
+              height: PHONE_SCREEN_HEIGHT,
+              '--preview-screen-height': `${PHONE_SCREEN_HEIGHT}px`,
+            } as React.CSSProperties
+          }
         >
           {children}
         </div>
@@ -155,58 +167,61 @@ export default function SuperEditorCreatePage() {
   }, [input])
 
   // Send message - Stage 1: Intro 생성
-  const handleSend = useCallback(async (messageText?: string) => {
-    const text = messageText ?? input.trim()
-    if (!text || isLoading) return
+  const handleSend = useCallback(
+    async (messageText?: string) => {
+      const text = messageText ?? input.trim()
+      if (!text || isLoading) return
 
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
-    }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setIsLoading(true)
-
-    try {
-      // Stage 1: Style + Intro만 생성
-      const response = await generateIntroOnlyAction({
-        prompt: text,
-        mood: [],
-      })
-
-      if (!response.success || !response.data) {
-        throw new Error(response.error ?? 'AI 생성에 실패했습니다')
-      }
-
-      // Update intro result
-      setIntroResult(response.data)
-
-      // Add assistant message
-      const assistantMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: '인트로 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요.\n다른 스타일을 원하시면 다시 말씀해주세요.',
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text,
         timestamp: new Date(),
       }
-      setMessages(prev => [...prev, assistantMessage])
+      setMessages((prev) => [...prev, userMessage])
+      setInput('')
+      setIsLoading(true)
 
-    } catch (err) {
-      console.error('Generation failed:', err)
+      try {
+        // Stage 1: Style + Intro만 생성
+        const response = await generateIntroOnlyAction({
+          prompt: text,
+          mood: [],
+        })
 
-      const errorMessage: ChatMessage = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: '죄송해요, 디자인 생성 중 문제가 발생했어요. 다시 시도해주시겠어요?',
-        timestamp: new Date(),
+        if (!response.success || !response.data) {
+          throw new Error(response.error ?? 'AI 생성에 실패했습니다')
+        }
+
+        // Update intro result
+        setIntroResult(response.data)
+
+        // Add assistant message
+        const assistantMessage: ChatMessage = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content:
+            '인트로 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요.\n다른 스타일을 원하시면 다시 말씀해주세요.',
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, assistantMessage])
+      } catch (err) {
+        console.error('Generation failed:', err)
+
+        const errorMessage: ChatMessage = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: '죄송해요, 디자인 생성 중 문제가 발생했어요. 다시 시도해주시겠어요?',
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, errorMessage])
+      } finally {
+        setIsLoading(false)
       }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }, [input, isLoading])
+    },
+    [input, isLoading]
+  )
 
   // Handle key down
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -365,9 +380,7 @@ export default function SuperEditorCreatePage() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-2 text-center">
-                Shift + Enter로 줄바꿈
-              </p>
+              <p className="text-xs text-gray-400 mt-2 text-center">Shift + Enter로 줄바꿈</p>
             </div>
           </div>
 
@@ -408,7 +421,9 @@ export default function SuperEditorCreatePage() {
       {introResult && (
         <div className="fixed bottom-20 right-4 lg:hidden">
           <button
-            onClick={() => {/* TODO: 모바일 프리뷰 모달 */}}
+            onClick={() => {
+              /* TODO: 모바일 프리뷰 모달 */
+            }}
             className="w-14 h-14 bg-rose-500 text-white rounded-full shadow-lg flex items-center justify-center"
           >
             <Sparkles className="w-6 h-6" />

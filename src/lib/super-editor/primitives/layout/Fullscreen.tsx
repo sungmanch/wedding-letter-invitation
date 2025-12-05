@@ -21,9 +21,11 @@ export function Fullscreen({
 
   const style: React.CSSProperties = {
     width: '100%',
+    height: props.minHeight || defaultHeight,
     minHeight: props.minHeight || defaultHeight,
     maxHeight: props.maxHeight,
     position: 'relative',
+    overflow: 'hidden',
     ...baseStyle,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
   }

@@ -164,7 +164,11 @@ export default function LegacyEditorClient() {
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-10" />
                   <div
                     className="relative bg-white rounded-[2.5rem] overflow-hidden"
-                    style={{ width: 375, height: 667 }}
+                    style={{
+                      width: 375,
+                      height: 667,
+                      '--preview-screen-height': '667px',
+                    } as React.CSSProperties}
                   >
                     {/* PrimitiveNode 렌더링 */}
                     {renderPrimitiveNode(introResult.root, renderContext)}
