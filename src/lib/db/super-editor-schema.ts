@@ -105,6 +105,13 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   status: varchar('status', { length: 20 }).default('draft').notNull(), // 'draft' | 'building' | 'published' | 'error'
   errorMessage: text('error_message'),
 
+  // 섹션 관리
+  sectionOrder: jsonb('section_order').$type<string[]>(), // 섹션 순서 (intro 제외)
+  sectionEnabled: jsonb('section_enabled').$type<Record<string, boolean>>(), // 섹션 활성화 상태
+
+  // 결제
+  isPaid: boolean('is_paid').default(false).notNull(),
+
   // 접근 설정
   slug: varchar('slug', { length: 100 }), // 커스텀 URL slug
   isPublic: boolean('is_public').default(true).notNull(),
