@@ -90,36 +90,102 @@ export const parentsSkeleton: SectionSkeleton = {
                         },
                       },
                       {
-                        id: 'groom-father',
-                        type: 'text',
+                        id: 'groom-father-row',
+                        type: 'row',
                         tokenStyle: {
-                          fontFamily: '$token.typography.bodyMd.fontFamily',
-                          fontSize: '$token.typography.bodyMd.fontSize',
-                          color: '$token.colors.text.primary',
+                          gap: '$token.spacing.xs',
                         },
                         style: {
-                          textAlign: 'center',
+                          justifyContent: 'center',
                         },
-                        props: {
-                          content: '{{parents.groom.father.name}}',
-                          as: 'p',
-                        },
+                        children: [
+                          {
+                            id: 'groom-father-deceased',
+                            type: 'conditional',
+                            props: {
+                              condition: 'parents.groom.father.status',
+                              operator: 'equals',
+                              value: 'deceased',
+                            },
+                            children: [
+                              {
+                                id: 'groom-father-deceased-text',
+                                type: 'text',
+                                tokenStyle: {
+                                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                                  fontSize: '$token.typography.bodyMd.fontSize',
+                                  color: '$token.colors.text.muted',
+                                },
+                                props: {
+                                  content: '故',
+                                  as: 'span',
+                                },
+                              },
+                            ],
+                          },
+                          {
+                            id: 'groom-father',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{parents.groom.father.name}}',
+                              as: 'span',
+                            },
+                          },
+                        ],
                       },
                       {
-                        id: 'groom-mother',
-                        type: 'text',
+                        id: 'groom-mother-row',
+                        type: 'row',
                         tokenStyle: {
-                          fontFamily: '$token.typography.bodyMd.fontFamily',
-                          fontSize: '$token.typography.bodyMd.fontSize',
-                          color: '$token.colors.text.primary',
+                          gap: '$token.spacing.xs',
                         },
                         style: {
-                          textAlign: 'center',
+                          justifyContent: 'center',
                         },
-                        props: {
-                          content: '{{parents.groom.mother.name}}',
-                          as: 'p',
-                        },
+                        children: [
+                          {
+                            id: 'groom-mother-deceased',
+                            type: 'conditional',
+                            props: {
+                              condition: 'parents.groom.mother.status',
+                              operator: 'equals',
+                              value: 'deceased',
+                            },
+                            children: [
+                              {
+                                id: 'groom-mother-deceased-text',
+                                type: 'text',
+                                tokenStyle: {
+                                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                                  fontSize: '$token.typography.bodyMd.fontSize',
+                                  color: '$token.colors.text.muted',
+                                },
+                                props: {
+                                  content: '故',
+                                  as: 'span',
+                                },
+                              },
+                            ],
+                          },
+                          {
+                            id: 'groom-mother',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{parents.groom.mother.name}}',
+                              as: 'span',
+                            },
+                          },
+                        ],
                       },
                       {
                         id: 'groom-son',
@@ -182,36 +248,102 @@ export const parentsSkeleton: SectionSkeleton = {
                         },
                       },
                       {
-                        id: 'bride-father',
-                        type: 'text',
+                        id: 'bride-father-row',
+                        type: 'row',
                         tokenStyle: {
-                          fontFamily: '$token.typography.bodyMd.fontFamily',
-                          fontSize: '$token.typography.bodyMd.fontSize',
-                          color: '$token.colors.text.primary',
+                          gap: '$token.spacing.xs',
                         },
                         style: {
-                          textAlign: 'center',
+                          justifyContent: 'center',
                         },
-                        props: {
-                          content: '{{parents.bride.father.name}}',
-                          as: 'p',
-                        },
+                        children: [
+                          {
+                            id: 'bride-father-deceased',
+                            type: 'conditional',
+                            props: {
+                              condition: 'parents.bride.father.status',
+                              operator: 'equals',
+                              value: 'deceased',
+                            },
+                            children: [
+                              {
+                                id: 'bride-father-deceased-text',
+                                type: 'text',
+                                tokenStyle: {
+                                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                                  fontSize: '$token.typography.bodyMd.fontSize',
+                                  color: '$token.colors.text.muted',
+                                },
+                                props: {
+                                  content: '故',
+                                  as: 'span',
+                                },
+                              },
+                            ],
+                          },
+                          {
+                            id: 'bride-father',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{parents.bride.father.name}}',
+                              as: 'span',
+                            },
+                          },
+                        ],
                       },
                       {
-                        id: 'bride-mother',
-                        type: 'text',
+                        id: 'bride-mother-row',
+                        type: 'row',
                         tokenStyle: {
-                          fontFamily: '$token.typography.bodyMd.fontFamily',
-                          fontSize: '$token.typography.bodyMd.fontSize',
-                          color: '$token.colors.text.primary',
+                          gap: '$token.spacing.xs',
                         },
                         style: {
-                          textAlign: 'center',
+                          justifyContent: 'center',
                         },
-                        props: {
-                          content: '{{parents.bride.mother.name}}',
-                          as: 'p',
-                        },
+                        children: [
+                          {
+                            id: 'bride-mother-deceased',
+                            type: 'conditional',
+                            props: {
+                              condition: 'parents.bride.mother.status',
+                              operator: 'equals',
+                              value: 'deceased',
+                            },
+                            children: [
+                              {
+                                id: 'bride-mother-deceased-text',
+                                type: 'text',
+                                tokenStyle: {
+                                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                                  fontSize: '$token.typography.bodyMd.fontSize',
+                                  color: '$token.colors.text.muted',
+                                },
+                                props: {
+                                  content: '故',
+                                  as: 'span',
+                                },
+                              },
+                            ],
+                          },
+                          {
+                            id: 'bride-mother',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{parents.bride.mother.name}}',
+                              as: 'span',
+                            },
+                          },
+                        ],
                       },
                       {
                         id: 'bride-daughter',

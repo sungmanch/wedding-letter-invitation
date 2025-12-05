@@ -3,6 +3,7 @@
  */
 
 export { introTemplate } from './intro'
+export { greetingTemplate } from './greeting'
 export { venueTemplate } from './venue'
 export { dateTemplate } from './date'
 export { galleryTemplate } from './gallery'
@@ -14,6 +15,7 @@ export { musicTemplate } from './music'
 import type { Screen } from '../../schema/layout'
 import type { SectionType } from '../../schema/section-types'
 import { introTemplate } from './intro'
+import { greetingTemplate } from './greeting'
 import { venueTemplate } from './venue'
 import { dateTemplate } from './date'
 import { galleryTemplate } from './gallery'
@@ -27,6 +29,7 @@ import { musicTemplate } from './music'
  */
 export const SECTION_TEMPLATES: Record<SectionType, Screen> = {
   intro: introTemplate,
+  greeting: greetingTemplate,
   venue: venueTemplate,
   date: dateTemplate,
   gallery: galleryTemplate,

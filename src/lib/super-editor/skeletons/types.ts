@@ -12,6 +12,7 @@ import type { TokenRef, TokenStyleRef } from '../tokens/schema'
 
 export type SectionType =
   | 'intro' // 인트로 (순서 고정: 1번)
+  | 'greeting' // 인사말
   | 'venue' // 예식장 위치
   | 'date' // 예식 날짜
   | 'gallery' // 갤러리
@@ -145,6 +146,7 @@ export interface SectionScreen {
 export function isSectionType(value: string): value is SectionType {
   return [
     'intro',
+    'greeting',
     'venue',
     'date',
     'gallery',
