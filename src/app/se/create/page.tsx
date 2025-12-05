@@ -198,7 +198,10 @@ function TemplateGallery({ onSelect, selectedId }: TemplateGalleryProps) {
                 <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.descriptionKo}</p>
                 <div className="flex gap-1 mt-2">
                   {t.mood.slice(0, 2).map((m) => (
-                    <span key={m} className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded">
+                    <span
+                      key={m}
+                      className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded"
+                    >
                       {m}
                     </span>
                   ))}
@@ -287,24 +290,30 @@ export default function SuperEditorCreatePage() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // previewFormData를 IntroBuilderData로 변환
-  const legacyBuilderData = useMemo<IntroBuilderData>(() => ({
-    groomName: previewFormData.groomName || '신랑',
-    brideName: previewFormData.brideName || '신부',
-    weddingDate: previewFormData.weddingDate || '2025년 3월 15일',
-    venueName: '웨딩홀',
-    mainImage: SAMPLE_IMAGE,
-  }), [previewFormData])
+  const legacyBuilderData = useMemo<IntroBuilderData>(
+    () => ({
+      groomName: previewFormData.groomName || '신랑',
+      brideName: previewFormData.brideName || '신부',
+      weddingDate: previewFormData.weddingDate || '2025년 3월 15일',
+      venueName: '웨딩홀',
+      mainImage: previewFormData.mainImage || SAMPLE_IMAGE,
+    }),
+    [previewFormData]
+  )
 
   // 템플릿 선택 핸들러
-  const handleTemplateSelect = useCallback((presetId: string) => {
-    setSelectedTemplateId(presetId)
-    setIntroResult(null) // AI 결과 초기화
-    const preset = legacyPresets[presetId]
-    if (preset) {
-      const result = buildLegacyIntro(preset, legacyBuilderData)
-      setLegacyResult(result)
-    }
-  }, [legacyBuilderData])
+  const handleTemplateSelect = useCallback(
+    (presetId: string) => {
+      setSelectedTemplateId(presetId)
+      setIntroResult(null) // AI 결과 초기화
+      const preset = legacyPresets[presetId]
+      if (preset) {
+        const result = buildLegacyIntro(preset, legacyBuilderData)
+        setLegacyResult(result)
+      }
+    },
+    [legacyBuilderData]
+  )
 
   // 레거시 템플릿 선택 시 폼 데이터 변경에 따라 결과 업데이트
   useEffect(() => {
@@ -534,7 +543,7 @@ export default function SuperEditorCreatePage() {
               <>
                 {/* Chat Header */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-                  <div className="w-10 h-10 bg-gradient-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -589,7 +598,7 @@ export default function SuperEditorCreatePage() {
                     <button
                       onClick={() => handleSend()}
                       disabled={!input.trim() || isLoading}
-                      className="p-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                      className="p-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     >
                       {isLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
