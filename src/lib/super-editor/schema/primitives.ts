@@ -1,6 +1,6 @@
 /**
  * Super Editor - Primitives Schema
- * 기본 빌딩 블록 타입 정의 (28개)
+ * 기본 빌딩 블록 타입 정의 (29개)
  */
 
 // ============================================
@@ -41,6 +41,8 @@ export type PrimitiveType =
   // 로직 (2개)
   | 'conditional'
   | 'repeat'
+  // 오디오 (1개)
+  | 'bgm-player'
 
 // ============================================
 // Base Node Interface
@@ -305,6 +307,28 @@ export interface RepeatProps {
 }
 
 // ============================================
+// Audio Primitives Props
+// ============================================
+
+export interface BgmPlayerProps {
+  src?: string // 커스텀 오디오 URL 또는 데이터 바인딩 ({{bgm.url}})
+  trackId?: string // 프리셋 BGM ID
+  autoplay?: boolean // 기본: true
+  loop?: boolean // 기본: true
+  volume?: number // 0-1, 기본: 0.5
+  fadeIn?: number // 페이드 인 (ms)
+  fadeOut?: number // 페이드 아웃 (ms)
+  syncWithScroll?: {
+    enabled: boolean
+    startVolume?: number // 기본: 1
+    endVolume?: number // 기본: 0.3
+  }
+  showControls?: boolean // 기본: true
+  controlsPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+  controlsStyle?: 'minimal' | 'vinyl'
+}
+
+// ============================================
 // Animation Config Types
 // ============================================
 
@@ -430,3 +454,4 @@ export type PrimitiveProps =
   | TransitionProps
   | ConditionalProps
   | RepeatProps
+  | BgmPlayerProps
