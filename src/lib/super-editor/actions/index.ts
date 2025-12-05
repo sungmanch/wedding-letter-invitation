@@ -197,6 +197,34 @@ export async function updateInvitationData(
   return updated
 }
 
+export async function updateInvitationSections(
+  invitationId: string,
+  sectionOrder: string[],
+  sectionEnabled: Record<string, boolean>
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const [updated] = await db
+    .update(superEditorInvitations)
+    .set({
+      sectionOrder,
+      sectionEnabled,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ))
+    .returning()
+
+  return updated
+}
+
 // ============================================
 // Build Action
 // ============================================

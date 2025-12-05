@@ -2,17 +2,19 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getInvitationWithTemplate, updateInvitationData } from '@/lib/super-editor/actions'
+import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import { InvitationRenderer } from '@/lib/super-editor/renderers'
-import { EditorPanel, EditorToolbar } from '@/lib/super-editor/components'
+import { EditorPanel, EditorToolbar, SectionManager } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
-import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, REORDERABLE_SECTIONS } from '@/lib/super-editor/schema/section-types'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { EditorSchema } from '@/lib/super-editor/schema/editor'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 import type { SectionType } from '@/lib/super-editor/schema/section-types'
+
+type EditorTab = 'fields' | 'sections'
 
 function EditPageContent() {
   const params = useParams()
@@ -28,6 +30,7 @@ function EditPageContent() {
   const [sectionOrder, setSectionOrder] = useState<SectionType[]>(DEFAULT_SECTION_ORDER)
   const [sectionEnabled, setSectionEnabled] = useState<Record<SectionType, boolean>>(DEFAULT_SECTION_ENABLED)
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>()
+  const [activeTab, setActiveTab] = useState<EditorTab>('fields')
 
   useEffect(() => {
     async function loadData() {
@@ -102,6 +105,24 @@ function EditPageContent() {
   const handleSelectNode = useCallback((id: string) => {
     setSelectedNodeId(id)
   }, [])
+
+  const handleSectionOrderChange = useCallback(async (newOrder: SectionType[]) => {
+    setSectionOrder(newOrder)
+    try {
+      await updateInvitationSections(invitationId, newOrder, sectionEnabled)
+    } catch (err) {
+      console.error('Failed to save section order:', err)
+    }
+  }, [invitationId, sectionEnabled])
+
+  const handleSectionEnabledChange = useCallback(async (newEnabled: Record<SectionType, boolean>) => {
+    setSectionEnabled(newEnabled)
+    try {
+      await updateInvitationSections(invitationId, sectionOrder, newEnabled)
+    } catch (err) {
+      console.error('Failed to save section enabled:', err)
+    }
+  }, [invitationId, sectionOrder])
 
   if (loading) {
     return (
@@ -185,14 +206,52 @@ function EditPageContent() {
       <div className="flex-1 flex overflow-hidden">
         {/* 왼쪽: 에디터 패널 */}
         <div className="w-[400px] flex flex-col bg-white border-r border-gray-200 flex-shrink-0">
-          {state.editor ? (
-            <>
-              <EditorToolbar />
-              <EditorPanel className="flex-1 overflow-y-auto" />
-            </>
+          {/* 탭 네비게이션 */}
+          <div className="flex border-b border-gray-200 flex-shrink-0">
+            <button
+              onClick={() => setActiveTab('fields')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'fields'
+                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              내용 편집
+            </button>
+            <button
+              onClick={() => setActiveTab('sections')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'sections'
+                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              섹션 관리
+            </button>
+          </div>
+
+          {/* 탭 콘텐츠 */}
+          {activeTab === 'fields' ? (
+            state.editor ? (
+              <>
+                <EditorToolbar />
+                <EditorPanel className="flex-1 overflow-y-auto" />
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-500">
+                <p>편집기를 불러오는 중...</p>
+              </div>
+            )
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              <p>편집기를 불러오는 중...</p>
+            <div className="flex-1 overflow-y-auto">
+              <SectionManager
+                sectionOrder={sectionOrder.filter((s): s is SectionType =>
+                  REORDERABLE_SECTIONS.includes(s as typeof REORDERABLE_SECTIONS[number])
+                )}
+                sectionEnabled={sectionEnabled}
+                onOrderChange={handleSectionOrderChange}
+                onEnabledChange={handleSectionEnabledChange}
+              />
             </div>
           )}
         </div>
