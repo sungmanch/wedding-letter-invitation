@@ -1,89 +1,132 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { getPublishedInvitation } from '@/lib/super-editor/actions'
-import { InvitationRenderer } from '@/lib/super-editor/renderers'
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+import { db } from '@/lib/db'
+import { superEditorInvitations, superEditorTemplates } from '@/lib/db/super-editor-schema'
+import { eq, and } from 'drizzle-orm'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
-import type { SuperEditorInvitation, SuperEditorTemplate } from '@/lib/db/super-editor-schema'
+import { ViewerClient } from './ViewerClient'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
-import type { UserData } from '@/lib/super-editor/schema/user-data'
+import type { UserData, WeddingInvitationData } from '@/lib/super-editor/schema/user-data'
 import type { SectionType } from '@/lib/super-editor/schema/section-types'
 
-export default function SuperEditorViewerPage() {
-  const params = useParams()
-  const invitationId = params.id as string
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-  const [data, setData] = useState<{
-    invitation: SuperEditorInvitation
-    template: SuperEditorTemplate
-  } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+// 청첩장 데이터 가져오기
+async function getInvitationData(id: string) {
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, id),
+      eq(superEditorInvitations.status, 'published')
+    ),
+  })
 
-  useEffect(() => {
-    async function loadInvitation() {
-      try {
-        const result = await getPublishedInvitation(invitationId)
-        if (!result) {
-          setError('청첩장을 찾을 수 없습니다.')
-        } else if (!result.invitation.isPaid) {
-          setError('아직 공개되지 않은 청첩장입니다.')
-        } else {
-          setData(result)
-        }
-      } catch (err) {
-        console.error('Failed to load invitation:', err)
-        setError('청첩장을 불러오는데 실패했습니다.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadInvitation()
-  }, [invitationId])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">로딩 중...</p>
-        </div>
-      </div>
-    )
+  if (!invitation || !invitation.isPaid) {
+    return null
   }
 
-  if (error || !data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8">
-          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <p className="text-lg font-medium text-gray-900">{error}</p>
-        </div>
-      </div>
-    )
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
+// 메타데이터에서 사용할 정보 추출
+function extractShareInfo(userData: UserData) {
+  const data = userData.data as unknown as WeddingInvitationData | undefined
+
+  const groomName = data?.couple?.groom?.name || '신랑'
+  const brideName = data?.couple?.bride?.name || '신부'
+  const title = `${groomName} ♥ ${brideName} 결혼합니다`
+
+  const dateDisplay = data?.wedding?.dateDisplay || ''
+  const venueName = data?.venue?.name || ''
+  const description = dateDisplay && venueName
+    ? `${dateDisplay} | ${venueName}`
+    : '모바일 청첩장'
+
+  const imageUrl = data?.photos?.main || data?.photos?.cover
+
+  return { title, description, imageUrl }
+}
+
+// 동적 메타데이터 생성
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
+  const data = await getInvitationData(id)
+
+  if (!data) {
+    return {
+      title: '청첩장을 찾을 수 없습니다',
+    }
+  }
+
+  const userData = data.invitation.userData as UserData
+  const { title, description, imageUrl } = extractShareInfo(userData)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://wedding-letter.vercel.app'
+  const url = `${baseUrl}/se/${id}`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: '웨딩레터',
+      type: 'website',
+      images: imageUrl ? [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+    other: {
+      'og:locale': 'ko_KR',
+    },
+  }
+}
+
+// 페이지 컴포넌트
+export default async function SuperEditorViewerPage({ params }: PageProps) {
+  const { id } = await params
+  const data = await getInvitationData(id)
+
+  if (!data) {
+    notFound()
   }
 
   const { invitation, template } = data
-
-  // 섹션 순서/활성화 상태 (DB에서 가져오거나 기본값 사용)
+  const userData = invitation.userData as UserData
   const sectionOrder = (invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER
   const sectionEnabled = (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
+  const shareInfo = extractShareInfo(userData)
 
   return (
-    <InvitationRenderer
+    <ViewerClient
+      invitationId={id}
       layout={template.layoutSchema as LayoutSchema}
       style={template.styleSchema as StyleSchema}
-      userData={invitation.userData as UserData}
+      userData={userData}
       sectionOrder={sectionOrder}
       sectionEnabled={sectionEnabled}
-      mode="preview"
+      shareInfo={shareInfo}
     />
   )
 }
