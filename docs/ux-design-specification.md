@@ -1,7 +1,8 @@
 # 모바일 청첩장 UX Design Specification
 
-_Created on 2025-11-30 by BMad_
-_Generated using BMad Method - Create UX Design Workflow v1.0_
+**Author:** BMad
+**Date:** 2025-12-05
+**Version:** 2.0
 
 ---
 
@@ -9,17 +10,18 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 **프로젝트:** 모바일 청첩장 - AI가 만들어주는 나만의 개인화 청첩장
 
-**비전:** 텍스트로 설명하면 AI가 나만의 유니크한 청첩장을 만들어주는 서비스. 기존 템플릿 기반 서비스와 달리 "선택"이 아닌 "창작"하는 경험 제공.
+**비전:** 프롬프트 또는 사진 기반으로 AI가 나만의 유니크한 청첩장을 만들어주는 서비스. 25개 섹션 타입, 11개 인트로 스타일, 2패널 실시간 편집으로 완전한 커스터마이징 경험 제공.
 
 **타겟 사용자:**
 - **Host (예비 신부):** 남들과 다른 특별한 청첩장을 원하는 사람
 - **Guest (하객):** 청첩장을 받고 축하 메시지를 남기는 사람
 
 **핵심 가치:**
-1. 대화형 AI로 청첩장 생성 (Gamma 스타일)
-2. 10초 만에 5개 시안 생성
-3. 사진/영상으로 개인화
-4. 게스트 축하 메시지 수집
+1. AI 디자인 생성 (5개 프리뷰, 5초 이내)
+2. 11개 인트로 스타일 (Cinematic, Magazine, Vinyl 등)
+3. 25개 섹션 타입 (Video, Timeline, D-DAY 등)
+4. 2패널 실시간 편집 (정보 입력 + 즉시 프리뷰)
+5. 게스트 축하 메시지 수집
 
 **감정적 목표:**
 - Host: 자부심 - "친구들이 이거 보면 부러워하겠다"
@@ -27,39 +29,28 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 **플랫폼:** 모바일 First 반응형 웹
 
-**UX 복잡도:** 낮음-중간
-- 2개 사용자 역할 (Host, Guest)
-- 주요 플로우: 대화형 생성 → 시안 선택 → 공유 → 메시지 열람
-
-**레퍼런스:** Gamma (AI 생성 경험, 깔끔한 UI)
-
-**차별점:** 커머스(장바구니→구매)가 아닌 크리에이션(AI와 함께 만드는) 경험
-
 ---
 
 ## 1. Design System Foundation
 
 ### 1.1 Design System Choice
 
-**선택:** shadcn/ui + Tailwind CSS
+**선택:** shadcn/ui + Tailwind CSS v4 + Radix UI
 
 **근거:**
-- Gamma 스타일의 모던/미니멀 베이스
-- 웨딩 테마(Blush Pink, Soft Gold) 커스터마이징 용이
-- 빠른 개발 + 일관된 UI
-- Next.js + Tailwind 기술 스택과 최적 호환
+- 모던/미니멀 베이스에 웨딩 테마 커스터마이징
+- Next.js 16 + React 19와 최적 호환
+- 접근성 (WCAG AA) 기본 지원
 
-**기본 제공 (shadcn/ui):**
+**기본 제공:**
 - Button, Input, Textarea, Modal, Card, Badge, Avatar, Skeleton, Toast
+- Dialog, Select, Tabs (Radix)
 
-**커스텀 컴포넌트 필요:**
-- ChatBubble, ChatInput (대화형 UI)
-- DesignCard (AI 시안 선택)
-- DatePicker, TimePicker (날짜/시간 선택)
-- PhotoUploader (사진 업로드)
-- InvitationViewer (청첩장 뷰어)
-- MessageCard (축하 메시지)
-- GeneratingLoader (AI 생성 로딩)
+**커스텀 컴포넌트:**
+- 인트로 컴포넌트 (11개)
+- 섹션 컴포넌트 (25개)
+- 편집 컴포넌트 (2패널 시스템)
+- 공통 컴포넌트 (디자인 카드, 로더 등)
 
 ---
 
@@ -68,27 +59,25 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 ### 2.1 Defining Experience
 
 **한 문장 정의:**
-> "텍스트로 설명하면 AI가 나만의 청첩장을 만들어주는 서비스"
+> "AI와 25개 섹션으로 나만의 특별한 청첩장을 만드는 서비스"
 
 **핵심 경험 원칙:**
 
 | 원칙 | 적용 |
 |------|------|
-| **Speed** | AI 생성 10초 이내, 로딩 UX로 기대감 유발 |
-| **Guidance** | 대화형으로 자연스럽게 정보 수집, 프롬프트 예시 제공 |
-| **Feedback** | 생성 중 애니메이션, 선택 시 즉각 반응 |
-| **Delight** | 5개 시안 공개 순간의 "와!" 경험 |
+| **Speed** | AI 프리뷰 5초, 레이아웃 10초 |
+| **Real-time** | 2패널 편집으로 즉시 프리뷰 |
+| **Customization** | 25개 섹션, 11개 인트로 |
+| **Delight** | 풍부한 애니메이션, 인트로 효과 |
 
 ### 2.2 핵심 인터랙션
 
-**기존 서비스 vs 우리 서비스:**
-
 | 기존 서비스 | 우리 서비스 |
 |------------|------------|
-| 커머스 (장바구니 → 구매) | 크리에이션 (나만의 것을 만든다) |
-| 템플릿에 나를 맞춤 | AI가 나에게 맞춤 |
-| 폼 입력 (딱딱함) | 대화형 입력 (자연스러움) |
-| 선택하는 느낌 | 창작하는 느낌 |
+| 템플릿 선택 | AI가 생성 |
+| 폼 입력 후 미리보기 | 실시간 2패널 편집 |
+| 고정된 섹션 | 25개 섹션 자유 조합 |
+| 단순 로딩 | 11개 인트로 스타일 |
 
 ---
 
@@ -100,11 +89,11 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 | 용도 | 색상 | Hex | 사용처 |
 |------|------|-----|--------|
-| Primary | Blush Pink | #FFB6C1 | 배경 강조, 선택 상태 |
 | Primary CTA | Deep Rose | #D4768A | CTA 버튼 (접근성 통과) |
-| Primary Dark | Rose | #E891A0 | 호버, 액티브 상태 |
-| Accent | Soft Gold | #D4AF37 | 포인트, 아이콘, 장식 요소 |
-| Accent Light | Champagne | #F7E7CE | 배지, 하이라이트 배경 |
+| Primary Light | Rose | #E891A0 | 호버, 액티브 상태 |
+| Accent | Blush Pink | #FFB6C1 | 배경 강조, 선택 상태 |
+| Accent Gold | Soft Gold | #D4AF37 | 포인트, 아이콘, 장식 |
+| Accent Light | Champagne | #F7E7CE | 배지, 하이라이트 |
 
 **Semantic Colors:**
 
@@ -120,9 +109,9 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 | 용도 | Hex | 사용처 |
 |------|-----|--------|
 | Text Primary | #1F2937 | 제목, 본문 |
-| Text Secondary | #6B7280 | 보조 텍스트, 플레이스홀더 |
+| Text Secondary | #6B7280 | 보조 텍스트 |
 | Border | #E5E7EB | 구분선, 카드 테두리 |
-| Background | #FFFBFC | 페이지 배경 (약간 핑크빛) |
+| Background | #FFFBFC | 페이지 배경 |
 | Card Background | #FFFFFF | 카드, 모달 배경 |
 
 ### 3.2 Typography
@@ -151,7 +140,7 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 | xl | 32px | p-8 |
 | 2xl | 48px | p-12 |
 
-**Border Radius (웨딩 테마 - 부드러운 곡선):**
+**Border Radius:**
 
 | 용도 | 값 | Tailwind |
 |------|-----|----------|
@@ -163,190 +152,179 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 ---
 
-## 4. Design Direction
+## 4. User Journey Flows
 
-### 4.1 Chosen Design Approach
-
-**방향:** Gamma 스타일 (모던/미니멀) + 웨딩 테마 (로맨틱/따뜻함)
-
-**레이아웃 원칙:**
-- 모바일 First (단일 컬럼)
-- 중앙 정렬, 여백 충분히
-- 카드 기반 컨텐츠
-- 고정 하단 CTA
-
-**비주얼 스타일:**
-- 깔끔하고 미니멀한 베이스
-- Blush Pink + Soft Gold 포인트
-- 부드러운 그림자 (shadow-sm)
-- 충분한 여백으로 고급스러운 느낌
-
-**핵심 화면 구조:**
+### 4.1 Host Journey (청첩장 생성)
 
 ```
-┌─────────────────────────┐
-│     ← Back / Logo       │  ← 심플한 헤더
-├─────────────────────────┤
-│                         │
-│    Main Content Area    │  ← 충분한 여백
-│    (Cards, Chat, AI)    │     깔끔한 카드
-│                         │
-├─────────────────────────┤
-│   [ Primary CTA ]       │  ← 고정 하단 버튼
-└─────────────────────────┘
+[1. 랜딩] → [2. 회원가입] → [3. 이미지 업로드(선택)]
+                                    ↓
+[4. 테마 선택/AI 생성] → [5. 디자인 선택] → [6. 2패널 편집]
+                                              ↓
+[9. 공유] ← [8. 결제] ← [7. 미리보기]
 ```
 
----
+**6. 2패널 편집 (핵심 플로우):**
+- 좌측: 정보 입력 폼 (아코디언 방식)
+- 우측: 실시간 프리뷰 (모바일 뷰)
+- 섹션 순서 드래그앤드롭
+- 각 섹션별 설정 커스터마이징
 
-## 5. User Journey Flows
-
-### 5.1 Host Journey (청첩장 생성)
-
-```
-[1. 랜딩] → [2. 회원가입] → [3. 대화형 생성] → [4. 시안 선택]
-                                                    ↓
-[8. 공유] ← [7. 결제] ← [6. 미리보기] ← [5. 사진 업로드]
-```
-
-**3. 대화형 생성 (핵심 플로우):**
-
-AI와 대화하며 모든 정보를 자연스럽게 수집:
-- 신랑/신부 이름
-- 결혼 일시 (캘린더 선택)
-- 결혼 장소
-- 혼주 이름
-- 연락처
-- 계좌번호
-- 원하는 스타일 (프롬프트)
-
-**대화형 UI 예시:**
+### 4.2 Guest Journey (청첩장 열람)
 
 ```
-🤖 "안녕하세요! 특별한 청첩장을 만들어 드릴게요 ✨
-    먼저, 결혼하시는 두 분 성함을 알려주세요!"
-
-            [ 신랑: 김민수 ]  👤
-
-🤖 "반가워요! 신부님 성함도 알려주세요"
-
-            [ 신부: 이수진 ]  👤
-
-🤖 "민수님 💑 수진님, 축하드려요!
-    결혼식은 언제인가요?"
-
-        [ 📅 날짜 선택하기 ]  → 캘린더 피커
-
-🤖 "봄 결혼식이네요! 🌸 몇 시에 진행하시나요?"
-
-        [ ⏰ 시간 선택하기 ]  → 타임 피커
-
-    ... (장소, 혼주, 연락처, 계좌 입력) ...
-
-🤖 "거의 다 됐어요! 마지막으로,
-    어떤 느낌의 청첩장을 원하세요?
-
-    예시:
-    • 봄처럼 따뜻하고 화사하게
-    • 모던하고 심플하게
-    • 클래식하고 우아하게"
-
-            [ 봄 야외 결혼식 느낌으로
-              따뜻하고 로맨틱하게 ✨ ]  👤
-
-🤖 "완벽해요! 민수님과 수진님만의
-    특별한 청첩장을 만들어 드릴게요"
-
-        [ 🎨 청첩장 생성하기 ]
-```
-
-### 5.2 Guest Journey (청첩장 열람)
-
-```
-[1. 링크 클릭] → [2. 청첩장 열람] → [3. 축하 메시지 작성] → [4. 완료]
-                       ↓
-                [바이럴: "나도 만들기"]
+[1. 링크 클릭] → [2. 인트로 화면] → [3. 청첩장 열람]
+                                          ↓
+                           [4. 축하 메시지 작성] → [5. 완료]
+                                          ↓
+                              [바이럴: "나도 만들기"]
 ```
 
 **Guest 핵심 포인트:**
-- 로그인 없이 열람
-- 아름다운 청첩장 디자인 (감탄 유발)
-- 일시/장소/지도 쉽게 확인
+- 인트로 스킵 기능
+- 일시/장소/지도 확인
 - 계좌번호 원클릭 복사
-- 축하 메시지 남기기 (선택)
-- "어디서 만들었지?" → 서비스 인지 → 바이럴
+- 축하 메시지 작성
 
-### 5.3 Host Journey (축하 메시지 열람)
+### 4.3 Host Journey (축하 메시지 열람)
 
 ```
-[로그인] → [내 청첩장] → [축하 메시지 목록] → [메시지 상세]
+[로그인] → [내 청첩장] → [축하 메시지 목록] → [읽음 처리]
 ```
 
 ---
 
-## 6. Component Library
+## 5. Component Library
 
-### 6.1 커스텀 컴포넌트
+### 5.1 인트로 컴포넌트 (11개)
 
-#### ChatBubble
-- **용도:** 대화형 정보 입력 UI
-- **Variants:** `ai` (좌측, 회색), `user` (우측, Primary)
-- **States:** default, typing (타이핑 애니메이션)
+| 컴포넌트 | 설명 | 특징 |
+|----------|------|------|
+| **KeynoteIntro** | Apple Keynote 스타일 | Sticky text reveal |
+| **CinematicIntro** | 영화적 스타일 | 16:9/4:3/21:9 비율, 필름 그레인 |
+| **ExhibitionIntro** | 갤러리 전시 | 프레임 커스터마이징, 3D 네비게이션 |
+| **MagazineIntro** | 매거진 커버 | Vogue/Kinfolk/Mono 스타일 |
+| **VinylIntro** | LP 레코드 | 70s/80s/90s/Y2K 시대별 |
+| **ChatIntro** | 메신저 스타일 | Kakao/iMessage/커스텀 |
+| **GlassmorphismIntro** | 글래스 효과 | Aurora 그라디언트, 플로팅 오브젝트 |
+| **PassportIntro** | 여권 스타일 | 스탬프 효과, 세계 지도 |
+| **PixelIntro** | 8비트 레트로 | RPG/플랫포머/어드벤처 |
+| **TypographyIntro** | 키네틱 타이포 | B&W/네온/파스텔 |
+| **IntroRenderer** | 타입 라우터 | 인트로 선택/렌더링 |
 
-#### ChatInput
-- **용도:** 대화 중 사용자 입력
-- **Variants:** `text`, `date`, `time`, `address`, `account`
-- **States:** default, focus, filled, error
+**인트로 공통 기능:**
+- Skip 버튼 (딜레이 설정 가능)
+- BGM 지원 (볼륨, 페이드, 루프)
+- Duration 설정
+- Phase 애니메이션 (loading → playing → ready → completed)
 
-#### DatePicker
-- **용도:** 결혼 날짜 선택
-- **Features:** 월 이동, 날짜 선택, 요일 표시
-- **제한:** 과거 날짜 비활성화
-- **스타일:** 선택된 날짜 Primary 색상
+### 5.2 섹션 컴포넌트 (25개 타입)
 
-#### TimePicker
-- **용도:** 결혼 시간 선택
-- **Features:** 오전/오후, 시, 분 스크롤 선택
-- **기본값:** 오후 12:00
-- **단위:** 30분 단위
+**기본 섹션 (11개):**
 
-#### DesignCard
-- **용도:** AI 생성 시안 5개 선택
-- **States:** default, hover, selected
-- **인터랙션:** 클릭 시 선택, 단일 선택
+| 타입 | 설명 | 주요 설정 |
+|------|------|----------|
+| hero | 메인 히어로 | displayMode, nameOrder, showDday |
+| greeting | 인사말 | template, signatureStyle |
+| calendar | 달력/날짜 | displayMode, showLunarDate, showTime |
+| gallery | 갤러리 | displayMode (6종), columns, autoPlay |
+| location | 장소/지도 | mapProvider (4종), showDirections |
+| parents | 혼주 정보 | displayMode, showDeceased |
+| contact | 연락처 | showProfileImage, grouping |
+| account | 계좌 정보 | showQR, showKakaoPay |
+| message | 축하 메시지 | displayMode, maxLength |
+| rsvp | 참석 여부 | confirmationType, mealOptions |
+| closing | 푸터/엔딩 | showWatermark, style |
 
-#### PhotoUploader
-- **용도:** 최대 10장 사진 업로드
-- **Features:** 드래그앤드롭, 순서 변경, 삭제
-- **States:** empty, uploading, filled
+**확장 섹션 (14개):**
 
-#### InvitationViewer
-- **용도:** 완성된 청첩장 표시
-- **Sections:** AI 디자인, 정보, 갤러리, 지도, 연락처, 계좌, 메시지
-- **States:** preview (Host), published (Guest)
+| 타입 | 설명 | 주요 설정 |
+|------|------|----------|
+| video | 영상 | source (YouTube/Vimeo/file), aspectRatio |
+| interview | 웨딩 Q&A | displayMode, showBothAnswers |
+| timeline | 타임라인 | displayMode, showConnectors |
+| dday | D-DAY 카운트다운 | style (flip/digital/analog), showSeconds |
+| profile | 프로필 소개 | - |
+| quote | 글귀 | - |
+| parents-contact | 혼주 연락처 | - |
+| transport | 교통수단 | - |
+| notice | 안내사항 | - |
+| announcement | 안내문 | - |
+| flower-gift | 화환 보내기 | - |
+| together-time | 함께한 시간 | - |
+| guest-snap | 게스트스냅 | - |
+| ending | 엔딩 크레딧 | - |
 
-#### MessageCard
-- **용도:** Host가 받은 축하 메시지 열람
-- **States:** new, read
-- **Features:** 닉네임, 메시지 (300자), 작성시간
+### 5.3 편집 컴포넌트
 
-#### GeneratingLoader
-- **용도:** AI 시안 생성 중 (10초)
-- **Features:** 프로그레스 바, 사용자 프롬프트 표시, 애니메이션
-- **UX 목표:** 기대감 유발, 지루함 방지
+| 컴포넌트 | 용도 | 위치 |
+|----------|------|------|
+| **EditClient** | 2패널 편집 클라이언트 | `/[id]/edit` |
+| **EditorForm** | 정보 입력 폼 (좌측) | 아코디언 방식 |
+| **EditContext** | 편집 상태 관리 | React Context |
+| **SectionEditor** | 섹션별 설정 편집 | 모달/드로어 |
+| **StyleEditor** | 스타일 편집 | 색상, 폰트 등 |
+| **TemplateSelector** | 템플릿 변경 | 디자인 교체 |
 
-### 6.2 컴포넌트 우선순위
+### 5.4 공통 컴포넌트
 
-| 컴포넌트 | 사용 화면 | 우선순위 |
-|----------|----------|----------|
-| ChatBubble | 대화형 생성 | 🔴 High |
-| ChatInput | 대화형 생성 | 🔴 High |
-| DatePicker | 대화형 생성 | 🔴 High |
-| TimePicker | 대화형 생성 | 🔴 High |
-| DesignCard | 시안 선택 | 🔴 High |
-| GeneratingLoader | AI 생성 중 | 🔴 High |
-| InvitationViewer | 미리보기, Guest 열람 | 🔴 High |
-| PhotoUploader | 사진 업로드 | 🟡 Medium |
-| MessageCard | 축하 메시지 열람 | 🟡 Medium |
+| 컴포넌트 | 용도 | 우선순위 |
+|----------|------|----------|
+| InvitationViewer | 청첩장 전체 렌더러 | High |
+| DesignCard | 디자인 프리뷰 카드 | High |
+| DesignPreviewCard | 확대 프리뷰 | High |
+| GeneratingLoader | AI 생성 로딩 | High |
+| PhotoUploader | 드래그앤드롭 업로드 | High |
+| SimpleImageUploader | 간단 이미지 업로드 | High |
+| TemplateCard | 템플릿 선택 카드 | Medium |
+| TemplateGrid | 템플릿 그리드 | Medium |
+| MessageCard | 메시지 표시 | Medium |
+| MessageForm | 메시지 작성 | Medium |
+| MessageList | 메시지 목록 | Medium |
+| TimePicker | 시간 선택 | Medium |
+
+---
+
+## 6. Animation System
+
+### 6.1 Animation Types (20+)
+
+```typescript
+type AnimationType =
+  | 'none'
+  | 'fade'
+  | 'slide' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right'
+  | 'scale' | 'zoom' | 'zoom-in' | 'zoom-out'
+  | 'rotate' | 'flip' | 'bounce'
+  | 'parallax'
+  | 'sticky-reveal'
+  | 'typewriter'
+  | 'glitch'
+  | 'neon-flicker'
+  | 'film-grain'
+  | 'page-turn'
+  | 'pixel-appear'
+  | 'stamp'
+  | 'kinetic-text'
+  | 'magic-scroll'
+```
+
+### 6.2 Global Effects
+
+**Background Effects:**
+- solid, gradient, pattern, animated, aurora
+
+**Particle Systems:**
+- snow, petals, confetti, sparkle, hearts, pixels, stamps
+
+**Cursor Effects:**
+- default, custom, trail, hidden
+
+**Scroll Behavior:**
+- smooth, indicators, snapping
+
+**Transitions:**
+- fade, slide, zoom, blur
 
 ---
 
@@ -356,69 +334,46 @@ AI와 대화하며 모든 정보를 자연스럽게 수집:
 
 | 타입 | 스타일 | 용도 |
 |------|--------|------|
-| **Primary** | Deep Rose (#D4768A) 배경, 흰 텍스트 | 주요 액션 (생성, 다음, 결제) |
-| **Secondary** | 흰 배경, Primary 테두리 | 보조 액션 (이전, 건너뛰기) |
-| **Ghost** | 투명 배경, 텍스트만 | 링크형 액션 (취소, 더보기) |
-| **Destructive** | Error Red 배경 | 삭제, 탈퇴 |
+| **Primary** | Deep Rose 배경, 흰 텍스트 | 주요 CTA |
+| **Secondary** | 흰 배경, Primary 테두리 | 보조 액션 |
+| **Ghost** | 투명 배경, 텍스트만 | 링크형 |
+| **Destructive** | Error Red 배경 | 삭제 |
 
 ### 7.2 Feedback Patterns
 
 | 상황 | 패턴 | 예시 |
 |------|------|------|
-| **Success** | Toast (상단, 3초 자동 닫힘) | "저장되었습니다 ✓" |
-| **Error** | AI 버블로 친절하게 재요청 | "날짜 형식이 맞지 않아요" |
-| **Loading** | Button 내 스피너 | [⟳ 저장 중...] |
-| **AI 생성** | 전용 로딩 화면 | GeneratingLoader |
-| **완료** | 모달 (축하 메시지) | "청첩장이 완성됐어요! 🎉" |
+| Success | Toast (상단, 3초) | "저장되었습니다 ✓" |
+| Error | Toast (에러 색상) | "저장에 실패했습니다" |
+| Loading | Button 내 스피너 | [⟳ 저장 중...] |
+| AI 생성 | GeneratingLoader | 프로그레스, 애니메이션 |
+| 완료 | 모달 | "청첩장이 완성됐어요!" |
 
-### 7.3 Form Patterns (대화형)
+### 7.3 Form Patterns (2패널 편집)
 
-| 입력 타입 | 패턴 | UI |
-|----------|------|-----|
-| **텍스트** | 일반 입력 필드 | ChatInput |
-| **날짜** | 캘린더 피커 | DatePicker 모달 |
-| **시간** | 시간 선택 | TimePicker (스크롤) |
-| **주소** | 입력 + 지도 검색 | ChatInput + 카카오맵 |
-| **계좌** | 은행 선택 + 번호 | Select + Input |
+| 영역 | 패턴 | 설명 |
+|------|------|------|
+| 좌측 폼 | 아코디언 | 섹션별 폼 그룹 |
+| 우측 프리뷰 | 실시간 업데이트 | 모바일 뷰포트 |
+| 섹션 순서 | 드래그앤드롭 | 순서 변경 |
+| 섹션 설정 | 드로어/모달 | 상세 설정 |
 
 ### 7.4 Navigation Patterns
 
 | 항목 | 결정 |
 |------|------|
-| **헤더** | 심플 (뒤로가기 + 로고/타이틀) |
-| **뒤로가기** | 이전 단계로 (대화 히스토리 유지) |
-| **프로그레스** | 단계 화면에서만 표시 |
-| **하단 CTA** | 고정 (Primary 버튼) |
+| 헤더 | 심플 (뒤로가기 + 로고/타이틀) |
+| 2패널 | 좌측 폼, 우측 프리뷰 |
+| 하단 CTA | 고정 (Primary 버튼) |
+| 프로그레스 | 생성 단계에서만 표시 |
 
 ### 7.5 Empty States
 
 | 상황 | 메시지 | CTA |
 |------|--------|-----|
 | 청첩장 없음 | "아직 청첩장이 없어요" | [첫 청첩장 만들기] |
-| 축하 메시지 없음 | "아직 받은 메시지가 없어요 💌" | 청첩장 공유 유도 |
+| 메시지 없음 | "아직 받은 메시지가 없어요" | 청첩장 공유 유도 |
 | 사진 없음 | "사진을 추가해보세요" | [사진 추가] |
-
-### 7.6 Confirmation Patterns
-
-| 상황 | 패턴 |
-|------|------|
-| 청첩장 삭제 | 모달 확인 ("정말 삭제할까요?") |
-| 결제 취소 | 모달 확인 + 환불 안내 |
-| 작성 중 이탈 | 자동 저장 (확인 불필요) |
-| 시안 재생성 | 모달 확인 (추가 결제 안내) |
-
-### 7.7 Sharing Patterns
-
-| 방법 | UX |
-|------|-----|
-| **카카오톡** | 원클릭 공유, OG 이미지 최적화 |
-| **링크 복사** | 복사 완료 Toast, URL 단축 |
-
-### 7.8 Account Copy Pattern
-
-계좌번호 복사 시:
-- [복사] 버튼 클릭
-- Toast: "계좌번호가 복사되었습니다 ✓"
 
 ---
 
@@ -426,22 +381,22 @@ AI와 대화하며 모든 정보를 자연스럽게 수집:
 
 ### 8.1 Responsive Strategy
 
-**핵심 원칙:** 모바일 First → 데스크탑에서도 모바일 레이아웃 유지
+**핵심 원칙:** 모바일 First
 
 | 디바이스 | 범위 | 레이아웃 |
 |----------|------|----------|
-| **Mobile** | < 640px | 단일 컬럼, 풀 너비 |
-| **Tablet** | 640px - 1024px | 단일 컬럼, max-w-lg 중앙 정렬 |
-| **Desktop** | > 1024px | 단일 컬럼, max-w-md 중앙 정렬 |
+| Mobile | < 640px | 단일 컬럼, 풀 너비 |
+| Tablet | 640px - 1024px | 2패널 (편집 시) |
+| Desktop | > 1024px | 2패널, max-w-6xl 중앙 |
 
 ### 8.2 Touch Optimization
 
 | 항목 | 기준 |
 |------|------|
-| **터치 타겟** | 최소 44x44px |
-| **버튼 높이** | 48px (py-3) |
-| **입력 필드** | 48px 높이 |
-| **카드 간격** | 12px (gap-3) |
+| 터치 타겟 | 최소 44x44px |
+| 버튼 높이 | 48px (py-3) |
+| 입력 필드 | 48px 높이 |
+| 카드 간격 | 12px (gap-3) |
 
 ### 8.3 Accessibility (WCAG AA)
 
@@ -450,9 +405,8 @@ AI와 대화하며 모든 정보를 자연스럽게 수집:
 - 본문: #1F2937 + Background (14:1)
 
 **키보드 네비게이션:**
-- 모든 인터랙티브 요소 Tab 접근 가능
+- Tab 접근 가능
 - Enter/Space로 버튼 클릭
-- 방향키로 시안/날짜 선택
 - Escape로 모달 닫기
 
 **Focus 표시:**
@@ -464,41 +418,66 @@ AI와 대화하며 모든 정보를 자연스럽게 수집:
 ```
 
 **스크린 리더:**
-- 시안 카드: `role="radio"`, `aria-checked`
-- 프로그레스: `aria-valuenow`, `aria-valuemax`
-- 로딩: `aria-live="polite"`
-- 모달: `role="dialog"`, `aria-modal="true"`
+- `role`, `aria-*` 속성 적용
+- `aria-live` 동적 콘텐츠
+- 의미 있는 `alt` 텍스트
 
 ---
 
-## 9. Implementation Guidance
+## 9. Theme System
 
-### 9.1 핵심 화면 목록
+### 9.1 Theme Categories (6개)
+
+| 카테고리 | 설명 | 대표 인트로 |
+|----------|------|------------|
+| Cinematic | 영화적 | CinematicIntro |
+| Playful | 유쾌한 | PixelIntro, ChatIntro |
+| Artistic | 예술적 | ExhibitionIntro |
+| Classic | 클래식 | KeynoteIntro |
+| Modern | 모던 | GlassmorphismIntro |
+| Retro | 레트로 | VinylIntro, MagazineIntro |
+
+### 9.2 AI Fallback Previews (5개)
+
+| 스타일 | 배경 | 텍스트 | 특징 |
+|--------|------|--------|------|
+| Pure & Minimalist | #FFFFFF | #1F2937 | 미니멀, 깔끔 |
+| Warm & Romantic | #FFF8F5 | #8B4513 | 따뜻한, Script 폰트 |
+| Classic & Elegant | #1A2744 | #F5F5DC | 네이비, 골드 악센트 |
+| Modern & Editorial | #000000 | #FFFFFF | 볼드, Sans-serif |
+| Garden & Natural | #FAFFF7 | #2D5016 | 내추럴, 보태니컬 |
+
+---
+
+## 10. Implementation Guidance
+
+### 10.1 핵심 화면 목록
 
 | 화면 | 설명 | 우선순위 |
 |------|------|----------|
-| 랜딩 페이지 | 서비스 소개, CTA | 🔴 High |
-| 회원가입/로그인 | 카카오/이메일 | 🔴 High |
-| 대화형 생성 | AI 대화로 정보 수집 | 🔴 High |
-| AI 시안 선택 | 5개 시안 중 선택 | 🔴 High |
-| 사진 업로드 | 최대 10장 | 🔴 High |
-| 미리보기 | 완성된 청첩장 확인 | 🔴 High |
-| 결제 | Polar.sh 연동 | 🔴 High |
-| 공유 | 카카오톡/링크 복사 | 🔴 High |
-| 청첩장 열람 (Guest) | 게스트 뷰 | 🔴 High |
-| 축하 메시지 작성 | 닉네임 + 300자 | 🟡 Medium |
-| 메시지 목록 (Host) | 받은 메시지 열람 | 🟡 Medium |
-| 내 청첩장 관리 | 목록, 수정, 삭제 | 🟡 Medium |
+| 랜딩 페이지 | 서비스 소개 | High |
+| 회원가입/로그인 | 카카오/이메일 | High |
+| 이미지 업로드 | AI 분석용 (선택) | High |
+| 테마 선택/AI 생성 | 5개 프리뷰 | High |
+| 2패널 편집 | 정보 입력 + 프리뷰 | High |
+| 미리보기 | 전체 청첩장 확인 | High |
+| 결제 | Polar.sh 연동 | High |
+| 공유 | 카카오톡/링크 | High |
+| 청첩장 열람 (Guest) | 인트로 + 콘텐츠 | High |
+| 축하 메시지 작성 | 닉네임 + 300자 | Medium |
+| 메시지 목록 (Host) | 받은 메시지 | Medium |
+| 내 청첩장 관리 | 목록/수정/삭제 | Medium |
 
-### 9.2 기술 스택 연계
+### 10.2 기술 스택 연계
 
-- **프레임워크:** Next.js 14+ (App Router)
-- **스타일링:** Tailwind CSS + shadcn/ui
+- **프레임워크:** Next.js 16 (App Router)
+- **스타일링:** Tailwind CSS v4 + shadcn/ui
 - **폰트:** Pretendard (next/font)
 - **아이콘:** Lucide Icons
-- **애니메이션:** Framer Motion (로딩, 전환)
+- **상태 관리:** React Context (EditContext)
 - **지도:** 카카오맵 API
 - **공유:** 카카오 SDK
+- **결제:** Polar.sh
 
 ---
 
@@ -506,6 +485,7 @@ AI와 대화하며 모든 정보를 자연스럽게 수집:
 
 ### Related Documents
 - Product Requirements: `docs/prd.md`
+- Architecture: `docs/architecture-invitation.md`
 - Epic Breakdown: `docs/epics.md`
 
 ### Version History
@@ -513,7 +493,8 @@ AI와 대화하며 모든 정보를 자연스럽게 수집:
 | Date | Version | Changes | Author |
 |------|---------|---------|--------|
 | 2025-11-30 | 1.0 | Initial UX Design Specification | BMad |
+| 2025-12-05 | 2.0 | 인트로 11개, 섹션 25개, 2패널 편집, 애니메이션 시스템 | BMad |
 
 ---
 
-_This UX Design Specification was created through collaborative design facilitation, not template generation. All decisions were made with user input and are documented with rationale._
+_This UX Design Specification reflects the current implementation with 11 intro styles, 25 section types, 2-panel editing, and rich animation system._
