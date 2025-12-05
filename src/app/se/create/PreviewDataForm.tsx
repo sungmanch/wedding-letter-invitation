@@ -11,8 +11,8 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react'
 export interface PreviewFormData {
   groomName: string
   brideName: string
-  weddingDate: string
-  weddingTime: string
+  weddingDate: string // YYYY-MM-DD 형식
+  weddingTime: string // HH:mm 형식
   overlayText?: string // 일부 템플릿에서만 사용 가능
 }
 
@@ -78,20 +78,18 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">예식 날짜</label>
               <input
-                type="text"
+                type="date"
                 value={data.weddingDate}
                 onChange={handleChange('weddingDate')}
-                placeholder="2025년 3월 15일"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">예식 시간</label>
               <input
-                type="text"
+                type="time"
                 value={data.weddingTime}
                 onChange={handleChange('weddingTime')}
-                placeholder="오후 2시"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               />
             </div>
@@ -133,6 +131,33 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
 }
 
 /**
+ * 날짜를 한국어 형식으로 포맷팅 (YYYY-MM-DD → 2025년 3월 15일)
+ */
+function formatDateKorean(dateStr: string): string {
+  if (!dateStr) return '2025년 3월 15일'
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`
+}
+
+/**
+ * 시간을 한국어 형식으로 포맷팅 (HH:mm → 오후 2시 30분)
+ */
+function formatTimeKorean(timeStr: string): string {
+  if (!timeStr) return '오후 2시'
+  const [hourStr, minuteStr] = timeStr.split(':')
+  const hour = parseInt(hourStr, 10)
+  const minute = parseInt(minuteStr, 10)
+  if (isNaN(hour)) return timeStr
+
+  const period = hour < 12 ? '오전' : '오후'
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+  const minutePart = minute > 0 ? ` ${minute}분` : ''
+
+  return `${period} ${displayHour}시${minutePart}`
+}
+
+/**
  * PreviewFormData를 DEFAULT_USER_DATA 형식으로 변환
  */
 export function formDataToUserData(formData: PreviewFormData) {
@@ -153,8 +178,8 @@ export function formDataToUserData(formData: PreviewFormData) {
         bride: { name: formData.brideName || '신부', englishName: 'Bride' },
       },
       wedding: {
-        date: formData.weddingDate || '2025년 3월 15일',
-        time: formData.weddingTime || '오후 2시',
+        date: formatDateKorean(formData.weddingDate),
+        time: formatTimeKorean(formData.weddingTime),
         venue: {
           name: '더채플앳청담',
           address: '서울특별시 강남구 청담동 123-45',
@@ -179,7 +204,7 @@ export function formDataToUserData(formData: PreviewFormData) {
 export const DEFAULT_PREVIEW_FORM_DATA: PreviewFormData = {
   groomName: '김신랑',
   brideName: '이신부',
-  weddingDate: '2025년 3월 15일',
-  weddingTime: '오후 2시',
+  weddingDate: '2025-03-15', // YYYY-MM-DD
+  weddingTime: '14:00', // HH:mm
   overlayText: '',
 }
