@@ -9,19 +9,7 @@ import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { EditorSchema } from '../schema/editor'
 import type { UserData } from '../schema/user-data'
-
-// 기본 섹션 순서
-const DEFAULT_SECTION_ORDER = ['venue', 'date', 'gallery', 'parents', 'accounts', 'guestbook']
-const DEFAULT_SECTION_ENABLED: Record<string, boolean> = {
-  intro: true,
-  venue: true,
-  date: true,
-  gallery: true,
-  parents: true,
-  accounts: true,
-  guestbook: true,
-  music: false,
-}
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '../schema/section-types'
 
 // ============================================
 // Template Actions
@@ -282,6 +270,7 @@ export async function generateTemplateWithLLM(prompt: string) {
       {
         id: 'intro',
         type: 'intro',
+        sectionType: 'intro',
         root: {
           id: 'root',
           type: 'fullscreen',

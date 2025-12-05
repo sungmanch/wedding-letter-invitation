@@ -4,6 +4,7 @@
  */
 
 import type { PrimitiveNode, CSSProperties } from './primitives'
+import type { SectionType } from './section-types'
 
 // ============================================
 // Layout Schema (LLM Generated)
@@ -46,6 +47,7 @@ export interface Screen {
   id: string
   name?: string
   type: ScreenType
+  sectionType: SectionType    // 청첩장 섹션 식별자
   root: PrimitiveNode
   transition?: ScreenTransition
   triggers?: ScreenTrigger[]
