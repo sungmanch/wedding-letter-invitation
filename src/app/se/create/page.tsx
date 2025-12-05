@@ -473,7 +473,7 @@ export default function SuperEditorCreatePage() {
       }
 
       // 편집 페이지로 이동
-      router.push(`/${saveResponse.data.invitationId}/edit`)
+      router.push(`/se/${saveResponse.data.invitationId}/edit`)
     } catch (err) {
       console.error('Template save failed:', err)
       alert(err instanceof Error ? err.message : '저장에 실패했습니다. 다시 시도해주세요.')

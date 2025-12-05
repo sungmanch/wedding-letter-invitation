@@ -54,6 +54,7 @@ export interface HistoryEntry {
 export type SuperEditorAction =
   | { type: 'SET_TEMPLATE'; layout: LayoutSchema; style: StyleSchema; editor: EditorSchema }
   | { type: 'SET_USER_DATA'; userData: UserData }
+  | { type: 'SET_STYLE'; style: StyleSchema }
   | { type: 'UPDATE_FIELD'; fieldPath: string; value: unknown }
   | { type: 'SELECT_NODE'; nodeId: string | null }
   | { type: 'SELECT_FIELD'; fieldId: string | null }
@@ -136,6 +137,13 @@ function superEditorReducer(
         ],
         historyIndex: 0,
         dirty: false,
+      }
+
+    case 'SET_STYLE':
+      return {
+        ...state,
+        style: action.style,
+        dirty: true,
       }
 
     case 'UPDATE_FIELD': {
@@ -245,6 +253,7 @@ interface SuperEditorContextValue {
   // 편의 함수들
   setTemplate: (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => void
   setUserData: (userData: UserData) => void
+  setStyle: (style: StyleSchema) => void
   updateField: (fieldPath: string, value: unknown) => void
   selectNode: (nodeId: string | null) => void
   selectField: (fieldId: string | null) => void
@@ -302,6 +311,10 @@ export function SuperEditorProvider({
 
   const setUserData = useCallback((userData: UserData) => {
     dispatch({ type: 'SET_USER_DATA', userData })
+  }, [])
+
+  const setStyle = useCallback((style: StyleSchema) => {
+    dispatch({ type: 'SET_STYLE', style })
   }, [])
 
   const updateField = useCallback((fieldPath: string, value: unknown) => {
@@ -365,6 +378,7 @@ export function SuperEditorProvider({
       dispatch,
       setTemplate,
       setUserData,
+      setStyle,
       updateField,
       selectNode,
       selectField,
@@ -381,6 +395,7 @@ export function SuperEditorProvider({
       state,
       setTemplate,
       setUserData,
+      setStyle,
       updateField,
       selectNode,
       selectField,

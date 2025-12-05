@@ -225,6 +225,42 @@ export async function updateInvitationSections(
   return updated
 }
 
+export async function updateTemplateStyle(
+  invitationId: string,
+  styleSchema: StyleSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 styleSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      styleSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
+    .returning()
+
+  return updated
+}
+
 // ============================================
 // Build Action
 // ============================================

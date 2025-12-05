@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections } from '@/lib/super-editor/actions'
+import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections, updateTemplateStyle } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import { InvitationRenderer } from '@/lib/super-editor/renderers'
-import { EditorPanel, EditorToolbar, SectionManager } from '@/lib/super-editor/components'
+import { EditorPanel, EditorToolbar, SectionManager, StyleEditor } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, REORDERABLE_SECTIONS } from '@/lib/super-editor/schema/section-types'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
@@ -14,14 +14,14 @@ import type { EditorSchema } from '@/lib/super-editor/schema/editor'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 import type { SectionType } from '@/lib/super-editor/schema/section-types'
 
-type EditorTab = 'fields' | 'sections'
+type EditorTab = 'fields' | 'style' | 'sections'
 
 function EditPageContent() {
   const params = useParams()
   const router = useRouter()
   const invitationId = params.id as string
 
-  const { state, setTemplate, setUserData } = useSuperEditor()
+  const { state, setTemplate, setUserData, setStyle } = useSuperEditor()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -124,6 +124,15 @@ function EditPageContent() {
     }
   }, [invitationId, sectionOrder])
 
+  const handleStyleChange = useCallback(async (newStyle: StyleSchema) => {
+    setStyle(newStyle)
+    try {
+      await updateTemplateStyle(invitationId, newStyle)
+    } catch (err) {
+      console.error('Failed to save style:', err)
+    }
+  }, [invitationId, setStyle])
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100">
@@ -210,28 +219,38 @@ function EditPageContent() {
           <div className="flex border-b border-gray-200 flex-shrink-0">
             <button
               onClick={() => setActiveTab('fields')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'fields'
                   ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              내용 편집
+              내용
+            </button>
+            <button
+              onClick={() => setActiveTab('style')}
+              className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'style'
+                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              스타일
             </button>
             <button
               onClick={() => setActiveTab('sections')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'sections'
                   ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              섹션 관리
+              섹션
             </button>
           </div>
 
           {/* 탭 콘텐츠 */}
-          {activeTab === 'fields' ? (
+          {activeTab === 'fields' && (
             state.editor ? (
               <>
                 <EditorToolbar />
@@ -242,7 +261,15 @@ function EditPageContent() {
                 <p>편집기를 불러오는 중...</p>
               </div>
             )
-          ) : (
+          )}
+          {activeTab === 'style' && state.style && (
+            <StyleEditor
+              style={state.style}
+              onStyleChange={handleStyleChange}
+              className="flex-1"
+            />
+          )}
+          {activeTab === 'sections' && (
             <div className="flex-1 overflow-y-auto">
               <SectionManager
                 sectionOrder={sectionOrder.filter((s): s is SectionType =>
@@ -265,7 +292,7 @@ function EditPageContent() {
                 <div className="relative bg-black rounded-[3rem] p-3 shadow-2xl">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-10" />
                   <div
-                    className="bg-white rounded-[2.5rem] overflow-hidden overflow-y-auto"
+                    className="bg-white rounded-[2.5rem] overflow-hidden overflow-y-auto mobile-scrollbar"
                     style={{
                       width: 375,
                       height: 667,

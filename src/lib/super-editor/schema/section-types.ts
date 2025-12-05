@@ -36,8 +36,8 @@ export interface SectionMeta {
   label: string
   description: string
   icon: string
-  isFixed: boolean      // 순서 고정 여부 (intro는 true)
-  isFloating: boolean   // 플로팅 UI 여부 (music은 true)
+  isFixed: boolean // 순서 고정 여부 (intro는 true)
+  isFloating: boolean // 플로팅 UI 여부 (music은 true)
   defaultEnabled: boolean
 }
 
@@ -123,10 +123,10 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
  * 기본 섹션 순서 (intro, music 제외)
  */
 export const DEFAULT_SECTION_ORDER: SectionType[] = [
-  'venue',
   'date',
-  'gallery',
   'parents',
+  'gallery',
+  'venue',
   'accounts',
   'guestbook',
 ]
@@ -193,32 +193,25 @@ export const SECTION_DATA_BINDINGS: Record<SectionType, string[]> = {
     'wedding.timeDisplay',
     'wedding.dday',
   ],
-  gallery: [
-    'photos.gallery',
-    'photos.main',
-  ],
+  gallery: ['photos.gallery', 'photos.main'],
   // parents: 편부모/보호자 등 다양한 케이스 지원, 동적 토글
   parents: [
-    'parents.groom.members',        // [{ name, relation, enabled }]
-    'parents.bride.members',        // [{ name, relation, enabled }]
+    'parents.groom.members', // [{ name, relation, enabled }]
+    'parents.bride.members', // [{ name, relation, enabled }]
   ],
   // accounts: 최대 6개 (신랑, 신부, 신랑 부/모, 신부 부/모)
   accounts: [
-    'accounts.groom',               // { name, accounts: [{ bank, number, holder }] }
-    'accounts.bride',               // { name, accounts: [{ bank, number, holder }] }
-    'accounts.groomFather',         // { name, accounts: [{ bank, number, holder }], enabled }
-    'accounts.groomMother',         // { name, accounts: [{ bank, number, holder }], enabled }
-    'accounts.brideFather',         // { name, accounts: [{ bank, number, holder }], enabled }
-    'accounts.brideMother',         // { name, accounts: [{ bank, number, holder }], enabled }
+    'accounts.groom', // { name, accounts: [{ bank, number, holder }] }
+    'accounts.bride', // { name, accounts: [{ bank, number, holder }] }
+    'accounts.groomFather', // { name, accounts: [{ bank, number, holder }], enabled }
+    'accounts.groomMother', // { name, accounts: [{ bank, number, holder }], enabled }
+    'accounts.brideFather', // { name, accounts: [{ bank, number, holder }], enabled }
+    'accounts.brideMother', // { name, accounts: [{ bank, number, holder }], enabled }
   ],
   guestbook: [
     'guestbook.messages',
     'guestbook.enabled',
-    'guestbook.ctaText',            // CTA 버튼 텍스트
+    'guestbook.ctaText', // CTA 버튼 텍스트
   ],
-  music: [
-    'bgm.presetId',
-    'bgm.enabled',
-    'bgm.autoplay',
-  ],
+  music: ['bgm.presetId', 'bgm.enabled', 'bgm.autoplay'],
 }
