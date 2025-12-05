@@ -13,6 +13,7 @@ import { SectionRenderer } from '@/lib/super-editor/renderers'
 import {
   generateIntroOnlyAction,
   completeTemplateAction,
+  saveInvitationAction,
 } from '@/lib/super-editor/actions/generate'
 import type { IntroGenerationResult } from '@/lib/super-editor/services'
 import {
@@ -424,7 +425,7 @@ export default function SuperEditorCreatePage() {
     }
   }
 
-  // Stage 2 & 3: 기본 섹션 추가 후 편집 화면으로 이동
+  // Stage 2 & 3: 기본 섹션 추가 후 DB 저장 및 편집 화면으로 이동
   const handleStartEditing = async () => {
     // 레거시 템플릿 또는 AI 결과 중 하나가 있어야 함
     if (!introResult && !legacyResult) return
@@ -445,23 +446,37 @@ export default function SuperEditorCreatePage() {
         throw new Error('인트로 결과가 없습니다')
       }
 
-      // AI 생성 결과로 시작 (레거시도 변환되어 동일하게 처리)
-      const response = await completeTemplateAction({
+      // Stage 2: 기본 섹션들로 전체 템플릿 완성
+      const completeResponse = await completeTemplateAction({
         introResult: targetIntroResult,
       })
 
-      if (!response.success || !response.data) {
-        throw new Error(response.error ?? '템플릿 완성에 실패했습니다')
+      if (!completeResponse.success || !completeResponse.data) {
+        throw new Error(completeResponse.error ?? '템플릿 완성에 실패했습니다')
       }
 
-      // TODO: Stage 3 - DB 저장 후 편집 페이지로 이동
-      console.log('Complete template:', response.data)
-      alert('저장 기능은 준비 중입니다.\n\n콘솔에서 생성 결과를 확인하세요.')
+      // Stage 3: DB 저장
+      const saveResponse = await saveInvitationAction({
+        generationResult: completeResponse.data,
+        previewData: {
+          groomName: previewFormData.groomName,
+          brideName: previewFormData.brideName,
+          weddingDate: previewFormData.weddingDate,
+          weddingTime: previewFormData.weddingTime,
+          mainImage: previewFormData.mainImage,
+        },
+        legacyPresetId: selectedTemplateId || undefined,
+      })
 
-      // router.push(`/se/${invitationId}/edit`)
+      if (!saveResponse.success || !saveResponse.data) {
+        throw new Error(saveResponse.error ?? '저장에 실패했습니다')
+      }
+
+      // 편집 페이지로 이동
+      router.push(`/${saveResponse.data.invitationId}/edit`)
     } catch (err) {
-      console.error('Template completion failed:', err)
-      alert('템플릿 완성에 실패했습니다. 다시 시도해주세요.')
+      console.error('Template save failed:', err)
+      alert(err instanceof Error ? err.message : '저장에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setIsLoading(false)
     }

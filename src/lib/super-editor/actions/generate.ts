@@ -15,6 +15,10 @@ import {
 } from '../services/generation-service'
 import { createGeminiProvider } from '../services/gemini-provider'
 import type { StyleSchema } from '../schema/style'
+import { db } from '@/lib/db'
+import { invitations, invitationDesigns, invitationPhotos } from '@/lib/db/invitation-schema'
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 // ============================================
 // AI Template Generation
@@ -211,5 +215,129 @@ export async function completeTemplateAction(
       success: false,
       error: error instanceof Error ? error.message : '템플릿 완성에 실패했습니다',
     }
+  }
+}
+
+// ============================================
+// Stage 3: Save to Database
+// ============================================
+
+export interface SaveInvitationInput {
+  // 생성 결과
+  generationResult: GenerationResult
+  // 프리뷰 폼 데이터
+  previewData: {
+    groomName: string
+    brideName: string
+    weddingDate: string // YYYY-MM-DD
+    weddingTime: string // HH:mm
+    mainImage?: string // base64 data URL
+  }
+  // 레거시 프리셋 사용 시
+  legacyPresetId?: string
+}
+
+export interface SaveInvitationOutput {
+  success: boolean
+  data?: { invitationId: string }
+  error?: string
+}
+
+/**
+ * Stage 3: 생성된 템플릿을 DB에 저장하고 invitation 생성
+ */
+export async function saveInvitationAction(
+  input: SaveInvitationInput
+): Promise<SaveInvitationOutput> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    const { generationResult, previewData, legacyPresetId } = input
+
+    // 1. Invitation 생성
+    const [invitation] = await db.insert(invitations).values({
+      userId: user.id,
+      groomName: previewData.groomName || '신랑',
+      brideName: previewData.brideName || '신부',
+      weddingDate: previewData.weddingDate || new Date().toISOString().split('T')[0],
+      weddingTime: previewData.weddingTime || '12:00',
+      venueName: '',
+      venueAddress: '',
+      status: 'draft',
+      templateId: legacyPresetId || 'super-editor',
+    }).returning()
+
+    // 2. Design 데이터 구성 (SuperEditor 전용 포맷)
+    const designData = {
+      version: 'super-editor-v1' as const,
+      style: generationResult.style,
+      tokens: generationResult.tokens,
+      cssVariables: generationResult.cssVariables,
+      layout: generationResult.layout,
+      screens: generationResult.screens,
+      legacyPresetId,
+    }
+
+    // 3. InvitationDesign 생성
+    const [design] = await db.insert(invitationDesigns).values({
+      invitationId: invitation.id,
+      designData: designData as unknown as Record<string, unknown>,
+      generationBatch: 1,
+      isSelected: true,
+    }).returning()
+
+    // 4. Invitation에 선택된 디자인 연결
+    await db.update(invitations)
+      .set({
+        selectedDesignId: design.id,
+        updatedAt: new Date(),
+      })
+      .where(
+        (await import('drizzle-orm')).eq(invitations.id, invitation.id)
+      )
+
+    // 5. 이미지가 있으면 저장
+    if (previewData.mainImage && previewData.mainImage.startsWith('data:')) {
+      try {
+        const fileName = `${invitation.id}/${Date.now()}.jpg`
+        const base64Data = previewData.mainImage.replace(/^data:image\/\w+;base64,/, '')
+        const buffer = Buffer.from(base64Data, 'base64')
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('invitation-photos')
+          .upload(fileName, buffer, {
+            contentType: 'image/jpeg',
+            upsert: true,
+          })
+
+        if (!uploadError && uploadData) {
+          const { data: urlData } = supabase.storage
+            .from('invitation-photos')
+            .getPublicUrl(fileName)
+
+          await db.insert(invitationPhotos).values({
+            invitationId: invitation.id,
+            storagePath: fileName,
+            url: urlData.publicUrl,
+            displayOrder: 0,
+          })
+        }
+      } catch (photoError) {
+        console.error('Failed to upload photo:', photoError)
+        // 사진 업로드 실패해도 계속 진행
+      }
+    }
+
+    revalidatePath('/my/invitations')
+
+    return { success: true, data: { invitationId: invitation.id } }
+  } catch (error) {
+    console.error('Failed to save invitation:', error)
+    return { success: false, error: '청첩장 저장에 실패했습니다' }
   }
 }
