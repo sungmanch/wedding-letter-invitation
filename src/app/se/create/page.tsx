@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateQuickTemplate } from '@/lib/super-editor/services'
+import { generateTemplateAction } from '@/lib/super-editor/actions/generate'
 import { TokenStyleProvider } from '@/lib/super-editor/context'
 import { InvitationRenderer } from '@/lib/super-editor/renderers'
 import type { GenerationResult } from '@/lib/super-editor/services'
@@ -77,7 +78,7 @@ export default function SuperEditorCreatePage() {
     }
   }, [])
 
-  // AI 생성 (TODO: AIProvider 연동)
+  // AI 생성
   const handleAIGenerate = useCallback(async () => {
     if (!prompt.trim() && selectedMoods.length === 0) {
       setError('스타일을 설명하거나 분위기를 선택해주세요')
@@ -88,30 +89,24 @@ export default function SuperEditorCreatePage() {
     setError(null)
 
     try {
-      // 분위기에 따른 색상 선택
-      const primaryColor = selectedMoods.includes('romantic') ? '#E91E63'
-        : selectedMoods.includes('modern') ? '#3B82F6'
-        : selectedMoods.includes('warm') ? '#F59E0B'
-        : selectedMoods.includes('elegant') ? '#8B5CF6'
-        : '#E91E63'
-
-      const headingFont = selectedMoods.includes('elegant') || selectedMoods.includes('romantic')
-        ? '"Noto Serif KR", serif'
-        : '"Pretendard", sans-serif'
-
-      const customStyle = createDefaultStyle({
-        name: prompt || selectedMoods.join(', '),
-        primaryColor,
-        headingFont,
+      // 서버 액션을 통해 AI 생성 호출
+      const response = await generateTemplateAction({
+        prompt: prompt || selectedMoods.map(m => {
+          const tag = MOOD_TAGS.find(t => t.id === m)
+          return tag?.label ?? m
+        }).join(', '),
         mood: selectedMoods,
       })
 
-      const generatedResult = generateQuickTemplate(customStyle)
-      setResult(generatedResult)
+      if (!response.success || !response.data) {
+        throw new Error(response.error ?? 'AI 생성에 실패했습니다')
+      }
+
+      setResult(response.data)
       setStatus('success')
     } catch (err) {
       console.error('AI generation failed:', err)
-      setError('AI 생성에 실패했습니다')
+      setError(err instanceof Error ? err.message : 'AI 생성에 실패했습니다')
       setStatus('error')
     }
   }, [prompt, selectedMoods])
