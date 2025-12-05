@@ -2,32 +2,39 @@
 
 import type { PrimitiveNode, ButtonProps, ButtonAction } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
-import { toInlineStyle, getNodeProps, resolveDataBinding } from '../types'
+import { getNodeProps, resolveDataBinding, mergeNodeStyles, getNodeEventHandlers } from '../types'
 
+// 확장된 노드 타입 (tokenStyle, events 포함)
+interface ExtendedNode extends PrimitiveNode {
+  tokenStyle?: Record<string, unknown>
+  events?: import('../../context/EventContext').NodeEventHandler[]
+}
+
+// 토큰 기반 variant 스타일
 const variantStyles: Record<string, React.CSSProperties> = {
   primary: {
-    backgroundColor: 'var(--color-primary, #3b82f6)',
+    backgroundColor: 'var(--color-brand, #3b82f6)',
     color: '#fff',
     border: 'none',
   },
   secondary: {
-    backgroundColor: 'var(--color-secondary, #6b7280)',
-    color: '#fff',
+    backgroundColor: 'var(--color-surface, #6b7280)',
+    color: 'var(--color-text-primary, #1f2937)',
     border: 'none',
   },
   outline: {
     backgroundColor: 'transparent',
-    color: 'var(--color-primary, #3b82f6)',
-    border: '1px solid currentColor',
+    color: 'var(--color-brand, #3b82f6)',
+    border: '1px solid var(--color-border, currentColor)',
   },
   ghost: {
     backgroundColor: 'transparent',
-    color: 'var(--color-primary, #3b82f6)',
+    color: 'var(--color-brand, #3b82f6)',
     border: 'none',
   },
   link: {
     backgroundColor: 'transparent',
-    color: 'var(--color-primary, #3b82f6)',
+    color: 'var(--color-brand, #3b82f6)',
     border: 'none',
     textDecoration: 'underline',
     padding: 0,
@@ -96,8 +103,14 @@ export function Button({
   node: PrimitiveNode
   context: RenderContext
 }) {
+  const extNode = node as ExtendedNode
   const props = getNodeProps<ButtonProps>(node)
-  const style = toInlineStyle(node.style)
+
+  // 토큰 스타일 + 직접 스타일 병합
+  const mergedStyle = mergeNodeStyles(extNode, context)
+
+  // 이벤트 핸들러 생성
+  const eventHandlers = getNodeEventHandlers(extNode, context)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
@@ -111,15 +124,36 @@ export function Button({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    borderRadius: '6px',
+    gap: 'var(--spacing-xs, 8px)',
+    borderRadius: 'var(--radius-md, 6px)',
     cursor: 'pointer',
     fontWeight: 500,
-    transition: 'all 0.2s',
+    transition: `all var(--duration-fast, 150ms) var(--easing-default, ease-out)`,
     ...variantStyles[variant],
     ...sizeStyles[size],
-    ...style,
+    ...mergedStyle,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
+  }
+
+  // 클릭 핸들러 결정
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (context.mode === 'edit') {
+      context.onSelectNode?.(node.id)
+    } else {
+      // v2 이벤트 시스템 우선, 없으면 레거시 action 처리
+      if (eventHandlers.onClick) {
+        eventHandlers.onClick(e)
+      } else if (props.action) {
+        // 레거시 action을 v2 executeAction으로 변환
+        if (context.executeAction) {
+          const action = convertLegacyAction(props.action)
+          if (action) context.executeAction(action)
+        } else {
+          handleAction(props.action)
+        }
+      }
+    }
   }
 
   return (
@@ -127,14 +161,11 @@ export function Button({
       data-node-id={node.id}
       data-node-type="button"
       style={buttonStyle}
-      onClick={(e) => {
-        e.stopPropagation()
-        if (context.mode === 'edit') {
-          context.onSelectNode?.(node.id)
-        } else {
-          handleAction(props.action)
-        }
-      }}
+      onClick={handleClick}
+      onFocus={eventHandlers.onFocus}
+      onBlur={eventHandlers.onBlur}
+      onMouseEnter={eventHandlers.onMouseEnter}
+      onMouseLeave={eventHandlers.onMouseLeave}
     >
       {props.icon && props.iconPosition !== 'right' && (
         <span className="button-icon">{props.icon}</span>
@@ -145,6 +176,28 @@ export function Button({
       )}
     </button>
   )
+}
+
+/**
+ * 레거시 ButtonAction을 v2 EventAction으로 변환
+ */
+function convertLegacyAction(action: ButtonAction): import('../../context/EventContext').EventAction | null {
+  switch (action.type) {
+    case 'link':
+      return { type: 'navigate', payload: { url: action.url, target: action.target } }
+    case 'copy':
+      return { type: 'copy', payload: { text: action.value, toast: action.toast } }
+    case 'call':
+      return { type: 'call', payload: { phone: action.phone } }
+    case 'sms':
+      return { type: 'sms', payload: { phone: action.phone, body: action.body } }
+    case 'map':
+      return { type: 'map', payload: { address: action.address, provider: action.provider } }
+    case 'scroll':
+      return { type: 'scroll-to', payload: { target: action.target } }
+    default:
+      return null
+  }
 }
 
 export const buttonRenderer: PrimitiveRenderer<ButtonProps> = {

@@ -2,7 +2,13 @@
 
 import type { PrimitiveNode, TextProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
-import { toInlineStyle, getNodeProps, resolveDataBinding } from '../types'
+import { getNodeProps, resolveDataBinding, mergeNodeStyles, getNodeEventHandlers } from '../types'
+
+// 확장된 노드 타입 (tokenStyle, events 포함)
+interface ExtendedNode extends PrimitiveNode {
+  tokenStyle?: Record<string, unknown>
+  events?: import('../../context/EventContext').NodeEventHandler[]
+}
 
 export function Text({
   node,
@@ -11,9 +17,15 @@ export function Text({
   node: PrimitiveNode
   context: RenderContext
 }) {
+  const extNode = node as ExtendedNode
   const props = getNodeProps<TextProps>(node)
-  const style = toInlineStyle(node.style)
   const Tag = props.as || 'p'
+
+  // 토큰 스타일 + 직접 스타일 병합
+  const mergedStyle = mergeNodeStyles(extNode, context)
+
+  // 이벤트 핸들러 생성
+  const eventHandlers = getNodeEventHandlers(extNode, context)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
@@ -21,9 +33,17 @@ export function Text({
   const content = resolveDataBinding(props.content || '', context.data) as string
 
   const combinedStyle: React.CSSProperties = {
-    ...style,
+    ...mergedStyle,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
   }
+
+  // 클릭 핸들러 결정
+  const handleClick = context.mode === 'edit'
+    ? (e: React.MouseEvent) => {
+        e.stopPropagation()
+        context.onSelectNode?.(node.id)
+      }
+    : eventHandlers.onClick
 
   // HTML 허용 여부에 따라 렌더링 방식 결정
   if (props.html) {
@@ -33,14 +53,9 @@ export function Text({
         data-node-type="text"
         style={combinedStyle}
         dangerouslySetInnerHTML={{ __html: content }}
-        onClick={
-          context.mode === 'edit'
-            ? (e) => {
-                e.stopPropagation()
-                context.onSelectNode?.(node.id)
-              }
-            : undefined
-        }
+        onClick={handleClick}
+        onMouseEnter={eventHandlers.onMouseEnter}
+        onMouseLeave={eventHandlers.onMouseLeave}
       />
     )
   }
@@ -50,14 +65,9 @@ export function Text({
       data-node-id={node.id}
       data-node-type="text"
       style={combinedStyle}
-      onClick={
-        context.mode === 'edit'
-          ? (e) => {
-              e.stopPropagation()
-              context.onSelectNode?.(node.id)
-            }
-          : undefined
-      }
+      onClick={handleClick}
+      onMouseEnter={eventHandlers.onMouseEnter}
+      onMouseLeave={eventHandlers.onMouseLeave}
     >
       {content}
     </Tag>
