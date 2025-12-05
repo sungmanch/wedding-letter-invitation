@@ -291,6 +291,7 @@ function buildNamesText(
       fontWeight: '600',
       color: colorStyles.textPrimary,
       textAlign: 'center',
+      whiteSpace: 'nowrap',
     },
     props: {
       content: '{{couple.groom.name}} & {{couple.bride.name}}',
