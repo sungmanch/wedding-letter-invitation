@@ -968,7 +968,7 @@ function OldMoneyPreview({ colors, fonts, groomName, brideName, dateFormatted, u
   )
 }
 
-// Monogram Preview - Heraldic Shield Portrait
+// Monogram Preview - Clean Portrait with Gold Frame
 function MonogramPreview({ groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   const monoColors = {
     navy: '#1A3A5C',
@@ -977,10 +977,6 @@ function MonogramPreview({ groomName, brideName, dateFormatted, userImageUrl }: 
     goldLight: '#D4BC8E',
     cream: '#F8F5F0',
   }
-
-  // Get initials for monogram
-  const groomInitial = groomName.charAt(0).toUpperCase()
-  const brideInitial = brideName.charAt(0).toUpperCase()
 
   return (
     <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: monoColors.navyDark }}>
@@ -995,46 +991,9 @@ function MonogramPreview({ groomName, brideName, dateFormatted, userImageUrl }: 
 
       {/* Content Layout */}
       <div className="relative z-10 h-full flex flex-col items-center p-3">
-        {/* Top: Monogram Crest */}
-        <div className="flex flex-col items-center mt-2 mb-3">
-          {/* Heraldic Shield with Initials */}
-          <svg width="50" height="56" viewBox="0 0 50 56" fill="none">
-            {/* Shield shape */}
-            <path
-              d="M25 2L46 10V28C46 42 25 54 25 54C25 54 4 42 4 28V10L25 2Z"
-              stroke={monoColors.gold}
-              strokeWidth="1.5"
-              fill="none"
-            />
-            {/* Inner shield */}
-            <path
-              d="M25 6L42 12V28C42 38 25 48 25 48C25 48 8 38 8 28V12L25 6Z"
-              fill={`${monoColors.navy}90`}
-            />
-            {/* Initials */}
-            <text
-              x="25"
-              y="32"
-              textAnchor="middle"
-              fill={monoColors.gold}
-              fontSize="14"
-              fontFamily="Cormorant Garamond, serif"
-              fontWeight="300"
-            >
-              {groomInitial}{brideInitial}
-            </text>
-            {/* Crown on top */}
-            <path
-              d="M18 4L21 0L25 3L29 0L32 4"
-              stroke={monoColors.gold}
-              strokeWidth="1"
-              fill="none"
-              strokeOpacity="0.6"
-            />
-          </svg>
-
-          {/* Decorative line under crest */}
-          <div className="flex items-center gap-2 mt-2">
+        {/* Top spacing with decorative line */}
+        <div className="flex flex-col items-center mt-3 mb-3">
+          <div className="flex items-center gap-2">
             <div className="w-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${monoColors.gold}60)` }} />
             <div className="w-1 h-1 rotate-45" style={{ backgroundColor: `${monoColors.gold}80` }} />
             <div className="w-6 h-px" style={{ background: `linear-gradient(to left, transparent, ${monoColors.gold}60)` }} />
