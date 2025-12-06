@@ -301,7 +301,11 @@ export function StyleEditor({
                     <button
                       key={opt.value}
                       onClick={() => updateTypography((typo) => {
-                        if (typo?.weights) typo.weights.bold = opt.value
+                        if (typo?.weights) {
+                          // bold와 semibold 모두 업데이트 (제목 전체에 적용)
+                          typo.weights.bold = opt.value
+                          typo.weights.semibold = opt.semibold
+                        }
                       })}
                       className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                         localStyle.theme.typography?.weights?.bold === opt.value
@@ -514,11 +518,11 @@ const FONT_WEIGHT_OPTIONS = [
   { value: 500, label: '굵게' },
 ]
 
-// 제목 굵기 옵션
+// 제목 굵기 옵션 (bold: 메인 타이틀, semibold: 섹션 제목)
 const HEADING_WEIGHT_OPTIONS = [
-  { value: 600, label: '보통' },
-  { value: 700, label: '굵게' },
-  { value: 800, label: '매우 굵게' },
+  { value: 600, semibold: 500, label: '보통' },
+  { value: 700, semibold: 600, label: '굵게' },
+  { value: 800, semibold: 700, label: '매우 굵게' },
 ]
 
 function FontSelector({
