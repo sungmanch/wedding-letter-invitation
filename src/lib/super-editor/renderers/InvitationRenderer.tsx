@@ -40,6 +40,10 @@ interface InvitationRendererProps {
   // undefined = sectionEnabled 기반, ['intro'] = 인트로만
   visibleSections?: SectionType[]
 
+  // Variant switcher (dev mode only)
+  sectionVariants?: Record<SectionType, string>
+  onVariantChange?: (sectionType: SectionType, variantId: string) => void
+
   className?: string
 }
 
@@ -96,6 +100,8 @@ function InvitationContent({
   selectedNodeId,
   onSelectNode,
   visibleSections,
+  sectionVariants,
+  onVariantChange,
   className,
 }: InvitationContentProps) {
   // 섹션 정렬
@@ -132,6 +138,8 @@ function InvitationContent({
           mode={mode}
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
+          currentVariantId={sectionVariants?.intro}
+          onVariantChange={onVariantChange}
         />
       )}
 
@@ -144,6 +152,8 @@ function InvitationContent({
           mode={mode}
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
+          currentVariantId={sectionVariants?.[screen.sectionType]}
+          onVariantChange={onVariantChange}
         />
       ))}
 
