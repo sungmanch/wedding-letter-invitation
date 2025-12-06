@@ -1,7 +1,10 @@
-# Project
+# Maison de Letter
 
-이 프로젝트는 개인화된 모바일 청첩장을 생성할 수 있는 서비스입니다.
-사용자가 본인의 웨딩 이미지를 업로드하면 해당 이미지를 바탕으로 꾸며진 모바일 청첩장 프리뷰를 보여주고 사용자에게 선택을 유도합니다.
+AI 기반 개인화 청첩장 서비스입니다.
+사용자가 본인의 웨딩 이미지를 업로드하면 해당 이미지를 바탕으로 꾸며진 청첩장 프리뷰를 보여주고 사용자에게 선택을 유도합니다.
+
+- **도메인**: maisondletter.com
+- **브랜드 톤**: Black & Gold 럭셔리, Wong Kar-wai 화양연화 무드
 
 ## 중요 규칙
 1. 모든 작업은 마이크로 단위로 작업에 대한 commit을 합니다.
@@ -23,17 +26,27 @@
 
 ## 변경 이력
 
-### 2025-12-05: 랜딩페이지 리디자인 - 라이브 프리뷰 히어로
-- **이유**: 정적 사진 기반이 아닌 "영상 같은" 애니메이션 청첩장 차별화 강조
+### 2025-12-06: 스크롤텔링 랜딩 페이지 리디자인
+- **이유**: 영화적 스토리텔링으로 전환율 극대화, Wong Kar-wai 화양연화 톤앤매너
 - **변경**:
-  - iframe 기반 라이브 프리뷰로 실제 템플릿 애니메이션(LP 회전, 필름 그레인, 채팅) 직접 노출
-  - 폰 목업 프레임 내에서 4가지 스타일 전환 가능한 인터랙티브 히어로
-  - 반응형 처리 (모바일: 도트 인디케이터, 데스크탑: 좌우 네비게이션)
+  - 6단계 스크롤텔링 구현 (Transition → Theme → Features → AI Demo → Pricing → CTA)
+  - 다크 테마 헤더 (골드/크림 텍스트, 투명 배경)
+  - S1: 영상 배경 + 딤 오버레이 + 도발적 질문
+  - S2: Sticky 아이폰 목업에서 Cinematic/Exhibition 테마 전환
+  - S3: 벤토 그리드 기능 쇼케이스 (인터뷰 영상 제거 → 포토 갤러리 메인 피처로 승격, 실제 웨딩 이미지 4장 적용)
+  - S4: 채팅 → AI 생성 시퀀스 데모
+  - S5: 프리미엄 가격 카드 (~~100,000원~~ → 50,000원)
+  - S6: 플로팅 CTA 바
 - **파일**:
-  - `src/components/landing/HeroWithLivePreview.tsx` - 라이브 프리뷰 히어로 컴포넌트
-  - `src/app/page.tsx` - 새 랜딩 페이지 구조
-  - `public/examples/` - 정적 서빙용 HTML 템플릿 (iframe 임베드)
-- **계획**: [랜딩페이지 개선 계획](./.claude/plans/abundant-sauteeing-hedgehog.md)
+  - `src/components/landing/ScrollytellingLanding.tsx` - 메인 컨테이너
+  - `src/components/landing/sections/S1-S6*.tsx` - 6개 섹션 컴포넌트
+  - `src/components/landing/hooks/useScrollProgress.ts` - 스크롤 훅
+  - `src/app/globals.css` - Wong Kar-wai 색상 변수 + 애니메이션 keyframes
+  - `src/app/page.tsx` - 다크 테마 헤더 + 새 랜딩 통합
+- **계획**: [스크롤텔링 랜딩 계획](./.claude/plans/valiant-roaming-coral.md)
+
+### 2025-12-05: 랜딩페이지 리디자인 - 라이브 프리뷰 히어로 (이전 버전)
+- **파일**: `src/components/landing/HeroWithLivePreview.tsx` (deprecated)
 
 ### 2025-12-02: AI 템플릿 시스템 + 확장 섹션 컴포넌트
 - **이유**: Salon de Letter 수준의 30+ 섹션 지원, AI 동적 템플릿 저장, S3 정적 배포
