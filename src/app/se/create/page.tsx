@@ -38,10 +38,8 @@ import type { RenderContext } from '@/lib/super-editor/primitives/types'
 
 // 새 super-editor 템플릿
 import { getAllTemplates, getTemplate, type TemplateId } from '@/lib/super-editor/templates'
-import { resolveTokens } from '@/lib/super-editor/tokens'
-import { generateCssVariables } from '@/lib/super-editor/tokens/css-generator'
-import type { SectionScreen, SkeletonNode } from '@/lib/super-editor/skeletons/types'
-import type { SectionType } from '@/lib/super-editor/schema/section-types'
+import type { Screen } from '@/lib/super-editor/schema/layout'
+import type { StyleSchema } from '@/lib/super-editor/schema/style'
 
 type CreateMode = 'template' | 'chat'
 
@@ -365,6 +363,10 @@ export default function SuperEditorCreatePage() {
   const [selectedTemplateType, setSelectedTemplateType] = useState<'legacy' | 'new' | null>(null)
   const [legacyResult, setLegacyResult] = useState<LegacyIntroResult | null>(null)
 
+  // 새 템플릿용 상태 (Screen 타입 직접 사용)
+  const [newTemplateScreen, setNewTemplateScreen] = useState<Screen | null>(null)
+  const [newTemplateStyle, setNewTemplateStyle] = useState<StyleSchema | null>(null)
+
   // Chat state
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE])
   const [input, setInput] = useState('')
@@ -403,36 +405,20 @@ export default function SuperEditorCreatePage() {
         // 새 super-editor 템플릿
         const template = getTemplate(presetId as TemplateId)
         if (template) {
-          // LayoutSchema의 첫 번째 screen을 intro로 사용
-          const screenFromLayout = template.layout.screens[0]
-          if (screenFromLayout) {
-            // Screen을 SectionScreen으로 변환
-            const introScreen: SectionScreen = {
-              id: screenFromLayout.id,
-              name: screenFromLayout.name,
-              type: screenFromLayout.type === 'intro' || screenFromLayout.type === 'content'
-                ? screenFromLayout.type
-                : 'content',
-              sectionType: (screenFromLayout.sectionType || 'intro') as SectionType,
-              root: screenFromLayout.root as unknown as SkeletonNode,
-            }
-
-            // tokens와 cssVariables 생성
-            const tokens = resolveTokens(template.style)
-            const cssVariables = generateCssVariables(tokens)
-
-            setIntroResult({
-              style: template.style,
-              tokens,
-              cssVariables,
-              introScreen,
-            })
+          // LayoutSchema의 첫 번째 screen을 intro로 사용 (Screen 타입 그대로 사용)
+          const screen = template.layout.screens[0]
+          if (screen) {
+            setNewTemplateScreen(screen)
+            setNewTemplateStyle(template.style)
+            setIntroResult(null)
             setLegacyResult(null)
           }
         }
       } else {
         // 레거시 템플릿
         setIntroResult(null)
+        setNewTemplateScreen(null)
+        setNewTemplateStyle(null)
         const preset = legacyPresets[presetId]
         if (preset) {
           const result = buildLegacyIntro(preset, legacyBuilderData)
@@ -538,6 +524,8 @@ export default function SuperEditorCreatePage() {
   const handleRegenerate = () => {
     setIntroResult(null)
     setLegacyResult(null)
+    setNewTemplateScreen(null)
+    setNewTemplateStyle(null)
     setSelectedTemplateId(null)
     setSelectedTemplateType(null)
     if (mode === 'chat') {
@@ -555,12 +543,20 @@ export default function SuperEditorCreatePage() {
 
   // Stage 2 & 3: 기본 섹션 추가 후 DB 저장 및 편집 화면으로 이동
   const handleStartEditing = async () => {
-    // 레거시 템플릿 또는 AI 결과 중 하나가 있어야 함
-    if (!introResult && !legacyResult) return
+    // 레거시 템플릿, AI 결과, 또는 새 템플릿 중 하나가 있어야 함
+    if (!introResult && !legacyResult && !newTemplateScreen) return
 
     setIsLoading(true)
 
     try {
+      // 새 템플릿의 경우 별도 처리 (TODO: 저장 로직 구현 필요)
+      if (newTemplateScreen && newTemplateStyle && selectedTemplateId) {
+        // TODO: 새 템플릿 저장 로직
+        alert('새 템플릿 저장 기능은 아직 구현 중입니다.')
+        setIsLoading(false)
+        return
+      }
+
       // 레거시 결과를 IntroGenerationResult로 변환 (통합 처리)
       let targetIntroResult = introResult
       if (legacyResult && selectedTemplateId) {
@@ -625,7 +621,7 @@ export default function SuperEditorCreatePage() {
               </button>
               <h1 className="text-lg font-semibold text-gray-900">새 청첩장 만들기</h1>
             </div>
-            {(introResult || legacyResult) && (
+            {(introResult || legacyResult || newTemplateScreen) && (
               <button
                 onClick={handleStartEditing}
                 disabled={isLoading}
@@ -777,10 +773,20 @@ export default function SuperEditorCreatePage() {
                 {legacyResult ? (
                   // 레거시 템플릿 선택 시 - PrimitiveNode 직접 렌더링
                   <LegacyPreview result={legacyResult} data={legacyBuilderData} />
+                ) : newTemplateScreen && newTemplateStyle ? (
+                  // 새 super-editor 템플릿 - Screen 타입 직접 사용
+                  <TokenStyleProvider style={newTemplateStyle}>
+                    <SectionRenderer
+                      screen={newTemplateScreen}
+                      userData={previewUserData}
+                      mode="preview"
+                    />
+                  </TokenStyleProvider>
                 ) : introResult ? (
+                  // AI 생성 결과
                   <TokenStyleProvider style={introResult.style}>
                     <SectionRenderer
-                      screen={introResult.introScreen}
+                      screen={introResult.introScreen as unknown as Screen}
                       userData={previewUserData}
                       mode="preview"
                     />
@@ -791,7 +797,7 @@ export default function SuperEditorCreatePage() {
               </PhoneFrame>
 
               {/* Regenerate button */}
-              {(introResult || legacyResult) && (
+              {(introResult || legacyResult || newTemplateScreen) && (
                 <button
                   onClick={handleRegenerate}
                   className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
@@ -806,7 +812,7 @@ export default function SuperEditorCreatePage() {
       </main>
 
       {/* Mobile Preview FAB */}
-      {(introResult || legacyResult) && (
+      {(introResult || legacyResult || newTemplateScreen) && (
         <div className="fixed bottom-20 right-4 lg:hidden">
           <button
             onClick={() => {
