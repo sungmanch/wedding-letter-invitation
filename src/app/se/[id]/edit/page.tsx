@@ -1,17 +1,20 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections, updateTemplateStyle } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import { EditorPanel, EditorToolbar, SectionManager, StyleEditor, InvitationPreview } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, REORDERABLE_SECTIONS } from '@/lib/super-editor/schema/section-types'
-import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
+import { replaceScreenVariant } from '@/lib/super-editor/builder/skeleton-resolver'
+import { getDefaultVariant } from '@/lib/super-editor/skeletons/registry'
+import type { LayoutSchema, Screen } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { EditorSchema } from '@/lib/super-editor/schema/editor'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 import type { SectionType } from '@/lib/super-editor/schema/section-types'
+import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 
 type EditorTab = 'fields' | 'style' | 'sections'
 
@@ -30,6 +33,8 @@ function EditPageContent() {
   const [sectionEnabled, setSectionEnabled] = useState<Record<SectionType, boolean>>(DEFAULT_SECTION_ENABLED)
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>()
   const [activeTab, setActiveTab] = useState<EditorTab>('fields')
+  // Variant switcher state (dev mode only)
+  const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>({} as Record<SectionType, string>)
 
   useEffect(() => {
     async function loadData() {
@@ -49,6 +54,19 @@ function EditPageContent() {
         setUserData(invitation.userData as UserData)
         setSectionOrder((invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER)
         setSectionEnabled((invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED)
+
+        // Initialize section variants from layout or defaults (dev mode only)
+        if (process.env.NODE_ENV === 'development') {
+          const layout = template.layoutSchema as LayoutSchema
+          const initialVariants: Record<SectionType, string> = {} as Record<SectionType, string>
+          for (const screen of layout.screens) {
+            const sectionType = screen.sectionType as SectionType
+            // Try to get variant from screen name or use default
+            const defaultVar = getDefaultVariant(sectionType)
+            initialVariants[sectionType] = defaultVar?.id ?? 'default'
+          }
+          setSectionVariants(initialVariants)
+        }
       } catch (err) {
         console.error('Failed to load invitation:', err)
         setError('청첩장을 불러오는데 실패했습니다.')
@@ -131,6 +149,28 @@ function EditPageContent() {
       console.error('Failed to save style:', err)
     }
   }, [invitationId, setStyle])
+
+  // Variant change handler (dev mode only)
+  const handleVariantChange = useCallback((sectionType: SectionType, variantId: string) => {
+    if (process.env.NODE_ENV !== 'development' || !state.layout) return
+
+    setSectionVariants(prev => ({ ...prev, [sectionType]: variantId }))
+
+    // Update layout with new variant screen
+    const newScreens = replaceScreenVariant(
+      state.layout.screens as SectionScreen[],
+      sectionType,
+      variantId
+    )
+
+    const newLayout: LayoutSchema = {
+      ...state.layout,
+      screens: newScreens as Screen[],
+    }
+
+    // Update context state (visual update only, not saved to DB)
+    setTemplate(newLayout, state.style!, state.editor!)
+  }, [state.layout, state.style, state.editor, setTemplate])
 
   if (loading) {
     return (
@@ -277,6 +317,7 @@ function EditPageContent() {
                 sectionEnabled={sectionEnabled}
                 onOrderChange={handleSectionOrderChange}
                 onEnabledChange={handleSectionEnabledChange}
+                layout={state.layout ?? undefined}
               />
             </div>
           )}
@@ -295,6 +336,8 @@ function EditPageContent() {
                 mode="edit"
                 selectedNodeId={selectedNodeId}
                 onSelectNode={handleSelectNode}
+                sectionVariants={sectionVariants}
+                onVariantChange={handleVariantChange}
                 withFrame
                 frameWidth={375}
                 frameHeight={667}

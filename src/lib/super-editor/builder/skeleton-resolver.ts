@@ -245,3 +245,47 @@ export function resolveAllSections(
 
   return screens
 }
+
+// ============================================
+// Variant Switcher Helpers (Dev Mode)
+// ============================================
+
+/**
+ * 특정 섹션의 variant를 변경한 Screen 생성
+ * 개발 모드에서 베리에이션 미리보기용
+ */
+export function createScreenFromVariant(
+  sectionType: SectionType,
+  variantId: string
+): SectionScreen | null {
+  const variant = getVariant(sectionType, variantId) ?? getDefaultVariant(sectionType)
+
+  if (!variant) {
+    console.error(`No variant found for ${sectionType}:${variantId}`)
+    return null
+  }
+
+  return {
+    id: `${sectionType}-screen`,
+    name: variant.name,
+    type: sectionType === 'intro' ? 'intro' : 'content',
+    sectionType,
+    root: deepClone(variant.structure),
+  }
+}
+
+/**
+ * Layout의 특정 섹션을 다른 variant로 교체
+ */
+export function replaceScreenVariant(
+  screens: SectionScreen[],
+  sectionType: SectionType,
+  variantId: string
+): SectionScreen[] {
+  const newScreen = createScreenFromVariant(sectionType, variantId)
+  if (!newScreen) return screens
+
+  return screens.map((screen) =>
+    screen.sectionType === sectionType ? newScreen : screen
+  )
+}

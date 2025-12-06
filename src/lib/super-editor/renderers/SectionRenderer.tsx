@@ -8,8 +8,10 @@
 import React from 'react'
 import type { Screen } from '../schema/layout'
 import type { UserData } from '../schema/user-data'
+import type { SectionType } from '../skeletons/types'
 import { createNodeRenderer, renderPrimitiveNode } from '../primitives'
 import type { RenderContext } from '../primitives/types'
+import { VariantSwitcher } from '../components/VariantSwitcher'
 
 interface SectionRendererProps {
   screen: Screen
@@ -18,6 +20,9 @@ interface SectionRendererProps {
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
   className?: string
+  // Variant switcher props (dev mode only)
+  currentVariantId?: string
+  onVariantChange?: (sectionType: SectionType, variantId: string) => void
 }
 
 export function SectionRenderer({
@@ -27,6 +32,8 @@ export function SectionRenderer({
   selectedNodeId,
   onSelectNode,
   className,
+  currentVariantId,
+  onVariantChange,
 }: SectionRendererProps) {
   // 렌더 컨텍스트 생성 - userData가 변경될 때마다 새로 생성
   const context: RenderContext = createNodeRenderer({
@@ -39,13 +46,27 @@ export function SectionRenderer({
   // Screen의 root 노드 렌더링
   const rendered = renderPrimitiveNode(screen.root, context)
 
+  // 개발 모드에서 variant switcher 표시 여부
+  const showVariantSwitcher =
+    process.env.NODE_ENV === 'development' &&
+    mode === 'edit' &&
+    currentVariantId &&
+    onVariantChange
+
   return (
     <section
       id={`section-${screen.sectionType}`}
       data-section-type={screen.sectionType}
       data-screen-id={screen.id}
-      className={className}
+      className={`relative ${className ?? ''}`}
     >
+      {showVariantSwitcher && (
+        <VariantSwitcher
+          sectionType={screen.sectionType}
+          currentVariantId={currentVariantId}
+          onVariantChange={(variantId) => onVariantChange(screen.sectionType, variantId)}
+        />
+      )}
       {rendered}
     </section>
   )

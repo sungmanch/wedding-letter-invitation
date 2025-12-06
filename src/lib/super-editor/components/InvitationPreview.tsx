@@ -37,6 +37,10 @@ interface InvitationPreviewProps {
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
 
+  // Variant switcher (dev mode only)
+  sectionVariants?: Record<SectionType, string>
+  onVariantChange?: (sectionType: SectionType, variantId: string) => void
+
   // PhoneFrame 옵션
   withFrame?: boolean
   frameWidth?: number
@@ -101,6 +105,8 @@ export function InvitationPreview({
   visibleSections,
   selectedNodeId,
   onSelectNode,
+  sectionVariants,
+  onVariantChange,
   withFrame = false,
   frameWidth,
   frameHeight,
@@ -117,6 +123,8 @@ export function InvitationPreview({
       visibleSections={visibleSections}
       selectedNodeId={selectedNodeId}
       onSelectNode={onSelectNode}
+      sectionVariants={sectionVariants}
+      onVariantChange={onVariantChange}
       className={className}
     />
   )
