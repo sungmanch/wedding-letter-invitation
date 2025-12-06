@@ -199,7 +199,7 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                       {
                         id: 'bride-name-text',
                         type: 'text',
-                        props: { content: '{{couple.bride.nameEn}}', as: 'h1' },
+                        props: { content: '{{couple.bride.name}}', as: 'h1' },
                         style: {
                           fontFamily: '"Cormorant Garamond", serif',
                           fontSize: '2.5rem',
@@ -238,7 +238,7 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                       {
                         id: 'groom-name-text',
                         type: 'text',
-                        props: { content: '{{couple.groom.nameEn}}', as: 'h1' },
+                        props: { content: '{{couple.groom.name}}', as: 'h1' },
                         style: {
                           fontFamily: '"Cormorant Garamond", serif',
                           fontSize: '2.5rem',
@@ -311,7 +311,7 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                       {
                         id: 'date-text',
                         type: 'text',
-                        props: { content: '{{wedding.dateDisplay}}', as: 'p' },
+                        props: { content: '{{wedding.date}}', as: 'p' },
                         style: {
                           fontFamily: '"Cormorant Garamond", serif',
                           fontSize: 14,
@@ -323,7 +323,7 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                       {
                         id: 'time-text',
                         type: 'text',
-                        props: { content: '{{wedding.dayTimeDisplay}}', as: 'p' },
+                        props: { content: '{{wedding.time}}', as: 'p' },
                         style: {
                           fontFamily: '"Cormorant Garamond", serif',
                           fontSize: 12,
@@ -369,7 +369,7 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                       {
                         id: 'venue-name-en',
                         type: 'text',
-                        props: { content: '{{venue.nameEn}}', as: 'p' },
+                        props: { content: '{{wedding.venue.name}}', as: 'p' },
                         style: {
                           fontFamily: '"Noto Serif KR", serif',
                           fontSize: 14,
@@ -380,7 +380,7 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                       {
                         id: 'venue-name-kr',
                         type: 'text',
-                        props: { content: '{{venue.name}}', as: 'p' },
+                        props: { content: '{{wedding.venue.hall}}', as: 'p' },
                         style: {
                           fontFamily: '"Noto Serif KR", serif',
                           fontSize: 12,
@@ -843,24 +843,21 @@ export const wkwFilmSampleData = {
   couple: {
     groom: {
       name: '홍길동',
-      nameEn: 'Gildong',
+      englishName: 'Gildong',
     },
     bride: {
       name: '김지윤',
-      nameEn: 'Jiyoon',
+      englishName: 'Jiyoon',
     },
   },
   wedding: {
-    date: '2025-11-30',
-    time: '11:30',
-    dateDisplay: '2025. 11. 30',
-    dayTimeDisplay: 'SUNDAY · 11:30 AM',
-  },
-  venue: {
-    name: '청담 더채플',
-    nameEn: 'The Chapel at Cheongdam',
-    hall: '그랜드볼룸',
-    address: '서울시 강남구 청담동 123-45',
+    date: '2025년 11월 30일',
+    time: '오전 11시 30분',
+    venue: {
+      name: '청담 더채플',
+      hall: '그랜드볼룸',
+      address: '서울시 강남구 청담동 123-45',
+    },
   },
   photos: {
     main: 'https://picsum.photos/seed/wkw-main/600/900',
