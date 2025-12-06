@@ -1,10 +1,12 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
+import Image from 'next/image'
 
 export function S1Transition() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [videoLoaded, setVideoLoaded] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,15 +34,34 @@ export function S1Transition() {
     <section ref={sectionRef} className="relative h-[150vh]">
       {/* Sticky Video Container */}
       <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Background Video */}
+        {/* Poster Image (shown while video loads) */}
+        {!videoLoaded && (
+          <Image
+            src="/examples/Landing_Video_poster.jpg"
+            alt="Wedding video poster"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        )}
+
+        {/* Background Video with multiple sources */}
         <video
-          className="absolute inset-0 w-full h-full object-cover"
-          src="/examples/Landing_Video.mp4"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            videoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           autoPlay
           muted
           loop
           playsInline
-        />
+          preload="auto"
+          poster="/examples/Landing_Video_poster.jpg"
+          onLoadedData={() => setVideoLoaded(true)}
+        >
+          <source src="/examples/Landing_Video.webm" type="video/webm" />
+          <source src="/examples/Landing_Video.mp4" type="video/mp4" />
+        </video>
 
         {/* Film Grain Overlay */}
         <div className="absolute inset-0 film-grain pointer-events-none" />

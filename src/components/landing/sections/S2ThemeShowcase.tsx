@@ -128,14 +128,14 @@ export function S2ThemeShowcase() {
             <p className="text-lg text-[#F5E6D3] font-medium">{currentTheme.nameKo}</p>
             <p className="text-sm text-[#F5E6D3]/60 mt-1">{currentTheme.description}</p>
           </div>
-        </div>
 
-        {/* Scroll Progress Bar */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#C9A962] rounded-full transition-all duration-100"
-            style={{ width: `${scrollProgress * 100}%` }}
-          />
+          {/* Scroll Progress Bar - Below Theme Label */}
+          <div className="mt-6 w-32 h-1 bg-white/10 rounded-full overflow-hidden mx-auto">
+            <div
+              className="h-full bg-[#C9A962] rounded-full transition-all duration-100"
+              style={{ width: `${scrollProgress * 100}%` }}
+            />
+          </div>
         </div>
       </div>
     </section>

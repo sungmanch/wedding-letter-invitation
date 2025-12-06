@@ -29,7 +29,7 @@ export default async function WeddingLandingPage() {
         <div className="flex h-16 items-center justify-between px-2 sm:px-6 lg:px-8 mt-2 sm:mt-3">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Image src="/logo.png" alt="Maison de Letter" width={300} height={72} className="brightness-110 w-[180px] sm:w-[240px] lg:w-[300px] h-auto" />
+            <Image src="/logo.png" alt="Maison de Letter" width={300} height={72} priority className="brightness-110 w-[180px] sm:w-[240px] lg:w-[300px] h-auto" />
           </Link>
 
           {/* Right Actions */}

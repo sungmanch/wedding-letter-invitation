@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   },
   // Image optimization for external sources
   images: {
+    // 최신 포맷 우선 (AVIF > WebP > 원본)
+    formats: ['image/avif', 'image/webp'],
+    // 디바이스별 최적화 이미지 생성
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
