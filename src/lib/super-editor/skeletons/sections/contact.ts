@@ -28,6 +28,26 @@ export const contactSkeleton: SectionSkeleton = {
         },
         children: [
           {
+            id: 'contact-title',
+            type: 'text',
+            tokenStyle: {
+              fontFamily: '$token.typography.sectionTitle.fontFamily',
+              fontSize: '$token.typography.sectionTitle.fontSize',
+              fontWeight: '$token.typography.sectionTitle.fontWeight',
+              letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+              color: '$token.colors.text.primary',
+              marginBottom: '$token.spacing.lg',
+            },
+            style: {
+              textAlign: 'center',
+              textTransform: 'uppercase',
+            },
+            props: {
+              content: 'CONTACT',
+              as: 'h2',
+            },
+          },
+          {
             id: 'contact-row',
             type: 'row',
             style: {
@@ -219,6 +239,26 @@ export const contactSkeleton: SectionSkeleton = {
           padding: '$token.spacing.lg',
         },
         children: [
+          {
+            id: 'contact-title',
+            type: 'text',
+            tokenStyle: {
+              fontFamily: '$token.typography.sectionTitle.fontFamily',
+              fontSize: '$token.typography.sectionTitle.fontSize',
+              fontWeight: '$token.typography.sectionTitle.fontWeight',
+              letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+              color: '$token.colors.text.primary',
+              marginBottom: '$token.spacing.lg',
+            },
+            style: {
+              textAlign: 'center',
+              textTransform: 'uppercase',
+            },
+            props: {
+              content: 'CONTACT',
+              as: 'h2',
+            },
+          },
           {
             id: 'contact-row',
             type: 'row',
