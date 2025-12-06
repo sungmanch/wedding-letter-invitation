@@ -166,6 +166,7 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
             alt="Preview"
             fill
             className="object-cover"
+            sizes="(max-width: 640px) 100vw, 320px"
             style={{ filter: 'brightness(0.7) contrast(1.2) saturate(1.1)' }}
           />
         </div>
@@ -336,6 +337,7 @@ function ExhibitionPreview({ colors, fonts, groomName, brideName, dateFormatted,
           alt="Gallery Background"
           fill
           className="object-cover"
+          sizes="(max-width: 640px) 100vw, 320px"
         />
       </div>
 
@@ -355,6 +357,7 @@ function ExhibitionPreview({ colors, fonts, groomName, brideName, dateFormatted,
               alt="Couple Photo"
               fill
               className="object-cover"
+              sizes="(max-width: 640px) 55vw, 180px"
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -421,6 +424,7 @@ function MagazinePreview({ colors, fonts, groomName, brideName, dateFormatted, u
             alt="Cover"
             fill
             className="object-cover"
+            sizes="(max-width: 640px) 100vw, 320px"
             style={{
               filter: 'brightness(0.9) contrast(1.05)',
             }}
@@ -794,6 +798,7 @@ function GothicRomancePreview({ groomName, brideName, dateFormatted, userImageUr
                 alt="Portrait"
                 fill
                 className="object-cover"
+                sizes="(max-width: 640px) 85vw, 280px"
                 style={{
                   filter: 'brightness(0.85) contrast(1.05) sepia(0.15)',
                 }}
@@ -895,6 +900,7 @@ function OldMoneyPreview({ colors, fonts, groomName, brideName, dateFormatted, u
             alt="Preview"
             fill
             className="object-cover"
+            sizes="(max-width: 640px) 100vw, 320px"
             style={{
               filter: 'brightness(1.05) contrast(0.92) saturate(0.7) sepia(0.15)',
             }}
@@ -1023,6 +1029,7 @@ function MonogramPreview({ groomName, brideName, dateFormatted, userImageUrl }: 
                 alt="Portrait"
                 fill
                 className="object-cover"
+                sizes="(max-width: 640px) 90vw, 290px"
                 style={{
                   filter: 'brightness(0.95) contrast(1.02)',
                 }}
@@ -1227,6 +1234,7 @@ function JewelVelvetPreview({ groomName, brideName, dateFormatted, userImageUrl 
                 alt="Portrait"
                 fill
                 className="object-cover"
+                sizes="(max-width: 640px) 60vw, 200px"
                 style={{
                   filter: 'brightness(0.9) contrast(1.05)',
                 }}
