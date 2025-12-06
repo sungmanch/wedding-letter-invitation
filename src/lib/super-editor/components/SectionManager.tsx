@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
-import { SECTION_META } from '../schema/section-types'
+import { SECTION_META, REORDERABLE_SECTIONS } from '../schema/section-types'
 import { extractSectionsFromLayout } from '../utils/variable-extractor'
+import { getAllSectionTypes } from '../skeletons/registry'
 import type { SectionType } from '../schema/section-types'
 import type { LayoutSchema } from '../schema/layout'
 
@@ -14,6 +15,8 @@ interface SectionManagerProps {
   className?: string
   /** Layout 스키마 - 제공되면 해당 레이아웃에 존재하는 섹션만 표시 */
   layout?: LayoutSchema
+  /** 섹션 추가 핸들러 (dev mode only) */
+  onAddSection?: (sectionType: SectionType) => void
 }
 
 export function SectionManager({
@@ -23,12 +26,20 @@ export function SectionManager({
   onEnabledChange,
   className = '',
   layout,
+  onAddSection,
 }: SectionManagerProps) {
   // Layout에서 실제 존재하는 섹션 추출
   const availableSections = useMemo(() => {
     if (!layout) return null // layout이 없으면 기존 방식 사용
     return new Set(extractSectionsFromLayout(layout))
   }, [layout])
+
+  // 개발 모드에서 추가 가능한 섹션 (현재 layout에 없는 섹션)
+  const missingSections = useMemo(() => {
+    if (process.env.NODE_ENV !== 'development' || !availableSections) return []
+    const allSections = getAllSectionTypes()
+    return allSections.filter((s) => !availableSections.has(s))
+  }, [availableSections])
 
   // 표시할 섹션 순서 (layout 기반 필터링)
   const displayOrder = useMemo(() => {
@@ -203,7 +214,57 @@ export function SectionManager({
             <p className="text-sm">레이아웃에 정의된 섹션이 없습니다</p>
           </div>
         )}
+
+        {/* 개발 모드: 추가 가능한 섹션 */}
+        {process.env.NODE_ENV === 'development' && missingSections.length > 0 && onAddSection && (
+          <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded">DEV</span>
+              <p className="text-xs text-gray-500">추가 가능한 섹션</p>
+            </div>
+            <div className="space-y-2">
+              {missingSections.map((sectionType) => {
+                const meta = SECTION_META[sectionType]
+                return (
+                  <div
+                    key={sectionType}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-blue-300 hover:bg-blue-50/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 flex items-center justify-center text-gray-400">
+                        <PlusCircleIcon />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-600">{meta.label}</p>
+                        <p className="text-xs text-gray-400">{meta.description}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onAddSection(sectionType)}
+                      className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                    >
+                      추가
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
+  )
+}
+
+// ============================================
+// Icons
+// ============================================
+
+function PlusCircleIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
   )
 }

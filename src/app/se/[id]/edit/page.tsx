@@ -7,7 +7,7 @@ import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import { EditorPanel, EditorToolbar, SectionManager, StyleEditor, InvitationPreview } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, REORDERABLE_SECTIONS } from '@/lib/super-editor/schema/section-types'
-import { replaceScreenVariant } from '@/lib/super-editor/builder/skeleton-resolver'
+import { replaceScreenVariant, createScreenFromVariant } from '@/lib/super-editor/builder/skeleton-resolver'
 import { getDefaultVariant } from '@/lib/super-editor/skeletons/registry'
 import type { LayoutSchema, Screen } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
@@ -172,6 +172,42 @@ function EditPageContent() {
     setTemplate(newLayout, state.style!, state.editor!)
   }, [state.layout, state.style, state.editor, setTemplate])
 
+  // Add section handler (dev mode only)
+  const handleAddSection = useCallback((sectionType: SectionType) => {
+    if (process.env.NODE_ENV !== 'development' || !state.layout) return
+
+    // Get default variant for the section
+    const defaultVariant = getDefaultVariant(sectionType)
+    if (!defaultVariant) {
+      console.error(`No default variant for section: ${sectionType}`)
+      return
+    }
+
+    // Create new screen from skeleton
+    const newScreen = createScreenFromVariant(sectionType, defaultVariant.id)
+    if (!newScreen) {
+      console.error(`Failed to create screen for section: ${sectionType}`)
+      return
+    }
+
+    // Add to layout
+    const newScreens = [...state.layout.screens, newScreen as Screen]
+    const newLayout: LayoutSchema = {
+      ...state.layout,
+      screens: newScreens,
+    }
+
+    // Update section order and enabled state
+    if (!sectionOrder.includes(sectionType)) {
+      setSectionOrder(prev => [...prev, sectionType])
+    }
+    setSectionEnabled(prev => ({ ...prev, [sectionType]: true }))
+    setSectionVariants(prev => ({ ...prev, [sectionType]: defaultVariant.id }))
+
+    // Update context state
+    setTemplate(newLayout, state.style!, state.editor!)
+  }, [state.layout, state.style, state.editor, setTemplate, sectionOrder])
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100">
@@ -318,6 +354,7 @@ function EditPageContent() {
                 onOrderChange={handleSectionOrderChange}
                 onEnabledChange={handleSectionEnabledChange}
                 layout={state.layout ?? undefined}
+                onAddSection={handleAddSection}
               />
             </div>
           )}
