@@ -261,6 +261,42 @@ export async function updateTemplateStyle(
   return updated
 }
 
+export async function updateTemplateLayout(
+  invitationId: string,
+  layoutSchema: LayoutSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 layoutSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      layoutSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
+    .returning()
+
+  return updated
+}
+
 // ============================================
 // Build Action
 // ============================================

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections, updateTemplateStyle } from '@/lib/super-editor/actions'
+import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections, updateTemplateStyle, updateTemplateLayout } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import { EditorPanel, EditorToolbar, SectionManager, StyleEditor, InvitationPreview } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
@@ -83,14 +83,23 @@ function EditPageContent() {
 
     setSaving(true)
     try {
+      // userData 저장
       await updateInvitationData(invitationId, state.userData)
+
+      // sectionOrder, sectionEnabled 저장
+      await updateInvitationSections(invitationId, sectionOrder, sectionEnabled)
+
+      // layout 저장 (섹션 추가/variant 변경 반영)
+      if (state.layout) {
+        await updateTemplateLayout(invitationId, state.layout)
+      }
     } catch (err) {
       console.error('Failed to save:', err)
       alert('저장에 실패했습니다.')
     } finally {
       setSaving(false)
     }
-  }, [invitationId, state.userData])
+  }, [invitationId, state.userData, state.layout, sectionOrder, sectionEnabled])
 
   const handleGenerateShareUrl = useCallback(async () => {
     try {
