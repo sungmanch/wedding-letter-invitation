@@ -47,23 +47,157 @@ AI(LLM)가 JSON 스키마를 생성하고, 이를 정적 HTML로 빌드하는 �
 
 ## Design Token System (v2)
 
-StyleSchema → SemanticDesignTokens → CSS Variables 자동 변환 시스템
+### 변환 파이프라인
 
-### 토큰 구조
-- **colors**: brand, accent, background, surface, text (primary/secondary/muted), border, divider
-- **typography**: displayLg/Md, headingLg/Md/Sm, body, caption (fontFamily, fontSize, fontWeight, lineHeight, letterSpacing)
-- **spacing**: xs(4px) ~ xxl(48px), section(64px), component(24px)
-- **borders**: radiusSm(4px) ~ radiusFull(9999px)
-- **shadows**: sm, md, lg
-- **animation**: durationFast(150ms)/Normal(300ms)/Slow(500ms), easing, staggerDelay(100ms)
-
-### CSS Variables 사용
-```css
-color: var(--color-text-primary);
-font-family: var(--typo-body-font-family);
-padding: var(--spacing-md);
-border-radius: var(--radius-md);
 ```
+StyleSchema          →  SemanticDesignTokens  →  CSS Variables  →  Skeleton 렌더링
+(theme.typography)      (resolveTokens)           (generateCss)     ($token.xxx → var(--xxx))
+     │                        │                        │                    │
+     │  tokens/resolver.ts    │  tokens/css-generator  │  primitives/       │
+     └────────────────────────┴────────────────────────┴────────────────────┘
+```
+
+### 1. CSS 변수 명명 규칙
+
+| 토큰 경로 | CSS 변수 |
+|-----------|----------|
+| `$token.colors.brand` | `var(--color-brand)` |
+| `$token.colors.text.primary` | `var(--color-text-primary)` |
+| `$token.typography.displayLg.fontFamily` | `var(--typo-display-lg-font-family)` |
+| `$token.typography.sectionTitle.fontWeight` | `var(--typo-section-title-font-weight)` |
+| `$token.spacing.md` | `var(--spacing-md)` |
+| `$token.borders.radiusMd` | `var(--radius-md)` |
+| `$token.shadows.lg` | `var(--shadow-lg)` |
+
+**변환 규칙**: `camelCase` → `kebab-case` (예: `displayLg` → `display-lg`)
+
+### 2. Typography Weight 체계
+
+```
+StyleSchema.theme.typography.weights
+├── bold     → displayLg (메인 타이틀)
+├── semibold → displayMd, headingLg, headingMd, headingSm (섹션 제목)
+├── medium   → sectionTitle (GALLERY, LOCATION 등 영문 타이틀)
+└── regular  → bodyLg, bodyMd, bodySm, caption (본문)
+```
+
+| Weight 키 | 기본값 | 용도 |
+|-----------|--------|------|
+| `bold` | 700 | 메인 타이틀 (인트로 신랑♥신부) |
+| `semibold` | 600 | 섹션 내 제목 |
+| `medium` | 500 | 섹션 영문 타이틀 |
+| `regular` | 400 | 본문 텍스트 |
+
+### 3. StyleEditor ↔ 토큰 영향 범위
+
+| StyleEditor UI | StyleSchema 경로 | 영향받는 토큰 |
+|----------------|------------------|---------------|
+| **제목 글꼴** | `fonts.heading.family` | displayLg/Md, sectionTitle, headingLg/Md/Sm |
+| **제목 굵기** | `weights.bold/semibold/medium` | displayLg, displayMd~headingSm, sectionTitle |
+| **본문 글꼴** | `fonts.body.family` | bodyLg/Md/Sm, caption |
+| **본문 굵기** | `weights.regular` | bodyLg/Md/Sm, caption |
+| **기본 크기** | `sizes.base` | headingSm, bodyLg 만 |
+| **줄 간격** | `lineHeights.relaxed` | bodyLg, bodyMd |
+| **자간** | `letterSpacing.tight` | displayLg, displayMd |
+
+### 4. 전체 CSS 변수 목록
+
+#### Colors (10개)
+```css
+--color-brand
+--color-accent
+--color-background
+--color-surface
+--color-text-primary
+--color-text-secondary
+--color-text-muted
+--color-text-on-brand
+--color-border
+--color-divider
+```
+
+#### Typography (10개 토큰 × 5개 속성 = 50개)
+```css
+/* 각 토큰별: font-family, font-size, font-weight, line-height, letter-spacing */
+--typo-display-lg-*      /* 메인 타이틀 (4xl, bold, tight) */
+--typo-display-md-*      /* 대제목 (3xl, semibold, tight) */
+--typo-section-title-*   /* 섹션 영문 (sm, medium, 0.25em spacing) */
+--typo-heading-lg-*      /* H1 (2xl, semibold, normal) */
+--typo-heading-md-*      /* H2 (lg, semibold, normal) */
+--typo-heading-sm-*      /* H3 (base, semibold, normal) */
+--typo-body-lg-*         /* 본문 대 (base, regular, relaxed) */
+--typo-body-md-*         /* 본문 중 (sm, regular, relaxed) */
+--typo-body-sm-*         /* 본문 소 (xs, regular, normal) */
+--typo-caption-*         /* 캡션 (xs, regular, normal) */
+```
+
+#### Spacing (8개)
+```css
+--spacing-xs       /* 4px */
+--spacing-sm       /* 8px */
+--spacing-md       /* 16px */
+--spacing-lg       /* 24px */
+--spacing-xl       /* 32px */
+--spacing-xxl      /* 48px */
+--spacing-section  /* 섹션 패딩 */
+--spacing-component /* 컴포넌트 간격 */
+```
+
+#### Borders (4개)
+```css
+--radius-sm        /* 4px */
+--radius-md        /* 8px */
+--radius-lg        /* 16px */
+--radius-full      /* 9999px */
+```
+
+#### Shadows (3개)
+```css
+--shadow-sm
+--shadow-md
+--shadow-lg
+```
+
+#### Animation (5개)
+```css
+--duration-fast    /* 150ms */
+--duration-normal  /* 300ms */
+--duration-slow    /* 500ms */
+--easing-default
+--stagger-delay    /* 100ms */
+```
+
+### 5. Skeleton에서 토큰 참조
+
+```typescript
+// skeletons/sections/*.ts
+tokenStyle: {
+  backgroundColor: '$token.colors.background',
+  color: '$token.colors.text.primary',
+  fontFamily: '$token.typography.displayLg.fontFamily',
+  fontWeight: '$token.typography.displayLg.fontWeight',
+  padding: '$token.spacing.section'
+}
+
+// 렌더링 시 변환 결과
+style: {
+  backgroundColor: 'var(--color-background)',
+  color: 'var(--color-text-primary)',
+  fontFamily: 'var(--typo-display-lg-font-family)',
+  fontWeight: 'var(--typo-display-lg-font-weight)',
+  padding: 'var(--spacing-section)'
+}
+```
+
+### 6. 관련 파일
+
+| 파일 | 역할 |
+|------|------|
+| `tokens/schema.ts` | SemanticDesignTokens 타입 정의 |
+| `tokens/resolver.ts` | StyleSchema → SemanticDesignTokens 변환 |
+| `tokens/css-generator.ts` | SemanticDesignTokens → CSS Variables 문자열 |
+| `context/TokenStyleContext.tsx` | CSS Variables를 `<style>` 태그로 주입 |
+| `components/StyleEditor.tsx` | 스타일 편집 UI |
 
 ## Section Skeletons (8개 섹션)
 
