@@ -13,7 +13,11 @@ import React from 'react'
 import type { LayoutSchema, Screen } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
-import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, type SectionType } from '../schema/section-types'
+import {
+  DEFAULT_SECTION_ORDER,
+  DEFAULT_SECTION_ENABLED,
+  type SectionType,
+} from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
 import { MusicPlayer } from './MusicPlayer'
 import { TokenStyleProvider } from '../context/TokenStyleContext'
@@ -62,25 +66,25 @@ function getSortedSections(
 ): { intro: Screen | undefined; sections: Screen[]; music: Screen | undefined } {
   // visibleSections가 있으면 해당 섹션만 표시
   if (visibleSections) {
-    const visible = screens.filter(s => visibleSections.includes(s.sectionType))
-    const intro = visible.find(s => s.sectionType === 'intro')
-    const sections = visible.filter(s => s.sectionType !== 'intro' && s.sectionType !== 'music')
-    const music = visible.find(s => s.sectionType === 'music')
+    const visible = screens.filter((s) => visibleSections.includes(s.sectionType))
+    const intro = visible.find((s) => s.sectionType === 'intro')
+    const sections = visible.filter((s) => s.sectionType !== 'intro' && s.sectionType !== 'music')
+    const music = visible.find((s) => s.sectionType === 'music')
     return { intro, sections, music }
   }
 
   // 기본 동작: sectionEnabled 기반
   // 1. intro 항상 첫번째
-  const intro = screens.find(s => s.sectionType === 'intro')
+  const intro = screens.find((s) => s.sectionType === 'intro')
 
   // 2. 나머지 섹션 순서대로 + 활성화된 것만
   const sections = sectionOrder
-    .filter(type => sectionEnabled[type])
-    .map(type => screens.find(s => s.sectionType === type))
+    .filter((type) => sectionEnabled[type])
+    .map((type) => screens.find((s) => s.sectionType === type))
     .filter((s): s is Screen => s !== undefined)
 
   // 3. music은 FAB로 별도 렌더링
-  const music = screens.find(s => s.sectionType === 'music')
+  const music = screens.find((s) => s.sectionType === 'music')
 
   return { intro, sections, music }
 }
@@ -138,13 +142,13 @@ function InvitationContent({
           mode={mode}
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
-          currentVariantId={sectionVariants?.intro}
+          // currentVariantId={sectionVariants?.intro}
           onVariantChange={onVariantChange}
         />
       )}
 
       {/* Content Sections (순서대로) */}
-      {sections.map(screen => (
+      {sections.map((screen) => (
         <SectionRenderer
           key={screen.id}
           screen={screen}
@@ -158,13 +162,7 @@ function InvitationContent({
       ))}
 
       {/* Music FAB (플로팅) */}
-      {showMusic && music && (
-        <MusicPlayer
-          screen={music}
-          userData={userData}
-          mode={mode}
-        />
-      )}
+      {showMusic && music && <MusicPlayer screen={music} userData={userData} mode={mode} />}
     </div>
   )
 }
