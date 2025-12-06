@@ -39,10 +39,10 @@ const TEMPLATE_PREVIEW_DATA: Record<string, {
     venueName: 'Gallery K',
   },
   'magazine': {
-    groomName: 'Jihoon',
-    brideName: 'Sophie',
+    groomName: '도윤',
+    brideName: '서아',
     weddingDate: '2025-03-08',
-    venueName: 'La Vie Belle',
+    venueName: '라비에벨',
   },
   'chat': {
     groomName: '민재',
@@ -51,10 +51,10 @@ const TEMPLATE_PREVIEW_DATA: Record<string, {
     venueName: '루나웨딩홀',
   },
   'gothic-romance': {
-    groomName: 'James',
-    brideName: 'Yerin',
+    groomName: '시우',
+    brideName: '예린',
     weddingDate: '2025-10-31',
-    venueName: 'The Cathedral',
+    venueName: '더채플 강남',
   },
   'old-money': {
     groomName: 'William',
@@ -69,10 +69,10 @@ const TEMPLATE_PREVIEW_DATA: Record<string, {
     venueName: '그랜드하얏트',
   },
   'jewel-velvet': {
-    groomName: 'Marcus',
-    brideName: 'Sohee',
+    groomName: '태민',
+    brideName: '소희',
     weddingDate: '2025-12-24',
-    venueName: 'Opera Hall',
+    venueName: '노블발렌티',
   },
 }
 
