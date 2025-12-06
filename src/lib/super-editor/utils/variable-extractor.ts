@@ -6,6 +6,7 @@
 import type { LayoutSchema, Screen } from '../schema/layout'
 import type { PrimitiveNode } from '../schema/primitives'
 import type { SkeletonNode, SectionScreen } from '../skeletons/types'
+import type { SectionType } from '../schema/section-types'
 import { isStandardVariable } from '../schema/variables'
 
 // ============================================
@@ -135,6 +136,35 @@ export function extractVariablesFromSections(
   }
 
   return Array.from(variables)
+}
+
+// ============================================
+// Section Extraction
+// ============================================
+
+/**
+ * LayoutSchema에서 존재하는 섹션 타입 추출
+ */
+export function extractSectionsFromLayout(layout: LayoutSchema): SectionType[] {
+  const sections: SectionType[] = []
+
+  for (const screen of layout.screens) {
+    // sectionType이 있으면 사용, 없으면 type을 sectionType으로 간주
+    const sectionType = (screen as { sectionType?: SectionType }).sectionType ?? screen.type
+    if (sectionType && !sections.includes(sectionType as SectionType)) {
+      sections.push(sectionType as SectionType)
+    }
+  }
+
+  return sections
+}
+
+/**
+ * LayoutSchema에서 순서 변경 가능한 섹션만 추출 (intro, music 제외)
+ */
+export function extractReorderableSections(layout: LayoutSchema): SectionType[] {
+  const allSections = extractSectionsFromLayout(layout)
+  return allSections.filter((s) => s !== 'intro' && s !== 'music')
 }
 
 // ============================================
