@@ -38,12 +38,27 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes that require authentication
-  const protectedPaths = ['/my', '/create']
+  const protectedPaths = ['/my', '/create', '/super-editor']
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
 
-  if (isProtectedPath && !user) {
+  // /se routes need special handling
+  const pathname = request.nextUrl.pathname
+  const isSeRoute = pathname.startsWith('/se/')
+
+  // /se/[id]/preview?token=xxx allows unauthenticated access
+  const isPreviewWithToken =
+    pathname.match(/^\/se\/[^/]+\/preview$/) &&
+    request.nextUrl.searchParams.has('token')
+
+  // /se/[id] (public viewer) - no auth required if published
+  const isPublicViewer = pathname.match(/^\/se\/[^/]+$/)
+
+  // /se routes that require auth (edit, preview without token)
+  const isSeProtected = isSeRoute && !isPreviewWithToken && !isPublicViewer
+
+  if ((isProtectedPath || isSeProtected) && !user) {
     // Redirect unauthenticated users to login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'

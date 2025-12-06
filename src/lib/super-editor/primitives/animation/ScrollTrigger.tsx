@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import type { PrimitiveNode, ScrollTriggerProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps } from '../types'
 import { getAnimationPreset } from '../../animations/presets'
+import { getScrollPreset, type ScrollKeyframe } from '../../animations/scroll-presets'
 
 export function ScrollTrigger({
   node,
@@ -51,69 +52,312 @@ export function ScrollTrigger({
     ? getAnimationPreset(props.animation.preset)
     : null
 
-  // Scrub 모드에서 스타일 계산
-  const getScrubStyle = (): React.CSSProperties => {
-    if (!preset || !props.scrub) return {}
+  // ============================================
+  // 향상된 보간 엔진
+  // ============================================
 
-    // 첫 번째와 마지막 키프레임 사이를 progress로 보간
-    const firstFrame = preset.keyframes[0]
-    const lastFrame = preset.keyframes[preset.keyframes.length - 1]
-
-    const interpolate = (
-      start: string | number | undefined,
-      end: string | number | undefined
-    ): string | number | undefined => {
-      if (start === undefined || end === undefined) return end
-
-      // 숫자 보간
-      if (typeof start === 'number' && typeof end === 'number') {
-        return start + (end - start) * progress
-      }
-
-      // opacity 보간
-      if (
-        typeof start === 'string' &&
-        typeof end === 'string' &&
-        !isNaN(Number(start)) &&
-        !isNaN(Number(end))
-      ) {
-        const startNum = Number(start)
-        const endNum = Number(end)
-        return startNum + (endNum - startNum) * progress
-      }
-
-      // transform 보간 (단순화)
-      if (
-        typeof start === 'string' &&
-        typeof end === 'string' &&
-        start.includes('translate')
-      ) {
-        // translateY(30px) → translateY(0)
-        const startMatch = start.match(/translateY\((\d+)px\)/)
-        const endMatch = end.match(/translateY\((\d+)px\)/) || { 1: '0' }
-
-        if (startMatch) {
-          const startY = parseInt(startMatch[1])
-          const endY = parseInt(endMatch[1])
-          const currentY = startY + (endY - startY) * progress
-          return `translateY(${currentY}px)`
-        }
-      }
-
-      return progress > 0.5 ? end : start
-    }
-
-    return {
-      opacity: interpolate(
-        firstFrame.opacity as number,
-        lastFrame.opacity as number
-      ) as number,
-      transform: interpolate(
-        firstFrame.transform as string,
-        lastFrame.transform as string
-      ) as string,
-    }
+  // 숫자 보간
+  const lerp = (start: number, end: number, t: number): number => {
+    return start + (end - start) * t
   }
+
+  // Transform 문자열 파싱
+  const parseTransform = (
+    transform: string
+  ): Map<string, { value: number; unit: string }> => {
+    const result = new Map<string, { value: number; unit: string }>()
+    if (!transform) return result
+
+    // translateX, translateY, scale, rotate, perspective, rotateX 등
+    const patterns = [
+      /translateX\(([-\d.]+)(px|%|rem|em)?\)/,
+      /translateY\(([-\d.]+)(px|%|rem|em)?\)/,
+      /translateZ\(([-\d.]+)(px|%|rem|em)?\)/,
+      /scale\(([\d.]+)\)/,
+      /scaleX\(([\d.]+)\)/,
+      /scaleY\(([\d.]+)\)/,
+      /rotate\(([-\d.]+)(deg|rad|turn)?\)/,
+      /rotateX\(([-\d.]+)(deg|rad|turn)?\)/,
+      /rotateY\(([-\d.]+)(deg|rad|turn)?\)/,
+      /skewX\(([-\d.]+)(deg)?\)/,
+      /skewY\(([-\d.]+)(deg)?\)/,
+      /perspective\(([-\d.]+)(px)?\)/,
+    ]
+
+    const names = [
+      'translateX',
+      'translateY',
+      'translateZ',
+      'scale',
+      'scaleX',
+      'scaleY',
+      'rotate',
+      'rotateX',
+      'rotateY',
+      'skewX',
+      'skewY',
+      'perspective',
+    ]
+
+    patterns.forEach((pattern, i) => {
+      const match = transform.match(pattern)
+      if (match) {
+        result.set(names[i], {
+          value: parseFloat(match[1]),
+          unit: match[2] || (names[i].includes('scale') ? '' : 'px'),
+        })
+      }
+    })
+
+    return result
+  }
+
+  // Transform Map을 문자열로 변환
+  const transformToString = (
+    transforms: Map<string, { value: number; unit: string }>
+  ): string => {
+    const parts: string[] = []
+    transforms.forEach(({ value, unit }, name) => {
+      if (name === 'scale' || name === 'scaleX' || name === 'scaleY') {
+        parts.push(`${name}(${value})`)
+      } else {
+        parts.push(`${name}(${value}${unit})`)
+      }
+    })
+    return parts.join(' ')
+  }
+
+  // Transform 보간
+  const interpolateTransform = (
+    start: string | undefined,
+    end: string | undefined,
+    t: number
+  ): string => {
+    if (!start && !end) return ''
+    if (!start) return end || ''
+    if (!end) return start
+
+    const startMap = parseTransform(start)
+    const endMap = parseTransform(end)
+    const result = new Map<string, { value: number; unit: string }>()
+
+    // start에 있는 모든 transform 보간
+    startMap.forEach(({ value: startVal, unit }, name) => {
+      const endEntry = endMap.get(name)
+      if (endEntry) {
+        result.set(name, { value: lerp(startVal, endEntry.value, t), unit })
+      } else {
+        // end에 없으면 기본값으로 보간
+        const defaultVal =
+          name === 'scale' || name === 'scaleX' || name === 'scaleY' ? 1 : 0
+        result.set(name, { value: lerp(startVal, defaultVal, t), unit })
+      }
+    })
+
+    // end에만 있는 transform 추가
+    endMap.forEach(({ value: endVal, unit }, name) => {
+      if (!startMap.has(name)) {
+        const defaultVal =
+          name === 'scale' || name === 'scaleX' || name === 'scaleY' ? 1 : 0
+        result.set(name, { value: lerp(defaultVal, endVal, t), unit })
+      }
+    })
+
+    return transformToString(result)
+  }
+
+  // Filter 파싱 및 보간
+  const parseFilter = (
+    filter: string
+  ): Map<string, { value: number; unit: string }> => {
+    const result = new Map<string, { value: number; unit: string }>()
+    if (!filter) return result
+
+    const patterns = [
+      /blur\(([\d.]+)(px)?\)/,
+      /brightness\(([\d.]+)\)/,
+      /contrast\(([\d.]+)%?\)/,
+      /grayscale\(([\d.]+)%?\)/,
+      /saturate\(([\d.]+)%?\)/,
+      /sepia\(([\d.]+)%?\)/,
+      /hue-rotate\(([\d.]+)(deg)?\)/,
+    ]
+
+    const names = [
+      'blur',
+      'brightness',
+      'contrast',
+      'grayscale',
+      'saturate',
+      'sepia',
+      'hue-rotate',
+    ]
+
+    patterns.forEach((pattern, i) => {
+      const match = filter.match(pattern)
+      if (match) {
+        result.set(names[i], {
+          value: parseFloat(match[1]),
+          unit: match[2] || (names[i] === 'blur' ? 'px' : ''),
+        })
+      }
+    })
+
+    return result
+  }
+
+  const filterToString = (
+    filters: Map<string, { value: number; unit: string }>
+  ): string => {
+    const parts: string[] = []
+    filters.forEach(({ value, unit }, name) => {
+      parts.push(`${name}(${value}${unit})`)
+    })
+    return parts.join(' ')
+  }
+
+  const interpolateFilter = (
+    start: string | undefined,
+    end: string | undefined,
+    t: number
+  ): string => {
+    if (!start && !end) return ''
+    if (!start) return end || ''
+    if (!end) return start
+
+    const startMap = parseFilter(start)
+    const endMap = parseFilter(end)
+    const result = new Map<string, { value: number; unit: string }>()
+
+    startMap.forEach(({ value: startVal, unit }, name) => {
+      const endEntry = endMap.get(name)
+      if (endEntry) {
+        result.set(name, { value: lerp(startVal, endEntry.value, t), unit })
+      } else {
+        // 기본값으로 보간 (blur는 0, 나머지는 1 또는 0)
+        const defaultVal = name === 'blur' ? 0 : 1
+        result.set(name, { value: lerp(startVal, defaultVal, t), unit })
+      }
+    })
+
+    endMap.forEach(({ value: endVal, unit }, name) => {
+      if (!startMap.has(name)) {
+        const defaultVal = name === 'blur' ? 0 : 1
+        result.set(name, { value: lerp(defaultVal, endVal, t), unit })
+      }
+    })
+
+    return filterToString(result)
+  }
+
+  // ClipPath 보간 (inset, circle 지원)
+  const interpolateClipPath = (
+    start: string | undefined,
+    end: string | undefined,
+    t: number
+  ): string => {
+    if (!start && !end) return ''
+    if (!start) return end || ''
+    if (!end) return start
+
+    // inset(100% 0 0 0) → inset(0 0 0 0)
+    const insetMatch = (str: string) =>
+      str.match(/inset\(([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)%?\)/)
+    const startInset = insetMatch(start)
+    const endInset = insetMatch(end)
+
+    if (startInset && endInset) {
+      const values = [1, 2, 3, 4].map((i) =>
+        lerp(parseFloat(startInset[i]), parseFloat(endInset[i]), t)
+      )
+      return `inset(${values[0]}% ${values[1]}% ${values[2]}% ${values[3]}%)`
+    }
+
+    // circle(0% at 50% 50%) → circle(100% at 50% 50%)
+    const circleMatch = (str: string) =>
+      str.match(/circle\(([\d.]+)%\s+at\s+([\d.]+)%\s+([\d.]+)%\)/)
+    const startCircle = circleMatch(start)
+    const endCircle = circleMatch(end)
+
+    if (startCircle && endCircle) {
+      const radius = lerp(
+        parseFloat(startCircle[1]),
+        parseFloat(endCircle[1]),
+        t
+      )
+      const x = lerp(parseFloat(startCircle[2]), parseFloat(endCircle[2]), t)
+      const y = lerp(parseFloat(startCircle[3]), parseFloat(endCircle[3]), t)
+      return `circle(${radius}% at ${x}% ${y}%)`
+    }
+
+    return t > 0.5 ? end : start
+  }
+
+  // Scrub 모드에서 스타일 계산
+  const getScrubStyle = useCallback((): React.CSSProperties => {
+    if (!props.scrub) return {}
+
+    // 스크롤 프리셋 또는 일반 애니메이션 프리셋에서 keyframes 가져오기
+    let keyframes: ScrollKeyframe[] | Keyframe[] = []
+
+    // 스크롤 프리셋 이름으로 검색
+    const scrollPreset = props.animation?.preset
+      ? getScrollPreset(props.animation.preset as Parameters<typeof getScrollPreset>[0])
+      : null
+
+    if (scrollPreset) {
+      keyframes = scrollPreset.keyframes
+    } else if (preset) {
+      keyframes = preset.keyframes
+    }
+
+    if (keyframes.length === 0) return {}
+
+    const firstFrame = keyframes[0] as ScrollKeyframe
+    const lastFrame = keyframes[keyframes.length - 1] as ScrollKeyframe
+
+    const result: React.CSSProperties = {}
+
+    // Opacity 보간
+    if (firstFrame.opacity !== undefined || lastFrame.opacity !== undefined) {
+      const startOpacity = firstFrame.opacity ?? 1
+      const endOpacity = lastFrame.opacity ?? 1
+      result.opacity = lerp(startOpacity, endOpacity, progress)
+    }
+
+    // Transform 보간
+    const transformResult = interpolateTransform(
+      firstFrame.transform,
+      lastFrame.transform,
+      progress
+    )
+    if (transformResult) {
+      result.transform = transformResult
+    }
+
+    // Filter 보간
+    const filterResult = interpolateFilter(
+      firstFrame.filter,
+      lastFrame.filter,
+      progress
+    )
+    if (filterResult) {
+      result.filter = filterResult
+    }
+
+    // ClipPath 보간
+    const clipPathResult = interpolateClipPath(
+      firstFrame.clipPath,
+      lastFrame.clipPath,
+      progress
+    )
+    if (clipPathResult) {
+      result.clipPath = clipPathResult
+      result.WebkitClipPath = clipPathResult // Safari 지원
+    }
+
+    return result
+  }, [preset, props.animation?.preset, props.scrub, progress])
 
   const containerStyle: React.CSSProperties = {
     ...style,
@@ -179,11 +423,30 @@ export const scrollTriggerRenderer: PrimitiveRenderer<ScrollTriggerProps> = {
       label: '애니메이션',
       type: 'select',
       options: [
-        { value: 'fade-in', label: '페이드 인' },
-        { value: 'slide-up', label: '슬라이드 업' },
-        { value: 'scale-in', label: '스케일 인' },
+        // 기본 등장
+        { value: 'scroll-fade-in', label: '페이드 인' },
+        { value: 'scroll-slide-up', label: '슬라이드 업' },
+        { value: 'scroll-slide-down', label: '슬라이드 다운' },
+        { value: 'scroll-slide-left', label: '슬라이드 왼쪽' },
+        { value: 'scroll-slide-right', label: '슬라이드 오른쪽' },
+        { value: 'scroll-scale-in', label: '스케일 인' },
+        // PPT 스타일
+        { value: 'scroll-blur-in', label: '블러 인' },
+        { value: 'scroll-rotate-in', label: '회전 인' },
+        { value: 'scroll-flip-in', label: '플립 인' },
+        { value: 'clip-reveal-up', label: '클립 업' },
+        { value: 'clip-reveal-down', label: '클립 다운' },
+        { value: 'clip-reveal-circle', label: '원형 리빌' },
+        // Parallax
+        { value: 'parallax-slow', label: '패럴랙스 (느림)' },
+        { value: 'parallax-fast', label: '패럴랙스 (빠름)' },
+        { value: 'parallax-zoom', label: '패럴랙스 줌' },
+        // 기존 프리셋 호환
+        { value: 'fade-in', label: '기본 페이드 인' },
+        { value: 'slide-up', label: '기본 슬라이드 업' },
+        { value: 'scale-in', label: '기본 스케일 인' },
       ],
-      defaultValue: 'fade-in',
+      defaultValue: 'scroll-fade-in',
     },
     {
       key: 'scrub',

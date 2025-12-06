@@ -1,0 +1,500 @@
+'use server'
+
+/**
+ * Super Editor - Server Actions for Template Generation
+ */
+
+import {
+  generateFullTemplate,
+  generateQuickTemplate,
+  generateIntroOnly,
+  completeTemplateWithDefaults,
+  type GenerationOptions,
+  type GenerationResult,
+  type IntroGenerationResult,
+} from '../services/generation-service'
+import { createGeminiProvider } from '../services/gemini-provider'
+import type { StyleSchema } from '../schema/style'
+import { db } from '@/lib/db'
+import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
+import { eq } from 'drizzle-orm'
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+import type { UserData, WeddingInvitationData } from '../schema/user-data'
+import type { EditorSchema } from '../schema/editor'
+
+// ============================================
+// AI Template Generation
+// ============================================
+
+export interface GenerateTemplateInput {
+  prompt: string
+  mood?: string[]
+  enabledSections?: string[]
+}
+
+export interface GenerateTemplateOutput {
+  success: boolean
+  data?: GenerationResult
+  error?: string
+}
+
+/**
+ * AI를 사용한 전체 템플릿 생성
+ */
+export async function generateTemplateAction(
+  input: GenerateTemplateInput
+): Promise<GenerateTemplateOutput> {
+  try {
+    const aiProvider = createGeminiProvider()
+
+    const options: GenerationOptions = {
+      prompt: input.prompt,
+      mood: input.mood,
+    }
+
+    const result = await generateFullTemplate(options, aiProvider)
+
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    console.error('Template generation failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '템플릿 생성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Quick Template Generation (AI 없이)
+// ============================================
+
+export interface QuickGenerateInput {
+  style: StyleSchema
+  enabledSections?: string[]
+}
+
+/**
+ * AI 없이 기본 스켈레톤으로 빠른 템플릿 생성
+ */
+export async function quickGenerateAction(
+  input: QuickGenerateInput
+): Promise<GenerateTemplateOutput> {
+  try {
+    const result = generateQuickTemplate(input.style)
+
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    console.error('Quick generation failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '빠른 생성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Style Only Generation
+// ============================================
+
+export interface GenerateStyleInput {
+  prompt: string
+  mood?: string[]
+}
+
+export interface GenerateStyleOutput {
+  success: boolean
+  data?: StyleSchema
+  error?: string
+}
+
+/**
+ * 스타일만 생성 (레이아웃 없이)
+ */
+export async function generateStyleAction(
+  input: GenerateStyleInput
+): Promise<GenerateStyleOutput> {
+  try {
+    const aiProvider = createGeminiProvider()
+    const style = await aiProvider.generateStyle(input.prompt, input.mood)
+
+    return {
+      success: true,
+      data: style,
+    }
+  } catch (error) {
+    console.error('Style generation failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '스타일 생성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Stage 1: Intro Only Generation
+// ============================================
+
+export interface GenerateIntroInput {
+  prompt: string
+  mood?: string[]
+}
+
+export interface GenerateIntroOutput {
+  success: boolean
+  data?: IntroGenerationResult
+  error?: string
+}
+
+/**
+ * Stage 1: Style + Intro만 생성
+ */
+export async function generateIntroOnlyAction(
+  input: GenerateIntroInput
+): Promise<GenerateIntroOutput> {
+  try {
+    const aiProvider = createGeminiProvider()
+
+    const options: GenerationOptions = {
+      prompt: input.prompt,
+      mood: input.mood,
+    }
+
+    const result = await generateIntroOnly(options, aiProvider)
+
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    console.error('Intro generation failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Intro 생성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Stage 2: Complete Template with Defaults
+// ============================================
+
+export interface CompleteTemplateInput {
+  introResult: IntroGenerationResult
+  enabledSections?: string[]
+}
+
+export interface CompleteTemplateOutput {
+  success: boolean
+  data?: GenerationResult
+  error?: string
+}
+
+/**
+ * Stage 2: Intro 결과 + 기본 섹션들로 전체 템플릿 완성
+ */
+export async function completeTemplateAction(
+  input: CompleteTemplateInput
+): Promise<CompleteTemplateOutput> {
+  try {
+    const result = completeTemplateWithDefaults(
+      input.introResult,
+      input.enabledSections as import('../skeletons/types').SectionType[] | undefined
+    )
+
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    console.error('Template completion failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '템플릿 완성에 실패했습니다',
+    }
+  }
+}
+
+// ============================================
+// Stage 3: Save to Database
+// ============================================
+
+export interface SaveInvitationInput {
+  // 생성 결과
+  generationResult: GenerationResult
+  // 프리뷰 폼 데이터
+  previewData: {
+    groomName: string
+    brideName: string
+    weddingDate: string // YYYY-MM-DD
+    weddingTime: string // HH:mm
+    mainImage?: string // base64 data URL 또는 URL
+  }
+  // 레거시 프리셋 사용 시
+  legacyPresetId?: string
+}
+
+export interface SaveInvitationOutput {
+  success: boolean
+  data?: { invitationId: string }
+  error?: string
+}
+
+/**
+ * Stage 3: 생성된 템플릿을 DB에 저장하고 invitation 생성
+ * superEditorTemplates + superEditorInvitations 사용
+ */
+export async function saveInvitationAction(
+  input: SaveInvitationInput
+): Promise<SaveInvitationOutput> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    const { generationResult, previewData, legacyPresetId } = input
+
+    // 1. Template 생성 (레이아웃, 스타일, 에디터 스키마 저장)
+    const editorSchema: EditorSchema = {
+      version: '1.0',
+      meta: {
+        id: 'default',
+        name: '청첩장 편집',
+        description: '청첩장의 모든 내용을 편집할 수 있습니다.',
+        layoutId: 'default',
+        styleId: 'default',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      sections: getDefaultEditorSections(),
+    }
+
+    const [template] = await db.insert(superEditorTemplates).values({
+      name: legacyPresetId ? `레거시: ${legacyPresetId}` : 'AI 생성 템플릿',
+      description: legacyPresetId ? `레거시 프리셋 ${legacyPresetId} 기반` : 'AI가 생성한 템플릿',
+      category: 'wedding',
+      layoutSchema: generationResult.layout,
+      styleSchema: generationResult.style,
+      editorSchema,
+      status: 'draft',
+      generationContext: {
+        prompt: legacyPresetId || 'super-editor',
+        model: 'gemini',
+        generatedAt: new Date().toISOString(),
+      },
+    }).returning()
+
+    // 2. UserData 구성
+    const weddingData: WeddingInvitationData = {
+      couple: {
+        groom: { name: previewData.groomName || '신랑' },
+        bride: { name: previewData.brideName || '신부' },
+      },
+      wedding: {
+        date: previewData.weddingDate || new Date().toISOString().split('T')[0],
+        time: previewData.weddingTime || '12:00',
+      },
+      venue: {
+        name: '',
+        address: '',
+        lat: 0,
+        lng: 0,
+      },
+      photos: {
+        main: previewData.mainImage || '',
+        gallery: previewData.mainImage ? [previewData.mainImage] : [],
+      },
+      greeting: {
+        content: '',
+      },
+    }
+
+    const userData: UserData = {
+      version: '1.0',
+      meta: {
+        id: template.id,
+        templateId: template.id,
+        layoutId: 'default',
+        styleId: 'default',
+        editorId: 'default',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      data: weddingData as unknown as Record<string, unknown>,
+    }
+
+    // 3. Invitation 생성
+    const [invitation] = await db.insert(superEditorInvitations).values({
+      templateId: template.id,
+      userId: user.id,
+      userData,
+      status: 'draft',
+    }).returning()
+
+    revalidatePath('/my/invitations')
+
+    return { success: true, data: { invitationId: invitation.id } }
+  } catch (error) {
+    console.error('Failed to save invitation:', error)
+    const errorMessage = error instanceof Error ? error.message : '청첩장 저장에 실패했습니다'
+    return { success: false, error: errorMessage }
+  }
+}
+
+// ============================================
+// Default Editor Sections
+// ============================================
+
+/**
+ * 청첩장 기본 에디터 섹션 생성
+ */
+function getDefaultEditorSections(): EditorSchema['sections'] {
+  return [
+    {
+      id: 'couple',
+      title: '신랑/신부 정보',
+      icon: 'heart',
+      order: 1,
+      fields: [
+        {
+          id: 'groom-name',
+          type: 'text',
+          label: '신랑 이름',
+          dataPath: 'couple.groom.name',
+          required: true,
+          order: 1,
+          placeholder: '신랑 이름을 입력하세요',
+        },
+        {
+          id: 'bride-name',
+          type: 'text',
+          label: '신부 이름',
+          dataPath: 'couple.bride.name',
+          required: true,
+          order: 2,
+          placeholder: '신부 이름을 입력하세요',
+        },
+      ],
+    },
+    {
+      id: 'wedding',
+      title: '예식 정보',
+      icon: 'calendar',
+      order: 2,
+      fields: [
+        {
+          id: 'wedding-date',
+          type: 'date',
+          label: '예식 날짜',
+          dataPath: 'wedding.date',
+          required: true,
+          order: 1,
+        },
+        {
+          id: 'wedding-time',
+          type: 'time',
+          label: '예식 시간',
+          dataPath: 'wedding.time',
+          required: true,
+          order: 2,
+        },
+      ],
+    },
+    {
+      id: 'venue',
+      title: '예식장 정보',
+      icon: 'map-pin',
+      order: 3,
+      fields: [
+        {
+          id: 'venue-name',
+          type: 'text',
+          label: '예식장 이름',
+          dataPath: 'venue.name',
+          required: true,
+          order: 1,
+          placeholder: '예: 그랜드 웨딩홀',
+        },
+        {
+          id: 'venue-hall',
+          type: 'text',
+          label: '홀 이름',
+          dataPath: 'venue.hall',
+          required: false,
+          order: 2,
+          placeholder: '예: 3층 그랜드볼룸',
+        },
+        {
+          id: 'venue-address',
+          type: 'text',
+          label: '주소',
+          dataPath: 'venue.address',
+          required: true,
+          order: 3,
+          placeholder: '예: 서울특별시 강남구...',
+        },
+        {
+          id: 'venue-tel',
+          type: 'phone',
+          label: '전화번호',
+          dataPath: 'venue.tel',
+          required: false,
+          order: 4,
+        },
+      ],
+    },
+    {
+      id: 'photos',
+      title: '사진',
+      icon: 'image',
+      order: 4,
+      fields: [
+        {
+          id: 'main-photo',
+          type: 'image',
+          label: '대표 사진',
+          dataPath: 'photos.main',
+          required: false,
+          order: 1,
+          aspectRatio: '3:4',
+        },
+        {
+          id: 'gallery-photos',
+          type: 'imageList',
+          label: '갤러리',
+          dataPath: 'photos.gallery',
+          required: false,
+          order: 2,
+          maxItems: 20,
+        },
+      ],
+    },
+    {
+      id: 'greeting',
+      title: '인사말',
+      icon: 'message-square',
+      order: 5,
+      fields: [
+        {
+          id: 'greeting-content',
+          type: 'textarea',
+          label: '인사말',
+          dataPath: 'greeting.content',
+          required: false,
+          order: 1,
+          rows: 5,
+          placeholder: '하객들에게 전할 인사말을 작성해주세요.',
+        },
+      ],
+    },
+  ]
+}

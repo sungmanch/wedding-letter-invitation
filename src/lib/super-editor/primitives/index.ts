@@ -1,6 +1,6 @@
 /**
  * Super Editor - All Primitives Export
- * 28개 기본 블록 렌더러
+ * 29개 기본 블록 렌더러
  */
 
 // Types
@@ -26,6 +26,11 @@ import { animationRenderers } from './animation'
 export * from './logic'
 import { logicRenderers } from './logic'
 
+// Audio (1개)
+export * from './audio'
+import { bgmPlayerRenderer } from './audio'
+const audioRenderers = { 'bgm-player': bgmPlayerRenderer }
+
 // ============================================
 // All Renderers Combined
 // ============================================
@@ -39,6 +44,7 @@ export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...imageCollectionRenderers,
   ...animationRenderers,
   ...logicRenderers,
+  ...audioRenderers,
 }
 
 /**
@@ -108,6 +114,11 @@ export const rendererCategories = {
     renderers: logicRenderers,
     types: ['conditional', 'repeat'],
   },
+  audio: {
+    label: '오디오',
+    renderers: audioRenderers,
+    types: ['bgm-player'],
+  },
 }
 
 // ============================================
@@ -121,10 +132,11 @@ export const primitiveStats = {
   imageCollection: Object.keys(imageCollectionRenderers).length,
   animation: Object.keys(animationRenderers).length,
   logic: Object.keys(logicRenderers).length,
+  audio: Object.keys(audioRenderers).length,
 }
 
-// 28개 확인
+// 29개 확인
 console.assert(
-  primitiveStats.total === 28,
-  `Expected 28 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 29,
+  `Expected 29 primitives, got ${primitiveStats.total}`
 )

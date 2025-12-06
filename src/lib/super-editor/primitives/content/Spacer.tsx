@@ -2,7 +2,12 @@
 
 import type { PrimitiveNode, SpacerProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
-import { toInlineStyle, getNodeProps } from '../types'
+import { getNodeProps, mergeNodeStyles } from '../types'
+
+// 확장된 노드 타입 (tokenStyle 포함)
+interface ExtendedNode extends PrimitiveNode {
+  tokenStyle?: Record<string, unknown>
+}
 
 export function Spacer({
   node,
@@ -11,8 +16,9 @@ export function Spacer({
   node: PrimitiveNode
   context: RenderContext
 }) {
+  const extNode = node as ExtendedNode
   const props = getNodeProps<SpacerProps>(node)
-  const style = toInlineStyle(node.style)
+  const style = mergeNodeStyles(extNode, context)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 

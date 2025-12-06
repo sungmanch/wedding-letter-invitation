@@ -2,12 +2,14 @@
 
 import { db } from '@/lib/db'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { buildHtml } from '../builder'
+import { createClient } from '@/lib/supabase/server'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { EditorSchema } from '../schema/editor'
 import type { UserData } from '../schema/user-data'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '../schema/section-types'
 
 // ============================================
 // Template Actions
@@ -63,15 +65,116 @@ export async function getInvitation(invitationId: string) {
   return invitation
 }
 
+/**
+ * 청첩장 + 템플릿 함께 조회 (편집 페이지용)
+ * 인증된 사용자 본인의 청첩장만 조회 가능
+ */
+export async function getInvitationWithTemplate(invitationId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
+/**
+ * 미리보기용 청첩장 조회
+ * 토큰이 있으면 토큰 검증 후 조회, 없으면 인증된 사용자 본인 것만 조회
+ */
+export async function getInvitationForPreview(invitationId: string, hasValidToken: boolean) {
+  if (hasValidToken) {
+    // 토큰이 유효하면 청첩장 조회 (소유자 확인 없이)
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: eq(superEditorInvitations.id, invitationId),
+    })
+    return invitation
+  }
+
+  // 토큰이 없으면 인증된 사용자 본인 것만
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  return invitation
+}
+
+/**
+ * 공개된 청첩장 조회 (결제 완료된 것만)
+ * 템플릿 정보도 함께 반환
+ */
+export async function getPublishedInvitation(invitationId: string) {
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.status, 'published')
+    ),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
 export async function createInvitation(data: {
   templateId: string
-  userId: string
   userData: UserData
 }) {
+  // 인증된 사용자 가져오기
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
   const [invitation] = await db.insert(superEditorInvitations).values({
     templateId: data.templateId,
-    userId: data.userId,
+    userId: user.id,
     userData: data.userData,
+    sectionOrder: DEFAULT_SECTION_ORDER,
+    sectionEnabled: DEFAULT_SECTION_ENABLED,
     status: 'draft',
   }).returning()
 
@@ -89,6 +192,70 @@ export async function updateInvitationData(
       updatedAt: new Date(),
     })
     .where(eq(superEditorInvitations.id, invitationId))
+    .returning()
+
+  return updated
+}
+
+export async function updateInvitationSections(
+  invitationId: string,
+  sectionOrder: string[],
+  sectionEnabled: Record<string, boolean>
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const [updated] = await db
+    .update(superEditorInvitations)
+    .set({
+      sectionOrder,
+      sectionEnabled,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ))
+    .returning()
+
+  return updated
+}
+
+export async function updateTemplateStyle(
+  invitationId: string,
+  styleSchema: StyleSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 styleSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      styleSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
     .returning()
 
   return updated
@@ -180,6 +347,7 @@ export async function generateTemplateWithLLM(prompt: string) {
       {
         id: 'intro',
         type: 'intro',
+        sectionType: 'intro',
         root: {
           id: 'root',
           type: 'fullscreen',

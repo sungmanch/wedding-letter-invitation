@@ -25,6 +25,7 @@ export const kakaoLayoutSchema: LayoutSchema = {
     {
       id: 'chat-main',
       type: 'content',
+      sectionType: 'intro',
       root: {
         id: 'chat-container',
         type: 'container',

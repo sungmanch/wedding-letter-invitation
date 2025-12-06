@@ -9,6 +9,12 @@ import { SelectField } from './SelectField'
 import { SwitchField } from './SwitchField'
 import { ImageField } from './ImageField'
 import { ImageListField } from './ImageListField'
+import { NumberField } from './NumberField'
+import { PhoneField } from './PhoneField'
+import { UrlField } from './UrlField'
+import { LocationField } from './LocationField'
+import { GroupField } from './GroupField'
+import { RepeaterField } from './RepeaterField'
 import { useSuperEditor } from '../../context'
 
 interface FieldRendererProps {
@@ -80,24 +86,36 @@ export function FieldRenderer({ field }: FieldRendererProps) {
     case 'imageList':
       return <ImageListField field={field} />
 
-    // TODO: 더 많은 필드 타입 추가
     case 'number':
+      return <NumberField field={field} />
+
+    case 'phone':
+      return <PhoneField field={field} />
+
+    case 'url':
+      return <UrlField field={field} />
+
+    case 'location':
+      return <LocationField field={field} />
+
+    case 'group':
+      return <GroupField field={field} />
+
+    case 'repeater':
+      return <RepeaterField field={field} />
+
+    // TODO: 더 많은 필드 타입 추가
     case 'datetime':
     case 'multiselect':
     case 'radio':
     case 'checkbox':
     case 'color':
     case 'icon':
-    case 'location':
     case 'person':
     case 'personList':
     case 'account':
     case 'accountList':
-    case 'phone':
-    case 'url':
     case 'richtext':
-    case 'group':
-    case 'repeater':
       return (
         <div className="p-3 bg-gray-100 rounded-lg text-sm text-gray-500">
           [{field.type}] {field.label || field.id} - 미구현
