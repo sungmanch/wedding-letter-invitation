@@ -55,6 +55,7 @@ export function generateCssVariables(tokens: SemanticDesignTokens): string {
   lines.push('  /* Typography */')
   lines.push(...generateTypoVariables('display-lg', tokens.typography.displayLg))
   lines.push(...generateTypoVariables('display-md', tokens.typography.displayMd))
+  lines.push(...generateTypoVariables('section-title', tokens.typography.sectionTitle))
   lines.push(...generateTypoVariables('heading-lg', tokens.typography.headingLg))
   lines.push(...generateTypoVariables('heading-md', tokens.typography.headingMd))
   lines.push(...generateTypoVariables('heading-sm', tokens.typography.headingSm))

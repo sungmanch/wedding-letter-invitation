@@ -302,9 +302,10 @@ export function StyleEditor({
                       key={opt.value}
                       onClick={() => updateTypography((typo) => {
                         if (typo?.weights) {
-                          // bold와 semibold 모두 업데이트 (제목 전체에 적용)
+                          // bold, semibold, medium 모두 업데이트 (제목 전체에 적용)
                           typo.weights.bold = opt.value
                           typo.weights.semibold = opt.semibold
+                          typo.weights.medium = opt.medium
                         }
                       })}
                       className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
@@ -518,11 +519,11 @@ const FONT_WEIGHT_OPTIONS = [
   { value: 500, label: '굵게' },
 ]
 
-// 제목 굵기 옵션 (bold: 메인 타이틀, semibold: 섹션 제목)
+// 제목 굵기 옵션 (bold: 메인 타이틀, semibold: 섹션 제목, medium: 섹션 영문 타이틀)
 const HEADING_WEIGHT_OPTIONS = [
-  { value: 600, semibold: 500, label: '보통' },
-  { value: 700, semibold: 600, label: '굵게' },
-  { value: 800, semibold: 700, label: '매우 굵게' },
+  { value: 600, semibold: 500, medium: 400, label: '보통' },
+  { value: 700, semibold: 600, medium: 500, label: '굵게' },
+  { value: 800, semibold: 700, medium: 600, label: '매우 굵게' },
 ]
 
 function FontSelector({
