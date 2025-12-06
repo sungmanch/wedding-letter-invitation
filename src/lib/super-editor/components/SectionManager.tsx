@@ -1,8 +1,10 @@
 'use client'
 
-import { useCallback } from 'react'
-import { SECTION_META, REORDERABLE_SECTIONS } from '../schema/section-types'
+import { useCallback, useMemo } from 'react'
+import { SECTION_META } from '../schema/section-types'
+import { extractSectionsFromLayout } from '../utils/variable-extractor'
 import type { SectionType } from '../schema/section-types'
+import type { LayoutSchema } from '../schema/layout'
 
 interface SectionManagerProps {
   sectionOrder: SectionType[]
@@ -10,6 +12,8 @@ interface SectionManagerProps {
   onOrderChange: (newOrder: SectionType[]) => void
   onEnabledChange: (newEnabled: Record<SectionType, boolean>) => void
   className?: string
+  /** Layout 스키마 - 제공되면 해당 레이아웃에 존재하는 섹션만 표시 */
+  layout?: LayoutSchema
 }
 
 export function SectionManager({
@@ -18,7 +22,24 @@ export function SectionManager({
   onOrderChange,
   onEnabledChange,
   className = '',
+  layout,
 }: SectionManagerProps) {
+  // Layout에서 실제 존재하는 섹션 추출
+  const availableSections = useMemo(() => {
+    if (!layout) return null // layout이 없으면 기존 방식 사용
+    return new Set(extractSectionsFromLayout(layout))
+  }, [layout])
+
+  // 표시할 섹션 순서 (layout 기반 필터링)
+  const displayOrder = useMemo(() => {
+    if (!availableSections) return sectionOrder
+    return sectionOrder.filter((s) => availableSections.has(s))
+  }, [sectionOrder, availableSections])
+
+  // intro/music 존재 여부
+  const hasIntro = !availableSections || availableSections.has('intro')
+  const hasMusic = !availableSections || availableSections.has('music')
+
   // 섹션 토글
   const toggleSection = useCallback(
     (sectionType: SectionType) => {
@@ -54,6 +75,7 @@ export function SectionManager({
 
       <div className="p-4 space-y-2">
         {/* 고정 섹션: intro */}
+        {hasIntro && (
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 flex items-center justify-center text-gray-400">
@@ -79,9 +101,10 @@ export function SectionManager({
             </label>
           </div>
         </div>
+        )}
 
         {/* 순서 변경 가능한 섹션들 */}
-        {sectionOrder.map((sectionType, index) => {
+        {displayOrder.map((sectionType, index) => {
           const meta = SECTION_META[sectionType]
           const isEnabled = sectionEnabled[sectionType]
 
@@ -110,7 +133,7 @@ export function SectionManager({
                   <button
                     type="button"
                     onClick={() => moveSection(index, index + 1)}
-                    disabled={index === sectionOrder.length - 1}
+                    disabled={index === displayOrder.length - 1}
                     className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,6 +163,7 @@ export function SectionManager({
         })}
 
         {/* 플로팅 섹션: music */}
+        {hasMusic && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <p className="text-xs text-gray-500 mb-2">플로팅 섹션</p>
           <div
@@ -171,6 +195,14 @@ export function SectionManager({
             </label>
           </div>
         </div>
+        )}
+
+        {/* Layout에 섹션이 없는 경우 안내 */}
+        {availableSections && availableSections.size === 0 && (
+          <div className="p-4 text-center text-gray-500">
+            <p className="text-sm">레이아웃에 정의된 섹션이 없습니다</p>
+          </div>
+        )}
       </div>
     </div>
   )
