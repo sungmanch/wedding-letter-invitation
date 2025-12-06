@@ -227,6 +227,7 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
 
         {activeSection === 'typography' && (
           <div className="space-y-6">
+            {/* 글꼴 선택 */}
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-700">제목 글꼴</h4>
               <FontSelector
@@ -258,6 +259,113 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
                   setIsDirty(true)
                 }}
               />
+            </div>
+
+            {/* 기본 폰트 크기 */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-700">기본 글자 크기</h4>
+              <SizeSelector
+                value={localStyle.theme.typography?.sizes?.base ?? '1rem'}
+                options={FONT_SIZE_OPTIONS}
+                onChange={(size) => {
+                  setLocalStyle(prev => {
+                    const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+                    if (newStyle.theme.typography?.sizes) {
+                      newStyle.theme.typography.sizes.base = size
+                    }
+                    return newStyle
+                  })
+                  setIsDirty(true)
+                }}
+              />
+            </div>
+
+            {/* 자간 */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-700">자간 (Letter Spacing)</h4>
+              <div className="grid grid-cols-3 gap-2">
+                {LETTER_SPACING_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      setLocalStyle(prev => {
+                        const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+                        if (newStyle.theme.typography?.letterSpacing) {
+                          newStyle.theme.typography.letterSpacing.normal = opt.value
+                        }
+                        return newStyle
+                      })
+                      setIsDirty(true)
+                    }}
+                    className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
+                      localStyle.theme.typography?.letterSpacing?.normal === opt.value
+                        ? 'border-rose-500 bg-rose-50 text-rose-700'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 줄 간격 */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-700">줄 간격 (Line Height)</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {LINE_HEIGHT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      setLocalStyle(prev => {
+                        const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+                        if (newStyle.theme.typography?.lineHeights) {
+                          newStyle.theme.typography.lineHeights.normal = opt.value
+                        }
+                        return newStyle
+                      })
+                      setIsDirty(true)
+                    }}
+                    className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
+                      localStyle.theme.typography?.lineHeights?.normal === opt.value
+                        ? 'border-rose-500 bg-rose-50 text-rose-700'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 기본 굵기 */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-700">본문 굵기</h4>
+              <div className="grid grid-cols-3 gap-2">
+                {FONT_WEIGHT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      setLocalStyle(prev => {
+                        const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+                        if (newStyle.theme.typography?.weights) {
+                          newStyle.theme.typography.weights.regular = opt.value
+                        }
+                        return newStyle
+                      })
+                      setIsDirty(true)
+                    }}
+                    className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                      localStyle.theme.typography?.weights?.regular === opt.value
+                        ? 'border-rose-500 bg-rose-50 text-rose-700'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    }`}
+                    style={{ fontWeight: opt.value }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -311,6 +419,35 @@ const FONT_OPTIONS = [
   { value: 'Gothic A1', label: 'Gothic A1' },
 ]
 
+// 폰트 크기 옵션
+const FONT_SIZE_OPTIONS = [
+  { value: '0.875rem', label: '작게 (14px)' },
+  { value: '1rem', label: '기본 (16px)' },
+  { value: '1.125rem', label: '크게 (18px)' },
+]
+
+// 자간 옵션
+const LETTER_SPACING_OPTIONS = [
+  { value: '-0.025em', label: '좁게' },
+  { value: '0', label: '기본' },
+  { value: '0.05em', label: '넓게' },
+]
+
+// 줄 간격 옵션
+const LINE_HEIGHT_OPTIONS = [
+  { value: 1.4, label: '좁게 (1.4)' },
+  { value: 1.6, label: '기본 (1.6)' },
+  { value: 1.8, label: '넓게 (1.8)' },
+  { value: 2.0, label: '여유 (2.0)' },
+]
+
+// 폰트 굵기 옵션
+const FONT_WEIGHT_OPTIONS = [
+  { value: 300, label: '얇게' },
+  { value: 400, label: '기본' },
+  { value: 500, label: '굵게' },
+]
+
 function FontSelector({
   value,
   onChange,
@@ -350,4 +487,33 @@ function darkenColor(hex: string, percent: number): string {
   const G = Math.max(0, ((num >> 8) & 0x00ff) - amt)
   const B = Math.max(0, (num & 0x0000ff) - amt)
   return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`
+}
+
+// 크기 선택기 컴포넌트
+function SizeSelector({
+  value,
+  options,
+  onChange,
+}: {
+  value: string
+  options: { value: string; label: string }[]
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
+            value === opt.value
+              ? 'border-rose-500 bg-rose-50 text-rose-700'
+              : 'border-gray-200 hover:border-gray-300 text-gray-600'
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
 }
