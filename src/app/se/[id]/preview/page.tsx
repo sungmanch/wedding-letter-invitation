@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { getInvitationForPreview, getInvitationWithTemplate } from '@/lib/super-editor/actions'
-import { InvitationRenderer } from '@/lib/super-editor/renderers'
+import { InvitationPreview } from '@/lib/super-editor/components'
 import { verifyPreviewToken } from '@/lib/utils/preview-token'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
 import type { SuperEditorInvitation, SuperEditorTemplate } from '@/lib/db/super-editor-schema'
@@ -143,7 +143,7 @@ export default function SuperEditorPreviewPage() {
     <div className="min-h-screen">
       {PreviewBanner}
       <div className={token ? 'pt-8' : 'pt-10'}>
-        <InvitationRenderer
+        <InvitationPreview
           layout={template.layoutSchema as LayoutSchema}
           style={template.styleSchema as StyleSchema}
           userData={invitation.userData as UserData}

@@ -3,6 +3,10 @@
 /**
  * InvitationRenderer - 전체 청첩장 렌더링 오케스트레이터
  * 섹션 순서/활성화 관리, 스크롤 스택 구성
+ *
+ * Clean Architecture:
+ * - TokenStyleProvider를 통해 CSS 변수 주입 (단일 책임)
+ * - visibleSections로 렌더링 섹션 제어 (개방-폐쇄)
  */
 
 import React from 'react'
@@ -12,20 +16,36 @@ import type { UserData } from '../schema/user-data'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, type SectionType } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
 import { MusicPlayer } from './MusicPlayer'
-import { resolveTokens } from '../tokens/resolver'
-import type { SemanticDesignTokens, TypoToken } from '../tokens/schema'
+import { TokenStyleProvider } from '../context/TokenStyleContext'
+
+// ============================================
+// Types
+// ============================================
 
 interface InvitationRendererProps {
   layout: LayoutSchema
   style: StyleSchema
   userData: UserData
+  mode?: 'preview' | 'edit' | 'build'
+
+  // 섹션 순서/활성화 제어 (선택적)
   sectionOrder?: SectionType[]
   sectionEnabled?: Record<SectionType, boolean>
-  mode?: 'preview' | 'edit' | 'build'
+
+  // 편집 모드 (선택적)
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
+
+  // 표시할 섹션 타입 제한 (선택적)
+  // undefined = sectionEnabled 기반, ['intro'] = 인트로만
+  visibleSections?: SectionType[]
+
   className?: string
 }
+
+// ============================================
+// Helper Functions
+// ============================================
 
 /**
  * 섹션 정렬 및 필터링
@@ -33,8 +53,19 @@ interface InvitationRendererProps {
 function getSortedSections(
   screens: Screen[],
   sectionOrder: SectionType[],
-  sectionEnabled: Record<SectionType, boolean>
+  sectionEnabled: Record<SectionType, boolean>,
+  visibleSections?: SectionType[]
 ): { intro: Screen | undefined; sections: Screen[]; music: Screen | undefined } {
+  // visibleSections가 있으면 해당 섹션만 표시
+  if (visibleSections) {
+    const visible = screens.filter(s => visibleSections.includes(s.sectionType))
+    const intro = visible.find(s => s.sectionType === 'intro')
+    const sections = visible.filter(s => s.sectionType !== 'intro' && s.sectionType !== 'music')
+    const music = visible.find(s => s.sectionType === 'music')
+    return { intro, sections, music }
+  }
+
+  // 기본 동작: sectionEnabled 기반
   // 1. intro 항상 첫번째
   const intro = screens.find(s => s.sectionType === 'intro')
 
@@ -50,132 +81,43 @@ function getSortedSections(
   return { intro, sections, music }
 }
 
-/**
- * camelCase를 kebab-case로 변환
- */
-function toKebabCase(str: string): string {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-}
+// ============================================
+// Inner Content Component
+// ============================================
 
-/**
- * 타이포그래피 토큰을 CSS Variables 객체로 변환
- */
-function generateTypoVariables(prefix: string, typo: TypoToken): Record<string, string> {
-  const baseVar = `--typo-${toKebabCase(prefix)}`
-  const vars: Record<string, string> = {}
+interface InvitationContentProps extends InvitationRendererProps {}
 
-  vars[`${baseVar}-font-family`] = typo.fontFamily
-  vars[`${baseVar}-font-size`] = typo.fontSize
-  vars[`${baseVar}-font-weight`] = String(typo.fontWeight)
-  vars[`${baseVar}-line-height`] = String(typo.lineHeight)
-
-  if (typo.letterSpacing) {
-    vars[`${baseVar}-letter-spacing`] = typo.letterSpacing
-  }
-
-  return vars
-}
-
-/**
- * SemanticDesignTokens를 CSS Variables 객체로 변환
- */
-function tokensToCssVariables(tokens: SemanticDesignTokens): Record<string, string> {
-  const vars: Record<string, string> = {}
-
-  // Colors
-  vars['--color-brand'] = tokens.colors.brand
-  vars['--color-accent'] = tokens.colors.accent
-  vars['--color-background'] = tokens.colors.background
-  vars['--color-surface'] = tokens.colors.surface
-  vars['--color-text-primary'] = tokens.colors.text.primary
-  vars['--color-text-secondary'] = tokens.colors.text.secondary
-  vars['--color-text-muted'] = tokens.colors.text.muted
-  vars['--color-text-on-brand'] = tokens.colors.text.onBrand
-  vars['--color-border'] = tokens.colors.border
-  vars['--color-divider'] = tokens.colors.divider
-
-  // Typography
-  Object.assign(vars, generateTypoVariables('display-lg', tokens.typography.displayLg))
-  Object.assign(vars, generateTypoVariables('display-md', tokens.typography.displayMd))
-  Object.assign(vars, generateTypoVariables('heading-lg', tokens.typography.headingLg))
-  Object.assign(vars, generateTypoVariables('heading-md', tokens.typography.headingMd))
-  Object.assign(vars, generateTypoVariables('heading-sm', tokens.typography.headingSm))
-  Object.assign(vars, generateTypoVariables('body-lg', tokens.typography.bodyLg))
-  Object.assign(vars, generateTypoVariables('body-md', tokens.typography.bodyMd))
-  Object.assign(vars, generateTypoVariables('body-sm', tokens.typography.bodySm))
-  Object.assign(vars, generateTypoVariables('caption', tokens.typography.caption))
-
-  // Spacing
-  vars['--spacing-xs'] = tokens.spacing.xs
-  vars['--spacing-sm'] = tokens.spacing.sm
-  vars['--spacing-md'] = tokens.spacing.md
-  vars['--spacing-lg'] = tokens.spacing.lg
-  vars['--spacing-xl'] = tokens.spacing.xl
-  vars['--spacing-xxl'] = tokens.spacing.xxl
-  vars['--spacing-section'] = tokens.spacing.section
-  vars['--spacing-component'] = tokens.spacing.component
-
-  // Borders
-  vars['--radius-sm'] = tokens.borders.radiusSm
-  vars['--radius-md'] = tokens.borders.radiusMd
-  vars['--radius-lg'] = tokens.borders.radiusLg
-  vars['--radius-full'] = tokens.borders.radiusFull
-
-  // Shadows
-  vars['--shadow-sm'] = tokens.shadows.sm
-  vars['--shadow-md'] = tokens.shadows.md
-  vars['--shadow-lg'] = tokens.shadows.lg
-
-  // Animation
-  vars['--duration-fast'] = `${tokens.animation.durationFast}ms`
-  vars['--duration-normal'] = `${tokens.animation.durationNormal}ms`
-  vars['--duration-slow'] = `${tokens.animation.durationSlow}ms`
-  vars['--easing-default'] = tokens.animation.easing
-  vars['--stagger-delay'] = `${tokens.animation.staggerDelay}ms`
-
-  return vars
-}
-
-/**
- * StyleSchema에서 CSS 변수 추출 (토큰 시스템 호환)
- */
-function getStyleVariables(style: StyleSchema): React.CSSProperties {
-  // StyleSchema를 SemanticDesignTokens로 변환
-  const tokens = resolveTokens(style)
-  // 토큰을 CSS 변수로 변환
-  const cssVars = tokensToCssVariables(tokens)
-
-  return cssVars as unknown as React.CSSProperties
-}
-
-export function InvitationRenderer({
+function InvitationContent({
   layout,
-  style,
   userData,
   sectionOrder = DEFAULT_SECTION_ORDER,
   sectionEnabled = DEFAULT_SECTION_ENABLED,
   mode = 'preview',
   selectedNodeId,
   onSelectNode,
+  visibleSections,
   className,
-}: InvitationRendererProps) {
+}: InvitationContentProps) {
   // 섹션 정렬
   const { intro, sections, music } = React.useMemo(
-    () => getSortedSections(layout.screens, sectionOrder, sectionEnabled),
-    [layout.screens, sectionOrder, sectionEnabled]
+    () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections),
+    [layout.screens, sectionOrder, sectionEnabled, visibleSections]
   )
 
-  // 스타일 변수
-  const styleVariables = React.useMemo(() => getStyleVariables(style), [style])
+  // intro 표시 여부 (visibleSections가 있으면 그 기준, 없으면 sectionEnabled 기준)
+  const showIntro = visibleSections
+    ? visibleSections.includes('intro') && intro
+    : sectionEnabled.intro && intro
 
-  // BGM 활성화 여부
-  const isMusicEnabled = sectionEnabled.music && music
+  // music 표시 여부
+  const showMusic = visibleSections
+    ? visibleSections.includes('music') && music
+    : sectionEnabled.music && music
 
   return (
     <div
       className={`invitation-renderer ${className ?? ''}`}
       style={{
-        ...styleVariables,
         minHeight: '100vh',
         backgroundColor: 'var(--color-background)',
         color: 'var(--color-text-primary)',
@@ -183,7 +125,7 @@ export function InvitationRenderer({
       }}
     >
       {/* Intro Section (항상 첫번째) */}
-      {intro && sectionEnabled.intro && (
+      {showIntro && intro && (
         <SectionRenderer
           screen={intro}
           userData={userData}
@@ -206,7 +148,7 @@ export function InvitationRenderer({
       ))}
 
       {/* Music FAB (플로팅) */}
-      {isMusicEnabled && (
+      {showMusic && music && (
         <MusicPlayer
           screen={music}
           userData={userData}
@@ -214,5 +156,17 @@ export function InvitationRenderer({
         />
       )}
     </div>
+  )
+}
+
+// ============================================
+// Main Component (with TokenStyleProvider)
+// ============================================
+
+export function InvitationRenderer(props: InvitationRendererProps) {
+  return (
+    <TokenStyleProvider style={props.style}>
+      <InvitationContent {...props} />
+    </TokenStyleProvider>
   )
 }

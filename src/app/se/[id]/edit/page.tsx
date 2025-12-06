@@ -4,8 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getInvitationWithTemplate, updateInvitationData, updateInvitationSections, updateTemplateStyle } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
-import { InvitationRenderer } from '@/lib/super-editor/renderers'
-import { EditorPanel, EditorToolbar, SectionManager, StyleEditor } from '@/lib/super-editor/components'
+import { EditorPanel, EditorToolbar, SectionManager, StyleEditor, InvitationPreview } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED, REORDERABLE_SECTIONS } from '@/lib/super-editor/schema/section-types'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
@@ -282,35 +281,23 @@ function EditPageContent() {
           )}
         </div>
 
-        {/* 중앙: 미리보기 (React 렌더러 사용) */}
+        {/* 중앙: 미리보기 */}
         <div className="flex-1 flex flex-col bg-gray-200">
           <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
             {state.layout && state.style && state.userData ? (
-              <div className="relative">
-                {/* 모바일 프레임 */}
-                <div className="relative bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-10" />
-                  <div
-                    className="bg-white rounded-[2.5rem] overflow-hidden overflow-y-auto mobile-scrollbar"
-                    style={{
-                      width: 375,
-                      height: 667,
-                      '--preview-screen-height': '667px',
-                    } as React.CSSProperties}
-                  >
-                    <InvitationRenderer
-                      layout={state.layout}
-                      style={state.style}
-                      userData={state.userData}
-                      sectionOrder={sectionOrder}
-                      sectionEnabled={sectionEnabled}
-                      mode="edit"
-                      selectedNodeId={selectedNodeId}
-                      onSelectNode={handleSelectNode}
-                    />
-                  </div>
-                </div>
-              </div>
+              <InvitationPreview
+                layout={state.layout}
+                style={state.style}
+                userData={state.userData}
+                sectionOrder={sectionOrder}
+                sectionEnabled={sectionEnabled}
+                mode="edit"
+                selectedNodeId={selectedNodeId}
+                onSelectNode={handleSelectNode}
+                withFrame
+                frameWidth={375}
+                frameHeight={667}
+              />
             ) : (
               <div className="text-center text-gray-500">
                 <p className="text-lg font-medium">미리보기 로딩 중...</p>

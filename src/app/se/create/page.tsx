@@ -7,9 +7,9 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Send, Loader2, Sparkles, RefreshCw, Grid, MessageSquare } from 'lucide-react'
-import { TokenStyleProvider } from '@/lib/super-editor/context'
-import { SectionRenderer } from '@/lib/super-editor/renderers'
+import { ArrowLeft, Send, Loader2, Sparkles, RefreshCw, Grid } from 'lucide-react'
+import { InvitationPreview } from '@/lib/super-editor/components'
+import { introResultToLayout, extractIntroLayout } from '@/lib/super-editor/adapters'
 import {
   generateIntroOnlyAction,
   completeTemplateAction,
@@ -28,13 +28,10 @@ import { legacyPresets, categoryLabels } from '@/lib/super-editor/presets/legacy
 import {
   buildLegacyIntro,
   getLegacyPresetPreviews,
-  collectAllIntroStyles,
   convertLegacyToIntroResult,
   type LegacyIntroResult,
 } from '@/lib/super-editor/presets/legacy/intro-builders'
 import type { IntroBuilderData } from '@/lib/super-editor/presets/legacy/intro-builders'
-import { renderPrimitiveNode } from '@/lib/super-editor/primitives'
-import type { RenderContext } from '@/lib/super-editor/primitives/types'
 
 // 새 super-editor 템플릿
 import { getAllTemplates, getTemplate, type TemplateId } from '@/lib/super-editor/templates'
@@ -120,37 +117,9 @@ function LoadingDots() {
   )
 }
 
-const PHONE_SCREEN_WIDTH = 320
-const PHONE_SCREEN_HEIGHT = 580
-
-function PhoneFrame({ children }: { children: React.ReactNode }) {
-  const allStyles = useMemo(() => collectAllIntroStyles(), [])
-
-  return (
-    <div className="relative">
-      {/* 인트로 애니메이션 스타일 */}
-      <style dangerouslySetInnerHTML={{ __html: allStyles }} />
-      {/* Phone bezel */}
-      <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
-        {/* Notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-10" />
-        {/* Screen */}
-        <div
-          className="bg-white rounded-4xl overflow-hidden overflow-y-auto"
-          style={
-            {
-              width: PHONE_SCREEN_WIDTH,
-              height: PHONE_SCREEN_HEIGHT,
-              '--preview-screen-height': `${PHONE_SCREEN_HEIGHT}px`,
-            } as React.CSSProperties
-          }
-        >
-          {children}
-        </div>
-      </div>
-    </div>
-  )
-}
+// PhoneFrame 크기 설정
+const PHONE_FRAME_WIDTH = 320
+const PHONE_FRAME_HEIGHT = 580
 
 // ============================================
 // Template Gallery
@@ -312,38 +281,6 @@ function EmptyPreview() {
       </div>
       <p className="text-center text-sm font-medium">템플릿을 선택하거나</p>
       <p className="text-center text-sm font-medium">AI에게 스타일을 요청해보세요</p>
-    </div>
-  )
-}
-
-// ============================================
-// Legacy Preview
-// ============================================
-
-function LegacyPreview({ result, data }: { result: LegacyIntroResult; data: IntroBuilderData }) {
-  const renderContext: RenderContext = useMemo(
-    () => ({
-      mode: 'preview' as const,
-      data: data as unknown as Record<string, unknown>,
-      renderNode: (node) => renderPrimitiveNode(node, renderContext),
-    }),
-    [data]
-  )
-
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: result.colors.background,
-        color: result.colors.text,
-        overflow: 'hidden',
-      }}
-    >
-      {result.additionalStyles && (
-        <style dangerouslySetInnerHTML={{ __html: result.additionalStyles }} />
-      )}
-      {renderPrimitiveNode(result.root, renderContext)}
     </div>
   )
 }
@@ -769,32 +706,58 @@ export default function SuperEditorCreatePage() {
               </div>
 
               <div className="text-sm text-gray-500 mb-4">인트로 미리보기</div>
-              <PhoneFrame>
-                {legacyResult ? (
-                  // 레거시 템플릿 선택 시 - PrimitiveNode 직접 렌더링
-                  <LegacyPreview result={legacyResult} data={legacyBuilderData} />
-                ) : newTemplateScreen && newTemplateStyle ? (
-                  // 새 super-editor 템플릿 - Screen 타입 직접 사용
-                  <TokenStyleProvider style={newTemplateStyle}>
-                    <SectionRenderer
-                      screen={newTemplateScreen}
+              {legacyResult && selectedTemplateId ? (
+                // 레거시 템플릿
+                (() => {
+                  const preset = legacyPresets[selectedTemplateId]
+                  if (!preset) return <EmptyPreview />
+                  const converted = convertLegacyToIntroResult(legacyResult, preset)
+                  return (
+                    <InvitationPreview
+                      layout={introResultToLayout(converted)}
+                      style={converted.style}
                       userData={previewUserData}
                       mode="preview"
+                      visibleSections={['intro']}
+                      withFrame
+                      frameWidth={PHONE_FRAME_WIDTH}
+                      frameHeight={PHONE_FRAME_HEIGHT}
                     />
-                  </TokenStyleProvider>
-                ) : introResult ? (
-                  // AI 생성 결과
-                  <TokenStyleProvider style={introResult.style}>
-                    <SectionRenderer
-                      screen={introResult.introScreen as unknown as Screen}
+                  )
+                })()
+              ) : newTemplateScreen && newTemplateStyle && selectedTemplateId ? (
+                // 새 super-editor 템플릿
+                (() => {
+                  const template = getTemplate(selectedTemplateId as TemplateId)
+                  if (!template) return <EmptyPreview />
+                  return (
+                    <InvitationPreview
+                      layout={extractIntroLayout(template.layout)}
+                      style={newTemplateStyle}
                       userData={previewUserData}
                       mode="preview"
+                      visibleSections={['intro']}
+                      withFrame
+                      frameWidth={PHONE_FRAME_WIDTH}
+                      frameHeight={PHONE_FRAME_HEIGHT}
                     />
-                  </TokenStyleProvider>
-                ) : (
-                  <EmptyPreview />
-                )}
-              </PhoneFrame>
+                  )
+                })()
+              ) : introResult ? (
+                // AI 생성 결과
+                <InvitationPreview
+                  layout={introResultToLayout(introResult)}
+                  style={introResult.style}
+                  userData={previewUserData}
+                  mode="preview"
+                  visibleSections={['intro']}
+                  withFrame
+                  frameWidth={PHONE_FRAME_WIDTH}
+                  frameHeight={PHONE_FRAME_HEIGHT}
+                />
+              ) : (
+                <EmptyPreview />
+              )}
 
               {/* Regenerate button */}
               {(introResult || legacyResult || newTemplateScreen) && (
