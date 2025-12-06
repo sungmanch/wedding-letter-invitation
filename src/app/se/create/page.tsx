@@ -36,6 +36,13 @@ import type { IntroBuilderData } from '@/lib/super-editor/presets/legacy/intro-b
 import { renderPrimitiveNode } from '@/lib/super-editor/primitives'
 import type { RenderContext } from '@/lib/super-editor/primitives/types'
 
+// 새 super-editor 템플릿
+import { getAllTemplates, getTemplate, type TemplateId } from '@/lib/super-editor/templates'
+import { resolveTokens } from '@/lib/super-editor/tokens'
+import { generateCssVariables } from '@/lib/super-editor/tokens/css-generator'
+import type { SectionScreen, SkeletonNode } from '@/lib/super-editor/skeletons/types'
+import type { SectionType } from '@/lib/super-editor/schema/section-types'
+
 type CreateMode = 'template' | 'chat'
 
 const SAMPLE_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
@@ -152,11 +159,22 @@ function PhoneFrame({ children }: { children: React.ReactNode }) {
 // ============================================
 
 interface TemplateGalleryProps {
-  onSelect: (presetId: string) => void
+  onSelect: (presetId: string, isNewTemplate?: boolean) => void
   selectedId: string | null
+  selectedType: 'legacy' | 'new' | null
 }
 
-function TemplateGallery({ onSelect, selectedId }: TemplateGalleryProps) {
+// 새 템플릿 카테고리 라벨
+const newTemplateCategoryLabels: Record<string, string> = {
+  letter: '레터 스타일',
+  chat: '채팅 스타일',
+}
+
+function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGalleryProps) {
+  // 새 super-editor 템플릿
+  const newTemplates = useMemo(() => getAllTemplates(), [])
+
+  // 레거시 템플릿
   const previews = useMemo(() => getLegacyPresetPreviews(legacyPresets), [])
 
   const grouped = useMemo(() => {
@@ -168,8 +186,80 @@ function TemplateGallery({ onSelect, selectedId }: TemplateGalleryProps) {
     return groups
   }, [previews])
 
+  // 새 템플릿 카테고리별 그룹화
+  const newGrouped = useMemo(() => {
+    const groups: Record<string, typeof newTemplates> = {}
+    newTemplates.forEach((t) => {
+      if (!groups[t.category]) groups[t.category] = []
+      groups[t.category].push(t)
+    })
+    return groups
+  }, [newTemplates])
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* 새 템플릿 섹션 */}
+      <div className="mb-2">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-600 rounded-full">NEW</span>
+          <span className="text-xs text-gray-500">super-editor 템플릿</span>
+        </div>
+        {Object.entries(newGrouped).map(([category, templates]) => (
+          <div key={`new-${category}`} className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              {newTemplateCategoryLabels[category] || category}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {templates.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => onSelect(t.id, true)}
+                  className={`p-3 rounded-xl border-2 text-left transition-all ${
+                    selectedId === t.id && selectedType === 'new'
+                      ? 'border-rose-500 bg-rose-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex gap-1 mb-2">
+                    {/* 색상 미리보기 (StyleSchema에서 추출) */}
+                    <div
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: t.style.theme.colors.primary[500] }}
+                    />
+                    <div
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: t.style.theme.colors.neutral[50] }}
+                    />
+                    <div
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: t.style.theme.colors.background.default }}
+                    />
+                  </div>
+                  <p className="font-medium text-gray-900 text-sm">{t.name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.category}</p>
+                  <div className="flex gap-1 mt-2">
+                    {(t.style.meta.mood || []).slice(0, 2).map((m) => (
+                      <span
+                        key={m}
+                        className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded"
+                      >
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 구분선 */}
+      <div className="border-t border-gray-200 pt-4">
+        <span className="text-xs text-gray-400">레거시 템플릿</span>
+      </div>
+
+      {/* 레거시 템플릿 섹션 */}
       {Object.entries(grouped).map(([category, templates]) => (
         <div key={category}>
           <h3 className="text-sm font-semibold text-gray-700 mb-3">
@@ -179,9 +269,9 @@ function TemplateGallery({ onSelect, selectedId }: TemplateGalleryProps) {
             {templates.map((t) => (
               <button
                 key={t.id}
-                onClick={() => onSelect(t.id)}
+                onClick={() => onSelect(t.id, false)}
                 className={`p-3 rounded-xl border-2 text-left transition-all ${
-                  selectedId === t.id
+                  selectedId === t.id && selectedType === 'legacy'
                     ? 'border-rose-500 bg-rose-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
@@ -272,6 +362,7 @@ export default function SuperEditorCreatePage() {
 
   // Template selection
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  const [selectedTemplateType, setSelectedTemplateType] = useState<'legacy' | 'new' | null>(null)
   const [legacyResult, setLegacyResult] = useState<LegacyIntroResult | null>(null)
 
   // Chat state
@@ -304,13 +395,49 @@ export default function SuperEditorCreatePage() {
 
   // 템플릿 선택 핸들러
   const handleTemplateSelect = useCallback(
-    (presetId: string) => {
+    (presetId: string, isNewTemplate: boolean = false) => {
       setSelectedTemplateId(presetId)
-      setIntroResult(null) // AI 결과 초기화
-      const preset = legacyPresets[presetId]
-      if (preset) {
-        const result = buildLegacyIntro(preset, legacyBuilderData)
-        setLegacyResult(result)
+      setSelectedTemplateType(isNewTemplate ? 'new' : 'legacy')
+
+      if (isNewTemplate) {
+        // 새 super-editor 템플릿
+        const template = getTemplate(presetId as TemplateId)
+        if (template) {
+          // LayoutSchema의 첫 번째 screen을 intro로 사용
+          const screenFromLayout = template.layout.screens[0]
+          if (screenFromLayout) {
+            // Screen을 SectionScreen으로 변환
+            const introScreen: SectionScreen = {
+              id: screenFromLayout.id,
+              name: screenFromLayout.name,
+              type: screenFromLayout.type === 'intro' || screenFromLayout.type === 'content'
+                ? screenFromLayout.type
+                : 'content',
+              sectionType: (screenFromLayout.sectionType || 'intro') as SectionType,
+              root: screenFromLayout.root as unknown as SkeletonNode,
+            }
+
+            // tokens와 cssVariables 생성
+            const tokens = resolveTokens(template.style)
+            const cssVariables = generateCssVariables(tokens)
+
+            setIntroResult({
+              style: template.style,
+              tokens,
+              cssVariables,
+              introScreen,
+            })
+            setLegacyResult(null)
+          }
+        }
+      } else {
+        // 레거시 템플릿
+        setIntroResult(null)
+        const preset = legacyPresets[presetId]
+        if (preset) {
+          const result = buildLegacyIntro(preset, legacyBuilderData)
+          setLegacyResult(result)
+        }
       }
     },
     [legacyBuilderData]
@@ -318,14 +445,14 @@ export default function SuperEditorCreatePage() {
 
   // 레거시 템플릿 선택 시 폼 데이터 변경에 따라 결과 업데이트
   useEffect(() => {
-    if (selectedTemplateId) {
+    if (selectedTemplateId && selectedTemplateType === 'legacy') {
       const preset = legacyPresets[selectedTemplateId]
       if (preset) {
         const result = buildLegacyIntro(preset, legacyBuilderData)
         setLegacyResult(result)
       }
     }
-  }, [selectedTemplateId, legacyBuilderData])
+  }, [selectedTemplateId, selectedTemplateType, legacyBuilderData])
 
   // Auto scroll
   useEffect(() => {
@@ -412,6 +539,7 @@ export default function SuperEditorCreatePage() {
     setIntroResult(null)
     setLegacyResult(null)
     setSelectedTemplateId(null)
+    setSelectedTemplateType(null)
     if (mode === 'chat') {
       setMessages([
         INITIAL_MESSAGE,
@@ -624,7 +752,11 @@ export default function SuperEditorCreatePage() {
 
             {/* Template Mode */}
             {mode === 'template' && (
-              <TemplateGallery onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
+              <TemplateGallery
+                onSelect={handleTemplateSelect}
+                selectedId={selectedTemplateId}
+                selectedType={selectedTemplateType}
+              />
             )}
           </div>
 

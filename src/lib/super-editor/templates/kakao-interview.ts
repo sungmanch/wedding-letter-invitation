@@ -725,7 +725,7 @@ export const kakaoInterviewStyleSchema: StyleSchema = {
   meta: {
     id: 'kakao-interview-style-v1',
     name: '카카오톡 인터뷰 스타일',
-    mood: ['playful', 'modern', 'casual'],
+    mood: ['playful', 'modern', 'cozy'],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
@@ -873,18 +873,12 @@ export const kakaoInterviewStyleSchema: StyleSchema = {
       bubbleCouple: '#FEE500',
     },
     tags: {
-      groom: {
-        bg: 'rgba(59, 130, 246, 0.15)',
-        color: '#2563eb',
-      },
-      bride: {
-        bg: 'rgba(236, 72, 153, 0.15)',
-        color: '#db2777',
-      },
-      both: {
-        bg: 'rgba(168, 85, 247, 0.15)',
-        color: '#9333ea',
-      },
+      groomBg: 'rgba(59, 130, 246, 0.15)',
+      groomColor: '#2563eb',
+      brideBg: 'rgba(236, 72, 153, 0.15)',
+      brideColor: '#db2777',
+      bothBg: 'rgba(168, 85, 247, 0.15)',
+      bothColor: '#9333ea',
     },
   },
   components: {
