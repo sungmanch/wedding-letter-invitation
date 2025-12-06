@@ -2,7 +2,8 @@
 
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { MessageCircle, Images, Calendar, Users, Heart } from 'lucide-react'
+import { MessageCircle, Images, Calendar, Users, Heart, MessagesSquare } from 'lucide-react'
+import { ChatPreview } from '@/components/invitation/intros/IntroPreview'
 
 const GALLERY_IMAGES = [
   '/examples/images/example_wedding_image9.png',
@@ -12,6 +13,14 @@ const GALLERY_IMAGES = [
 ]
 
 const FEATURES = [
+  {
+    id: 'interview',
+    title: '인터렉티브한 구성',
+    desc: '단조로운 구성은 이제 그만, 대화형 인터뷰를 통해 우리만의 스토리를 공유해요',
+    icon: MessagesSquare,
+    span: 'col-span-2',
+    preview: 'interview',
+  },
   {
     id: 'gallery',
     title: '포토 갤러리',
@@ -127,6 +136,17 @@ export function S3FeaturesBento() {
                 <p className="text-sm text-[#F5E6D3]/50">{feature.desc}</p>
 
                 {/* Feature-specific preview */}
+                {feature.preview === 'interview' && isVisible && (
+                  <div className="mt-4 h-[200px] sm:h-[240px] rounded-xl overflow-hidden relative">
+                    <ChatPreview
+                      groomName="민수"
+                      brideName="수진"
+                      dateFormatted="2025.05.24"
+                      isCompact={true}
+                    />
+                  </div>
+                )}
+
                 {feature.preview === 'messages' && isVisible && (
                   <div className="mt-4 space-y-2">
                     <MessageBubble delay={300}>축하해요! 행복하세요 💕</MessageBubble>

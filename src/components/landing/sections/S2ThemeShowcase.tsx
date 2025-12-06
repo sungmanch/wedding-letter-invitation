@@ -30,14 +30,6 @@ const THEMES = [
     imageUrl: '/examples/images/example_wedding_image4.png',
   },
   {
-    id: 'chat',
-    name: 'Interview',
-    nameKo: '인터뷰',
-    description: '커플의 이야기를 담은 대화',
-    bgColor: '#2D2D2D',
-    imageUrl: '/examples/images/example_wedding_image5.png',
-  },
-  {
     id: 'gothic-romance',
     name: 'Gothic Romance',
     nameKo: '고딕 로맨스',
@@ -75,7 +67,9 @@ export function S2ThemeShowcase() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const currentTheme = THEMES[activeTheme]
+  // activeTheme이 배열 범위를 벗어나지 않도록 보장 (HMR 안정성)
+  const safeIndex = Math.min(activeTheme, THEMES.length - 1)
+  const currentTheme = THEMES[safeIndex]
   const fullTemplate = useMemo(() => getTemplateById(currentTheme.id), [currentTheme.id])
 
   if (!fullTemplate) return null
@@ -83,7 +77,7 @@ export function S2ThemeShowcase() {
   return (
     <section
       ref={containerRef}
-      className="relative h-[400vh] transition-colors duration-700"
+      className="relative h-[320vh] transition-colors duration-700"
       style={{ backgroundColor: currentTheme.bgColor }}
     >
       {/* Sticky Container */}
@@ -134,31 +128,6 @@ export function S2ThemeShowcase() {
             <p className="text-lg text-[#F5E6D3] font-medium">{currentTheme.nameKo}</p>
             <p className="text-sm text-[#F5E6D3]/60 mt-1">{currentTheme.description}</p>
           </div>
-        </div>
-
-        {/* Theme Indicator Dots */}
-        <div className="mt-8 flex gap-3">
-          {THEMES.map((theme, i) => (
-            <button
-              key={theme.id}
-              onClick={() => {
-                // Scroll to the appropriate position for each theme
-                if (containerRef.current) {
-                  const targetProgress = (i + 0.5) / THEMES.length
-                  const containerTop = containerRef.current.offsetTop
-                  const containerHeight = containerRef.current.offsetHeight - window.innerHeight
-                  const targetScroll = containerTop + containerHeight * targetProgress
-                  window.scrollTo({ top: targetScroll, behavior: 'smooth' })
-                }
-              }}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === activeTheme
-                  ? 'bg-[#C9A962] w-6'
-                  : 'bg-white/30 w-2 hover:bg-white/50'
-              }`}
-              aria-label={`${theme.nameKo} 테마로 이동`}
-            />
-          ))}
         </div>
 
         {/* Scroll Progress Bar */}

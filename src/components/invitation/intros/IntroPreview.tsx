@@ -74,12 +74,9 @@ export function IntroPreview({
 
     case 'chat':
       return <ChatPreview
-        colors={colors}
-        fonts={fonts}
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
-        userImageUrl={userImageUrl}
         isCompact={isCompact}
       />
 
@@ -554,7 +551,14 @@ function MagazinePreview({ colors, fonts, groomName, brideName, dateFormatted, u
 }
 
 // Chat Preview with Animation (Interview style - Full conversation)
-function ChatPreview({ groomName, brideName, dateFormatted, isCompact }: PreviewProps) {
+export interface ChatPreviewProps {
+  groomName: string
+  brideName: string
+  dateFormatted: string
+  isCompact?: boolean
+}
+
+export function ChatPreview({ groomName, brideName, dateFormatted, isCompact }: ChatPreviewProps) {
   const [visibleMessages, setVisibleMessages] = React.useState(0)
   const [showTyping, setShowTyping] = React.useState(false)
   const [typingPosition, setTypingPosition] = React.useState<'left' | 'right'>('left')
