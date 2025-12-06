@@ -486,11 +486,25 @@ export default function SuperEditorCreatePage() {
     setIsLoading(true)
 
     try {
-      // 새 템플릿의 경우 별도 처리 (TODO: 저장 로직 구현 필요)
+      // 새 super-editor 템플릿 저장
       if (newTemplateScreen && newTemplateStyle && selectedTemplateId) {
-        // TODO: 새 템플릿 저장 로직
-        alert('새 템플릿 저장 기능은 아직 구현 중입니다.')
-        setIsLoading(false)
+        const saveResponse = await saveInvitationAction({
+          newTemplateId: selectedTemplateId,
+          previewData: {
+            groomName: previewFormData.groomName,
+            brideName: previewFormData.brideName,
+            weddingDate: previewFormData.weddingDate,
+            weddingTime: previewFormData.weddingTime,
+            mainImage: previewFormData.mainImage,
+          },
+        })
+
+        if (!saveResponse.success || !saveResponse.data) {
+          throw new Error(saveResponse.error ?? '저장에 실패했습니다')
+        }
+
+        // 편집 페이지로 이동
+        router.push(`/se/${saveResponse.data.invitationId}/edit`)
         return
       }
 
