@@ -18,28 +18,22 @@ export type ThemeCategory =
 
 /** 인트로 타입 - 정적 템플릿용 컴포넌트 ID */
 export type IntroType =
-  | 'keynote'           // 애플 키노트
   | 'cinematic'         // 화양연화/필름
   | 'exhibition'        // 갤러리/전시회
   | 'magazine'          // 보그/에디토리얼
-  | 'vinyl'             // LP/레트로
   | 'chat'              // 메신저 대화
-  | 'glassmorphism'     // 3D 글래스모피즘
-  | 'passport'          // 여권/여행
-  | 'pixel'             // 8-Bit 픽셀
-  | 'typography'        // 키네틱 타이포
+  | 'gothic-romance'    // 고딕 로맨스
+  | 'old-money'         // Quiet Luxury
+  | 'monogram'          // 모노그램 크레스트
+  | 'jewel-velvet'      // 주얼 벨벳
   | 'custom'            // AI 동적 생성
 
 /** 본문 인터랙션 방식 */
 export type InteractionType =
   | 'scroll'            // 일반 스크롤
-  | 'sticky-scroll'     // 스티키 스크롤 (키노트 스타일)
   | 'swipe'             // 페이지 넘김 (매거진)
   | 'horizontal'        // 가로 스크롤 (전시회)
-  | '3d-space'          // 3D 공간 이동
   | 'chat-flow'         // 채팅 형식
-  | 'game-progress'     // 게임 진행
-  | 'track-list'        // 트랙리스트 (LP)
 
 /** 섹션 타입 */
 export type SectionType =
@@ -57,7 +51,6 @@ export type SectionType =
   | 'closing'
   | 'story'             // 스토리/타임라인
   | 'interview'         // 인터뷰 형식
-  | 'quest'             // 게임 퀘스트
   // 신규 섹션 (Salon de Letter 수준)
   | 'loading'           // 로딩 화면
   | 'quote'             // 글귀
@@ -89,15 +82,9 @@ export type AnimationType =
   | 'flip'
   | 'bounce'
   | 'parallax'
-  | 'sticky-reveal'     // 키노트 스타일
   | 'typewriter'
-  | 'glitch'
-  | 'neon-flicker'
   | 'film-grain'
   | 'page-turn'         // 책장 넘김
-  | 'pixel-appear'      // 픽셀 등장
-  | 'stamp'             // 도장 찍기
-  | 'kinetic-text'      // 키네틱 타이포
 
 /** 레이아웃 타입 */
 export type LayoutType =
@@ -164,9 +151,6 @@ export interface IntroConfig {
 
   /** 정적 인트로용 커스텀 설정 */
   settings?: {
-    // Keynote
-    stickyTexts?: string[]
-
     // Cinematic
     filmGrain?: boolean
     aspectRatio?: '16:9' | '4:3' | '21:9'
@@ -180,34 +164,9 @@ export interface IntroConfig {
     coverStyle?: 'vogue' | 'kinfolk' | 'mono'
     pageTransition?: 'slide' | 'flip' | 'fade'
 
-    // Vinyl
-    vinylColor?: string
-    albumArtStyle?: 'photo' | 'illustration' | 'typography'
-    era?: '70s' | '80s' | '90s' | 'y2k'
-
     // Chat
     platform?: 'kakao' | 'imessage' | 'custom'
     botPersonality?: 'formal' | 'friendly' | 'witty'
-
-    // Glassmorphism
-    glassOpacity?: number
-    gradientColors?: string[]
-    floatingObjects?: string[]
-
-    // Passport
-    passportColor?: 'navy' | 'burgundy' | 'green' | 'black'
-    stampStyle?: 'vintage' | 'modern' | 'minimal'
-    showMap?: boolean
-
-    // Pixel
-    pixelSize?: number
-    characterStyle?: 'rpg' | 'platformer' | 'adventure'
-    gameTitle?: string
-
-    // Typography
-    colorScheme?: 'bw' | 'neon' | 'pastel'
-    motionIntensity?: 'subtle' | 'moderate' | 'dynamic'
-    hiddenPhotos?: boolean
   }
 
   /** AI 동적 생성 인트로용 (type이 'custom'일 때) */
@@ -300,7 +259,7 @@ export interface SectionConfig {
     titleSize?: 'small' | 'medium' | 'large' | 'xlarge' | 'hero'
     titleAnimation?: AnimationType
     showDecorations?: boolean
-    decorationType?: 'floral' | 'minimal' | 'frame' | 'pixel' | 'stamp' | 'none'
+    decorationType?: 'floral' | 'minimal' | 'frame' | 'none'
     customTexts?: Record<string, string>
     // 테마별 특수 설정
     themeSpecific?: Record<string, unknown>
@@ -320,7 +279,7 @@ export interface EffectsConfig {
 
   particles?: {
     enabled: boolean
-    type: 'snow' | 'petals' | 'confetti' | 'sparkle' | 'hearts' | 'pixels' | 'stamps'
+    type: 'snow' | 'petals' | 'confetti' | 'sparkle' | 'hearts'
     density?: 'low' | 'medium' | 'high'
     color?: string
   }
@@ -453,15 +412,6 @@ export interface InvitationThemeData {
 
   // 테마별 특수 데이터
   themeData?: {
-    // Pixel 테마: 캐릭터 커스터마이징
-    characters?: {
-      groom: { style: string; color: string }
-      bride: { style: string; color: string }
-    }
-    // Passport 테마: 방문 장소들
-    locations?: { name: string; date: string; stamp?: string }[]
-    // Vinyl 테마: 트랙리스트
-    tracks?: { title: string; description: string }[]
     // Chat 테마: 대화 스크립트
     chatScript?: { sender: 'groom' | 'bride' | 'bot'; message: string; delay?: number }[]
     // Interview 테마: Q&A

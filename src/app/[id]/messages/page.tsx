@@ -8,7 +8,7 @@ import { ArrowLeft, Share2 } from 'lucide-react'
 import { MessagesClient } from './MessagesClient'
 
 export const metadata = {
-  title: '축하 메시지 - 모바일 청첩장',
+  title: '축하 메시지 - Maison de Letter',
   description: '받은 축하 메시지를 확인하세요',
 }
 
