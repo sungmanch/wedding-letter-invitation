@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import type { StyleSchema } from '../schema/style'
 
 interface StyleEditorProps {
   style: StyleSchema
   onStyleChange: (style: StyleSchema) => void
   className?: string
+  /** 실시간 업데이트 여부 (기본: true) */
+  liveUpdate?: boolean
+  /** 디바운스 시간 (ms, 기본: 300) */
+  debounceMs?: number
 }
 
 // 색상 프리셋
@@ -21,13 +25,20 @@ const COLOR_PRESETS = [
   { name: '버건디', primary: '#9f1239', accent: '#be123c', background: '#fff1f2' },
 ]
 
-export function StyleEditor({ style, onStyleChange, className = '' }: StyleEditorProps) {
+export function StyleEditor({
+  style,
+  onStyleChange,
+  className = '',
+  liveUpdate = true,
+  debounceMs = 300,
+}: StyleEditorProps) {
   const [activeSection, setActiveSection] = useState<'colors' | 'typography' | 'presets'>('presets')
   // 로컬 상태로 스타일 관리 (실시간 변경용)
   const [localStyle, setLocalStyle] = useState<StyleSchema>(style)
   const [isDirty, setIsDirty] = useState(false)
   const localStyleRef = useRef(localStyle)
   const isDirtyRef = useRef(isDirty)
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // ref 업데이트
   useEffect(() => {
@@ -40,9 +51,25 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
     setLocalStyle(style)
   }, [style])
 
-  // 컴포넌트 언마운트 시 변경사항 저장
+  // 디바운스된 스타일 업데이트
+  const debouncedStyleChange = useCallback((newStyle: StyleSchema) => {
+    if (!liveUpdate) return
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      onStyleChange(newStyle)
+    }, debounceMs)
+  }, [liveUpdate, debounceMs, onStyleChange])
+
+  // 컴포넌트 언마운트 시 변경사항 저장 (디바운스 취소 후 즉시 저장)
   useEffect(() => {
     return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
       if (isDirtyRef.current) {
         onStyleChange(localStyleRef.current)
       }
@@ -61,10 +88,12 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
       }
       current[parts[parts.length - 1]] = value
 
+      // 실시간 프리뷰 업데이트
+      debouncedStyleChange(newStyle)
       return newStyle
     })
     setIsDirty(true)
-  }, [])
+  }, [debouncedStyleChange])
 
   const applyPreset = useCallback((preset: typeof COLOR_PRESETS[0]) => {
     setLocalStyle(prev => {
@@ -87,10 +116,27 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
       // 배경 색상
       newStyle.theme.colors.background.default = preset.background
 
+      // 실시간 프리뷰 업데이트
+      debouncedStyleChange(newStyle)
       return newStyle
     })
     setIsDirty(true)
-  }, [])
+  }, [debouncedStyleChange])
+
+  // 타이포그래피 업데이트 헬퍼
+  const updateTypography = useCallback((
+    updater: (typography: StyleSchema['theme']['typography']) => void
+  ) => {
+    setLocalStyle(prev => {
+      const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
+      if (newStyle.theme.typography) {
+        updater(newStyle.theme.typography)
+      }
+      debouncedStyleChange(newStyle)
+      return newStyle
+    })
+    setIsDirty(true)
+  }, [debouncedStyleChange])
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
@@ -232,32 +278,18 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
               <h4 className="text-sm font-medium text-gray-700">제목 글꼴</h4>
               <FontSelector
                 value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
-                onChange={(family) => {
-                  setLocalStyle(prev => {
-                    const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-                    if (newStyle.theme.typography?.fonts?.heading) {
-                      newStyle.theme.typography.fonts.heading.family = family
-                    }
-                    return newStyle
-                  })
-                  setIsDirty(true)
-                }}
+                onChange={(family) => updateTypography((typo) => {
+                  if (typo?.fonts?.heading) typo.fonts.heading.family = family
+                })}
               />
             </div>
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-700">본문 글꼴</h4>
               <FontSelector
                 value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
-                onChange={(family) => {
-                  setLocalStyle(prev => {
-                    const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-                    if (newStyle.theme.typography?.fonts?.body) {
-                      newStyle.theme.typography.fonts.body.family = family
-                    }
-                    return newStyle
-                  })
-                  setIsDirty(true)
-                }}
+                onChange={(family) => updateTypography((typo) => {
+                  if (typo?.fonts?.body) typo.fonts.body.family = family
+                })}
               />
             </div>
 
@@ -267,16 +299,9 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
               <SizeSelector
                 value={localStyle.theme.typography?.sizes?.base ?? '1rem'}
                 options={FONT_SIZE_OPTIONS}
-                onChange={(size) => {
-                  setLocalStyle(prev => {
-                    const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-                    if (newStyle.theme.typography?.sizes) {
-                      newStyle.theme.typography.sizes.base = size
-                    }
-                    return newStyle
-                  })
-                  setIsDirty(true)
-                }}
+                onChange={(size) => updateTypography((typo) => {
+                  if (typo?.sizes) typo.sizes.base = size
+                })}
               />
             </div>
 
@@ -287,16 +312,9 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
                 {LETTER_SPACING_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => {
-                      setLocalStyle(prev => {
-                        const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-                        if (newStyle.theme.typography?.letterSpacing) {
-                          newStyle.theme.typography.letterSpacing.normal = opt.value
-                        }
-                        return newStyle
-                      })
-                      setIsDirty(true)
-                    }}
+                    onClick={() => updateTypography((typo) => {
+                      if (typo?.letterSpacing) typo.letterSpacing.normal = opt.value
+                    })}
                     className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
                       localStyle.theme.typography?.letterSpacing?.normal === opt.value
                         ? 'border-rose-500 bg-rose-50 text-rose-700'
@@ -316,16 +334,9 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
                 {LINE_HEIGHT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => {
-                      setLocalStyle(prev => {
-                        const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-                        if (newStyle.theme.typography?.lineHeights) {
-                          newStyle.theme.typography.lineHeights.normal = opt.value
-                        }
-                        return newStyle
-                      })
-                      setIsDirty(true)
-                    }}
+                    onClick={() => updateTypography((typo) => {
+                      if (typo?.lineHeights) typo.lineHeights.normal = opt.value
+                    })}
                     className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
                       localStyle.theme.typography?.lineHeights?.normal === opt.value
                         ? 'border-rose-500 bg-rose-50 text-rose-700'
@@ -345,16 +356,9 @@ export function StyleEditor({ style, onStyleChange, className = '' }: StyleEdito
                 {FONT_WEIGHT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => {
-                      setLocalStyle(prev => {
-                        const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-                        if (newStyle.theme.typography?.weights) {
-                          newStyle.theme.typography.weights.regular = opt.value
-                        }
-                        return newStyle
-                      })
-                      setIsDirty(true)
-                    }}
+                    onClick={() => updateTypography((typo) => {
+                      if (typo?.weights) typo.weights.regular = opt.value
+                    })}
                     className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                       localStyle.theme.typography?.weights?.regular === opt.value
                         ? 'border-rose-500 bg-rose-50 text-rose-700'
