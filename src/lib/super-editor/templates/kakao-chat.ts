@@ -845,7 +845,7 @@ export const kakaoEditorSchema: EditorSchema = {
   meta: {
     id: 'kakao-editor-v1',
     name: '카카오톡 청첩장 편집기',
-    description: '카카오톡 채팅 스타일의 모바일 청첩장을 만들어보세요',
+    description: '카카오톡 채팅 스타일의 청첩장을 만들어보세요',
     layoutId: 'kakao-chat-v1',
     styleId: 'kakao-style-v1',
     createdAt: '2024-01-01T00:00:00Z',

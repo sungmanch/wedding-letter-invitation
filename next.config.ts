@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Disable dev toolbar
+  devIndicators: false,
   // Server Actions body size limit (for image uploads)
   experimental: {
     serverActions: {

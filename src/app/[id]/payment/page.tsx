@@ -57,7 +57,7 @@ export default function PaymentPage() {
         {/* Product Info */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-charcoal mb-2">
-            모바일 청첩장
+            Maison de Letter
           </h1>
           <p className="text-gray-500">
             결제 후 청첩장을 친구들에게 공유할 수 있습니다

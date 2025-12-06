@@ -2,27 +2,21 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { SimpleImageUploader } from '@/components/invitation/SimpleImageUploader'
+import Image from 'next/image'
+import Link from 'next/link'
 import { TemplateGrid } from '@/components/invitation/TemplateGrid'
 import { CustomThemeDialog } from '@/components/invitation/CustomThemeDialog'
 import { GeneratingLoader } from '@/components/invitation/GeneratingLoader'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowRight, SkipForward } from 'lucide-react'
 import { getTemplatePreviews, type ThemePreview } from '@/lib/themes'
 import { createDraftInvitation } from '@/lib/actions/wedding'
 import type { DesignPreview } from '@/lib/actions/ai-design'
 
-type CreateStep = 'upload' | 'themes' | 'creating'
-
-interface ImageData {
-  url: string
-  base64: string
-}
+type CreateStep = 'themes' | 'creating'
 
 export function CreateFlow() {
   const router = useRouter()
-  const [step, setStep] = React.useState<CreateStep>('upload')
-  const [uploadedImage, setUploadedImage] = React.useState<ImageData | null>(null)
+  const [step, setStep] = React.useState<CreateStep>('themes')
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(null)
   const [customDialogOpen, setCustomDialogOpen] = React.useState(false)
   const [customPreviews, setCustomPreviews] = React.useState<DesignPreview[] | null>(null)
@@ -30,19 +24,6 @@ export function CreateFlow() {
 
   // Get static templates
   const templates = React.useMemo(() => getTemplatePreviews(), [])
-
-  const handleImageChange = (imageData: ImageData | null) => {
-    setUploadedImage(imageData)
-    setError(null)
-  }
-
-  const handleContinueToThemes = () => {
-    setStep('themes')
-  }
-
-  const handleSkipImage = () => {
-    setStep('themes')
-  }
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId)
@@ -69,7 +50,7 @@ export function CreateFlow() {
     try {
       const result = await createDraftInvitation(
         selectedTemplateId,
-        uploadedImage?.base64
+        undefined
       )
 
       if (result.success && result.data) {
@@ -84,91 +65,39 @@ export function CreateFlow() {
     }
   }
 
-  const handleBack = () => {
-    if (step === 'themes') {
-      setStep('upload')
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              {step !== 'upload' && step !== 'creating' && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="p-2 -ml-2 rounded-full hover:bg-gray-100"
-                >
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-              <h1 className="text-lg font-semibold text-gray-900">
-                청첩장 만들기
-              </h1>
-            </div>
-            <StepIndicator currentStep={step} />
-          </div>
+    <div className="min-h-screen bg-[#0A0806]">
+      {/* Header - 랜딩 페이지 스타일 */}
+      <header className="fixed top-0 z-50 w-full bg-transparent">
+        <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 mt-2 sm:mt-3">
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Maison de Letter"
+              width={300}
+              height={72}
+              className="brightness-110 w-[180px] sm:w-[240px] lg:w-[300px] h-auto"
+            />
+          </Link>
+          <StepIndicator currentStep={step} />
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {step === 'upload' && (
-          <div className="max-w-xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                웨딩 사진을 업로드하세요
-              </h2>
-              <p className="text-gray-600">
-                업로드한 사진을 바탕으로 어울리는 테마를 추천해드려요
-              </p>
-            </div>
-
-            <SimpleImageUploader
-              value={uploadedImage?.url || null}
-              onChange={handleImageChange}
-              className="mb-8"
-            />
-
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={handleContinueToThemes}
-                className="w-full bg-[#D4768A] hover:bg-[#C4667A] text-white h-12"
-              >
-                테마 선택하러 가기
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={handleSkipImage}
-                className="w-full text-gray-500"
-              >
-                <SkipForward className="w-4 h-4 mr-2" />
-                사진 없이 진행하기
-              </Button>
-            </div>
-          </div>
-        )}
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
         {step === 'themes' && (
           <div>
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-bold text-[#F5E6D3] mb-2">
                 테마를 선택하세요
               </h2>
-              <p className="text-gray-600">
-                {uploadedImage
-                  ? '업로드한 사진에 어울리는 테마를 선택하거나 직접 만들어보세요'
-                  : '마음에 드는 테마를 선택하거나 직접 만들어보세요'}
+              <p className="text-[#F5E6D3]/70">
+                마음에 드는 테마를 선택하거나 직접 만들어보세요
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg text-center">
+              <div className="mb-4 p-4 bg-red-900/30 text-red-300 rounded-lg text-center border border-red-500/30">
                 {error}
               </div>
             )}
@@ -178,16 +107,15 @@ export function CreateFlow() {
               selectedTemplateId={selectedTemplateId}
               onSelect={handleTemplateSelect}
               onCustomClick={() => setCustomDialogOpen(true)}
-              userImageUrl={uploadedImage?.url}
               className="mb-8"
             />
 
-            <div className="sticky bottom-0 bg-gray-50 py-4 border-t border-gray-200">
+            <div className="sticky bottom-0 bg-[#0A0806]/95 backdrop-blur-sm py-4 border-t border-white/10">
               <div className="max-w-xl mx-auto">
                 <Button
                   onClick={handleCreate}
                   disabled={!selectedTemplateId}
-                  className="w-full bg-[#D4768A] hover:bg-[#C4667A] text-white h-12 disabled:opacity-50"
+                  className="w-full bg-[#C9A962] hover:bg-[#B8A052] text-[#0A0806] h-12 disabled:opacity-50 font-semibold"
                 >
                   이 테마로 시작하기
                 </Button>
@@ -207,7 +135,6 @@ export function CreateFlow() {
       <CustomThemeDialog
         open={customDialogOpen}
         onOpenChange={setCustomDialogOpen}
-        imageBase64={uploadedImage?.base64}
         onGenerated={handleCustomGenerated}
       />
     </div>
@@ -217,7 +144,6 @@ export function CreateFlow() {
 // Step Indicator Component
 function StepIndicator({ currentStep }: { currentStep: CreateStep }) {
   const steps = [
-    { id: 'upload', label: '사진' },
     { id: 'themes', label: '테마' },
     { id: 'creating', label: '완료' },
   ]
@@ -231,8 +157,8 @@ function StepIndicator({ currentStep }: { currentStep: CreateStep }) {
           <div
             className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
               index <= currentIndex
-                ? 'bg-[#D4768A] text-white'
-                : 'bg-gray-200 text-gray-500'
+                ? 'bg-[#C9A962] text-[#0A0806]'
+                : 'bg-white/10 text-[#F5E6D3]/50'
             }`}
           >
             {index + 1}
@@ -240,7 +166,7 @@ function StepIndicator({ currentStep }: { currentStep: CreateStep }) {
           {index < steps.length - 1 && (
             <div
               className={`w-8 h-0.5 ${
-                index < currentIndex ? 'bg-[#D4768A]' : 'bg-gray-200'
+                index < currentIndex ? 'bg-[#C9A962]' : 'bg-white/10'
               }`}
             />
           )}

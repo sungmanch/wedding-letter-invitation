@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { CreateFlow } from './CreateFlow'
 
 export const metadata = {
-  title: '청첩장 만들기 - 모바일 청첩장',
-  description: '사진을 업로드하고 테마를 선택해 나만의 특별한 청첩장을 만들어보세요',
+  title: '청첩장 만들기 - Maison de Letter',
+  description: '테마를 선택해 나만의 특별한 청첩장을 만들어보세요',
 }
 
 export default async function CreateInvitationPage() {

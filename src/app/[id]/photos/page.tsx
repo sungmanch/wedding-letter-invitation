@@ -6,7 +6,7 @@ import { selectDesign } from '@/lib/actions/wedding'
 import { PhotoUploadClient } from './PhotoUploadClient'
 
 export const metadata = {
-  title: '사진 업로드 - 모바일 청첩장',
+  title: '사진 업로드 - Maison de Letter',
   description: '청첩장에 들어갈 사진을 업로드하세요',
 }
 

@@ -2,16 +2,10 @@
 
 import * as React from 'react'
 import type { IntroConfig, ColorPalette, FontSet } from '@/lib/themes/schema'
-import { KeynoteIntro } from './KeynoteIntro'
 import { CinematicIntro } from './CinematicIntro'
 import { ExhibitionIntro } from './ExhibitionIntro'
 import { MagazineIntro } from './MagazineIntro'
-import { VinylIntro } from './VinylIntro'
 import { ChatIntro } from './ChatIntro'
-import { GlassmorphismIntro } from './GlassmorphismIntro'
-import { PassportIntro } from './PassportIntro'
-import { PixelIntro } from './PixelIntro'
-import { TypographyIntro } from './TypographyIntro'
 import type { IntroProps } from './types'
 
 interface IntroRendererProps {
@@ -88,26 +82,20 @@ export function IntroRenderer({
 
   const renderIntro = () => {
     switch (intro.type) {
-      case 'keynote':
-        return <KeynoteIntro {...commonProps} />
       case 'cinematic':
         return <CinematicIntro {...commonProps} />
       case 'exhibition':
         return <ExhibitionIntro {...commonProps} />
       case 'magazine':
         return <MagazineIntro {...commonProps} />
-      case 'vinyl':
-        return <VinylIntro {...commonProps} />
       case 'chat':
         return <ChatIntro {...commonProps} />
-      case 'glassmorphism':
-        return <GlassmorphismIntro {...commonProps} />
-      case 'passport':
-        return <PassportIntro {...commonProps} />
-      case 'pixel':
-        return <PixelIntro {...commonProps} />
-      case 'typography':
-        return <TypographyIntro {...commonProps} />
+      case 'gothic-romance':
+      case 'old-money':
+      case 'monogram':
+      case 'jewel-velvet':
+        // These themes use CinematicIntro with different styling
+        return <CinematicIntro {...commonProps} />
       default:
         // For custom or unknown types, auto-complete
         handleComplete()
