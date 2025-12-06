@@ -486,10 +486,20 @@ export default function SuperEditorCreatePage() {
     setIsLoading(true)
 
     try {
-      // 새 super-editor 템플릿 저장
+      // 새 super-editor 템플릿: completeTemplateAction으로 기본 섹션 추가 후 저장
       if (newTemplateScreen && newTemplateStyle && selectedTemplateId) {
-        const saveResponse = await saveInvitationAction({
+        // Stage 2: 기본 섹션들로 전체 템플릿 완성
+        const completeResponse = await completeTemplateAction({
           newTemplateId: selectedTemplateId,
+        })
+
+        if (!completeResponse.success || !completeResponse.data) {
+          throw new Error(completeResponse.error ?? '템플릿 완성에 실패했습니다')
+        }
+
+        // Stage 3: DB 저장
+        const saveResponse = await saveInvitationAction({
+          generationResult: completeResponse.data,
           previewData: {
             groomName: previewFormData.groomName,
             brideName: previewFormData.brideName,

@@ -188,7 +188,10 @@ export async function generateIntroOnlyAction(
 // ============================================
 
 export interface CompleteTemplateInput {
-  introResult: IntroGenerationResult
+  // AI 생성 또는 레거시 템플릿의 intro 결과
+  introResult?: IntroGenerationResult
+  // 새 super-editor 템플릿 ID (introResult 대신 사용)
+  newTemplateId?: string
   enabledSections?: string[]
 }
 
@@ -199,14 +202,69 @@ export interface CompleteTemplateOutput {
 }
 
 /**
+ * 새 템플릿에서 IntroGenerationResult 생성
+ */
+function createIntroResultFromTemplate(templateId: string): IntroGenerationResult | undefined {
+  const { resolveTokens } = require('../tokens/resolver')
+  const { generateCssVariables } = require('../tokens/css-generator')
+
+  const template = getTemplate(templateId as TemplateId)
+  if (!template) return undefined
+
+  const style = template.style
+  const tokens = resolveTokens(style)
+  const cssVariables = generateCssVariables(tokens)
+
+  // 템플릿의 첫 번째 screen을 intro로 사용
+  const introScreenDef = template.layout.screens[0]
+  if (!introScreenDef) return undefined
+
+  // PrimitiveNode를 SkeletonNode로 변환 (구조가 동일하므로 타입 캐스팅)
+  const introScreen = {
+    id: introScreenDef.id,
+    name: template.layout.meta.name,
+    type: 'intro' as const,
+    sectionType: 'intro' as const,
+    root: introScreenDef.root as unknown as import('../skeletons/types').SkeletonNode,
+  }
+
+  return {
+    style,
+    tokens,
+    cssVariables,
+    introScreen,
+  }
+}
+
+/**
  * Stage 2: Intro 결과 + 기본 섹션들로 전체 템플릿 완성
  */
 export async function completeTemplateAction(
   input: CompleteTemplateInput
 ): Promise<CompleteTemplateOutput> {
   try {
+    let introResult = input.introResult
+
+    // 새 템플릿 ID가 있으면 해당 템플릿에서 IntroGenerationResult 생성
+    if (!introResult && input.newTemplateId) {
+      introResult = createIntroResultFromTemplate(input.newTemplateId)
+      if (!introResult) {
+        return {
+          success: false,
+          error: `템플릿 '${input.newTemplateId}'을(를) 찾을 수 없습니다`,
+        }
+      }
+    }
+
+    if (!introResult) {
+      return {
+        success: false,
+        error: 'introResult 또는 newTemplateId가 필요합니다',
+      }
+    }
+
     const result = completeTemplateWithDefaults(
-      input.introResult,
+      introResult,
       input.enabledSections as import('../skeletons/types').SectionType[] | undefined
     )
 
