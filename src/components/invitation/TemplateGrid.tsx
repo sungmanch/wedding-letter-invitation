@@ -75,29 +75,30 @@ function CustomThemeButton({ onClick, className }: CustomThemeButtonProps) {
       onClick={onClick}
       className={cn(
         'relative flex flex-col rounded-2xl overflow-hidden transition-all',
-        'border-2 border-dashed border-gray-300 hover:border-[#D4768A] hover:shadow-lg',
-        'focus:outline-none focus:ring-2 focus:ring-[#D4768A]/50',
+        'border-2 border-dashed border-white/20 hover:border-[#C9A962]/50 hover:shadow-lg hover:shadow-[#C9A962]/10',
+        'focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50',
+        'bg-white/5 backdrop-blur-sm',
         'group',
         className
       )}
     >
       {/* Button Content */}
-      <div className="aspect-[3/4] bg-gray-50 group-hover:bg-pink-50 flex flex-col items-center justify-center gap-3 transition-colors">
-        <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#D4768A] flex items-center justify-center transition-colors">
-          <Plus className="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" />
+      <div className="aspect-[3/4] bg-white/5 group-hover:bg-[#C9A962]/10 flex flex-col items-center justify-center gap-3 transition-colors">
+        <div className="w-12 h-12 rounded-full bg-white/10 group-hover:bg-[#C9A962] flex items-center justify-center transition-colors">
+          <Plus className="w-6 h-6 text-[#F5E6D3]/60 group-hover:text-[#0A0806] transition-colors" />
         </div>
-        <div className="text-sm font-medium text-gray-600 group-hover:text-[#D4768A] transition-colors">
+        <div className="text-sm font-medium text-[#F5E6D3]/80 group-hover:text-[#C9A962] transition-colors">
           커스텀 테마
         </div>
-        <div className="text-xs text-gray-400 text-center px-2">
+        <div className="text-xs text-[#F5E6D3]/50 text-center px-2">
           AI로 나만의 테마 생성
         </div>
       </div>
 
       {/* Bottom Info */}
-      <div className="p-3 bg-white border-t border-gray-100">
-        <div className="text-sm font-medium text-gray-700">Custom Theme</div>
-        <div className="text-xs text-gray-500 mt-1">
+      <div className="p-3 bg-white/5 border-t border-white/5">
+        <div className="text-sm font-medium text-[#F5E6D3]">Custom Theme</div>
+        <div className="text-xs text-[#F5E6D3]/50 mt-1">
           스타일을 설명해주세요
         </div>
       </div>

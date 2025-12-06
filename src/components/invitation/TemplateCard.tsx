@@ -31,10 +31,11 @@ export function TemplateCard({
       onClick={onSelect}
       className={cn(
         'relative flex flex-col rounded-2xl overflow-hidden transition-all',
-        'border-2 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#D4768A]/50',
+        'border-2 hover:shadow-lg hover:shadow-[#C9A962]/10 focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50',
+        'bg-white/5 backdrop-blur-sm',
         isSelected
-          ? 'border-[#D4768A] shadow-lg ring-2 ring-[#D4768A]/20'
-          : 'border-gray-200 hover:border-gray-300',
+          ? 'border-[#C9A962] shadow-lg ring-2 ring-[#C9A962]/20'
+          : 'border-white/10 hover:border-[#C9A962]/30',
         className
       )}
     >
@@ -110,17 +111,17 @@ export function TemplateCard({
       </div>
 
       {/* Template Info */}
-      <div className="p-3 bg-white border-t border-gray-100">
-        <div className="text-sm font-medium text-gray-900">{template.name}</div>
-        <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+      <div className="p-3 bg-white/5 border-t border-white/5">
+        <div className="text-sm font-medium text-[#F5E6D3]">{template.name}</div>
+        <div className="text-xs text-[#F5E6D3]/50 mt-1 line-clamp-2">
           {template.description}
         </div>
       </div>
 
       {/* Selected Indicator */}
       {isSelected && (
-        <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-[#D4768A] flex items-center justify-center z-50">
-          <Check className="h-4 w-4 text-white" />
+        <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-[#C9A962] flex items-center justify-center z-50">
+          <Check className="h-4 w-4 text-[#0A0806]" />
         </div>
       )}
     </button>
@@ -132,14 +133,14 @@ export function TemplateCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'flex flex-col rounded-2xl overflow-hidden border-2 border-gray-200',
+        'flex flex-col rounded-2xl overflow-hidden border-2 border-white/10 bg-white/5',
         className
       )}
     >
-      <div className="aspect-[3/4] bg-gray-100 animate-pulse" />
-      <div className="p-3 bg-white border-t border-gray-100">
-        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-        <div className="h-3 bg-gray-100 rounded animate-pulse w-full mt-2" />
+      <div className="aspect-[3/4] bg-white/10 animate-pulse" />
+      <div className="p-3 bg-white/5 border-t border-white/5">
+        <div className="h-4 bg-white/10 rounded animate-pulse w-2/3" />
+        <div className="h-3 bg-white/5 rounded animate-pulse w-full mt-2" />
       </div>
     </div>
   )

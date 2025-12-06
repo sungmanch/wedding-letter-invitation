@@ -1,4 +1,4 @@
-# 모바일 청첩장 - Product Requirements Document
+# Maison de Letter - Product Requirements Document
 
 **Author:** BMad
 **Date:** 2025-12-05

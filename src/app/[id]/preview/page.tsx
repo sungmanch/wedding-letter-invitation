@@ -7,7 +7,7 @@ import { Button } from '@/components/ui'
 import { ArrowLeft, Edit, CreditCard } from 'lucide-react'
 
 export const metadata = {
-  title: '청첩장 미리보기 - 모바일 청첩장',
+  title: '청첩장 미리보기 - Maison de Letter',
   description: '완성된 청첩장을 미리보기합니다',
 }
 

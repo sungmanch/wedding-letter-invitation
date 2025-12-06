@@ -7,7 +7,7 @@ import { Button } from '@/components/ui'
 import type { Invitation } from '@/lib/db/invitation-schema'
 
 export const metadata = {
-  title: '내 청첩장 - 모바일 청첩장',
+  title: '내 청첩장 - Maison de Letter',
   description: '내가 만든 청첩장 목록',
 }
 

@@ -4,7 +4,7 @@ import { getInvitation } from '@/lib/actions/wedding'
 import { ShareClient } from './ShareClient'
 
 export const metadata = {
-  title: '청첩장 공유 - 모바일 청첩장',
+  title: '청첩장 공유 - Maison de Letter',
   description: '청첩장을 카카오톡으로 공유하세요',
 }
 

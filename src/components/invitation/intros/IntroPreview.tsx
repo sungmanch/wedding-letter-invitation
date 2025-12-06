@@ -13,6 +13,7 @@ interface IntroPreviewProps {
   weddingDate: string
   venueName?: string
   userImageUrl?: string
+  isCompact?: boolean
 }
 
 /**
@@ -28,6 +29,7 @@ export function IntroPreview({
   weddingDate,
   venueName,
   userImageUrl,
+  isCompact,
 }: IntroPreviewProps) {
   // Format date for display
   const formatDate = (dateStr: string) => {
@@ -87,6 +89,7 @@ export function IntroPreview({
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
+        userImageUrl={userImageUrl}
       />
 
     case 'chat':
@@ -96,6 +99,8 @@ export function IntroPreview({
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
+        userImageUrl={userImageUrl}
+        isCompact={isCompact}
       />
 
     case 'glassmorphism':
@@ -159,6 +164,7 @@ interface PreviewProps {
   venueName?: string
   userImageUrl?: string
   intro?: IntroConfig
+  isCompact?: boolean
 }
 
 // Cinematic (화양연화) Preview
@@ -370,26 +376,79 @@ function KeynotePreview({ colors, fonts, groomName, brideName, dateFormatted, in
   )
 }
 
-// Exhibition Preview
+// Exhibition Preview - Gallery style like HTML template
 function ExhibitionPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-      <div className="w-4/5 aspect-[3/4] border-4 flex items-center justify-center" style={{ borderColor: colors.text }}>
-        {userImageUrl ? (
-          <Image src={userImageUrl} alt="Preview" fill className="object-cover" />
-        ) : (
-          <div className="text-center p-2">
-            <p className="text-[6px] tracking-[0.3em] uppercase mb-2" style={{ color: colors.textMuted }}>
-              Wedding Exhibition
-            </p>
-            <h1 className="text-sm font-medium" style={{ color: colors.text, fontFamily: fonts.title.family }}>
-              {groomName} & {brideName}
-            </h1>
-            <p className="text-[7px] mt-2" style={{ color: colors.textMuted }}>
-              {dateFormatted}
-            </p>
-          </div>
-        )}
+    <div className="absolute inset-0 bg-gray-900">
+      {/* Gallery Background */}
+      <div className="absolute inset-0">
+        <Image
+          src="/examples/images/gallery.png"
+          alt="Gallery Background"
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      {/* Main Photo Frame - centered */}
+      <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: '15%' }}>
+        <div
+          className="relative overflow-hidden"
+          style={{
+            width: '55%',
+            aspectRatio: '3/4',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.4), 0 15px 30px rgba(0,0,0,0.3), 0 5px 15px rgba(0,0,0,0.25)',
+          }}
+        >
+          {userImageUrl ? (
+            <Image
+              src={userImageUrl}
+              alt="Couple Photo"
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400 text-xs">Photo</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom gradient overlay */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.15) 70%, rgba(0,0,0,0.4) 100%)',
+        }}
+      />
+
+      {/* Wedding Info - Museum Placard Style */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+        <div
+          className="px-4 py-3 text-center rounded-sm"
+          style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          }}
+        >
+          {/* Names */}
+          <h1
+            className="text-sm tracking-wide font-light italic"
+            style={{ color: '#1f2937', fontFamily: fonts.title.family }}
+          >
+            {groomName} <span className="text-gray-400 mx-0.5">&</span> {brideName}
+          </h1>
+
+          {/* Divider */}
+          <div className="w-6 h-px bg-gray-300 mx-auto my-1.5" />
+
+          {/* Date */}
+          <p className="text-gray-700 text-[7px] tracking-[0.15em] uppercase font-medium">
+            {dateFormatted}
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -429,27 +488,59 @@ function MagazinePreview({ colors, fonts, groomName, brideName, dateFormatted, u
 }
 
 // Vinyl Preview
-function VinylPreview({ colors, fonts, groomName, brideName, dateFormatted }: PreviewProps) {
+function VinylPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   return (
     <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: colors.background }}>
       {/* Vinyl Record */}
       <div
-        className="w-3/4 aspect-square rounded-full relative"
+        className="w-3/4 aspect-square rounded-full relative overflow-hidden"
         style={{ backgroundColor: '#1a1a1a' }}
       >
+        {/* User Image as vinyl texture */}
+        {userImageUrl && (
+          <div className="absolute inset-0 rounded-full overflow-hidden">
+            <Image
+              src={userImageUrl}
+              alt="Vinyl"
+              fill
+              className="object-cover opacity-30"
+              style={{ filter: 'grayscale(50%)' }}
+            />
+          </div>
+        )}
+
         {/* Grooves */}
         <div className="absolute inset-2 rounded-full border border-gray-700" />
         <div className="absolute inset-4 rounded-full border border-gray-700" />
         <div className="absolute inset-6 rounded-full border border-gray-700" />
 
-        {/* Center Label */}
+        {/* Center Label with user image */}
         <div
-          className="absolute inset-0 m-auto w-1/3 aspect-square rounded-full flex flex-col items-center justify-center"
+          className="absolute inset-0 m-auto w-1/3 aspect-square rounded-full flex flex-col items-center justify-center overflow-hidden"
           style={{ backgroundColor: colors.accent }}
         >
-          <p className="text-[6px] font-bold text-white">{groomName}</p>
-          <p className="text-[5px] text-white/70">&</p>
-          <p className="text-[6px] font-bold text-white">{brideName}</p>
+          {userImageUrl ? (
+            <>
+              <Image
+                src={userImageUrl}
+                alt="Center"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="relative z-10 text-center">
+                <p className="text-[6px] font-bold text-white">{groomName}</p>
+                <p className="text-[5px] text-white/70">&</p>
+                <p className="text-[6px] font-bold text-white">{brideName}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-[6px] font-bold text-white">{groomName}</p>
+              <p className="text-[5px] text-white/70">&</p>
+              <p className="text-[6px] font-bold text-white">{brideName}</p>
+            </>
+          )}
         </div>
       </div>
 
@@ -464,45 +555,173 @@ function VinylPreview({ colors, fonts, groomName, brideName, dateFormatted }: Pr
   )
 }
 
-// Chat Preview
-function ChatPreview({ colors, fonts, groomName, brideName, dateFormatted }: PreviewProps) {
+// Chat Preview with Animation (Interview style - Full conversation)
+function ChatPreview({ groomName, brideName, dateFormatted, isCompact }: PreviewProps) {
+  const [visibleMessages, setVisibleMessages] = React.useState(0)
+  const [showTyping, setShowTyping] = React.useState(false)
+  const [typingPosition, setTypingPosition] = React.useState<'left' | 'right'>('left')
+
+  // 크기 클래스 조건부 설정
+  const bubblePadding = isCompact ? 'px-2 py-1' : 'px-3.5 py-2'
+  const textSize = isCompact ? 'text-[10px]' : 'text-sm'
+  const tagSize = isCompact ? 'text-[7px]' : 'text-[10px]'
+  const dotSize = isCompact ? 'w-1.5 h-1.5' : 'w-2 h-2'
+  const containerGap = isCompact ? 'gap-1' : 'gap-2'
+  const dateBadgeSize = isCompact ? 'text-[9px] px-2 py-0.5' : 'text-xs px-3 py-1'
+
+  // 전체 대화 메시지 (HTML 템플릿 기반)
+  const messages: { type: 'interviewer' | 'groom' | 'bride' | 'both'; text: string }[] = [
+    { type: 'interviewer', text: '어떻게 만나셨어요?' },
+    { type: 'groom', text: '친구 소개로 만났어요 🌸' },
+    { type: 'bride', text: '첫인상이 차가웠는데 알고보니 긴장한 거였대요 ㅋㅋ' },
+    { type: 'groom', text: '너무 예뻐서 말이 안 나왔어요 😅' },
+    { type: 'interviewer', text: '기억에 남는 순간은?' },
+    { type: 'bride', text: '제주도 첫 여행! 비가 엄청 왔는데...' },
+    { type: 'groom', text: '호텔에서 라면 끓여먹었어요 🍜' },
+    { type: 'both', text: '비 오면 그때 생각나요 ☔' },
+    { type: 'interviewer', text: '프로포즈는요? 💍' },
+    { type: 'groom', text: '크리스마스에 준비했어요...' },
+    { type: 'groom', text: '"나랑 결혼해줄래?" 💍' },
+    { type: 'bride', text: '당연히 "응!!!" 🥹💕' },
+    { type: 'both', text: '저희 결혼합니다! 🎊' },
+  ]
+
+  const totalMessages = messages.length
+
+  // 메시지 타입에 따른 위치 결정
+  const getPosition = (type: string): 'left' | 'right' => {
+    return type === 'interviewer' ? 'left' : 'right'
+  }
+
+  React.useEffect(() => {
+    const showNextMessage = () => {
+      if (visibleMessages < totalMessages) {
+        setTypingPosition(getPosition(messages[visibleMessages].type))
+        setShowTyping(true)
+        setTimeout(() => {
+          setShowTyping(false)
+          setVisibleMessages(prev => prev + 1)
+        }, 400)
+      }
+    }
+
+    if (visibleMessages === 0) {
+      setTypingPosition('left')
+      setShowTyping(true)
+      const timer = setTimeout(() => {
+        setShowTyping(false)
+        setVisibleMessages(1)
+      }, 400)
+      return () => clearTimeout(timer)
+    }
+
+    if (visibleMessages < totalMessages) {
+      const timer = setTimeout(showNextMessage, 600)
+      return () => clearTimeout(timer)
+    }
+
+    const resetTimer = setTimeout(() => setVisibleMessages(0), 1500)
+    return () => clearTimeout(resetTimer)
+  }, [visibleMessages, totalMessages])
+
+  // 태그 색상
+  const getTagStyle = (type: string) => {
+    switch (type) {
+      case 'groom': return 'bg-blue-500/20 text-blue-600'
+      case 'bride': return 'bg-pink-500/20 text-pink-600'
+      case 'both': return 'bg-purple-500/20 text-purple-600'
+      default: return ''
+    }
+  }
+
+  const getTagName = (type: string) => {
+    switch (type) {
+      case 'groom': return groomName
+      case 'bride': return brideName
+      case 'both': return '함께'
+      default: return ''
+    }
+  }
+
+  // 보이는 메시지만 필터링 (최근 7개만 표시)
+  const visibleMessagesList = messages.slice(0, visibleMessages).slice(-7)
+
   return (
-    <div className="absolute inset-0 flex flex-col" style={{ backgroundColor: colors.background }}>
-      {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: `${colors.text}10` }}>
-        <div className="flex -space-x-1">
-          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[6px] text-white" style={{ backgroundColor: colors.accent }}>
-            {groomName[0]}
+    <div className="absolute inset-0 flex flex-col" style={{ background: 'linear-gradient(180deg, #9BBBD4 0%, #7BA3C7 100%)' }}>
+      {/* Chat bubbles - 헤더 제거, 전체 파란 배경 */}
+      <div className={`flex-1 flex flex-col justify-end p-3 ${containerGap} overflow-hidden`}>
+        {visibleMessagesList.map((msg, idx) => (
+          <div
+            key={`${visibleMessages}-${idx}`}
+            className={`flex animate-slideIn ${
+              msg.type === 'interviewer' ? 'justify-start' : 'justify-end'
+            }`}
+          >
+            {msg.type === 'interviewer' ? (
+              <div className={`${bubblePadding} ${textSize} bg-white text-gray-800 shadow-sm max-w-[85%]`} style={{ borderRadius: '4px 16px 16px 16px' }}>
+                {msg.text}
+              </div>
+            ) : (
+              <div className="flex flex-col items-end max-w-[85%]">
+                <span className={`${tagSize} px-2 py-0.5 rounded-full mb-1 font-medium ${getTagStyle(msg.type)}`}>
+                  {getTagName(msg.type)}
+                </span>
+                <div className={`${bubblePadding} ${textSize} bg-[#FEE500] text-[#3C1E1E] shadow-sm`} style={{ borderRadius: '16px 4px 16px 16px' }}>
+                  {msg.text}
+                </div>
+              </div>
+            )}
           </div>
-          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[6px] border border-white" style={{ backgroundColor: colors.primary, color: colors.secondary }}>
-            {brideName[0]}
+        ))}
+
+        {/* Typing indicator */}
+        {showTyping && (
+          <div className={`flex ${typingPosition === 'left' ? 'justify-start' : 'justify-end'}`}>
+            <div
+              className={`${bubblePadding} flex gap-1 shadow-sm`}
+              style={{
+                backgroundColor: typingPosition === 'left' ? '#FFFFFF' : '#FEE500',
+                borderRadius: typingPosition === 'left' ? '4px 16px 16px 16px' : '16px 4px 16px 16px'
+              }}
+            >
+              <span className={`${dotSize} rounded-full animate-bounce`} style={{ backgroundColor: typingPosition === 'left' ? '#9CA3AF' : '#3C1E1E', animationDelay: '0ms' }} />
+              <span className={`${dotSize} rounded-full animate-bounce`} style={{ backgroundColor: typingPosition === 'left' ? '#9CA3AF' : '#3C1E1E', animationDelay: '150ms' }} />
+              <span className={`${dotSize} rounded-full animate-bounce`} style={{ backgroundColor: typingPosition === 'left' ? '#9CA3AF' : '#3C1E1E', animationDelay: '300ms' }} />
+            </div>
           </div>
-        </div>
-        <p className="text-[8px] font-medium" style={{ color: colors.text }}>
-          {groomName} & {brideName}
-        </p>
+        )}
       </div>
 
-      {/* Chat bubbles */}
-      <div className="flex-1 flex flex-col justify-end p-2 gap-1">
-        <div className="flex justify-end">
-          <div className="px-2 py-1 rounded-xl text-[7px]" style={{ backgroundColor: colors.primary, color: colors.secondary }}>
-            우리 결혼해요! 💍
-          </div>
-        </div>
-        <div className="flex">
-          <div className="px-2 py-1 rounded-xl text-[7px]" style={{ backgroundColor: colors.surface, color: colors.text }}>
-            네! 좋아요 ❤️
-          </div>
-        </div>
-      </div>
-
-      {/* Date */}
-      <div className="px-3 py-2 text-center">
-        <span className="text-[6px] px-2 py-0.5 rounded-full" style={{ backgroundColor: `${colors.text}10`, color: colors.textMuted }}>
+      {/* Date badge */}
+      <div className="px-3 py-2 flex justify-center flex-shrink-0">
+        <span className={`${dateBadgeSize} rounded-full bg-white/90 text-gray-600 shadow-sm font-medium`}>
           {dateFormatted}
         </span>
       </div>
+
+      {/* Animation keyframes */}
+      <style jsx>{`
+        @keyframes bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-4px); }
+        }
+        .animate-bounce {
+          animation: bounce 0.6s infinite;
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   )
 }

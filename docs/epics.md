@@ -1,4 +1,4 @@
-# 모바일 청첩장 - Epic Breakdown v2.0
+# Maison de Letter - Epic Breakdown v2.0
 
 **Author:** BMad
 **Date:** 2025-12-05

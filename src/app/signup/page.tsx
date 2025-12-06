@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 import { Button, Input, Card } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
@@ -264,12 +265,11 @@ export default function SignupPage() {
         <div className="mx-auto max-w-sm">
           {/* Logo */}
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blush-pink/20">
-              <span className="text-3xl">💌</span>
+            <div className="mx-auto mb-4">
+              <Image src="/logo.png" alt="Maison de Letter" width={180} height={40} className="mx-auto h-10 w-auto" />
             </div>
-            <h2 className="text-xl font-bold text-charcoal">청모장 가입하기</h2>
             <p className="mt-1 text-sm text-charcoal/60">
-              가입하고 청모장을 계속 관리하세요
+              가입하고 청첩장을 계속 관리하세요
             </p>
           </div>
 

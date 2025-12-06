@@ -1,4 +1,4 @@
-# 모바일 청첩장 - Architecture Document
+# Maison de Letter - Architecture Document
 
 **Author:** BMad
 **Date:** 2025-12-05

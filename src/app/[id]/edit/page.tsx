@@ -4,7 +4,7 @@ import { getInvitation } from '@/lib/actions/wedding'
 import { EditClient } from './EditClient'
 
 export const metadata = {
-  title: '청첩장 편집 - 모바일 청첩장',
+  title: '청첩장 편집 - Maison de Letter',
   description: '청첩장 정보를 편집합니다',
 }
 

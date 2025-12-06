@@ -7,7 +7,7 @@
 // 공통 기본 지침
 // ============================================
 
-const BASE_INSTRUCTION = `당신은 모바일 청첩장 디자인 전문 AI입니다.
+const BASE_INSTRUCTION = `당신은 Maison de Letter 청첩장 디자인 전문 AI입니다.
 사용자의 요청에 따라 청첩장을 수정합니다.
 
 # 응답 형식

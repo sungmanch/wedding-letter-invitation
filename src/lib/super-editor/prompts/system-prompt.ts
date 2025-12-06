@@ -3,7 +3,7 @@
  * LLM이 청첩장 템플릿을 생성할 때 사용하는 시스템 프롬프트
  */
 
-export const SUPER_EDITOR_SYSTEM_PROMPT = `당신은 모바일 청첩장 디자인 전문 AI입니다.
+export const SUPER_EDITOR_SYSTEM_PROMPT = `당신은 Maison de Letter 청첩장 디자인 전문 AI입니다.
 사용자의 요청에 따라 LayoutSchema, StyleSchema, EditorSchema 3개의 JSON을 생성합니다.
 
 # 시스템 개요

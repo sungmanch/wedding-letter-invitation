@@ -1,4 +1,4 @@
-# 모바일 청첩장 UX Design Specification
+# Maison de Letter UX Design Specification
 
 **Author:** BMad
 **Date:** 2025-12-05
