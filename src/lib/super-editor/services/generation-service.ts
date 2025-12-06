@@ -9,6 +9,7 @@ import type { SemanticDesignTokens } from '../tokens/schema'
 import type { SectionType, SectionFillResult, SectionScreen } from '../skeletons/types'
 import type { FillerResponse } from '../prompts/filler-prompt'
 import type { DesignPatterns } from '../utils/design-pattern-extractor'
+import type { VariableDeclaration, VariablesSchema } from '../schema/variables'
 
 import { resolveTokens } from '../tokens/resolver'
 import { generateCssVariables } from '../tokens/css-generator'
@@ -32,6 +33,8 @@ export interface GenerationResult {
   cssVariables: string
   layout: LayoutSchema
   screens: SectionScreen[]
+  /** 변수 선언 (커스텀 변수 포함) */
+  variables?: VariablesSchema
 }
 
 // ============================================
@@ -160,6 +163,8 @@ export async function generateFullTemplate(
     cssVariables,
     layout,
     screens: allScreens,
+    // TODO: AI 응답에서 customVariables 수집 시 채우기
+    variables: { declarations: [] },
   }
 }
 

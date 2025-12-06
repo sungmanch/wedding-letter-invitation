@@ -4,29 +4,62 @@ import { useMemo } from 'react'
 import { useSuperEditor } from '../context'
 import { SectionRenderer } from './fields/FieldRenderer'
 import { generateEditorSections } from '../utils/dynamic-editor'
-import type { SectionType } from '../skeletons/types'
+import { generateEditorSectionsFromLayout } from '../utils/editor-generator'
+import type { SectionType, SectionScreen } from '../skeletons/types'
 import type { EditorSection } from '../schema/editor'
+import type { LayoutSchema } from '../schema/layout'
+import type { VariableDeclaration } from '../schema/variables'
 
 interface EditorPanelProps {
   className?: string
-  /** 활성화된 섹션 목록 - 제공되면 동적으로 에디터 필드 생성 */
+  /** 활성화된 섹션 목록 - 제공되면 동적으로 에디터 필드 생성 (레거시) */
   enabledSections?: SectionType[]
   /** 커스텀 섹션 (동적 생성 대신 직접 제공) */
   customSections?: EditorSection[]
+  /** Layout 스키마 - 제공되면 변수 기반 동적 에디터 생성 */
+  layout?: LayoutSchema
+  /** 섹션 스크린 배열 - layout 대신 사용 가능 */
+  screens?: SectionScreen[]
+  /** AI/Skeleton이 제공한 변수 선언 */
+  declarations?: VariableDeclaration[]
 }
 
-export function EditorPanel({ className = '', enabledSections, customSections }: EditorPanelProps) {
+export function EditorPanel({
+  className = '',
+  enabledSections,
+  customSections,
+  layout,
+  screens,
+  declarations,
+}: EditorPanelProps) {
   const { state } = useSuperEditor()
   const { editor, loading, error } = state
 
-  // 동적으로 에디터 섹션 생성 (enabledSections가 제공된 경우)
+  // 동적으로 에디터 섹션 생성
+  // 우선순위: customSections > layout/screens 기반 > enabledSections(레거시)
   const dynamicSections = useMemo(() => {
+    // 1. 커스텀 섹션 직접 제공
     if (customSections) return customSections
+
+    // 2. 새 방식: Layout/Screens에서 변수 추출하여 동적 생성
+    if (layout || screens) {
+      return generateEditorSectionsFromLayout({
+        layout,
+        screens,
+        declarations,
+        fallbackToStandard: true,
+        inferUnknown: true,
+        groupBySection: true,
+      })
+    }
+
+    // 3. 레거시 방식: enabledSections 기반 정적 매핑
     if (enabledSections && enabledSections.length > 0) {
       return generateEditorSections(enabledSections)
     }
+
     return null
-  }, [enabledSections, customSections])
+  }, [enabledSections, customSections, layout, screens, declarations])
 
   // 사용할 섹션 결정: 동적 > editor.sections
   const sections = dynamicSections || editor?.sections || []

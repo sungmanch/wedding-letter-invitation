@@ -1,6 +1,14 @@
 /**
- * 동적 에디터 필드 생성
- * 모든 데이터 필드를 체계적으로 정의
+ * 동적 에디터 필드 생성 (레거시)
+ *
+ * @deprecated
+ * 이 모듈은 레거시 호환성을 위해 유지됩니다.
+ * 새 코드에서는 `utils/editor-generator.ts`의 `generateEditorSectionsFromLayout`을 사용하세요.
+ *
+ * 마이그레이션 가이드:
+ * - generateEditorSections(enabledSections) → generateEditorSectionsFromLayout({ layout })
+ * - 기존: 섹션 타입 기반 정적 매핑
+ * - 신규: Layout에서 변수 추출 → 자동 에디터 생성
  */
 
 import type { EditorSection, EditorField } from '../schema/editor'
@@ -537,6 +545,7 @@ const SECTION_TYPE_TO_EDITOR_SECTIONS: Record<SectionType, string[]> = {
 
 /**
  * 활성화된 섹션들에 필요한 에디터 섹션 생성
+ * @deprecated `editor-generator.ts`의 `generateEditorSectionsFromLayout`을 사용하세요.
  */
 export function generateEditorSections(
   enabledSections: SectionType[]
