@@ -40,6 +40,7 @@ export interface SemanticDesignTokens {
   typography: {
     displayLg: TypoToken // 인트로 메인 제목 (28-36px)
     displayMd: TypoToken // 섹션 대제목 (24-28px)
+    sectionTitle: TypoToken // 섹션 영문 제목 (GALLERY, LOCATION 등)
     headingLg: TypoToken // H1 (20-24px)
     headingMd: TypoToken // H2 (18-20px)
     headingSm: TypoToken // H3 (16-18px)
@@ -134,6 +135,13 @@ export const DEFAULT_TOKENS: SemanticDesignTokens = {
       fontWeight: 600,
       lineHeight: 1.35,
       letterSpacing: '-0.01em',
+    },
+    sectionTitle: {
+      fontFamily: "'Cinzel', 'Noto Serif KR', serif",
+      fontSize: '14px',
+      fontWeight: 400,
+      lineHeight: 1.4,
+      letterSpacing: '0.25em',
     },
     headingLg: {
       fontFamily: "'Noto Sans KR', sans-serif",

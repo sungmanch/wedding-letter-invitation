@@ -7,6 +7,7 @@ import type { SectionSkeleton, SectionType, SkeletonVariant } from './types'
 import {
   introSkeleton,
   greetingSkeleton,
+  contactSkeleton,
   venueSkeleton,
   dateSkeleton,
   gallerySkeleton,
@@ -23,6 +24,7 @@ import {
 const skeletonRegistry: Record<SectionType, SectionSkeleton> = {
   intro: introSkeleton,
   greeting: greetingSkeleton,
+  contact: contactSkeleton,
   venue: venueSkeleton,
   date: dateSkeleton,
   gallery: gallerySkeleton,
@@ -89,6 +91,7 @@ export function getAllSectionTypes(): SectionType[] {
  */
 export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'greeting',
+  'contact',
   'venue',
   'date',
   'gallery',
@@ -103,6 +106,7 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
 export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   intro: true, // 항상 활성화
   greeting: true,
+  contact: true,
   venue: true,
   date: true,
   gallery: true,
@@ -122,5 +126,5 @@ export const skeletonStats = {
   sectionsWithMultipleVariants: Object.values(skeletonRegistry).filter((s) => s.variants.length > 1).length,
 }
 
-// 9개 섹션 확인
-console.assert(skeletonStats.totalSections === 9, `Expected 9 sections, got ${skeletonStats.totalSections}`)
+// 10개 섹션 확인 (intro, greeting, contact, venue, date, gallery, parents, accounts, guestbook, music)
+console.assert(skeletonStats.totalSections === 10, `Expected 10 sections, got ${skeletonStats.totalSections}`)

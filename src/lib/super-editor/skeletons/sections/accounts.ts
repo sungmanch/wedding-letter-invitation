@@ -601,5 +601,378 @@ export const accountsSkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Modal Popup Variant (샘플 6-7.png 참고)
+    // ============================================
+    {
+      id: 'modal-popup',
+      name: '팝업 모달',
+      description: '버튼 클릭 시 모달로 계좌 표시',
+      tags: ['clean', 'minimal', 'modern'],
+      structure: {
+        id: 'accounts-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'accounts-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              // 타이틀
+              {
+                id: 'accounts-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.headingLg.fontFamily',
+                  fontSize: '$token.typography.headingLg.fontSize',
+                  fontWeight: '$token.typography.headingLg.fontWeight',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  textAlign: 'center',
+                },
+                props: {
+                  content: '신랑 & 신부에게 마음 전하기',
+                  as: 'h2',
+                },
+              },
+              // 서브타이틀
+              {
+                id: 'accounts-subtitle',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.bodySm.fontFamily',
+                  fontSize: '$token.typography.bodySm.fontSize',
+                  color: '$token.colors.text.muted',
+                },
+                style: {
+                  textAlign: 'center',
+                },
+                props: {
+                  content: '축복의 의미로 축의금을 전달해보세요.',
+                  as: 'p',
+                },
+              },
+              // 버튼 영역
+              {
+                id: 'accounts-buttons',
+                type: 'column',
+                tokenStyle: {
+                  gap: '$token.spacing.md',
+                },
+                style: {
+                  width: '100%',
+                  maxWidth: '320px',
+                },
+                children: [
+                  // 신랑측 계좌번호 버튼
+                  {
+                    id: 'groom-accounts-btn',
+                    type: 'button',
+                    tokenStyle: {
+                      borderColor: '$token.colors.border',
+                      borderRadius: '$token.borders.radiusFull',
+                      backgroundColor: '$token.colors.background',
+                    },
+                    style: {
+                      width: '100%',
+                    },
+                    props: {
+                      label: '신랑 측 계좌번호',
+                      variant: 'outline',
+                      size: 'lg',
+                      action: {
+                        type: 'modal',
+                        target: 'groom-modal',
+                      },
+                    },
+                  },
+                  // 신부측 계좌번호 버튼
+                  {
+                    id: 'bride-accounts-btn',
+                    type: 'button',
+                    tokenStyle: {
+                      borderColor: '$token.colors.border',
+                      borderRadius: '$token.borders.radiusFull',
+                      backgroundColor: '$token.colors.background',
+                    },
+                    style: {
+                      width: '100%',
+                    },
+                    props: {
+                      label: '신부 측 계좌번호',
+                      variant: 'outline',
+                      size: 'lg',
+                      action: {
+                        type: 'modal',
+                        target: 'bride-modal',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          // 신랑측 모달
+          {
+            id: 'groom-modal',
+            type: 'overlay',
+            props: {
+              visible: false,
+              title: '신랑 계좌',
+              showClose: true,
+            },
+            children: [
+              {
+                id: 'groom-modal-content',
+                type: 'column',
+                tokenStyle: {
+                  gap: '$token.spacing.lg',
+                  padding: '$token.spacing.lg',
+                },
+                children: [
+                  {
+                    id: 'groom-accounts-repeat',
+                    type: 'repeat',
+                    props: {
+                      dataPath: 'accounts.groom',
+                      as: 'account',
+                    },
+                    children: [
+                      {
+                        id: 'groom-account-card',
+                        type: 'column',
+                        tokenStyle: {
+                          gap: '$token.spacing.xs',
+                          padding: '$token.spacing.md',
+                          borderRadius: '$token.borders.radiusMd',
+                        },
+                        style: {
+                          borderBottom: '1px solid #eee',
+                          paddingBottom: '16px',
+                        },
+                        children: [
+                          // 계좌 라벨 (신랑 계좌 / 신랑 부 계좌 등)
+                          {
+                            id: 'account-label',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.headingSm.fontFamily',
+                              fontSize: '$token.typography.headingSm.fontSize',
+                              fontWeight: '$token.typography.headingSm.fontWeight',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{account.label}}',
+                              as: 'h4',
+                            },
+                          },
+                          // 은행/예금주
+                          {
+                            id: 'account-bank-holder',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodySm.fontFamily',
+                              fontSize: '$token.typography.bodySm.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            props: {
+                              content: '{{account.bank}} (예금주:{{account.holder}})',
+                              as: 'span',
+                            },
+                          },
+                          // 계좌번호
+                          {
+                            id: 'account-number',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyLg.fontFamily',
+                              fontSize: '$token.typography.bodyLg.fontSize',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{account.number}}',
+                              as: 'p',
+                            },
+                          },
+                          // 복사 버튼
+                          {
+                            id: 'account-copy-btn',
+                            type: 'button',
+                            tokenStyle: {
+                              backgroundColor: '$token.colors.brand',
+                              color: '$token.colors.text.onBrand',
+                              borderRadius: '$token.borders.radiusFull',
+                            },
+                            style: {
+                              marginTop: '8px',
+                            },
+                            props: {
+                              label: '계좌번호 복사',
+                              size: 'sm',
+                              variant: 'primary',
+                              action: {
+                                type: 'copy',
+                                value: '{{account.number}}',
+                                toast: '계좌번호가 복사되었습니다',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          // 신부측 모달
+          {
+            id: 'bride-modal',
+            type: 'overlay',
+            props: {
+              visible: false,
+              title: '신부 계좌',
+              showClose: true,
+            },
+            children: [
+              {
+                id: 'bride-modal-content',
+                type: 'column',
+                tokenStyle: {
+                  gap: '$token.spacing.lg',
+                  padding: '$token.spacing.lg',
+                },
+                children: [
+                  {
+                    id: 'bride-accounts-repeat',
+                    type: 'repeat',
+                    props: {
+                      dataPath: 'accounts.bride',
+                      as: 'account',
+                    },
+                    children: [
+                      {
+                        id: 'bride-account-card',
+                        type: 'column',
+                        tokenStyle: {
+                          gap: '$token.spacing.xs',
+                          padding: '$token.spacing.md',
+                          borderRadius: '$token.borders.radiusMd',
+                        },
+                        style: {
+                          borderBottom: '1px solid #eee',
+                          paddingBottom: '16px',
+                        },
+                        children: [
+                          // 계좌 라벨
+                          {
+                            id: 'account-label',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.headingSm.fontFamily',
+                              fontSize: '$token.typography.headingSm.fontSize',
+                              fontWeight: '$token.typography.headingSm.fontWeight',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{account.label}}',
+                              as: 'h4',
+                            },
+                          },
+                          // 은행/예금주
+                          {
+                            id: 'account-bank-holder',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodySm.fontFamily',
+                              fontSize: '$token.typography.bodySm.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            props: {
+                              content: '{{account.bank}} (예금주:{{account.holder}})',
+                              as: 'span',
+                            },
+                          },
+                          // 계좌번호
+                          {
+                            id: 'account-number',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyLg.fontFamily',
+                              fontSize: '$token.typography.bodyLg.fontSize',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{account.number}}',
+                              as: 'p',
+                            },
+                          },
+                          // 복사 버튼
+                          {
+                            id: 'account-copy-btn',
+                            type: 'button',
+                            tokenStyle: {
+                              backgroundColor: '$token.colors.brand',
+                              color: '$token.colors.text.onBrand',
+                              borderRadius: '$token.borders.radiusFull',
+                            },
+                            style: {
+                              marginTop: '8px',
+                            },
+                            props: {
+                              label: '계좌번호 복사',
+                              size: 'sm',
+                              variant: 'primary',
+                              action: {
+                                type: 'copy',
+                                value: '{{account.number}}',
+                                toast: '계좌번호가 복사되었습니다',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'groom-accounts',
+          path: 'accounts.groom',
+          type: 'account',
+          required: true,
+          description: '신랑측 계좌 목록 (label, bank, holder, number)',
+        },
+        {
+          id: 'bride-accounts',
+          path: 'accounts.bride',
+          type: 'account',
+          required: true,
+          description: '신부측 계좌 목록 (label, bank, holder, number)',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 400 },
+        ],
+      },
+    },
   ],
 }
