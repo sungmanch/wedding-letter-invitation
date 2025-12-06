@@ -382,7 +382,6 @@ export const galleryMuseumStyleSchema: StyleSchema = {
         tight: '0.02em',
         normal: '0.05em',
         wide: '0.15em',
-        wider: '0.2em',
       },
     },
     spacing: {

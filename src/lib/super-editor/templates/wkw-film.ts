@@ -562,7 +562,6 @@ export const wkwFilmStyleSchema: StyleSchema = {
         tight: '0',
         normal: '0.1em',
         wide: '0.2em',
-        wider: '0.3em',
       },
     },
     spacing: {
