@@ -15,7 +15,9 @@ import {
 } from '../services/generation-service'
 import { createGeminiProvider } from '../services/gemini-provider'
 import type { StyleSchema } from '../schema/style'
+import type { LayoutSchema } from '../schema/layout'
 import { db } from '@/lib/db'
+import { getTemplate, type TemplateId } from '../templates'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
 import { eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
@@ -226,8 +228,10 @@ export async function completeTemplateAction(
 // ============================================
 
 export interface SaveInvitationInput {
-  // 생성 결과
-  generationResult: GenerationResult
+  // 생성 결과 (AI 생성 또는 레거시 템플릿용)
+  generationResult?: GenerationResult
+  // 새 super-editor 템플릿 ID (generationResult 대신 사용)
+  newTemplateId?: string
   // 프리뷰 폼 데이터
   previewData: {
     groomName: string
@@ -261,7 +265,33 @@ export async function saveInvitationAction(
       return { success: false, error: '로그인이 필요합니다' }
     }
 
-    const { generationResult, previewData, legacyPresetId } = input
+    const { generationResult, newTemplateId, previewData, legacyPresetId } = input
+
+    // 새 템플릿 또는 생성 결과에서 layout/style 추출
+    let layoutSchema: LayoutSchema
+    let styleSchema: StyleSchema
+    let templateName: string
+    let templateDescription: string
+
+    if (newTemplateId) {
+      // 새 super-editor 템플릿 사용
+      const predefinedTemplate = getTemplate(newTemplateId as TemplateId)
+      if (!predefinedTemplate) {
+        return { success: false, error: `템플릿 '${newTemplateId}'을(를) 찾을 수 없습니다` }
+      }
+      layoutSchema = predefinedTemplate.layout
+      styleSchema = predefinedTemplate.style
+      templateName = `템플릿: ${predefinedTemplate.layout.meta.name}`
+      templateDescription = `${newTemplateId} 템플릿 기반`
+    } else if (generationResult) {
+      // AI 생성 또는 레거시 템플릿
+      layoutSchema = generationResult.layout
+      styleSchema = generationResult.style
+      templateName = legacyPresetId ? `레거시: ${legacyPresetId}` : 'AI 생성 템플릿'
+      templateDescription = legacyPresetId ? `레거시 프리셋 ${legacyPresetId} 기반` : 'AI가 생성한 템플릿'
+    } else {
+      return { success: false, error: 'generationResult 또는 newTemplateId가 필요합니다' }
+    }
 
     // 1. Template 생성 (레이아웃, 스타일, 에디터 스키마 저장)
     const editorSchema: EditorSchema = {
@@ -279,16 +309,16 @@ export async function saveInvitationAction(
     }
 
     const [template] = await db.insert(superEditorTemplates).values({
-      name: legacyPresetId ? `레거시: ${legacyPresetId}` : 'AI 생성 템플릿',
-      description: legacyPresetId ? `레거시 프리셋 ${legacyPresetId} 기반` : 'AI가 생성한 템플릿',
+      name: templateName,
+      description: templateDescription,
       category: 'wedding',
-      layoutSchema: generationResult.layout,
-      styleSchema: generationResult.style,
+      layoutSchema,
+      styleSchema,
       editorSchema,
       status: 'draft',
       generationContext: {
-        prompt: legacyPresetId || 'super-editor',
-        model: 'gemini',
+        prompt: newTemplateId || legacyPresetId || 'super-editor',
+        model: newTemplateId ? 'predefined' : 'gemini',
         generatedAt: new Date().toISOString(),
       },
     }).returning()
