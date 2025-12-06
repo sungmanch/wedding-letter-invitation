@@ -254,6 +254,7 @@ function EditPageContent() {
               <EditorToolbar />
               <EditorPanel
                 className="flex-1 overflow-y-auto"
+                layout={state.layout ?? undefined}
                 enabledSections={
                   ['intro', ...sectionOrder.filter(s => sectionEnabled[s])] as SectionType[]
                 }
