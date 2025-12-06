@@ -4,12 +4,21 @@
  */
 
 export * from './kakao-chat'
+export * from './wkw-film'
+export * from './gallery-museum'
+export * from './kakao-interview'
 
 // Template registry for easy access
 import { kakaoTemplate } from './kakao-chat'
+import { wkwFilmTemplate } from './wkw-film'
+import { galleryMuseumTemplate } from './gallery-museum'
+import { kakaoInterviewTemplate } from './kakao-interview'
 
 export const templates = {
   'kakao-chat': kakaoTemplate,
+  'wkw-film': wkwFilmTemplate,
+  'gallery-museum': galleryMuseumTemplate,
+  'kakao-interview': kakaoInterviewTemplate,
 } as const
 
 export type TemplateId = keyof typeof templates
