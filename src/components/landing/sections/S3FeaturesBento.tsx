@@ -22,8 +22,8 @@ const FEATURES = [
   },
   {
     id: 'messages',
-    title: '축하 메시지',
-    desc: '하객들의 진심 어린 축하',
+    title: '프라이빗 축하 메시지',
+    desc: '하객들의 진심 어린 축하를, 나만 볼 수 있도록',
     icon: MessageCircle,
     span: 'col-span-1',
     preview: 'messages',
@@ -147,7 +147,7 @@ export function S3FeaturesBento() {
                           alt={`Wedding photo ${idx + 1}`}
                           fill
                           className="object-cover transition-transform duration-500 hover:scale-110"
-                          sizes="80px"
+                          sizes="(max-width: 768px) 25vw, 200px"
                         />
                       </div>
                     ))}
