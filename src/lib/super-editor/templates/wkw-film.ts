@@ -39,21 +39,34 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
           backgroundColor: '#000',
         },
         children: [
-          // 배경 이미지
+          // 배경 이미지 (film-flicker 효과 적용)
           {
-            id: 'bg-image',
-            type: 'image',
+            id: 'bg-image-wrapper',
+            type: 'custom',
             props: {
-              src: '{{photos.main}}',
-              objectFit: 'cover',
+              className: 'film-flicker',
             },
             style: {
               position: 'absolute',
               inset: 0,
               width: '100%',
               height: '100%',
-              filter: 'brightness(0.7) contrast(1.2) saturate(1.1)',
             },
+            children: [
+              {
+                id: 'bg-image',
+                type: 'image',
+                props: {
+                  src: '{{photos.main}}',
+                  objectFit: 'cover',
+                },
+                style: {
+                  width: '100%',
+                  height: '100%',
+                  filter: 'brightness(0.7) contrast(1.2) saturate(1.1)',
+                },
+              },
+            ],
           },
 
           // 레드/웜 틴트 오버레이 (왕가위 시그니처)
@@ -99,16 +112,12 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
             },
           },
 
-          // 필름 그레인 오버레이 (CSS 애니메이션으로 구현)
+          // 필름 그레인 오버레이 (custom primitive로 ::before 가상 요소 지원)
           {
             id: 'film-grain-overlay',
-            type: 'container',
-            style: {
-              position: 'absolute',
-              inset: 0,
-              opacity: 0.15,
-              pointerEvents: 'none',
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            type: 'custom',
+            props: {
+              className: 'film-grain',
             },
           },
 
@@ -187,12 +196,19 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                     },
                   },
 
-                  // 신부 이름
+                  // 신부 이름 (커스텀 fadeInUp 애니메이션)
                   {
                     id: 'bride-name',
                     type: 'animated',
                     props: {
-                      animation: { preset: 'fade-in', duration: 1200 },
+                      animation: {
+                        keyframes: [
+                          { offset: 0, opacity: 0, transform: 'translateY(20px)' },
+                          { offset: 1, opacity: 1, transform: 'translateY(0)' },
+                        ],
+                        duration: 1200,
+                        easing: 'ease-out',
+                      },
                       trigger: 'mount',
                     },
                     children: [
@@ -226,12 +242,20 @@ export const wkwFilmLayoutSchema: LayoutSchema = {
                     },
                   },
 
-                  // 신랑 이름
+                  // 신랑 이름 (커스텀 fadeInUp 애니메이션)
                   {
                     id: 'groom-name',
                     type: 'animated',
                     props: {
-                      animation: { preset: 'fade-in', duration: 1200, delay: 300 },
+                      animation: {
+                        keyframes: [
+                          { offset: 0, opacity: 0, transform: 'translateY(20px)' },
+                          { offset: 1, opacity: 1, transform: 'translateY(0)' },
+                        ],
+                        duration: 1200,
+                        delay: 300,
+                        easing: 'ease-out',
+                      },
                       trigger: 'mount',
                     },
                     children: [
@@ -487,6 +511,85 @@ export const wkwFilmStyleSchema: StyleSchema = {
     mood: ['romantic', 'elegant', 'vintage'],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+  },
+  // ============================================
+  // Custom Styles - 필름 효과
+  // ============================================
+  customStyles: {
+    // 커스텀 @keyframes 정의
+    keyframes: {
+      // 필름 그레인 애니메이션
+      grain: [
+        { offset: 0, transform: 'translate(0, 0)' },
+        { offset: 0.1, transform: 'translate(-5%, -10%)' },
+        { offset: 0.2, transform: 'translate(-15%, 5%)' },
+        { offset: 0.3, transform: 'translate(7%, -25%)' },
+        { offset: 0.4, transform: 'translate(-5%, 25%)' },
+        { offset: 0.5, transform: 'translate(-15%, 10%)' },
+        { offset: 0.6, transform: 'translate(15%, 0%)' },
+        { offset: 0.7, transform: 'translate(0%, 15%)' },
+        { offset: 0.8, transform: 'translate(3%, 35%)' },
+        { offset: 0.9, transform: 'translate(-10%, 10%)' },
+        { offset: 1, transform: 'translate(0, 0)' },
+      ],
+      // 필름 플리커 (미세 깜빡임)
+      flicker: [
+        { offset: 0, opacity: 1 },
+        { offset: 0.5, opacity: 0.98 },
+        { offset: 0.75, opacity: 0.99 },
+        { offset: 1, opacity: 1 },
+      ],
+      // fadeInUp 애니메이션
+      fadeInUp: [
+        { offset: 0, opacity: 0, transform: 'translateY(20px)' },
+        { offset: 1, opacity: 1, transform: 'translateY(0)' },
+      ],
+    },
+    // 가상 요소를 포함한 커스텀 클래스
+    classes: {
+      // 필름 그레인 오버레이
+      'film-grain': {
+        base: {
+          position: 'absolute',
+          inset: '0',
+          pointerEvents: 'none',
+          zIndex: '50',
+          overflow: 'hidden',
+        },
+        before: {
+          position: 'absolute',
+          top: '-50%',
+          left: '-50%',
+          right: '-50%',
+          bottom: '-50%',
+          width: '200%',
+          height: '200%',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          opacity: '0.15',
+          animation: 'grain 0.5s steps(10) infinite',
+        },
+      },
+      // 필름 플리커 효과
+      'film-flicker': {
+        base: {
+          animation: 'flicker 0.15s infinite',
+        },
+      },
+    },
+    // 추가 글로벌 CSS
+    globalCss: `
+      /* 텍스트 글로우 효과 */
+      .text-glow {
+        text-shadow: 0 0 40px rgba(220, 38, 38, 0.3),
+                     0 0 80px rgba(220, 38, 38, 0.2);
+      }
+
+      /* 세로 텍스트 */
+      .vertical-text {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+      }
+    `,
   },
   theme: {
     colors: {

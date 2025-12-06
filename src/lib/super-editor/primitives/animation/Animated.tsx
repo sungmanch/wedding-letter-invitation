@@ -1,10 +1,37 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { PrimitiveNode, AnimatedProps } from '../../schema/primitives'
+import type { PrimitiveNode, AnimatedProps, CustomAnimationKeyframe } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps } from '../types'
-import { getAnimationPreset } from '../../animations/presets'
+import { getAnimationPreset, type AnimationPresetConfig } from '../../animations/presets'
+
+/**
+ * 키프레임 배열을 CSS @keyframes 문자열로 변환
+ */
+function keyframesToCss(
+  name: string,
+  keyframes: CustomAnimationKeyframe[] | AnimationPresetConfig['keyframes']
+): string {
+  return `
+    @keyframes ${name} {
+      ${keyframes
+        .map(
+          (kf) =>
+            `${(kf.offset ?? 0) * 100}% {
+              ${Object.entries(kf)
+                .filter(([key]) => key !== 'offset')
+                .map(([key, value]) => {
+                  const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase()
+                  return `${cssKey}: ${value};`
+                })
+                .join(' ')}
+            }`
+        )
+        .join('\n')}
+    }
+  `
+}
 
 export function Animated({
   node,
@@ -47,12 +74,36 @@ export function Animated({
     }
   }, [trigger])
 
-  // Get animation preset
-  const preset = props.animation?.preset
-    ? getAnimationPreset(props.animation.preset)
-    : null
+  // ============================================
+  // 애니메이션 소스 결정 (우선순위)
+  // 1. 커스텀 keyframes (직접 정의)
+  // 2. keyframesRef (StyleSchema.customStyles.keyframes 참조)
+  // 3. preset (미리 정의된 프리셋)
+  // ============================================
 
-  if (!preset) {
+  const animation = props.animation
+  let keyframes: CustomAnimationKeyframe[] | null = null
+  let defaultDuration = 500
+  let defaultEasing = 'ease-out'
+
+  // 1. 커스텀 keyframes 직접 정의
+  if (animation?.keyframes && animation.keyframes.length > 0) {
+    keyframes = animation.keyframes
+  }
+  // 2. keyframesRef로 StyleSchema 참조 (context.customKeyframes에서 가져옴)
+  // TODO: context에 customKeyframes 추가 필요
+  // 3. preset 사용
+  else if (animation?.preset) {
+    const preset = getAnimationPreset(animation.preset)
+    if (preset) {
+      keyframes = preset.keyframes as CustomAnimationKeyframe[]
+      defaultDuration = preset.defaultDuration
+      defaultEasing = preset.defaultEasing
+    }
+  }
+
+  // 애니메이션이 없는 경우
+  if (!keyframes || keyframes.length === 0) {
     return (
       <div
         data-node-id={node.id}
@@ -69,30 +120,13 @@ export function Animated({
 
   // Generate keyframes CSS
   const keyframesName = `anim-${node.id}`
-  const keyframesCSS = `
-    @keyframes ${keyframesName} {
-      ${preset.keyframes
-        .map(
-          (kf) =>
-            `${kf.offset * 100}% {
-              ${Object.entries(kf)
-                .filter(([key]) => key !== 'offset')
-                .map(([key, value]) => {
-                  const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase()
-                  return `${cssKey}: ${value};`
-                })
-                .join(' ')}
-            }`
-        )
-        .join('\n')}
-    }
-  `
+  const keyframesCSS = keyframesToCss(keyframesName, keyframes)
 
-  const duration = props.animation.duration ?? preset.defaultDuration
-  const easing = props.animation.easing ?? preset.defaultEasing
-  const delay = props.animation.delay ?? 0
-  const repeat = props.animation.repeat
-  const direction = props.animation.direction ?? 'normal'
+  const duration = animation?.duration ?? defaultDuration
+  const easing = animation?.easing ?? defaultEasing
+  const delay = animation?.delay ?? 0
+  const repeat = animation?.repeat
+  const direction = animation?.direction ?? 'normal'
 
   const animationValue = isVisible
     ? `${keyframesName} ${duration}ms ${easing} ${delay}ms ${
