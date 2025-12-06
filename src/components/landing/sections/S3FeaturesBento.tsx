@@ -17,7 +17,7 @@ const FEATURES = [
     title: '포토 갤러리',
     desc: '아름다운 순간들을 담아',
     icon: Images,
-    span: 'col-span-2 row-span-2',
+    span: 'col-span-1',
     preview: 'gallery',
   },
   {
@@ -41,7 +41,7 @@ const FEATURES = [
     title: '참석 여부',
     desc: '간편한 참석 확인',
     icon: Users,
-    span: 'col-span-1 col-start-2',
+    span: 'col-span-1',
     preview: 'rsvp',
   },
 ]
@@ -91,9 +91,9 @@ export function S3FeaturesBento() {
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen bg-[#0A0806] py-20 px-4"
+      className="min-h-[70vh] bg-[#0A0806] py-20 px-4"
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
           <p className="text-[#C9A962] text-sm tracking-widest uppercase mb-2">
@@ -136,18 +136,18 @@ export function S3FeaturesBento() {
                 )}
 
                 {feature.preview === 'gallery' && (
-                  <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="mt-4 grid grid-cols-2 gap-1.5">
                     {GALLERY_IMAGES.map((src, idx) => (
                       <div
                         key={src}
-                        className="relative aspect-[3/4] rounded-lg overflow-hidden"
+                        className="relative aspect-square rounded-md overflow-hidden"
                       >
                         <Image
                           src={src}
                           alt={`Wedding photo ${idx + 1}`}
                           fill
                           className="object-cover transition-transform duration-500 hover:scale-110"
-                          sizes="(max-width: 768px) 25vw, 150px"
+                          sizes="80px"
                         />
                       </div>
                     ))}
