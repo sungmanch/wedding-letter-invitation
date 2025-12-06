@@ -273,102 +273,164 @@ export function StyleEditor({
 
         {activeSection === 'typography' && (
           <div className="space-y-6">
-            {/* 글꼴 선택 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">제목 글꼴</h4>
-              <FontSelector
-                value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
-                onChange={(family) => updateTypography((typo) => {
-                  if (typo?.fonts?.heading) typo.fonts.heading.family = family
-                })}
-              />
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">본문 글꼴</h4>
-              <FontSelector
-                value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
-                onChange={(family) => updateTypography((typo) => {
-                  if (typo?.fonts?.body) typo.fonts.body.family = family
-                })}
-              />
-            </div>
+            {/* ========== 제목 설정 ========== */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-900">제목 설정</h3>
+                <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                  메인 타이틀, 섹션 제목
+                </span>
+              </div>
 
-            {/* 기본 폰트 크기 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">기본 글자 크기</h4>
-              <SizeSelector
-                value={localStyle.theme.typography?.sizes?.base ?? '1rem'}
-                options={FONT_SIZE_OPTIONS}
-                onChange={(size) => updateTypography((typo) => {
-                  if (typo?.sizes) typo.sizes.base = size
-                })}
-              />
-            </div>
+              {/* 제목 글꼴 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">글꼴</label>
+                <FontSelector
+                  value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
+                  onChange={(family) => updateTypography((typo) => {
+                    if (typo?.fonts?.heading) typo.fonts.heading.family = family
+                  })}
+                />
+              </div>
 
-            {/* 자간 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">자간 (Letter Spacing)</h4>
-              <div className="grid grid-cols-3 gap-2">
-                {LETTER_SPACING_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => updateTypography((typo) => {
-                      if (typo?.letterSpacing) typo.letterSpacing.normal = opt.value
-                    })}
-                    className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
-                      localStyle.theme.typography?.letterSpacing?.normal === opt.value
-                        ? 'border-rose-500 bg-rose-50 text-rose-700'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              {/* 제목 굵기 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">굵기</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {HEADING_WEIGHT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.weights) typo.weights.bold = opt.value
+                      })}
+                      className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                        localStyle.theme.typography?.weights?.bold === opt.value
+                          ? 'border-rose-500 bg-rose-50 text-rose-700'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      }`}
+                      style={{ fontWeight: opt.value }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* 줄 간격 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">줄 간격 (Line Height)</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {LINE_HEIGHT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => updateTypography((typo) => {
-                      if (typo?.lineHeights) typo.lineHeights.normal = opt.value
-                    })}
-                    className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
-                      localStyle.theme.typography?.lineHeights?.normal === opt.value
-                        ? 'border-rose-500 bg-rose-50 text-rose-700'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+            <div className="border-t border-gray-100" />
+
+            {/* ========== 본문 설정 ========== */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-900">본문 설정</h3>
+                <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                  설명 텍스트, 내용
+                </span>
+              </div>
+
+              {/* 본문 글꼴 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">글꼴</label>
+                <FontSelector
+                  value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
+                  onChange={(family) => updateTypography((typo) => {
+                    if (typo?.fonts?.body) typo.fonts.body.family = family
+                  })}
+                />
+              </div>
+
+              {/* 본문 크기 */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-600">기본 크기</label>
+                  <span className="text-[10px] text-gray-400">본문(대), 소제목</span>
+                </div>
+                <SizeSelector
+                  value={localStyle.theme.typography?.sizes?.base ?? '1rem'}
+                  options={FONT_SIZE_OPTIONS}
+                  onChange={(size) => updateTypography((typo) => {
+                    if (typo?.sizes) typo.sizes.base = size
+                  })}
+                />
+              </div>
+
+              {/* 본문 굵기 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">굵기</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {FONT_WEIGHT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.weights) typo.weights.regular = opt.value
+                      })}
+                      className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                        localStyle.theme.typography?.weights?.regular === opt.value
+                          ? 'border-rose-500 bg-rose-50 text-rose-700'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      }`}
+                      style={{ fontWeight: opt.value }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 줄 간격 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">줄 간격</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {LINE_HEIGHT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.lineHeights) typo.lineHeights.relaxed = opt.value
+                      })}
+                      className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
+                        localStyle.theme.typography?.lineHeights?.relaxed === opt.value
+                          ? 'border-rose-500 bg-rose-50 text-rose-700'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* 기본 굵기 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">본문 굵기</h4>
-              <div className="grid grid-cols-3 gap-2">
-                {FONT_WEIGHT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => updateTypography((typo) => {
-                      if (typo?.weights) typo.weights.regular = opt.value
-                    })}
-                    className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
-                      localStyle.theme.typography?.weights?.regular === opt.value
-                        ? 'border-rose-500 bg-rose-50 text-rose-700'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                    }`}
-                    style={{ fontWeight: opt.value }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+            <div className="border-t border-gray-100" />
+
+            {/* ========== 공통 설정 ========== */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-900">공통 설정</h3>
+              </div>
+
+              {/* 자간 */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-600">자간</label>
+                  <span className="text-[10px] text-gray-400">메인 타이틀</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {LETTER_SPACING_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.letterSpacing) typo.letterSpacing.tight = opt.value
+                      })}
+                      className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
+                        localStyle.theme.typography?.letterSpacing?.tight === opt.value
+                          ? 'border-rose-500 bg-rose-50 text-rose-700'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -445,11 +507,18 @@ const LINE_HEIGHT_OPTIONS = [
   { value: 2.0, label: '여유 (2.0)' },
 ]
 
-// 폰트 굵기 옵션
+// 본문 굵기 옵션
 const FONT_WEIGHT_OPTIONS = [
   { value: 300, label: '얇게' },
   { value: 400, label: '기본' },
   { value: 500, label: '굵게' },
+]
+
+// 제목 굵기 옵션
+const HEADING_WEIGHT_OPTIONS = [
+  { value: 600, label: '보통' },
+  { value: 700, label: '굵게' },
+  { value: 800, label: '매우 굵게' },
 ]
 
 function FontSelector({
