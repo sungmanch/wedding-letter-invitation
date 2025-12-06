@@ -173,7 +173,7 @@ export const galleryMuseumLayoutSchema: LayoutSchema = {
                       {
                         id: 'names',
                         type: 'text',
-                        props: { content: '{{couple.bride.nameEn}} & {{couple.groom.nameEn}}', as: 'h1' },
+                        props: { content: '{{couple.bride.name}} & {{couple.groom.name}}', as: 'h1' },
                         style: {
                           fontFamily: '"Cormorant", serif',
                           fontSize: 20,
@@ -200,7 +200,7 @@ export const galleryMuseumLayoutSchema: LayoutSchema = {
                       {
                         id: 'date',
                         type: 'text',
-                        props: { content: '{{wedding.dateDisplay}}', as: 'p' },
+                        props: { content: '{{wedding.date}}', as: 'p' },
                         style: {
                           fontFamily: '"Inter", sans-serif',
                           fontSize: 10,
@@ -215,7 +215,7 @@ export const galleryMuseumLayoutSchema: LayoutSchema = {
                       {
                         id: 'time',
                         type: 'text',
-                        props: { content: '{{wedding.timeDisplay}}', as: 'p' },
+                        props: { content: '{{wedding.time}}', as: 'p' },
                         style: {
                           fontFamily: '"Inter", sans-serif',
                           fontSize: 9,
@@ -238,7 +238,7 @@ export const galleryMuseumLayoutSchema: LayoutSchema = {
                           {
                             id: 'venue-name',
                             type: 'text',
-                            props: { content: '{{venue.nameEn}}', as: 'p' },
+                            props: { content: '{{wedding.venue.name}}', as: 'p' },
                             style: {
                               fontFamily: '"Inter", sans-serif',
                               fontSize: 8,
@@ -677,23 +677,21 @@ export const galleryMuseumSampleData = {
   couple: {
     groom: {
       name: '홍길동',
-      nameEn: 'Gildong',
+      englishName: 'Gildong',
     },
     bride: {
       name: '김지윤',
-      nameEn: 'Jiyoon',
+      englishName: 'Jiyoon',
     },
   },
   wedding: {
-    date: '2025-11-30',
-    time: '11:30',
-    dateDisplay: '2025. 11. 30 (Sun)',
-    timeDisplay: '11:30 AM',
-  },
-  venue: {
-    name: '청담 더채플',
-    nameEn: 'The Chapel at Cheongdam',
-    address: '서울시 강남구 청담동 123-45',
+    date: '2025년 11월 30일',
+    time: '오전 11시 30분',
+    venue: {
+      name: '청담 더채플',
+      hall: '그랜드볼룸',
+      address: '서울시 강남구 청담동 123-45',
+    },
   },
   photos: {
     galleryBackground: 'https://picsum.photos/seed/gallery-bg/600/900',

@@ -525,7 +525,7 @@ export const kakaoInterviewLayoutSchema: LayoutSchema = {
                               {
                                 id: 'info-date',
                                 type: 'text',
-                                props: { content: '{{wedding.dateDisplay}}', as: 'p' },
+                                props: { content: '{{wedding.date}}', as: 'p' },
                                 style: {
                                   fontFamily: '"Noto Sans KR", sans-serif',
                                   fontSize: 18,
@@ -536,7 +536,7 @@ export const kakaoInterviewLayoutSchema: LayoutSchema = {
                               {
                                 id: 'info-time',
                                 type: 'text',
-                                props: { content: '{{wedding.dayTimeDisplay}}', as: 'p' },
+                                props: { content: '{{wedding.time}}', as: 'p' },
                                 style: {
                                   fontFamily: '"Noto Sans KR", sans-serif',
                                   fontSize: 14,
@@ -560,7 +560,7 @@ export const kakaoInterviewLayoutSchema: LayoutSchema = {
                               {
                                 id: 'info-venue-name',
                                 type: 'text',
-                                props: { content: '{{venue.name}}', as: 'p' },
+                                props: { content: '{{wedding.venue.name}}', as: 'p' },
                                 style: {
                                   fontFamily: '"Noto Sans KR", sans-serif',
                                   fontSize: 16,
@@ -571,7 +571,7 @@ export const kakaoInterviewLayoutSchema: LayoutSchema = {
                               {
                                 id: 'info-venue-address',
                                 type: 'text',
-                                props: { content: '{{venue.address}}', as: 'p' },
+                                props: { content: '{{wedding.venue.address}}', as: 'p' },
                                 style: {
                                   fontFamily: '"Noto Sans KR", sans-serif',
                                   fontSize: 13,
@@ -1107,9 +1107,11 @@ export const kakaoInterviewSampleData = {
   couple: {
     groom: {
       name: '길동',
+      englishName: 'Gildong',
     },
     bride: {
       name: '지윤',
+      englishName: 'Jiyoon',
     },
   },
   interview: {
@@ -1119,14 +1121,13 @@ export const kakaoInterviewSampleData = {
     closingMessage: '저희의 새로운 시작을 함께 축복해주세요.<br/>소중한 분들을 모시고 사랑의 결실을 맺으려 합니다. 💕',
   },
   wedding: {
-    date: '2025-11-30',
-    time: '11:30',
-    dateDisplay: '2025년 11월 30일',
-    dayTimeDisplay: '일요일 오전 11시 30분',
-  },
-  venue: {
-    name: '청담 더채플',
-    address: '서울 강남구 청담동',
+    date: '2025년 11월 30일',
+    time: '오전 11시 30분',
+    venue: {
+      name: '청담 더채플',
+      hall: '그랜드볼룸',
+      address: '서울 강남구 청담동',
+    },
   },
   photos: {
     main: 'https://picsum.photos/seed/interview-main/400/400',
