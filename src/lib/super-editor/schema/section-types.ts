@@ -22,6 +22,7 @@
 export type SectionType =
   | 'intro'
   | 'greeting'
+  | 'contact'
   | 'venue'
   | 'date'
   | 'gallery'
@@ -61,6 +62,15 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
     label: '인사말',
     description: '신랑/신부 인사말',
     icon: 'message-square',
+    isFixed: false,
+    isFloating: false,
+    defaultEnabled: true,
+  },
+  contact: {
+    type: 'contact',
+    label: '연락처',
+    description: '신랑/신부 연락처',
+    icon: 'phone',
     isFixed: false,
     isFloating: false,
     defaultEnabled: true,
@@ -135,6 +145,7 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
  */
 export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'greeting',
+  'contact',
   'date',
   'parents',
   'gallery',
@@ -148,6 +159,7 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
  */
 export const REORDERABLE_SECTIONS: SectionType[] = [
   'greeting',
+  'contact',
   'venue',
   'date',
   'gallery',
@@ -162,6 +174,7 @@ export const REORDERABLE_SECTIONS: SectionType[] = [
 export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   intro: true,
   greeting: true,
+  contact: true,
   venue: true,
   date: true,
   gallery: true,
@@ -194,6 +207,12 @@ export const SECTION_DATA_BINDINGS: Record<SectionType, string[]> = {
     'greeting.content',
     'couple.groom.name',
     'couple.bride.name',
+  ],
+  contact: [
+    'couple.groom.name',
+    'couple.groom.phone',
+    'couple.bride.name',
+    'couple.bride.phone',
   ],
   venue: [
     'venue.name',

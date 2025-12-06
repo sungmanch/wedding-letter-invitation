@@ -262,5 +262,91 @@ export const gallerySkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Vertical Swipe Variant (샘플 2-4.png 참고)
+    // ============================================
+    {
+      id: 'vertical-swipe',
+      name: '세로형 스와이프',
+      description: '세로형 풀 이미지 스와이프 갤러리',
+      tags: ['fullscreen', 'immersive', 'elegant'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: 'GALLERY',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-swiper',
+                type: 'carousel',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  direction: 'vertical',
+                  aspectRatio: '3:4',
+                  objectFit: 'cover',
+                  fullWidth: true,
+                  autoplay: false,
+                  infinite: true,
+                  showDots: true,
+                  showArrows: false,
+                  effect: 'slide',
+                  onClick: 'lightbox',
+                  spaceBetween: 0,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+        layouts: [
+          { id: '3:4', name: '3:4 비율', props: { aspectRatio: '3:4' } },
+          { id: '4:5', name: '4:5 비율', props: { aspectRatio: '4:5' } },
+          { id: '9:16', name: '9:16 비율', props: { aspectRatio: '9:16' } },
+        ],
+      },
+    },
   ],
 }

@@ -4,6 +4,7 @@
 
 export { introEditorSection } from './intro'
 export { greetingEditorSection } from './greeting'
+export { contactEditorSection } from './contact'
 export { venueEditorSection } from './venue'
 export { dateEditorSection } from './date'
 export { galleryEditorSection } from './gallery'
@@ -16,6 +17,7 @@ import type { EditorSection } from '../../schema/editor'
 import type { SectionType } from '../../schema/section-types'
 import { introEditorSection } from './intro'
 import { greetingEditorSection } from './greeting'
+import { contactEditorSection } from './contact'
 import { venueEditorSection } from './venue'
 import { dateEditorSection } from './date'
 import { galleryEditorSection } from './gallery'
@@ -30,6 +32,7 @@ import { musicEditorSection } from './music'
 export const SECTION_EDITOR_SCHEMAS: Record<SectionType, EditorSection> = {
   intro: introEditorSection,
   greeting: greetingEditorSection,
+  contact: contactEditorSection,
   venue: venueEditorSection,
   date: dateEditorSection,
   gallery: galleryEditorSection,

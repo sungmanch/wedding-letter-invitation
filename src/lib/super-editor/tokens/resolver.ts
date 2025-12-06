@@ -145,6 +145,10 @@ function resolveTypography(typography: TypographyConfig | undefined): SemanticDe
   return {
     displayLg: createTypoToken(typography, 'heading', '4xl', 'bold', 'tight'),
     displayMd: createTypoToken(typography, 'heading', '3xl', 'semibold', 'tight'),
+    sectionTitle: {
+      ...createTypoToken(typography, 'heading', 'sm', 'regular', 'normal'),
+      letterSpacing: '0.25em',
+    },
     headingLg: createTypoToken(typography, 'heading', '2xl', 'semibold', 'normal'),
     headingMd: createTypoToken(typography, 'heading', 'lg', 'semibold', 'normal'),
     headingSm: createTypoToken(typography, 'heading', 'base', 'semibold', 'normal'),

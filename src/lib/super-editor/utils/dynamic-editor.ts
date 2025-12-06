@@ -521,6 +521,7 @@ const EDITOR_SECTIONS: Record<string, EditorSection> = {
 const SECTION_TYPE_TO_EDITOR_SECTIONS: Record<SectionType, string[]> = {
   intro: ['intro', 'couple', 'wedding', 'photos'],
   greeting: ['greeting'],
+  contact: ['couple'], // 연락처는 couple 섹션의 전화번호 사용
   venue: ['venue', 'transportation'],
   date: ['wedding'],
   gallery: ['gallery'],
