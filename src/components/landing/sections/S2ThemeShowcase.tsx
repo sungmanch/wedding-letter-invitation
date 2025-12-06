@@ -21,6 +21,30 @@ const THEMES = [
     bgColor: '#2D2D2D',
     imageUrl: '/examples/images/example_wedding_image3.png',
   },
+  {
+    id: 'magazine',
+    name: 'Magazine',
+    nameKo: '매거진',
+    description: '보그처럼 세련된 에디토리얼',
+    bgColor: '#1A1A1A',
+    imageUrl: '/examples/images/example_wedding_image4.png',
+  },
+  {
+    id: 'chat',
+    name: 'Interview',
+    nameKo: '인터뷰',
+    description: '커플의 이야기를 담은 대화',
+    bgColor: '#2D2D2D',
+    imageUrl: '/examples/images/example_wedding_image5.png',
+  },
+  {
+    id: 'gothic-romance',
+    name: 'Gothic Romance',
+    nameKo: '고딕 로맨스',
+    description: '무디하고 드라마틱한 감성',
+    bgColor: '#0D0D0D',
+    imageUrl: '/examples/images/example_wedding_image6.png',
+  },
 ]
 
 export function S2ThemeShowcase() {
@@ -40,8 +64,8 @@ export function S2ThemeShowcase() {
       const progress = Math.min(1, Math.max(0, scrolled / sectionHeight))
       setScrollProgress(progress)
 
-      // Map progress to theme index (2 themes: 0-50% = theme 0, 50-100% = theme 1)
-      const themeIndex = progress < 0.5 ? 0 : 1
+      // Map progress to theme index (5 themes: each ~20%)
+      const themeIndex = Math.min(THEMES.length - 1, Math.floor(progress * THEMES.length))
       setActiveTheme(themeIndex)
     }
 
@@ -59,7 +83,7 @@ export function S2ThemeShowcase() {
   return (
     <section
       ref={containerRef}
-      className="relative h-[200vh] transition-colors duration-700"
+      className="relative h-[400vh] transition-colors duration-700"
       style={{ backgroundColor: currentTheme.bgColor }}
     >
       {/* Sticky Container */}
@@ -118,9 +142,9 @@ export function S2ThemeShowcase() {
             <button
               key={theme.id}
               onClick={() => {
-                // Scroll to the appropriate position
+                // Scroll to the appropriate position for each theme
                 if (containerRef.current) {
-                  const targetProgress = i === 0 ? 0.25 : 0.75
+                  const targetProgress = (i + 0.5) / THEMES.length
                   const containerTop = containerRef.current.offsetTop
                   const containerHeight = containerRef.current.offsetHeight - window.innerHeight
                   const targetScroll = containerTop + containerHeight * targetProgress

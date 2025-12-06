@@ -52,16 +52,6 @@ export function IntroPreview({
         userImageUrl={userImageUrl}
       />
 
-    case 'keynote':
-      return <KeynotePreview
-        colors={colors}
-        fonts={fonts}
-        groomName={groomName}
-        brideName={brideName}
-        dateFormatted={dateFormatted}
-        intro={intro}
-      />
-
     case 'exhibition':
       return <ExhibitionPreview
         colors={colors}
@@ -82,16 +72,6 @@ export function IntroPreview({
         userImageUrl={userImageUrl}
       />
 
-    case 'vinyl':
-      return <VinylPreview
-        colors={colors}
-        fonts={fonts}
-        groomName={groomName}
-        brideName={brideName}
-        dateFormatted={dateFormatted}
-        userImageUrl={userImageUrl}
-      />
-
     case 'chat':
       return <ChatPreview
         colors={colors}
@@ -103,41 +83,44 @@ export function IntroPreview({
         isCompact={isCompact}
       />
 
-    case 'glassmorphism':
-      return <GlassmorphismPreview
+    case 'gothic-romance':
+      return <GothicRomancePreview
         colors={colors}
         fonts={fonts}
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
+        userImageUrl={userImageUrl}
       />
 
-    case 'passport':
-      return <PassportPreview
+    case 'old-money':
+      return <OldMoneyPreview
         colors={colors}
         fonts={fonts}
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
+        userImageUrl={userImageUrl}
       />
 
-    case 'pixel':
-      return <PixelPreview
+    case 'monogram':
+      return <MonogramPreview
         colors={colors}
         fonts={fonts}
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
-        intro={intro}
+        userImageUrl={userImageUrl}
       />
 
-    case 'typography':
-      return <TypographyPreview
+    case 'jewel-velvet':
+      return <JewelVelvetPreview
         colors={colors}
         fonts={fonts}
         groomName={groomName}
         brideName={brideName}
         dateFormatted={dateFormatted}
+        userImageUrl={userImageUrl}
       />
 
     default:
@@ -345,37 +328,6 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
   )
 }
 
-// Keynote Preview
-function KeynotePreview({ colors, fonts, groomName, brideName, dateFormatted, intro }: PreviewProps) {
-  const stickyTexts = intro?.settings?.stickyTexts || ['우리의 사랑']
-
-  return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: colors.background }}>
-      <div className="text-center px-4">
-        <p className="text-[8px] tracking-wider mb-2" style={{ color: colors.textMuted }}>
-          {stickyTexts[0]}
-        </p>
-        <h1
-          className="text-xl font-bold tracking-tight"
-          style={{ color: colors.text, fontFamily: fonts.title.family }}
-        >
-          {groomName}
-        </h1>
-        <p className="text-sm my-1" style={{ color: colors.accent }}>&</p>
-        <h1
-          className="text-xl font-bold tracking-tight"
-          style={{ color: colors.text, fontFamily: fonts.title.family }}
-        >
-          {brideName}
-        </h1>
-        <p className="text-[8px] mt-3" style={{ color: colors.textMuted }}>
-          {dateFormatted}
-        </p>
-      </div>
-    </div>
-  )
-}
-
 // Exhibition Preview - Gallery style like HTML template
 function ExhibitionPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   return (
@@ -483,74 +435,6 @@ function MagazinePreview({ colors, fonts, groomName, brideName, dateFormatted, u
           {dateFormatted}
         </p>
       </div>
-    </div>
-  )
-}
-
-// Vinyl Preview
-function VinylPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-      {/* Vinyl Record */}
-      <div
-        className="w-3/4 aspect-square rounded-full relative overflow-hidden"
-        style={{ backgroundColor: '#1a1a1a' }}
-      >
-        {/* User Image as vinyl texture */}
-        {userImageUrl && (
-          <div className="absolute inset-0 rounded-full overflow-hidden">
-            <Image
-              src={userImageUrl}
-              alt="Vinyl"
-              fill
-              className="object-cover opacity-30"
-              style={{ filter: 'grayscale(50%)' }}
-            />
-          </div>
-        )}
-
-        {/* Grooves */}
-        <div className="absolute inset-2 rounded-full border border-gray-700" />
-        <div className="absolute inset-4 rounded-full border border-gray-700" />
-        <div className="absolute inset-6 rounded-full border border-gray-700" />
-
-        {/* Center Label with user image */}
-        <div
-          className="absolute inset-0 m-auto w-1/3 aspect-square rounded-full flex flex-col items-center justify-center overflow-hidden"
-          style={{ backgroundColor: colors.accent }}
-        >
-          {userImageUrl ? (
-            <>
-              <Image
-                src={userImageUrl}
-                alt="Center"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-black/30" />
-              <div className="relative z-10 text-center">
-                <p className="text-[6px] font-bold text-white">{groomName}</p>
-                <p className="text-[5px] text-white/70">&</p>
-                <p className="text-[6px] font-bold text-white">{brideName}</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-[6px] font-bold text-white">{groomName}</p>
-              <p className="text-[5px] text-white/70">&</p>
-              <p className="text-[6px] font-bold text-white">{brideName}</p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Date below */}
-      <p
-        className="absolute bottom-3 text-[7px]"
-        style={{ color: colors.textMuted }}
-      >
-        {dateFormatted}
-      </p>
     </div>
   )
 }
@@ -726,179 +610,599 @@ function ChatPreview({ groomName, brideName, dateFormatted, isCompact }: Preview
   )
 }
 
-// Glassmorphism Preview
-function GlassmorphismPreview({ colors, fonts, groomName, brideName, dateFormatted }: PreviewProps) {
+// Gothic Romance Preview - Dark, moody jewel tones with Victorian elegance
+function GothicRomancePreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+  const gothicColors = {
+    burgundy: '#722F37',
+    emerald: '#2F4538',
+    gold: '#C9A962',
+    cream: '#F5E6D3',
+    dark: '#0D0D0D',
+  }
+
   return (
-    <div className="absolute inset-0" style={{ backgroundColor: colors.background }}>
-      {/* Aurora Background */}
+    <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: gothicColors.dark }}>
+      {/* Background Image with dark overlay */}
+      {userImageUrl && (
+        <div className="absolute inset-0">
+          <Image
+            src={userImageUrl}
+            alt="Preview"
+            fill
+            className="object-cover"
+            style={{ filter: 'brightness(0.4) contrast(1.1) saturate(0.9)' }}
+          />
+        </div>
+      )}
+
+      {/* Gradient Overlays */}
       <div
         className="absolute inset-0"
         style={{
-          background: `
-            radial-gradient(ellipse at 20% 20%, rgba(168,85,247,0.4) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 80%, rgba(59,130,246,0.4) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 50%, rgba(236,72,153,0.3) 0%, transparent 60%)
-          `,
+          background: `linear-gradient(180deg,
+            rgba(114, 47, 55, 0.4) 0%,
+            rgba(13, 13, 13, 0.6) 40%,
+            rgba(47, 69, 56, 0.3) 70%,
+            rgba(13, 13, 13, 0.8) 100%)`,
         }}
       />
 
-      {/* Glass Card */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="w-4/5 px-4 py-6 rounded-2xl text-center"
+      {/* Gold accent gradient */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at 50% 30%, rgba(201, 169, 98, 0.1) 0%, transparent 60%)`,
+          mixBlendMode: 'overlay',
+        }}
+      />
+
+      {/* Strong Vignette */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.8) 100%)',
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
+        {/* Top ornament */}
+        <div className="mb-4">
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-8 h-px" style={{ background: `linear-gradient(to right, transparent, ${gothicColors.gold}80)` }} />
+            <div className="w-1.5 h-1.5 rotate-45 border" style={{ borderColor: gothicColors.gold }} />
+            <div className="w-8 h-px" style={{ background: `linear-gradient(to left, transparent, ${gothicColors.gold}80)` }} />
+          </div>
+        </div>
+
+        {/* Names */}
+        <h1
+          className="text-xl font-light tracking-[0.15em] italic"
           style={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
+            color: gothicColors.cream,
+            fontFamily: fonts.title.family,
+            textShadow: `0 2px 20px rgba(114, 47, 55, 0.5)`,
           }}
         >
-          <p className="text-[6px] tracking-[0.2em] uppercase mb-2" style={{ color: colors.textMuted }}>
-            Wedding
-          </p>
-          <h1 className="text-base font-semibold" style={{ color: colors.text, fontFamily: fonts.title.family }}>
-            {groomName}
-          </h1>
-          <p className="text-sm my-1" style={{ color: colors.accent }}>♥</p>
-          <h1 className="text-base font-semibold" style={{ color: colors.text, fontFamily: fonts.title.family }}>
-            {brideName}
-          </h1>
-          <p className="text-[7px] mt-2" style={{ color: colors.textMuted }}>
+          {groomName}
+        </h1>
+
+        <div className="my-2 flex items-center gap-2">
+          <div className="w-4 h-px" style={{ backgroundColor: `${gothicColors.gold}66` }} />
+          <span className="text-xs" style={{ color: gothicColors.gold }}>&</span>
+          <div className="w-4 h-px" style={{ backgroundColor: `${gothicColors.gold}66` }} />
+        </div>
+
+        <h1
+          className="text-xl font-light tracking-[0.15em] italic"
+          style={{
+            color: gothicColors.cream,
+            fontFamily: fonts.title.family,
+            textShadow: `0 2px 20px rgba(114, 47, 55, 0.5)`,
+          }}
+        >
+          {brideName}
+        </h1>
+
+        {/* Bottom ornament & date */}
+        <div className="mt-6">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${gothicColors.gold}60)` }} />
+            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: `${gothicColors.gold}80` }} />
+            <div className="w-6 h-px" style={{ background: `linear-gradient(to left, transparent, ${gothicColors.gold}60)` }} />
+          </div>
+          <p
+            className="text-[9px] tracking-[0.2em] uppercase"
+            style={{ color: `${gothicColors.cream}cc` }}
+          >
             {dateFormatted}
           </p>
         </div>
       </div>
 
-      {/* Floating objects */}
-      <div className="absolute top-4 left-4 text-lg">💕</div>
-      <div className="absolute bottom-6 right-4 text-lg">💍</div>
-    </div>
-  )
-}
-
-// Passport Preview
-function PassportPreview({ colors, fonts, groomName, brideName, dateFormatted }: PreviewProps) {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-      <div
-        className="w-4/5 aspect-[3/4] rounded-lg shadow-lg p-3"
-        style={{ backgroundColor: '#1E3A5F' }}
-      >
-        <div className="h-full flex flex-col items-center justify-center text-center">
-          <div className="w-8 h-8 rounded-full border flex items-center justify-center mb-2" style={{ borderColor: colors.secondary }}>
-            <span className="text-sm">✈️</span>
-          </div>
-          <p className="text-[8px] tracking-[0.15em] mb-1" style={{ color: colors.secondary }}>
-            PASSPORT
-          </p>
-          <p className="text-[5px] tracking-wider" style={{ color: `${colors.secondary}80` }}>
-            WEDDING JOURNEY
-          </p>
-          <div className="mt-3 text-[7px]" style={{ color: colors.secondary }}>
-            {groomName} & {brideName}
-          </div>
-          <p className="text-[6px] mt-1" style={{ color: `${colors.secondary}80` }}>
-            {dateFormatted}
-          </p>
-        </div>
+      {/* Corner ornaments */}
+      <div className="absolute top-3 left-3 w-6 h-6">
+        <div className="absolute top-0 left-0 w-full h-px" style={{ background: `linear-gradient(to right, ${gothicColors.gold}60, transparent)` }} />
+        <div className="absolute top-0 left-0 h-full w-px" style={{ background: `linear-gradient(to bottom, ${gothicColors.gold}60, transparent)` }} />
+      </div>
+      <div className="absolute top-3 right-3 w-6 h-6">
+        <div className="absolute top-0 right-0 w-full h-px" style={{ background: `linear-gradient(to left, ${gothicColors.gold}60, transparent)` }} />
+        <div className="absolute top-0 right-0 h-full w-px" style={{ background: `linear-gradient(to bottom, ${gothicColors.gold}60, transparent)` }} />
+      </div>
+      <div className="absolute bottom-3 left-3 w-6 h-6">
+        <div className="absolute bottom-0 left-0 w-full h-px" style={{ background: `linear-gradient(to right, ${gothicColors.gold}60, transparent)` }} />
+        <div className="absolute bottom-0 left-0 h-full w-px" style={{ background: `linear-gradient(to top, ${gothicColors.gold}60, transparent)` }} />
+      </div>
+      <div className="absolute bottom-3 right-3 w-6 h-6">
+        <div className="absolute bottom-0 right-0 w-full h-px" style={{ background: `linear-gradient(to left, ${gothicColors.gold}60, transparent)` }} />
+        <div className="absolute bottom-0 right-0 h-full w-px" style={{ background: `linear-gradient(to top, ${gothicColors.gold}60, transparent)` }} />
       </div>
     </div>
   )
 }
 
-// Pixel Preview
-function PixelPreview({ colors, fonts, groomName, brideName, intro }: PreviewProps) {
-  const gameTitle = intro?.settings?.gameTitle || 'WEDDING QUEST'
-
-  // Simple pixel heart
-  const PixelHeart = () => (
-    <div className="grid grid-cols-7 gap-px">
-      {[
-        [0,1,1,0,1,1,0],
-        [1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1],
-        [0,1,1,1,1,1,0],
-        [0,0,1,1,1,0,0],
-        [0,0,0,1,0,0,0],
-      ].flat().map((filled, i) => (
-        <div
-          key={i}
-          className="w-1 h-1"
-          style={{ backgroundColor: filled ? colors.accent : 'transparent' }}
-        />
-      ))}
-    </div>
-  )
+// Old Money Preview - Quiet Luxury with letterpress texture
+function OldMoneyPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+  const oldMoneyColors = {
+    ivory: '#FAF8F5',
+    charcoal: '#2C2C2C',
+    warmGray: '#8A8580',
+    border: '#D4D0C8',
+  }
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: colors.background }}>
-      {/* Scanlines */}
+    <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: oldMoneyColors.ivory }}>
+      {/* Cotton paper texture - subtle letterpress feel */}
       <div
-        className="absolute inset-0 opacity-10 pointer-events-none"
+        className="absolute inset-0 opacity-[0.04]"
         style={{
-          backgroundImage: `repeating-linear-gradient(0deg, ${colors.text} 0px, ${colors.text} 1px, transparent 1px, transparent 3px)`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E")`,
         }}
       />
 
-      {/* Game Title */}
-      <h1
-        className="text-sm tracking-wider mb-4"
-        style={{ color: colors.text, textShadow: `2px 2px 0 ${colors.secondary}` }}
-      >
-        {gameTitle}
-      </h1>
+      {/* User image - larger portion with elegant fade */}
+      {userImageUrl && (
+        <div className="absolute top-0 left-0 right-0 h-[65%]">
+          <Image
+            src={userImageUrl}
+            alt="Preview"
+            fill
+            className="object-cover"
+            style={{
+              filter: 'brightness(1.05) contrast(0.92) saturate(0.7) sepia(0.15)',
+            }}
+          />
+          {/* Ivory tone overlay */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'rgba(250, 248, 240, 0.15)',
+              mixBlendMode: 'overlay',
+            }}
+          />
+          {/* Smooth fade to ivory */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to bottom, transparent 70%, ${oldMoneyColors.ivory} 100%)`,
+            }}
+          />
+        </div>
+      )}
 
-      {/* Characters and Heart */}
-      <div className="flex items-center gap-3 mb-4">
-        <p className="text-[8px]" style={{ color: colors.text }}>{groomName}</p>
-        <PixelHeart />
-        <p className="text-[8px]" style={{ color: colors.text }}>{brideName}</p>
+      {/* Content - compact typography, bottom portion */}
+      <div className="relative z-10 h-full flex flex-col justify-end items-center text-center px-8 pb-4">
+        {/* Names with refined typography */}
+        <h1
+          className="text-lg tracking-[0.25em] font-normal uppercase"
+          style={{
+            color: oldMoneyColors.charcoal,
+            fontFamily: 'Cormorant Garamond, serif',
+          }}
+        >
+          {groomName}
+        </h1>
+
+        <span
+          className="text-[10px] my-2 tracking-[0.3em] uppercase"
+          style={{
+            color: oldMoneyColors.warmGray,
+            fontFamily: 'Cormorant Garamond, serif',
+          }}
+        >
+          and
+        </span>
+
+        <h1
+          className="text-lg tracking-[0.25em] font-normal uppercase"
+          style={{
+            color: oldMoneyColors.charcoal,
+            fontFamily: 'Cormorant Garamond, serif',
+          }}
+        >
+          {brideName}
+        </h1>
+
+        {/* Thin divider line */}
+        <div
+          className="w-10 h-px mt-4 mb-3"
+          style={{ backgroundColor: oldMoneyColors.border }}
+        />
+
+        {/* Date - formal style */}
+        <p
+          className="text-[8px] tracking-[0.2em] uppercase"
+          style={{
+            color: oldMoneyColors.warmGray,
+            fontFamily: 'Cormorant Garamond, serif',
+          }}
+        >
+          {dateFormatted}
+        </p>
       </div>
 
-      {/* Press Start */}
-      <p className="text-[7px] tracking-[0.2em]" style={{ color: colors.text }}>
-        ▶ PRESS START
-      </p>
     </div>
   )
 }
 
-// Typography Preview
-function TypographyPreview({ colors, fonts, groomName, brideName, dateFormatted }: PreviewProps) {
+// Monogram Preview - Royal emblem with navy and gold
+function MonogramPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+  const monoColors = {
+    navy: '#1A3A5C',
+    gold: '#C5A572',
+    goldLight: '#D4BC8E',
+    cream: '#F8F5F0',
+  }
+
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: colors.background }}>
-      <div className="text-center px-4">
+    <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: monoColors.navy }}>
+      {/* Subtle damask pattern overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='%23C5A572' fill-opacity='0.5'/%3E%3C/svg%3E")`,
+          backgroundSize: '30px 30px',
+        }}
+      />
+
+      {/* User image with navy overlay */}
+      {userImageUrl && (
+        <div className="absolute inset-0">
+          <Image
+            src={userImageUrl}
+            alt="Preview"
+            fill
+            className="object-cover"
+            style={{
+              filter: 'brightness(0.4) contrast(1.1) saturate(0.6)',
+            }}
+          />
+          {/* Navy tint overlay */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, ${monoColors.navy}dd 0%, ${monoColors.navy}cc 50%, ${monoColors.navy}ee 100%)`,
+              mixBlendMode: 'multiply',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
+        {/* Shield Crest with Laurel */}
+        <div className="relative mb-4">
+          {/* Laurel wreath - left */}
+          <div
+            className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-12"
+            style={{
+              background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 20 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 30C18 20 12 10 8 5C10 12 10 20 8 30C10 40 10 48 8 55C12 50 18 40 18 30Z' fill='none' stroke='%23C5A572' stroke-width='1'/%3E%3Cpath d='M14 20C12 18 8 16 6 18C8 20 10 24 10 30C10 24 12 22 14 20Z' fill='%23C5A572' opacity='0.6'/%3E%3Cpath d='M14 40C12 42 8 44 6 42C8 40 10 36 10 30C10 36 12 38 14 40Z' fill='%23C5A572' opacity='0.6'/%3E%3C/svg%3E") no-repeat center`,
+              backgroundSize: 'contain',
+              opacity: 0.8,
+            }}
+          />
+          {/* Laurel wreath - right */}
+          <div
+            className="absolute -right-4 top-1/2 -translate-y-1/2 w-4 h-12"
+            style={{
+              background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 20 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 30C2 20 8 10 12 5C10 12 10 20 12 30C10 40 10 48 12 55C8 50 2 40 2 30Z' fill='none' stroke='%23C5A572' stroke-width='1'/%3E%3Cpath d='M6 20C8 18 12 16 14 18C12 20 10 24 10 30C10 24 8 22 6 20Z' fill='%23C5A572' opacity='0.6'/%3E%3Cpath d='M6 40C8 42 12 44 14 42C12 40 10 36 10 30C10 36 8 38 6 40Z' fill='%23C5A572' opacity='0.6'/%3E%3C/svg%3E") no-repeat center`,
+              backgroundSize: 'contain',
+              opacity: 0.8,
+            }}
+          />
+
+          {/* Shield shape */}
+          <div
+            className="w-14 h-16 flex items-center justify-center relative"
+            style={{
+              background: `linear-gradient(145deg, ${monoColors.gold} 0%, ${monoColors.goldLight} 50%, ${monoColors.gold} 100%)`,
+              clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)',
+              boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2)',
+            }}
+          >
+            {/* Inner shield border */}
+            <div
+              className="absolute inset-[3px] flex items-center justify-center"
+              style={{
+                background: monoColors.navy,
+                clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)',
+              }}
+            >
+              {/* Initials */}
+              <span
+                className="text-base font-normal tracking-[0.15em]"
+                style={{
+                  color: monoColors.gold,
+                  fontFamily: 'Playfair Display, serif',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                }}
+              >
+                {groomName.charAt(0)}{brideName.charAt(0)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Names */}
         <h1
-          className="text-3xl font-bold tracking-tighter leading-none"
-          style={{ color: colors.text, fontFamily: fonts.title.family }}
+          className="text-base tracking-[0.2em] font-normal uppercase"
+          style={{
+            color: monoColors.cream,
+            fontFamily: 'Cormorant Garamond, serif',
+          }}
         >
-          WE
-        </h1>
-        <h1
-          className="text-3xl font-bold tracking-tighter leading-none -mt-1"
-          style={{ color: colors.text, fontFamily: fonts.title.family }}
-        >
-          ARE
-        </h1>
-        <p
-          className="text-[8px] tracking-[0.2em] mt-1"
-          style={{ color: colors.textMuted }}
-        >
-          GETTING MARRIED
-        </p>
-        <div className="w-12 h-px mx-auto my-3" style={{ backgroundColor: colors.text }} />
-        <p className="text-sm" style={{ color: colors.text }}>
           {groomName}
-          <span className="mx-1 text-xs" style={{ color: colors.accent }}>&</span>
+        </h1>
+
+        <div className="my-2 flex items-center gap-3">
+          <div
+            className="w-6 h-px"
+            style={{
+              background: `linear-gradient(to right, transparent, ${monoColors.gold})`,
+            }}
+          />
+          <span
+            className="text-[10px] tracking-widest uppercase"
+            style={{
+              color: monoColors.gold,
+              fontFamily: 'Cormorant Garamond, serif',
+            }}
+          >
+            and
+          </span>
+          <div
+            className="w-6 h-px"
+            style={{
+              background: `linear-gradient(to left, transparent, ${monoColors.gold})`,
+            }}
+          />
+        </div>
+
+        <h1
+          className="text-base tracking-[0.2em] font-normal uppercase"
+          style={{
+            color: monoColors.cream,
+            fontFamily: 'Cormorant Garamond, serif',
+          }}
+        >
           {brideName}
-        </p>
-        <p className="text-[7px] mt-2 font-mono" style={{ color: colors.textMuted }}>
-          {dateFormatted.replace(/-/g, '.')}
-        </p>
+        </h1>
+
+        {/* Date with decorative line */}
+        <div className="mt-4 flex flex-col items-center">
+          <div
+            className="w-12 h-px mb-3"
+            style={{
+              background: `linear-gradient(to right, transparent, ${monoColors.gold}80, transparent)`,
+            }}
+          />
+          <p
+            className="text-[8px] tracking-[0.2em] uppercase"
+            style={{
+              color: `${monoColors.cream}cc`,
+              fontFamily: 'Cormorant Garamond, serif',
+            }}
+          >
+            {dateFormatted}
+          </p>
+        </div>
       </div>
 
-      {/* Corner accents */}
-      <div className="absolute top-3 left-3 w-4 h-4 border-l border-t opacity-30" style={{ borderColor: colors.text }} />
-      <div className="absolute bottom-3 right-3 w-4 h-4 border-r border-b opacity-30" style={{ borderColor: colors.text }} />
+      {/* Elegant corner flourishes */}
+      <div className="absolute top-3 left-3 w-6 h-6">
+        <div
+          className="absolute top-0 left-0 w-full h-[1px]"
+          style={{ background: `linear-gradient(to right, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute top-0 left-0 h-full w-[1px]"
+          style={{ background: `linear-gradient(to bottom, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute top-1 left-1 w-1 h-1 rounded-full"
+          style={{ backgroundColor: monoColors.gold }}
+        />
+      </div>
+      <div className="absolute top-3 right-3 w-6 h-6">
+        <div
+          className="absolute top-0 right-0 w-full h-[1px]"
+          style={{ background: `linear-gradient(to left, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute top-0 right-0 h-full w-[1px]"
+          style={{ background: `linear-gradient(to bottom, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute top-1 right-1 w-1 h-1 rounded-full"
+          style={{ backgroundColor: monoColors.gold }}
+        />
+      </div>
+      <div className="absolute bottom-3 left-3 w-6 h-6">
+        <div
+          className="absolute bottom-0 left-0 w-full h-[1px]"
+          style={{ background: `linear-gradient(to right, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute bottom-0 left-0 h-full w-[1px]"
+          style={{ background: `linear-gradient(to top, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute bottom-1 left-1 w-1 h-1 rounded-full"
+          style={{ backgroundColor: monoColors.gold }}
+        />
+      </div>
+      <div className="absolute bottom-3 right-3 w-6 h-6">
+        <div
+          className="absolute bottom-0 right-0 w-full h-[1px]"
+          style={{ background: `linear-gradient(to left, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute bottom-0 right-0 h-full w-[1px]"
+          style={{ background: `linear-gradient(to top, ${monoColors.gold}, transparent)` }}
+        />
+        <div
+          className="absolute bottom-1 right-1 w-1 h-1 rounded-full"
+          style={{ backgroundColor: monoColors.gold }}
+        />
+      </div>
+    </div>
+  )
+}
+
+// Jewel Velvet Preview - Deep jewel tones with velvet gradient
+function JewelVelvetPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+  const jewelColors = {
+    emerald: '#2F4538',
+    burgundy: '#722F37',
+    gold: '#C9A962',
+    cream: '#F5E6D3',
+    dark: '#0D0D0D',
+  }
+
+  return (
+    <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: jewelColors.dark }}>
+      {/* Velvet gradient background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(135deg, ${jewelColors.emerald} 0%, ${jewelColors.dark} 50%, ${jewelColors.burgundy} 100%)`,
+        }}
+      />
+
+      {/* User image with dark overlay */}
+      {userImageUrl && (
+        <div className="absolute inset-0">
+          <Image
+            src={userImageUrl}
+            alt="Preview"
+            fill
+            className="object-cover"
+            style={{ filter: 'brightness(0.3) contrast(1.1) saturate(0.8)' }}
+          />
+        </div>
+      )}
+
+      {/* Gradient overlay for velvet effect */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(135deg,
+            rgba(47, 69, 56, 0.7) 0%,
+            rgba(13, 13, 13, 0.5) 50%,
+            rgba(114, 47, 55, 0.7) 100%)`,
+        }}
+      />
+
+      {/* Gold accent */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at 50% 40%, rgba(201, 169, 98, 0.15) 0%, transparent 50%)`,
+          mixBlendMode: 'overlay',
+        }}
+      />
+
+      {/* Strong vignette */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%)',
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
+        {/* Top ornament */}
+        <div className="mb-4">
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-6 h-px" style={{ background: `linear-gradient(to right, transparent, ${jewelColors.gold}80)` }} />
+            <div className="w-2 h-2 rotate-45" style={{ border: `1px solid ${jewelColors.gold}`, background: 'transparent' }} />
+            <div className="w-6 h-px" style={{ background: `linear-gradient(to left, transparent, ${jewelColors.gold}80)` }} />
+          </div>
+        </div>
+
+        {/* Names */}
+        <h1
+          className="text-xl font-light tracking-[0.12em]"
+          style={{
+            color: jewelColors.cream,
+            fontFamily: fonts.title.family,
+            textShadow: `0 2px 15px rgba(114, 47, 55, 0.5)`,
+          }}
+        >
+          {groomName}
+        </h1>
+
+        <div className="my-2 flex items-center gap-2">
+          <div className="w-4 h-px" style={{ backgroundColor: `${jewelColors.gold}66` }} />
+          <span className="text-xs" style={{ color: jewelColors.gold }}>&</span>
+          <div className="w-4 h-px" style={{ backgroundColor: `${jewelColors.gold}66` }} />
+        </div>
+
+        <h1
+          className="text-xl font-light tracking-[0.12em]"
+          style={{
+            color: jewelColors.cream,
+            fontFamily: fonts.title.family,
+            textShadow: `0 2px 15px rgba(47, 69, 56, 0.5)`,
+          }}
+        >
+          {brideName}
+        </h1>
+
+        {/* Bottom ornament & date */}
+        <div className="mt-5">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-5 h-px" style={{ background: `linear-gradient(to right, transparent, ${jewelColors.gold}60)` }} />
+            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: `${jewelColors.gold}80` }} />
+            <div className="w-5 h-px" style={{ background: `linear-gradient(to left, transparent, ${jewelColors.gold}60)` }} />
+          </div>
+          <p
+            className="text-[9px] tracking-[0.2em] uppercase"
+            style={{ color: `${jewelColors.cream}cc` }}
+          >
+            {dateFormatted}
+          </p>
+        </div>
+      </div>
+
+      {/* Subtle corner accents */}
+      <div className="absolute top-3 left-3 w-5 h-5">
+        <div className="absolute top-0 left-0 w-full h-px" style={{ background: `linear-gradient(to right, ${jewelColors.gold}50, transparent)` }} />
+        <div className="absolute top-0 left-0 h-full w-px" style={{ background: `linear-gradient(to bottom, ${jewelColors.gold}50, transparent)` }} />
+      </div>
+      <div className="absolute top-3 right-3 w-5 h-5">
+        <div className="absolute top-0 right-0 w-full h-px" style={{ background: `linear-gradient(to left, ${jewelColors.gold}50, transparent)` }} />
+        <div className="absolute top-0 right-0 h-full w-px" style={{ background: `linear-gradient(to bottom, ${jewelColors.gold}50, transparent)` }} />
+      </div>
+      <div className="absolute bottom-3 left-3 w-5 h-5">
+        <div className="absolute bottom-0 left-0 w-full h-px" style={{ background: `linear-gradient(to right, ${jewelColors.gold}50, transparent)` }} />
+        <div className="absolute bottom-0 left-0 h-full w-px" style={{ background: `linear-gradient(to top, ${jewelColors.gold}50, transparent)` }} />
+      </div>
+      <div className="absolute bottom-3 right-3 w-5 h-5">
+        <div className="absolute bottom-0 right-0 w-full h-px" style={{ background: `linear-gradient(to left, ${jewelColors.gold}50, transparent)` }} />
+        <div className="absolute bottom-0 right-0 h-full w-px" style={{ background: `linear-gradient(to top, ${jewelColors.gold}50, transparent)` }} />
+      </div>
     </div>
   )
 }

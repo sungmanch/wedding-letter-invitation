@@ -29,25 +29,30 @@ export function TemplateGrid({
     return (
       <div
         className={cn(
-          'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4',
+          'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4',
           className
         )}
       >
-        {Array.from({ length: 11 }).map((_, i) => (
+        {Array.from({ length: 8 }).map((_, i) => (
           <TemplateCardSkeleton key={i} />
         ))}
       </div>
     )
   }
 
+  // 커스텀 버튼 위치: 첫번째 줄 마지막
+  // 7개 템플릿 + 커스텀 = 8개 (4열 x 2줄)
+  // 모바일(2열): 3번째, 태블릿(3열): 3번째, 데스크탑(4열): 3번째
+  const customButtonIndex = 3
+
   return (
     <div
       className={cn(
-        'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4',
+        'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4',
         className
       )}
     >
-      {templates.map((template) => (
+      {templates.slice(0, customButtonIndex).map((template) => (
         <TemplateCard
           key={template.id}
           template={template}
@@ -57,8 +62,18 @@ export function TemplateGrid({
         />
       ))}
 
-      {/* Custom Theme Button - Last position */}
+      {/* Custom Theme Button - 첫번째 줄 가운데 */}
       <CustomThemeButton onClick={onCustomClick} />
+
+      {templates.slice(customButtonIndex).map((template) => (
+        <TemplateCard
+          key={template.id}
+          template={template}
+          isSelected={selectedTemplateId === template.id}
+          onSelect={() => onSelect(template.id)}
+          userImageUrl={userImageUrl}
+        />
+      ))}
     </div>
   )
 }

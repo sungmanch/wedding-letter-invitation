@@ -20,6 +20,9 @@ import templatesData from './templates.json'
 
 const staticTemplates: ThemeTemplate[] = templatesData.templates as ThemeTemplate[]
 
+// /create 페이지에서 숨길 템플릿 ID
+const HIDDEN_FROM_CREATE = ['chat']
+
 /**
  * 모든 정적 템플릿 가져오기
  */
@@ -43,9 +46,14 @@ export function getTemplatesByCategory(category: ThemeCategory): ThemeTemplate[]
 
 /**
  * 템플릿 미리보기 목록 가져오기
+ * @param options.includeHidden - true면 숨겨진 템플릿도 포함 (기본: false)
  */
-export function getTemplatePreviews(): ThemePreview[] {
-  return staticTemplates.map((t) => ({
+export function getTemplatePreviews(options?: { includeHidden?: boolean }): ThemePreview[] {
+  const filtered = options?.includeHidden
+    ? staticTemplates
+    : staticTemplates.filter((t) => !HIDDEN_FROM_CREATE.includes(t.id))
+
+  return filtered.map((t) => ({
     id: t.id,
     name: t.name,
     nameKo: t.nameKo,

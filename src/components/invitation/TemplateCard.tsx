@@ -7,6 +7,18 @@ import type { ThemePreview } from '@/lib/themes'
 import { getTemplateById } from '@/lib/themes'
 import { IntroPreview } from './intros/IntroPreview'
 
+// 템플릿 ID별 기본 프리뷰 이미지 매핑
+const TEMPLATE_DEFAULT_IMAGES: Record<string, string> = {
+  'cinematic': '/examples/images/example_wedding_image2.png',
+  'exhibition': '/examples/images/example_wedding_image3.png',
+  'magazine': '/examples/images/example_wedding_image4.png',
+  'chat': '/examples/images/example_wedding_image5.png',
+  'gothic-romance': '/examples/images/example_wedding_image6.png',
+  'old-money': '/examples/images/example_wedding_image7.png',
+  'monogram': '/examples/images/example_wedding_image8.png',
+  'jewel-velvet': '/examples/images/example_wedding_image9.png',
+}
+
 interface TemplateCardProps {
   template: ThemePreview
   isSelected: boolean
@@ -24,6 +36,9 @@ export function TemplateCard({
 }: TemplateCardProps) {
   // Get full template data for intro config
   const fullTemplate = React.useMemo(() => getTemplateById(template.id), [template.id])
+
+  // 사용자 이미지가 없으면 템플릿별 기본 이미지 사용
+  const previewImageUrl = userImageUrl || TEMPLATE_DEFAULT_IMAGES[template.id]
 
   return (
     <button
@@ -54,7 +69,7 @@ export function TemplateCard({
             brideName="수진"
             weddingDate="2025-05-24"
             venueName="더채플 청담"
-            userImageUrl={userImageUrl}
+            userImageUrl={previewImageUrl}
           />
         )}
 
