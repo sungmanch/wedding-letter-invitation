@@ -7,6 +7,7 @@ import type { SectionType, SkeletonVariant } from '../skeletons/types'
 import type { SemanticDesignTokens } from '../tokens/schema'
 import type { DesignPatterns } from '../utils/design-pattern-extractor'
 import type { IntroBlockComposition } from '../skeletons/intro-blocks'
+import type { VariableDeclaration } from '../schema/variables'
 import {
   IMAGE_LAYOUT_DESCRIPTIONS,
   TEXT_LAYOUT_DESCRIPTIONS,
@@ -94,6 +95,8 @@ export interface VariantSummary {
 
 export interface FillerResponse {
   sections: SectionSelection[]
+  /** 커스텀 변수 선언 (표준 변수 외 추가 변수) */
+  customVariables?: VariableDeclaration[]
 }
 
 export interface SectionSelection {

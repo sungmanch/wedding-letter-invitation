@@ -24,6 +24,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
 import type { EditorSchema } from '../schema/editor'
+import { generateEditorSectionsFromLayout } from '../utils/editor-generator'
 
 // ============================================
 // AI Template Generation
@@ -352,6 +353,16 @@ export async function saveInvitationAction(
     }
 
     // 1. Template 생성 (레이아웃, 스타일, 에디터 스키마 저장)
+    // Layout이 있으면 변수 기반 동적 에디터 생성, 없으면 레거시 방식
+    const editorSections = layoutSchema
+      ? generateEditorSectionsFromLayout({
+          layout: layoutSchema,
+          declarations: generationResult?.variables?.declarations,
+          fallbackToStandard: true,
+          inferUnknown: true,
+        })
+      : getDefaultEditorSections()
+
     const editorSchema: EditorSchema = {
       version: '1.0',
       meta: {
@@ -363,7 +374,7 @@ export async function saveInvitationAction(
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      sections: getDefaultEditorSections(),
+      sections: editorSections,
     }
 
     const [template] = await db.insert(superEditorTemplates).values({

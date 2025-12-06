@@ -13,13 +13,14 @@ Super Editor는 28개의 Primitive 블록을 조합하여 다양한 청첩장 �
 
 # 출력 형식
 
-반드시 아래 3개의 JSON을 생성해야 합니다:
+반드시 아래 4개의 JSON을 생성해야 합니다:
 
 \`\`\`json
 {
   "layout": { ... LayoutSchema },
   "style": { ... StyleSchema },
-  "editor": { ... EditorSchema }
+  "editor": { ... EditorSchema },
+  "variables": { ... VariablesSchema }
 }
 \`\`\`
 
@@ -860,6 +861,76 @@ Layout에서 사용자 데이터를 표시할 때 \`{{path.to.data}}\` 형식을
 
 ---
 
+# 5. VariablesSchema (변수 선언)
+
+Layout에서 사용하는 모든 \`{{path.to.data}}\` 형태의 변수를 선언합니다.
+에디터가 자동으로 필드를 생성하는 데 사용됩니다.
+
+\`\`\`typescript
+interface VariablesSchema {
+  declarations: VariableDeclaration[]
+}
+
+interface VariableDeclaration {
+  path: string              // 데이터 바인딩 경로 (예: "couple.groom.name")
+  type: VariableType        // 변수 타입
+  label: string             // 에디터 라벨 (한글)
+  required: boolean         // 필수 여부
+  defaultValue?: unknown    // 기본값
+  placeholder?: string      // 플레이스홀더
+  helpText?: string        // 도움말
+  // 타입별 속성
+  options?: { value: string; label: string }[]  // select용
+  aspectRatio?: string      // image용
+  maxLength?: number        // text/textarea용
+  rows?: number            // textarea용
+}
+
+type VariableType =
+  | 'text' | 'textarea' | 'image' | 'images'
+  | 'date' | 'time' | 'number' | 'select'
+  | 'phone' | 'url' | 'location'
+\`\`\`
+
+## 표준 변수 (선언 생략 가능)
+
+아래 경로는 시스템에 미리 정의되어 있어 선언하지 않아도 됩니다:
+
+- \`couple.groom.name\`, \`couple.bride.name\` - 신랑/신부 이름
+- \`wedding.date\`, \`wedding.time\` - 예식 날짜/시간
+- \`venue.name\`, \`venue.address\`, \`venue.hall\` - 예식장 정보
+- \`photos.main\`, \`photos.gallery\` - 사진
+- \`greeting.title\`, \`greeting.content\` - 인사말
+- \`parents.groom.father.name\`, \`parents.groom.mother.name\` 등 - 혼주 정보
+
+## 커스텀 변수 선언 (필수)
+
+Layout에서 표준 변수 외의 새로운 변수를 사용하면 **반드시 declarations에 선언**해야 합니다:
+
+\`\`\`json
+{
+  "declarations": [
+    {
+      "path": "custom.heroTitle",
+      "type": "text",
+      "label": "히어로 제목",
+      "required": false,
+      "defaultValue": "우리의 특별한 날",
+      "placeholder": "제목을 입력하세요"
+    },
+    {
+      "path": "custom.subtitle",
+      "type": "textarea",
+      "label": "서브 타이틀",
+      "required": false,
+      "rows": 2
+    }
+  ]
+}
+\`\`\`
+
+---
+
 # 주의사항
 
 1. **모든 ID는 고유해야 합니다** (kebab-case 권장)
@@ -867,6 +938,7 @@ Layout에서 사용자 데이터를 표시할 때 \`{{path.to.data}}\` 형식을
 3. **JSON만 출력하세요** (설명 없이 순수 JSON)
 4. **버전은 항상 "1.0"입니다**
 5. **날짜는 ISO 형식 (new Date().toISOString())**
+6. **커스텀 변수는 반드시 variables.declarations에 선언해야 합니다**
 `
 
 /**
