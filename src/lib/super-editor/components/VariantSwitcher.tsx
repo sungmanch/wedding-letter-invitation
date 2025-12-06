@@ -53,7 +53,7 @@ export function VariantSwitcher({
 
   return (
     <div
-      className={`absolute left-0 right-0 ${positionClass} flex items-center justify-center gap-2 z-20 pointer-events-none ${className}`}
+      className={`absolute left-0 right-0 top-[-24px] ${positionClass} flex items-center justify-start gap-2 z-20 pointer-events-none opacity-50 hover:opacity-100 ${className}`}
     >
       <div className="flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 pointer-events-auto">
         <button
@@ -65,9 +65,7 @@ export function VariantSwitcher({
         </button>
 
         <div className="px-2 min-w-[100px] text-center">
-          <span className="text-xs text-white/60 block leading-none">
-            {skeleton?.name}
-          </span>
+          <span className="text-xs text-white/60 block leading-none">{skeleton?.name}</span>
           <span className="text-sm text-white font-medium leading-tight">
             {currentVariant?.name ?? 'Unknown'}
           </span>
@@ -118,9 +116,7 @@ export function VariantInfo({ variant }: { variant: SkeletonVariant }) {
   return (
     <div className="bg-black/60 backdrop-blur-sm rounded-lg p-3 text-white">
       <h4 className="font-medium text-sm">{variant.name}</h4>
-      {variant.description && (
-        <p className="text-xs text-white/70 mt-1">{variant.description}</p>
-      )}
+      {variant.description && <p className="text-xs text-white/70 mt-1">{variant.description}</p>}
       {variant.tags.length > 0 && (
         <div className="flex gap-1 mt-2 flex-wrap">
           {variant.tags.map((tag) => (

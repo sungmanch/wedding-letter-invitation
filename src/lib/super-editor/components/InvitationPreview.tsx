@@ -62,7 +62,11 @@ interface PhoneFrameProps {
   children: React.ReactNode
 }
 
-function PhoneFrame({ width = DEFAULT_FRAME_WIDTH, height = DEFAULT_FRAME_HEIGHT, children }: PhoneFrameProps) {
+function PhoneFrame({
+  width = DEFAULT_FRAME_WIDTH,
+  height = DEFAULT_FRAME_HEIGHT,
+  children,
+}: PhoneFrameProps) {
   const allStyles = useMemo(() => collectAllIntroStyles(), [])
 
   return (
