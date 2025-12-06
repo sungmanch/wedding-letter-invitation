@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { InvitationRenderer } from '@/lib/super-editor/renderers'
-import { ShareFab, ShareModal } from '@/lib/super-editor/components'
+import { InvitationPreview, ShareFab, ShareModal } from '@/lib/super-editor/components'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
@@ -35,7 +34,7 @@ export function ViewerClient({
 
   return (
     <>
-      <InvitationRenderer
+      <InvitationPreview
         layout={layout}
         style={style}
         userData={userData}
