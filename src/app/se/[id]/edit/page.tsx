@@ -117,13 +117,18 @@ function EditPageContent() {
       if (state.layout) {
         await updateTemplateLayout(invitationId, state.layout)
       }
+
+      // style 저장
+      if (state.style) {
+        await updateTemplateStyle(invitationId, state.style)
+      }
     } catch (err) {
       console.error('Failed to save:', err)
       alert('저장에 실패했습니다.')
     } finally {
       setSaving(false)
     }
-  }, [invitationId, state.userData, state.layout, sectionOrder, sectionEnabled])
+  }, [invitationId, state.userData, state.layout, state.style, sectionOrder, sectionEnabled])
 
   const handleGenerateShareUrl = useCallback(async () => {
     try {
@@ -180,16 +185,12 @@ function EditPageContent() {
     [invitationId, sectionOrder]
   )
 
+  // 스타일 변경 (프리뷰 업데이트만, 저장은 handleSave에서)
   const handleStyleChange = useCallback(
-    async (newStyle: StyleSchema) => {
+    (newStyle: StyleSchema) => {
       setStyle(newStyle)
-      try {
-        await updateTemplateStyle(invitationId, newStyle)
-      } catch (err) {
-        console.error('Failed to save style:', err)
-      }
     },
-    [invitationId, setStyle]
+    [setStyle]
   )
 
   // Variant change handler (dev mode only)
