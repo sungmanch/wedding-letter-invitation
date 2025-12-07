@@ -8,6 +8,11 @@ import type { StyleSchema, StyleMood } from '../schema/style'
 import type { AIProvider } from './generation-service'
 import type { FillerResponse } from '../prompts/filler-prompt'
 import { FILLER_SYSTEM_PROMPT } from '../prompts/filler-prompt'
+import {
+  getMoodVariantHints,
+  COLOR_PRESETS,
+  type EnhancedPromptInput,
+} from '../prompts/prompt-hints'
 
 // ============================================
 // Configuration
@@ -82,6 +87,92 @@ export function createGeminiProvider(): AIProvider {
   return {
     generateStyle,
     selectVariants,
+  }
+}
+
+// ============================================
+// Enhanced Style Generation (구조화된 입력 지원)
+// ============================================
+
+export interface EnhancedGenerateStyleOptions {
+  prompt: string
+  mood?: string[]
+  colorPreset?: string
+  customColor?: string
+  keyword?: string
+}
+
+/**
+ * 구조화된 입력으로 스타일 생성 (위저드 UI용)
+ */
+export async function generateStyleEnhanced(
+  options: EnhancedGenerateStyleOptions
+): Promise<StyleSchema> {
+  const { prompt, mood, colorPreset, customColor, keyword } = options
+
+  // variantHints 추출 (AI 프롬프트에 포함)
+  const variantHints = getMoodVariantHints(mood ?? [])
+
+  // 색상 프리셋 적용
+  let colorHint = ''
+  if (customColor) {
+    colorHint = `\n\n# 색상 지정\n사용자가 "${customColor}" 색상을 요청했습니다. 이 색상을 primary 색상으로 사용하세요.`
+  } else if (colorPreset && COLOR_PRESETS[colorPreset]) {
+    const preset = COLOR_PRESETS[colorPreset]
+    colorHint = `\n\n# 색상 프리셋\nprimary: ${preset.primary}\nbackground: ${preset.background}\n이 색상을 기반으로 조화로운 팔레트를 구성하세요.`
+  }
+
+  // 키워드 힌트
+  let keywordHint = ''
+  if (keyword?.trim()) {
+    keywordHint = `\n\n# 키워드\n"${keyword.trim()}" - 이 단어가 연상시키는 분위기와 느낌을 반영하세요.`
+  }
+
+  // variantHints 힌트
+  let variantHintStr = ''
+  if (variantHints.length > 0) {
+    variantHintStr = `\n\n# 추천 Intro Variant\n${variantHints.join(', ')} - 이 variant들에 잘 어울리는 스타일을 생성하세요.`
+  }
+
+  // 강화된 시스템 프롬프트
+  const enhancedSystemPrompt = STYLE_SYSTEM_PROMPT + colorHint + keywordHint + variantHintStr
+
+  const model = genAI.getGenerativeModel({
+    model: MODEL,
+    systemInstruction: enhancedSystemPrompt,
+  })
+
+  const userPrompt = buildStylePrompt(prompt, mood)
+
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+      generationConfig: {
+        maxOutputTokens: 4096,
+        temperature: 0.7,
+      },
+    })
+
+    const response = await result.response
+    const text = response.text()
+
+    if (!text) {
+      throw new Error('No response from AI')
+    }
+
+    const parsed = parseStyleResponse(text, mood)
+
+    // 색상 프리셋이 지정된 경우 강제 적용
+    if (colorPreset && COLOR_PRESETS[colorPreset]) {
+      const preset = COLOR_PRESETS[colorPreset]
+      parsed.theme.colors.primary = { ...parsed.theme.colors.primary, 500: preset.primary }
+      parsed.theme.colors.background = { ...parsed.theme.colors.background, default: preset.background }
+    }
+
+    return parsed
+  } catch (error) {
+    console.error('Enhanced style generation failed:', error)
+    return createFallbackStyle(mood)
   }
 }
 
