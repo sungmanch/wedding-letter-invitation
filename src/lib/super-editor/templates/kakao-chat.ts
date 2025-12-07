@@ -5,7 +5,6 @@
 
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
 
 // ============================================
 // Layout Schema - 카카오톡 채팅 UI 구조
@@ -841,7 +840,7 @@ export const kakaoStyleSchema: StyleSchema = {
 // Editor Schema - 사용자 입력 필드 정의
 // ============================================
 
-export const kakaoEditorSchema: EditorSchema = {
+export const kakaoEditorSchema = {
   version: '1.0',
   meta: {
     id: 'kakao-editor-v1',
@@ -1208,7 +1207,6 @@ export const kakaoSampleData = {
 export const kakaoTemplate = {
   layout: kakaoLayoutSchema,
   style: kakaoStyleSchema,
-  editor: kakaoEditorSchema,
   sampleData: kakaoSampleData,
 }
 

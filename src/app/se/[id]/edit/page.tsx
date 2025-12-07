@@ -30,10 +30,10 @@ import {
 import { getDefaultVariant } from '@/lib/super-editor/skeletons/registry'
 import type { LayoutSchema, Screen } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
-import type { EditorSchema } from '@/lib/super-editor/schema/editor'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
+import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 
 type EditorTab = 'fields' | 'style' | 'sections'
 
@@ -53,6 +53,8 @@ function EditPageContent() {
     useState<Record<SectionType, boolean>>(DEFAULT_SECTION_ENABLED)
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>()
   const [activeTab, setActiveTab] = useState<EditorTab>('fields')
+  // 변수 선언 (에디터 필드 생성용)
+  const [variablesSchema, setVariablesSchema] = useState<VariablesSchema | undefined>()
   // Variant switcher state (dev mode only)
   const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>(
     {} as Record<SectionType, string>
@@ -70,10 +72,13 @@ function EditPageContent() {
         const { invitation, template } = data
         setTemplate(
           template.layoutSchema as LayoutSchema,
-          template.styleSchema as StyleSchema,
-          template.editorSchema as EditorSchema
+          template.styleSchema as StyleSchema
         )
         setUserData(invitation.userData as UserData)
+        // 변수 선언 저장 (에디터 필드 생성에 사용)
+        if (template.variablesSchema) {
+          setVariablesSchema(template.variablesSchema as VariablesSchema)
+        }
         setSectionOrder((invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER)
         setSectionEnabled(
           (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
@@ -213,9 +218,9 @@ function EditPageContent() {
       }
 
       // Update context state (visual update only, not saved to DB)
-      setTemplate(newLayout, state.style!, state.editor!)
+      setTemplate(newLayout, state.style!)
     },
-    [state.layout, state.style, state.editor, setTemplate]
+    [state.layout, state.style, setTemplate]
   )
 
   // Add section handler (dev mode only)
@@ -252,9 +257,9 @@ function EditPageContent() {
       setSectionVariants((prev) => ({ ...prev, [sectionType]: defaultVariant.id }))
 
       // Update context state
-      setTemplate(newLayout, state.style!, state.editor!)
+      setTemplate(newLayout, state.style!)
     },
-    [state.layout, state.style, state.editor, setTemplate, sectionOrder]
+    [state.layout, state.style, setTemplate, sectionOrder]
   )
 
   if (loading) {
@@ -380,6 +385,7 @@ function EditPageContent() {
               <EditorPanel
                 className="flex-1 overflow-y-auto"
                 layout={state.layout ?? undefined}
+                declarations={variablesSchema?.declarations}
                 enabledSections={
                   ['intro', ...sectionOrder.filter((s) => sectionEnabled[s])] as SectionType[]
                 }

@@ -8,7 +8,6 @@
 
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
 
 // ============================================
 // Layout Schema - 미술관 갤러리 UI 구조
@@ -485,7 +484,7 @@ export const galleryMuseumStyleSchema: StyleSchema = {
 // Editor Schema - 사용자 입력 필드 정의
 // ============================================
 
-export const galleryMuseumEditorSchema: EditorSchema = {
+export const galleryMuseumEditorSchema = {
   version: '1.0',
   meta: {
     id: 'gallery-museum-editor-v1',
@@ -706,7 +705,6 @@ export const galleryMuseumSampleData = {
 export const galleryMuseumTemplate = {
   layout: galleryMuseumLayoutSchema,
   style: galleryMuseumStyleSchema,
-  editor: galleryMuseumEditorSchema,
   sampleData: galleryMuseumSampleData,
 }
 

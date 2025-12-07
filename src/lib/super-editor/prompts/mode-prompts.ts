@@ -274,162 +274,10 @@ interface PrimitiveNode {
 `
 
 // ============================================
-// 에디터 모드 프롬프트
-// ============================================
-
-export const EDITOR_MODE_PROMPT = `${BASE_INSTRUCTION}
-
-# 에디터 수정 모드
-
-당신은 EditorSchema만 수정합니다.
-
-## EditorSchema 구조
-\`\`\`typescript
-interface EditorSchema {
-  version: '1.0'
-  meta: {
-    id: string
-    name: string
-    description?: string
-    layoutId: string
-    styleId: string
-    createdAt: string
-    updatedAt: string
-  }
-  sections: EditorSection[]
-  validation?: {
-    mode: 'onBlur' | 'onChange' | 'onSubmit'
-    showErrors: 'inline' | 'toast' | 'summary'
-  }
-}
-
-interface EditorSection {
-  id: string
-  title: string
-  description?: string
-  icon?: string
-  collapsed?: boolean
-  order: number
-  fields: EditorField[]
-}
-
-interface EditorField {
-  id: string
-  type: FieldType
-  label: string
-  description?: string
-  placeholder?: string
-  helpText?: string
-  required?: boolean
-  order: number
-  dataPath: string  // 데이터 바인딩 경로 (e.g., "couple.groom.name")
-  validation?: { rules: ValidationRule[], mode?: string }
-}
-\`\`\`
-
-## 필드 타입 (23개)
-
-기본 입력:
-- text: 텍스트 (maxLength?, minLength?, pattern?)
-- textarea: 여러 줄 텍스트 (rows?, maxLength?)
-- richtext: 리치 텍스트 (features?: ['bold', 'italic', 'link', 'list'])
-- number: 숫자 (min?, max?, step?, unit?)
-
-날짜/시간:
-- date: 날짜 (min?, max?, format?)
-- time: 시간 (step?, format?: '12h' | '24h')
-- datetime: 날짜+시간
-
-선택:
-- select: 드롭다운 (options: [{value, label}], searchable?)
-- multiselect: 다중 선택 (options, maxItems?, minItems?)
-- radio: 라디오 버튼 (options, layout?: 'horizontal' | 'vertical')
-- checkbox: 체크박스 (options?)
-- switch: 토글 스위치 (onLabel?, offLabel?)
-
-미디어:
-- image: 이미지 (aspectRatio?, crop?, maxSize?)
-- imageList: 이미지 목록 (maxItems?, sortable?)
-- color: 색상 선택기 (swatches?, alpha?)
-
-특수:
-- phone: 전화번호
-- url: URL
-- location: 위치/지도 (mapProvider?: 'kakao' | 'naver')
-- icon: 아이콘 선택
-
-청첩장 전용:
-- person: 인물 정보 (subfields: { name, role?, phone?, relation? })
-- personList: 인물 목록
-- account: 계좌 정보 (subfields: { bank, accountNumber, holder, kakaoPayUrl? })
-- accountList: 계좌 목록
-
-복합:
-- group: 필드 그룹 (fields: EditorField[], layout?)
-- repeater: 반복 필드 (fields: EditorField[], maxItems?, sortable?)
-
-## 응답 예시
-필드 추가:
-\`\`\`json
-{
-  "message": "신랑 정보에 직업 필드를 추가했어요!",
-  "changes": {
-    "type": "partial",
-    "editor": {
-      "sections": [{
-        "id": "groom",
-        "fields": [{
-          "id": "groom-job",
-          "type": "text",
-          "label": "직업",
-          "dataPath": "couple.groom.job",
-          "placeholder": "신랑 직업을 입력하세요",
-          "order": 3
-        }]
-      }]
-    }
-  }
-}
-\`\`\`
-
-계좌 정보 섹션 추가:
-\`\`\`json
-{
-  "message": "마음 전하기 섹션을 추가했어요!",
-  "changes": {
-    "type": "partial",
-    "editor": {
-      "sections": [{
-        "id": "accounts",
-        "title": "마음 전하기",
-        "icon": "💰",
-        "order": 7,
-        "collapsed": true,
-        "fields": [{
-          "id": "groom-account",
-          "type": "account",
-          "label": "신랑측 계좌",
-          "dataPath": "accounts.groom",
-          "order": 0
-        }, {
-          "id": "bride-account",
-          "type": "account",
-          "label": "신부측 계좌",
-          "dataPath": "accounts.bride",
-          "order": 1
-        }]
-      }]
-    }
-  }
-}
-\`\`\`
-`
-
-// ============================================
 // 모드별 프롬프트 선택 함수
 // ============================================
 
-export type EditMode = 'style' | 'layout' | 'editor' | 'all'
+export type EditMode = 'style' | 'layout' | 'all'
 
 export function getPromptForMode(mode: EditMode): string {
   switch (mode) {
@@ -437,21 +285,18 @@ export function getPromptForMode(mode: EditMode): string {
       return STYLE_MODE_PROMPT
     case 'layout':
       return LAYOUT_MODE_PROMPT
-    case 'editor':
-      return EDITOR_MODE_PROMPT
     case 'all':
       // 전체 모드는 기존 전체 프롬프트 사용
       return `${BASE_INSTRUCTION}
 
 # 전체 수정 모드
 
-모든 스키마(Layout, Style, Editor)를 수정할 수 있습니다.
+Layout과 Style 스키마를 수정할 수 있습니다.
 현재 컨텍스트를 참고하여 적절한 변경사항을 생성하세요.
 
 ## 변경 시 주의사항
 - layout: 화면 구조, 섹션, 노드 트리
 - style: 색상, 폰트, 애니메이션
-- editor: 편집 가능한 필드 구성
 
 변경된 스키마만 changes에 포함하세요.
 `

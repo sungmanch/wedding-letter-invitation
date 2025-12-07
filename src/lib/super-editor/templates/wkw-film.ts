@@ -8,7 +8,6 @@
 
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
 
 // ============================================
 // Layout Schema - 왕가위 영화풍 UI 구조
@@ -754,7 +753,7 @@ export const wkwFilmStyleSchema: StyleSchema = {
 // Editor Schema - 사용자 입력 필드 정의
 // ============================================
 
-export const wkwFilmEditorSchema: EditorSchema = {
+export const wkwFilmEditorSchema = {
   version: '1.0',
   meta: {
     id: 'wkw-film-editor-v1',
@@ -974,7 +973,6 @@ export const wkwFilmSampleData = {
 export const wkwFilmTemplate = {
   layout: wkwFilmLayoutSchema,
   style: wkwFilmStyleSchema,
-  editor: wkwFilmEditorSchema,
   sampleData: wkwFilmSampleData,
 }
 

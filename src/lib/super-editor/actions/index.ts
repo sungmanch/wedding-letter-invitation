@@ -7,7 +7,7 @@ import { buildHtml } from '../builder'
 import { createClient } from '@/lib/supabase/server'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
+import type { VariablesSchema } from '../schema/variables'
 import type { UserData } from '../schema/user-data'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '../schema/section-types'
 
@@ -37,7 +37,7 @@ export async function createTemplate(data: {
   category: string
   layout: LayoutSchema
   style: StyleSchema
-  editor: EditorSchema
+  variables?: VariablesSchema
 }) {
   const [template] = await db.insert(superEditorTemplates).values({
     name: data.name,
@@ -45,12 +45,31 @@ export async function createTemplate(data: {
     category: data.category,
     layoutSchema: data.layout,
     styleSchema: data.style,
-    editorSchema: data.editor,
+    variablesSchema: data.variables,
     status: 'draft',
     isPublic: false,
   }).returning()
 
   return template
+}
+
+/**
+ * 템플릿의 variablesSchema 업데이트
+ */
+export async function updateTemplateVariables(
+  templateId: string,
+  variablesSchema: VariablesSchema
+) {
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      variablesSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, templateId))
+    .returning()
+
+  return updated
 }
 
 // ============================================
@@ -516,95 +535,10 @@ export async function generateTemplateWithLLM(prompt: string) {
     components: {},
   }
 
-  const sampleEditor: EditorSchema = {
-    version: '1.0',
-    meta: {
-      id: 'sample-editor',
-      name: '청첩장 편집기',
-      layoutId: 'sample-template',
-      styleId: 'sample-style',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    sections: [
-      {
-        id: 'couple',
-        title: '신랑신부 정보',
-        order: 0,
-        fields: [
-          {
-            id: 'groom-name',
-            type: 'text',
-            label: '신랑 이름',
-            dataPath: 'couple.groom.name',
-            placeholder: '신랑 이름을 입력하세요',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'bride-name',
-            type: 'text',
-            label: '신부 이름',
-            dataPath: 'couple.bride.name',
-            placeholder: '신부 이름을 입력하세요',
-            required: true,
-            order: 1,
-          },
-        ],
-      },
-      {
-        id: 'wedding',
-        title: '예식 정보',
-        order: 1,
-        fields: [
-          {
-            id: 'wedding-date',
-            type: 'date',
-            label: '예식 날짜',
-            dataPath: 'wedding.date',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'wedding-time',
-            type: 'time',
-            label: '예식 시간',
-            dataPath: 'wedding.time',
-            required: true,
-            order: 1,
-          },
-        ],
-      },
-      {
-        id: 'photos',
-        title: '사진',
-        order: 2,
-        fields: [
-          {
-            id: 'main-photo',
-            type: 'image',
-            label: '메인 사진',
-            dataPath: 'photos.main',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'gallery',
-            type: 'imageList',
-            label: '갤러리',
-            dataPath: 'photos.gallery',
-            maxItems: 10,
-            sortable: true,
-            order: 1,
-          },
-        ],
-      },
-    ],
-  }
+  // EditorSchema는 Layout의 {{변수}}에서 동적 생성됨
 
   return {
     layout: sampleLayout,
     style: sampleStyle,
-    editor: sampleEditor,
   }
 }

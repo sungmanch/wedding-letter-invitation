@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getPromptForMode, type EditMode } from '@/lib/super-editor/prompts/mode-prompts'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
-import type { EditorSchema } from '@/lib/super-editor/schema/editor'
+
 
 // ============================================
 // Types
@@ -14,7 +14,6 @@ interface ChatRequest {
   editMode?: EditMode
   currentLayout?: LayoutSchema
   currentStyle?: StyleSchema
-  currentEditor?: EditorSchema
   history?: Array<{
     role: 'user' | 'assistant'
     content: string
@@ -27,7 +26,6 @@ interface ChatResponse {
     type: 'full' | 'partial'
     layout?: LayoutSchema
     style?: StyleSchema
-    editor?: EditorSchema
     description?: string
     affectedNodes?: string[]
   }
@@ -56,7 +54,7 @@ function buildUserMessage(request: ChatRequest): string {
   const mode = request.editMode || 'style'
 
   // 현재 템플릿 상태 (모드에 따라 필요한 것만)
-  const hasContext = request.currentLayout || request.currentStyle || request.currentEditor
+  const hasContext = request.currentLayout || request.currentStyle
   if (hasContext) {
     parts.push('## 현재 상태\n')
 
@@ -81,18 +79,6 @@ function buildUserMessage(request: ChatRequest): string {
         })),
       }
       parts.push(`### Layout\n\`\`\`json\n${JSON.stringify(layoutSummary, null, 2)}\n\`\`\`\n`)
-    }
-
-    if (request.currentEditor && (mode === 'editor' || mode === 'all')) {
-      // 에디터는 섹션 목록만 요약
-      const editorSummary = {
-        sections: request.currentEditor.sections?.map((s) => ({
-          id: s.id,
-          title: s.title,
-          fieldCount: s.fields?.length || 0,
-        })),
-      }
-      parts.push(`### Editor\n\`\`\`json\n${JSON.stringify(editorSummary, null, 2)}\n\`\`\`\n`)
     }
   }
 

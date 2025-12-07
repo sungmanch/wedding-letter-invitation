@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
-import type { EditorSchema } from '@/lib/super-editor/schema/editor'
+
 import type { UserData } from '@/lib/super-editor/schema/user-data'
 
 // ============================================
@@ -12,7 +12,6 @@ import type { UserData } from '@/lib/super-editor/schema/user-data'
 interface SuggestionsRequest {
   layout?: LayoutSchema
   style?: StyleSchema
-  editor?: EditorSchema
   userData?: UserData
 }
 
@@ -110,13 +109,6 @@ function buildAnalysisMessage(request: SuggestionsRequest): string {
     parts.push(`- 이름: ${request.style.meta.name}`)
     parts.push(`- 분위기: ${request.style.meta.mood?.join(', ') || '미지정'}`)
     parts.push(`- 메인 색상: ${request.style.theme.colors.primary[500]}`)
-    parts.push('')
-  }
-
-  if (request.editor) {
-    const sectionTitles = request.editor.sections.map(s => s.title)
-    parts.push(`### Editor 섹션`)
-    parts.push(`- ${sectionTitles.join(', ')}`)
     parts.push('')
   }
 

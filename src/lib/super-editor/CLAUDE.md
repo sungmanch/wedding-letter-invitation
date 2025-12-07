@@ -12,7 +12,15 @@ AI(LLM)가 JSON 스키마를 생성하고, 이를 정적 HTML로 빌드하는 �
 |--------|------|
 | **LayoutSchema** | UI 트리 구조 (Screen + PrimitiveNode 배열) |
 | **StyleSchema** | 테마/색상/타이포그래피 정의 |
-| **EditorSchema** | 편집기 폼 필드 정의 |
+| **VariablesSchema** | 변수 선언 (에디터 필드 생성 + 기본값) |
+
+## 에디터 필드 생성 흐름
+
+```
+LLM → VariablesSchema (declarations) → DB 저장
+                ↓
+Layout의 {{변수}} + declarations → generateEditorSectionsFromLayout() → EditorSection[]
+```
 
 ## 29개 Primitive 타입
 
@@ -248,7 +256,7 @@ interface AIProvider {
 
 ```
 super-editor/
-├── schema/          # 타입 정의 (primitives, layout, style, editor, user-data)
+├── schema/          # 타입 정의 (primitives, layout, style, user-data)
 ├── tokens/          # Design Token 시스템 (schema, resolver, css-generator)
 ├── skeletons/       # Section Skeletons (types, registry, sections/*)
 ├── services/        # Generation Pipeline (generation-service)
@@ -267,7 +275,8 @@ super-editor/
 
 ## 동작 흐름
 
-1. **AI 생성**: 사용자 요청 시 LLM이 Layout/Style/Editor JSON 생성
-2. **데이터 바인딩**: Editor를 통해서 UserData를 Layout에 바인딩
-3. **HTML 빌드**: `buildHtml()` 함수로 정적 HTML/CSS/JS 생성 (스크롤 모션 + BGM 런타임 포함)
-4. **렌더링**: 프리뷰 또는 배포용 출력 생성
+1. **AI 생성**: 사용자 요청 시 LLM이 Layout/Style JSON 생성
+2. **에디터 동적 생성**: Layout의 `{{변수}}` 바인딩에서 EditorSection/Field 자동 생성
+3. **데이터 바인딩**: 동적 에디터를 통해 UserData를 Layout에 바인딩
+4. **HTML 빌드**: `buildHtml()` 함수로 정적 HTML/CSS/JS 생성 (스크롤 모션 + BGM 런타임 포함)
+5. **렌더링**: 프리뷰 또는 배포용 출력 생성
