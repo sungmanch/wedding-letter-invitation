@@ -90,22 +90,64 @@ const initialState: SuperEditorState = {
 // Reducer
 // ============================================
 
+/**
+ * 경로 문자열을 파싱해서 배열로 변환
+ * 'accounts.groom[0].bank' → ['accounts', 'groom', 0, 'bank']
+ */
+function parsePath(path: string): (string | number)[] {
+  const result: (string | number)[] = []
+  const regex = /([^.\[\]]+)|\[(\d+)\]/g
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(path)) !== null) {
+    if (match[1] !== undefined) {
+      result.push(match[1])
+    } else if (match[2] !== undefined) {
+      result.push(parseInt(match[2], 10))
+    }
+  }
+
+  return result
+}
+
 function setValueByPath(
   obj: Record<string, unknown>,
   path: string,
   value: unknown
 ): Record<string, unknown> {
-  const parts = path.split('.')
-  const result = { ...obj }
-  let current: Record<string, unknown> = result
+  const parts = parsePath(path)
+  const result = JSON.parse(JSON.stringify(obj)) // deep clone
+  let current: unknown = result
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i]
-    current[part] = { ...(current[part] as Record<string, unknown> || {}) }
-    current = current[part] as Record<string, unknown>
+    const nextPart = parts[i + 1]
+
+    if (typeof part === 'number') {
+      // 현재 파트가 배열 인덱스
+      const arr = current as unknown[]
+      if (!arr[part]) {
+        arr[part] = typeof nextPart === 'number' ? [] : {}
+      }
+      current = arr[part]
+    } else {
+      // 현재 파트가 객체 키
+      const obj = current as Record<string, unknown>
+      if (!obj[part]) {
+        obj[part] = typeof nextPart === 'number' ? [] : {}
+      }
+      current = obj[part]
+    }
   }
 
-  current[parts[parts.length - 1]] = value
+  // 마지막 파트에 값 설정
+  const lastPart = parts[parts.length - 1]
+  if (typeof lastPart === 'number') {
+    (current as unknown[])[lastPart] = value
+  } else {
+    (current as Record<string, unknown>)[lastPart] = value
+  }
+
   return result
 }
 
@@ -364,6 +406,8 @@ function superEditorReducer(
 interface SuperEditorContextValue {
   state: SuperEditorState
   dispatch: React.Dispatch<SuperEditorAction>
+  // 청첩장 ID (이미지 업로드 등에 사용)
+  invitationId: string | undefined
   // 편의 함수들
   setTemplate: (layout: LayoutSchema, style: StyleSchema) => void
   setUserData: (userData: UserData) => void
@@ -390,6 +434,7 @@ const SuperEditorContext = createContext<SuperEditorContextValue | null>(null)
 
 interface SuperEditorProviderProps {
   children: ReactNode
+  invitationId?: string
   initialTemplate?: {
     layout: LayoutSchema
     style: StyleSchema
@@ -399,6 +444,7 @@ interface SuperEditorProviderProps {
 
 export function SuperEditorProvider({
   children,
+  invitationId,
   initialTemplate,
   initialUserData,
 }: SuperEditorProviderProps) {
@@ -461,15 +507,25 @@ export function SuperEditorProvider({
     (fieldPath: string): unknown => {
       if (!state.userData?.data) return undefined
 
-      const parts = fieldPath.split('.')
+      const parts = parsePath(fieldPath)
       let current: unknown = state.userData.data
 
       for (const part of parts) {
         if (current === null || current === undefined) return undefined
-        if (typeof current === 'object') {
-          current = (current as Record<string, unknown>)[part]
+        if (typeof part === 'number') {
+          // 배열 인덱스
+          if (Array.isArray(current)) {
+            current = current[part]
+          } else {
+            return undefined
+          }
         } else {
-          return undefined
+          // 객체 키
+          if (typeof current === 'object') {
+            current = (current as Record<string, unknown>)[part]
+          } else {
+            return undefined
+          }
         }
       }
 
@@ -488,6 +544,7 @@ export function SuperEditorProvider({
     () => ({
       state,
       dispatch,
+      invitationId,
       setTemplate,
       setUserData,
       setStyle,
@@ -505,6 +562,7 @@ export function SuperEditorProvider({
     }),
     [
       state,
+      invitationId,
       setTemplate,
       setUserData,
       setStyle,

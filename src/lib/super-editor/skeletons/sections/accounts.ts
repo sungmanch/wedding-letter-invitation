@@ -100,6 +100,9 @@ export const accountsSkeleton: SectionSkeleton = {
                     props: {
                       dataPath: 'accounts.groom',
                       as: 'account',
+                      defaultValue: [
+                        { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+                      ],
                     },
                     children: [
                       {
@@ -130,15 +133,29 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
+                                    id: 'groom-account-relation',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      fontFamily: '$token.typography.headingSm.fontFamily',
+                                      fontSize: '$token.typography.headingSm.fontSize',
+                                      fontWeight: '$token.typography.headingSm.fontWeight',
+                                      color: '$token.colors.text.primary',
+                                    },
+                                    props: {
+                                      content: '{{account.relationLabel}}',
+                                      as: 'h4',
+                                    },
+                                  },
+                                  {
                                     id: 'groom-account-name',
                                     type: 'text',
                                     tokenStyle: {
                                       fontFamily: '$token.typography.bodySm.fontFamily',
                                       fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.muted',
+                                      color: '$token.colors.text.secondary',
                                     },
                                     props: {
-                                      content: '{{account.bank}} {{account.holder}}',
+                                      content: '{{account.bank}} (예금주: {{account.holder}})',
                                       as: 'span',
                                     },
                                   },
@@ -215,6 +232,9 @@ export const accountsSkeleton: SectionSkeleton = {
                     props: {
                       dataPath: 'accounts.bride',
                       as: 'account',
+                      defaultValue: [
+                        { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+                      ],
                     },
                     children: [
                       {
@@ -245,15 +265,29 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
+                                    id: 'bride-account-relation',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      fontFamily: '$token.typography.headingSm.fontFamily',
+                                      fontSize: '$token.typography.headingSm.fontSize',
+                                      fontWeight: '$token.typography.headingSm.fontWeight',
+                                      color: '$token.colors.text.primary',
+                                    },
+                                    props: {
+                                      content: '{{account.relationLabel}}',
+                                      as: 'h4',
+                                    },
+                                  },
+                                  {
                                     id: 'bride-account-name',
                                     type: 'text',
                                     tokenStyle: {
                                       fontFamily: '$token.typography.bodySm.fontFamily',
                                       fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.muted',
+                                      color: '$token.colors.text.secondary',
                                     },
                                     props: {
-                                      content: '{{account.bank}} {{account.holder}}',
+                                      content: '{{account.bank}} (예금주: {{account.holder}})',
                                       as: 'span',
                                     },
                                   },
@@ -311,7 +345,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신랑측 계좌 목록',
           defaultValue: [
-            { label: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+            { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
           ],
         },
         {
@@ -321,7 +355,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신부측 계좌 목록',
           defaultValue: [
-            { label: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+            { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
           ],
         },
       ],
@@ -431,6 +465,9 @@ export const accountsSkeleton: SectionSkeleton = {
                             props: {
                               dataPath: 'accounts.groom',
                               as: 'account',
+                              defaultValue: [
+                                { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+                              ],
                             },
                             children: [
                               {
@@ -445,17 +482,53 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
-                                    id: 'groom-compact-text',
-                                    type: 'text',
+                                    id: 'groom-account-info',
+                                    type: 'column',
                                     tokenStyle: {
-                                      fontFamily: '$token.typography.bodySm.fontFamily',
-                                      fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.primary',
+                                      gap: '$token.spacing.xs',
                                     },
-                                    props: {
-                                      content: '{{account.bank}} {{account.number}} ({{account.holder}})',
-                                      as: 'p',
-                                    },
+                                    children: [
+                                      {
+                                        id: 'groom-account-relation',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.headingSm.fontFamily',
+                                          fontSize: '$token.typography.headingSm.fontSize',
+                                          fontWeight: '$token.typography.headingSm.fontWeight',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.relationLabel}}',
+                                          as: 'h4',
+                                        },
+                                      },
+                                      {
+                                        id: 'groom-account-bank',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodySm.fontFamily',
+                                          fontSize: '$token.typography.bodySm.fontSize',
+                                          color: '$token.colors.text.secondary',
+                                        },
+                                        props: {
+                                          content: '{{account.bank}} (예금주: {{account.holder}})',
+                                          as: 'span',
+                                        },
+                                      },
+                                      {
+                                        id: 'groom-account-number',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                                          fontSize: '$token.typography.bodyMd.fontSize',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.number}}',
+                                          as: 'p',
+                                        },
+                                      },
+                                    ],
                                   },
                                   {
                                     id: 'groom-compact-copy',
@@ -531,6 +604,9 @@ export const accountsSkeleton: SectionSkeleton = {
                             props: {
                               dataPath: 'accounts.bride',
                               as: 'account',
+                              defaultValue: [
+                                { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+                              ],
                             },
                             children: [
                               {
@@ -545,17 +621,53 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
-                                    id: 'bride-compact-text',
-                                    type: 'text',
+                                    id: 'bride-account-info',
+                                    type: 'column',
                                     tokenStyle: {
-                                      fontFamily: '$token.typography.bodySm.fontFamily',
-                                      fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.primary',
+                                      gap: '$token.spacing.xs',
                                     },
-                                    props: {
-                                      content: '{{account.bank}} {{account.number}} ({{account.holder}})',
-                                      as: 'p',
-                                    },
+                                    children: [
+                                      {
+                                        id: 'bride-account-relation',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.headingSm.fontFamily',
+                                          fontSize: '$token.typography.headingSm.fontSize',
+                                          fontWeight: '$token.typography.headingSm.fontWeight',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.relationLabel}}',
+                                          as: 'h4',
+                                        },
+                                      },
+                                      {
+                                        id: 'bride-account-bank',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodySm.fontFamily',
+                                          fontSize: '$token.typography.bodySm.fontSize',
+                                          color: '$token.colors.text.secondary',
+                                        },
+                                        props: {
+                                          content: '{{account.bank}} (예금주: {{account.holder}})',
+                                          as: 'span',
+                                        },
+                                      },
+                                      {
+                                        id: 'bride-account-number',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                                          fontSize: '$token.typography.bodyMd.fontSize',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.number}}',
+                                          as: 'p',
+                                        },
+                                      },
+                                    ],
                                   },
                                   {
                                     id: 'bride-compact-copy',
@@ -596,7 +708,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신랑측 계좌 목록',
           defaultValue: [
-            { label: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+            { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
           ],
         },
         {
@@ -606,7 +718,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신부측 계좌 목록',
           defaultValue: [
-            { label: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+            { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
           ],
         },
       ],
@@ -765,6 +877,9 @@ export const accountsSkeleton: SectionSkeleton = {
                     props: {
                       dataPath: 'accounts.groom',
                       as: 'account',
+                      defaultValue: [
+                        { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+                      ],
                     },
                     children: [
                       {
@@ -791,7 +906,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.primary',
                             },
                             props: {
-                              content: '{{account.relation}}',
+                              content: '{{account.relationLabel}}',
                               as: 'h4',
                             },
                           },
@@ -802,10 +917,10 @@ export const accountsSkeleton: SectionSkeleton = {
                             tokenStyle: {
                               fontFamily: '$token.typography.bodySm.fontFamily',
                               fontSize: '$token.typography.bodySm.fontSize',
-                              color: '$token.colors.text.muted',
+                              color: '$token.colors.text.secondary',
                             },
                             props: {
-                              content: '{{account.bank}} (예금주:{{account.holder}})',
+                              content: '{{account.bank}} (예금주: {{account.holder}})',
                               as: 'span',
                             },
                           },
@@ -878,6 +993,9 @@ export const accountsSkeleton: SectionSkeleton = {
                     props: {
                       dataPath: 'accounts.bride',
                       as: 'account',
+                      defaultValue: [
+                        { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+                      ],
                     },
                     children: [
                       {
@@ -904,7 +1022,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.primary',
                             },
                             props: {
-                              content: '{{account.relation}}',
+                              content: '{{account.relationLabel}}',
                               as: 'h4',
                             },
                           },
@@ -915,10 +1033,10 @@ export const accountsSkeleton: SectionSkeleton = {
                             tokenStyle: {
                               fontFamily: '$token.typography.bodySm.fontFamily',
                               fontSize: '$token.typography.bodySm.fontSize',
-                              color: '$token.colors.text.muted',
+                              color: '$token.colors.text.secondary',
                             },
                             props: {
-                              content: '{{account.bank}} (예금주:{{account.holder}})',
+                              content: '{{account.bank}} (예금주: {{account.holder}})',
                               as: 'span',
                             },
                           },
@@ -975,9 +1093,9 @@ export const accountsSkeleton: SectionSkeleton = {
           path: 'accounts.groom',
           type: 'account',
           required: true,
-          description: '신랑측 계좌 목록 (label, bank, holder, number)',
+          description: '신랑측 계좌 목록 (relation, bank, holder, number)',
           defaultValue: [
-            { label: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+            { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
           ],
         },
         {
@@ -985,9 +1103,9 @@ export const accountsSkeleton: SectionSkeleton = {
           path: 'accounts.bride',
           type: 'account',
           required: true,
-          description: '신부측 계좌 목록 (label, bank, holder, number)',
+          description: '신부측 계좌 목록 (relation, bank, holder, number)',
           defaultValue: [
-            { label: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+            { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
           ],
         },
       ],

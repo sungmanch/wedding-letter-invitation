@@ -16,6 +16,8 @@ import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
 import type { SectionType } from '../schema/section-types'
 import { InvitationRenderer } from '../renderers'
+import { GuestbookFab } from '../renderers/GuestbookFab'
+import { MusicPlayer } from '../renderers/MusicPlayer'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
 import { VariantControlPanel } from './VariantControlPanel'
 
@@ -68,6 +70,8 @@ interface PhoneFrameProps {
   children: React.ReactNode
   scrollRef?: React.RefObject<HTMLDivElement | null>
   onScroll?: () => void
+  /** 스크롤 컨테이너 위에 오버레이로 표시할 요소 (FAB 등) */
+  overlay?: React.ReactNode
 }
 
 function PhoneFrame({
@@ -76,6 +80,7 @@ function PhoneFrame({
   children,
   scrollRef,
   onScroll,
+  overlay,
 }: PhoneFrameProps) {
   const allStyles = useMemo(() => collectAllIntroStyles(), [])
 
@@ -87,20 +92,18 @@ function PhoneFrame({
       <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
         {/* Notch */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-100" />
-        {/* Screen */}
-        <div
-          ref={scrollRef}
-          onScroll={onScroll}
-          className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto scrollbar-hide"
-          style={
-            {
-              width,
-              height,
-              '--preview-screen-height': `${height}px`,
-            } as React.CSSProperties
-          }
-        >
-          {children}
+        {/* Screen container - relative로 오버레이 기준점 */}
+        <div className="relative" style={{ width, height }}>
+          {/* Scrollable content */}
+          <div
+            ref={scrollRef}
+            onScroll={onScroll}
+            className="absolute inset-0 bg-white rounded-[2rem] overflow-hidden overflow-y-auto scrollbar-hide"
+          >
+            {children}
+          </div>
+          {/* Overlay (FAB 등) - 스크롤 컨테이너 위에 고정 */}
+          {overlay}
         </div>
       </div>
     </div>
@@ -204,6 +207,35 @@ export function InvitationPreview({
     const showVariantPanel = mode === 'edit' && onVariantChange && sectionVariants
     const frameH = frameHeight ?? DEFAULT_FRAME_HEIGHT
 
+    // Guestbook FAB 표시 여부 (fab variant이고 활성화된 경우)
+    const showGuestbookFab =
+      sectionVariants?.guestbook === 'fab' && sectionEnabled?.guestbook !== false
+
+    // Music FAB 표시 여부
+    const showMusicFab = sectionEnabled?.music !== false
+
+    // Music screen 찾기
+    const musicScreen = layout.screens.find((s) => s.sectionType === 'music')
+
+    // PhoneFrame용 오버레이 (FAB 등)
+    const frameOverlay = (
+      <>
+        {/* Music FAB - 우상단 */}
+        {showMusicFab && musicScreen && (
+          <MusicPlayer screen={musicScreen} userData={userData} mode={mode} />
+        )}
+        {/* Guestbook FAB - 하단 중앙 */}
+        {showGuestbookFab && (
+          <GuestbookFab
+            onClick={() => {
+              // TODO: 방명록 모달 열기
+              console.log('Open guestbook modal')
+            }}
+          />
+        )}
+      </>
+    )
+
     return (
       <div className="relative flex items-start gap-4">
         {/* PhoneFrame */}
@@ -212,6 +244,7 @@ export function InvitationPreview({
           height={frameHeight}
           scrollRef={scrollContainerRef}
           onScroll={handleScroll}
+          overlay={frameOverlay}
         >
           {renderer}
         </PhoneFrame>

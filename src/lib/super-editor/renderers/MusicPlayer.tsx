@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react'
+import { Volume2, VolumeX } from 'lucide-react'
 import type { Screen } from '../schema/layout'
 import type { UserData } from '../schema/user-data'
 
@@ -96,65 +97,48 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
     }
   }
 
-  if (!bgmData?.enabled || !audioUrl) return null
+  // edit 모드에서는 항상 FAB 표시, 그 외에는 bgmData 필요
+  const showFab = mode === 'edit' || (bgmData?.enabled && audioUrl)
+  if (!showFab) return null
 
   return (
     <>
       {/* Hidden Audio Element */}
       <audio ref={audioRef} preload="auto" />
 
-      {/* FAB Button */}
+      {/* FAB Button - 우상단 32x32 */}
       <button
         onClick={togglePlay}
-        disabled={!isLoaded}
+        disabled={mode === 'edit' ? false : !isLoaded}
         className="music-fab"
         style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
+          position: 'absolute',
+          top: 16,
+          right: 16,
           zIndex: 1000,
-          width: 48,
-          height: 48,
+          width: 32,
+          height: 32,
           borderRadius: '50%',
           backgroundColor: '#fff',
           border: 'none',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: isLoaded ? 'pointer' : 'wait',
+          cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
+          pointerEvents: 'auto',
         }}
-        aria-label={isPlaying ? '음악 정지' : '음악 재생'}
+        aria-label={isPlaying ? '음악 끄기' : '음악 켜기'}
       >
         {isPlaying ? (
-          // Pause Icon
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="6" y="4" width="4" height="16" rx="1" />
-            <rect x="14" y="4" width="4" height="16" rx="1" />
-          </svg>
+          <Volume2 size={16} strokeWidth={2} />
         ) : (
-          // Play Icon (with spinning animation when playing)
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            style={{
-              animation: isLoaded ? 'none' : 'spin 1s linear infinite',
-            }}
-          >
-            <path d="M8 5v14l11-7z" />
-          </svg>
+          <VolumeX size={16} strokeWidth={2} />
         )}
       </button>
 
-      {/* Keyframes for spinning */}
       <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
         .music-fab:hover {
           transform: scale(1.05);
           box-shadow: 0 6px 16px rgba(0,0,0,0.2);

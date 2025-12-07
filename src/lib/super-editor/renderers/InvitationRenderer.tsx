@@ -19,7 +19,6 @@ import {
   type SectionType,
 } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
-import { MusicPlayer } from './MusicPlayer'
 import { TokenStyleProvider } from '../context/TokenStyleContext'
 
 // ============================================
@@ -70,31 +69,53 @@ function getSortedSections(
   screens: Screen[],
   sectionOrder: SectionType[],
   sectionEnabled: Record<SectionType, boolean>,
-  visibleSections?: SectionType[]
-): { intro: Screen | undefined; sections: Screen[]; music: Screen | undefined } {
+  visibleSections?: SectionType[],
+  sectionVariants?: Record<SectionType, string>
+): {
+  intro: Screen | undefined
+  sections: Screen[]
+  music: Screen | undefined
+  guestbookFab: Screen | undefined
+} {
+  // guestbook이 FAB variant인지 확인
+  const isGuestbookFab = sectionVariants?.guestbook === 'fab'
+
   // visibleSections가 있으면 해당 섹션만 표시
   if (visibleSections) {
     const visible = screens.filter((s) => visibleSections.includes(s.sectionType))
     const intro = visible.find((s) => s.sectionType === 'intro')
-    const sections = visible.filter((s) => s.sectionType !== 'intro' && s.sectionType !== 'music')
+    const sections = visible.filter(
+      (s) =>
+        s.sectionType !== 'intro' &&
+        s.sectionType !== 'music' &&
+        !(s.sectionType === 'guestbook' && isGuestbookFab)
+    )
     const music = visible.find((s) => s.sectionType === 'music')
-    return { intro, sections, music }
+    const guestbookFab = isGuestbookFab ? visible.find((s) => s.sectionType === 'guestbook') : undefined
+    return { intro, sections, music, guestbookFab }
   }
 
   // 기본 동작: sectionEnabled 기반
   // 1. intro 항상 첫번째
   const intro = screens.find((s) => s.sectionType === 'intro')
 
-  // 2. 나머지 섹션 순서대로 + 활성화된 것만
+  // 2. 나머지 섹션 순서대로 + 활성화된 것만 (guestbook FAB은 제외)
   const sections = sectionOrder
     .filter((type) => sectionEnabled[type])
+    .filter((type) => !(type === 'guestbook' && isGuestbookFab))
     .map((type) => screens.find((s) => s.sectionType === type))
     .filter((s): s is Screen => s !== undefined)
 
   // 3. music은 FAB로 별도 렌더링
   const music = screens.find((s) => s.sectionType === 'music')
 
-  return { intro, sections, music }
+  // 4. guestbook FAB variant는 별도 렌더링
+  const guestbookFab =
+    isGuestbookFab && sectionEnabled.guestbook
+      ? screens.find((s) => s.sectionType === 'guestbook')
+      : undefined
+
+  return { intro, sections, music, guestbookFab }
 }
 
 // ============================================
@@ -120,9 +141,9 @@ function InvitationContent({
   className,
 }: InvitationContentProps) {
   // 섹션 정렬
-  const { intro, sections, music } = React.useMemo(
-    () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections),
-    [layout.screens, sectionOrder, sectionEnabled, visibleSections]
+  const { intro, sections, music, guestbookFab } = React.useMemo(
+    () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants),
+    [layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants]
   )
 
   // intro 표시 여부 (visibleSections가 있으면 그 기준, 없으면 sectionEnabled 기준)
@@ -183,8 +204,6 @@ function InvitationContent({
         ))}
       </div>
 
-      {/* Music FAB (플로팅) */}
-      {showMusic && music && <MusicPlayer screen={music} userData={userData} mode={mode} />}
     </div>
   )
 }

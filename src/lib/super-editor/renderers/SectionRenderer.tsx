@@ -5,7 +5,7 @@
  * PrimitiveNode 트리를 React 컴포넌트로 변환
  */
 
-import React from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import type { Screen } from '../schema/layout'
 import type { UserData } from '../schema/user-data'
 import type { SectionType } from '../skeletons/types'
@@ -48,15 +48,48 @@ export function SectionRenderer({
   // 토큰 스타일 컨텍스트에서 resolveTokenRef 가져오기
   const { resolveTokenRef, tokens } = useTokenStyle()
 
+  // 모달 상태 관리
+  const [openedModals, setOpenedModals] = useState<Set<string>>(new Set())
+
+  const openModal = useCallback((modalId: string) => {
+    setOpenedModals((prev) => new Set(prev).add(modalId))
+  }, [])
+
+  const closeModal = useCallback((modalId: string) => {
+    setOpenedModals((prev) => {
+      const next = new Set(prev)
+      next.delete(modalId)
+      return next
+    })
+  }, [])
+
   // 렌더 컨텍스트 생성 - userData가 변경될 때마다 새로 생성
-  const context: RenderContext = createNodeRenderer({
-    data: userData.data as Record<string, unknown>,
-    mode,
-    selectedNodeId,
-    onSelectNode,
-    resolveTokenRef,
-    tokens,
-  })
+  const context: RenderContext = useMemo(
+    () =>
+      createNodeRenderer({
+        data: userData.data as Record<string, unknown>,
+        mode,
+        selectedNodeId,
+        onSelectNode,
+        resolveTokenRef,
+        tokens,
+        // 모달 시스템
+        openedModals,
+        openModal,
+        closeModal,
+      }),
+    [
+      userData.data,
+      mode,
+      selectedNodeId,
+      onSelectNode,
+      resolveTokenRef,
+      tokens,
+      openedModals,
+      openModal,
+      closeModal,
+    ]
+  )
 
   // Screen의 root 노드 렌더링
   const rendered = renderPrimitiveNode(screen.root, context)

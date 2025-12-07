@@ -38,6 +38,14 @@ export interface RenderContext {
     nodeId: string,
     events: NodeEventHandler[] | undefined
   ) => Record<string, (e?: React.SyntheticEvent) => void>
+
+  // ====== 모달 시스템 ======
+  // 열린 모달 ID 목록
+  openedModals?: Set<string>
+  // 모달 열기
+  openModal?: (modalId: string) => void
+  // 모달 닫기
+  closeModal?: (modalId: string) => void
 }
 
 // ============================================
