@@ -16,6 +16,59 @@ export interface StyleSchema {
   tokens: DesignTokens
   components: ComponentStyles
   utilities?: UtilityClasses
+  /**
+   * 커스텀 스타일 확장
+   * - keyframes: 커스텀 애니메이션 정의
+   * - classes: 가상 요소(::before, ::after) 포함 클래스
+   * - globalCss: 원시 CSS 직접 주입
+   */
+  customStyles?: CustomStyles
+}
+
+// ============================================
+// Custom Styles Extension
+// ============================================
+
+export interface CustomStyles {
+  /**
+   * 커스텀 @keyframes 정의
+   * 예: { 'grain': [{ offset: 0, transform: 'translate(0,0)' }, ...] }
+   */
+  keyframes?: Record<string, CustomKeyframe[]>
+
+  /**
+   * 가상 요소를 포함한 커스텀 클래스
+   * 예: { 'film-grain': { base: {...}, before: {...}, after: {...} } }
+   */
+  classes?: Record<string, CustomClassDefinition>
+
+  /**
+   * 원시 CSS 직접 주입 (폰트, 복잡한 선택자 등)
+   */
+  globalCss?: string
+}
+
+export interface CustomKeyframe {
+  offset: number // 0-1
+  [property: string]: string | number | undefined
+}
+
+export interface CustomClassDefinition {
+  /** 기본 스타일 */
+  base?: CSSProperties
+  /** ::before 가상 요소 */
+  before?: PseudoElementStyle
+  /** ::after 가상 요소 */
+  after?: PseudoElementStyle
+  /** :hover 상태 */
+  hover?: CSSProperties
+  /** :active 상태 */
+  active?: CSSProperties
+}
+
+export type PseudoElementStyle = CSSProperties & {
+  content?: string
+  animation?: string
 }
 
 export interface StyleMeta {

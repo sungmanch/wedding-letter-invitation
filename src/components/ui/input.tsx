@@ -28,7 +28,8 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, error, label, id, variant, ...props }, ref) => {
-    const inputId = id || React.useId()
+    const generatedId = React.useId()
+    const inputId = id || generatedId
     const isDark = variant === 'dark'
 
     return (

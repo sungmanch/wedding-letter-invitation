@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   // Server Actions body size limit (for image uploads)
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb',
+      bodySizeLimit: '20mb',
     },
   },
   // Image optimization for external sources
@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
   },

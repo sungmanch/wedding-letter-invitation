@@ -2,12 +2,14 @@
 
 import { db } from '@/lib/db'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { buildHtml } from '../builder'
+import { createClient } from '@/lib/supabase/server'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
+import type { VariablesSchema } from '../schema/variables'
 import type { UserData } from '../schema/user-data'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '../schema/section-types'
 
 // ============================================
 // Template Actions
@@ -35,7 +37,7 @@ export async function createTemplate(data: {
   category: string
   layout: LayoutSchema
   style: StyleSchema
-  editor: EditorSchema
+  variables?: VariablesSchema
 }) {
   const [template] = await db.insert(superEditorTemplates).values({
     name: data.name,
@@ -43,12 +45,31 @@ export async function createTemplate(data: {
     category: data.category,
     layoutSchema: data.layout,
     styleSchema: data.style,
-    editorSchema: data.editor,
+    variablesSchema: data.variables,
     status: 'draft',
     isPublic: false,
   }).returning()
 
   return template
+}
+
+/**
+ * 템플릿의 variablesSchema 업데이트
+ */
+export async function updateTemplateVariables(
+  templateId: string,
+  variablesSchema: VariablesSchema
+) {
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      variablesSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, templateId))
+    .returning()
+
+  return updated
 }
 
 // ============================================
@@ -63,15 +84,116 @@ export async function getInvitation(invitationId: string) {
   return invitation
 }
 
+/**
+ * 청첩장 + 템플릿 함께 조회 (편집 페이지용)
+ * 인증된 사용자 본인의 청첩장만 조회 가능
+ */
+export async function getInvitationWithTemplate(invitationId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
+/**
+ * 미리보기용 청첩장 조회
+ * 토큰이 있으면 토큰 검증 후 조회, 없으면 인증된 사용자 본인 것만 조회
+ */
+export async function getInvitationForPreview(invitationId: string, hasValidToken: boolean) {
+  if (hasValidToken) {
+    // 토큰이 유효하면 청첩장 조회 (소유자 확인 없이)
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: eq(superEditorInvitations.id, invitationId),
+    })
+    return invitation
+  }
+
+  // 토큰이 없으면 인증된 사용자 본인 것만
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  return invitation
+}
+
+/**
+ * 공개된 청첩장 조회 (결제 완료된 것만)
+ * 템플릿 정보도 함께 반환
+ */
+export async function getPublishedInvitation(invitationId: string) {
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.status, 'published')
+    ),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
 export async function createInvitation(data: {
   templateId: string
-  userId: string
   userData: UserData
 }) {
+  // 인증된 사용자 가져오기
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
   const [invitation] = await db.insert(superEditorInvitations).values({
     templateId: data.templateId,
-    userId: data.userId,
+    userId: user.id,
     userData: data.userData,
+    sectionOrder: DEFAULT_SECTION_ORDER,
+    sectionEnabled: DEFAULT_SECTION_ENABLED,
     status: 'draft',
   }).returning()
 
@@ -89,6 +211,106 @@ export async function updateInvitationData(
       updatedAt: new Date(),
     })
     .where(eq(superEditorInvitations.id, invitationId))
+    .returning()
+
+  return updated
+}
+
+export async function updateInvitationSections(
+  invitationId: string,
+  sectionOrder: string[],
+  sectionEnabled: Record<string, boolean>
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const [updated] = await db
+    .update(superEditorInvitations)
+    .set({
+      sectionOrder,
+      sectionEnabled,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ))
+    .returning()
+
+  return updated
+}
+
+export async function updateTemplateStyle(
+  invitationId: string,
+  styleSchema: StyleSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 styleSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      styleSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
+    .returning()
+
+  return updated
+}
+
+export async function updateTemplateLayout(
+  invitationId: string,
+  layoutSchema: LayoutSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 layoutSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      layoutSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
     .returning()
 
   return updated
@@ -160,6 +382,383 @@ export async function buildInvitation(invitationId: string) {
 }
 
 // ============================================
+// OG Metadata Actions
+// ============================================
+
+const OG_BUCKET_NAME = 'og-images'
+const GALLERY_BUCKET_NAME = 'wedding-photos'
+const MAX_GALLERY_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+
+// ============================================
+// Gallery Image Upload Actions
+// ============================================
+
+/**
+ * 갤러리 이미지 업로드 (단일/다중)
+ * base64 데이터를 Supabase Storage에 업로드하고 URL 반환
+ */
+export async function uploadGalleryImages(
+  invitationId: string,
+  images: Array<{ data: string; filename: string; mimeType: string }>
+): Promise<{ success: boolean; urls?: string[]; errors?: string[] }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, errors: ['로그인이 필요합니다'] }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, errors: ['청첩장을 찾을 수 없습니다'] }
+    }
+
+    const uploadedUrls: string[] = []
+    const errors: string[] = []
+
+    for (const image of images) {
+      // MIME 타입 검증
+      if (!ALLOWED_IMAGE_TYPES.includes(image.mimeType)) {
+        errors.push(`${image.filename}: 지원하지 않는 이미지 형식입니다`)
+        continue
+      }
+
+      // base64 → Buffer
+      const base64Data = image.data.replace(/^data:image\/\w+;base64,/, '')
+      const buffer = Buffer.from(base64Data, 'base64')
+
+      // 파일 크기 검증
+      if (buffer.length > MAX_GALLERY_IMAGE_SIZE) {
+        errors.push(`${image.filename}: 파일 크기가 10MB를 초과합니다`)
+        continue
+      }
+
+      // 파일 확장자 결정
+      const ext = image.mimeType.split('/')[1] === 'jpeg' ? 'jpg' : image.mimeType.split('/')[1]
+      const filename = `se/${invitationId}/gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+      // Supabase Storage에 업로드
+      const { error: uploadError } = await supabase.storage
+        .from(GALLERY_BUCKET_NAME)
+        .upload(filename, buffer, {
+          contentType: image.mimeType,
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error('Gallery image upload error:', uploadError)
+        errors.push(`${image.filename}: 업로드에 실패했습니다`)
+        continue
+      }
+
+      // Public URL 가져오기
+      const { data: urlData } = supabase.storage
+        .from(GALLERY_BUCKET_NAME)
+        .getPublicUrl(filename)
+
+      uploadedUrls.push(urlData.publicUrl)
+    }
+
+    if (uploadedUrls.length === 0 && errors.length > 0) {
+      return { success: false, errors }
+    }
+
+    return { success: true, urls: uploadedUrls, errors: errors.length > 0 ? errors : undefined }
+  } catch (error) {
+    console.error('Failed to upload gallery images:', error)
+    return { success: false, errors: ['이미지 업로드에 실패했습니다'] }
+  }
+}
+
+/**
+ * 갤러리 이미지 삭제
+ */
+export async function deleteGalleryImage(
+  invitationId: string,
+  imageUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, error: '청첩장을 찾을 수 없습니다' }
+    }
+
+    // URL에서 storage path 추출
+    const pathMatch = imageUrl.match(new RegExp(`${GALLERY_BUCKET_NAME}/(.+)$`))
+    if (!pathMatch) {
+      return { success: false, error: '유효하지 않은 이미지 URL입니다' }
+    }
+
+    const storagePath = pathMatch[1]
+
+    // 본인 청첩장의 이미지인지 확인 (se/{invitationId}/ 경로)
+    if (!storagePath.startsWith(`se/${invitationId}/`)) {
+      return { success: false, error: '삭제 권한이 없습니다' }
+    }
+
+    // Storage에서 삭제
+    const { error: deleteError } = await supabase.storage
+      .from(GALLERY_BUCKET_NAME)
+      .remove([storagePath])
+
+    if (deleteError) {
+      console.error('Gallery image delete error:', deleteError)
+      return { success: false, error: '이미지 삭제에 실패했습니다' }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to delete gallery image:', error)
+    return { success: false, error: '이미지 삭제에 실패했습니다' }
+  }
+}
+
+/**
+ * OG 이미지 업로드 (1200x630 JPG 이미지)
+ */
+export async function uploadOgImage(
+  invitationId: string,
+  imageData: string // base64 encoded JPG
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, error: '청첩장을 찾을 수 없습니다' }
+    }
+
+    // base64 → Buffer
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '')
+    const buffer = Buffer.from(base64Data, 'base64')
+
+    // 파일명: invitationId/og-{timestamp}.jpg
+    const filename = `${invitationId}/og-${Date.now()}.jpg`
+
+    // 기존 OG 이미지가 있으면 삭제
+    if (invitation.ogImageUrl) {
+      const oldPath = invitation.ogImageUrl.split(`${OG_BUCKET_NAME}/`)[1]
+      if (oldPath) {
+        await supabase.storage.from(OG_BUCKET_NAME).remove([oldPath])
+      }
+    }
+
+    // Supabase Storage에 업로드
+    const { error: uploadError } = await supabase.storage
+      .from(OG_BUCKET_NAME)
+      .upload(filename, buffer, {
+        contentType: 'image/jpeg',
+        cacheControl: '3600',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('OG image upload error:', uploadError)
+      return { success: false, error: '이미지 업로드에 실패했습니다' }
+    }
+
+    // Public URL 가져오기
+    const { data: urlData } = supabase.storage
+      .from(OG_BUCKET_NAME)
+      .getPublicUrl(filename)
+
+    // DB 업데이트
+    await db
+      .update(superEditorInvitations)
+      .set({
+        ogImageUrl: urlData.publicUrl,
+        updatedAt: new Date(),
+      })
+      .where(eq(superEditorInvitations.id, invitationId))
+
+    return { success: true, url: urlData.publicUrl }
+  } catch (error) {
+    console.error('Failed to upload OG image:', error)
+    return { success: false, error: 'OG 이미지 업로드에 실패했습니다' }
+  }
+}
+
+/**
+ * OG 메타데이터 업데이트 (title, description)
+ */
+export async function updateOgMetadata(
+  invitationId: string,
+  data: { ogTitle?: string; ogDescription?: string }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, error: '청첩장을 찾을 수 없습니다' }
+    }
+
+    await db
+      .update(superEditorInvitations)
+      .set({
+        ogTitle: data.ogTitle,
+        ogDescription: data.ogDescription,
+        updatedAt: new Date(),
+      })
+      .where(eq(superEditorInvitations.id, invitationId))
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to update OG metadata:', error)
+    return { success: false, error: 'OG 메타데이터 업데이트에 실패했습니다' }
+  }
+}
+
+/**
+ * OG 메타데이터 조회
+ */
+export async function getOgMetadata(invitationId: string): Promise<{
+  ogTitle: string | null
+  ogDescription: string | null
+  ogImageUrl: string | null
+} | null> {
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: eq(superEditorInvitations.id, invitationId),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  return {
+    ogTitle: invitation.ogTitle,
+    ogDescription: invitation.ogDescription,
+    ogImageUrl: invitation.ogImageUrl,
+  }
+}
+
+// ============================================
+// Geocoding Action (주소 → 좌표 변환)
+// ============================================
+
+interface GeocodeResult {
+  success: boolean
+  lat?: number
+  lng?: number
+  error?: string
+}
+
+/**
+ * 도로명주소를 좌표(위도/경도)로 변환
+ * VWorld Geocoder API 사용 (국토교통부)
+ */
+export async function geocodeAddress(address: string): Promise<GeocodeResult> {
+  if (!address.trim()) {
+    return { success: false, error: '주소를 입력해주세요' }
+  }
+
+  const apiKey = process.env.VWORLD_API_KEY
+  if (!apiKey) {
+    console.error('VWORLD_API_KEY is not set')
+    return { success: false, error: 'Geocoding API가 설정되지 않았습니다' }
+  }
+
+  try {
+    const url = new URL('https://api.vworld.kr/req/address')
+    url.searchParams.set('service', 'address')
+    url.searchParams.set('request', 'getCoord')
+    url.searchParams.set('version', '2.0')
+    url.searchParams.set('crs', 'epsg:4326')
+    url.searchParams.set('type', 'ROAD')
+    url.searchParams.set('refine', 'true')
+    url.searchParams.set('simple', 'false')
+    url.searchParams.set('format', 'json')
+    url.searchParams.set('key', apiKey)
+    url.searchParams.set('address', address)
+
+    const response = await fetch(url.toString())
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    // VWorld API 응답 구조 확인
+    if (data.response?.status === 'OK' && data.response?.result?.point) {
+      const point = data.response.result.point
+      return {
+        success: true,
+        lat: parseFloat(point.y),
+        lng: parseFloat(point.x),
+      }
+    }
+
+    // 도로명 주소로 찾지 못한 경우 지번 주소로 재시도
+    url.searchParams.set('type', 'PARCEL')
+    const retryResponse = await fetch(url.toString())
+    const retryData = await retryResponse.json()
+
+    if (retryData.response?.status === 'OK' && retryData.response?.result?.point) {
+      const point = retryData.response.result.point
+      return {
+        success: true,
+        lat: parseFloat(point.y),
+        lng: parseFloat(point.x),
+      }
+    }
+
+    return { success: false, error: '주소를 찾을 수 없습니다' }
+  } catch (error) {
+    console.error('Geocoding failed:', error)
+    return { success: false, error: '좌표 변환에 실패했습니다' }
+  }
+}
+
+// ============================================
 // LLM Generation Action (Placeholder)
 // ============================================
 
@@ -180,6 +779,7 @@ export async function generateTemplateWithLLM(prompt: string) {
       {
         id: 'intro',
         type: 'intro',
+        sectionType: 'intro',
         root: {
           id: 'root',
           type: 'fullscreen',
@@ -312,95 +912,10 @@ export async function generateTemplateWithLLM(prompt: string) {
     components: {},
   }
 
-  const sampleEditor: EditorSchema = {
-    version: '1.0',
-    meta: {
-      id: 'sample-editor',
-      name: '청첩장 편집기',
-      layoutId: 'sample-template',
-      styleId: 'sample-style',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    sections: [
-      {
-        id: 'couple',
-        title: '신랑신부 정보',
-        order: 0,
-        fields: [
-          {
-            id: 'groom-name',
-            type: 'text',
-            label: '신랑 이름',
-            dataPath: 'couple.groom.name',
-            placeholder: '신랑 이름을 입력하세요',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'bride-name',
-            type: 'text',
-            label: '신부 이름',
-            dataPath: 'couple.bride.name',
-            placeholder: '신부 이름을 입력하세요',
-            required: true,
-            order: 1,
-          },
-        ],
-      },
-      {
-        id: 'wedding',
-        title: '예식 정보',
-        order: 1,
-        fields: [
-          {
-            id: 'wedding-date',
-            type: 'date',
-            label: '예식 날짜',
-            dataPath: 'wedding.date',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'wedding-time',
-            type: 'time',
-            label: '예식 시간',
-            dataPath: 'wedding.time',
-            required: true,
-            order: 1,
-          },
-        ],
-      },
-      {
-        id: 'photos',
-        title: '사진',
-        order: 2,
-        fields: [
-          {
-            id: 'main-photo',
-            type: 'image',
-            label: '메인 사진',
-            dataPath: 'photos.main',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'gallery',
-            type: 'imageList',
-            label: '갤러리',
-            dataPath: 'photos.gallery',
-            maxItems: 10,
-            sortable: true,
-            order: 1,
-          },
-        ],
-      },
-    ],
-  }
+  // EditorSchema는 Layout의 {{변수}}에서 동적 생성됨
 
   return {
     layout: sampleLayout,
     style: sampleStyle,
-    editor: sampleEditor,
   }
 }

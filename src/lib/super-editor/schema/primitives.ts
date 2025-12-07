@@ -1,6 +1,6 @@
 /**
  * Super Editor - Primitives Schema
- * 기본 빌딩 블록 타입 정의 (28개)
+ * 기본 빌딩 블록 타입 정의 (29개)
  */
 
 // ============================================
@@ -15,7 +15,7 @@ export type PrimitiveType =
   | 'scroll-container'
   | 'overlay'
   | 'fullscreen'
-  // 콘텐츠 (9개)
+  // 콘텐츠 (11개)
   | 'text'
   | 'image'
   | 'video'
@@ -25,6 +25,8 @@ export type PrimitiveType =
   | 'divider'
   | 'input'
   | 'map-embed'
+  | 'calendar'
+  | 'countdown'
   // 이미지 컬렉션 (6개)
   | 'gallery'
   | 'carousel'
@@ -41,6 +43,10 @@ export type PrimitiveType =
   // 로직 (2개)
   | 'conditional'
   | 'repeat'
+  // 오디오 (1개)
+  | 'bgm-player'
+  // 확장 (1개)
+  | 'custom'
 
 // ============================================
 // Base Node Interface
@@ -87,6 +93,10 @@ export interface ScrollContainerProps {
 export interface OverlayProps {
   position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
   inset?: string | number
+  // 모달 관련 props
+  visible?: boolean // 초기 표시 여부 (기본: true, modal용은 false)
+  title?: string // 모달 제목
+  showClose?: boolean // 닫기 버튼 표시
 }
 
 export interface FullscreenProps {
@@ -139,6 +149,7 @@ export interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link'
   size?: 'sm' | 'md' | 'lg'
   icon?: string
+  iconSrc?: string // 이미지 URL 아이콘 (icon 대신 사용)
   iconPosition?: 'left' | 'right'
   action?: ButtonAction
 }
@@ -151,6 +162,8 @@ export type ButtonAction =
   | { type: 'map'; provider: 'kakao' | 'naver' | 'tmap'; address: string; lat?: number; lng?: number }
   | { type: 'scroll'; target: string }
   | { type: 'custom'; handler: string }
+  | { type: 'kakao-navi'; name: string; lat: string | number; lng: string | number }
+  | { type: 'modal'; target: string } // 모달 열기 (target = overlay node id)
 
 export interface SpacerProps {
   height?: number | string
@@ -186,6 +199,23 @@ export interface MapEmbedProps {
   navigationButtons?: ('kakao' | 'naver' | 'tmap')[]
 }
 
+export interface CalendarProps {
+  /** 결혼 날짜 (ISO 형식: 2025-03-15 또는 데이터 바인딩: {{wedding.dateISO}}) */
+  date: string
+  /** 달력 시작 요일 (0: 일요일, 1: 월요일) */
+  weekStartsOn?: 0 | 1
+  /** 요일 표시 형식 */
+  weekdayFormat?: 'narrow' | 'short' | 'long' // 일/월/화 | 일요일/월요일 | Sunday
+  /** 로케일 */
+  locale?: 'ko' | 'en'
+  /** 결혼 날짜 하이라이트 스타일 */
+  highlightStyle?: 'circle' | 'filled' | 'ring'
+  /** 일요일/공휴일 색상 표시 */
+  showHolidayColor?: boolean
+  /** 토요일 색상 표시 */
+  showSaturdayColor?: boolean
+}
+
 // ============================================
 // Image Collection Primitives Props
 // ============================================
@@ -214,7 +244,7 @@ export interface CarouselProps extends ImageCollectionBaseProps {
   showArrows?: boolean
   showDots?: boolean
   slidesToShow?: number
-  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
+  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'cards'
   spacing?: number
 }
 
@@ -302,6 +332,29 @@ export interface RepeatProps {
   key?: string // 고유 키 필드
   limit?: number
   offset?: number
+  defaultValue?: unknown[] // 데이터가 없을 때 사용할 기본값
+}
+
+// ============================================
+// Audio Primitives Props
+// ============================================
+
+export interface BgmPlayerProps {
+  src?: string // 커스텀 오디오 URL 또는 데이터 바인딩 ({{bgm.url}})
+  trackId?: string // 프리셋 BGM ID
+  autoplay?: boolean // 기본: true
+  loop?: boolean // 기본: true
+  volume?: number // 0-1, 기본: 0.5
+  fadeIn?: number // 페이드 인 (ms)
+  fadeOut?: number // 페이드 아웃 (ms)
+  syncWithScroll?: {
+    enabled: boolean
+    startVolume?: number // 기본: 1
+    endVolume?: number // 기본: 0.3
+  }
+  showControls?: boolean // 기본: true
+  controlsPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+  controlsStyle?: 'minimal' | 'vinyl'
 }
 
 // ============================================
@@ -309,7 +362,21 @@ export interface RepeatProps {
 // ============================================
 
 export interface AnimationConfig {
-  preset: AnimationPreset
+  /**
+   * 프리셋 애니메이션 (미리 정의된 효과)
+   * preset 또는 keyframes 중 하나 필수
+   */
+  preset?: AnimationPreset
+  /**
+   * 커스텀 키프레임 (프리셋 대신 직접 정의)
+   * 예: [{ offset: 0, opacity: 0 }, { offset: 1, opacity: 1 }]
+   */
+  keyframes?: CustomAnimationKeyframe[]
+  /**
+   * StyleSchema.customStyles.keyframes에 정의된 이름 참조
+   * 예: 'grain', 'flicker'
+   */
+  keyframesRef?: string
   duration?: number
   delay?: number
   easing?: EasingType
@@ -322,6 +389,18 @@ export interface AnimationConfig {
   // 스태거 애니메이션용
   staggerDelay?: number
   staggerFrom?: 'start' | 'center' | 'end' | 'random'
+}
+
+/**
+ * 커스텀 애니메이션 키프레임
+ */
+export interface CustomAnimationKeyframe {
+  offset: number // 0-1
+  opacity?: number
+  transform?: string
+  filter?: string
+  clipPath?: string
+  [property: string]: string | number | undefined
 }
 
 export type AnimationPreset =
@@ -417,6 +496,7 @@ export type PrimitiveProps =
   | DividerProps
   | InputProps
   | MapEmbedProps
+  | CalendarProps
   | GalleryProps
   | CarouselProps
   | GridProps
@@ -430,3 +510,49 @@ export type PrimitiveProps =
   | TransitionProps
   | ConditionalProps
   | RepeatProps
+  | BgmPlayerProps
+  | CustomProps
+
+// ============================================
+// Custom Primitive Props (확장용)
+// ============================================
+
+/**
+ * Custom primitive - 가상 요소, 원시 CSS, 확장 기능 지원
+ */
+export interface CustomProps {
+  /**
+   * StyleSchema.customStyles.classes에 정의된 클래스 이름
+   * 가상 요소(::before, ::after) 포함 가능
+   */
+  className?: string
+
+  /**
+   * 인라인 커스텀 CSS (해당 요소에만 적용)
+   */
+  inlineCss?: string
+
+  /**
+   * 가상 요소 직접 정의 (className 없이 사용 시)
+   */
+  pseudoElements?: {
+    before?: PseudoElementConfig
+    after?: PseudoElementConfig
+  }
+
+  /**
+   * 애니메이션 설정 (커스텀 keyframes 포함)
+   */
+  animation?: AnimationConfig
+
+  /**
+   * 컴포넌트 태그 (기본: div)
+   */
+  as?: 'div' | 'span' | 'section' | 'article'
+}
+
+export interface PseudoElementConfig {
+  content?: string
+  style?: CSSProperties
+  animation?: string
+}

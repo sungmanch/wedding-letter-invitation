@@ -3,6 +3,49 @@
 import type { PrimitiveNode, RepeatProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, getValueByPath } from '../types'
+import { renderPrimitiveNode } from '../render-node'
+
+// relation → relationLabel 매핑
+const GROOM_RELATION_LABELS: Record<string, string> = {
+  self: '신랑',
+  father: '신랑 부',
+  mother: '신랑 모',
+}
+
+const BRIDE_RELATION_LABELS: Record<string, string> = {
+  self: '신부',
+  father: '신부 부',
+  mother: '신부 모',
+}
+
+/**
+ * 계좌 데이터에 relationLabel 추가
+ */
+function addRelationLabel(
+  item: unknown,
+  dataPath: string
+): unknown {
+  if (typeof item !== 'object' || item === null) return item
+  const record = item as Record<string, unknown>
+
+  // relation 필드가 있으면 relationLabel 추가
+  if ('relation' in record && typeof record.relation === 'string') {
+    const isGroom = dataPath.includes('groom')
+    const labelMap = isGroom ? GROOM_RELATION_LABELS : BRIDE_RELATION_LABELS
+    const label = labelMap[record.relation] || record.relation
+    return {
+      ...record,
+      relationLabel: label,
+    }
+  }
+
+  // relation 필드가 없으면 기본값 추가
+  const isGroom = dataPath.includes('groom')
+  return {
+    ...record,
+    relationLabel: isGroom ? '신랑' : '신부',
+  }
+}
 
 export function Repeat({
   node,
@@ -32,13 +75,17 @@ export function Repeat({
     }
   }
 
-  // 편집 모드에서는 샘플 데이터 표시
-  if (context.mode === 'edit' && items.length === 0) {
-    items = [
-      { __sample: true, index: 0 },
-      { __sample: true, index: 1 },
-      { __sample: true, index: 2 },
-    ]
+  // 데이터가 없거나 비어있을 때 defaultValue 사용
+  // - items.length === 0: 데이터 배열이 비어있음
+  // - items가 있지만 모든 item이 빈 객체 (필수 필드가 없음)
+  const hasValidData = items.length > 0 && items.some(item => {
+    if (typeof item !== 'object' || item === null) return false
+    const values = Object.values(item as Record<string, unknown>)
+    return values.some(v => v !== '' && v !== undefined && v !== null)
+  })
+
+  if (!hasValidData && props.defaultValue && Array.isArray(props.defaultValue)) {
+    items = props.defaultValue
   }
 
   // limit, offset 적용
@@ -48,17 +95,28 @@ export function Repeat({
 
   // 반복 렌더링
   const renderItems = slicedItems.map((item, index) => {
+    // relationLabel 자동 추가 (accounts.groom/bride용)
+    const enhancedItem = addRelationLabel(item, dataPath || '')
+
     // 컨텍스트에 반복 변수 추가
+    const itemData = {
+      ...context.data,
+      [props.as]: enhancedItem,
+      [`${props.as}Index`]: index,
+      [`${props.as}First`]: index === 0,
+      [`${props.as}Last`]: index === slicedItems.length - 1,
+    }
+
+    // 새로운 renderNode 함수를 생성하여 itemData를 사용하도록 함
     const itemContext: RenderContext = {
       ...context,
-      data: {
-        ...context.data,
-        [props.as]: item,
-        [`${props.as}Index`]: index,
-        [`${props.as}First`]: index === 0,
-        [`${props.as}Last`]: index === slicedItems.length - 1,
-      },
+      data: itemData,
+      renderNode: (childNode: PrimitiveNode) =>
+        renderPrimitiveNode(childNode, { ...context, data: itemData, renderNode: itemContext.renderNode }),
     }
+    // renderNode가 자기 자신을 참조하도록 재할당
+    itemContext.renderNode = (childNode: PrimitiveNode) =>
+      renderPrimitiveNode(childNode, itemContext)
 
     // 고유 키 생성
     const key = props.key && typeof item === 'object' && item !== null

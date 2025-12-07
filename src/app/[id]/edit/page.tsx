@@ -1,7 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { getInvitation } from '@/lib/actions/wedding'
-import { EditClient } from './EditClient'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
   title: '청첩장 편집 - Maison de Letter',
@@ -12,39 +9,13 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+/**
+ * Legacy edit route - redirects to SE editor
+ * 기존 /{id}/edit URL 호환성을 위해 유지
+ */
 export default async function EditPage({ params }: PageProps) {
   const { id } = await params
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect(`/login?redirect=/${id}/edit`)
-  }
-
-  const invitationResult = await getInvitation(id)
-
-  if (!invitationResult.success || !invitationResult.data) {
-    notFound()
-  }
-
-  const invitation = invitationResult.data
-
-  // Verify ownership
-  if (invitation.userId !== user.id) {
-    redirect('/my/invitations')
-  }
-
-  // Generate share URL
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://wedding.example.com'
-  const shareUrl = `${baseUrl}/${id}`
-
-  return (
-    <EditClient
-      invitation={invitation}
-      design={invitation.selectedDesign}
-      photos={invitation.photos || []}
-      shareUrl={shareUrl}
-    />
-  )
+  // SE 에디터로 리다이렉트
+  redirect(`/se/${id}/edit`)
 }

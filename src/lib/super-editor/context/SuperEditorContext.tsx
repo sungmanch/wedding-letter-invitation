@@ -8,9 +8,10 @@ import {
   useMemo,
   type ReactNode,
 } from 'react'
+import { format, parseISO, differenceInDays } from 'date-fns'
+import { ko } from 'date-fns/locale'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
 import type { UserData } from '../schema/user-data'
 import type { PrimitiveNode } from '../schema/primitives'
 
@@ -22,7 +23,7 @@ export interface SuperEditorState {
   // 스키마 데이터
   layout: LayoutSchema | null
   style: StyleSchema | null
-  editor: EditorSchema | null
+  // editor는 더 이상 저장하지 않음 (Layout의 {{변수}}에서 동적 생성)
   userData: UserData | null
 
   // UI 상태
@@ -52,8 +53,9 @@ export interface HistoryEntry {
 // ============================================
 
 export type SuperEditorAction =
-  | { type: 'SET_TEMPLATE'; layout: LayoutSchema; style: StyleSchema; editor: EditorSchema }
+  | { type: 'SET_TEMPLATE'; layout: LayoutSchema; style: StyleSchema }
   | { type: 'SET_USER_DATA'; userData: UserData }
+  | { type: 'SET_STYLE'; style: StyleSchema }
   | { type: 'UPDATE_FIELD'; fieldPath: string; value: unknown }
   | { type: 'SELECT_NODE'; nodeId: string | null }
   | { type: 'SELECT_FIELD'; fieldId: string | null }
@@ -72,7 +74,6 @@ export type SuperEditorAction =
 const initialState: SuperEditorState = {
   layout: null,
   style: null,
-  editor: null,
   userData: null,
   selectedNodeId: null,
   selectedFieldId: null,
@@ -89,22 +90,166 @@ const initialState: SuperEditorState = {
 // Reducer
 // ============================================
 
+/**
+ * 경로 문자열을 파싱해서 배열로 변환
+ * 'accounts.groom[0].bank' → ['accounts', 'groom', 0, 'bank']
+ */
+function parsePath(path: string): (string | number)[] {
+  const result: (string | number)[] = []
+  const regex = /([^.\[\]]+)|\[(\d+)\]/g
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(path)) !== null) {
+    if (match[1] !== undefined) {
+      result.push(match[1])
+    } else if (match[2] !== undefined) {
+      result.push(parseInt(match[2], 10))
+    }
+  }
+
+  return result
+}
+
 function setValueByPath(
   obj: Record<string, unknown>,
   path: string,
   value: unknown
 ): Record<string, unknown> {
-  const parts = path.split('.')
-  const result = { ...obj }
-  let current: Record<string, unknown> = result
+  const parts = parsePath(path)
+  const result = JSON.parse(JSON.stringify(obj)) // deep clone
+  let current: unknown = result
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i]
-    current[part] = { ...(current[part] as Record<string, unknown> || {}) }
-    current = current[part] as Record<string, unknown>
+    const nextPart = parts[i + 1]
+
+    if (typeof part === 'number') {
+      // 현재 파트가 배열 인덱스
+      const arr = current as unknown[]
+      if (!arr[part]) {
+        arr[part] = typeof nextPart === 'number' ? [] : {}
+      }
+      current = arr[part]
+    } else {
+      // 현재 파트가 객체 키
+      const obj = current as Record<string, unknown>
+      if (!obj[part]) {
+        obj[part] = typeof nextPart === 'number' ? [] : {}
+      }
+      current = obj[part]
+    }
   }
 
-  current[parts[parts.length - 1]] = value
+  // 마지막 파트에 값 설정
+  const lastPart = parts[parts.length - 1]
+  if (typeof lastPart === 'number') {
+    (current as unknown[])[lastPart] = value
+  } else {
+    (current as Record<string, unknown>)[lastPart] = value
+  }
+
+  return result
+}
+
+/**
+ * 데이터에서 값을 path로 가져오기
+ */
+function getValueByPath(obj: Record<string, unknown>, path: string): unknown {
+  const parts = path.split('.')
+  let current: unknown = obj
+  for (const part of parts) {
+    if (current === null || current === undefined) return undefined
+    if (typeof current === 'object') {
+      current = (current as Record<string, unknown>)[part]
+    } else {
+      return undefined
+    }
+  }
+  return current
+}
+
+/**
+ * wedding.date 또는 wedding.time 변경 시 파생 필드 자동 계산
+ */
+function computeDerivedFields(
+  data: Record<string, unknown>,
+  fieldPath: string,
+  value: unknown
+): Record<string, unknown> {
+  let result = data
+
+  // wedding.date 변경 시 날짜 관련 파생 필드 계산
+  if (fieldPath === 'wedding.date' && typeof value === 'string' && value) {
+    try {
+      const date = parseISO(value)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // 한글 날짜 표시 (2025년 3월 15일 토요일)
+      const dateDisplay = format(date, 'yyyy년 M월 d일 EEEE', { locale: ko })
+      result = setValueByPath(result, 'wedding.dateDisplay', dateDisplay)
+
+      // 영문 날짜 표시 (Saturday, March 15, 2025)
+      const dateEn = format(date, 'EEEE, MMMM d, yyyy')
+      result = setValueByPath(result, 'wedding.dateEn', dateEn)
+
+      // Calendar variant용 파생 필드
+      result = setValueByPath(result, 'wedding.month', format(date, 'yyyy년 M월', { locale: ko }))
+      result = setValueByPath(result, 'wedding.day', format(date, 'd'))
+      result = setValueByPath(result, 'wedding.weekday', format(date, 'EEEE', { locale: ko }))
+
+      // D-Day 계산
+      const dday = differenceInDays(date, today)
+      result = setValueByPath(result, 'wedding.dday', dday)
+      result = setValueByPath(result, 'countdown.days', dday)
+    } catch (e) {
+      console.error('Failed to compute date derived fields:', e)
+    }
+  }
+
+  // wedding.time 변경 시 시간 관련 파생 필드 계산
+  if (fieldPath === 'wedding.time' && typeof value === 'string' && value) {
+    try {
+      const [hours, minutes] = value.split(':').map(Number)
+      const period = hours >= 12 ? '오후' : '오전'
+      const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours
+
+      // 한글 시간 표시 (오후 2시)
+      const timeDisplay = minutes === 0
+        ? `${period} ${displayHours}시`
+        : `${period} ${displayHours}시 ${minutes}분`
+      result = setValueByPath(result, 'wedding.timeDisplay', timeDisplay)
+
+      // 영문 시간 표시 (PM 2:00)
+      const periodEn = hours >= 12 ? 'PM' : 'AM'
+      const timeEn = `${periodEn} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+      result = setValueByPath(result, 'wedding.timeEn', timeEn)
+    } catch (e) {
+      console.error('Failed to compute time derived fields:', e)
+    }
+  }
+
+  return result
+}
+
+/**
+ * 초기 데이터 로드 시 모든 파생 필드 계산
+ */
+function computeAllDerivedFields(data: Record<string, unknown>): Record<string, unknown> {
+  let result = data
+
+  // wedding.date에서 파생 필드 계산
+  const weddingDate = getValueByPath(data, 'wedding.date')
+  if (weddingDate && typeof weddingDate === 'string') {
+    result = computeDerivedFields(result, 'wedding.date', weddingDate)
+  }
+
+  // wedding.time에서 파생 필드 계산
+  const weddingTime = getValueByPath(data, 'wedding.time')
+  if (weddingTime && typeof weddingTime === 'string') {
+    result = computeDerivedFields(result, 'wedding.time', weddingTime)
+  }
+
   return result
 }
 
@@ -118,18 +263,25 @@ function superEditorReducer(
         ...state,
         layout: action.layout,
         style: action.style,
-        editor: action.editor,
         loading: false,
         error: null,
       }
 
-    case 'SET_USER_DATA':
+    case 'SET_USER_DATA': {
+      // 초기 데이터 로드 시 파생 필드 계산
+      const computedData = computeAllDerivedFields(
+        action.userData.data as Record<string, unknown>
+      )
+      const userDataWithDerived: UserData = {
+        ...action.userData,
+        data: computedData,
+      }
       return {
         ...state,
-        userData: action.userData,
+        userData: userDataWithDerived,
         history: [
           {
-            userData: action.userData,
+            userData: userDataWithDerived,
             timestamp: Date.now(),
             description: 'Initial load',
           },
@@ -137,15 +289,27 @@ function superEditorReducer(
         historyIndex: 0,
         dirty: false,
       }
+    }
+
+    case 'SET_STYLE':
+      return {
+        ...state,
+        style: action.style,
+        dirty: true,
+      }
 
     case 'UPDATE_FIELD': {
       if (!state.userData) return state
 
-      const newData = setValueByPath(
+      // 먼저 기본 필드 업데이트
+      let newData = setValueByPath(
         state.userData.data as Record<string, unknown>,
         action.fieldPath,
         action.value
       )
+
+      // 파생 필드 자동 계산 (wedding.date → dateDisplay 등)
+      newData = computeDerivedFields(newData, action.fieldPath, action.value)
 
       const newUserData: UserData = {
         ...state.userData,
@@ -242,9 +406,12 @@ function superEditorReducer(
 interface SuperEditorContextValue {
   state: SuperEditorState
   dispatch: React.Dispatch<SuperEditorAction>
+  // 청첩장 ID (이미지 업로드 등에 사용)
+  invitationId: string | undefined
   // 편의 함수들
-  setTemplate: (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => void
+  setTemplate: (layout: LayoutSchema, style: StyleSchema) => void
   setUserData: (userData: UserData) => void
+  setStyle: (style: StyleSchema) => void
   updateField: (fieldPath: string, value: unknown) => void
   selectNode: (nodeId: string | null) => void
   selectField: (fieldId: string | null) => void
@@ -267,16 +434,17 @@ const SuperEditorContext = createContext<SuperEditorContextValue | null>(null)
 
 interface SuperEditorProviderProps {
   children: ReactNode
+  invitationId?: string
   initialTemplate?: {
     layout: LayoutSchema
     style: StyleSchema
-    editor: EditorSchema
   }
   initialUserData?: UserData
 }
 
 export function SuperEditorProvider({
   children,
+  invitationId,
   initialTemplate,
   initialUserData,
 }: SuperEditorProviderProps) {
@@ -284,7 +452,6 @@ export function SuperEditorProvider({
     ...initialState,
     layout: initialTemplate?.layout || null,
     style: initialTemplate?.style || null,
-    editor: initialTemplate?.editor || null,
     userData: initialUserData || null,
     history: initialUserData
       ? [{ userData: initialUserData, timestamp: Date.now(), description: 'Initial' }]
@@ -294,14 +461,18 @@ export function SuperEditorProvider({
 
   // 편의 함수들
   const setTemplate = useCallback(
-    (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => {
-      dispatch({ type: 'SET_TEMPLATE', layout, style, editor })
+    (layout: LayoutSchema, style: StyleSchema) => {
+      dispatch({ type: 'SET_TEMPLATE', layout, style })
     },
     []
   )
 
   const setUserData = useCallback((userData: UserData) => {
     dispatch({ type: 'SET_USER_DATA', userData })
+  }, [])
+
+  const setStyle = useCallback((style: StyleSchema) => {
+    dispatch({ type: 'SET_STYLE', style })
   }, [])
 
   const updateField = useCallback((fieldPath: string, value: unknown) => {
@@ -336,15 +507,25 @@ export function SuperEditorProvider({
     (fieldPath: string): unknown => {
       if (!state.userData?.data) return undefined
 
-      const parts = fieldPath.split('.')
+      const parts = parsePath(fieldPath)
       let current: unknown = state.userData.data
 
       for (const part of parts) {
         if (current === null || current === undefined) return undefined
-        if (typeof current === 'object') {
-          current = (current as Record<string, unknown>)[part]
+        if (typeof part === 'number') {
+          // 배열 인덱스
+          if (Array.isArray(current)) {
+            current = current[part]
+          } else {
+            return undefined
+          }
         } else {
-          return undefined
+          // 객체 키
+          if (typeof current === 'object') {
+            current = (current as Record<string, unknown>)[part]
+          } else {
+            return undefined
+          }
         }
       }
 
@@ -363,8 +544,10 @@ export function SuperEditorProvider({
     () => ({
       state,
       dispatch,
+      invitationId,
       setTemplate,
       setUserData,
+      setStyle,
       updateField,
       selectNode,
       selectField,
@@ -379,8 +562,10 @@ export function SuperEditorProvider({
     }),
     [
       state,
+      invitationId,
       setTemplate,
       setUserData,
+      setStyle,
       updateField,
       selectNode,
       selectField,
@@ -429,11 +614,6 @@ export function useSuperEditorLayout() {
 export function useSuperEditorStyle() {
   const { state } = useSuperEditor()
   return state.style
-}
-
-export function useSuperEditorEditor() {
-  const { state } = useSuperEditor()
-  return state.editor
 }
 
 export function useSuperEditorUserData() {

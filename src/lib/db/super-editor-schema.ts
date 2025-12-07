@@ -12,12 +12,13 @@ import {
 
 import type { LayoutSchema } from '../super-editor/schema/layout'
 import type { StyleSchema } from '../super-editor/schema/style'
-import type { EditorSchema } from '../super-editor/schema/editor'
+import type { VariablesSchema } from '../super-editor/schema/variables'
 import type { UserData } from '../super-editor/schema/user-data'
 
 // ============================================
 // Super Editor Templates
-// LLM이 생성한 레이아웃, 스타일, 에디터 스키마 저장
+// LLM이 생성한 레이아웃, 스타일 스키마 저장
+// (EditorSchema는 Layout의 {{변수}}에서 동적 생성됨)
 // ============================================
 
 export const superEditorTemplates = pgTable('super_editor_templates', {
@@ -35,7 +36,10 @@ export const superEditorTemplates = pgTable('super_editor_templates', {
   // LLM 생성 스키마 (핵심!)
   layoutSchema: jsonb('layout_schema').$type<LayoutSchema>().notNull(),
   styleSchema: jsonb('style_schema').$type<StyleSchema>().notNull(),
-  editorSchema: jsonb('editor_schema').$type<EditorSchema>().notNull(),
+  // 변수 선언 (에디터 필드 생성 + 기본값 제공)
+  variablesSchema: jsonb('variables_schema').$type<VariablesSchema>(),
+  // editorSchema는 deprecated (variablesSchema로 대체)
+  editorSchema: jsonb('editor_schema').$type<Record<string, unknown>>(),
 
   // 버전 관리
   version: varchar('version', { length: 20 }).default('1.0').notNull(),
@@ -101,9 +105,22 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   // S3 배포 URL
   publishedUrl: varchar('published_url', { length: 500 }),
 
+  // Open Graph 메타데이터 (카카오톡/문자 공유 시 표시)
+  ogTitle: varchar('og_title', { length: 100 }), // 기본값: "{신랑} ♥ {신부} 결혼합니다"
+  ogDescription: varchar('og_description', { length: 200 }), // 기본값: "{일시} {장소}에서 축하해주세요"
+  ogImageUrl: varchar('og_image_url', { length: 500 }), // OG 공유용 이미지 URL (1200x630 JPG)
+
   // 상태
   status: varchar('status', { length: 20 }).default('draft').notNull(), // 'draft' | 'building' | 'published' | 'error'
   errorMessage: text('error_message'),
+
+  // 섹션 관리
+  sectionOrder: jsonb('section_order').$type<string[]>(), // 섹션 순서 (intro 제외)
+  sectionEnabled: jsonb('section_enabled').$type<Record<string, boolean>>(), // 섹션 활성화 상태
+
+  // 결제
+  isPaid: boolean('is_paid').default(false).notNull(),
+  paymentId: uuid('payment_id'), // invitation_payments 참조
 
   // 접근 설정
   slug: varchar('slug', { length: 100 }), // 커스텀 URL slug
@@ -122,6 +139,7 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   index('idx_se_invitations_user').on(table.userId),
   index('idx_se_invitations_status').on(table.status),
   index('idx_se_invitations_slug').on(table.slug),
+  index('idx_se_invitations_payment').on(table.paymentId),
 ]).enableRLS()
 
 // ============================================
@@ -161,6 +179,33 @@ export const superEditorPresets = pgTable('super_editor_presets', {
 ]).enableRLS()
 
 // ============================================
+// Guestbook Messages
+// 게스트가 청첩장에 남긴 축하 메시지
+// ============================================
+
+export const guestbookMessages = pgTable('guestbook_messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // FK: superEditorInvitations
+  invitationId: uuid('invitation_id')
+    .references(() => superEditorInvitations.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // 익명 사용자 구분 (브라우저 쿠키 기반)
+  cookieId: varchar('cookie_id', { length: 100 }).notNull(),
+
+  // 메시지 내용
+  name: varchar('name', { length: 50 }).notNull(),
+  message: text('message').notNull(),
+
+  // 생성 시간 (수정 불가이므로 updatedAt 없음)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_guestbook_invitation').on(table.invitationId),
+  index('idx_guestbook_cookie').on(table.cookieId),
+]).enableRLS()
+
+// ============================================
 // Type exports
 // ============================================
 
@@ -172,3 +217,6 @@ export type NewSuperEditorInvitation = typeof superEditorInvitations.$inferInser
 
 export type SuperEditorPreset = typeof superEditorPresets.$inferSelect
 export type NewSuperEditorPreset = typeof superEditorPresets.$inferInsert
+
+export type GuestbookMessage = typeof guestbookMessages.$inferSelect
+export type NewGuestbookMessage = typeof guestbookMessages.$inferInsert

@@ -72,11 +72,13 @@
   --color-pink-500: #ec4899;
 
   /* Fonts */
-  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
+  --font-sans:
+    'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
     'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
 }
 
 body {
@@ -132,7 +134,8 @@ body {
 
 /* Slow pulse animation for important notices */
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -146,35 +149,80 @@ body {
 
 /* Hide scrollbar utility */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari, Opera */
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* Mobile-style thin scrollbar for preview frame */
-.scrollbar-mobile {
+.scrollbar-mobile,
+.mobile-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: transparent transparent;
 }
 
-.scrollbar-mobile::-webkit-scrollbar {
-  width: 3px;
+.scrollbar-mobile:hover,
+.mobile-scrollbar:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
-.scrollbar-mobile::-webkit-scrollbar-track {
+.scrollbar-mobile::-webkit-scrollbar,
+.mobile-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-mobile::-webkit-scrollbar-track,
+.mobile-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-mobile::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+.scrollbar-mobile::-webkit-scrollbar-thumb,
+.mobile-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
-.scrollbar-mobile::-webkit-scrollbar-thumb:hover {
+.scrollbar-mobile:hover::-webkit-scrollbar-thumb,
+.mobile-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+.scrollbar-mobile::-webkit-scrollbar-thumb:hover,
+.mobile-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   Gold Theme Scrollbar (Editor)
+   ========================================== */
+
+/* 에디터 패널용 골드 스크롤바 */
+.scrollbar-gold {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 98, 0.3) transparent;
+}
+
+.scrollbar-gold::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-gold::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-gold::-webkit-scrollbar-thumb {
+  background-color: rgba(201, 169, 98, 0.3);
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.scrollbar-gold::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(201, 169, 98, 0.6);
+  box-shadow: 0 0 8px rgba(201, 169, 98, 0.3);
 }
 
 /* ==========================================
@@ -183,16 +231,16 @@ body {
 
 :root {
   /* Wong Kar-wai Signature Colors */
-  --wkw-gold: #C9A962;
-  --wkw-gold-dark: #B8A052;
-  --wkw-red: #8B2635;
-  --wkw-teal: #1A4D4D;
-  --wkw-cream: #F5E6D3;
+  --wkw-gold: #c9a962;
+  --wkw-gold-dark: #b8a052;
+  --wkw-red: #8b2635;
+  --wkw-teal: #1a4d4d;
+  --wkw-cream: #f5e6d3;
 
   /* Stage Backgrounds */
-  --bg-dark: #0A0806;
-  --bg-cinema: #1A1A1A;
-  --bg-exhibition: #2D2D2D;
+  --bg-dark: #0a0806;
+  --bg-cinema: #1a1a1a;
+  --bg-exhibition: #2d2d2d;
 }
 
 /* Fade up animation */
@@ -256,7 +304,8 @@ body {
 
 /* Card float animation */
 @keyframes cardFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotateX(0);
   }
   50% {
@@ -272,7 +321,9 @@ body {
 
 /* Bounce dots animation for loading */
 @keyframes bounceDot {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
   }
   40% {
@@ -313,6 +364,54 @@ body {
 
 /* Film grain effect for cinematic sections */
 @keyframes grain {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-5%, -10%);
+  }
+  20% {
+    transform: translate(-15%, 5%);
+  }
+  30% {
+    transform: translate(7%, -25%);
+  }
+  40% {
+    transform: translate(-5%, 25%);
+  }
+  50% {
+    transform: translate(-15%, 10%);
+  }
+  60% {
+    transform: translate(15%, 0%);
+  }
+  70% {
+    transform: translate(0%, 15%);
+  }
+  80% {
+    transform: translate(3%, 35%);
+  }
+  90% {
+    transform: translate(-10%, 10%);
+  }
+}
+
+.film-grain::before {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.08;
+  pointer-events: none;
+  animation: grain 0.5s steps(10) infinite;
+}
+
+/* ========================================== */
+/* Cinematic Intro - Skeleton Variant Styles */
+/* ========================================== */
+
+@keyframes cinematicGrain {
   0%, 100% { transform: translate(0, 0); }
   10% { transform: translate(-5%, -10%); }
   20% { transform: translate(-15%, 5%); }
@@ -325,12 +424,40 @@ body {
   90% { transform: translate(-10%, 10%); }
 }
 
-.film-grain::before {
+.cinematic-grain::before {
   content: '';
   position: absolute;
-  inset: -100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.08;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.15;
   pointer-events: none;
-  animation: grain 0.5s steps(10) infinite;
+  animation: cinematicGrain 0.5s steps(10) infinite;
+  z-index: 50;
+}
+
+@keyframes cinematicFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+  75% { opacity: 0.99; }
+}
+
+.cinematic-flicker {
+  animation: cinematicFlicker 0.15s infinite;
+}
+
+/* ========================================== */
+/* Jewel Velvet Intro - Star Decoration */
+/* ========================================== */
+
+.jewel-star::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(212, 175, 114, 0.6);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }

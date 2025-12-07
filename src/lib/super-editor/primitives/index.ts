@@ -1,10 +1,19 @@
 /**
  * Super Editor - All Primitives Export
- * 28개 기본 블록 렌더러
+ * 29개 기본 블록 렌더러
  */
 
 // Types
 export * from './types'
+
+// Render utilities (circular import 방지를 위해 분리)
+export {
+  renderPrimitiveNode,
+  createNodeRenderer,
+  getRenderer,
+  setRenderers,
+} from './render-node'
+import { setRenderers } from './render-node'
 
 // Layout (6개)
 export * from './layout'
@@ -26,12 +35,21 @@ import { animationRenderers } from './animation'
 export * from './logic'
 import { logicRenderers } from './logic'
 
+// Audio (1개)
+export * from './audio'
+import { bgmPlayerRenderer } from './audio'
+const audioRenderers = { 'bgm-player': bgmPlayerRenderer }
+
+// Custom (1개)
+export * from './custom'
+import { customRenderer } from './custom'
+const customRenderers = { custom: customRenderer }
+
 // ============================================
 // All Renderers Combined
 // ============================================
 
-import type { PrimitiveNode } from '../schema/primitives'
-import type { RenderContext, PrimitiveRenderer } from './types'
+import type { PrimitiveRenderer } from './types'
 
 export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...layoutRenderers,
@@ -39,44 +57,12 @@ export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...imageCollectionRenderers,
   ...animationRenderers,
   ...logicRenderers,
+  ...audioRenderers,
+  ...customRenderers,
 }
 
-/**
- * 노드 타입에 따른 렌더러 가져오기
- */
-export function getRenderer(type: string): PrimitiveRenderer | undefined {
-  return allRenderers[type]
-}
-
-/**
- * 노드 렌더링 함수
- */
-export function renderPrimitiveNode(
-  node: PrimitiveNode,
-  context: RenderContext
-): React.ReactNode {
-  const renderer = getRenderer(node.type)
-
-  if (!renderer) {
-    console.warn(`Unknown primitive type: ${node.type}`)
-    return null
-  }
-
-  return renderer.render(node, context)
-}
-
-/**
- * 컨텍스트와 함께 렌더링 함수 생성
- */
-export function createNodeRenderer(
-  baseContext: Omit<RenderContext, 'renderNode'>
-): RenderContext {
-  const context: RenderContext = {
-    ...baseContext,
-    renderNode: (node: PrimitiveNode) => renderPrimitiveNode(node, context),
-  }
-  return context
-}
+// 렌더러 레지스트리 초기화
+setRenderers(allRenderers)
 
 // ============================================
 // Renderer Categories
@@ -91,7 +77,7 @@ export const rendererCategories = {
   content: {
     label: '콘텐츠',
     renderers: contentRenderers,
-    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed'],
+    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed', 'calendar'],
   },
   imageCollection: {
     label: '이미지 컬렉션',
@@ -108,6 +94,16 @@ export const rendererCategories = {
     renderers: logicRenderers,
     types: ['conditional', 'repeat'],
   },
+  audio: {
+    label: '오디오',
+    renderers: audioRenderers,
+    types: ['bgm-player'],
+  },
+  custom: {
+    label: '확장',
+    renderers: customRenderers,
+    types: ['custom'],
+  },
 }
 
 // ============================================
@@ -121,10 +117,12 @@ export const primitiveStats = {
   imageCollection: Object.keys(imageCollectionRenderers).length,
   animation: Object.keys(animationRenderers).length,
   logic: Object.keys(logicRenderers).length,
+  audio: Object.keys(audioRenderers).length,
+  custom: Object.keys(customRenderers).length,
 }
 
-// 28개 확인
+// 31개 확인 (30 + custom)
 console.assert(
-  primitiveStats.total === 28,
-  `Expected 28 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 31,
+  `Expected 31 primitives, got ${primitiveStats.total}`
 )

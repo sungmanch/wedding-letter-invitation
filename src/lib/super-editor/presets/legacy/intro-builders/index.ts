@@ -1,0 +1,128 @@
+/**
+ * Intro Builders Index
+ * PrimitiveNode 기반 인트로 빌더 모음
+ */
+
+export * from './types'
+export * from './to-screen'
+
+// Individual builders
+export { buildCinematicIntro } from './cinematic'
+export { buildExhibitionIntro } from './exhibition'
+export { buildMagazineIntro } from './magazine'
+export { buildGothicRomanceIntro } from './gothic-romance'
+export { buildOldMoneyIntro } from './old-money'
+export { buildMonogramIntro } from './monogram'
+export { buildJewelVelvetIntro } from './jewel-velvet'
+
+import type { IntroBuilder, IntroBuilderContext, IntroBuilderResult, IntroBuilderData } from './types'
+import type { LegacyIntroType } from '../types'
+import { resetIdCounter } from './types'
+
+import { buildCinematicIntro } from './cinematic'
+import { buildExhibitionIntro } from './exhibition'
+import { buildMagazineIntro } from './magazine'
+import { buildGothicRomanceIntro } from './gothic-romance'
+import { buildOldMoneyIntro } from './old-money'
+import { buildMonogramIntro } from './monogram'
+import { buildJewelVelvetIntro } from './jewel-velvet'
+
+// ============================================
+// Builder Registry
+// ============================================
+
+export const introBuilders: Record<LegacyIntroType, IntroBuilder> = {
+  cinematic: buildCinematicIntro,
+  exhibition: buildExhibitionIntro,
+  magazine: buildMagazineIntro,
+  'gothic-romance': buildGothicRomanceIntro,
+  'old-money': buildOldMoneyIntro,
+  monogram: buildMonogramIntro,
+  'jewel-velvet': buildJewelVelvetIntro,
+}
+
+// ============================================
+// Main Build Function
+// ============================================
+
+/**
+ * 인트로 타입에 따라 PrimitiveNode 트리 생성
+ */
+export function buildIntro(ctx: IntroBuilderContext): IntroBuilderResult {
+  const introType = ctx.preset.intro.type as LegacyIntroType
+  const builder = introBuilders[introType]
+
+  if (!builder) {
+    console.warn(`Unknown intro type: ${introType}, falling back to cinematic`)
+    return buildCinematicIntro(ctx)
+  }
+
+  // ID 카운터 리셋 (빌드마다 깨끗한 상태로 시작)
+  resetIdCounter()
+
+  return builder(ctx)
+}
+
+/**
+ * 프리셋과 데이터로 인트로 빌드
+ */
+export function buildIntroFromPreset(
+  preset: IntroBuilderContext['preset'],
+  data: IntroBuilderData
+): IntroBuilderResult {
+  return buildIntro({ preset, data })
+}
+
+// ============================================
+// Collect All Additional Styles
+// ============================================
+
+/**
+ * 모든 인트로 타입의 추가 스타일 수집
+ * CSS 애니메이션을 페이지에 주입하기 위해 사용
+ */
+export function collectAllIntroStyles(): string {
+  return `
+/* ========================================== */
+/* Cinematic Intro Styles */
+/* ========================================== */
+@keyframes cinematicGrain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+.cinematic-grain::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  pointer-events: none;
+  animation: cinematicGrain 0.5s steps(10) infinite;
+  z-index: 50;
+}
+
+@keyframes cinematicFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+  75% { opacity: 0.99; }
+}
+
+.cinematic-flicker {
+  animation: cinematicFlicker 0.15s infinite;
+}
+`
+}

@@ -11,6 +11,8 @@ export { Spacer, spacerRenderer } from './Spacer'
 export { Divider, dividerRenderer } from './Divider'
 export { Input, inputRenderer } from './Input'
 export { MapEmbed, mapEmbedRenderer } from './MapEmbed'
+export { Calendar, calendarRenderer } from './Calendar'
+export { Countdown, countdownRenderer } from './Countdown'
 
 import { textRenderer } from './Text'
 import { imageRenderer } from './Image'
@@ -21,6 +23,8 @@ import { spacerRenderer } from './Spacer'
 import { dividerRenderer } from './Divider'
 import { inputRenderer } from './Input'
 import { mapEmbedRenderer } from './MapEmbed'
+import { calendarRenderer } from './Calendar'
+import { countdownRenderer } from './Countdown'
 
 export const contentRenderers = {
   text: textRenderer,
@@ -32,4 +36,6 @@ export const contentRenderers = {
   divider: dividerRenderer,
   input: inputRenderer,
   'map-embed': mapEmbedRenderer,
+  calendar: calendarRenderer,
+  countdown: countdownRenderer,
 }
