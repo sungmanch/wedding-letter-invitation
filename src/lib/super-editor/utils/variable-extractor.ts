@@ -78,6 +78,31 @@ export function extractVariablesFromNode(
     const propsVars = extractFromProps(n.props as Record<string, unknown>)
     propsVars.forEach((v) => variables.add(v))
 
+    // conditional 노드의 condition은 {{}} 없이 직접 경로로 되어 있음
+    if (n.type === 'conditional' && n.props) {
+      const props = n.props as { condition?: string }
+      if (props.condition && typeof props.condition === 'string') {
+        // {{}}로 감싸진 경우와 직접 경로인 경우 모두 처리
+        if (props.condition.includes('{{')) {
+          extractVariablesFromString(props.condition).forEach((v) => variables.add(v))
+        } else {
+          variables.add(props.condition)
+        }
+      }
+    }
+
+    // repeat 노드의 items도 직접 경로일 수 있음
+    if (n.type === 'repeat' && n.props) {
+      const props = n.props as { items?: string }
+      if (props.items && typeof props.items === 'string') {
+        if (props.items.includes('{{')) {
+          extractVariablesFromString(props.items).forEach((v) => variables.add(v))
+        } else {
+          variables.add(props.items)
+        }
+      }
+    }
+
     // tokenStyle에서 추출 (SkeletonNode에만 존재, 일반적으로 $token 참조이지만 혹시 모를 경우)
     if ('tokenStyle' in n && n.tokenStyle) {
       for (const value of Object.values(n.tokenStyle)) {
