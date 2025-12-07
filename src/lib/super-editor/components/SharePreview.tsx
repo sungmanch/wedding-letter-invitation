@@ -19,9 +19,9 @@ export function SharePreview({
   className,
 }: SharePreviewProps) {
   return (
-    <div className={cn('flex flex-col items-center h-full overflow-y-auto py-8 px-4', className)}>
+    <div className={cn('flex flex-col items-center py-8 px-4', className)}>
       {/* 카카오톡 채팅방 시뮬레이션 */}
-      <div className="w-full max-w-[400px] flex-shrink-0">
+      <div className="w-full max-w-[400px]">
         <h3 className="text-sm font-medium text-gray-500 mb-4 text-center">
           카카오톡에서 공유 시 미리보기
         </h3>
