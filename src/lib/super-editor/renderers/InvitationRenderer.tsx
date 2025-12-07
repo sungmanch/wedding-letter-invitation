@@ -19,7 +19,6 @@ import {
   type SectionType,
 } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
-import { MusicPlayer } from './MusicPlayer'
 import { TokenStyleProvider } from '../context/TokenStyleContext'
 
 // ============================================
@@ -205,8 +204,6 @@ function InvitationContent({
         ))}
       </div>
 
-      {/* Music FAB (플로팅) */}
-      {showMusic && music && <MusicPlayer screen={music} userData={userData} mode={mode} />}
     </div>
   )
 }

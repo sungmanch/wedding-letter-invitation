@@ -17,6 +17,7 @@ import type { UserData } from '../schema/user-data'
 import type { SectionType } from '../schema/section-types'
 import { InvitationRenderer } from '../renderers'
 import { GuestbookFab } from '../renderers/GuestbookFab'
+import { MusicPlayer } from '../renderers/MusicPlayer'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
 import { VariantControlPanel } from './VariantControlPanel'
 
@@ -210,9 +211,20 @@ export function InvitationPreview({
     const showGuestbookFab =
       sectionVariants?.guestbook === 'fab' && sectionEnabled?.guestbook !== false
 
+    // Music FAB 표시 여부
+    const showMusicFab = sectionEnabled?.music !== false
+
+    // Music screen 찾기
+    const musicScreen = layout.screens.find((s) => s.sectionType === 'music')
+
     // PhoneFrame용 오버레이 (FAB 등)
     const frameOverlay = (
       <>
+        {/* Music FAB - 우상단 */}
+        {showMusicFab && musicScreen && (
+          <MusicPlayer screen={musicScreen} userData={userData} mode={mode} />
+        )}
+        {/* Guestbook FAB - 하단 중앙 */}
         {showGuestbookFab && (
           <GuestbookFab
             onClick={() => {
