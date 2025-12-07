@@ -11,6 +11,7 @@ export interface ColorPreset {
   primary: string
   background: string
   accent?: string
+  text?: string  // 텍스트 색상 (가독성 보장)
 }
 
 export interface KeywordStyleHint {
@@ -18,6 +19,7 @@ export interface KeywordStyleHint {
   typography?: 'serif' | 'sans-serif' | 'mixed'
   feel?: string
   colors?: string
+  suggestedVariants?: string[]  // 키워드에 특화된 variant 추천
 }
 
 export interface EnhancedPromptInput {
@@ -57,9 +59,12 @@ export const MOOD_VARIANT_HINTS: Record<string, string[]> = {
  * 여러 분위기의 variant 힌트를 합치고 우선순위 정렬
  */
 export function getMoodVariantHints(moods: string[]): string[] {
+  console.log('[DEBUG] getMoodVariantHints INPUT:', { moods })
+
   if (moods.length === 0) {
-    // 기본값: 다양한 variant 후보
-    return ['elegant', 'romantic', 'minimal']
+    const result = ['elegant', 'romantic', 'minimal']
+    console.log('[DEBUG] getMoodVariantHints OUTPUT (default):', result)
+    return result
   }
 
   // 각 mood의 힌트를 수집하고 빈도순 정렬
@@ -73,10 +78,13 @@ export function getMoodVariantHints(moods: string[]): string[] {
   }
 
   // 빈도순 정렬 후 상위 3개 반환
-  return Array.from(hintCounts.entries())
+  const result = Array.from(hintCounts.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([hint]) => hint)
+
+  console.log('[DEBUG] getMoodVariantHints OUTPUT:', result)
+  return result
 }
 
 // ============================================
@@ -88,30 +96,79 @@ export function getMoodVariantHints(moods: string[]): string[] {
  * key는 COLOR_OPTIONS의 value와 일치
  */
 export const COLOR_PRESETS: Record<string, ColorPreset> = {
+  // 기존 프리셋 (밝은 배경 → 어두운 텍스트)
   'white-gold': {
     primary: '#D4AF37',
     background: '#FFFEF5',
     accent: '#B8860B',
+    text: '#1F2937',
   },
   'blush-pink': {
     primary: '#EC4899',
     background: '#FDF2F8',
     accent: '#DB2777',
+    text: '#1F2937',
   },
   'deep-navy': {
     primary: '#1E3A8A',
     background: '#F8FAFC',
     accent: '#3B82F6',
+    text: '#1E293B',
   },
   'natural-green': {
     primary: '#16A34A',
     background: '#F0FDF4',
     accent: '#22C55E',
+    text: '#14532D',
   },
   'terracotta': {
     primary: '#C2410C',
     background: '#FFF7ED',
     accent: '#EA580C',
+    text: '#7C2D12',
+  },
+  // 신규 추가 프리셋
+  'burgundy': {
+    primary: '#800020',
+    background: '#FFF5F5',
+    accent: '#A52A2A',
+    text: '#450A0A',
+  },
+  'lavender': {
+    primary: '#9F7AEA',
+    background: '#FAF5FF',
+    accent: '#805AD5',
+    text: '#4C1D95',
+  },
+  'charcoal': {
+    primary: '#374151',
+    background: '#F9FAFB',
+    accent: '#6B7280',
+    text: '#111827',
+  },
+  'sage': {
+    primary: '#6B8E23',
+    background: '#F7FDF4',
+    accent: '#9ACD32',
+    text: '#365314',
+  },
+  'dusty-rose': {
+    primary: '#C08081',
+    background: '#FFF0F1',
+    accent: '#E8B4B8',
+    text: '#4A1E1F',
+  },
+  'champagne': {
+    primary: '#D4A574',
+    background: '#FFFDF5',
+    accent: '#F7E7CE',
+    text: '#78350F',
+  },
+  'midnight': {
+    primary: '#191970',
+    background: '#F0F4FF',
+    accent: '#4169E1',
+    text: '#1E3A8A',
   },
 }
 
@@ -124,6 +181,13 @@ export const COLOR_PRESET_LABELS: Record<string, string> = {
   'deep-navy': '딥 네이비',
   'natural-green': '내추럴 그린',
   'terracotta': '테라코타',
+  'burgundy': '버건디',
+  'lavender': '라벤더',
+  'charcoal': '차콜',
+  'sage': '세이지',
+  'dusty-rose': '더스티 로즈',
+  'champagne': '샴페인',
+  'midnight': '미드나잇',
 }
 
 // ============================================
@@ -138,8 +202,8 @@ export const KEYWORD_STYLE_HINTS: Record<string, KeywordStyleHint> = {
   // 장소
   '뉴욕': { mood: ['modern', 'minimal'], typography: 'sans-serif', feel: 'urban, sophisticated' },
   '파리': { mood: ['romantic', 'elegant'], typography: 'serif', feel: 'classic, artistic' },
-  '박물관': { mood: ['elegant', 'minimal'], typography: 'serif', feel: 'classical, refined, artistic' },
-  '미술관': { mood: ['modern', 'minimal'], typography: 'sans-serif', feel: 'contemporary, clean' },
+  '박물관': { mood: ['elegant', 'minimal'], typography: 'serif', feel: 'classical, refined, artistic', suggestedVariants: ['exhibition', 'minimal', 'oldmoney'] },
+  '미술관': { mood: ['modern', 'minimal'], typography: 'sans-serif', feel: 'contemporary, clean', suggestedVariants: ['exhibition', 'minimal', 'split'] },
   '성당': { mood: ['elegant', 'luxury'], typography: 'serif', feel: 'sacred, majestic' },
   '물의교회': { mood: ['minimal', 'elegant'], typography: 'serif', feel: 'sacred, serene, zen' },
   '호텔': { mood: ['luxury', 'elegant'], typography: 'serif', feel: 'sophisticated, premium' },
@@ -209,6 +273,8 @@ export function getKeywordStyleHint(keyword: string): KeywordStyleHint | null {
  * // → "# 사용자 선택 (구조화된 입력)\n- 분위기: 로맨틱, 우아한\n..."
  */
 export function buildEnhancedPrompt(input: EnhancedPromptInput): string {
+  console.log('[DEBUG] buildEnhancedPrompt INPUT:', JSON.stringify(input, null, 2))
+
   const lines: string[] = []
 
   lines.push('# 사용자 선택 (구조화된 입력)')
@@ -253,6 +319,9 @@ export function buildEnhancedPrompt(input: EnhancedPromptInput): string {
       if (hint.colors) {
         lines.push(`- 색상 톤: ${hint.colors}`)
       }
+      if (hint.suggestedVariants) {
+        lines.push(`- 추천 variant: ${hint.suggestedVariants.join(', ')} (이 키워드에 최적화된 스타일)`)
+      }
     }
   }
 
@@ -271,7 +340,9 @@ export function buildEnhancedPrompt(input: EnhancedPromptInput): string {
     lines.push(`이 분위기에 어울리는 variant: ${variantHints.join(', ')}`)
   }
 
-  return lines.join('\n')
+  const result = lines.join('\n')
+  console.log('[DEBUG] buildEnhancedPrompt OUTPUT:', result)
+  return result
 }
 
 // ============================================

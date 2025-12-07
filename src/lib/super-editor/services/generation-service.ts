@@ -22,6 +22,7 @@ import {
 import { resolveSkeletonToScreen, resolveAllSections } from '../builder/skeleton-resolver'
 import { extractPatternsFromSkeleton, patternsToPromptContext } from '../utils/design-pattern-extractor'
 import { buildFillerPrompt, variantToSummary } from '../prompts/filler-prompt'
+import { getMoodVariantHints } from '../prompts/prompt-hints'
 
 // ============================================
 // Generation Result
@@ -187,6 +188,7 @@ async function generateIntroSection(
   }
 
   // AI에 variant 선택 요청
+  const variantHints = getMoodVariantHints(mood ?? [])
   const fillerPrompt = buildFillerPrompt({
     prompt,
     mood,
@@ -197,6 +199,7 @@ async function generateIntroSection(
       },
     ],
     tokens,
+    variantHints,
   })
 
   try {
@@ -245,11 +248,13 @@ async function generateSectionsInParallel(
   }
 
   // 전체 섹션에 대해 한 번의 AI 호출
+  const variantHints = getMoodVariantHints(mood ?? [])
   const fillerPrompt = buildFillerPrompt({
     prompt,
     mood,
     sections: sectionsInfo,
     referencePatterns: patterns,
+    variantHints,
   })
 
   try {

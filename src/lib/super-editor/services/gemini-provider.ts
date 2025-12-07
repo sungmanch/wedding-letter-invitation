@@ -108,6 +108,8 @@ export interface EnhancedGenerateStyleOptions {
 export async function generateStyleEnhanced(
   options: EnhancedGenerateStyleOptions
 ): Promise<StyleSchema> {
+  console.log('[DEBUG] generateStyleEnhanced INPUT:', JSON.stringify(options, null, 2))
+
   const { prompt, mood, colorPreset, customColor, keyword } = options
 
   // variantHints 추출 (AI 프롬프트에 포함)
@@ -143,18 +145,20 @@ export async function generateStyleEnhanced(
   })
 
   const userPrompt = buildStylePrompt(prompt, mood)
+  console.log('[DEBUG] generateStyleEnhanced userPrompt:', userPrompt)
 
   try {
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
       generationConfig: {
         maxOutputTokens: 4096,
-        temperature: 0.7,
+        temperature: 0.95,
       },
     })
 
     const response = await result.response
     const text = response.text()
+    console.log('[DEBUG] generateStyleEnhanced AI response:', text?.substring(0, 500) + '...')
 
     if (!text) {
       throw new Error('No response from AI')
@@ -162,12 +166,19 @@ export async function generateStyleEnhanced(
 
     const parsed = parseStyleResponse(text, mood)
 
-    // 색상 프리셋이 지정된 경우 강제 적용
+    // 텍스트 색상만 프리셋에서 적용 (가독성 보장)
+    // primary/background는 AI 생성 색상 존중 (다양성)
     if (colorPreset && COLOR_PRESETS[colorPreset]) {
       const preset = COLOR_PRESETS[colorPreset]
-      parsed.theme.colors.primary = { ...parsed.theme.colors.primary, 500: preset.primary }
-      parsed.theme.colors.background = { ...parsed.theme.colors.background, default: preset.background }
+      if (preset.text) {
+        parsed.theme.colors.text = { ...parsed.theme.colors.text, primary: preset.text }
+      }
     }
+
+    console.log('[DEBUG] generateStyleEnhanced OUTPUT:', JSON.stringify({
+      colors: parsed.theme.colors,
+      fonts: parsed.theme.typography.fonts,
+    }, null, 2))
 
     return parsed
   } catch (error) {
@@ -192,7 +203,7 @@ async function generateStyle(prompt: string, mood?: string[]): Promise<StyleSche
       contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
       generationConfig: {
         maxOutputTokens: 4096,
-        temperature: 0.7,
+        temperature: 0.95,
       },
     })
 
@@ -216,6 +227,8 @@ async function generateStyle(prompt: string, mood?: string[]): Promise<StyleSche
  * Variant 선택
  */
 async function selectVariants(prompt: string, systemPrompt: string): Promise<FillerResponse> {
+  console.log('[DEBUG] selectVariants INPUT:', { prompt: prompt.substring(0, 200) + '...', systemPrompt: systemPrompt.substring(0, 200) + '...' })
+
   const model = genAI.getGenerativeModel({
     model: MODEL,
     systemInstruction: FILLER_SYSTEM_PROMPT,
@@ -226,18 +239,20 @@ async function selectVariants(prompt: string, systemPrompt: string): Promise<Fil
       contents: [{ role: 'user', parts: [{ text: systemPrompt }] }],
       generationConfig: {
         maxOutputTokens: 2048,
-        temperature: 0.5,
+        temperature: 0.8,
       },
     })
 
     const response = await result.response
     const text = response.text()
+    console.log('[DEBUG] selectVariants AI response:', text?.substring(0, 500) + '...')
 
     if (!text) {
       throw new Error('No response from AI')
     }
 
     const parsed = parseFillerResponse(text)
+    console.log('[DEBUG] selectVariants OUTPUT:', JSON.stringify(parsed, null, 2))
     return parsed
   } catch (error) {
     console.error('Variant selection failed:', error)
