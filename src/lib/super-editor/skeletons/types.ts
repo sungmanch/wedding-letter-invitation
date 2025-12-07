@@ -137,6 +137,7 @@ export interface SectionScreen {
   name?: string
   type: 'intro' | 'content' // 기존 ScreenType
   sectionType: SectionType // 새로 추가
+  variantId?: string // 선택된 variant ID
   root: SkeletonNode
 }
 
