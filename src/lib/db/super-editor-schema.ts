@@ -174,6 +174,33 @@ export const superEditorPresets = pgTable('super_editor_presets', {
 ]).enableRLS()
 
 // ============================================
+// Guestbook Messages
+// 게스트가 청첩장에 남긴 축하 메시지
+// ============================================
+
+export const guestbookMessages = pgTable('guestbook_messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // FK: superEditorInvitations
+  invitationId: uuid('invitation_id')
+    .references(() => superEditorInvitations.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // 익명 사용자 구분 (브라우저 쿠키 기반)
+  cookieId: varchar('cookie_id', { length: 100 }).notNull(),
+
+  // 메시지 내용
+  name: varchar('name', { length: 50 }).notNull(),
+  message: text('message').notNull(),
+
+  // 생성 시간 (수정 불가이므로 updatedAt 없음)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_guestbook_invitation').on(table.invitationId),
+  index('idx_guestbook_cookie').on(table.cookieId),
+]).enableRLS()
+
+// ============================================
 // Type exports
 // ============================================
 
@@ -185,3 +212,6 @@ export type NewSuperEditorInvitation = typeof superEditorInvitations.$inferInser
 
 export type SuperEditorPreset = typeof superEditorPresets.$inferSelect
 export type NewSuperEditorPreset = typeof superEditorPresets.$inferInsert
+
+export type GuestbookMessage = typeof guestbookMessages.$inferSelect
+export type NewGuestbookMessage = typeof guestbookMessages.$inferInsert
