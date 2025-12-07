@@ -188,9 +188,9 @@ export function applyIntroStyleToSchema(
     newStyle.theme.colors.secondary[500] = colors.accent
   }
 
-  // Background + Surface (Alpha Blend)
+  // Background + Surface (Alpha Blend with Accent)
   newStyle.theme.colors.background.default = colors.background
-  newStyle.theme.colors.background.paper = deriveSurfaceColor(colors.background)
+  newStyle.theme.colors.background.paper = deriveSurfaceColor(colors.background, colors.accent)
 
   // Text - 제목/본문 분리
   newStyle.theme.colors.text.primary = colors.titleText
@@ -278,7 +278,12 @@ const WARM_BROWN = [61, 52, 40] as const     // #3D3428
  * - Dark 배경: 크림색 10% 블렌딩 → 따뜻한 다크 서피스
  * - Light 배경: 웜브라운 4% 블렌딩 → 은은한 아이보리 서피스
  */
-export function deriveSurfaceColor(background: string): string {
+export function deriveSurfaceColor(background: string, accentColor?: string): string {
+  // accent 색상이 제공되면 테마 기반 블렌딩 사용
+  if (accentColor) {
+    return deriveSurfaceColorWithAccent(background, accentColor)
+  }
+
   const [bgR, bgG, bgB] = hexToRgb(background)
 
   if (isDark(background)) {
@@ -296,6 +301,38 @@ export function deriveSurfaceColor(background: string): string {
     const r = Math.round(bgR + (blendR - bgR) * alpha)
     const g = Math.round(bgG + (blendG - bgG) * alpha)
     const b = Math.round(bgB + (blendB - bgB) * alpha)
+    return rgbToHex(r, g, b)
+  }
+}
+
+/**
+ * 테마 Accent 색상을 활용한 Surface 계산
+ * - 테마 통일감을 위해 accent 색상으로 블렌딩
+ * - Dark 배경: accent 8% 블렌딩
+ * - Light 배경: accent를 어둡게 변환 후 5% 블렌딩
+ */
+export function deriveSurfaceColorWithAccent(background: string, accent: string): string {
+  const [bgR, bgG, bgB] = hexToRgb(background)
+  const [accentR, accentG, accentB] = hexToRgb(accent)
+
+  if (isDark(background)) {
+    // Dark 배경: accent 색상 8% 블렌딩
+    const alpha = 0.08
+    const r = Math.round(bgR + (accentR - bgR) * alpha)
+    const g = Math.round(bgG + (accentG - bgG) * alpha)
+    const b = Math.round(bgB + (accentB - bgB) * alpha)
+    return rgbToHex(r, g, b)
+  } else {
+    // Light 배경: accent를 어둡게 해서 5% 블렌딩
+    const darkenedAccent = [
+      Math.round(accentR * 0.3),
+      Math.round(accentG * 0.3),
+      Math.round(accentB * 0.3),
+    ]
+    const alpha = 0.05
+    const r = Math.round(bgR + (darkenedAccent[0] - bgR) * alpha)
+    const g = Math.round(bgG + (darkenedAccent[1] - bgG) * alpha)
+    const b = Math.round(bgB + (darkenedAccent[2] - bgB) * alpha)
     return rgbToHex(r, g, b)
   }
 }

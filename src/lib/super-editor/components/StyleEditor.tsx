@@ -144,9 +144,10 @@ export function StyleEditor({
       }
       current[parts[parts.length - 1]] = value
 
-      // 배경색 변경 시 surface 색상 자동 계산 (Alpha Blend)
+      // 배경색 변경 시 surface 색상 자동 계산 (Alpha Blend with Accent)
       if (path === 'background.default') {
-        newStyle.theme.colors.background.paper = deriveSurfaceColor(value)
+        const accentColor = newStyle.theme.colors.accent?.[500] ?? newStyle.theme.colors.primary?.[500]
+        newStyle.theme.colors.background.paper = deriveSurfaceColor(value, accentColor)
       }
 
       debouncedStyleChange(newStyle)
