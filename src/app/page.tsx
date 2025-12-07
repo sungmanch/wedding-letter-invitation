@@ -64,13 +64,32 @@ export default async function WeddingLandingPage() {
       <ScrollytellingLanding />
 
       {/* Footer */}
-      <footer className="border-t border-white/10 px-4 py-8 bg-[#0A0806]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center">
-            <Image src="/logo.png" alt="Maison de Letter" width={100} height={24} className="brightness-110 opacity-60 h-5 w-auto" />
+      <footer className="border-t border-white/10 px-6 py-10 bg-[#0A0806]">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
+          {/* Logo */}
+          <Image src="/logo.png" alt="Maison de Letter" width={120} height={28} className="brightness-110 opacity-60 h-6 w-auto" />
+
+          {/* Legal Links */}
+          <div className="flex items-center gap-4 text-xs">
+            <Link href="/terms" className="text-[#F5E6D3]/50 hover:text-[#F5E6D3]/80 transition-colors">
+              이용약관
+            </Link>
+            <span className="text-[#F5E6D3]/30">|</span>
+            <Link href="/privacy" className="text-[#F5E6D3]/50 hover:text-[#F5E6D3]/80 transition-colors">
+              개인정보처리방침
+            </Link>
           </div>
-          <p className="text-xs text-[#F5E6D3]/40">
-            2025 Maison de Letter. Made with love for brides-to-be
+
+          {/* Business Info */}
+          <div className="flex flex-col items-center gap-1 text-[10px] text-[#F5E6D3]/30">
+            <p>티비디랩 | 사업자등록번호: 876-14-02417</p>
+            <p>서울특별시 관악구 봉천로 408-1, 3층 126A호(봉천동)</p>
+            <p>문의: sungman.cho@tbdlabs.team</p>
+          </div>
+
+          {/* Copyright */}
+          <p className="text-[10px] text-[#F5E6D3]/20">
+            © 2025 Maison de Letter. All rights reserved.
           </p>
         </div>
       </footer>
