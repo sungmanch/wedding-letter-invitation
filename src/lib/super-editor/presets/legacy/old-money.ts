@@ -1,74 +1,80 @@
 /**
- * Keynote Template Preset
- * Apple Keynote 스타일 - 스티키 스크롤, 다이나믹 텍스트 리빌, 시네마틱 줌 효과
+ * Old Money Template Preset
+ * 레터프레스 질감과 클래식 세리프 타이포그래피, 여백의 미가 돋보이는 Quiet Luxury
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const keynotePreset: LegacyTemplatePreset = {
-  id: 'keynote',
+export const oldMoneyPreset: PredefinedTemplatePreset = {
+  id: 'old-money',
   version: '1.0.0',
   source: 'static',
 
   // 메타 정보
-  name: 'The Keynote',
-  nameKo: '키노트',
-  category: 'modern',
-  description: 'Apple product launch style with sticky scroll, dynamic text reveals, and cinematic zoom effects',
-  descriptionKo: '애플 제품 공개처럼 스크롤에 따라 텍스트가 서서히 떠오르고 이미지가 줌인/줌아웃되는 스타일',
-  matchKeywords: ['애플', '키노트', '모던', '세련된', '깔끔한', '프리미엄', '미니멀', '테크', '스티키', '다이나믹'],
-  recommendedFor: 'Couples who prefer clean, sophisticated design and have high-quality wedding photos',
-  recommendedForKo: '깔끔하고 세련된 것을 선호하며, 웨딩 사진 퀄리티가 높은 커플',
+  name: 'Old Money',
+  nameKo: '올드 머니',
+  category: 'classic',
+  description: 'Quiet luxury with letterpress texture, classic serif typography, and timeless ivory elegance',
+  descriptionKo: '레터프레스 질감과 클래식 세리프 타이포그래피, 여백의 미가 돋보이는 Quiet Luxury',
+  matchKeywords: ['올드머니', 'quiet luxury', '클래식', '레터프레스', '아이보리', '골드', '우아한', '타임리스', '상속녀', '럭셔리'],
+  recommendedFor: 'Couples who appreciate timeless elegance and understated luxury',
+  recommendedForKo: '시대를 초월한 우아함과 과시하지 않는 럭셔리를 추구하는 커플',
 
   // 프리뷰 정보
   preview: {
     colors: {
-      primary: '#000000',
-      secondary: '#86868B',
-      background: '#FFFFFF',
-      surface: '#F5F5F7',
-      text: '#1D1D1F',
-      textMuted: '#86868B',
-      accent: '#0071E3',
+      primary: '#D4AF37',
+      secondary: '#8B7355',
+      background: '#FFFEF5',
+      surface: '#FAF9F6',
+      text: '#36454F',
+      textMuted: '#6B7280',
+      accent: '#D4AF37',
     },
-    mood: ['세련된', '프리미엄', '다이나믹'],
+    mood: ['우아한', '타임리스', '럭셔리'],
   },
 
   // 인트로 설정
   intro: {
-    type: 'keynote',
+    type: 'cinematic', // old-money uses cinematic intro type
     duration: 4000,
     skipEnabled: true,
     skipDelay: 2000,
     settings: {
-      stickyTexts: ['우리의 사랑', '그 완전히 새로운 시작'],
+      textureStyle: 'letterpress',
+      ornamentStyle: 'wax-seal',
     },
   },
 
   // 인터랙션 방식
-  interaction: 'sticky-scroll',
+  interaction: 'scroll',
 
   // 기본 색상
   defaultColors: {
-    primary: '#000000',
-    secondary: '#86868B',
-    background: '#FFFFFF',
-    surface: '#F5F5F7',
-    text: '#1D1D1F',
-    textMuted: '#86868B',
-    accent: '#0071E3',
+    primary: '#D4AF37',
+    secondary: '#8B7355',
+    background: '#FFFEF5',
+    surface: '#FAF9F6',
+    text: '#36454F',
+    textMuted: '#6B7280',
+    accent: '#D4AF37',
   },
 
   // 기본 폰트
   defaultFonts: {
     title: {
-      family: 'SF Pro Display, Pretendard',
-      weight: 700,
-      letterSpacing: '-0.02em',
+      family: 'Cormorant Garamond, serif',
+      weight: 500,
+      letterSpacing: '0.08em',
     },
     body: {
-      family: 'SF Pro Text, Pretendard',
+      family: 'Noto Sans KR, sans-serif',
+      weight: 300,
+    },
+    accent: {
+      family: 'Cormorant Garamond, serif',
       weight: 400,
+      style: 'italic',
     },
   },
 
@@ -79,20 +85,21 @@ export const keynotePreset: LegacyTemplatePreset = {
       type: 'hero',
       enabled: true,
       order: 0,
-      layout: 'fullscreen',
+      layout: 'centered',
       animation: {
-        type: 'sticky-reveal',
-        trigger: 'on-scroll',
-        duration: 1000,
+        type: 'fade',
+        trigger: 'on-enter',
+        duration: 1500,
       },
       style: {
-        backgroundColor: '#000000',
-        textColor: '#FFFFFF',
-        padding: 'none',
+        padding: 'xlarge',
       },
       content: {
-        titleSize: 'hero',
-        titleAnimation: 'zoom-in',
+        titleSize: 'medium',
+        themeSpecific: {
+          waxSeal: true,
+          letterpressTexture: true,
+        },
       },
     },
     {
@@ -104,13 +111,10 @@ export const keynotePreset: LegacyTemplatePreset = {
       animation: {
         type: 'fade',
         trigger: 'on-scroll',
-        duration: 800,
+        duration: 1200,
       },
       style: {
         padding: 'xlarge',
-      },
-      content: {
-        titleSize: 'large',
       },
     },
     {
@@ -118,13 +122,13 @@ export const keynotePreset: LegacyTemplatePreset = {
       type: 'gallery',
       enabled: true,
       order: 2,
-      layout: 'fullscreen',
+      layout: 'centered',
       animation: {
-        type: 'parallax',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
-        padding: 'none',
+        padding: 'large',
       },
     },
     {
@@ -148,7 +152,7 @@ export const keynotePreset: LegacyTemplatePreset = {
       order: 4,
       layout: 'centered',
       animation: {
-        type: 'slide-up',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
@@ -192,33 +196,30 @@ export const keynotePreset: LegacyTemplatePreset = {
       animation: {
         type: 'fade',
         trigger: 'on-scroll',
+        duration: 1500,
       },
       style: {
-        padding: 'large',
-        backgroundColor: '#000000',
-        textColor: '#FFFFFF',
+        padding: 'xlarge',
       },
     },
   ],
 
   // 효과 설정
   effects: {
+    background: {
+      type: 'solid',
+      value: '#FFFEF5',
+    },
     scrollBehavior: {
       smooth: true,
-      indicator: true,
-      indicatorStyle: 'progress',
-      snapToSection: false,
-    },
-    transition: {
-      type: 'fade',
-      duration: 300,
+      indicator: false,
     },
   },
 
   // 커스터마이징
   customizable: {
     colors: true,
-    fonts: false,
+    fonts: true,
     sectionOrder: true,
     sectionToggle: true,
     introSettings: true,

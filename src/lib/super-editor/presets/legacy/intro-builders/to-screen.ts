@@ -4,7 +4,7 @@
  */
 
 import type { PrimitiveNode } from '../../../schema/primitives'
-import type { LegacyTemplatePreset } from '../types'
+import type { PredefinedTemplatePreset } from '../types'
 import type { IntroBuilderData, IntroBuilderResult } from './types'
 import type { StyleSchema, StyleMood } from '../../../schema/style'
 import type { SectionScreen, SkeletonNode } from '../../../skeletons/types'
@@ -38,7 +38,7 @@ export interface LegacyIntroResult {
  * 레거시 프리셋을 인트로 결과로 변환
  */
 export function buildLegacyIntro(
-  preset: LegacyTemplatePreset,
+  preset: PredefinedTemplatePreset,
   data: IntroBuilderData
 ): LegacyIntroResult {
   const result = buildIntroFromPreset(preset, data)
@@ -83,7 +83,7 @@ export interface LegacyPresetPreview {
  * 템플릿 선택용 프리셋 목록 가져오기
  */
 export function getLegacyPresetPreviews(
-  presets: Record<string, LegacyTemplatePreset>
+  presets: Record<string, PredefinedTemplatePreset>
 ): LegacyPresetPreview[] {
   return Object.values(presets).map((preset) => ({
     id: preset.id,
@@ -124,7 +124,7 @@ function primitiveToSkeleton(node: PrimitiveNode): SkeletonNode {
 /**
  * 레거시 프리셋에서 StyleSchema 생성
  */
-function createStyleSchemaFromPreset(preset: LegacyTemplatePreset): StyleSchema {
+function createStyleSchemaFromPreset(preset: PredefinedTemplatePreset): StyleSchema {
   const { defaultColors, defaultFonts } = preset
   const mood = mapLegacyMood(preset.preview.mood)
 
@@ -263,7 +263,7 @@ function createStyleSchemaFromPreset(preset: LegacyTemplatePreset): StyleSchema 
  */
 export function convertLegacyToIntroResult(
   legacyResult: LegacyIntroResult,
-  preset: LegacyTemplatePreset
+  preset: PredefinedTemplatePreset
 ): IntroGenerationResult {
   // StyleSchema 생성
   const style = createStyleSchemaFromPreset(preset)

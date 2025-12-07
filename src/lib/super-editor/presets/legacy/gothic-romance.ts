@@ -1,49 +1,49 @@
 /**
- * Typography Template Preset
- * 미니멀 타이포 스타일 - 키네틱 텍스트, 흑백 대비, 히든 포토
+ * Gothic Romance Template Preset
+ * 딥 버건디와 에메랄드의 무디한 색감, 빅토리안 우아함과 드라마틱한 분위기
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const typographyPreset: LegacyTemplatePreset = {
-  id: 'typography',
+export const gothicRomancePreset: PredefinedTemplatePreset = {
+  id: 'gothic-romance',
   version: '1.0.0',
   source: 'static',
 
   // 메타 정보
-  name: 'Minimalist Typo',
-  nameKo: '미니멀 타이포',
-  category: 'artistic',
-  description: 'Typography-focused design with kinetic text, bold contrasts, and hidden photo reveals',
-  descriptionKo: '사진보다 글자의 미학을 강조, 키네틱 타이포그래피와 강렬한 블랙&화이트',
-  matchKeywords: ['타이포', '글자', '미니멀', '흑백', '네온', '디자이너', '시크', '모던', '포스터'],
-  recommendedFor: 'Designer couples or those who prefer minimal photo exposure',
-  recommendedForKo: '디자이너 커플, 혹은 사진 공개를 최소화하고 싶은 시크한 커플',
+  name: 'Gothic Romance',
+  nameKo: '고딕 로맨스',
+  category: 'cinematic',
+  description: 'Dark, moody aesthetic with deep jewel tones, Victorian-inspired elegance, and dramatic shadows',
+  descriptionKo: '딥 버건디와 에메랄드의 무디한 색감, 빅토리안 우아함과 드라마틱한 분위기',
+  matchKeywords: ['무디', '고딕', '드라마틱', '주얼톤', '버건디', '에메랄드', '빅토리안', '다크', '로맨틱', '럭셔리'],
+  recommendedFor: 'Couples who love dramatic, moody aesthetics with deep jewel tones and vintage elegance',
+  recommendedForKo: '드라마틱하고 무디한 분위기를 선호하며, 깊은 주얼톤과 빈티지 우아함을 원하는 커플',
 
   // 프리뷰 정보
   preview: {
     colors: {
-      primary: '#FFFFFF',
-      secondary: '#333333',
-      background: '#000000',
-      surface: '#111111',
-      text: '#FFFFFF',
-      textMuted: '#666666',
-      accent: '#FFFFFF',
+      primary: '#722F37',
+      secondary: '#2F4538',
+      background: '#0D0D0D',
+      surface: '#1A1A1A',
+      text: '#F5E6D3',
+      textMuted: '#A89F91',
+      accent: '#C9A962',
     },
-    mood: ['시크한', '미니멀', '아티스틱'],
+    mood: ['무디한', '드라마틱', '럭셔리'],
   },
 
   // 인트로 설정
   intro: {
-    type: 'typography',
-    duration: 4000,
+    type: 'cinematic', // gothic-romance uses cinematic intro type
+    duration: 4500,
     skipEnabled: true,
-    skipDelay: 2000,
+    skipDelay: 2500,
     settings: {
-      colorScheme: 'bw',
-      motionIntensity: 'dynamic',
-      hiddenPhotos: true,
+      colorScheme: 'jewel',
+      vignetteIntensity: 'strong',
+      ornamentStyle: 'victorian',
     },
   },
 
@@ -52,28 +52,29 @@ export const typographyPreset: LegacyTemplatePreset = {
 
   // 기본 색상
   defaultColors: {
-    primary: '#FFFFFF',
-    secondary: '#333333',
-    background: '#000000',
-    surface: '#111111',
-    text: '#FFFFFF',
-    textMuted: '#666666',
-    accent: '#FFFFFF',
+    primary: '#722F37',
+    secondary: '#2F4538',
+    background: '#0D0D0D',
+    surface: '#1A1A1A',
+    text: '#F5E6D3',
+    textMuted: '#A89F91',
+    accent: '#C9A962',
   },
 
   // 기본 폰트
   defaultFonts: {
     title: {
-      family: 'Bebas Neue, sans-serif',
-      weight: 400,
+      family: 'Cormorant Garamond, serif',
+      weight: 500,
+      style: 'italic',
       letterSpacing: '0.05em',
     },
     body: {
-      family: 'Inter, sans-serif',
+      family: 'Noto Sans KR, sans-serif',
       weight: 300,
     },
     accent: {
-      family: 'Space Mono, monospace',
+      family: 'Cormorant Garamond, serif',
       weight: 400,
     },
   },
@@ -87,16 +88,20 @@ export const typographyPreset: LegacyTemplatePreset = {
       order: 0,
       layout: 'fullscreen',
       animation: {
-        type: 'kinetic-text',
+        type: 'fade',
         trigger: 'on-enter',
-        duration: 3000,
+        duration: 2000,
       },
       style: {
         padding: 'none',
+        backgroundEffect: 'gradient',
       },
       content: {
-        titleSize: 'hero',
-        titleAnimation: 'kinetic-text',
+        titleSize: 'large',
+        themeSpecific: {
+          vignette: true,
+          ornaments: true,
+        },
       },
     },
     {
@@ -106,8 +111,9 @@ export const typographyPreset: LegacyTemplatePreset = {
       order: 1,
       layout: 'centered',
       animation: {
-        type: 'kinetic-text',
+        type: 'fade',
         trigger: 'on-scroll',
+        duration: 1200,
       },
       style: {
         padding: 'xlarge',
@@ -118,19 +124,13 @@ export const typographyPreset: LegacyTemplatePreset = {
       type: 'gallery',
       enabled: true,
       order: 2,
-      layout: 'centered',
+      layout: 'masonry',
       animation: {
         type: 'fade',
-        trigger: 'on-click',
+        trigger: 'on-scroll',
       },
       style: {
         padding: 'large',
-      },
-      content: {
-        themeSpecific: {
-          hiddenOnPress: true,
-          revealHint: '길게 눌러 사진 보기',
-        },
       },
     },
     {
@@ -138,16 +138,13 @@ export const typographyPreset: LegacyTemplatePreset = {
       type: 'calendar',
       enabled: true,
       order: 3,
-      layout: 'fullscreen',
+      layout: 'centered',
       animation: {
-        type: 'kinetic-text',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
-        padding: 'xlarge',
-      },
-      content: {
-        titleSize: 'hero',
+        padding: 'large',
       },
     },
     {
@@ -157,7 +154,7 @@ export const typographyPreset: LegacyTemplatePreset = {
       order: 4,
       layout: 'centered',
       animation: {
-        type: 'slide-up',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
@@ -197,10 +194,11 @@ export const typographyPreset: LegacyTemplatePreset = {
       type: 'closing',
       enabled: true,
       order: 7,
-      layout: 'fullscreen',
+      layout: 'centered',
       animation: {
-        type: 'kinetic-text',
+        type: 'fade',
         trigger: 'on-scroll',
+        duration: 1500,
       },
       style: {
         padding: 'xlarge',
@@ -210,14 +208,13 @@ export const typographyPreset: LegacyTemplatePreset = {
 
   // 효과 설정
   effects: {
-    cursor: {
-      type: 'custom',
-      asset: 'crosshair',
+    background: {
+      type: 'gradient',
+      value: 'linear-gradient(180deg, #0D0D0D 0%, #1A1A1A 100%)',
     },
     scrollBehavior: {
       smooth: true,
-      indicator: true,
-      indicatorStyle: 'line',
+      indicator: false,
     },
   },
 

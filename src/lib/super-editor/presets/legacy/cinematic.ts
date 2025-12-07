@@ -3,9 +3,9 @@
  * 화양연화 스타일 - 필름 그레인, 레터박스, 자막 스타일 캡션
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const cinematicPreset: LegacyTemplatePreset = {
+export const cinematicPreset: PredefinedTemplatePreset = {
   id: 'cinematic',
   version: '1.0.0',
   source: 'static',

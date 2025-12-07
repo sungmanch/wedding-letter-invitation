@@ -24,6 +24,7 @@ import { eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
+import { getTemplateDefaultImage } from '../presets/legacy/template-preview-data'
 
 // ============================================
 // AI Template Generation
@@ -372,6 +373,12 @@ export async function saveInvitationAction(
     }).returning()
 
     // 2. UserData 구성
+    // 템플릿별 예시 이미지를 fallback으로 사용
+    const defaultImage = legacyPresetId
+      ? getTemplateDefaultImage(legacyPresetId)
+      : undefined
+    const mainImage = previewData.mainImage || defaultImage || ''
+
     const weddingData: WeddingInvitationData = {
       couple: {
         groom: { name: previewData.groomName || '신랑' },
@@ -388,8 +395,8 @@ export async function saveInvitationAction(
         lng: 0,
       },
       photos: {
-        main: previewData.mainImage || '',
-        gallery: previewData.mainImage ? [previewData.mainImage] : [],
+        main: mainImage,
+        gallery: mainImage ? [mainImage] : [],
       },
       greeting: {
         content: '',

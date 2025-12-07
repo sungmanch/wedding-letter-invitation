@@ -1,9 +1,9 @@
 /**
  * Legacy Converter Adapter
- * LegacyTemplatePreset만으로 IntroGenerationResult를 생성하는 래퍼
+ * PredefinedTemplatePreset만으로 IntroGenerationResult를 생성하는 래퍼
  */
 
-import type { LegacyTemplatePreset } from '../presets/legacy/types'
+import type { PredefinedTemplatePreset } from '../presets/legacy/types'
 import type { IntroGenerationResult } from '../services/generation-service'
 import type { IntroBuilderData } from '../presets/legacy/intro-builders/types'
 import {
@@ -37,17 +37,17 @@ function getDefaultWeddingDate(): string {
 // ============================================
 
 /**
- * LegacyTemplatePreset에서 IntroGenerationResult 생성
+ * PredefinedTemplatePreset에서 IntroGenerationResult 생성
  *
- * 기존 convertLegacyToIntroResult는 (LegacyIntroResult, LegacyTemplatePreset)을 받지만
- * 이 함수는 LegacyTemplatePreset만 받아서 기본 데이터로 LegacyIntroResult를 먼저 생성
+ * 기존 convertLegacyToIntroResult는 (LegacyIntroResult, PredefinedTemplatePreset)을 받지만
+ * 이 함수는 PredefinedTemplatePreset만 받아서 기본 데이터로 LegacyIntroResult를 먼저 생성
  *
- * @param preset - 레거시 템플릿 프리셋
+ * @param preset - 사전 정의된 템플릿 프리셋
  * @param customData - 선택적 커스텀 데이터 (기본값 오버라이드)
  * @returns IntroGenerationResult (style, tokens, cssVariables, introScreen)
  */
 export function convertLegacyToIntroResult(
-  preset: LegacyTemplatePreset,
+  preset: PredefinedTemplatePreset,
   customData?: Partial<IntroBuilderData>
 ): IntroGenerationResult {
   // 1. 인트로 빌드 데이터 준비

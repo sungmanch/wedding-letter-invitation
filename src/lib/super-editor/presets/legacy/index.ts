@@ -1,52 +1,43 @@
 /**
- * Legacy Template Presets
- * templates.json에서 마이그레이션된 10개의 레거시 템플릿 프리셋
+ * Predefined Template Presets
+ * 사전 정의된 청첩장 템플릿 프리셋
  */
 
 // Types
 export * from './types'
 
 // Individual presets
-export { keynotePreset } from './keynote'
 export { cinematicPreset } from './cinematic'
 export { exhibitionPreset } from './exhibition'
 export { magazinePreset } from './magazine'
-export { vinylPreset } from './vinyl'
-export { chatPreset } from './chat'
-export { glassmorphismPreset } from './glassmorphism'
-export { passportPreset } from './passport'
-export { pixelPreset } from './pixel'
-export { typographyPreset } from './typography'
+export { gothicRomancePreset } from './gothic-romance'
+export { oldMoneyPreset } from './old-money'
+export { monogramPreset } from './monogram'
+export { jewelVelvetPreset } from './jewel-velvet'
 
 // Import for registry
-import { keynotePreset } from './keynote'
 import { cinematicPreset } from './cinematic'
 import { exhibitionPreset } from './exhibition'
 import { magazinePreset } from './magazine'
-import { vinylPreset } from './vinyl'
-import { chatPreset } from './chat'
-import { glassmorphismPreset } from './glassmorphism'
-import { passportPreset } from './passport'
-import { pixelPreset } from './pixel'
-import { typographyPreset } from './typography'
+import { gothicRomancePreset } from './gothic-romance'
+import { oldMoneyPreset } from './old-money'
+import { monogramPreset } from './monogram'
+import { jewelVelvetPreset } from './jewel-velvet'
 
-import type { LegacyTemplatePreset, LegacyTemplateCategory, LegacyIntroType } from './types'
+import type { PredefinedTemplatePreset, PredefinedTemplateCategory, LegacyIntroType } from './types'
 
 // ============================================
 // Preset Registry
 // ============================================
 
-export const legacyPresets: Record<string, LegacyTemplatePreset> = {
-  keynote: keynotePreset,
+export const predefinedPresets: Record<string, PredefinedTemplatePreset> = {
   cinematic: cinematicPreset,
   exhibition: exhibitionPreset,
   magazine: magazinePreset,
-  vinyl: vinylPreset,
-  chat: chatPreset,
-  glassmorphism: glassmorphismPreset,
-  passport: passportPreset,
-  pixel: pixelPreset,
-  typography: typographyPreset,
+  'gothic-romance': gothicRomancePreset,
+  'old-money': oldMoneyPreset,
+  monogram: monogramPreset,
+  'jewel-velvet': jewelVelvetPreset,
 }
 
 // ============================================
@@ -54,39 +45,39 @@ export const legacyPresets: Record<string, LegacyTemplatePreset> = {
 // ============================================
 
 /**
- * ID로 레거시 프리셋 가져오기
+ * ID로 프리셋 가져오기
  */
-export function getLegacyPreset(id: string): LegacyTemplatePreset | undefined {
-  return legacyPresets[id]
+export function getPredefinedPreset(id: string): PredefinedTemplatePreset | undefined {
+  return predefinedPresets[id]
 }
 
 /**
- * 모든 레거시 프리셋 목록 가져오기
+ * 모든 프리셋 목록 가져오기
  */
-export function getAllLegacyPresets(): LegacyTemplatePreset[] {
-  return Object.values(legacyPresets)
+export function getAllPredefinedPresets(): PredefinedTemplatePreset[] {
+  return Object.values(predefinedPresets)
 }
 
 /**
  * 카테고리별 프리셋 필터링
  */
-export function getLegacyPresetsByCategory(category: LegacyTemplateCategory): LegacyTemplatePreset[] {
-  return Object.values(legacyPresets).filter(preset => preset.category === category)
+export function getPredefinedPresetsByCategory(category: PredefinedTemplateCategory): PredefinedTemplatePreset[] {
+  return Object.values(predefinedPresets).filter(preset => preset.category === category)
 }
 
 /**
  * 인트로 타입별 프리셋 필터링
  */
-export function getLegacyPresetsByIntroType(introType: LegacyIntroType): LegacyTemplatePreset[] {
-  return Object.values(legacyPresets).filter(preset => preset.intro.type === introType)
+export function getPredefinedPresetsByIntroType(introType: LegacyIntroType): PredefinedTemplatePreset[] {
+  return Object.values(predefinedPresets).filter(preset => preset.intro.type === introType)
 }
 
 /**
  * 키워드로 프리셋 검색
  */
-export function searchLegacyPresets(keyword: string): LegacyTemplatePreset[] {
+export function searchPredefinedPresets(keyword: string): PredefinedTemplatePreset[] {
   const normalizedKeyword = keyword.toLowerCase()
-  return Object.values(legacyPresets).filter(preset =>
+  return Object.values(predefinedPresets).filter(preset =>
     preset.matchKeywords.some(k => k.toLowerCase().includes(normalizedKeyword)) ||
     preset.name.toLowerCase().includes(normalizedKeyword) ||
     preset.nameKo.includes(keyword) ||
@@ -97,8 +88,8 @@ export function searchLegacyPresets(keyword: string): LegacyTemplatePreset[] {
 /**
  * 무드로 프리셋 추천
  */
-export function recommendLegacyPresetsByMood(moods: string[], limit = 3): LegacyTemplatePreset[] {
-  const scored = Object.values(legacyPresets).map(preset => {
+export function recommendPredefinedPresetsByMood(moods: string[], limit = 3): PredefinedTemplatePreset[] {
+  const scored = Object.values(predefinedPresets).map(preset => {
     const score = moods.reduce((acc, mood) => {
       if (preset.preview.mood.includes(mood)) return acc + 2
       if (preset.matchKeywords.includes(mood)) return acc + 1
@@ -116,8 +107,8 @@ export function recommendLegacyPresetsByMood(moods: string[], limit = 3): Legacy
 /**
  * 프리셋 메타 정보만 가져오기 (리스트 표시용)
  */
-export function getLegacyPresetMetas() {
-  return Object.values(legacyPresets).map(preset => ({
+export function getPredefinedPresetMetas() {
+  return Object.values(predefinedPresets).map(preset => ({
     id: preset.id,
     name: preset.name,
     nameKo: preset.nameKo,
@@ -135,7 +126,7 @@ export function getLegacyPresetMetas() {
 // Category Labels
 // ============================================
 
-export const categoryLabels: Record<LegacyTemplateCategory, { en: string; ko: string }> = {
+export const categoryLabels: Record<PredefinedTemplateCategory, { en: string; ko: string }> = {
   modern: { en: 'Modern', ko: '모던' },
   cinematic: { en: 'Cinematic', ko: '시네마틱' },
   artistic: { en: 'Artistic', ko: '아티스틱' },
@@ -145,14 +136,7 @@ export const categoryLabels: Record<LegacyTemplateCategory, { en: string; ko: st
 }
 
 export const introTypeLabels: Record<LegacyIntroType, { en: string; ko: string }> = {
-  keynote: { en: 'Keynote', ko: '키노트' },
   cinematic: { en: 'Cinematic', ko: '시네마틱' },
   exhibition: { en: 'Exhibition', ko: '갤러리' },
   magazine: { en: 'Magazine', ko: '매거진' },
-  vinyl: { en: 'Vinyl', ko: '바이닐' },
-  chat: { en: 'Chat', ko: '채팅' },
-  glassmorphism: { en: 'Glassmorphism', ko: '글래스' },
-  passport: { en: 'Passport', ko: '패스포트' },
-  pixel: { en: 'Pixel', ko: '픽셀' },
-  typography: { en: 'Typography', ko: '타이포' },
 }

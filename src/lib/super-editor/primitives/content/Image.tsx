@@ -91,17 +91,33 @@ export function Image({
           handleClick()
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          style={imgStyle}
-          loading={props.loading || 'lazy'}
-        />
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt={alt}
+            style={imgStyle}
+            loading={props.loading || 'lazy'}
+          />
+        ) : (
+          <div
+            style={{
+              ...imgStyle,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--color-surface, #f5f5f5)',
+              color: 'var(--color-text-muted, #888)',
+              fontSize: '14px',
+            }}
+          >
+            Wedding Photo
+          </div>
+        )}
       </div>
 
       {/* Lightbox Modal */}
-      {showLightbox && (
+      {showLightbox && src && (
         <div
           style={{
             position: 'fixed',

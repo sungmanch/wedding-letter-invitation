@@ -75,9 +75,9 @@ export function LocationField({ field }: LocationFieldProps) {
   return (
     <div className="field-wrapper">
       {field.label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[#F5E6D3]/80 mb-2">
           {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-red-400 ml-1">*</span>}
         </label>
       )}
 
@@ -89,14 +89,14 @@ export function LocationField({ field }: LocationFieldProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="주소를 검색하세요"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 px-3 py-2 border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 focus:ring-2 focus:ring-[#C9A962]/50 focus:border-[#C9A962]/30"
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button
             type="button"
             onClick={handleSearch}
             disabled={isSearching}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+            className="px-4 py-2 bg-white/10 text-[#F5E6D3] rounded-lg hover:bg-white/20 disabled:opacity-50"
           >
             {isSearching ? '검색 중...' : '검색'}
           </button>
@@ -106,7 +106,7 @@ export function LocationField({ field }: LocationFieldProps) {
       {/* 좌표 입력 */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">위도 (Latitude)</label>
+          <label className="block text-xs text-[#F5E6D3]/50 mb-1">위도 (Latitude)</label>
           <input
             type="number"
             step="any"
@@ -114,11 +114,11 @@ export function LocationField({ field }: LocationFieldProps) {
             onChange={handleLatChange}
             placeholder="37.5665"
             disabled={field.disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+            className="w-full px-3 py-2 border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 focus:ring-2 focus:ring-[#C9A962]/50 focus:border-[#C9A962]/30 disabled:bg-white/[0.02]"
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">경도 (Longitude)</label>
+          <label className="block text-xs text-[#F5E6D3]/50 mb-1">경도 (Longitude)</label>
           <input
             type="number"
             step="any"
@@ -126,7 +126,7 @@ export function LocationField({ field }: LocationFieldProps) {
             onChange={handleLngChange}
             placeholder="126.9780"
             disabled={field.disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+            className="w-full px-3 py-2 border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 focus:ring-2 focus:ring-[#C9A962]/50 focus:border-[#C9A962]/30 disabled:bg-white/[0.02]"
           />
         </div>
       </div>
@@ -136,7 +136,7 @@ export function LocationField({ field }: LocationFieldProps) {
         <button
           type="button"
           onClick={openMap}
-          className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          className="mt-2 text-sm text-[#C9A962] hover:text-[#B8A052] flex items-center gap-1"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -147,7 +147,7 @@ export function LocationField({ field }: LocationFieldProps) {
       )}
 
       {field.helpText && (
-        <p className="mt-2 text-sm text-gray-500">{field.helpText}</p>
+        <p className="mt-2 text-sm text-[#F5E6D3]/50">{field.helpText}</p>
       )}
     </div>
   )

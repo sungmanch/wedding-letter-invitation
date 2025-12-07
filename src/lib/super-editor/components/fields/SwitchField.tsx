@@ -18,13 +18,13 @@ export function SwitchField({ field }: SwitchFieldProps) {
           {field.label && (
             <label
               htmlFor={field.id}
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#F5E6D3]/80"
             >
               {field.label}
             </label>
           )}
           {field.helpText && (
-            <p className="text-sm text-gray-500">{field.helpText}</p>
+            <p className="text-sm text-[#F5E6D3]/50">{field.helpText}</p>
           )}
         </div>
 
@@ -39,9 +39,9 @@ export function SwitchField({ field }: SwitchFieldProps) {
             relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer
             rounded-full border-2 border-transparent transition-colors
             duration-200 ease-in-out focus:outline-none focus:ring-2
-            focus:ring-blue-500 focus:ring-offset-2
+            focus:ring-[#C9A962]/50 focus:ring-offset-2 focus:ring-offset-[#1A1A1A]
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${value ? 'bg-blue-600' : 'bg-gray-200'}
+            ${value ? 'bg-[#C9A962]' : 'bg-white/20'}
           `}
         >
           <span
@@ -56,7 +56,7 @@ export function SwitchField({ field }: SwitchFieldProps) {
       </div>
 
       {(field.onLabel || field.offLabel) && (
-        <p className="mt-1 text-xs text-gray-400">
+        <p className="mt-1 text-xs text-[#F5E6D3]/40">
           {value ? field.onLabel : field.offLabel}
         </p>
       )}

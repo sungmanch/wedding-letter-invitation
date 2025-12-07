@@ -8,30 +8,16 @@ export * from './to-screen'
 
 // Individual builders
 export { buildCinematicIntro } from './cinematic'
-export { buildKeynoteIntro } from './keynote'
 export { buildExhibitionIntro } from './exhibition'
 export { buildMagazineIntro } from './magazine'
-export { buildVinylIntro } from './vinyl'
-export { buildChatIntro } from './chat'
-export { buildGlassmorphismIntro } from './glassmorphism'
-export { buildPassportIntro } from './passport'
-export { buildPixelIntro } from './pixel'
-export { buildTypographyIntro } from './typography'
 
 import type { IntroBuilder, IntroBuilderContext, IntroBuilderResult, IntroBuilderData } from './types'
 import type { LegacyIntroType } from '../types'
 import { resetIdCounter } from './types'
 
 import { buildCinematicIntro } from './cinematic'
-import { buildKeynoteIntro } from './keynote'
 import { buildExhibitionIntro } from './exhibition'
 import { buildMagazineIntro } from './magazine'
-import { buildVinylIntro } from './vinyl'
-import { buildChatIntro } from './chat'
-import { buildGlassmorphismIntro } from './glassmorphism'
-import { buildPassportIntro } from './passport'
-import { buildPixelIntro } from './pixel'
-import { buildTypographyIntro } from './typography'
 
 // ============================================
 // Builder Registry
@@ -39,15 +25,8 @@ import { buildTypographyIntro } from './typography'
 
 export const introBuilders: Record<LegacyIntroType, IntroBuilder> = {
   cinematic: buildCinematicIntro,
-  keynote: buildKeynoteIntro,
   exhibition: buildExhibitionIntro,
   magazine: buildMagazineIntro,
-  vinyl: buildVinylIntro,
-  chat: buildChatIntro,
-  glassmorphism: buildGlassmorphismIntro,
-  passport: buildPassportIntro,
-  pixel: buildPixelIntro,
-  typography: buildTypographyIntro,
 }
 
 // ============================================
@@ -62,8 +41,8 @@ export function buildIntro(ctx: IntroBuilderContext): IntroBuilderResult {
   const builder = introBuilders[introType]
 
   if (!builder) {
-    console.warn(`Unknown intro type: ${introType}, falling back to keynote`)
-    return buildKeynoteIntro(ctx)
+    console.warn(`Unknown intro type: ${introType}, falling back to cinematic`)
+    return buildCinematicIntro(ctx)
   }
 
   // ID 카운터 리셋 (빌드마다 깨끗한 상태로 시작)
@@ -132,47 +111,6 @@ export function collectAllIntroStyles(): string {
 
 .cinematic-flicker {
   animation: cinematicFlicker 0.15s infinite;
-}
-
-/* ========================================== */
-/* Vinyl Intro Styles */
-/* ========================================== */
-@keyframes vinylSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.vinyl-spinning {
-  animation: vinylSpin 3s linear infinite;
-}
-
-/* ========================================== */
-/* Glassmorphism Intro Styles */
-/* ========================================== */
-@keyframes glassFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.glass-float {
-  animation: glassFloat 3s ease-in-out infinite;
-}
-
-.glass-float-delayed {
-  animation: glassFloat 3s ease-in-out infinite;
-  animation-delay: 1.5s;
-}
-
-/* ========================================== */
-/* Pixel Intro Styles */
-/* ========================================== */
-@keyframes pixelBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.pixel-blink {
-  animation: pixelBlink 1s steps(1) infinite;
 }
 `
 }

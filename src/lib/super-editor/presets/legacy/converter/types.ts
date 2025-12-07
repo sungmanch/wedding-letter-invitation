@@ -3,7 +3,7 @@
  * 레거시 프리셋을 LayoutSchema + StyleSchema로 변환하기 위한 타입 정의
  */
 
-import type { LegacyTemplatePreset, LegacySectionDefinition } from '../types'
+import type { PredefinedTemplatePreset, LegacySectionDefinition } from '../types'
 import type { LayoutSchema, Screen } from '../../../schema/layout'
 import type { StyleSchema } from '../../../schema/style'
 import type { PrimitiveNode } from '../../../schema/primitives'
@@ -62,7 +62,7 @@ export interface ConvertResult {
 // ============================================
 
 export interface SectionBuilderContext {
-  preset: LegacyTemplatePreset
+  preset: PredefinedTemplatePreset
   section: LegacySectionDefinition
   sectionIndex: number
   options: ConvertOptions
