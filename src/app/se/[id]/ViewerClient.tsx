@@ -57,7 +57,7 @@ export function ViewerClient({
       />
 
       {/* 축하하기 FAB */}
-      <GuestbookFab onClick={() => setIsGuestbookModalOpen(true)} />
+      <GuestbookFab onClick={() => setIsGuestbookModalOpen(true)} mode="build" />
 
       {/* 공유 FAB */}
       <ShareFab onClick={() => setIsShareModalOpen(true)} />
