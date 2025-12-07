@@ -31,13 +31,13 @@ export function declarationToField(
 ): EditorField {
   const fieldType = variableTypeToFieldType(decl.type)
 
-  // 공통 속성
+  // 공통 속성 (declaration의 order가 있으면 우선, 없으면 fallback)
   const base = {
     id: decl.id || decl.path.replace(/\./g, '-'),
     label: decl.label,
     dataPath: decl.path,
     required: decl.required,
-    order,
+    order: decl.order ?? order,
     placeholder: decl.placeholder,
     helpText: decl.helpText,
     description: decl.description,

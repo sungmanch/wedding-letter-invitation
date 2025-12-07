@@ -153,12 +153,14 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     label: '예식 날짜',
     required: true,
     defaultValue: '2025-03-15',
+    order: 1,
   },
   'wedding.time': {
     type: 'time',
     label: '예식 시간',
     required: true,
     defaultValue: '14:00',
+    order: 2,
   },
   // 화면 표시용 날짜/시간 (파생 필드 - wedding.date/time에서 자동 계산)
   'wedding.dateDisplay': {
