@@ -44,6 +44,20 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-07: StyleEditor UX 개선 - 탭 제거 및 섹션 기반 구조
+- **이유**: 프리셋이 인트로 스타일과 불일치, 색상/글꼴 탭 분리가 비전문가에게 복잡
+- **변경**:
+  - 3개 탭(프리셋/색상/글꼴) 제거 → 단일 스크롤 뷰
+  - "추천 스타일 적용" 버튼 최상단 배치 (인트로 타입별 색상/폰트 원클릭 적용)
+  - 글 스타일 섹션: 제목/본문 글꼴 분리, ColorChipSelector (6개 프리셋 + 직접 선택)
+  - 배경 스타일 섹션: 배경 색상 ColorChipSelector
+  - 고급 옵션 접기/펼치기 (DisclosurePanel)
+- **파일**:
+  - `src/lib/super-editor/presets/intro-style-presets.ts` - 신규: 7개 인트로별 스타일 프리셋
+  - `src/lib/super-editor/components/StyleEditor.tsx` - 전면 리팩토링
+  - `src/app/se/[id]/edit/page.tsx` - introType props 전달
+- **계획**: [StyleEditor UX 계획](./.claude/plans/starry-twirling-popcorn.md)
+
 ### 2025-12-07: 편집 패널 UX 리디자인 - Section-First 패턴
 - **이유**: "내용"과 "섹션" 탭이 분리되어 사용자 인지 부하 발생, 점진적 공개 UX 개선
 - **변경**:
