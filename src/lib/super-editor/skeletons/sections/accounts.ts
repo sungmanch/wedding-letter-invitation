@@ -101,7 +101,7 @@ export const accountsSkeleton: SectionSkeleton = {
                       dataPath: 'accounts.groom',
                       as: 'account',
                       defaultValue: [
-                        { relation: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+                        { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
                       ],
                     },
                     children: [
@@ -219,7 +219,7 @@ export const accountsSkeleton: SectionSkeleton = {
                       dataPath: 'accounts.bride',
                       as: 'account',
                       defaultValue: [
-                        { relation: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+                        { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
                       ],
                     },
                     children: [
@@ -317,7 +317,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신랑측 계좌 목록',
           defaultValue: [
-            { relation: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+            { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
           ],
         },
         {
@@ -327,7 +327,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신부측 계좌 목록',
           defaultValue: [
-            { relation: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+            { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
           ],
         },
       ],
@@ -438,7 +438,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               dataPath: 'accounts.groom',
                               as: 'account',
                               defaultValue: [
-                                { relation: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+                                { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
                               ],
                             },
                             children: [
@@ -541,7 +541,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               dataPath: 'accounts.bride',
                               as: 'account',
                               defaultValue: [
-                                { relation: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+                                { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
                               ],
                             },
                             children: [
@@ -608,7 +608,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신랑측 계좌 목록',
           defaultValue: [
-            { relation: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+            { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
           ],
         },
         {
@@ -618,7 +618,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신부측 계좌 목록',
           defaultValue: [
-            { relation: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+            { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
           ],
         },
       ],
@@ -778,7 +778,7 @@ export const accountsSkeleton: SectionSkeleton = {
                       dataPath: 'accounts.groom',
                       as: 'account',
                       defaultValue: [
-                        { relation: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+                        { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
                       ],
                     },
                     children: [
@@ -806,7 +806,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.primary',
                             },
                             props: {
-                              content: '{{account.relation}}',
+                              content: '{{account.relationLabel}}',
                               as: 'h4',
                             },
                           },
@@ -894,7 +894,7 @@ export const accountsSkeleton: SectionSkeleton = {
                       dataPath: 'accounts.bride',
                       as: 'account',
                       defaultValue: [
-                        { relation: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+                        { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
                       ],
                     },
                     children: [
@@ -922,7 +922,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.primary',
                             },
                             props: {
-                              content: '{{account.relation}}',
+                              content: '{{account.relationLabel}}',
                               as: 'h4',
                             },
                           },
@@ -995,7 +995,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신랑측 계좌 목록 (relation, bank, holder, number)',
           defaultValue: [
-            { relation: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+            { relation: 'self', relationLabel: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
           ],
         },
         {
@@ -1005,7 +1005,7 @@ export const accountsSkeleton: SectionSkeleton = {
           required: true,
           description: '신부측 계좌 목록 (relation, bank, holder, number)',
           defaultValue: [
-            { relation: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+            { relation: 'self', relationLabel: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
           ],
         },
       ],
