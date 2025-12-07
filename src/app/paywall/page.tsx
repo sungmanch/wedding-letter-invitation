@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CreditCard, Check, Loader2 } from 'lucide-react'
@@ -9,7 +10,7 @@ import { createUnifiedCheckoutSession, type InvitationType } from '@/lib/actions
 
 const PRICE = 9900
 
-export default function PaywallPage() {
+function PaywallContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -148,5 +149,17 @@ function FeatureItem({ children }: { children: React.ReactNode }) {
       <Check className="h-4 w-4 text-[#D4768A]" />
       {children}
     </li>
+  )
+}
+
+export default function PaywallPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col min-h-screen bg-white lg:max-w-2xl lg:mx-auto lg:shadow-xl items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    }>
+      <PaywallContent />
+    </Suspense>
   )
 }
