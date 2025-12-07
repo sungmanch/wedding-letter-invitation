@@ -107,9 +107,10 @@ export function Countdown({
       style={{
         display: 'flex',
         flexDirection: 'row',
-        gap: 'var(--spacing-sm, 8px)',
+        gap: 'var(--spacing-xs, 4px)',
         justifyContent: 'center',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
+        width: '100%',
         ...mergedStyle,
       }}
     >
@@ -120,11 +121,12 @@ export function Countdown({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 'var(--spacing-xs, 4px)',
-            minWidth: '70px',
+            gap: '2px',
+            flex: '1 1 0',
+            maxWidth: '80px',
             ...(showCards
               ? {
-                  padding: 'var(--spacing-md, 16px)',
+                  padding: '12px 8px',
                   backgroundColor: 'var(--color-background)',
                   borderRadius: 'var(--radius-md, 8px)',
                   boxShadow: 'var(--shadow-md)',
@@ -135,7 +137,7 @@ export function Countdown({
           <span
             style={{
               fontFamily: 'var(--typo-display-lg-font-family)',
-              fontSize: 'var(--typo-display-lg-font-size, 32px)',
+              fontSize: 'clamp(20px, 6vw, 32px)',
               fontWeight: 'var(--typo-display-lg-font-weight, 700)',
               color: 'var(--color-text-primary)',
               lineHeight: 1,
@@ -146,7 +148,7 @@ export function Countdown({
           <span
             style={{
               fontFamily: 'var(--typo-caption-font-family)',
-              fontSize: 'var(--typo-caption-font-size, 12px)',
+              fontSize: '10px',
               color: 'var(--color-text-muted)',
               letterSpacing: '0.05em',
             }}
