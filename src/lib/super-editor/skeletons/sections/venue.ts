@@ -141,21 +141,6 @@ export const venueSkeleton: SectionSkeleton = {
                     },
                     children: [
                       {
-                        id: 'nav-tmap',
-                        type: 'button',
-                        props: {
-                          label: '티맵',
-                          iconSrc: '/tmap.png',
-                          variant: 'ghost',
-                          size: 'sm',
-                          action: {
-                            type: 'link',
-                            url: 'https://apis.openapi.sk.com/tmap/app/routes?appKey=&name={{venue.name}}&lon={{venue.lng}}&lat={{venue.lat}}',
-                            target: '_blank',
-                          },
-                        },
-                      },
-                      {
                         id: 'nav-kakao-navi',
                         type: 'button',
                         props: {
@@ -470,21 +455,6 @@ export const venueSkeleton: SectionSkeleton = {
                     },
                     children: [
                       {
-                        id: 'nav-tmap',
-                        type: 'button',
-                        props: {
-                          label: '티맵',
-                          iconSrc: '/tmap.png',
-                          variant: 'ghost',
-                          size: 'sm',
-                          action: {
-                            type: 'link',
-                            url: 'https://apis.openapi.sk.com/tmap/app/routes?appKey=&name={{venue.name}}&lon={{venue.lng}}&lat={{venue.lat}}',
-                            target: '_blank',
-                          },
-                        },
-                      },
-                      {
                         id: 'nav-kakao-navi',
                         type: 'button',
                         props: {
@@ -767,21 +737,6 @@ export const venueSkeleton: SectionSkeleton = {
                       borderTopRightRadius: 0,
                     },
                     children: [
-                      {
-                        id: 'nav-tmap',
-                        type: 'button',
-                        props: {
-                          label: '티맵',
-                          iconSrc: '/tmap.png',
-                          variant: 'ghost',
-                          size: 'sm',
-                          action: {
-                            type: 'link',
-                            url: 'https://apis.openapi.sk.com/tmap/app/routes?appKey=&name={{venue.name}}&lon={{venue.lng}}&lat={{venue.lat}}',
-                            target: '_blank',
-                          },
-                        },
-                      },
                       {
                         id: 'nav-kakao-navi',
                         type: 'button',
