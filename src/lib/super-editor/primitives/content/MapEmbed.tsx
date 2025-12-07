@@ -30,7 +30,8 @@ export function MapEmbed({
   const rawLng = resolveDataBinding(String(props.lng || ''), context.data)
   const lat = typeof rawLat === 'number' ? rawLat : parseFloat(String(rawLat)) || 0
   const lng = typeof rawLng === 'number' ? rawLng : parseFloat(String(rawLng)) || 0
-  const provider = props.provider || 'naver'
+  // 네이버 지도 고정 사용
+  const provider = 'naver' as const
   const zoom = props.zoom || 16
   const showMarker = props.showMarker !== false
   const height = props.height || 280
