@@ -54,7 +54,7 @@ function loadNaverMapScript(): Promise<void> {
     const script = document.createElement('script')
     script.id = NAVER_MAP_SCRIPT_ID
     script.type = 'text/javascript'
-    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`
+    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`
     script.async = true
 
     script.onload = () => resolve()
