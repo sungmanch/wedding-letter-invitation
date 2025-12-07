@@ -39,6 +39,12 @@ export function ViewerClient({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isGuestbookModalOpen, setIsGuestbookModalOpen] = useState(false)
 
+  // Viewer에서는 guestbook 섹션 비활성화 (별도 FAB 사용)
+  const viewerSectionEnabled = {
+    ...sectionEnabled,
+    guestbook: false,
+  }
+
   return (
     <>
       <InvitationPreview
@@ -46,7 +52,7 @@ export function ViewerClient({
         style={style}
         userData={userData}
         sectionOrder={sectionOrder}
-        sectionEnabled={sectionEnabled}
+        sectionEnabled={viewerSectionEnabled}
         mode="preview"
       />
 
