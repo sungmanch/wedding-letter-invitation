@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
-import html2canvas from 'html2canvas'
+import { useState, useCallback, useRef, useEffect, ChangeEvent } from 'react'
 import { uploadOgImage, updateOgMetadata, getOgMetadata } from '../actions'
 import { cn } from '@/lib/utils'
 
@@ -9,29 +8,98 @@ interface OgMetadataEditorProps {
   invitationId: string
   defaultTitle: string
   defaultDescription: string
-  previewRef?: React.RefObject<HTMLDivElement | null>
+  mainImageUrl?: string
+  groomName?: string
+  brideName?: string
   className?: string
   onChange?: (values: { title: string; description: string; imageUrl: string }) => void
 }
+
+const OG_WIDTH = 1200
+const OG_HEIGHT = 630
 
 export function OgMetadataEditor({
   invitationId,
   defaultTitle,
   defaultDescription,
-  previewRef,
+  mainImageUrl,
+  groomName = '신랑',
+  brideName = '신부',
   className,
   onChange,
 }: OgMetadataEditorProps) {
   const [ogTitle, setOgTitle] = useState(defaultTitle)
   const [ogDescription, setOgDescription] = useState(defaultDescription)
-  const [ogImageUrl, setOgImageUrl] = useState<string | null>(null) // 서버에 저장된 URL
-  const [localImageData, setLocalImageData] = useState<string | null>(null) // 로컬 미리보기용 base64
+  const [ogImageUrl, setOgImageUrl] = useState<string | null>(null)
+  const [localImageData, setLocalImageData] = useState<string | null>(null)
+  const [defaultImageData, setDefaultImageData] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // OG 데이터 로드
+  // 메인 이미지에서 기본 OG 이미지 생성 (30% 오버레이 + 텍스트)
+  const generateDefaultImage = useCallback(async () => {
+    if (!mainImageUrl) return null
+
+    return new Promise<string>((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = OG_WIDTH
+        canvas.height = OG_HEIGHT
+        const ctx = canvas.getContext('2d')
+
+        if (!ctx) {
+          reject(new Error('Canvas context not available'))
+          return
+        }
+
+        // 1. 이미지를 OG 비율에 맞게 크롭하면서 그리기
+        const srcRatio = img.width / img.height
+        const dstRatio = OG_WIDTH / OG_HEIGHT
+
+        let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height
+
+        if (srcRatio > dstRatio) {
+          srcW = img.height * dstRatio
+          srcX = (img.width - srcW) / 2
+        } else {
+          srcH = img.width / dstRatio
+          srcY = 0
+        }
+
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, OG_WIDTH, OG_HEIGHT)
+
+        // 2. 30% 어두운 오버레이
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+        ctx.fillRect(0, 0, OG_WIDTH, OG_HEIGHT)
+
+        // 3. 텍스트 추가: "신랑 🩷 신부"
+        const text = `${groomName} 🩷 ${brideName}`
+        ctx.fillStyle = '#ffffff'
+        ctx.font = 'bold 72px "Pretendard", sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        // 텍스트 그림자
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
+        ctx.shadowBlur = 10
+        ctx.shadowOffsetX = 2
+        ctx.shadowOffsetY = 2
+
+        ctx.fillText(text, OG_WIDTH / 2, OG_HEIGHT / 2)
+
+        resolve(canvas.toDataURL('image/jpeg', 0.92))
+      }
+      img.onerror = () => reject(new Error('Failed to load image'))
+      img.src = mainImageUrl
+    })
+  }, [mainImageUrl, groomName, brideName])
+
+  // OG 데이터 로드 및 기본 이미지 생성
   useEffect(() => {
     async function loadOgData() {
       const data = await getOgMetadata(invitationId)
@@ -40,23 +108,35 @@ export function OgMetadataEditor({
         if (data.ogDescription) setOgDescription(data.ogDescription)
         if (data.ogImageUrl) setOgImageUrl(data.ogImageUrl)
       }
+
+      // 저장된 OG 이미지가 없으면 기본 이미지 생성
+      if (!data?.ogImageUrl && mainImageUrl) {
+        try {
+          const defaultImg = await generateDefaultImage()
+          if (defaultImg) {
+            setDefaultImageData(defaultImg)
+          }
+        } catch (error) {
+          console.error('Failed to generate default OG image:', error)
+        }
+      }
     }
     loadOgData()
-  }, [invitationId])
+  }, [invitationId, mainImageUrl, generateDefaultImage])
 
-  // 값 변경 시 부모에게 알림 (로컬 이미지 우선)
+  // 값 변경 시 부모에게 알림
   useEffect(() => {
     onChange?.({
       title: ogTitle,
       description: ogDescription,
-      imageUrl: localImageData || ogImageUrl || '',
+      imageUrl: localImageData || ogImageUrl || defaultImageData || mainImageUrl || '',
     })
-  }, [ogTitle, ogDescription, ogImageUrl, localImageData, onChange])
+  }, [ogTitle, ogDescription, ogImageUrl, localImageData, defaultImageData, mainImageUrl, onChange])
 
-  // OG 이미지 생성 (로컬 미리보기용, 서버 업로드는 저장 시)
-  const handleGenerateImage = useCallback(async () => {
-    if (!previewRef?.current) {
-      setMessage({ type: 'error', text: '미리보기를 찾을 수 없습니다. 잠시 후 다시 시도해주세요.' })
+  // 기본 이미지 생성 버튼 핸들러
+  const handleGenerateDefault = useCallback(async () => {
+    if (!mainImageUrl) {
+      setMessage({ type: 'error', text: '메인 이미지가 없습니다.' })
       return
     }
 
@@ -64,64 +144,73 @@ export function OgMetadataEditor({
     setMessage(null)
 
     try {
-      const targetElement = previewRef.current
-
-      // 1. 원본 크기로 캡처 (scale: 2로 고해상도)
-      const originalCanvas = await html2canvas(targetElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      })
-
-      // 2. 1200x630으로 리사이즈 (OG 이미지 표준 크기)
-      const OG_WIDTH = 1200
-      const OG_HEIGHT = 630
-
-      const resizedCanvas = document.createElement('canvas')
-      resizedCanvas.width = OG_WIDTH
-      resizedCanvas.height = OG_HEIGHT
-      const ctx = resizedCanvas.getContext('2d')
-
-      if (!ctx) {
-        throw new Error('Canvas context not available')
+      const imageData = await generateDefaultImage()
+      if (imageData) {
+        setLocalImageData(imageData)
+        setHasUnsavedChanges(true)
+        setMessage({ type: 'success', text: '이미지가 생성되었습니다. 저장 버튼을 눌러 반영하세요.' })
       }
-
-      // 원본 이미지를 OG 비율에 맞게 크롭하면서 리사이즈
-      const srcRatio = originalCanvas.width / originalCanvas.height
-      const dstRatio = OG_WIDTH / OG_HEIGHT
-
-      let srcX = 0, srcY = 0, srcW = originalCanvas.width, srcH = originalCanvas.height
-
-      if (srcRatio > dstRatio) {
-        // 원본이 더 넓음 - 좌우 크롭
-        srcW = originalCanvas.height * dstRatio
-        srcX = (originalCanvas.width - srcW) / 2
-      } else {
-        // 원본이 더 높음 - 상단 기준으로 하단 크롭
-        srcH = originalCanvas.width / dstRatio
-        srcY = 0 // 상단 기준
-      }
-
-      ctx.drawImage(
-        originalCanvas,
-        srcX, srcY, srcW, srcH,
-        0, 0, OG_WIDTH, OG_HEIGHT
-      )
-
-      // 3. Canvas를 JPG base64로 변환 (로컬 저장)
-      const imageData = resizedCanvas.toDataURL('image/jpeg', 0.92)
-      setLocalImageData(imageData)
-      setHasUnsavedChanges(true)
-      setMessage({ type: 'success', text: '이미지가 생성되었습니다. 저장 버튼을 눌러 반영하세요.' })
     } catch (error) {
       console.error('Failed to generate OG image:', error)
       setMessage({ type: 'error', text: '이미지 생성 중 오류가 발생했습니다' })
     } finally {
       setIsGenerating(false)
     }
-  }, [previewRef])
+  }, [mainImageUrl, generateDefaultImage])
+
+  // 이미지 업로드 핸들러
+  const handleImageUpload = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 파일 크기 체크 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: '이미지 크기는 5MB 이하여야 합니다.' })
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const img = new Image()
+      img.onload = () => {
+        // 1200x630으로 리사이즈
+        const canvas = document.createElement('canvas')
+        canvas.width = OG_WIDTH
+        canvas.height = OG_HEIGHT
+        const ctx = canvas.getContext('2d')
+
+        if (!ctx) {
+          setMessage({ type: 'error', text: '이미지 처리 중 오류가 발생했습니다.' })
+          return
+        }
+
+        const srcRatio = img.width / img.height
+        const dstRatio = OG_WIDTH / OG_HEIGHT
+
+        let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height
+
+        if (srcRatio > dstRatio) {
+          srcW = img.height * dstRatio
+          srcX = (img.width - srcW) / 2
+        } else {
+          srcH = img.width / dstRatio
+          srcY = 0
+        }
+
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, OG_WIDTH, OG_HEIGHT)
+
+        const imageData = canvas.toDataURL('image/jpeg', 0.92)
+        setLocalImageData(imageData)
+        setHasUnsavedChanges(true)
+        setMessage({ type: 'success', text: '이미지가 선택되었습니다. 저장 버튼을 눌러 반영하세요.' })
+      }
+      img.src = event.target?.result as string
+    }
+    reader.readAsDataURL(file)
+
+    // input 초기화 (같은 파일 재선택 가능하게)
+    e.target.value = ''
+  }, [])
 
   // OG 메타데이터 및 이미지 저장
   const handleSave = useCallback(async () => {
@@ -129,19 +218,21 @@ export function OgMetadataEditor({
     setMessage(null)
 
     try {
-      // 1. 로컬 이미지가 있으면 먼저 업로드
-      if (localImageData) {
-        const imageResult = await uploadOgImage(invitationId, localImageData)
+      // 로컬 이미지가 있으면 업로드
+      const imageToUpload = localImageData || (!ogImageUrl && defaultImageData)
+      if (imageToUpload) {
+        const imageResult = await uploadOgImage(invitationId, imageToUpload)
         if (imageResult.success && imageResult.url) {
           setOgImageUrl(imageResult.url)
-          setLocalImageData(null) // 업로드 완료 후 로컬 데이터 클리어
+          setLocalImageData(null)
+          setDefaultImageData(null)
         } else {
           setMessage({ type: 'error', text: imageResult.error || '이미지 저장에 실패했습니다' })
           return
         }
       }
 
-      // 2. 메타데이터 저장
+      // 메타데이터 저장
       const result = await updateOgMetadata(invitationId, {
         ogTitle,
         ogDescription,
@@ -159,7 +250,10 @@ export function OgMetadataEditor({
     } finally {
       setIsSaving(false)
     }
-  }, [invitationId, ogTitle, ogDescription, localImageData])
+  }, [invitationId, ogTitle, ogDescription, localImageData, ogImageUrl, defaultImageData])
+
+  // 현재 표시할 이미지
+  const displayImageUrl = localImageData || ogImageUrl || defaultImageData
 
   return (
     <div className={cn('p-4 space-y-6', className)}>
@@ -175,32 +269,49 @@ export function OgMetadataEditor({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label className="block text-sm font-medium text-gray-700">공유 이미지</label>
-          {localImageData && (
+          {(localImageData || (!ogImageUrl && defaultImageData)) && (
             <span className="text-xs text-amber-600 font-medium">저장되지 않음</span>
           )}
         </div>
         <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
-          {(localImageData || ogImageUrl) ? (
+          {displayImageUrl ? (
             <img
-              src={localImageData || ogImageUrl || ''}
+              src={displayImageUrl}
               alt="OG Preview"
               className="w-full aspect-[1200/630] object-cover"
             />
           ) : (
             <div className="w-full aspect-[1200/630] flex items-center justify-center text-gray-400 text-sm">
-              이미지가 없습니다
+              메인 이미지가 없습니다
             </div>
           )}
         </div>
-        <button
-          onClick={handleGenerateImage}
-          disabled={isGenerating}
-          className="w-full px-4 py-2.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
-        >
-          {isGenerating ? '생성 중...' : '인트로에서 이미지 생성'}
-        </button>
+
+        {/* 이미지 버튼들 */}
+        <div className="flex gap-2">
+          <button
+            onClick={handleGenerateDefault}
+            disabled={isGenerating || !mainImageUrl}
+            className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+          >
+            {isGenerating ? '생성 중...' : '기본 이미지 생성'}
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-1 px-4 py-2.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 text-sm font-medium transition-colors"
+          >
+            이미지 업로드
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </div>
         <p className="text-xs text-gray-500">
-          현재 청첩장의 인트로 화면을 1200x630 크기의 공유용 이미지로 생성합니다.
+          기본 이미지: 메인 사진에 어두운 오버레이와 "{groomName} 🩷 {brideName}" 텍스트가 추가됩니다.
         </p>
       </div>
 
@@ -244,12 +355,12 @@ export function OgMetadataEditor({
         disabled={isSaving}
         className={cn(
           "w-full px-4 py-2.5 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors",
-          hasUnsavedChanges
+          hasUnsavedChanges || (!ogImageUrl && defaultImageData)
             ? "bg-rose-600 hover:bg-rose-700"
             : "bg-gray-900 hover:bg-gray-800"
         )}
       >
-        {isSaving ? '저장 중...' : hasUnsavedChanges ? '변경사항 저장' : '저장'}
+        {isSaving ? '저장 중...' : (hasUnsavedChanges || (!ogImageUrl && defaultImageData)) ? '변경사항 저장' : '저장'}
       </button>
 
       {/* 메시지 */}
