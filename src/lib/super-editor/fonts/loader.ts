@@ -64,14 +64,30 @@ export function buildGoogleFontsUrlFromPresets(presets: FontPreset[]): string {
 }
 
 /**
- * font-family 문자열에서 사용된 폰트 추출 및 로드 URL 생성
+ * @font-face CSS 생성
+ */
+export function buildFontFaceCss(preset: FontPreset): string {
+  if (!preset.fontFace) return ''
+
+  return `@font-face {
+  font-family: '${preset.family}';
+  src: url('${preset.fontFace.src}') format('${preset.fontFace.format}');
+  font-weight: ${preset.defaultWeight};
+  font-display: swap;
+}`
+}
+
+/**
+ * font-family 문자열에서 사용된 폰트 추출 및 로드 정보 생성
  */
 export function extractAndBuildFontUrls(fontFamilies: string[]): {
   googleFontsUrl: string
   cdnUrls: string[]
+  fontFaceCss: string[]
 } {
   const googleFonts: GoogleFontsRequest[] = []
   const cdnUrls: string[] = []
+  const fontFaceCss: string[] = []
 
   // 각 fontFamily 문자열에서 첫 번째 폰트 추출
   for (const fontFamily of fontFamilies) {
@@ -93,12 +109,18 @@ export function extractAndBuildFontUrls(fontFamilies: string[]): {
       if (!cdnUrls.includes(preset.cdnUrl)) {
         cdnUrls.push(preset.cdnUrl)
       }
+    } else if (preset.source === 'fontface' && preset.fontFace) {
+      const css = buildFontFaceCss(preset)
+      if (css && !fontFaceCss.includes(css)) {
+        fontFaceCss.push(css)
+      }
     }
   }
 
   return {
     googleFontsUrl: buildGoogleFontsUrl(googleFonts),
     cdnUrls,
+    fontFaceCss,
   }
 }
 
@@ -107,25 +129,30 @@ export function extractAndBuildFontUrls(fontFamilies: string[]): {
 // ============================================
 
 /**
- * 폰트 로드용 HTML <link> 태그 생성
+ * 폰트 로드용 HTML <link> 태그 + <style> 태그 생성
  */
 export function buildFontLinkTags(fontFamilies: string[]): string {
-  const { googleFontsUrl, cdnUrls } = extractAndBuildFontUrls(fontFamilies)
-  const links: string[] = []
+  const { googleFontsUrl, cdnUrls, fontFaceCss } = extractAndBuildFontUrls(fontFamilies)
+  const lines: string[] = []
 
   // Google Fonts preconnect
   if (googleFontsUrl) {
-    links.push('<link rel="preconnect" href="https://fonts.googleapis.com">')
-    links.push('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>')
-    links.push(`<link href="${googleFontsUrl}" rel="stylesheet">`)
+    lines.push('<link rel="preconnect" href="https://fonts.googleapis.com">')
+    lines.push('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>')
+    lines.push(`<link href="${googleFontsUrl}" rel="stylesheet">`)
   }
 
   // CDN URLs
   for (const url of cdnUrls) {
-    links.push(`<link href="${url}" rel="stylesheet">`)
+    lines.push(`<link href="${url}" rel="stylesheet">`)
   }
 
-  return links.join('\n  ')
+  // @font-face CSS (inline style)
+  if (fontFaceCss.length > 0) {
+    lines.push(`<style>\n${fontFaceCss.join('\n\n')}\n</style>`)
+  }
+
+  return lines.join('\n  ')
 }
 
 // ============================================
@@ -163,6 +190,9 @@ export async function loadFontDynamically(fontFamily: string): Promise<boolean> 
       await loadStylesheet(url)
     } else if (preset.source === 'cdn' && preset.cdnUrl) {
       await loadStylesheet(preset.cdnUrl)
+    } else if (preset.source === 'fontface' && preset.fontFace) {
+      // @font-face CSS를 동적으로 주입
+      await injectFontFaceCss(preset)
     }
 
     loadedFonts.add(firstFont)
@@ -171,6 +201,40 @@ export async function loadFontDynamically(fontFamily: string): Promise<boolean> 
     console.error(`Failed to load font: ${firstFont}`, error)
     return false
   }
+}
+
+/**
+ * @font-face CSS를 동적으로 주입
+ */
+function injectFontFaceCss(preset: FontPreset): Promise<void> {
+  return new Promise((resolve) => {
+    const styleId = `font-face-${preset.id}`
+
+    // 이미 주입된 스타일인지 확인
+    if (document.getElementById(styleId)) {
+      resolve()
+      return
+    }
+
+    const css = buildFontFaceCss(preset)
+    if (!css) {
+      resolve()
+      return
+    }
+
+    const style = document.createElement('style')
+    style.id = styleId
+    style.textContent = css
+    document.head.appendChild(style)
+
+    // 폰트 로드 완료 대기 (선택적)
+    if ('fonts' in document) {
+      document.fonts.load(`${preset.defaultWeight} 16px "${preset.family}"`).then(() => resolve())
+    } else {
+      // 폰트 로드 API가 없으면 즉시 resolve
+      resolve()
+    }
+  })
 }
 
 /**
