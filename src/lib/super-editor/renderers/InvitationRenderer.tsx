@@ -40,13 +40,21 @@ interface InvitationRendererProps {
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
 
+  // 섹션 클릭 핸들러 (에디터 연동)
+  onSectionClick?: (sectionType: SectionType) => void
+  // 하이라이트할 섹션 (에디터에서 펼쳐진 섹션)
+  highlightedSection?: SectionType | null
+
   // 표시할 섹션 타입 제한 (선택적)
   // undefined = sectionEnabled 기반, ['intro'] = 인트로만
   visibleSections?: SectionType[]
 
-  // Variant switcher (dev mode only)
+  // Variant switcher
   sectionVariants?: Record<SectionType, string>
   onVariantChange?: (sectionType: SectionType, variantId: string) => void
+
+  // 섹션 내부 VariantSwitcher 표시 여부 (false면 외부 패널 사용)
+  showVariantSwitcher?: boolean
 
   className?: string
 }
@@ -103,9 +111,12 @@ function InvitationContent({
   mode = 'preview',
   selectedNodeId,
   onSelectNode,
+  onSectionClick,
+  highlightedSection,
   visibleSections,
   sectionVariants,
   onVariantChange,
+  showVariantSwitcher = true,
   className,
 }: InvitationContentProps) {
   // 섹션 정렬
@@ -123,6 +134,9 @@ function InvitationContent({
   const showMusic = visibleSections
     ? visibleSections.includes('music') && music
     : sectionEnabled.music && music
+
+  // 편집 모드일 때만 섹션 간 간격 적용
+  const sectionGap = mode === 'edit' ? '48px' : '0px'
 
   return (
     <div
@@ -142,24 +156,32 @@ function InvitationContent({
           mode={mode}
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
-          // currentVariantId={sectionVariants?.intro}
+          onSectionClick={onSectionClick}
+          isHighlighted={highlightedSection === 'intro'}
+          currentVariantId={sectionVariants?.intro}
           onVariantChange={onVariantChange}
+          showVariantSwitcher={showVariantSwitcher}
         />
       )}
 
-      {/* Content Sections (순서대로) */}
-      {sections.map((screen) => (
-        <SectionRenderer
-          key={screen.id}
-          screen={screen}
-          userData={userData}
-          mode={mode}
-          selectedNodeId={selectedNodeId}
-          onSelectNode={onSelectNode}
-          currentVariantId={sectionVariants?.[screen.sectionType]}
-          onVariantChange={onVariantChange}
-        />
-      ))}
+      {/* Content Sections (순서대로, 편집 모드에서는 간격 적용) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: sectionGap }}>
+        {sections.map((screen) => (
+          <SectionRenderer
+            key={screen.id}
+            screen={screen}
+            userData={userData}
+            mode={mode}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={onSelectNode}
+            onSectionClick={onSectionClick}
+            isHighlighted={highlightedSection === screen.sectionType}
+            currentVariantId={sectionVariants?.[screen.sectionType]}
+            onVariantChange={onVariantChange}
+            showVariantSwitcher={showVariantSwitcher}
+          />
+        ))}
+      </div>
 
       {/* Music FAB (플로팅) */}
       {showMusic && music && <MusicPlayer screen={music} userData={userData} mode={mode} />}

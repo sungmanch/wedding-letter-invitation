@@ -24,11 +24,6 @@ export function VariantSwitcher({
   position = 'top',
   className = '',
 }: VariantSwitcherProps) {
-  // 개발 모드에서만 표시
-  if (process.env.NODE_ENV !== 'development') {
-    return null
-  }
-
   const skeleton = useMemo(() => getSkeleton(sectionType), [sectionType])
 
   const variants = skeleton?.variants ?? []

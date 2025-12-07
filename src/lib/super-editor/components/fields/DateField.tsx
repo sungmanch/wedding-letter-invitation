@@ -9,7 +9,8 @@ interface DateFieldProps {
 
 export function DateField({ field }: DateFieldProps) {
   const { getFieldValue, updateField } = useSuperEditor()
-  const value = (getFieldValue(field.dataPath) as string) || ''
+  const storedValue = getFieldValue(field.dataPath) as string
+  const value = storedValue || (field.defaultValue as string) || ''
 
   return (
     <div className="field-wrapper">

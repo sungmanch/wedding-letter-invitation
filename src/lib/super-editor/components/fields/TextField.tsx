@@ -35,7 +35,7 @@ export function TextField({ field }: TextFieldProps) {
           type="text"
           value={value}
           onChange={(e) => updateField(field.dataPath, e.target.value)}
-          placeholder={field.placeholder}
+          placeholder={field.placeholder || (field.defaultValue as string) || ''}
           disabled={field.disabled}
           maxLength={field.maxLength}
           minLength={field.minLength}

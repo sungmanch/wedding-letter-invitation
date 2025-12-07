@@ -526,13 +526,14 @@ const EDITOR_SECTIONS: Record<string, EditorSection> = {
 }
 
 // 섹션 타입별 필요한 에디터 섹션 매핑
-const SECTION_TYPE_TO_EDITOR_SECTIONS: Record<SectionType, string[]> = {
+// EditorSection ID는 variables.ts의 SECTION_GROUP_META와 일치해야 함
+export const SECTION_TYPE_TO_EDITOR_SECTIONS: Record<SectionType, string[]> = {
   intro: ['intro', 'couple', 'wedding', 'photos'],
   greeting: ['greeting'],
   contact: ['couple'], // 연락처는 couple 섹션의 전화번호 사용
-  venue: ['venue', 'transportation'],
+  venue: ['venue'],
   date: ['wedding'],
-  gallery: ['gallery'],
+  gallery: ['photos'], // photos.gallery 경로의 에디터 섹션 ID는 'photos'
   parents: ['parents'],
   accounts: ['accounts'],
   guestbook: [], // 방명록은 사용자 입력 받는 섹션이므로 에디터 필드 없음

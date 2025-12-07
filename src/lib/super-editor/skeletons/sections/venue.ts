@@ -173,6 +173,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '예식장 이름',
+          defaultValue: '그랜드 웨딩홀',
         },
         {
           id: 'venue-hall',
@@ -180,27 +181,19 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '홀 이름',
+          defaultValue: '3층 그랜드볼룸',
         },
         {
           id: 'venue-address',
-          path: 'venue.address',
+          path: 'venue',
           type: 'location',
           required: true,
-          description: '주소',
-        },
-        {
-          id: 'venue-lat',
-          path: 'venue.lat',
-          type: 'text',
-          required: true,
-          description: '위도',
-        },
-        {
-          id: 'venue-lng',
-          path: 'venue.lng',
-          type: 'text',
-          required: true,
-          description: '경도',
+          description: '주소 (좌표 자동 변환)',
+          defaultValue: {
+            address: '서울특별시 강남구 테헤란로 123',
+            lat: 37.5065,
+            lng: 127.0536,
+          },
         },
         {
           id: 'venue-tel',
@@ -208,6 +201,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'phone',
           required: false,
           description: '전화번호',
+          defaultValue: '02-1234-5678',
         },
       ],
       options: {
@@ -392,6 +386,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '예식장 이름',
+          defaultValue: '그랜드 웨딩홀',
         },
         {
           id: 'venue-hall',
@@ -399,27 +394,19 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '홀 이름',
+          defaultValue: '3층 그랜드볼룸',
         },
         {
           id: 'venue-address',
-          path: 'venue.address',
+          path: 'venue',
           type: 'location',
           required: true,
-          description: '주소',
-        },
-        {
-          id: 'venue-lat',
-          path: 'venue.lat',
-          type: 'text',
-          required: true,
-          description: '위도',
-        },
-        {
-          id: 'venue-lng',
-          path: 'venue.lng',
-          type: 'text',
-          required: true,
-          description: '경도',
+          description: '주소 (좌표 자동 변환)',
+          defaultValue: {
+            address: '서울특별시 강남구 테헤란로 123',
+            lat: 37.5065,
+            lng: 127.0536,
+          },
         },
         {
           id: 'venue-tel',
@@ -427,6 +414,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'phone',
           required: false,
           description: '전화번호',
+          defaultValue: '02-1234-5678',
         },
       ],
       options: {
@@ -476,7 +464,7 @@ export const venueSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'LOCATION',
+                  content: '오시는 길',
                   as: 'h2',
                 },
               },
@@ -847,6 +835,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '예식장 이름',
+          defaultValue: '그랜드 웨딩홀',
         },
         {
           id: 'venue-hall',
@@ -854,27 +843,19 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '홀 이름',
+          defaultValue: '3층 그랜드볼룸',
         },
         {
           id: 'venue-address',
-          path: 'venue.address',
+          path: 'venue',
           type: 'location',
           required: true,
-          description: '주소',
-        },
-        {
-          id: 'venue-lat',
-          path: 'venue.lat',
-          type: 'text',
-          required: true,
-          description: '위도',
-        },
-        {
-          id: 'venue-lng',
-          path: 'venue.lng',
-          type: 'text',
-          required: true,
-          description: '경도',
+          description: '주소 (좌표 자동 변환)',
+          defaultValue: {
+            address: '서울특별시 강남구 테헤란로 123',
+            lat: 37.5065,
+            lng: 127.0536,
+          },
         },
         {
           id: 'venue-tel',
@@ -882,6 +863,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'phone',
           required: false,
           description: '전화번호',
+          defaultValue: '02-1234-5678',
         },
         {
           id: 'transport-bus',
@@ -889,6 +871,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '버스 안내',
+          defaultValue: '146, 341, 360번 예식장 앞 하차',
         },
         {
           id: 'transport-car',
@@ -896,6 +879,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '자가용 안내',
+          defaultValue: '건물 지하 1~3층 무료 주차 (3시간)',
         },
         {
           id: 'transport-subway',
@@ -903,6 +887,7 @@ export const venueSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '지하철 안내',
+          defaultValue: '2호선 강남역 3번 출구 도보 5분',
         },
       ],
       options: {

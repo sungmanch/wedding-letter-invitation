@@ -38,7 +38,7 @@ export function TextareaField({ field }: TextareaFieldProps) {
         id={field.id}
         value={value}
         onChange={(e) => updateField(field.dataPath, e.target.value)}
-        placeholder={field.placeholder}
+        placeholder={field.placeholder || (field.defaultValue as string) || ''}
         disabled={field.disabled}
         rows={field.rows || 4}
         maxLength={field.maxLength}

@@ -49,7 +49,7 @@ export const accountsSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GIFT',
+                  content: '마음 전하실 곳',
                   as: 'h2',
                 },
               },
@@ -310,6 +310,9 @@ export const accountsSkeleton: SectionSkeleton = {
           type: 'account',
           required: true,
           description: '신랑측 계좌 목록',
+          defaultValue: [
+            { label: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+          ],
         },
         {
           id: 'bride-accounts',
@@ -317,6 +320,9 @@ export const accountsSkeleton: SectionSkeleton = {
           type: 'account',
           required: true,
           description: '신부측 계좌 목록',
+          defaultValue: [
+            { label: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+          ],
         },
       ],
       options: {
@@ -365,7 +371,7 @@ export const accountsSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GIFT',
+                  content: '마음 전하실 곳',
                   as: 'h2',
                 },
               },
@@ -589,6 +595,9 @@ export const accountsSkeleton: SectionSkeleton = {
           type: 'account',
           required: true,
           description: '신랑측 계좌 목록',
+          defaultValue: [
+            { label: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+          ],
         },
         {
           id: 'bride-accounts',
@@ -596,6 +605,9 @@ export const accountsSkeleton: SectionSkeleton = {
           type: 'account',
           required: true,
           description: '신부측 계좌 목록',
+          defaultValue: [
+            { label: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+          ],
         },
       ],
       options: {
@@ -648,7 +660,7 @@ export const accountsSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GIFT',
+                  content: '마음 전하실 곳',
                   as: 'h2',
                 },
               },
@@ -964,6 +976,9 @@ export const accountsSkeleton: SectionSkeleton = {
           type: 'account',
           required: true,
           description: '신랑측 계좌 목록 (label, bank, holder, number)',
+          defaultValue: [
+            { label: '신랑', bank: '국민은행', holder: '홍길동', number: '123-456-789012' },
+          ],
         },
         {
           id: 'bride-accounts',
@@ -971,6 +986,9 @@ export const accountsSkeleton: SectionSkeleton = {
           type: 'account',
           required: true,
           description: '신부측 계좌 목록 (label, bank, holder, number)',
+          defaultValue: [
+            { label: '신부', bank: '신한은행', holder: '김영희', number: '110-123-456789' },
+          ],
         },
       ],
       options: {
