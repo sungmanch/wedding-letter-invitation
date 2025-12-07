@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useSuperEditor } from '../context'
 import { SectionRenderer } from './fields/FieldRenderer'
-import { generateEditorSections } from '../utils/dynamic-editor'
+import { generateEditorSections, SECTION_TYPE_TO_EDITOR_SECTIONS } from '../utils/dynamic-editor'
 import { generateEditorSectionsFromLayout } from '../utils/editor-generator'
 import type { SectionType, SectionScreen } from '../skeletons/types'
 import type { EditorSection } from '../schema/editor'
@@ -37,13 +37,17 @@ export function EditorPanel({
 
   // 동적으로 에디터 섹션 생성
   // 우선순위: customSections > layout/screens 기반 > enabledSections(레거시)
+  // enabledSections가 있으면 해당 섹션만 필터링하여 표시
   const sections = useMemo(() => {
-    // 1. 커스텀 섹션 직접 제공
-    if (customSections) return customSections
+    let generatedSections: EditorSection[] = []
 
+    // 1. 커스텀 섹션 직접 제공
+    if (customSections) {
+      generatedSections = customSections
+    }
     // 2. 새 방식: Layout/Screens에서 변수 추출하여 동적 생성
-    if (layout || screens) {
-      return generateEditorSectionsFromLayout({
+    else if (layout || screens) {
+      generatedSections = generateEditorSectionsFromLayout({
         layout,
         screens,
         declarations,
@@ -52,13 +56,41 @@ export function EditorPanel({
         groupBySection: true,
       })
     }
-
     // 3. 레거시 방식: enabledSections 기반 정적 매핑
-    if (enabledSections && enabledSections.length > 0) {
+    else if (enabledSections && enabledSections.length > 0) {
       return generateEditorSections(enabledSections)
     }
 
-    return []
+    // enabledSections 기반 필터링 및 순서 정렬
+    // 섹션 탭에서 활성화된 섹션만 내용 탭에 표시
+    if (enabledSections && enabledSections.length > 0 && generatedSections.length > 0) {
+      // 활성화된 섹션에 해당하는 에디터 섹션 ID 수집
+      const allowedIds = new Set<string>()
+      const orderMap = new Map<string, number>()
+
+      enabledSections.forEach((sectionType, index) => {
+        const ids = SECTION_TYPE_TO_EDITOR_SECTIONS[sectionType] || []
+        ids.forEach((id) => {
+          allowedIds.add(id)
+          // 첫 번째로 등장한 순서만 기록 (중복 섹션 처리)
+          if (!orderMap.has(id)) {
+            orderMap.set(id, index)
+          }
+        })
+      })
+
+      // 필터링: 활성화된 섹션만
+      generatedSections = generatedSections.filter((s) => allowedIds.has(s.id))
+
+      // 정렬: enabledSections 순서대로
+      generatedSections.sort((a, b) => {
+        const orderA = orderMap.get(a.id) ?? 999
+        const orderB = orderMap.get(b.id) ?? 999
+        return orderA - orderB
+      })
+    }
+
+    return generatedSections
   }, [enabledSections, customSections, layout, screens, declarations])
 
   if (loading) {
