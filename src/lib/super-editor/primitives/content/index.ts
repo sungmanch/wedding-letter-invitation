@@ -12,6 +12,7 @@ export { Divider, dividerRenderer } from './Divider'
 export { Input, inputRenderer } from './Input'
 export { MapEmbed, mapEmbedRenderer } from './MapEmbed'
 export { Calendar, calendarRenderer } from './Calendar'
+export { Countdown, countdownRenderer } from './Countdown'
 
 import { textRenderer } from './Text'
 import { imageRenderer } from './Image'
@@ -23,6 +24,7 @@ import { dividerRenderer } from './Divider'
 import { inputRenderer } from './Input'
 import { mapEmbedRenderer } from './MapEmbed'
 import { calendarRenderer } from './Calendar'
+import { countdownRenderer } from './Countdown'
 
 export const contentRenderers = {
   text: textRenderer,
@@ -35,4 +37,5 @@ export const contentRenderers = {
   input: inputRenderer,
   'map-embed': mapEmbedRenderer,
   calendar: calendarRenderer,
+  countdown: countdownRenderer,
 }

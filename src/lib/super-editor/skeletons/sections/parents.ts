@@ -979,17 +979,78 @@ export const parentsSkeleton: SectionSkeleton = {
                           },
                           {
                             id: 'groom-names',
-                            type: 'text',
+                            type: 'row',
                             tokenStyle: {
                               fontFamily: '$token.typography.bodyMd.fontFamily',
                               fontSize: '$token.typography.bodyMd.fontSize',
                               color: '$token.colors.text.primary',
                             },
-                            props: {
-                              content:
-                                '{{parents.groom.father.name}} · {{parents.groom.mother.name}}의 아들 {{couple.groom.name}}',
-                              as: 'p',
+                            style: {
+                              flexWrap: 'wrap',
+                              alignItems: 'center',
                             },
+                            children: [
+                              {
+                                id: 'groom-father-deceased',
+                                type: 'conditional',
+                                props: {
+                                  condition: 'parents.groom.father.status',
+                                  operator: 'equals',
+                                  value: 'deceased',
+                                },
+                                children: [
+                                  {
+                                    id: 'groom-father-deceased-icon',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      color: '$token.colors.text.muted',
+                                    },
+                                    props: {
+                                      content: '{{parents.deceasedIcon}}',
+                                      as: 'span',
+                                    },
+                                  },
+                                ],
+                              },
+                              {
+                                id: 'groom-father-name',
+                                type: 'text',
+                                props: {
+                                  content: '{{parents.groom.father.name}} · ',
+                                  as: 'span',
+                                },
+                              },
+                              {
+                                id: 'groom-mother-deceased',
+                                type: 'conditional',
+                                props: {
+                                  condition: 'parents.groom.mother.status',
+                                  operator: 'equals',
+                                  value: 'deceased',
+                                },
+                                children: [
+                                  {
+                                    id: 'groom-mother-deceased-icon',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      color: '$token.colors.text.muted',
+                                    },
+                                    props: {
+                                      content: '{{parents.deceasedIcon}}',
+                                      as: 'span',
+                                    },
+                                  },
+                                ],
+                              },
+                              {
+                                id: 'groom-mother-name',
+                                type: 'text',
+                                props: {
+                                  content: '{{parents.groom.mother.name}}의 아들 {{couple.groom.name}}',
+                                  as: 'span',
+                                },
+                              },
+                            ],
                           },
                         ],
                       },
@@ -1033,17 +1094,78 @@ export const parentsSkeleton: SectionSkeleton = {
                           },
                           {
                             id: 'bride-names',
-                            type: 'text',
+                            type: 'row',
                             tokenStyle: {
                               fontFamily: '$token.typography.bodyMd.fontFamily',
                               fontSize: '$token.typography.bodyMd.fontSize',
                               color: '$token.colors.text.primary',
                             },
-                            props: {
-                              content:
-                                '{{parents.bride.father.name}} · {{parents.bride.mother.name}}의 딸 {{couple.bride.name}}',
-                              as: 'p',
+                            style: {
+                              flexWrap: 'wrap',
+                              alignItems: 'center',
                             },
+                            children: [
+                              {
+                                id: 'bride-father-deceased',
+                                type: 'conditional',
+                                props: {
+                                  condition: 'parents.bride.father.status',
+                                  operator: 'equals',
+                                  value: 'deceased',
+                                },
+                                children: [
+                                  {
+                                    id: 'bride-father-deceased-icon',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      color: '$token.colors.text.muted',
+                                    },
+                                    props: {
+                                      content: '{{parents.deceasedIcon}}',
+                                      as: 'span',
+                                    },
+                                  },
+                                ],
+                              },
+                              {
+                                id: 'bride-father-name',
+                                type: 'text',
+                                props: {
+                                  content: '{{parents.bride.father.name}} · ',
+                                  as: 'span',
+                                },
+                              },
+                              {
+                                id: 'bride-mother-deceased',
+                                type: 'conditional',
+                                props: {
+                                  condition: 'parents.bride.mother.status',
+                                  operator: 'equals',
+                                  value: 'deceased',
+                                },
+                                children: [
+                                  {
+                                    id: 'bride-mother-deceased-icon',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      color: '$token.colors.text.muted',
+                                    },
+                                    props: {
+                                      content: '{{parents.deceasedIcon}}',
+                                      as: 'span',
+                                    },
+                                  },
+                                ],
+                              },
+                              {
+                                id: 'bride-mother-name',
+                                type: 'text',
+                                props: {
+                                  content: '{{parents.bride.mother.name}}의 딸 {{couple.bride.name}}',
+                                  as: 'span',
+                                },
+                              },
+                            ],
                           },
                         ],
                       },
