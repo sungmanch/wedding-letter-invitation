@@ -122,7 +122,6 @@ export default async function SuperEditorViewerPage({ params }: PageProps) {
   const userData = invitation.userData as UserData
   const sectionOrder = (invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER
   const sectionEnabled = (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
-  const shareInfo = extractShareInfo(userData)
 
   return (
     <ViewerClient
@@ -132,7 +131,6 @@ export default async function SuperEditorViewerPage({ params }: PageProps) {
       userData={userData}
       sectionOrder={sectionOrder}
       sectionEnabled={sectionEnabled}
-      shareInfo={shareInfo}
     />
   )
 }
