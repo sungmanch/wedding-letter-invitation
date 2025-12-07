@@ -35,7 +35,19 @@ export function Carousel({
     images = props.images
   }
 
-  const effect = props.effect || 'slide'
+  // effect 해결 (데이터 바인딩 지원)
+  let effect: NonNullable<CarouselProps['effect']> = 'slide'
+  if (props.effect) {
+    if (typeof props.effect === 'string' && props.effect.startsWith('{{')) {
+      const path = props.effect.replace(/^\{\{|\}\}$/g, '').trim()
+      const resolved = getValueByPath(context.data, path)
+      if (typeof resolved === 'string' && resolved) {
+        effect = resolved as NonNullable<CarouselProps['effect']>
+      }
+    } else {
+      effect = props.effect
+    }
+  }
   const slidesToShow = props.slidesToShow || 1
 
   // 자동 재생

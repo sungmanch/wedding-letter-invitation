@@ -360,6 +360,24 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     helpText: '최대 20장까지 업로드 가능합니다',
   },
 
+  // Gallery Settings
+  'gallery.effect': {
+    type: 'select',
+    label: '갤러리 효과',
+    required: false,
+    defaultValue: 'slide',
+    options: [
+      { value: 'slide', label: '슬라이드' },
+      { value: 'fade', label: '페이드' },
+      { value: 'coverflow', label: '커버플로우' },
+      { value: 'cards', label: '카드 스택' },
+      { value: 'cube', label: '큐브' },
+      { value: 'flip', label: '플립' },
+      { value: 'film-strip', label: '필름 스트립' },
+    ],
+    helpText: '캐러셀/필름 스트립 갤러리의 전환 효과',
+  },
+
   // Greeting
   'greeting.title': {
     type: 'text',

@@ -46,7 +46,7 @@ export interface SkeletonNode {
 export interface DataSlot {
   id: string
   path: string // 데이터 바인딩 경로 (예: "couple.groom.name")
-  type: 'text' | 'image' | 'images' | 'date' | 'time' | 'location' | 'phone' | 'account'
+  type: 'text' | 'image' | 'images' | 'date' | 'time' | 'location' | 'phone' | 'account' | 'select'
   required: boolean
   description: string
   defaultValue?: unknown
