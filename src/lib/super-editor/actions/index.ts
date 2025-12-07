@@ -382,6 +382,155 @@ export async function buildInvitation(invitationId: string) {
 }
 
 // ============================================
+// OG Metadata Actions
+// ============================================
+
+const OG_BUCKET_NAME = 'og-images'
+
+/**
+ * OG 이미지 업로드 (1200x630 JPG 이미지)
+ */
+export async function uploadOgImage(
+  invitationId: string,
+  imageData: string // base64 encoded JPG
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, error: '청첩장을 찾을 수 없습니다' }
+    }
+
+    // base64 → Buffer
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '')
+    const buffer = Buffer.from(base64Data, 'base64')
+
+    // 파일명: invitationId/og-{timestamp}.jpg
+    const filename = `${invitationId}/og-${Date.now()}.jpg`
+
+    // 기존 OG 이미지가 있으면 삭제
+    if (invitation.ogImageUrl) {
+      const oldPath = invitation.ogImageUrl.split(`${OG_BUCKET_NAME}/`)[1]
+      if (oldPath) {
+        await supabase.storage.from(OG_BUCKET_NAME).remove([oldPath])
+      }
+    }
+
+    // Supabase Storage에 업로드
+    const { error: uploadError } = await supabase.storage
+      .from(OG_BUCKET_NAME)
+      .upload(filename, buffer, {
+        contentType: 'image/jpeg',
+        cacheControl: '3600',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('OG image upload error:', uploadError)
+      return { success: false, error: '이미지 업로드에 실패했습니다' }
+    }
+
+    // Public URL 가져오기
+    const { data: urlData } = supabase.storage
+      .from(OG_BUCKET_NAME)
+      .getPublicUrl(filename)
+
+    // DB 업데이트
+    await db
+      .update(superEditorInvitations)
+      .set({
+        ogImageUrl: urlData.publicUrl,
+        updatedAt: new Date(),
+      })
+      .where(eq(superEditorInvitations.id, invitationId))
+
+    return { success: true, url: urlData.publicUrl }
+  } catch (error) {
+    console.error('Failed to upload OG image:', error)
+    return { success: false, error: 'OG 이미지 업로드에 실패했습니다' }
+  }
+}
+
+/**
+ * OG 메타데이터 업데이트 (title, description)
+ */
+export async function updateOgMetadata(
+  invitationId: string,
+  data: { ogTitle?: string; ogDescription?: string }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, error: '청첩장을 찾을 수 없습니다' }
+    }
+
+    await db
+      .update(superEditorInvitations)
+      .set({
+        ogTitle: data.ogTitle,
+        ogDescription: data.ogDescription,
+        updatedAt: new Date(),
+      })
+      .where(eq(superEditorInvitations.id, invitationId))
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to update OG metadata:', error)
+    return { success: false, error: 'OG 메타데이터 업데이트에 실패했습니다' }
+  }
+}
+
+/**
+ * OG 메타데이터 조회
+ */
+export async function getOgMetadata(invitationId: string): Promise<{
+  ogTitle: string | null
+  ogDescription: string | null
+  ogImageUrl: string | null
+} | null> {
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: eq(superEditorInvitations.id, invitationId),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  return {
+    ogTitle: invitation.ogTitle,
+    ogDescription: invitation.ogDescription,
+    ogImageUrl: invitation.ogImageUrl,
+  }
+}
+
+// ============================================
 // LLM Generation Action (Placeholder)
 // ============================================
 

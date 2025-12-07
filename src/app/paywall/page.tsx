@@ -10,6 +10,14 @@ import { createUnifiedCheckoutSession, type InvitationType } from '@/lib/actions
 
 const PRICE = 9900
 
+function PaywallLoading() {
+  return (
+    <div className="flex flex-col min-h-screen bg-white lg:max-w-2xl lg:mx-auto lg:shadow-xl items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+    </div>
+  )
+}
+
 function PaywallContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -154,11 +162,7 @@ function FeatureItem({ children }: { children: React.ReactNode }) {
 
 export default function PaywallPage() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-col min-h-screen bg-white lg:max-w-2xl lg:mx-auto lg:shadow-xl items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-      </div>
-    }>
+    <Suspense fallback={<PaywallLoading />}>
       <PaywallContent />
     </Suspense>
   )

@@ -8,6 +8,8 @@ import {
   updateInvitationSections,
   updateTemplateStyle,
   updateTemplateLayout,
+  uploadOgImage,
+  updateOgMetadata,
 } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import {
@@ -16,6 +18,9 @@ import {
   SectionManager,
   StyleEditor,
   InvitationPreview,
+  OgMetadataEditor,
+  SharePreview,
+  type OgMetadataValues,
 } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import {
@@ -35,7 +40,7 @@ import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 
-type EditorTab = 'fields' | 'style' | 'sections'
+type EditorTab = 'fields' | 'style' | 'sections' | 'share'
 
 function EditPageContent() {
   const params = useParams()
@@ -59,6 +64,24 @@ function EditPageContent() {
   const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>(
     {} as Record<SectionType, string>
   )
+  // OG 기본값
+  const [ogDefaults, setOgDefaults] = useState({
+    title: '',
+    description: '',
+    mainImageUrl: '',
+    groomName: '신랑',
+    brideName: '신부',
+  })
+  // OG 현재값 (저장에 필요한 데이터 포함)
+  const [ogValues, setOgValues] = useState<OgMetadataValues>({
+    title: '',
+    description: '',
+    imageUrl: '',
+    pendingImageData: null,
+    savedImageUrl: null,
+  })
+  // OG 저장 결과 메시지
+  const [ogSaveMessage, setOgSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -84,6 +107,29 @@ function EditPageContent() {
           (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
         )
 
+        // OG 기본값 설정
+        const userData = invitation.userData as UserData
+        const weddingData = userData.data as {
+          couple?: { groom?: { name?: string }; bride?: { name?: string } }
+          wedding?: { dateDisplay?: string }
+          venue?: { name?: string }
+          photos?: { main?: string; cover?: string }
+        } | undefined
+        const groomName = weddingData?.couple?.groom?.name || '신랑'
+        const brideName = weddingData?.couple?.bride?.name || '신부'
+        const dateDisplay = weddingData?.wedding?.dateDisplay || ''
+        const venueName = weddingData?.venue?.name || ''
+        const mainImageUrl = weddingData?.photos?.main || weddingData?.photos?.cover || ''
+        setOgDefaults({
+          title: `${groomName} ♥ ${brideName} 결혼합니다`,
+          description: dateDisplay && venueName
+            ? `${dateDisplay} | ${venueName}에서 축하해주세요`
+            : '모바일 청첩장',
+          mainImageUrl,
+          groomName,
+          brideName,
+        })
+
         // Initialize section variants from layout or defaults (dev mode only)
         if (process.env.NODE_ENV === 'development') {
           const layout = template.layoutSchema as LayoutSchema
@@ -107,10 +153,42 @@ function EditPageContent() {
     loadData()
   }, [invitationId, setTemplate, setUserData])
 
+  // userData 변경 시 OG 기본값 업데이트 (실시간 반영)
+  useEffect(() => {
+    if (!state.userData) return
+
+    const weddingData = state.userData.data as {
+      couple?: { groom?: { name?: string }; bride?: { name?: string } }
+      wedding?: { dateDisplay?: string }
+      venue?: { name?: string }
+      photos?: { main?: string; cover?: string }
+    } | undefined
+
+    const groomName = weddingData?.couple?.groom?.name || '신랑'
+    const brideName = weddingData?.couple?.bride?.name || '신부'
+    const dateDisplay = weddingData?.wedding?.dateDisplay || ''
+    const venueName = weddingData?.venue?.name || ''
+    const mainImageUrl = weddingData?.photos?.main || weddingData?.photos?.cover || ''
+
+    setOgDefaults({
+      title: `${groomName} ♥ ${brideName} 결혼합니다`,
+      description: dateDisplay && venueName
+        ? `${dateDisplay} | ${venueName}에서 축하해주세요`
+        : '모바일 청첩장',
+      mainImageUrl,
+      groomName,
+      brideName,
+    })
+  }, [state.userData])
+
   const handleSave = useCallback(async () => {
     if (!state.userData) return
 
     setSaving(true)
+    setOgSaveMessage(null)
+
+    const ogErrors: string[] = []
+
     try {
       // userData 저장
       await updateInvitationData(invitationId, state.userData)
@@ -127,13 +205,37 @@ function EditPageContent() {
       if (state.style) {
         await updateTemplateStyle(invitationId, state.style)
       }
+
+      // OG 이미지 저장 (pendingImageData가 있는 경우)
+      if (ogValues.pendingImageData) {
+        const imageResult = await uploadOgImage(invitationId, ogValues.pendingImageData)
+        if (!imageResult.success) {
+          ogErrors.push(imageResult.error || '이미지 저장 실패')
+        }
+      }
+
+      // OG 메타데이터 저장
+      const ogResult = await updateOgMetadata(invitationId, {
+        ogTitle: ogValues.title,
+        ogDescription: ogValues.description,
+      })
+      if (!ogResult.success) {
+        ogErrors.push(ogResult.error || '메타데이터 저장 실패')
+      }
+
+      // OG 저장 결과 메시지 설정
+      if (ogErrors.length > 0) {
+        setOgSaveMessage({ type: 'error', text: ogErrors.join(', ') })
+      } else {
+        setOgSaveMessage({ type: 'success', text: '저장되었습니다' })
+      }
     } catch (err) {
       console.error('Failed to save:', err)
       alert('저장에 실패했습니다.')
     } finally {
       setSaving(false)
     }
-  }, [invitationId, state.userData, state.layout, state.style, sectionOrder, sectionEnabled])
+  }, [invitationId, state.userData, state.layout, state.style, sectionOrder, sectionEnabled, ogValues])
 
   const handleGenerateShareUrl = useCallback(async () => {
     try {
@@ -382,6 +484,16 @@ function EditPageContent() {
             >
               섹션
             </button>
+            <button
+              onClick={() => setActiveTab('share')}
+              className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'share'
+                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              공유
+            </button>
           </div>
 
           {/* 탭 콘텐츠 */}
@@ -415,34 +527,59 @@ function EditPageContent() {
               />
             </div>
           )}
+          {activeTab === 'share' && (
+            <OgMetadataEditor
+              invitationId={invitationId}
+              defaultTitle={ogDefaults.title}
+              defaultDescription={ogDefaults.description}
+              mainImageUrl={ogDefaults.mainImageUrl}
+              groomName={ogDefaults.groomName}
+              brideName={ogDefaults.brideName}
+              className="flex-1 overflow-y-auto"
+              onChange={setOgValues}
+              saveMessage={ogSaveMessage}
+            />
+          )}
         </div>
 
         {/* 중앙: 미리보기 */}
-        <div className="flex-1 flex flex-col bg-gray-200">
-          <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-            {state.layout && state.style && state.userData ? (
-              <InvitationPreview
-                layout={state.layout}
-                style={state.style}
-                userData={state.userData}
-                sectionOrder={sectionOrder}
-                sectionEnabled={sectionEnabled}
-                mode="edit"
-                selectedNodeId={selectedNodeId}
-                onSelectNode={handleSelectNode}
-                sectionVariants={sectionVariants}
-                onVariantChange={handleVariantChange}
-                withFrame
-                frameWidth={375}
-                frameHeight={667}
-              />
-            ) : (
-              <div className="text-center text-gray-500">
-                <p className="text-lg font-medium">미리보기 로딩 중...</p>
-              </div>
-            )}
+        {activeTab === 'share' ? (
+          // 공유 탭: 배경 전체가 스크롤되는 레이아웃
+          <div className="flex-1 bg-gray-200 overflow-y-auto">
+            <SharePreview
+              ogTitle={ogValues.title || ogDefaults.title}
+              ogDescription={ogValues.description || ogDefaults.description}
+              ogImageUrl={ogValues.imageUrl || null}
+            />
           </div>
-        </div>
+        ) : (
+          // 다른 탭: 중앙 정렬된 PhoneFrame 레이아웃
+          <div className="flex-1 flex flex-col bg-gray-200">
+            <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
+              {state.layout && state.style && state.userData ? (
+                <InvitationPreview
+                  layout={state.layout}
+                  style={state.style}
+                  userData={state.userData}
+                  sectionOrder={sectionOrder}
+                  sectionEnabled={sectionEnabled}
+                  mode="edit"
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={handleSelectNode}
+                  sectionVariants={sectionVariants}
+                  onVariantChange={handleVariantChange}
+                  withFrame
+                  frameWidth={375}
+                  frameHeight={667}
+                />
+              ) : (
+                <div className="text-center text-gray-500">
+                  <p className="text-lg font-medium">미리보기 로딩 중...</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

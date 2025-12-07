@@ -105,6 +105,11 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   // S3 배포 URL
   publishedUrl: varchar('published_url', { length: 500 }),
 
+  // Open Graph 메타데이터 (카카오톡/문자 공유 시 표시)
+  ogTitle: varchar('og_title', { length: 100 }), // 기본값: "{신랑} ♥ {신부} 결혼합니다"
+  ogDescription: varchar('og_description', { length: 200 }), // 기본값: "{일시} {장소}에서 축하해주세요"
+  ogImageUrl: varchar('og_image_url', { length: 500 }), // OG 공유용 이미지 URL (1200x630 JPG)
+
   // 상태
   status: varchar('status', { length: 20 }).default('draft').notNull(), // 'draft' | 'building' | 'published' | 'error'
   errorMessage: text('error_message'),
@@ -174,6 +179,33 @@ export const superEditorPresets = pgTable('super_editor_presets', {
 ]).enableRLS()
 
 // ============================================
+// Guestbook Messages
+// 게스트가 청첩장에 남긴 축하 메시지
+// ============================================
+
+export const guestbookMessages = pgTable('guestbook_messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // FK: superEditorInvitations
+  invitationId: uuid('invitation_id')
+    .references(() => superEditorInvitations.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // 익명 사용자 구분 (브라우저 쿠키 기반)
+  cookieId: varchar('cookie_id', { length: 100 }).notNull(),
+
+  // 메시지 내용
+  name: varchar('name', { length: 50 }).notNull(),
+  message: text('message').notNull(),
+
+  // 생성 시간 (수정 불가이므로 updatedAt 없음)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_guestbook_invitation').on(table.invitationId),
+  index('idx_guestbook_cookie').on(table.cookieId),
+]).enableRLS()
+
+// ============================================
 // Type exports
 // ============================================
 
@@ -185,3 +217,6 @@ export type NewSuperEditorInvitation = typeof superEditorInvitations.$inferInser
 
 export type SuperEditorPreset = typeof superEditorPresets.$inferSelect
 export type NewSuperEditorPreset = typeof superEditorPresets.$inferInsert
+
+export type GuestbookMessage = typeof guestbookMessages.$inferSelect
+export type NewGuestbookMessage = typeof guestbookMessages.$inferInsert
