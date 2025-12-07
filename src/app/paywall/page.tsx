@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CreditCard, Check, Loader2 } from 'lucide-react'
@@ -9,7 +10,23 @@ import { createUnifiedCheckoutSession, type InvitationType } from '@/lib/actions
 
 const PRICE = 9900
 
+function PaywallLoading() {
+  return (
+    <div className="flex flex-col min-h-screen bg-white lg:max-w-2xl lg:mx-auto lg:shadow-xl items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+    </div>
+  )
+}
+
 export default function PaywallPage() {
+  return (
+    <Suspense fallback={<PaywallLoading />}>
+      <PaywallContent />
+    </Suspense>
+  )
+}
+
+function PaywallContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
