@@ -259,7 +259,7 @@ export const guestbookSkeleton: SectionSkeleton = {
         id: 'guestbook-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
