@@ -141,7 +141,7 @@ export const accountsSkeleton: SectionSkeleton = {
                                       color: '$token.colors.text.muted',
                                     },
                                     props: {
-                                      content: '{{account.bank}} {{account.holder}}',
+                                      content: '{{account.bank}} (예금주: {{account.holder}})',
                                       as: 'span',
                                     },
                                   },
@@ -259,7 +259,7 @@ export const accountsSkeleton: SectionSkeleton = {
                                       color: '$token.colors.text.muted',
                                     },
                                     props: {
-                                      content: '{{account.bank}} {{account.holder}}',
+                                      content: '{{account.bank}} (예금주: {{account.holder}})',
                                       as: 'span',
                                     },
                                   },
@@ -462,7 +462,7 @@ export const accountsSkeleton: SectionSkeleton = {
                                       color: '$token.colors.text.primary',
                                     },
                                     props: {
-                                      content: '{{account.bank}} {{account.number}} ({{account.holder}})',
+                                      content: '{{account.bank}} {{account.number}} (예금주: {{account.holder}})',
                                       as: 'p',
                                     },
                                   },
@@ -565,7 +565,7 @@ export const accountsSkeleton: SectionSkeleton = {
                                       color: '$token.colors.text.primary',
                                     },
                                     props: {
-                                      content: '{{account.bank}} {{account.number}} ({{account.holder}})',
+                                      content: '{{account.bank}} {{account.number}} (예금주: {{account.holder}})',
                                       as: 'p',
                                     },
                                   },
@@ -820,7 +820,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.muted',
                             },
                             props: {
-                              content: '{{account.bank}} (예금주:{{account.holder}})',
+                              content: '{{account.bank}} (예금주: {{account.holder}})',
                               as: 'span',
                             },
                           },
@@ -936,7 +936,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.muted',
                             },
                             props: {
-                              content: '{{account.bank}} (예금주:{{account.holder}})',
+                              content: '{{account.bank}} (예금주: {{account.holder}})',
                               as: 'span',
                             },
                           },
