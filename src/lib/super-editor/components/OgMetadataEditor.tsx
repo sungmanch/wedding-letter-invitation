@@ -217,8 +217,10 @@ export function OgMetadataEditor({
     setIsSaving(true)
     setMessage(null)
 
+    const errors: string[] = []
+
     try {
-      // 로컬 이미지가 있으면 업로드
+      // 1. 로컬 이미지가 있으면 업로드 시도 (실패해도 메타데이터는 저장)
       const imageToUpload = localImageData || (!ogImageUrl && defaultImageData)
       if (imageToUpload) {
         const imageResult = await uploadOgImage(invitationId, imageToUpload)
@@ -227,22 +229,31 @@ export function OgMetadataEditor({
           setLocalImageData(null)
           setDefaultImageData(null)
         } else {
-          setMessage({ type: 'error', text: imageResult.error || '이미지 저장에 실패했습니다' })
-          return
+          errors.push(imageResult.error || '이미지 저장 실패')
         }
       }
 
-      // 메타데이터 저장
+      // 2. 메타데이터 저장 (이미지 실패와 무관하게 진행)
       const result = await updateOgMetadata(invitationId, {
         ogTitle,
         ogDescription,
       })
 
-      if (result.success) {
+      if (!result.success) {
+        errors.push(result.error || '메타데이터 저장 실패')
+      }
+
+      // 3. 결과 메시지 표시
+      if (errors.length === 0) {
         setHasUnsavedChanges(false)
         setMessage({ type: 'success', text: '저장되었습니다' })
+      } else if (result.success) {
+        // 이미지만 실패, 메타데이터는 성공
+        setHasUnsavedChanges(false)
+        setMessage({ type: 'error', text: `제목/설명은 저장됨. 이미지 오류: ${errors.join(', ')}` })
       } else {
-        setMessage({ type: 'error', text: result.error || '저장에 실패했습니다' })
+        // 모두 실패
+        setMessage({ type: 'error', text: errors.join(', ') })
       }
     } catch (error) {
       console.error('Failed to save OG data:', error)
