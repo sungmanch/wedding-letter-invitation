@@ -152,7 +152,7 @@ export const accountsSkeleton: SectionSkeleton = {
                                     tokenStyle: {
                                       fontFamily: '$token.typography.bodySm.fontFamily',
                                       fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.muted',
+                                      color: '$token.colors.text.secondary',
                                     },
                                     props: {
                                       content: '{{account.bank}} (예금주: {{account.holder}})',
@@ -284,7 +284,7 @@ export const accountsSkeleton: SectionSkeleton = {
                                     tokenStyle: {
                                       fontFamily: '$token.typography.bodySm.fontFamily',
                                       fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.muted',
+                                      color: '$token.colors.text.secondary',
                                     },
                                     props: {
                                       content: '{{account.bank}} (예금주: {{account.holder}})',
@@ -845,7 +845,7 @@ export const accountsSkeleton: SectionSkeleton = {
                             tokenStyle: {
                               fontFamily: '$token.typography.bodySm.fontFamily',
                               fontSize: '$token.typography.bodySm.fontSize',
-                              color: '$token.colors.text.muted',
+                              color: '$token.colors.text.secondary',
                             },
                             props: {
                               content: '{{account.bank}} (예금주: {{account.holder}})',
@@ -961,7 +961,7 @@ export const accountsSkeleton: SectionSkeleton = {
                             tokenStyle: {
                               fontFamily: '$token.typography.bodySm.fontFamily',
                               fontSize: '$token.typography.bodySm.fontSize',
-                              color: '$token.colors.text.muted',
+                              color: '$token.colors.text.secondary',
                             },
                             props: {
                               content: '{{account.bank}} (예금주: {{account.holder}})',
