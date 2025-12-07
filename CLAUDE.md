@@ -44,6 +44,19 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-08: Color System 60-30-10 법칙 적용
+- **이유**: Surface(카드) 색상이 배경 변경에 반응하지 않고, 예술적 감성 부족
+- **변경**:
+  - 60-30-10 법칙 적용 (Background 60%, Surface 30%, Accent 10%)
+  - `deriveSurfaceColor(bg, accent?)` - Alpha Blend로 Surface 자동 계산
+  - 따뜻한 중립 톤: 크림/웜브라운 블렌딩 (기본)
+  - 테마 통일 모드: accent 색상으로 블렌딩 (테마 적용 시)
+  - 제목/본문 스타일 섹션 분리 (각각 상세설정 가능)
+- **파일**:
+  - `src/lib/super-editor/presets/intro-style-presets.ts` - `isDark()`, `deriveSurfaceColor()` 추가
+  - `src/lib/super-editor/components/StyleEditor.tsx` - 제목/본문 분리, surface 자동 계산
+- **문서**: [Color System 상세](./src/lib/super-editor/CLAUDE.md#4-color-system-60-30-10-법칙)
+
 ### 2025-12-07: StyleEditor UX 개선 - 탭 제거 및 섹션 기반 구조
 - **이유**: 프리셋이 인트로 스타일과 불일치, 색상/글꼴 탭 분리가 비전문가에게 복잡
 - **변경**:
