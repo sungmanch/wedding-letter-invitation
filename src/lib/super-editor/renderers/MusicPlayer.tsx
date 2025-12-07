@@ -96,7 +96,9 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
     }
   }
 
-  if (!bgmData?.enabled || !audioUrl) return null
+  // edit 모드에서는 항상 FAB 표시, 그 외에는 bgmData 필요
+  const showFab = mode === 'edit' || (bgmData?.enabled && audioUrl)
+  if (!showFab) return null
 
   return (
     <>
