@@ -109,7 +109,7 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
         disabled={!isLoaded}
         className="music-fab"
         style={{
-          position: 'fixed',
+          position: 'absolute',
           top: 16,
           right: 16,
           zIndex: 1000,
@@ -124,6 +124,7 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
           justifyContent: 'center',
           cursor: isLoaded ? 'pointer' : 'wait',
           transition: 'transform 0.2s, box-shadow 0.2s',
+          pointerEvents: 'auto',
         }}
         aria-label={isPlaying ? '음악 정지' : '음악 재생'}
       >
