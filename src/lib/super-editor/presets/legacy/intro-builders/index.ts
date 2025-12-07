@@ -10,6 +10,10 @@ export * from './to-screen'
 export { buildCinematicIntro } from './cinematic'
 export { buildExhibitionIntro } from './exhibition'
 export { buildMagazineIntro } from './magazine'
+export { buildGothicRomanceIntro } from './gothic-romance'
+export { buildOldMoneyIntro } from './old-money'
+export { buildMonogramIntro } from './monogram'
+export { buildJewelVelvetIntro } from './jewel-velvet'
 
 import type { IntroBuilder, IntroBuilderContext, IntroBuilderResult, IntroBuilderData } from './types'
 import type { LegacyIntroType } from '../types'
@@ -18,6 +22,10 @@ import { resetIdCounter } from './types'
 import { buildCinematicIntro } from './cinematic'
 import { buildExhibitionIntro } from './exhibition'
 import { buildMagazineIntro } from './magazine'
+import { buildGothicRomanceIntro } from './gothic-romance'
+import { buildOldMoneyIntro } from './old-money'
+import { buildMonogramIntro } from './monogram'
+import { buildJewelVelvetIntro } from './jewel-velvet'
 
 // ============================================
 // Builder Registry
@@ -27,6 +35,10 @@ export const introBuilders: Record<LegacyIntroType, IntroBuilder> = {
   cinematic: buildCinematicIntro,
   exhibition: buildExhibitionIntro,
   magazine: buildMagazineIntro,
+  'gothic-romance': buildGothicRomanceIntro,
+  'old-money': buildOldMoneyIntro,
+  monogram: buildMonogramIntro,
+  'jewel-velvet': buildJewelVelvetIntro,
 }
 
 // ============================================
