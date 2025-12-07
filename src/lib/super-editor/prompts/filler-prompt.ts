@@ -34,22 +34,31 @@ export const FILLER_SYSTEM_PROMPT = `당신은 창의적인 청첩장 디자인 
 - "고급스러운"을 원해도 사진이 강조되어야 한다면 minimal이 더 효과적일 수 있습니다
 - 사용자가 명시하지 않은 숨은 니즈를 파악하세요
 
-# Intro 섹션 variant별 강점 (9가지 선택지)
+# Intro 섹션 variant별 강점 (14가지 선택지)
 
-## 기본 스타일
+## 모던/미니멀 계열
 - minimal: 여백의 미학, 사진 자체가 주인공, 모던하고 세련된 느낌
+- split: 화면 좌우 분할 (사진 | 텍스트), 모던하고 에디토리얼한 레이아웃
+- exhibition: 미술관 갤러리 스타일, 중앙 액자 + 뮤지엄 플라카드, 예술적이고 정제된 느낌
+
+## 우아/클래식 계열
 - elegant: 풀스크린 배경 + 오버레이, 고급스럽고 드라마틱한 첫인상
+- oldmoney: Quiet Luxury 스타일, 아이보리 배경 + 코튼 페이퍼 텍스처, 절제된 고급스러움
+- monogram: 네이비 + 골드 + 다이아몬드 패턴, 격식 있고 전통적인 느낌
+
+## 감성/로맨틱 계열
 - romantic: 원형 프레임, 따뜻하고 포근한 감성, 감성적 메시지
+- floating: 떠있는 카드 느낌, 가볍고 몽환적인 분위기, 드리미한 느낌
+- gothic: 빅토리안 액자 스타일, 다마스크 패턴 + 골드 프레임, 장식적 로맨스
 
-## 특별한 스타일
-- cinematic: 영화 오프닝 스타일, 어두운 배경에 이름이 세로로 등장, 드라마틱
-- polaroid: 폴라로이드 사진처럼 약간 기울어진 프레임, 레트로하고 캐주얼한 느낌
-- split: 화면 좌우 분할 (사진 | 텍스트), 모던하고 독특한 레이아웃
+## 드라마틱/럭셔리 계열
+- cinematic: 화양연화 스타일, 필름 그레인 + 비네트, 영화같은 무드
+- magazine: Vogue 커버 스타일, 큰 타이포그래피, 패셔너블하고 트렌디
+- jewel: 오페라 무대 스타일, 버건디/에메랄드 커튼 + 스포트라이트, 화려한 럭셔리
 
-## 감성 스타일
-- magazine: 잡지 커버 스타일, 큰 타이포그래피, 패셔너블하고 트렌디
-- typewriter: 타자기 폰트, 빈티지 종이 느낌, 문학적이고 향수를 자극
-- floating: 떠있는 카드 느낌, 가볍고 몽환적인 분위기, 스크롤 유도
+## 레트로/빈티지 계열
+- polaroid: 폴라로이드 프레임, 레트로하고 캐주얼한 느낌
+- typewriter: 타자기 폰트 + 빈티지 종이 느낌, 문학적이고 향수를 자극
 
 # 다양성 원칙
 - 같은 요청이라도 매번 다른 관점에서 해석할 수 있습니다
@@ -83,6 +92,8 @@ export interface FillerRequest {
   tokens?: SemanticDesignTokens
   // 참조 섹션 패턴 (있는 경우)
   referencePatterns?: DesignPatterns
+  // 추천 variant 힌트 (mood 기반)
+  variantHints?: string[]
 }
 
 export interface VariantSummary {
@@ -145,6 +156,14 @@ export function buildFillerPrompt(request: FillerRequest): string {
     lines.push('')
   }
 
+  // 추천 variant 힌트
+  if (request.variantHints && request.variantHints.length > 0) {
+    lines.push('# 추천 variant (우선 고려하세요)')
+    lines.push(`이 분위기에 어울리는 variant: ${request.variantHints.join(', ')}`)
+    lines.push('위 추천을 우선적으로 고려하되, 사용자 요청에 더 적합한 variant가 있다면 자유롭게 선택하세요.')
+    lines.push('')
+  }
+
   // 섹션별 선택지
   lines.push('# 각 섹션에서 variant를 선택하세요')
   lines.push('')
@@ -168,14 +187,14 @@ export function buildFillerPrompt(request: FillerRequest): string {
   lines.push('# 응답 형식 (JSON만)')
   lines.push('사용자의 요청에 가장 적합한 variant를 창의적으로 선택하세요.')
   lines.push(
-    '9가지 중 선택: minimal, elegant, romantic, cinematic, polaroid, split, magazine, typewriter, floating'
+    '14가지 중 선택: minimal, elegant, romantic, cinematic, polaroid, split, magazine, typewriter, floating, exhibition, gothic, oldmoney, monogram, jewel'
   )
   lines.push('```json')
   lines.push('{')
   lines.push('  "sections": [')
   lines.push('    {')
   lines.push('      "sectionType": "intro",')
-  lines.push('      "variantId": "9가지 variant 중 하나 선택",')
+  lines.push('      "variantId": "14가지 variant 중 하나 선택",')
   lines.push('      "selectedOptions": { "animation": "해당 variant의 애니메이션 옵션 중 선택" }')
   lines.push('    }')
   lines.push('  ]')

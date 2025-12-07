@@ -161,25 +161,42 @@
 ### 매핑 테이블
 
 **Mood → Variant 힌트:**
+
+> **총 14개 Intro Variant:**
+> - 기존 7개: `minimal`, `elegant`, `romantic`, `polaroid`, `split`, `typewriter`, `floating`
+> - 교체 2개: `cinematic` (화양연화 스타일), `magazine` (MAISON 마스트헤드)
+> - 신규 5개: `exhibition` (갤러리), `gothic` (빅토리안), `oldmoney` (아이보리), `monogram` (네이비+골드), `jewel` (오페라 커튼)
+
 ```typescript
 const MOOD_VARIANT_HINTS = {
-  romantic: ['romantic', 'floating', 'polaroid'],
-  elegant: ['elegant', 'cinematic', 'magazine'],
-  minimal: ['minimal', 'split'],
-  modern: ['minimal', 'split', 'magazine'],
-  warm: ['romantic', 'polaroid', 'typewriter'],
-  luxury: ['elegant', 'cinematic'],
+  romantic: ['romantic', 'floating', 'polaroid', 'gothic', 'jewel'],
+  elegant: ['elegant', 'cinematic', 'magazine', 'oldmoney', 'monogram'],
+  minimal: ['minimal', 'split', 'exhibition'],
+  modern: ['minimal', 'split', 'magazine', 'exhibition'],
+  warm: ['romantic', 'polaroid', 'typewriter', 'oldmoney'],
+  luxury: ['elegant', 'cinematic', 'jewel', 'gothic', 'monogram'],
+  playful: ['polaroid', 'magazine', 'floating'],
+  natural: ['romantic', 'typewriter', 'minimal', 'oldmoney'],
 }
 ```
 
-**색상 프리셋:**
+**색상 프리셋 (12개):**
 ```typescript
 const COLOR_PRESETS = {
-  'white-gold': { primary: '#D4AF37', background: '#FFFEF5' },
-  'blush-pink': { primary: '#EC4899', background: '#FDF2F8' },
-  'deep-navy': { primary: '#1E3A8A', background: '#F8FAFC' },
-  'natural-green': { primary: '#16A34A', background: '#F0FDF4' },
-  'terracotta': { primary: '#C2410C', background: '#FFF7ED' },
+  // 기존 5개
+  'white-gold': { primary: '#D4AF37', background: '#FFFEF5', text: '#1F2937' },
+  'blush-pink': { primary: '#EC4899', background: '#FDF2F8', text: '#1F2937' },
+  'deep-navy': { primary: '#1E3A8A', background: '#F8FAFC', text: '#1E293B' },
+  'natural-green': { primary: '#16A34A', background: '#F0FDF4', text: '#14532D' },
+  'terracotta': { primary: '#C2410C', background: '#FFF7ED', text: '#7C2D12' },
+  // 신규 7개
+  'burgundy': { primary: '#800020', background: '#FFF5F5', text: '#450A0A' },
+  'lavender': { primary: '#9F7AEA', background: '#FAF5FF', text: '#4C1D95' },
+  'charcoal': { primary: '#374151', background: '#F9FAFB', text: '#111827' },
+  'sage': { primary: '#6B8E23', background: '#F7FDF4', text: '#365314' },
+  'dusty-rose': { primary: '#C08081', background: '#FFF0F1', text: '#4A1E1F' },
+  'champagne': { primary: '#D4A574', background: '#FFFDF5', text: '#78350F' },
+  'midnight': { primary: '#191970', background: '#F0F4FF', text: '#1E3A8A' },
 }
 ```
 

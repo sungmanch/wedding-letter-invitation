@@ -229,14 +229,10 @@ export async function generateIntroOnlyAction(
           },
         ],
         tokens,
+        variantHints,
       })
 
-      // variant 선택 시 힌트 전달
-      const hintedPrompt = variantHints.length > 0
-        ? `${fillerPrompt}\n\n# 추천 Variant (우선 고려)\n${variantHints.join(', ')}`
-        : fillerPrompt
-
-      const response = await aiProvider.selectVariants(enhancedPrompt, hintedPrompt)
+      const response = await aiProvider.selectVariants(enhancedPrompt, fillerPrompt)
       const introSelection = response.sections.find(s => s.sectionType === 'intro') ?? {
         sectionType: 'intro' as const,
         variantId: introSkeleton.defaultVariant,
