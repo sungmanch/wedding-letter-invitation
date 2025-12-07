@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   getInvitationWithTemplate,
@@ -61,10 +61,14 @@ function EditPageContent() {
   const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>(
     {} as Record<SectionType, string>
   )
-  // 미리보기 ref (OG 이미지 생성용)
-  const previewRef = useRef<HTMLDivElement>(null)
   // OG 기본값
-  const [ogDefaults, setOgDefaults] = useState({ title: '', description: '' })
+  const [ogDefaults, setOgDefaults] = useState({
+    title: '',
+    description: '',
+    mainImageUrl: '',
+    groomName: '신랑',
+    brideName: '신부',
+  })
   // OG 현재값 (실시간 미리보기용)
   const [ogValues, setOgValues] = useState({ title: '', description: '', imageUrl: '' })
 
@@ -98,16 +102,21 @@ function EditPageContent() {
           couple?: { groom?: { name?: string }; bride?: { name?: string } }
           wedding?: { dateDisplay?: string }
           venue?: { name?: string }
+          photos?: { main?: string; cover?: string }
         } | undefined
         const groomName = weddingData?.couple?.groom?.name || '신랑'
         const brideName = weddingData?.couple?.bride?.name || '신부'
         const dateDisplay = weddingData?.wedding?.dateDisplay || ''
         const venueName = weddingData?.venue?.name || ''
+        const mainImageUrl = weddingData?.photos?.main || weddingData?.photos?.cover || ''
         setOgDefaults({
           title: `${groomName} ♥ ${brideName} 결혼합니다`,
           description: dateDisplay && venueName
             ? `${dateDisplay} | ${venueName}에서 축하해주세요`
             : '모바일 청첩장',
+          mainImageUrl,
+          groomName,
+          brideName,
         })
 
         // Initialize section variants from layout or defaults (dev mode only)
@@ -456,7 +465,9 @@ function EditPageContent() {
               invitationId={invitationId}
               defaultTitle={ogDefaults.title}
               defaultDescription={ogDefaults.description}
-              previewRef={previewRef}
+              mainImageUrl={ogDefaults.mainImageUrl}
+              groomName={ogDefaults.groomName}
+              brideName={ogDefaults.brideName}
               className="flex-1 overflow-y-auto"
               onChange={setOgValues}
             />
@@ -473,7 +484,6 @@ function EditPageContent() {
                 ogImageUrl={ogValues.imageUrl || null}
               />
             ) : state.layout && state.style && state.userData ? (
-              <div ref={previewRef}>
               <InvitationPreview
                 layout={state.layout}
                 style={state.style}
@@ -489,32 +499,12 @@ function EditPageContent() {
                 frameWidth={375}
                 frameHeight={667}
               />
-              </div>
             ) : (
               <div className="text-center text-gray-500">
                 <p className="text-lg font-medium">미리보기 로딩 중...</p>
               </div>
             )}
           </div>
-
-          {/* OG 이미지 캡처용 숨겨진 프리뷰 (공유 탭에서만 렌더링) */}
-          {activeTab === 'share' && state.layout && state.style && state.userData && (
-            <div
-              ref={previewRef}
-              className="fixed -left-[9999px] top-0"
-              style={{ width: 375, height: 667 }}
-            >
-              <InvitationPreview
-                layout={state.layout}
-                style={state.style}
-                userData={state.userData}
-                sectionOrder={['intro']}
-                sectionEnabled={{ intro: true } as Record<SectionType, boolean>}
-                mode="preview"
-                withFrame={false}
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>
