@@ -496,6 +496,25 @@ function EditPageContent() {
               </div>
             )}
           </div>
+
+          {/* OG 이미지 캡처용 숨겨진 프리뷰 (공유 탭에서만 렌더링) */}
+          {activeTab === 'share' && state.layout && state.style && state.userData && (
+            <div
+              ref={previewRef}
+              className="fixed -left-[9999px] top-0"
+              style={{ width: 375, height: 667 }}
+            >
+              <InvitationPreview
+                layout={state.layout}
+                style={state.style}
+                userData={state.userData}
+                sectionOrder={['intro']}
+                sectionEnabled={{ intro: true } as Record<SectionType, boolean>}
+                mode="preview"
+                withFrame={false}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
