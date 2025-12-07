@@ -103,138 +103,12 @@ export const dateSkeleton: SectionSkeleton = {
               },
               {
                 id: 'date-countdown',
-                type: 'row',
-                tokenStyle: {
-                  gap: '$token.spacing.md',
-                  padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.background',
-                  borderRadius: '$token.borders.radiusMd',
+                type: 'countdown',
+                props: {
+                  date: '{{wedding.date}}',
+                  time: '{{wedding.time}}',
+                  showCards: true,
                 },
-                style: {
-                  justifyContent: 'center',
-                },
-                children: [
-                  {
-                    id: 'countdown-days',
-                    type: 'column',
-                    tokenStyle: {
-                      gap: '$token.spacing.xs',
-                    },
-                    style: {
-                      alignItems: 'center',
-                      minWidth: '60px',
-                    },
-                    children: [
-                      {
-                        id: 'days-value',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.displayLg.fontFamily',
-                          fontSize: '$token.typography.displayLg.fontSize',
-                          fontWeight: '$token.typography.displayLg.fontWeight',
-                          color: '$token.colors.brand',
-                        },
-                        props: {
-                          content: '{{countdown.days}}',
-                          as: 'span',
-                        },
-                      },
-                      {
-                        id: 'days-label',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.caption.fontFamily',
-                          fontSize: '$token.typography.caption.fontSize',
-                          color: '$token.colors.text.muted',
-                        },
-                        props: {
-                          content: 'DAYS',
-                          as: 'span',
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    id: 'countdown-hours',
-                    type: 'column',
-                    tokenStyle: {
-                      gap: '$token.spacing.xs',
-                    },
-                    style: {
-                      alignItems: 'center',
-                      minWidth: '60px',
-                    },
-                    children: [
-                      {
-                        id: 'hours-value',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.displayLg.fontFamily',
-                          fontSize: '$token.typography.displayLg.fontSize',
-                          fontWeight: '$token.typography.displayLg.fontWeight',
-                          color: '$token.colors.brand',
-                        },
-                        props: {
-                          content: '{{countdown.hours}}',
-                          as: 'span',
-                        },
-                      },
-                      {
-                        id: 'hours-label',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.caption.fontFamily',
-                          fontSize: '$token.typography.caption.fontSize',
-                          color: '$token.colors.text.muted',
-                        },
-                        props: {
-                          content: 'HOURS',
-                          as: 'span',
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    id: 'countdown-mins',
-                    type: 'column',
-                    tokenStyle: {
-                      gap: '$token.spacing.xs',
-                    },
-                    style: {
-                      alignItems: 'center',
-                      minWidth: '60px',
-                    },
-                    children: [
-                      {
-                        id: 'mins-value',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.displayLg.fontFamily',
-                          fontSize: '$token.typography.displayLg.fontSize',
-                          fontWeight: '$token.typography.displayLg.fontWeight',
-                          color: '$token.colors.brand',
-                        },
-                        props: {
-                          content: '{{countdown.minutes}}',
-                          as: 'span',
-                        },
-                      },
-                      {
-                        id: 'mins-label',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.caption.fontFamily',
-                          fontSize: '$token.typography.caption.fontSize',
-                          color: '$token.colors.text.muted',
-                        },
-                        props: {
-                          content: 'MINS',
-                          as: 'span',
-                        },
-                      },
-                    ],
-                  },
-                ],
               },
             ],
           },
@@ -246,16 +120,16 @@ export const dateSkeleton: SectionSkeleton = {
           path: 'wedding.date',
           type: 'date',
           required: true,
-          description: '결혼 날짜',
-          defaultValue: '2025년 3월 15일',
+          description: '예식 날짜',
+          defaultValue: '2025-03-15',
         },
         {
           id: 'wedding-time',
           path: 'wedding.time',
-          type: 'text',
-          required: false,
-          description: '결혼 시간',
-          defaultValue: '오후 2시',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
         },
       ],
       options: {
@@ -313,105 +187,95 @@ export const dateSkeleton: SectionSkeleton = {
                 },
               },
               {
-                id: 'date-calendar-card',
+                id: 'date-info',
                 type: 'column',
                 tokenStyle: {
-                  padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.surface',
-                  borderRadius: '$token.borders.radiusMd',
-                  boxShadow: '$token.shadows.sm',
-                  gap: '$token.spacing.md',
+                  gap: '$token.spacing.xs',
                 },
                 style: {
                   alignItems: 'center',
-                  minWidth: '280px',
                 },
                 children: [
+                  // 숨김 데이터 참조 (변수 추출용 - wedding.time 필드 노출)
                   {
-                    id: 'calendar-month',
+                    id: 'date-time-hidden',
+                    type: 'text',
+                    style: {
+                      display: 'none',
+                    },
+                    props: {
+                      content: '{{wedding.time}}',
+                      as: 'span',
+                    },
+                  },
+                  {
+                    id: 'date-full-ko',
                     type: 'text',
                     tokenStyle: {
                       fontFamily: '$token.typography.headingMd.fontFamily',
                       fontSize: '$token.typography.headingMd.fontSize',
                       fontWeight: '$token.typography.headingMd.fontWeight',
-                      color: '$token.colors.brand',
-                    },
-                    props: {
-                      content: '{{wedding.month}}',
-                      as: 'p',
-                    },
-                  },
-                  {
-                    id: 'calendar-day',
-                    type: 'text',
-                    tokenStyle: {
-                      fontFamily: '$token.typography.displayLg.fontFamily',
-                      fontWeight: '$token.typography.displayLg.fontWeight',
                       color: '$token.colors.text.primary',
                     },
                     style: {
-                      fontSize: '72px',
-                      lineHeight: 1,
+                      textAlign: 'center',
                     },
                     props: {
-                      content: '{{wedding.day}}',
-                      as: 'p',
-                    },
-                  },
-                  {
-                    id: 'calendar-weekday',
-                    type: 'text',
-                    tokenStyle: {
-                      fontFamily: '$token.typography.bodyMd.fontFamily',
-                      fontSize: '$token.typography.bodyMd.fontSize',
-                      color: '$token.colors.text.secondary',
-                    },
-                    props: {
-                      content: '{{wedding.weekday}}',
-                      as: 'p',
-                    },
-                  },
-                  {
-                    id: 'calendar-divider',
-                    type: 'divider',
-                    tokenStyle: {
-                      backgroundColor: '$token.colors.divider',
-                    },
-                    style: {
-                      width: '80%',
-                    },
-                    props: {
-                      thickness: 1,
-                    },
-                  },
-                  {
-                    id: 'calendar-time',
-                    type: 'text',
-                    tokenStyle: {
-                      fontFamily: '$token.typography.headingSm.fontFamily',
-                      fontSize: '$token.typography.headingSm.fontSize',
-                      color: '$token.colors.text.primary',
-                    },
-                    props: {
-                      content: '{{wedding.time}}',
+                      content: '{{wedding.dateDisplay}} | {{wedding.timeDisplay}}',
                       as: 'p',
                     },
                   },
                 ],
               },
               {
-                id: 'date-dday',
+                id: 'date-calendar-wrapper',
+                type: 'column',
+                tokenStyle: {
+                  padding: '$token.spacing.lg',
+                  backgroundColor: '$token.colors.surface',
+                  borderRadius: '$token.borders.radiusMd',
+                },
+                style: {
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '360px',
+                },
+                children: [
+                  {
+                    id: 'date-calendar',
+                    type: 'calendar',
+                    props: {
+                      date: '{{wedding.date}}',
+                      locale: 'ko',
+                      highlightStyle: 'circle',
+                      showHolidayColor: true,
+                      showSaturdayColor: true,
+                    },
+                  },
+                ],
+              },
+              {
+                id: 'date-countdown',
+                type: 'countdown',
+                props: {
+                  date: '{{wedding.date}}',
+                  time: '{{wedding.time}}',
+                  showCards: true,
+                },
+              },
+              {
+                id: 'date-dday-text',
                 type: 'text',
                 tokenStyle: {
-                  fontFamily: '$token.typography.bodySm.fontFamily',
-                  fontSize: '$token.typography.bodySm.fontSize',
-                  color: '$token.colors.text.muted',
+                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                  fontSize: '$token.typography.bodyMd.fontSize',
+                  color: '$token.colors.text.secondary',
                 },
                 style: {
                   textAlign: 'center',
                 },
                 props: {
-                  content: '결혼식까지 D-{{countdown.days}}',
+                  content: '{{couple.groom.name}} ♥ {{couple.bride.name}} 결혼식이 {{countdown.days}}일 남았습니다',
                   as: 'p',
                 },
               },
@@ -425,40 +289,32 @@ export const dateSkeleton: SectionSkeleton = {
           path: 'wedding.date',
           type: 'date',
           required: true,
-          description: '결혼 날짜',
-          defaultValue: '2025년 3월 15일',
-        },
-        {
-          id: 'wedding-month',
-          path: 'wedding.month',
-          type: 'text',
-          required: true,
-          description: '월 (예: 2024년 12월)',
-          defaultValue: '2025년 3월',
-        },
-        {
-          id: 'wedding-day',
-          path: 'wedding.day',
-          type: 'text',
-          required: true,
-          description: '일 (예: 25)',
-          defaultValue: '15',
-        },
-        {
-          id: 'wedding-weekday',
-          path: 'wedding.weekday',
-          type: 'text',
-          required: true,
-          description: '요일 (예: 토요일)',
-          defaultValue: '토요일',
+          description: '예식 날짜',
+          defaultValue: '2025-03-15',
         },
         {
           id: 'wedding-time',
           path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+        {
+          id: 'groom-name',
+          path: 'couple.groom.name',
           type: 'text',
-          required: false,
-          description: '결혼 시간',
-          defaultValue: '오후 2시',
+          required: true,
+          description: '신랑 이름',
+          defaultValue: '신랑',
+        },
+        {
+          id: 'bride-name',
+          path: 'couple.bride.name',
+          type: 'text',
+          required: true,
+          description: '신부 이름',
+          defaultValue: '신부',
         },
       ],
       options: {

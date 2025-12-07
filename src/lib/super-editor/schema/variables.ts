@@ -48,6 +48,8 @@ export interface VariableDeclaration {
   placeholder?: string
   /** 도움말 텍스트 */
   helpText?: string
+  /** 그룹 내 정렬 순서 (낮을수록 위) */
+  order?: number
 
   // ============================================
   // 타입별 속성
@@ -151,29 +153,39 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     label: '예식 날짜',
     required: true,
     defaultValue: '2025-03-15',
+    order: 1,
   },
   'wedding.time': {
     type: 'time',
     label: '예식 시간',
     required: true,
     defaultValue: '14:00',
+    order: 2,
   },
-  // 화면 표시용 날짜/시간 (한글 형식 - 스켈레톤 템플릿에서 사용)
+  // 화면 표시용 날짜/시간 (파생 필드 - wedding.date/time에서 자동 계산)
   'wedding.dateDisplay': {
     type: 'text',
-    label: '예식 날짜',
-    required: true,
-    placeholder: '2025년 3월 15일 토요일',
-    defaultValue: '2025년 3월 15일 토요일',
-    helpText: '예: 2025년 3월 15일 토요일',
+    label: '예식 날짜 표시',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
   },
   'wedding.timeDisplay': {
     type: 'text',
-    label: '예식 시간',
-    required: true,
-    placeholder: '오후 2시',
-    defaultValue: '오후 2시',
-    helpText: '예: 오후 2시, 낮 12시',
+    label: '예식 시간 표시',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
+  },
+  'wedding.dateEn': {
+    type: 'text',
+    label: '예식 날짜 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
+  },
+  'wedding.timeEn': {
+    type: 'text',
+    label: '예식 시간 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
   },
   'wedding.dday': {
     type: 'number',
@@ -217,6 +229,12 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
   'countdown.minutes': {
     type: 'number',
     label: '분',
+    required: false,
+    description: '__HIDDEN__',
+  },
+  'countdown.seconds': {
+    type: 'number',
+    label: '초',
     required: false,
     description: '__HIDDEN__',
   },
@@ -342,6 +360,22 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     helpText: '최대 20장까지 업로드 가능합니다',
   },
 
+  // Gallery Settings
+  'gallery.effect': {
+    type: 'select',
+    label: '갤러리 효과',
+    required: false,
+    defaultValue: 'slide',
+    options: [
+      { value: 'slide', label: '슬라이드' },
+      { value: 'fade', label: '페이드' },
+      { value: 'coverflow', label: '커버플로우' },
+      { value: 'cards', label: '카드 스택' },
+      { value: 'cube', label: '큐브' },
+    ],
+    helpText: '캐러셀 갤러리의 전환 효과',
+  },
+
   // Greeting
   'greeting.title': {
     type: 'text',
@@ -356,6 +390,21 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     rows: 5,
     placeholder:
       '서로를 향한 마음을 모아\n평생을 함께하고자 합니다.\n\n귀한 걸음 하시어\n저희의 새 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.',
+  },
+
+  // Parents - Deceased Icon (order: 0 = 제일 위)
+  'parents.deceasedIcon': {
+    type: 'select',
+    label: '고인 표시',
+    required: false,
+    defaultValue: '故',
+    options: [
+      { value: '고', label: '고 (한글)' },
+      { value: '故', label: '故 (한문)' },
+      { value: '✿', label: '✿ (백합 꽃)' },
+    ],
+    helpText: '고인을 나타내는 표시 방식을 선택하세요',
+    order: 0,
   },
 
   // Parents - Groom
@@ -516,6 +565,14 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
         placeholder: '김영희',
       },
     ],
+  },
+
+  // Guestbook (DB에서 가져오는 데이터 - 에디터에서 숨김)
+  'guestbook.messages': {
+    type: 'text',
+    label: '방명록 메시지',
+    required: false,
+    description: '__HIDDEN__', // DB에서 조회, 에디터 입력 불필요
   },
 
   // BGM

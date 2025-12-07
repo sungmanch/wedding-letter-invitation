@@ -40,6 +40,7 @@ export function resolveSkeletonToScreen(
     name: variant.name,
     type: sectionType === 'intro' ? 'intro' : 'content',
     sectionType,
+    variantId: fillResult.variantId, // variant ID 저장
     root: structure, // SkeletonNode 유지 (빌드 시점에 변환)
   }
 }
@@ -270,6 +271,7 @@ export function createScreenFromVariant(
     name: variant.name,
     type: sectionType === 'intro' ? 'intro' : 'content',
     sectionType,
+    variantId, // variant ID 저장
     root: deepClone(variant.structure),
   }
 }

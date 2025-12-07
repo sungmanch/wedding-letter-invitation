@@ -15,7 +15,7 @@ export type PrimitiveType =
   | 'scroll-container'
   | 'overlay'
   | 'fullscreen'
-  // 콘텐츠 (9개)
+  // 콘텐츠 (11개)
   | 'text'
   | 'image'
   | 'video'
@@ -25,6 +25,8 @@ export type PrimitiveType =
   | 'divider'
   | 'input'
   | 'map-embed'
+  | 'calendar'
+  | 'countdown'
   // 이미지 컬렉션 (6개)
   | 'gallery'
   | 'carousel'
@@ -143,6 +145,7 @@ export interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link'
   size?: 'sm' | 'md' | 'lg'
   icon?: string
+  iconSrc?: string // 이미지 URL 아이콘 (icon 대신 사용)
   iconPosition?: 'left' | 'right'
   action?: ButtonAction
 }
@@ -155,6 +158,7 @@ export type ButtonAction =
   | { type: 'map'; provider: 'kakao' | 'naver' | 'tmap'; address: string; lat?: number; lng?: number }
   | { type: 'scroll'; target: string }
   | { type: 'custom'; handler: string }
+  | { type: 'kakao-navi'; name: string; lat: string | number; lng: string | number }
 
 export interface SpacerProps {
   height?: number | string
@@ -190,6 +194,23 @@ export interface MapEmbedProps {
   navigationButtons?: ('kakao' | 'naver' | 'tmap')[]
 }
 
+export interface CalendarProps {
+  /** 결혼 날짜 (ISO 형식: 2025-03-15 또는 데이터 바인딩: {{wedding.dateISO}}) */
+  date: string
+  /** 달력 시작 요일 (0: 일요일, 1: 월요일) */
+  weekStartsOn?: 0 | 1
+  /** 요일 표시 형식 */
+  weekdayFormat?: 'narrow' | 'short' | 'long' // 일/월/화 | 일요일/월요일 | Sunday
+  /** 로케일 */
+  locale?: 'ko' | 'en'
+  /** 결혼 날짜 하이라이트 스타일 */
+  highlightStyle?: 'circle' | 'filled' | 'ring'
+  /** 일요일/공휴일 색상 표시 */
+  showHolidayColor?: boolean
+  /** 토요일 색상 표시 */
+  showSaturdayColor?: boolean
+}
+
 // ============================================
 // Image Collection Primitives Props
 // ============================================
@@ -218,7 +239,7 @@ export interface CarouselProps extends ImageCollectionBaseProps {
   showArrows?: boolean
   showDots?: boolean
   slidesToShow?: number
-  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
+  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'cards'
   spacing?: number
 }
 
@@ -469,6 +490,7 @@ export type PrimitiveProps =
   | DividerProps
   | InputProps
   | MapEmbedProps
+  | CalendarProps
   | GalleryProps
   | CarouselProps
   | GridProps

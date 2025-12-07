@@ -31,13 +31,13 @@ export function declarationToField(
 ): EditorField {
   const fieldType = variableTypeToFieldType(decl.type)
 
-  // 공통 속성
+  // 공통 속성 (declaration의 order가 있으면 우선, 없으면 fallback)
   const base = {
     id: decl.id || decl.path.replace(/\./g, '-'),
     label: decl.label,
     dataPath: decl.path,
     required: decl.required,
-    order,
+    order: decl.order ?? order,
     placeholder: decl.placeholder,
     helpText: decl.helpText,
     description: decl.description,
@@ -248,6 +248,7 @@ export function resolveStandardVariable(path: string): VariableDeclaration | nul
     minItems: standard.minItems,
     fields: standard.fields,
     itemLabel: standard.itemLabel,
+    order: standard.order,
   }
 }
 
@@ -294,6 +295,26 @@ const PATH_REPLACEMENT_RULES: Array<{
     // venue.address, venue.lat, venue.lng → venue (location 타입)
     triggers: ['venue.address', 'venue.lat', 'venue.lng'],
     replacement: 'venue',
+  },
+  {
+    // wedding.dateDisplay, wedding.dateEn 등 → wedding.date (date 타입 입력 필드)
+    triggers: ['wedding.dateDisplay', 'wedding.dateEn', 'wedding.month', 'wedding.day', 'wedding.weekday'],
+    replacement: 'wedding.date',
+  },
+  {
+    // wedding.timeDisplay, wedding.timeEn → wedding.time (time 타입 입력 필드)
+    triggers: ['wedding.timeDisplay', 'wedding.timeEn'],
+    replacement: 'wedding.time',
+  },
+  {
+    // parents 관련 필드가 있으면 → parents.deceasedIcon 추가
+    triggers: [
+      'parents.groom.father.name',
+      'parents.groom.mother.name',
+      'parents.bride.father.name',
+      'parents.bride.mother.name',
+    ],
+    replacement: 'parents.deceasedIcon',
   },
 ]
 

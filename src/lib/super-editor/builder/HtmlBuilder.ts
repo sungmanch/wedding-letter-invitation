@@ -38,6 +38,11 @@ interface BgmConfig {
   }
 }
 
+interface ShowAfterScrollConfig {
+  elementId: string
+  scrollThreshold: number
+}
+
 interface BuildContext {
   data: Record<string, unknown>
   styles: Map<string, string>
@@ -46,6 +51,7 @@ interface BuildContext {
   idCounter: number
   scrollTriggers: ScrollTriggerConfig[]
   bgmConfigs: BgmConfig[]
+  showAfterScrollConfigs: ShowAfterScrollConfig[]
 }
 
 function createBuildContext(data: Record<string, unknown>): BuildContext {
@@ -57,6 +63,7 @@ function createBuildContext(data: Record<string, unknown>): BuildContext {
     idCounter: 0,
     scrollTriggers: [],
     bgmConfigs: [],
+    showAfterScrollConfigs: [],
   }
 }
 
@@ -207,6 +214,28 @@ function buildChildren(node: PrimitiveNode, ctx: BuildContext): string {
 
 // Layout Builders
 function buildContainer(node: PrimitiveNode, ctx: BuildContext): string {
+  const props = node.props as Record<string, unknown> || {}
+  const showAfterScroll = props.showAfterScroll as number | undefined
+
+  // showAfterScroll prop이 있으면 스크롤 후 나타나는 FAB으로 처리
+  if (showAfterScroll !== undefined) {
+    const elementId = `fab-${++ctx.idCounter}`
+    ctx.showAfterScrollConfigs.push({
+      elementId,
+      scrollThreshold: showAfterScroll,
+    })
+
+    const baseStyle = {
+      ...node.style,
+      opacity: 0,
+      transform: 'translateY(20px)',
+      transition: 'opacity 0.3s ease, transform 0.3s ease',
+    }
+    const style = toCssString(baseStyle as CSSProperties)
+    const children = buildChildren(node, ctx)
+    return `<div id="${elementId}" data-show-after-scroll="${showAfterScroll}" style="${style}">${children}</div>`
+  }
+
   const style = toCssString(node.style)
   const children = buildChildren(node, ctx)
   return `<div style="${style}">${children}</div>`
@@ -1036,6 +1065,55 @@ ${customStyles}
 })();
   ` : ''
 
+  // FAB 스크롤 노출 런타임 JS
+  const showAfterScrollJs = ctx.showAfterScrollConfigs.length > 0 ? `
+// Show After Scroll Runtime
+(function() {
+  var configs = ${JSON.stringify(ctx.showAfterScrollConfigs)};
+
+  function initShowAfterScroll() {
+    configs.forEach(function(cfg) {
+      var el = document.getElementById(cfg.elementId);
+      if (!el) return;
+
+      var shown = false;
+      var hidden = true;
+
+      function checkScroll() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        if (scrollY >= cfg.scrollThreshold && !shown) {
+          shown = true;
+          hidden = false;
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        } else if (scrollY < cfg.scrollThreshold && !hidden) {
+          shown = false;
+          hidden = true;
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(20px)';
+        }
+      }
+
+      var ticking = false;
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          requestAnimationFrame(function() {
+            checkScroll();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+
+      // 초기 체크
+      checkScroll();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initShowAfterScroll);
+})();
+  ` : ''
+
   // 기본 JS
   const baseJs = `
 document.addEventListener('DOMContentLoaded', function() {
@@ -1048,6 +1126,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 ${scrollMotionJs}
 ${bgmJs}
+${showAfterScrollJs}
   `.trim()
 
   // 사용된 폰트 추출 및 로드 태그 생성

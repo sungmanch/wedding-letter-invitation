@@ -46,7 +46,7 @@ export interface SkeletonNode {
 export interface DataSlot {
   id: string
   path: string // 데이터 바인딩 경로 (예: "couple.groom.name")
-  type: 'text' | 'image' | 'images' | 'date' | 'location' | 'phone' | 'account'
+  type: 'text' | 'image' | 'images' | 'date' | 'time' | 'location' | 'phone' | 'account' | 'select'
   required: boolean
   description: string
   defaultValue?: unknown
@@ -137,6 +137,7 @@ export interface SectionScreen {
   name?: string
   type: 'intro' | 'content' // 기존 ScreenType
   sectionType: SectionType // 새로 추가
+  variantId?: string // 선택된 variant ID
   root: SkeletonNode
 }
 

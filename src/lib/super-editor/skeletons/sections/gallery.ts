@@ -97,6 +97,88 @@ export const gallerySkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Grid Seamless Variant (여백 없는 꽉 찬 그리드)
+    // ============================================
+    {
+      id: 'grid-seamless',
+      name: '꽉 찬 그리드',
+      description: '여백 없이 꽉 채워진 인스타그램 스타일 그리드',
+      tags: ['instagram', 'seamless', 'modern', 'full-bleed'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-grid-seamless',
+                type: 'gallery',
+                style: {
+                  borderRadius: 0,
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  layout: 'grid',
+                  columns: 3,
+                  gap: 0,
+                  aspectRatio: '1:1',
+                  objectFit: 'cover',
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
+        ],
+        layouts: [
+          { id: '2col', name: '2열', props: { columns: 2 } },
+          { id: '3col', name: '3열', props: { columns: 3 } },
+          { id: '4col', name: '4열', props: { columns: 4 } },
+        ],
+      },
+    },
+
+    // ============================================
     // Masonry Variant
     // ============================================
     {
@@ -239,7 +321,7 @@ export const gallerySkeleton: SectionSkeleton = {
                   infinite: true,
                   showDots: true,
                   showArrows: false,
-                  effect: 'slide',
+                  effect: '{{gallery.effect}}',
                   onClick: 'lightbox',
                 },
               },
@@ -255,16 +337,19 @@ export const gallerySkeleton: SectionSkeleton = {
           required: true,
           description: '갤러리 이미지 배열',
         },
+        {
+          id: 'gallery-effect',
+          path: 'gallery.effect',
+          type: 'select',
+          required: false,
+          defaultValue: 'slide',
+          description: '캐러셀 전환 효과',
+        },
       ],
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
-        ],
-        layouts: [
-          { id: 'slide', name: '슬라이드', props: { effect: 'slide' } },
-          { id: 'fade', name: '페이드', props: { effect: 'fade' } },
-          { id: 'coverflow', name: '커버플로우', props: { effect: 'coverflow' } },
         ],
       },
     },

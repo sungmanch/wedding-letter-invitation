@@ -125,8 +125,15 @@ function groupDeclarationsIntoSections(
     const isStandardGroup = groupId in SECTION_GROUP_META
     const sectionId = isStandardGroup ? meta.id : groupId
 
+    // 그룹 내 선언을 order로 정렬 (order가 있으면 그 값으로, 없으면 Infinity)
+    const sortedDecls = [...groupDecls].sort((a, b) => {
+      const orderA = a.order ?? Infinity
+      const orderB = b.order ?? Infinity
+      return orderA - orderB
+    })
+
     // 그룹 내 선언을 EditorField로 변환
-    const fields: EditorField[] = groupDecls.map((decl, index) =>
+    const fields: EditorField[] = sortedDecls.map((decl, index) =>
       declarationToField(decl, index + 1)
     )
 
@@ -209,7 +216,14 @@ export function getFieldsForSectionType(
 
   const resolvedDeclarations = pathsToDeclarations(paths, declarations)
 
-  return resolvedDeclarations.map((decl, index) => declarationToField(decl, index + 1))
+  // order로 정렬 (order가 있으면 그 값으로, 없으면 Infinity)
+  const sortedDeclarations = [...resolvedDeclarations].sort((a, b) => {
+    const orderA = a.order ?? Infinity
+    const orderB = b.order ?? Infinity
+    return orderA - orderB
+  })
+
+  return sortedDeclarations.map((decl, index) => declarationToField(decl, index + 1))
 }
 
 // ============================================
