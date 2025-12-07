@@ -503,37 +503,43 @@ function EditPageContent() {
         </div>
 
         {/* 중앙: 미리보기 */}
-        <div className="flex-1 flex flex-col bg-gray-200">
-          <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-            {activeTab === 'share' ? (
-              <SharePreview
-                ogTitle={ogValues.title || ogDefaults.title}
-                ogDescription={ogValues.description || ogDefaults.description}
-                ogImageUrl={ogValues.imageUrl || null}
-              />
-            ) : state.layout && state.style && state.userData ? (
-              <InvitationPreview
-                layout={state.layout}
-                style={state.style}
-                userData={state.userData}
-                sectionOrder={sectionOrder}
-                sectionEnabled={sectionEnabled}
-                mode="edit"
-                selectedNodeId={selectedNodeId}
-                onSelectNode={handleSelectNode}
-                sectionVariants={sectionVariants}
-                onVariantChange={handleVariantChange}
-                withFrame
-                frameWidth={375}
-                frameHeight={667}
-              />
-            ) : (
-              <div className="text-center text-gray-500">
-                <p className="text-lg font-medium">미리보기 로딩 중...</p>
-              </div>
-            )}
+        {activeTab === 'share' ? (
+          // 공유 탭: 배경 전체가 스크롤되는 레이아웃
+          <div className="flex-1 bg-gray-200 overflow-y-auto">
+            <SharePreview
+              ogTitle={ogValues.title || ogDefaults.title}
+              ogDescription={ogValues.description || ogDefaults.description}
+              ogImageUrl={ogValues.imageUrl || null}
+            />
           </div>
-        </div>
+        ) : (
+          // 다른 탭: 중앙 정렬된 PhoneFrame 레이아웃
+          <div className="flex-1 flex flex-col bg-gray-200">
+            <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
+              {state.layout && state.style && state.userData ? (
+                <InvitationPreview
+                  layout={state.layout}
+                  style={state.style}
+                  userData={state.userData}
+                  sectionOrder={sectionOrder}
+                  sectionEnabled={sectionEnabled}
+                  mode="edit"
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={handleSelectNode}
+                  sectionVariants={sectionVariants}
+                  onVariantChange={handleVariantChange}
+                  withFrame
+                  frameWidth={375}
+                  frameHeight={667}
+                />
+              ) : (
+                <div className="text-center text-gray-500">
+                  <p className="text-lg font-medium">미리보기 로딩 중...</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
