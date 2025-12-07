@@ -164,6 +164,7 @@ function InvitationContent({
       className={`invitation-renderer ${className ?? ''}`}
       style={{
         minHeight: '100vh',
+        paddingBottom: 96, // FAB 버튼 공간 확보
         backgroundColor: 'var(--color-background)',
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--typo-body-md-font-family)',
