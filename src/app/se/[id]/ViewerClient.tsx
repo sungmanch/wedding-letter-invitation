@@ -44,8 +44,10 @@ export function ViewerClient({
         mode="preview"
       />
 
-      {/* 축하하기 FAB */}
-      <GuestbookFab onClick={() => setIsGuestbookModalOpen(true)} mode="build" />
+      {/* 축하하기 FAB - 모달이 열리면 숨김 */}
+      {!isGuestbookModalOpen && (
+        <GuestbookFab onClick={() => setIsGuestbookModalOpen(true)} mode="build" />
+      )}
 
       {/* 축하하기 모달 */}
       <GuestbookModal
