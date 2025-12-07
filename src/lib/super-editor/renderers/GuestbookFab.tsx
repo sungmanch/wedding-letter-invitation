@@ -14,13 +14,16 @@ interface GuestbookFabProps {
   mode?: 'preview' | 'edit' | 'build'
 }
 
-export function GuestbookFab({ onClick }: GuestbookFabProps) {
+export function GuestbookFab({ onClick, mode = 'preview' }: GuestbookFabProps) {
+  // 프리뷰: PhoneFrame 내 고정 (absolute), 실제 화면: 화면 하단 고정 (fixed)
+  const isViewer = mode === 'build'
+
   return (
     <button
       onClick={onClick}
       className="guestbook-fab"
       style={{
-        position: 'fixed',
+        position: isViewer ? 'fixed' : 'absolute',
         bottom: 24,
         left: '50%',
         transform: 'translateX(-50%)',
