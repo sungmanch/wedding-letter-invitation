@@ -28,9 +28,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  env: {
-    NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: '3zoz9orgws',
-  },
   // Security headers
   async headers() {
     return [
