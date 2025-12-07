@@ -62,17 +62,18 @@ export async function createCheckoutSession(
       .where(eq(invitations.id, invitationId))
 
     // Create Polar checkout session
-    const checkoutResponse = await fetch(`${POLAR_API_URL}/checkouts/custom`, {
+    const checkoutResponse = await fetch(`${POLAR_API_URL}/checkouts`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        product_id: POLAR_PRODUCT_ID,
-        success_url: `${APP_URL}/${invitationId}?success=true`,
-        cancel_url: `${APP_URL}/${invitationId}/preview`,
+        products: [POLAR_PRODUCT_ID],
+        success_url: `${APP_URL}/checkout/success?checkout_id={CHECKOUT_ID}`,
+        return_url: `${APP_URL}/${invitationId}/preview`,
         metadata: {
+          invitation_type: '1',
           invitation_id: invitationId,
           payment_id: payment.id,
           user_id: user.id,
@@ -286,30 +287,34 @@ export async function createUnifiedCheckoutSession(
     const successPath = type === 1 ? `/${id}` : `/se/${id}`
     const cancelPath = type === 1 ? `/${id}/preview` : `/se/${id}/edit`
 
-    const checkoutResponse = await fetch(`${POLAR_API_URL}/checkouts/custom`, {
+    const requestBody = {
+      products: [POLAR_PRODUCT_ID],
+      success_url: `${APP_URL}/checkout/success?checkout_id={CHECKOUT_ID}`,
+      return_url: `${APP_URL}${cancelPath}`,
+      metadata: {
+        invitation_type: String(type),
+        invitation_id: id,
+        payment_id: payment.id,
+        user_id: user.id,
+      },
+      customer_email: user.email,
+    }
+
+    console.log('Polar checkout request:', JSON.stringify(requestBody, null, 2))
+
+    const checkoutResponse = await fetch(`${POLAR_API_URL}/checkouts`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        product_id: POLAR_PRODUCT_ID,
-        success_url: `${APP_URL}${successPath}?success=true`,
-        cancel_url: `${APP_URL}${cancelPath}`,
-        metadata: {
-          invitation_type: type,
-          invitation_id: id,
-          payment_id: payment.id,
-          user_id: user.id,
-        },
-        customer_email: user.email,
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     if (!checkoutResponse.ok) {
       const errorData = await checkoutResponse.text()
-      console.error('Polar checkout error:', errorData)
-      throw new Error('Failed to create checkout session')
+      console.error('Polar checkout error:', checkoutResponse.status, errorData)
+      throw new Error(`Polar API (${checkoutResponse.status}): ${errorData.slice(0, 200)}`)
     }
 
     const checkoutData = await checkoutResponse.json()
@@ -326,7 +331,8 @@ export async function createUnifiedCheckoutSession(
     }
   } catch (error) {
     console.error('Failed to create unified checkout session:', error)
-    return { success: false, error: '결제 세션 생성에 실패했습니다' }
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    return { success: false, error: `결제 세션 생성에 실패했습니다: ${errorMessage}` }
   }
 }
 
