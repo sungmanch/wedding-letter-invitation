@@ -48,6 +48,7 @@ export interface Screen {
   name?: string
   type: ScreenType
   sectionType: SectionType    // 청첩장 섹션 식별자
+  variantId?: string          // 선택된 variant ID (skeleton registry 참조)
   root: PrimitiveNode
   transition?: ScreenTransition
   triggers?: ScreenTrigger[]
