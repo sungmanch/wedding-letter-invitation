@@ -133,6 +133,20 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
+                                    id: 'groom-account-relation',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      fontFamily: '$token.typography.headingSm.fontFamily',
+                                      fontSize: '$token.typography.headingSm.fontSize',
+                                      fontWeight: '$token.typography.headingSm.fontWeight',
+                                      color: '$token.colors.text.primary',
+                                    },
+                                    props: {
+                                      content: '{{account.relationLabel}}',
+                                      as: 'h4',
+                                    },
+                                  },
+                                  {
                                     id: 'groom-account-name',
                                     type: 'text',
                                     tokenStyle: {
@@ -250,6 +264,20 @@ export const accountsSkeleton: SectionSkeleton = {
                                   gap: '$token.spacing.xs',
                                 },
                                 children: [
+                                  {
+                                    id: 'bride-account-relation',
+                                    type: 'text',
+                                    tokenStyle: {
+                                      fontFamily: '$token.typography.headingSm.fontFamily',
+                                      fontSize: '$token.typography.headingSm.fontSize',
+                                      fontWeight: '$token.typography.headingSm.fontWeight',
+                                      color: '$token.colors.text.primary',
+                                    },
+                                    props: {
+                                      content: '{{account.relationLabel}}',
+                                      as: 'h4',
+                                    },
+                                  },
                                   {
                                     id: 'bride-account-name',
                                     type: 'text',
