@@ -406,6 +406,8 @@ function superEditorReducer(
 interface SuperEditorContextValue {
   state: SuperEditorState
   dispatch: React.Dispatch<SuperEditorAction>
+  // 청첩장 ID (이미지 업로드 등에 사용)
+  invitationId: string | undefined
   // 편의 함수들
   setTemplate: (layout: LayoutSchema, style: StyleSchema) => void
   setUserData: (userData: UserData) => void
@@ -432,6 +434,7 @@ const SuperEditorContext = createContext<SuperEditorContextValue | null>(null)
 
 interface SuperEditorProviderProps {
   children: ReactNode
+  invitationId?: string
   initialTemplate?: {
     layout: LayoutSchema
     style: StyleSchema
@@ -441,6 +444,7 @@ interface SuperEditorProviderProps {
 
 export function SuperEditorProvider({
   children,
+  invitationId,
   initialTemplate,
   initialUserData,
 }: SuperEditorProviderProps) {
@@ -540,6 +544,7 @@ export function SuperEditorProvider({
     () => ({
       state,
       dispatch,
+      invitationId,
       setTemplate,
       setUserData,
       setStyle,
@@ -557,6 +562,7 @@ export function SuperEditorProvider({
     }),
     [
       state,
+      invitationId,
       setTemplate,
       setUserData,
       setStyle,

@@ -1,21 +1,29 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { ImageListField as ImageListFieldType } from '../../schema/editor'
 import { useSuperEditor } from '../../context'
+import { uploadGalleryImages, deleteGalleryImage } from '../../actions'
 
 interface ImageListFieldProps {
   field: ImageListFieldType
 }
 
 export function ImageListField({ field }: ImageListFieldProps) {
-  const { getFieldValue, updateField } = useSuperEditor()
+  const { getFieldValue, updateField, invitationId } = useSuperEditor()
   const images = (getFieldValue(field.dataPath) as string[]) || []
   const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (!files.length) return
+
+    // invitationId가 없으면 업로드 불가
+    if (!invitationId) {
+      alert('청첩장 ID가 없습니다. 페이지를 새로고침해주세요.')
+      return
+    }
 
     // 최대 개수 체크
     if (field.maxItems && images.length + files.length > field.maxItems) {
@@ -23,33 +31,77 @@ export function ImageListField({ field }: ImageListFieldProps) {
       return
     }
 
-    // TODO: 실제 업로드 로직 구현
-    const newImages: string[] = []
+    setUploading(true)
 
-    for (const file of files) {
-      // 파일 크기 체크
-      if (field.maxSize && file.size > field.maxSize) {
-        alert(`${file.name}의 크기가 너무 큽니다.`)
-        continue
+    try {
+      // 파일들을 base64로 변환하여 서버에 전송
+      const imagesToUpload: Array<{ data: string; filename: string; mimeType: string }> = []
+
+      for (const file of files) {
+        // 파일 크기 체크 (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`${file.name}의 크기가 10MB를 초과합니다.`)
+          continue
+        }
+
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = (event) => resolve(event.target?.result as string)
+          reader.readAsDataURL(file)
+        })
+
+        imagesToUpload.push({
+          data: dataUrl,
+          filename: file.name,
+          mimeType: file.type,
+        })
       }
 
-      const dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader()
-        reader.onload = (event) => resolve(event.target?.result as string)
-        reader.readAsDataURL(file)
-      })
+      if (imagesToUpload.length === 0) {
+        return
+      }
 
-      newImages.push(dataUrl)
-    }
+      // S3에 업로드
+      const result = await uploadGalleryImages(invitationId, imagesToUpload)
 
-    updateField(field.dataPath, [...images, ...newImages])
+      if (!result.success) {
+        alert(result.errors?.join('\n') || '업로드에 실패했습니다.')
+        return
+      }
 
-    if (inputRef.current) {
-      inputRef.current.value = ''
+      // 성공한 URL들을 userData에 추가
+      if (result.urls && result.urls.length > 0) {
+        updateField(field.dataPath, [...images, ...result.urls])
+      }
+
+      // 부분 실패 시 알림
+      if (result.errors && result.errors.length > 0) {
+        alert(`일부 이미지 업로드 실패:\n${result.errors.join('\n')}`)
+      }
+    } catch (error) {
+      console.error('Image upload failed:', error)
+      alert('이미지 업로드에 실패했습니다.')
+    } finally {
+      setUploading(false)
+      if (inputRef.current) {
+        inputRef.current.value = ''
+      }
     }
   }
 
-  const handleRemove = (index: number) => {
+  const handleRemove = async (index: number) => {
+    const imageUrl = images[index]
+
+    // S3에서 삭제 시도 (URL이 S3 URL인 경우)
+    if (invitationId && imageUrl.includes('supabase')) {
+      try {
+        await deleteGalleryImage(invitationId, imageUrl)
+      } catch (error) {
+        console.error('Failed to delete from storage:', error)
+        // 스토리지 삭제 실패해도 UI에서는 제거
+      }
+    }
+
     const newImages = images.filter((_, i) => i !== index)
     updateField(field.dataPath, newImages)
   }
@@ -83,7 +135,7 @@ export function ImageListField({ field }: ImageListFieldProps) {
         accept={field.accept?.join(',') || 'image/*'}
         multiple
         onChange={handleFileChange}
-        disabled={field.disabled || !canAddMore}
+        disabled={field.disabled || !canAddMore || uploading}
         className="hidden"
         id={`file-${field.id}`}
       />

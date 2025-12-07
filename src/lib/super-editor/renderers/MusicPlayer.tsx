@@ -108,7 +108,7 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
       {/* FAB Button - 우상단 32x32 */}
       <button
         onClick={togglePlay}
-        disabled={!isLoaded}
+        disabled={mode === 'edit' ? false : !isLoaded}
         className="music-fab"
         style={{
           position: 'absolute',
@@ -124,40 +124,30 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: isLoaded ? 'pointer' : 'wait',
+          cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',
           pointerEvents: 'auto',
         }}
-        aria-label={isPlaying ? '음악 정지' : '음악 재생'}
+        aria-label={isPlaying ? '음악 끄기' : '음악 켜기'}
       >
         {isPlaying ? (
-          // Pause Icon
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="6" y="4" width="4" height="16" rx="1" />
-            <rect x="14" y="4" width="4" height="16" rx="1" />
+          // Volume On Icon
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
           </svg>
         ) : (
-          // Play Icon (with spinning animation when playing)
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            style={{
-              animation: isLoaded ? 'none' : 'spin 1s linear infinite',
-            }}
-          >
-            <path d="M8 5v14l11-7z" />
+          // Volume Off Icon
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <line x1="23" y1="9" x2="17" y2="15" />
+            <line x1="17" y1="9" x2="23" y2="15" />
           </svg>
         )}
       </button>
 
-      {/* Keyframes for spinning */}
       <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
         .music-fab:hover {
           transform: scale(1.05);
           box-shadow: 0 6px 16px rgba(0,0,0,0.2);

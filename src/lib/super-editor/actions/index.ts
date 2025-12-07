@@ -386,6 +386,156 @@ export async function buildInvitation(invitationId: string) {
 // ============================================
 
 const OG_BUCKET_NAME = 'og-images'
+const GALLERY_BUCKET_NAME = 'wedding-photos'
+const MAX_GALLERY_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+
+// ============================================
+// Gallery Image Upload Actions
+// ============================================
+
+/**
+ * 갤러리 이미지 업로드 (단일/다중)
+ * base64 데이터를 Supabase Storage에 업로드하고 URL 반환
+ */
+export async function uploadGalleryImages(
+  invitationId: string,
+  images: Array<{ data: string; filename: string; mimeType: string }>
+): Promise<{ success: boolean; urls?: string[]; errors?: string[] }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, errors: ['로그인이 필요합니다'] }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, errors: ['청첩장을 찾을 수 없습니다'] }
+    }
+
+    const uploadedUrls: string[] = []
+    const errors: string[] = []
+
+    for (const image of images) {
+      // MIME 타입 검증
+      if (!ALLOWED_IMAGE_TYPES.includes(image.mimeType)) {
+        errors.push(`${image.filename}: 지원하지 않는 이미지 형식입니다`)
+        continue
+      }
+
+      // base64 → Buffer
+      const base64Data = image.data.replace(/^data:image\/\w+;base64,/, '')
+      const buffer = Buffer.from(base64Data, 'base64')
+
+      // 파일 크기 검증
+      if (buffer.length > MAX_GALLERY_IMAGE_SIZE) {
+        errors.push(`${image.filename}: 파일 크기가 10MB를 초과합니다`)
+        continue
+      }
+
+      // 파일 확장자 결정
+      const ext = image.mimeType.split('/')[1] === 'jpeg' ? 'jpg' : image.mimeType.split('/')[1]
+      const filename = `se/${invitationId}/gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+      // Supabase Storage에 업로드
+      const { error: uploadError } = await supabase.storage
+        .from(GALLERY_BUCKET_NAME)
+        .upload(filename, buffer, {
+          contentType: image.mimeType,
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error('Gallery image upload error:', uploadError)
+        errors.push(`${image.filename}: 업로드에 실패했습니다`)
+        continue
+      }
+
+      // Public URL 가져오기
+      const { data: urlData } = supabase.storage
+        .from(GALLERY_BUCKET_NAME)
+        .getPublicUrl(filename)
+
+      uploadedUrls.push(urlData.publicUrl)
+    }
+
+    if (uploadedUrls.length === 0 && errors.length > 0) {
+      return { success: false, errors }
+    }
+
+    return { success: true, urls: uploadedUrls, errors: errors.length > 0 ? errors : undefined }
+  } catch (error) {
+    console.error('Failed to upload gallery images:', error)
+    return { success: false, errors: ['이미지 업로드에 실패했습니다'] }
+  }
+}
+
+/**
+ * 갤러리 이미지 삭제
+ */
+export async function deleteGalleryImage(
+  invitationId: string,
+  imageUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 소유권 확인
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: and(
+        eq(superEditorInvitations.id, invitationId),
+        eq(superEditorInvitations.userId, user.id)
+      ),
+    })
+
+    if (!invitation) {
+      return { success: false, error: '청첩장을 찾을 수 없습니다' }
+    }
+
+    // URL에서 storage path 추출
+    const pathMatch = imageUrl.match(new RegExp(`${GALLERY_BUCKET_NAME}/(.+)$`))
+    if (!pathMatch) {
+      return { success: false, error: '유효하지 않은 이미지 URL입니다' }
+    }
+
+    const storagePath = pathMatch[1]
+
+    // 본인 청첩장의 이미지인지 확인 (se/{invitationId}/ 경로)
+    if (!storagePath.startsWith(`se/${invitationId}/`)) {
+      return { success: false, error: '삭제 권한이 없습니다' }
+    }
+
+    // Storage에서 삭제
+    const { error: deleteError } = await supabase.storage
+      .from(GALLERY_BUCKET_NAME)
+      .remove([storagePath])
+
+    if (deleteError) {
+      console.error('Gallery image delete error:', deleteError)
+      return { success: false, error: '이미지 삭제에 실패했습니다' }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to delete gallery image:', error)
+    return { success: false, error: '이미지 삭제에 실패했습니다' }
+  }
+}
 
 /**
  * OG 이미지 업로드 (1200x630 JPG 이미지)
