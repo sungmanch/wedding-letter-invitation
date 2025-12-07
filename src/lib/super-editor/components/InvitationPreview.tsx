@@ -10,13 +10,14 @@
  * - /se/[id] - withFrame=false
  */
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
 import type { SectionType } from '../schema/section-types'
 import { InvitationRenderer } from '../renderers'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
+import { VariantControlPanel } from './VariantControlPanel'
 
 // ============================================
 // Types
@@ -116,6 +117,13 @@ export function InvitationPreview({
   frameHeight,
   className,
 }: InvitationPreviewProps) {
+  // 활성 섹션 추적 (스크롤에 따라 변경)
+  const [activeSection, setActiveSection] = useState<SectionType | null>(null)
+
+  const handleActiveSectionChange = useCallback((sectionType: SectionType | null) => {
+    setActiveSection(sectionType)
+  }, [])
+
   const renderer = (
     <InvitationRenderer
       layout={layout}
@@ -129,15 +137,34 @@ export function InvitationPreview({
       onSelectNode={onSelectNode}
       sectionVariants={sectionVariants}
       onVariantChange={onVariantChange}
+      onActiveSectionChange={handleActiveSectionChange}
+      showVariantSwitcher={false}
       className={className}
     />
   )
 
   if (withFrame) {
+    // 편집 모드에서는 PhoneFrame 옆에 VariantControlPanel 표시
+    const showVariantPanel = mode === 'edit' && onVariantChange && sectionVariants
+
     return (
-      <PhoneFrame width={frameWidth} height={frameHeight}>
-        {renderer}
-      </PhoneFrame>
+      <div className="relative flex items-start gap-4">
+        {/* PhoneFrame */}
+        <PhoneFrame width={frameWidth} height={frameHeight}>
+          {renderer}
+        </PhoneFrame>
+
+        {/* 오른쪽 Variant Control Panel */}
+        {showVariantPanel && (
+          <VariantControlPanel
+            activeSection={activeSection}
+            sectionVariants={sectionVariants}
+            onVariantChange={onVariantChange}
+            layout={layout}
+            className="sticky top-8"
+          />
+        )}
+      </div>
     )
   }
 
