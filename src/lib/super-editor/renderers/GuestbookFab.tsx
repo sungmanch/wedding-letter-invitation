@@ -20,7 +20,7 @@ export function GuestbookFab({ onClick }: GuestbookFabProps) {
       onClick={onClick}
       className="guestbook-fab"
       style={{
-        position: 'absolute',
+        position: 'fixed',
         bottom: 24,
         left: '50%',
         transform: 'translateX(-50%)',
