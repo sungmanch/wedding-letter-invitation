@@ -281,7 +281,25 @@ export function resolveVariableDeclaration(path: string): VariableDeclaration {
 // ============================================
 
 /**
+ * 경로 매핑 규칙
+ * 특정 hidden 경로들이 있으면 대체 경로를 자동 추가
+ */
+const PATH_REPLACEMENT_RULES: Array<{
+  /** 이 경로들 중 하나라도 있으면 */
+  triggers: string[]
+  /** 이 경로를 추가 */
+  replacement: string
+}> = [
+  {
+    // venue.address, venue.lat, venue.lng → venue (location 타입)
+    triggers: ['venue.address', 'venue.lat', 'venue.lng'],
+    replacement: 'venue',
+  },
+]
+
+/**
  * 경로 배열을 VariableDeclaration 배열로 변환
+ * __HIDDEN__ description을 가진 필드는 자동으로 필터링됨
  */
 export function pathsToDeclarations(
   paths: string[],
@@ -296,14 +314,26 @@ export function pathsToDeclarations(
     }
   }
 
+  // 경로 대체 규칙 적용 - hidden 경로들이 있으면 대체 경로 추가
+  const pathSet = new Set(paths)
+  for (const rule of PATH_REPLACEMENT_RULES) {
+    const hasAnyTrigger = rule.triggers.some((t) => pathSet.has(t))
+    if (hasAnyTrigger && !pathSet.has(rule.replacement)) {
+      pathSet.add(rule.replacement)
+    }
+  }
+
   // 경로별로 선언 생성 (없으면 해결)
-  for (const path of paths) {
+  for (const path of pathSet) {
     if (!declMap.has(path)) {
       declMap.set(path, resolveVariableDeclaration(path))
     }
   }
 
-  return Array.from(declMap.values())
+  // __HIDDEN__ description을 가진 필드는 에디터에서 숨김 처리
+  return Array.from(declMap.values()).filter(
+    (decl) => decl.description !== '__HIDDEN__'
+  )
 }
 
 /**

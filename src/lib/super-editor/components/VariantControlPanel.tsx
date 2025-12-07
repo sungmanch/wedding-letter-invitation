@@ -9,12 +9,18 @@ import React, { useMemo } from 'react'
 import { getSkeleton } from '../skeletons/registry'
 import type { SectionType } from '../skeletons/types'
 import type { LayoutSchema } from '../schema/layout'
+import {
+  DEFAULT_SECTION_ORDER,
+  DEFAULT_SECTION_ENABLED,
+} from '../schema/section-types'
 
 interface VariantControlPanelProps {
   activeSection: SectionType | null
   sectionVariants?: Record<SectionType, string>
   onVariantChange: (sectionType: SectionType, variantId: string) => void
   layout: LayoutSchema
+  sectionOrder?: SectionType[]
+  sectionEnabled?: Record<SectionType, boolean>
   className?: string
 }
 
@@ -23,23 +29,27 @@ export function VariantControlPanel({
   sectionVariants,
   onVariantChange,
   layout,
+  sectionOrder = DEFAULT_SECTION_ORDER,
+  sectionEnabled = DEFAULT_SECTION_ENABLED,
   className = '',
 }: VariantControlPanelProps) {
-  // 현재 레이아웃에 있는 섹션들 (intro, music 제외 + 중복 제거)
-  const sections = useMemo(() => {
+  // layout.screens에 있는 섹션 타입들 (중복 제거)
+  const availableSections = useMemo(() => {
     const seen = new Set<SectionType>()
-    return layout.screens
-      .filter((s) => {
-        // intro, music 제외
-        if (s.sectionType === 'intro' || s.sectionType === 'music') return false
-        // 중복 제거
-        const sectionType = s.sectionType as SectionType
-        if (seen.has(sectionType)) return false
-        seen.add(sectionType)
-        return true
-      })
-      .map((s) => s.sectionType as SectionType)
+    layout.screens.forEach((s) => {
+      if (s.sectionType !== 'intro' && s.sectionType !== 'music') {
+        seen.add(s.sectionType as SectionType)
+      }
+    })
+    return seen
   }, [layout.screens])
+
+  // sectionOrder 순서대로 정렬하고, 활성화된 섹션만 필터링
+  const sections = useMemo(() => {
+    return sectionOrder.filter(
+      (type) => sectionEnabled[type] && availableSections.has(type)
+    )
+  }, [sectionOrder, sectionEnabled, availableSections])
 
   // variant가 2개 이상인 섹션만 필터링
   const sectionsWithVariants = useMemo(() => {
@@ -56,11 +66,11 @@ export function VariantControlPanel({
   return (
     <div
       className={`w-48 bg-black/80 backdrop-blur-md rounded-2xl p-3
-                  border border-white/10 shadow-xl ${className}`}
+                  border border-white/10 shadow-xl flex flex-col ${className}`}
     >
-      <h4 className="text-xs font-medium text-white/60 mb-3 px-1">섹션 스타일</h4>
+      <h4 className="text-xs font-medium text-white/60 mb-3 px-1 shrink-0">섹션 스타일</h4>
 
-      <div className="space-y-1">
+      <div className="space-y-1 overflow-y-auto flex-1 min-h-0">
         {sectionsWithVariants.map((sectionType) => (
           <SectionVariantItem
             key={sectionType}
