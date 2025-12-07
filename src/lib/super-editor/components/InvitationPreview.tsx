@@ -38,6 +38,11 @@ interface InvitationPreviewProps {
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
 
+  // 섹션 클릭 핸들러 (에디터 연동)
+  onSectionClick?: (sectionType: SectionType) => void
+  // 하이라이트할 섹션 (에디터에서 펼쳐진 섹션)
+  highlightedSection?: SectionType | null
+
   // Variant switcher (dev mode only)
   sectionVariants?: Record<SectionType, string>
   onVariantChange?: (sectionType: SectionType, variantId: string) => void
@@ -86,7 +91,7 @@ function PhoneFrame({
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto mobile-scrollbar"
+          className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto scrollbar-hide"
           style={
             {
               width,
@@ -116,6 +121,8 @@ export function InvitationPreview({
   visibleSections,
   selectedNodeId,
   onSelectNode,
+  onSectionClick,
+  highlightedSection,
   sectionVariants,
   onVariantChange,
   withFrame = false,
@@ -184,6 +191,8 @@ export function InvitationPreview({
       visibleSections={visibleSections}
       selectedNodeId={selectedNodeId}
       onSelectNode={onSelectNode}
+      onSectionClick={onSectionClick}
+      highlightedSection={highlightedSection}
       sectionVariants={sectionVariants}
       onVariantChange={onVariantChange}
       showVariantSwitcher={false}

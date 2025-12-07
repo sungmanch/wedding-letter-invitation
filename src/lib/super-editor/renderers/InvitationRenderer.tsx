@@ -40,6 +40,11 @@ interface InvitationRendererProps {
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
 
+  // 섹션 클릭 핸들러 (에디터 연동)
+  onSectionClick?: (sectionType: SectionType) => void
+  // 하이라이트할 섹션 (에디터에서 펼쳐진 섹션)
+  highlightedSection?: SectionType | null
+
   // 표시할 섹션 타입 제한 (선택적)
   // undefined = sectionEnabled 기반, ['intro'] = 인트로만
   visibleSections?: SectionType[]
@@ -106,6 +111,8 @@ function InvitationContent({
   mode = 'preview',
   selectedNodeId,
   onSelectNode,
+  onSectionClick,
+  highlightedSection,
   visibleSections,
   sectionVariants,
   onVariantChange,
@@ -149,6 +156,8 @@ function InvitationContent({
           mode={mode}
           selectedNodeId={selectedNodeId}
           onSelectNode={onSelectNode}
+          onSectionClick={onSectionClick}
+          isHighlighted={highlightedSection === 'intro'}
           currentVariantId={sectionVariants?.intro}
           onVariantChange={onVariantChange}
           showVariantSwitcher={showVariantSwitcher}
@@ -165,6 +174,8 @@ function InvitationContent({
             mode={mode}
             selectedNodeId={selectedNodeId}
             onSelectNode={onSelectNode}
+            onSectionClick={onSectionClick}
+            isHighlighted={highlightedSection === screen.sectionType}
             currentVariantId={sectionVariants?.[screen.sectionType]}
             onVariantChange={onVariantChange}
             showVariantSwitcher={showVariantSwitcher}

@@ -24,7 +24,38 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 - [테마 시스템](./src/lib/themes/CLAUDE.md) - 청첩장 테마 템플릿
 
+## Super Editor 아키텍처 주의사항
+
+**⚠️ 핵심 혼란 원인**:
+1. **스켈레톤 slots ≠ EditorPanel**: slots.defaultValue 수정해도 EditorPanel에 반영 안 됨
+2. **wedding.date ≠ wedding.dateDisplay**: ISO 형식(`2025-03-15`) vs 한글 형식(`2025년 3월 15일 토요일`)
+
+**EditorPanel과 PhonePreview는 완전히 분리된 데이터 플로우**:
+
+| 파일 | 역할 | EditorPanel 영향 | Preview 영향 |
+|------|------|------------------|--------------|
+| `schema/variables.ts` | 표준 변수 정의 (라벨, 타입, defaultValue) | ✅ 직접 | ❌ |
+| `skeletons/sections/*.ts` | 섹션 렌더링 구조 + slots | ❌ | ✅ 직접 |
+| `components/fields/*.tsx` | EditorField UI 컴포넌트 | ✅ 직접 | ❌ |
+
+- **EditorPanel 라벨/기본값 수정**: `STANDARD_VARIABLE_PATHS` (variables.ts)
+- **스켈레톤 slots.defaultValue는 EditorPanel에 영향 없음**
+- **`__HIDDEN__` description**: 자동 계산 필드를 에디터에서 숨김
+
 ## 변경 이력
+
+### 2025-12-07: 편집 패널 UX 리디자인 - Section-First 패턴
+- **이유**: "내용"과 "섹션" 탭이 분리되어 사용자 인지 부하 발생, 점진적 공개 UX 개선
+- **변경**:
+  - 탭 구조 변경: `[내용] [스타일] [섹션] [공유]` → `[콘텐츠] [디자인] [공유]`
+  - 콘텐츠 탭에 섹션 아코디언 통합 (섹션 on/off + 내용 입력을 한 곳에서)
+  - 프리뷰 ↔ 에디터 양방향 연동 (섹션 클릭 → 해당 아코디언 펼침, 하이라이트)
+- **파일**:
+  - `src/lib/super-editor/components/SectionAccordion.tsx` - 신규: 개별 섹션 아코디언
+  - `src/lib/super-editor/components/ContentTab.tsx` - 신규: 섹션 목록 + 필드 편집 통합
+  - `src/app/se/[id]/edit/page.tsx` - 탭 구조 변경
+  - `src/lib/super-editor/renderers/SectionRenderer.tsx` - 섹션 클릭/하이라이트 추가
+- **계획**: [UX 리디자인 계획](./.claude/plans/tidy-weaving-sundae.md)
 
 ### 2025-12-07: OG 메타데이터 커스터마이징 기능
 - **이유**: 카카오톡/문자 공유 시 청첩장 인트로를 OG 이미지로 표시하고 제목/설명 수정 가능
