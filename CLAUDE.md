@@ -44,6 +44,17 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-08: 다양한 폰트 지원을 위한 폰트 시스템 구축
+- **이유**: 9개 고정 폰트만 사용 가능했고, 새 폰트 추가 시 여러 파일 수동 수정 필요
+- **변경**:
+  - `fonts/presets.ts`: 30+ 폰트 프리셋 (한글 고딕/명조/손글씨, 영문 세리프/산세리프/디스플레이)
+  - `fonts/loader.ts`: Google Fonts URL 동적 생성, CDN 링크 자동 로드
+  - StyleEditor: 카테고리별 그룹화된 폰트 선택기 (폰트 선택 시 실시간 로드)
+  - HtmlBuilder: 사용된 폰트만 동적으로 CDN 링크 생성
+  - TokenStyleContext: 스타일 변경 시 자동 폰트 로드
+- **파일**: `src/lib/super-editor/fonts/` (presets.ts, loader.ts, index.ts)
+- **새 폰트 추가 방법**: `fonts/presets.ts`의 `FONT_PRESETS` 배열에 추가
+
 ### 2025-12-08: Color System 60-30-10 법칙 적용
 - **이유**: Surface(카드) 색상이 배경 변경에 반응하지 않고, 예술적 감성 부족
 - **변경**:
