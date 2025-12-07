@@ -103,22 +103,22 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
       {/* Hidden Audio Element */}
       <audio ref={audioRef} preload="auto" />
 
-      {/* FAB Button */}
+      {/* FAB Button - 우상단 32x32 */}
       <button
         onClick={togglePlay}
         disabled={!isLoaded}
         className="music-fab"
         style={{
           position: 'fixed',
-          bottom: 24,
-          right: 24,
+          top: 16,
+          right: 16,
           zIndex: 1000,
-          width: 48,
-          height: 48,
+          width: 32,
+          height: 32,
           borderRadius: '50%',
           backgroundColor: '#fff',
           border: 'none',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -129,15 +129,15 @@ export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerP
       >
         {isPlaying ? (
           // Pause Icon
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="6" y="4" width="4" height="16" rx="1" />
             <rect x="14" y="4" width="4" height="16" rx="1" />
           </svg>
         ) : (
           // Play Icon (with spinning animation when playing)
           <svg
-            width="20"
-            height="20"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="currentColor"
             style={{

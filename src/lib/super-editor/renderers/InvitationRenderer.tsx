@@ -20,6 +20,7 @@ import {
 } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
 import { MusicPlayer } from './MusicPlayer'
+import { GuestbookFab } from './GuestbookFab'
 import { TokenStyleProvider } from '../context/TokenStyleContext'
 
 // ============================================
@@ -210,17 +211,13 @@ function InvitationContent({
 
       {/* Guestbook FAB (플로팅) */}
       {guestbookFab && (
-        <SectionRenderer
-          screen={guestbookFab}
-          userData={userData}
+        <GuestbookFab
+          showAfterScroll={200}
           mode={mode}
-          selectedNodeId={selectedNodeId}
-          onSelectNode={onSelectNode}
-          onSectionClick={onSectionClick}
-          isHighlighted={highlightedSection === 'guestbook'}
-          currentVariantId={sectionVariants?.guestbook}
-          onVariantChange={onVariantChange}
-          showVariantSwitcher={false}
+          onClick={() => {
+            // TODO: 방명록 모달 열기
+            console.log('Open guestbook modal')
+          }}
         />
       )}
     </div>
