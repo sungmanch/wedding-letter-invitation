@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { PrimitiveNode, CarouselProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps, getValueByPath } from '../types'
@@ -16,6 +16,12 @@ export function Carousel({
   const style = toInlineStyle(node.style)
   const [currentIndex, setCurrentIndex] = useState(0)
   const autoplayRef = useRef<NodeJS.Timeout | null>(null)
+
+  // 스와이프 상태
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
+  const dragStartX = useRef(0)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
@@ -52,7 +58,7 @@ export function Carousel({
 
   // 자동 재생
   useEffect(() => {
-    if (props.autoplay && context.mode !== 'edit' && images.length > 1) {
+    if (props.autoplay && context.mode !== 'edit' && images.length > 1 && !isDragging) {
       autoplayRef.current = setInterval(() => {
         setCurrentIndex((prev) =>
           props.infinite
@@ -67,7 +73,62 @@ export function Carousel({
         clearInterval(autoplayRef.current)
       }
     }
-  }, [props.autoplay, props.autoplayInterval, props.infinite, images.length, context.mode])
+  }, [props.autoplay, props.autoplayInterval, props.infinite, images.length, context.mode, isDragging])
+
+  // 스와이프 핸들러
+  const handleDragStart = useCallback((clientX: number) => {
+    if (context.mode === 'edit') return
+    setIsDragging(true)
+    dragStartX.current = clientX
+    setDragOffset(0)
+  }, [context.mode])
+
+  const handleDragMove = useCallback((clientX: number) => {
+    if (!isDragging) return
+    const diff = clientX - dragStartX.current
+    setDragOffset(diff)
+  }, [isDragging])
+
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const threshold = 50 // 스와이프 임계값 (px)
+    if (dragOffset > threshold) {
+      // 왼쪽으로 스와이프 (이전)
+      goTo(currentIndex - 1)
+    } else if (dragOffset < -threshold) {
+      // 오른쪽으로 스와이프 (다음)
+      goTo(currentIndex + 1)
+    }
+    setDragOffset(0)
+  }, [isDragging, dragOffset, currentIndex])
+
+  // 터치 이벤트
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.touches[0].clientX)
+  }
+  const handleTouchMove = (e: React.TouchEvent) => {
+    handleDragMove(e.touches[0].clientX)
+  }
+  const handleTouchEnd = () => {
+    handleDragEnd()
+  }
+
+  // 마우스 이벤트
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    handleDragStart(e.clientX)
+  }
+  const handleMouseMove = (e: React.MouseEvent) => {
+    handleDragMove(e.clientX)
+  }
+  const handleMouseUp = () => {
+    handleDragEnd()
+  }
+  const handleMouseLeave = () => {
+    if (isDragging) handleDragEnd()
+  }
 
   const goTo = (index: number) => {
     if (props.infinite) {
@@ -83,15 +144,31 @@ export function Carousel({
     overflow: 'hidden',
     ...style,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
+    cursor: isDragging ? 'grabbing' : 'grab',
+    userSelect: 'none',
+    touchAction: 'pan-y pinch-zoom',
+  }
+
+  // 공통 스와이프 이벤트 props
+  const swipeProps = {
+    onTouchStart: handleTouchStart,
+    onTouchMove: handleTouchMove,
+    onTouchEnd: handleTouchEnd,
+    onMouseDown: handleMouseDown,
+    onMouseMove: handleMouseMove,
+    onMouseUp: handleMouseUp,
+    onMouseLeave: handleMouseLeave,
   }
 
   // Fade 효과
   if (effect === 'fade') {
     return (
       <div
+        ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
         style={containerStyle}
+        {...swipeProps}
         onClick={
           context.mode === 'edit'
             ? (e) => {
@@ -130,9 +207,11 @@ export function Carousel({
   if (effect === 'coverflow') {
     return (
       <div
+        ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
         style={{ ...containerStyle, perspective: '1000px' }}
+        {...swipeProps}
         onClick={
           context.mode === 'edit'
             ? (e) => {
@@ -197,9 +276,11 @@ export function Carousel({
   if (effect === 'cards') {
     return (
       <div
+        ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
         style={{ ...containerStyle, perspective: '1200px' }}
+        {...swipeProps}
         onClick={
           context.mode === 'edit'
             ? (e) => {
@@ -266,6 +347,7 @@ export function Carousel({
   if (effect === 'cube') {
     return (
       <div
+        ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
         style={{
@@ -273,6 +355,7 @@ export function Carousel({
           perspective: '1200px',
           perspectiveOrigin: '50% 50%',
         }}
+        {...swipeProps}
         onClick={
           context.mode === 'edit'
             ? (e) => {
@@ -322,12 +405,14 @@ export function Carousel({
   if (effect === 'flip') {
     return (
       <div
+        ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
         style={{
           ...containerStyle,
           perspective: '1200px',
         }}
+        {...swipeProps}
         onClick={
           context.mode === 'edit'
             ? (e) => {
@@ -381,6 +466,7 @@ export function Carousel({
   if (effect === 'film-strip') {
     return (
       <div
+        ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
         style={{
@@ -388,6 +474,7 @@ export function Carousel({
           backgroundColor: '#1a1a1a',
           padding: '0',
         }}
+        {...swipeProps}
         onClick={
           context.mode === 'edit'
             ? (e) => {
@@ -475,9 +562,11 @@ export function Carousel({
   // Slide 효과 (기본)
   return (
     <div
+      ref={containerRef}
       data-node-id={node.id}
       data-node-type="carousel"
       style={containerStyle}
+      {...swipeProps}
       onClick={
         context.mode === 'edit'
           ? (e) => {
@@ -491,8 +580,8 @@ export function Carousel({
         style={{
           display: 'flex',
           gap: `${props.spacing || 0}px`,
-          transform: `translateX(calc(-${currentIndex * (100 / slidesToShow)}% - ${currentIndex * (props.spacing || 0)}px))`,
-          transition: 'transform 0.5s ease',
+          transform: `translateX(calc(-${currentIndex * (100 / slidesToShow)}% - ${currentIndex * (props.spacing || 0)}px + ${dragOffset}px))`,
+          transition: isDragging ? 'none' : 'transform 0.5s ease',
         }}
       >
         {images.map((src, index) => (
