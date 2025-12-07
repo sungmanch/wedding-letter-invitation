@@ -18,6 +18,7 @@ export type FontCategory =
 export type FontSource =
   | 'google'        // Google Fonts
   | 'cdn'           // 기타 CDN (jsdelivr, cdnjs 등)
+  | 'fontface'      // @font-face CSS (projectnoonnu 등)
   | 'local'         // 로컬 호스팅 (public/fonts/)
 
 export interface FontWeight {
@@ -36,6 +37,10 @@ export interface FontPreset {
   // 폰트 로드 정보
   googleFontsId?: string    // Google Fonts ID (예: 'Noto+Serif+KR')
   cdnUrl?: string           // CDN URL (@import 또는 <link>)
+  fontFace?: {              // @font-face 정의 (projectnoonnu 등)
+    src: string             // woff/woff2 URL
+    format: 'woff' | 'woff2'
+  }
   localFiles?: {            // 로컬 파일 경로 (public/fonts/ 기준)
     weight: number
     style: 'normal' | 'italic'
@@ -633,6 +638,194 @@ export const FONT_PRESETS: FontPreset[] = [
     license: 'OFL',
     description: '캘리그래피 스타일 스크립트',
     recommended: ['title', 'accent'],
+  },
+
+  // ============================================
+  // 한글 손글씨 (projectnoonnu)
+  // ============================================
+  {
+    id: 'school-safety-bookmark',
+    family: 'SchoolSafetyBookmark',
+    label: '학교안심 책갈피',
+    labelEn: 'School Safety Bookmark',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/2510-1@1.0/HakgyoansimChaekgalpiR.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '학교안심 책갈피체. 따뜻한 손글씨',
+    recommended: ['accent'],
+  },
+  {
+    id: 'daeam-lee-taejun',
+    family: 'DaeAmLeeTaeJun',
+    label: '대암 이태준체',
+    labelEn: 'DaeAm Lee TaeJun',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2312-1@1.1/DAEAM_LEE_TAE_JOON.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '문학적인 감성의 손글씨체',
+    recommended: ['title', 'accent'],
+  },
+  {
+    id: 'gabia-sai',
+    family: 'GabiaSai',
+    label: '가비아 사이체',
+    labelEn: 'Gabia Sai',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/2510-1@1.0/GabiaSai-Regular.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '자연스러운 필기체 손글씨',
+    recommended: ['accent'],
+  },
+  {
+    id: 'noh-haechan',
+    family: 'NohHaeChan',
+    label: '노회찬체',
+    labelEn: 'Noh HaeChan',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/ROEHOE-CHAN.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '진정성 있는 손글씨체',
+    recommended: ['accent'],
+  },
+  {
+    id: 'gyeombalbal',
+    family: 'Gyeombalbal',
+    label: '귀염발랄체',
+    labelEn: 'Gyeombalbal',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/insungitCutelivelyjisu.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '귀엽고 발랄한 손글씨체',
+    recommended: ['accent'],
+  },
+  {
+    id: 'ongleip-study-well',
+    family: 'OngleipStudyWell',
+    label: '온글잎 공부잘하자나',
+    labelEn: 'Ongleip Study Well',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_StudyHard-Rg.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '정성스러운 필기체',
+    recommended: ['accent'],
+  },
+  {
+    id: 'yoon-cho-woosan',
+    family: 'YoonChoWooSan',
+    label: '윤초록우산어린이 만세',
+    labelEn: 'Yoon Cho WooSan',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/2408@1.0/YoonChildfundkoreaManSeh.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '순수하고 밝은 손글씨체',
+    recommended: ['accent'],
+  },
+
+  // ============================================
+  // 한글 고딕 (projectnoonnu)
+  // ============================================
+  {
+    id: 'gamulchi-free-gothic',
+    family: 'GamulchiFreeGothic',
+    label: '가물치 무료고딕',
+    labelEn: 'Gamulchi Free Gothic',
+    category: 'sans-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/2410-1@1.0/AssacomFreeGothicTTF-Regular.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'sans-serif',
+    license: 'OFL',
+    description: '깔끔한 무료 고딕체',
+    recommended: ['body'],
+  },
+  {
+    id: 'cafe24-simple',
+    family: 'Cafe24Simple',
+    label: '카페24 심플해',
+    labelEn: 'Cafe24 Simple',
+    category: 'sans-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Simplehae.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'sans-serif',
+    license: 'OFL',
+    description: '심플하고 모던한 고딕체',
+    recommended: ['body'],
+  },
+  {
+    id: 'joseon-gane-gothic',
+    family: 'JoseonGaneGothic',
+    label: '조선가는고딕',
+    labelEn: 'Joseon Gane Gothic',
+    category: 'sans-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunSg.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'sans-serif',
+    license: 'OFL',
+    description: '가늘고 세련된 고딕체',
+    recommended: ['body'],
   },
 ]
 
