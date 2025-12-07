@@ -91,16 +91,11 @@ function InvitationCard({ invitation }: { invitation: InvitationItem }) {
           <div className="flex items-center gap-2 mb-2">
             {isPaid ? (
               <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">
-                결제완료
+                공개중
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">
-                결제대기
-              </span>
-            )}
-            {status === 'published' && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
-                공개
+              <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                제작중
               </span>
             )}
           </div>
