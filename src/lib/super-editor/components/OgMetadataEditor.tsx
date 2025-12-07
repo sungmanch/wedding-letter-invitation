@@ -24,9 +24,11 @@ export function OgMetadataEditor({
 }: OgMetadataEditorProps) {
   const [ogTitle, setOgTitle] = useState(defaultTitle)
   const [ogDescription, setOgDescription] = useState(defaultDescription)
-  const [ogImageUrl, setOgImageUrl] = useState<string | null>(null)
+  const [ogImageUrl, setOgImageUrl] = useState<string | null>(null) // 서버에 저장된 URL
+  const [localImageData, setLocalImageData] = useState<string | null>(null) // 로컬 미리보기용 base64
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // OG 데이터 로드
@@ -42,16 +44,16 @@ export function OgMetadataEditor({
     loadOgData()
   }, [invitationId])
 
-  // 값 변경 시 부모에게 알림
+  // 값 변경 시 부모에게 알림 (로컬 이미지 우선)
   useEffect(() => {
     onChange?.({
       title: ogTitle,
       description: ogDescription,
-      imageUrl: ogImageUrl || '',
+      imageUrl: localImageData || ogImageUrl || '',
     })
-  }, [ogTitle, ogDescription, ogImageUrl, onChange])
+  }, [ogTitle, ogDescription, ogImageUrl, localImageData, onChange])
 
-  // OG 이미지 생성
+  // OG 이미지 생성 (로컬 미리보기용, 서버 업로드는 저장 시)
   const handleGenerateImage = useCallback(async () => {
     if (!previewRef?.current) {
       setMessage({ type: 'error', text: '미리보기를 찾을 수 없습니다. 잠시 후 다시 시도해주세요.' })
@@ -108,49 +110,56 @@ export function OgMetadataEditor({
         0, 0, OG_WIDTH, OG_HEIGHT
       )
 
-      // 3. Canvas를 JPG base64로 변환
+      // 3. Canvas를 JPG base64로 변환 (로컬 저장)
       const imageData = resizedCanvas.toDataURL('image/jpeg', 0.92)
-
-      // 4. 서버에 업로드
-      const result = await uploadOgImage(invitationId, imageData)
-
-      if (result.success && result.url) {
-        setOgImageUrl(result.url)
-        setMessage({ type: 'success', text: 'OG 이미지가 생성되었습니다' })
-      } else {
-        setMessage({ type: 'error', text: result.error || '이미지 생성에 실패했습니다' })
-      }
+      setLocalImageData(imageData)
+      setHasUnsavedChanges(true)
+      setMessage({ type: 'success', text: '이미지가 생성되었습니다. 저장 버튼을 눌러 반영하세요.' })
     } catch (error) {
       console.error('Failed to generate OG image:', error)
       setMessage({ type: 'error', text: '이미지 생성 중 오류가 발생했습니다' })
     } finally {
       setIsGenerating(false)
     }
-  }, [invitationId, previewRef])
+  }, [previewRef])
 
-  // OG 메타데이터 저장
-  const handleSaveMetadata = useCallback(async () => {
+  // OG 메타데이터 및 이미지 저장
+  const handleSave = useCallback(async () => {
     setIsSaving(true)
     setMessage(null)
 
     try {
+      // 1. 로컬 이미지가 있으면 먼저 업로드
+      if (localImageData) {
+        const imageResult = await uploadOgImage(invitationId, localImageData)
+        if (imageResult.success && imageResult.url) {
+          setOgImageUrl(imageResult.url)
+          setLocalImageData(null) // 업로드 완료 후 로컬 데이터 클리어
+        } else {
+          setMessage({ type: 'error', text: imageResult.error || '이미지 저장에 실패했습니다' })
+          return
+        }
+      }
+
+      // 2. 메타데이터 저장
       const result = await updateOgMetadata(invitationId, {
         ogTitle,
         ogDescription,
       })
 
       if (result.success) {
+        setHasUnsavedChanges(false)
         setMessage({ type: 'success', text: '저장되었습니다' })
       } else {
         setMessage({ type: 'error', text: result.error || '저장에 실패했습니다' })
       }
     } catch (error) {
-      console.error('Failed to save OG metadata:', error)
+      console.error('Failed to save OG data:', error)
       setMessage({ type: 'error', text: '저장 중 오류가 발생했습니다' })
     } finally {
       setIsSaving(false)
     }
-  }, [invitationId, ogTitle, ogDescription])
+  }, [invitationId, ogTitle, ogDescription, localImageData])
 
   return (
     <div className={cn('p-4 space-y-6', className)}>
@@ -164,11 +173,16 @@ export function OgMetadataEditor({
 
       {/* OG 이미지 프리뷰 */}
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-700">공유 이미지</label>
-        <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-          {ogImageUrl ? (
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-medium text-gray-700">공유 이미지</label>
+          {localImageData && (
+            <span className="text-xs text-amber-600 font-medium">저장되지 않음</span>
+          )}
+        </div>
+        <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
+          {(localImageData || ogImageUrl) ? (
             <img
-              src={ogImageUrl}
+              src={localImageData || ogImageUrl || ''}
               alt="OG Preview"
               className="w-full aspect-[1200/630] object-cover"
             />
@@ -196,7 +210,10 @@ export function OgMetadataEditor({
         <input
           type="text"
           value={ogTitle}
-          onChange={(e) => setOgTitle(e.target.value)}
+          onChange={(e) => {
+            setOgTitle(e.target.value)
+            setHasUnsavedChanges(true)
+          }}
           placeholder="예: 홍길동 ♥ 김영희 결혼합니다"
           maxLength={100}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
@@ -209,7 +226,10 @@ export function OgMetadataEditor({
         <label className="block text-sm font-medium text-gray-700">공유 설명</label>
         <textarea
           value={ogDescription}
-          onChange={(e) => setOgDescription(e.target.value)}
+          onChange={(e) => {
+            setOgDescription(e.target.value)
+            setHasUnsavedChanges(true)
+          }}
           placeholder="예: 2025년 3월 15일 토요일 오후 2시, 그랜드볼룸에서 축하해주세요"
           maxLength={200}
           rows={3}
@@ -220,11 +240,16 @@ export function OgMetadataEditor({
 
       {/* 저장 버튼 */}
       <button
-        onClick={handleSaveMetadata}
+        onClick={handleSave}
         disabled={isSaving}
-        className="w-full px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+        className={cn(
+          "w-full px-4 py-2.5 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors",
+          hasUnsavedChanges
+            ? "bg-rose-600 hover:bg-rose-700"
+            : "bg-gray-900 hover:bg-gray-800"
+        )}
       >
-        {isSaving ? '저장 중...' : '제목/설명 저장'}
+        {isSaving ? '저장 중...' : hasUnsavedChanges ? '변경사항 저장' : '저장'}
       </button>
 
       {/* 메시지 */}
