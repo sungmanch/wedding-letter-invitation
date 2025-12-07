@@ -188,8 +188,9 @@ export function applyIntroStyleToSchema(
     newStyle.theme.colors.secondary[500] = colors.accent
   }
 
-  // Background
+  // Background + Surface (Alpha Blend)
   newStyle.theme.colors.background.default = colors.background
+  newStyle.theme.colors.background.paper = deriveSurfaceColor(colors.background)
 
   // Text - 제목/본문 분리
   newStyle.theme.colors.text.primary = colors.titleText
@@ -231,4 +232,64 @@ function darkenColor(hex: string, percent: number): string {
   const G = Math.max(0, ((num >> 8) & 0x00ff) - amt)
   const B = Math.max(0, (num & 0x0000ff) - amt)
   return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`
+}
+
+/**
+ * HEX 색상을 RGB 배열로 변환
+ */
+function hexToRgb(hex: string): [number, number, number] {
+  const num = parseInt(hex.replace('#', ''), 16)
+  return [
+    (num >> 16) & 0xff,
+    (num >> 8) & 0xff,
+    num & 0xff,
+  ]
+}
+
+/**
+ * RGB 배열을 HEX로 변환
+ */
+function rgbToHex(r: number, g: number, b: number): string {
+  return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`
+}
+
+/**
+ * 배경색이 어두운지 판단 (Relative Luminance 기준)
+ * WCAG 2.0 공식 사용
+ */
+export function isDark(hex: string): boolean {
+  const [r, g, b] = hexToRgb(hex)
+  // sRGB to linear RGB
+  const toLinear = (c: number) => {
+    const v = c / 255
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+  }
+  // Relative luminance
+  const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
+  return luminance < 0.5
+}
+
+/**
+ * Alpha Blend로 Surface 색상 계산
+ * - Dark 배경: 흰색 12% 블렌딩
+ * - Light 배경: 검정 5% 블렌딩
+ */
+export function deriveSurfaceColor(background: string): string {
+  const [bgR, bgG, bgB] = hexToRgb(background)
+
+  if (isDark(background)) {
+    // Dark 배경: 흰색(255,255,255)과 12% 블렌딩
+    const alpha = 0.12
+    const r = Math.round(bgR + (255 - bgR) * alpha)
+    const g = Math.round(bgG + (255 - bgG) * alpha)
+    const b = Math.round(bgB + (255 - bgB) * alpha)
+    return rgbToHex(r, g, b)
+  } else {
+    // Light 배경: 검정(0,0,0)과 5% 블렌딩
+    const alpha = 0.05
+    const r = Math.round(bgR * (1 - alpha))
+    const g = Math.round(bgG * (1 - alpha))
+    const b = Math.round(bgB * (1 - alpha))
+    return rgbToHex(r, g, b)
+  }
 }
