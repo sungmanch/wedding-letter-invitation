@@ -33,9 +33,12 @@ export function ImageListField({ field }: ImageListFieldProps) {
 
     setUploading(true)
 
+    // 배치 크기 제한 (base64 인코딩 시 33% 증가를 고려하여 10MB로 설정)
+    const BATCH_SIZE_LIMIT = 10 * 1024 * 1024
+
     try {
-      // 파일들을 base64로 변환하여 서버에 전송
-      const imagesToUpload: Array<{ data: string; filename: string; mimeType: string }> = []
+      // 파일들을 base64로 변환
+      const allImages: Array<{ data: string; filename: string; mimeType: string; size: number }> = []
 
       for (const file of files) {
         // 파일 크기 체크 (10MB)
@@ -50,33 +53,71 @@ export function ImageListField({ field }: ImageListFieldProps) {
           reader.readAsDataURL(file)
         })
 
-        imagesToUpload.push({
+        allImages.push({
           data: dataUrl,
           filename: file.name,
           mimeType: file.type,
+          size: file.size,
         })
       }
 
-      if (imagesToUpload.length === 0) {
+      if (allImages.length === 0) {
         return
       }
 
-      // S3에 업로드
-      const result = await uploadGalleryImages(invitationId, imagesToUpload)
+      // 이미지를 배치로 분할
+      const batches: Array<Array<{ data: string; filename: string; mimeType: string }>> = []
+      let currentBatch: Array<{ data: string; filename: string; mimeType: string }> = []
+      let currentBatchSize = 0
 
-      if (!result.success) {
-        alert(result.errors?.join('\n') || '업로드에 실패했습니다.')
-        return
+      for (const image of allImages) {
+        // 현재 배치에 추가하면 제한을 초과하는 경우 새 배치 시작
+        if (currentBatchSize + image.size > BATCH_SIZE_LIMIT && currentBatch.length > 0) {
+          batches.push(currentBatch)
+          currentBatch = []
+          currentBatchSize = 0
+        }
+
+        currentBatch.push({
+          data: image.data,
+          filename: image.filename,
+          mimeType: image.mimeType,
+        })
+        currentBatchSize += image.size
       }
 
-      // 성공한 URL들을 userData에 추가
-      if (result.urls && result.urls.length > 0) {
-        updateField(field.dataPath, [...images, ...result.urls])
+      // 마지막 배치 추가
+      if (currentBatch.length > 0) {
+        batches.push(currentBatch)
       }
 
-      // 부분 실패 시 알림
-      if (result.errors && result.errors.length > 0) {
-        alert(`일부 이미지 업로드 실패:\n${result.errors.join('\n')}`)
+      // 배치를 순차적으로 업로드
+      const allUploadedUrls: string[] = []
+      const allErrors: string[] = []
+
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i]
+        const result = await uploadGalleryImages(invitationId, batch)
+
+        if (result.urls) {
+          allUploadedUrls.push(...result.urls)
+        }
+        if (result.errors) {
+          allErrors.push(...result.errors)
+        }
+
+        // 업로드된 URL들을 즉시 반영 (배치마다)
+        if (result.urls && result.urls.length > 0) {
+          const currentImages = (getFieldValue(field.dataPath) as string[]) || []
+          updateField(field.dataPath, [...currentImages, ...result.urls])
+        }
+      }
+
+      // 전체 결과 알림
+      if (allUploadedUrls.length === 0 && allErrors.length > 0) {
+        alert(allErrors.join('\n') || '업로드에 실패했습니다.')
+      } else if (allErrors.length > 0) {
+        alert(`일부 이미지 업로드 실패:\n${allErrors.join('\n')}`)
       }
     } catch (error) {
       console.error('Image upload failed:', error)
