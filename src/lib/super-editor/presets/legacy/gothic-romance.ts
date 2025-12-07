@@ -36,7 +36,7 @@ export const gothicRomancePreset: PredefinedTemplatePreset = {
 
   // 인트로 설정
   intro: {
-    type: 'cinematic', // gothic-romance uses cinematic intro type
+    type: 'gothic-romance',
     duration: 4500,
     skipEnabled: true,
     skipDelay: 2500,

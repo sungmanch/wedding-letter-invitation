@@ -139,4 +139,8 @@ export const introTypeLabels: Record<LegacyIntroType, { en: string; ko: string }
   cinematic: { en: 'Cinematic', ko: '시네마틱' },
   exhibition: { en: 'Exhibition', ko: '갤러리' },
   magazine: { en: 'Magazine', ko: '매거진' },
+  'gothic-romance': { en: 'Gothic Romance', ko: '고딕 로맨스' },
+  'old-money': { en: 'Old Money', ko: '올드 머니' },
+  monogram: { en: 'Monogram Crest', ko: '모노그램 크레스트' },
+  'jewel-velvet': { en: 'Jewel Velvet', ko: '주얼 벨벳' },
 }

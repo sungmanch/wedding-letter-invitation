@@ -8,17 +8,16 @@ import type { PrimitiveNode } from '../../../schema/primitives'
 import type { IntroBuilder, IntroBuilderResult, IntroBuilderContext } from './types'
 import { uid, formatDate, withOpacity } from './types'
 
-// Wong Kar-wai 시그니처 컬러
-const WKW_COLORS = {
+// Cinematic 고유의 오버레이 색상 (화양연화 무드)
+const CINEMATIC_OVERLAY = {
   red: '#8B2635',
-  gold: '#C9A962',
-  cream: '#F5E6D3',
   teal: '#1A4D4D',
 }
 
 export const buildCinematicIntro: IntroBuilder = (ctx: IntroBuilderContext): IntroBuilderResult => {
   const { preset, data } = ctx
   const { groomName, brideName, weddingDate, venueName, mainImage } = data
+  const colors = preset.defaultColors
   const fonts = preset.defaultFonts
 
   // 데이터 바인딩 표현식인지 확인 (런타임에 치환될 경우)
@@ -37,25 +36,24 @@ export const buildCinematicIntro: IntroBuilder = (ctx: IntroBuilderContext): Int
     weekday = formatted.weekday
   }
 
-  // Root: fullscreen with black background
+  // Root: fullscreen with preset background color
   const root: PrimitiveNode = {
     id: uid('cinematic-root'),
     type: 'fullscreen',
     style: {
-      backgroundColor: '#000000',
+      backgroundColor: colors.background,
       overflow: 'hidden',
       position: 'relative',
     },
     children: [
       // 1. Background Image (with film flicker class)
-      // 항상 이미지 컨테이너 생성 (바인딩 표현식은 런타임에 치환됨)
       createBackgroundImage(mainImage || ''),
 
       // 2. Red/Teal Gradient Overlay (Wong Kar-wai signature)
       createColorOverlay(),
 
-      // 3. Gold Highlight Layer
-      createGoldHighlight(),
+      // 3. Gold Highlight Layer (using preset accent)
+      createGoldHighlight(colors.accent),
 
       // 4. Vignette Effect
       createVignette(),
@@ -64,7 +62,7 @@ export const buildCinematicIntro: IntroBuilder = (ctx: IntroBuilderContext): Int
       createFilmGrain(),
 
       // 6. Content Layer
-      createContentLayer(fonts, groomName, brideName, dateFormatted, weekday, venueName),
+      createContentLayer(fonts, colors, groomName, brideName, dateFormatted, weekday, venueName),
 
       // 7. Film Frame Edges
       createFilmFrameEdges(),
@@ -113,26 +111,27 @@ function createBackgroundImage(src: string): PrimitiveNode {
 }
 
 function createColorOverlay(): PrimitiveNode {
+  // 화양연화 시그니처 오버레이 (cinematic 전용)
   return {
     id: uid('color-overlay'),
     type: 'container',
     style: {
       position: 'absolute',
       inset: 0,
-      background: `linear-gradient(180deg, rgba(139, 38, 53, 0.4) 0%, rgba(180, 60, 60, 0.3) 30%, rgba(26, 77, 77, 0.2) 70%, rgba(0, 0, 0, 0.6) 100%)`,
+      background: `linear-gradient(180deg, ${withOpacity(CINEMATIC_OVERLAY.red, 0.4)} 0%, ${withOpacity(CINEMATIC_OVERLAY.red, 0.3)} 30%, ${withOpacity(CINEMATIC_OVERLAY.teal, 0.2)} 70%, rgba(0, 0, 0, 0.6) 100%)`,
       mixBlendMode: 'multiply',
     },
   }
 }
 
-function createGoldHighlight(): PrimitiveNode {
+function createGoldHighlight(accentColor: string): PrimitiveNode {
   return {
     id: uid('gold-highlight'),
     type: 'container',
     style: {
       position: 'absolute',
       inset: 0,
-      background: `radial-gradient(ellipse at 30% 20%, rgba(201, 169, 98, 0.15) 0%, transparent 50%)`,
+      background: `radial-gradient(ellipse at 30% 20%, ${withOpacity(accentColor, 0.15)} 0%, transparent 50%)`,
       mixBlendMode: 'overlay',
     },
   }
@@ -167,6 +166,7 @@ function createFilmGrain(): PrimitiveNode {
 
 function createContentLayer(
   fonts: { title: { family: string }; body: { family: string } },
+  colors: { text: string; accent: string; textMuted?: string },
   groomName: string,
   brideName: string,
   dateFormatted: string,
@@ -187,16 +187,16 @@ function createContentLayer(
     },
     children: [
       // Top Section
-      createTopSection(fonts.body.family),
+      createTopSection(fonts.body.family, colors.text),
       // Middle Section (Names & Date)
-      createMiddleSection(fonts.title.family, groomName, brideName, dateFormatted, weekday),
+      createMiddleSection(fonts.title.family, colors, groomName, brideName, dateFormatted, weekday),
       // Bottom Section (Location)
-      createBottomSection(fonts.body.family, venueName),
+      createBottomSection(fonts.body.family, colors, venueName),
     ],
   }
 }
 
-function createTopSection(bodyFont: string): PrimitiveNode {
+function createTopSection(bodyFont: string, textColor: string): PrimitiveNode {
   return {
     id: uid('top-section'),
     type: 'row',
@@ -215,7 +215,7 @@ function createTopSection(bodyFont: string): PrimitiveNode {
           fontSize: '12px',
           letterSpacing: '0.15em',
           opacity: 0.6,
-          color: WKW_COLORS.cream,
+          color: textColor,
           fontFamily: bodyFont,
         },
         props: {
@@ -230,7 +230,7 @@ function createTopSection(bodyFont: string): PrimitiveNode {
           fontSize: '10px',
           letterSpacing: '0.3em',
           textTransform: 'uppercase',
-          color: withOpacity(WKW_COLORS.cream, 0.5),
+          color: withOpacity(textColor, 0.5),
         },
         props: {
           content: 'Wedding Ceremony',
@@ -242,6 +242,7 @@ function createTopSection(bodyFont: string): PrimitiveNode {
 
 function createMiddleSection(
   titleFont: string,
+  colors: { text: string; accent: string },
   groomName: string,
   brideName: string,
   dateFormatted: string,
@@ -268,7 +269,7 @@ function createMiddleSection(
           width: '1px',
           height: '48px',
           marginBottom: '24px',
-          background: `linear-gradient(to bottom, transparent, ${withOpacity(WKW_COLORS.gold, 0.6)}, transparent)`,
+          background: `linear-gradient(to bottom, transparent, ${withOpacity(colors.accent, 0.6)}, transparent)`,
         },
       },
       // Groom Name
@@ -280,9 +281,9 @@ function createMiddleSection(
           lineHeight: 1.1,
           fontWeight: 300,
           letterSpacing: '0.2em',
-          color: WKW_COLORS.cream,
+          color: colors.text,
           fontFamily: titleFont,
-          textShadow: '0 0 40px rgba(220, 38, 38, 0.3), 0 0 80px rgba(220, 38, 38, 0.2)',
+          textShadow: `0 0 40px ${withOpacity(CINEMATIC_OVERLAY.red, 0.3)}, 0 0 80px ${withOpacity(CINEMATIC_OVERLAY.red, 0.2)}`,
         },
         props: {
           content: groomName,
@@ -297,7 +298,7 @@ function createMiddleSection(
           fontSize: '1.125rem',
           letterSpacing: '0.15em',
           margin: '12px 0',
-          color: withOpacity(WKW_COLORS.gold, 0.8),
+          color: withOpacity(colors.accent, 0.8),
         },
         props: {
           content: '&',
@@ -312,9 +313,9 @@ function createMiddleSection(
           lineHeight: 1.1,
           fontWeight: 300,
           letterSpacing: '0.2em',
-          color: WKW_COLORS.cream,
+          color: colors.text,
           fontFamily: titleFont,
-          textShadow: '0 0 40px rgba(220, 38, 38, 0.3), 0 0 80px rgba(220, 38, 38, 0.2)',
+          textShadow: `0 0 40px ${withOpacity(CINEMATIC_OVERLAY.red, 0.3)}, 0 0 80px ${withOpacity(CINEMATIC_OVERLAY.red, 0.2)}`,
         },
         props: {
           content: brideName,
@@ -322,7 +323,7 @@ function createMiddleSection(
         },
       },
       // Decorative divider
-      createDecorativeDivider(),
+      createDecorativeDivider(colors.accent),
       // Date
       {
         id: uid('date'),
@@ -331,7 +332,7 @@ function createMiddleSection(
           fontSize: '0.875rem',
           letterSpacing: '0.25em',
           marginBottom: '4px',
-          color: withOpacity(WKW_COLORS.cream, 0.9),
+          color: withOpacity(colors.text, 0.9),
         },
         props: {
           content: dateFormatted,
@@ -344,7 +345,7 @@ function createMiddleSection(
         style: {
           fontSize: '0.75rem',
           letterSpacing: '0.3em',
-          color: withOpacity(WKW_COLORS.cream, 0.6),
+          color: withOpacity(colors.text, 0.6),
         },
         props: {
           content: weekday,
@@ -354,7 +355,7 @@ function createMiddleSection(
   }
 }
 
-function createDecorativeDivider(): PrimitiveNode {
+function createDecorativeDivider(accentColor: string): PrimitiveNode {
   return {
     id: uid('divider'),
     type: 'row',
@@ -370,7 +371,7 @@ function createDecorativeDivider(): PrimitiveNode {
         style: {
           width: '48px',
           height: '1px',
-          background: `linear-gradient(to right, transparent, ${withOpacity(WKW_COLORS.gold, 0.5)})`,
+          background: `linear-gradient(to right, transparent, ${withOpacity(accentColor, 0.5)})`,
         },
       },
       {
@@ -380,7 +381,7 @@ function createDecorativeDivider(): PrimitiveNode {
           width: '6px',
           height: '6px',
           transform: 'rotate(45deg)',
-          backgroundColor: withOpacity(WKW_COLORS.gold, 0.6),
+          backgroundColor: withOpacity(accentColor, 0.6),
         },
       },
       {
@@ -389,19 +390,23 @@ function createDecorativeDivider(): PrimitiveNode {
         style: {
           width: '48px',
           height: '1px',
-          background: `linear-gradient(to left, transparent, ${withOpacity(WKW_COLORS.gold, 0.5)})`,
+          background: `linear-gradient(to left, transparent, ${withOpacity(accentColor, 0.5)})`,
         },
       },
     ],
   }
 }
 
-function createBottomSection(bodyFont: string, venueName?: string): PrimitiveNode {
+function createBottomSection(
+  bodyFont: string,
+  colors: { text: string; accent: string },
+  venueName?: string
+): PrimitiveNode {
   return {
     id: uid('bottom-section'),
     type: 'column',
     style: {
-      borderTop: `1px solid ${withOpacity(WKW_COLORS.gold, 0.2)}`,
+      borderTop: `1px solid ${withOpacity(colors.accent, 0.2)}`,
       paddingTop: '24px',
     },
     children: [
@@ -413,7 +418,7 @@ function createBottomSection(bodyFont: string, venueName?: string): PrimitiveNod
           letterSpacing: '0.4em',
           textTransform: 'uppercase',
           marginBottom: '8px',
-          color: withOpacity(WKW_COLORS.cream, 0.4),
+          color: withOpacity(colors.text, 0.4),
         },
         props: {
           content: 'Location',
@@ -427,7 +432,7 @@ function createBottomSection(bodyFont: string, venueName?: string): PrimitiveNod
               style: {
                 fontSize: '0.875rem',
                 letterSpacing: '0.05em',
-                color: withOpacity(WKW_COLORS.cream, 0.9),
+                color: withOpacity(colors.text, 0.9),
                 fontFamily: bodyFont,
               },
               props: {
@@ -437,12 +442,12 @@ function createBottomSection(bodyFont: string, venueName?: string): PrimitiveNod
           ]
         : []),
       // Scroll indicator
-      createScrollIndicator(),
+      createScrollIndicator(colors.text),
     ],
   }
 }
 
-function createScrollIndicator(): PrimitiveNode {
+function createScrollIndicator(textColor: string): PrimitiveNode {
   return {
     id: uid('scroll-indicator'),
     type: 'column',
@@ -460,7 +465,7 @@ function createScrollIndicator(): PrimitiveNode {
           fontSize: '8px',
           letterSpacing: '0.3em',
           textTransform: 'uppercase',
-          color: withOpacity(WKW_COLORS.cream, 0.5),
+          color: withOpacity(textColor, 0.5),
         },
         props: {
           content: 'Scroll',
@@ -472,7 +477,7 @@ function createScrollIndicator(): PrimitiveNode {
         style: {
           width: '1px',
           height: '24px',
-          background: `linear-gradient(to bottom, ${withOpacity(WKW_COLORS.cream, 0.5)}, transparent)`,
+          background: `linear-gradient(to bottom, ${withOpacity(textColor, 0.5)}, transparent)`,
         },
         props: {
           className: 'animate-pulse',

@@ -36,7 +36,7 @@ export const monogramPreset: PredefinedTemplatePreset = {
 
   // 인트로 설정
   intro: {
-    type: 'cinematic', // monogram uses cinematic intro type
+    type: 'monogram',
     duration: 3500,
     skipEnabled: true,
     skipDelay: 2000,
