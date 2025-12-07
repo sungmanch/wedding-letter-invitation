@@ -827,6 +827,69 @@ export const FONT_PRESETS: FontPreset[] = [
     description: '가늘고 세련된 고딕체',
     recommended: ['body'],
   },
+
+  // ============================================
+  // 영문 디스플레이 (Self-hosted - Supabase)
+  // ============================================
+  {
+    id: 'lt-museum',
+    family: 'LTMuseum',
+    label: 'LT Museum',
+    labelEn: 'LT Museum',
+    category: 'serif-en',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://jtfqjfpvwikcvtoigufi.supabase.co/storage/v1/object/public/webfont/lt-museum/LTMuseum-Regular.woff2',
+      format: 'woff2',
+    },
+    weights: [
+      { value: 300, label: '얇게' },
+      { value: 400, label: '보통' },
+      { value: 700, label: '굵게' },
+      { value: 900, label: '매우 굵게' },
+    ],
+    defaultWeight: 400,
+    fallback: 'serif',
+    license: 'OFL',
+    description: '클래식 박물관 스타일 세리프. 격조 있는 타이틀용',
+    recommended: ['title'],
+  },
+  {
+    id: 'high-summit',
+    family: 'HighSummit',
+    label: 'High Summit',
+    labelEn: 'High Summit',
+    category: 'display-en',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://jtfqjfpvwikcvtoigufi.supabase.co/storage/v1/object/public/webfont/high-summit/HighSummit.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'serif',
+    license: 'Free',
+    description: '자연스러운 손글씨 디스플레이 폰트',
+    recommended: ['title', 'accent'],
+  },
+  {
+    id: 'high-empathy',
+    family: 'HighEmpathy',
+    label: 'High Empathy',
+    labelEn: 'High Empathy',
+    category: 'display-en',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://jtfqjfpvwikcvtoigufi.supabase.co/storage/v1/object/public/webfont/high-empathy/HighEmpathy.woff2',
+      format: 'woff2',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'Free',
+    description: '감성적인 손글씨 스크립트체',
+    recommended: ['accent'],
+  },
 ]
 
 // ============================================
