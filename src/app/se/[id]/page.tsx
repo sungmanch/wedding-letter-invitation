@@ -68,10 +68,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const userData = data.invitation.userData as UserData
-  const { title, description, imageUrl } = extractShareInfo(userData)
+  const { invitation } = data
+  const userData = invitation.userData as UserData
+  const fallback = extractShareInfo(userData)
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://wedding-letter.vercel.app'
   const url = `${baseUrl}/se/${id}`
+
+  // DB에 저장된 OG 데이터 우선 사용, 없으면 fallback
+  const title = invitation.ogTitle || fallback.title
+  const description = invitation.ogDescription || fallback.description
+  const imageUrl = invitation.ogImageUrl || fallback.imageUrl
 
   return {
     title,
@@ -80,7 +86,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       url,
-      siteName: '웨딩레터',
+      siteName: 'Maison de Letter',
       type: 'website',
       images: imageUrl ? [
         {
