@@ -13,7 +13,8 @@ import {
   type GenerationResult,
   type IntroGenerationResult,
 } from '../services/generation-service'
-import { createGeminiProvider } from '../services/gemini-provider'
+import { createGeminiProvider, generateStyleEnhanced } from '../services/gemini-provider'
+import { buildEnhancedPrompt, getMoodVariantHints, type EnhancedPromptInput } from '../prompts/prompt-hints'
 import type { StyleSchema } from '../schema/style'
 import type { LayoutSchema } from '../schema/layout'
 import type { VariablesSchema } from '../schema/variables'
@@ -147,6 +148,10 @@ export async function generateStyleAction(
 export interface GenerateIntroInput {
   prompt: string
   mood?: string[]
+  // 구조화된 입력 (위저드 UI용)
+  colorPreset?: string
+  customColor?: string
+  keyword?: string
 }
 
 export interface GenerateIntroOutput {
@@ -157,16 +162,107 @@ export interface GenerateIntroOutput {
 
 /**
  * Stage 1: Style + Intro만 생성
+ * 구조화된 입력 (mood, colorPreset, keyword)을 활용하여 더 정확한 스타일 생성
  */
 export async function generateIntroOnlyAction(
   input: GenerateIntroInput
 ): Promise<GenerateIntroOutput> {
   try {
-    const aiProvider = createGeminiProvider()
+    const { prompt, mood, colorPreset, customColor, keyword } = input
 
+    // 구조화된 입력이 있으면 강화된 프롬프트 생성
+    let enhancedPrompt = prompt
+    if (mood?.length || colorPreset || customColor || keyword) {
+      const enhancedInput: EnhancedPromptInput = {
+        moods: mood ?? [],
+        colorPreset,
+        customColor,
+        keyword,
+        additionalText: prompt,
+      }
+      enhancedPrompt = buildEnhancedPrompt(enhancedInput)
+    }
+
+    // 구조화된 입력이 있으면 generateStyleEnhanced 사용
+    const hasStructuredInput = colorPreset || customColor || keyword
+
+    if (hasStructuredInput) {
+      // 강화된 스타일 생성
+      const style = await generateStyleEnhanced({
+        prompt: enhancedPrompt,
+        mood,
+        colorPreset,
+        customColor,
+        keyword,
+      })
+
+      // variantHints 기반으로 Intro 섹션 생성
+      const variantHints = getMoodVariantHints(mood ?? [])
+
+      // AIProvider 생성 (selectVariants용)
+      const aiProvider = createGeminiProvider()
+
+      // generateIntroOnly 대신 직접 처리
+      const { resolveTokens } = await import('../tokens/resolver')
+      const { generateCssVariables } = await import('../tokens/css-generator')
+      const { getSkeleton } = await import('../skeletons/registry')
+      const { resolveSkeletonToScreen } = await import('../builder/skeleton-resolver')
+      const { buildFillerPrompt, variantToSummary } = await import('../prompts/filler-prompt')
+
+      const tokens = resolveTokens(style)
+      const cssVariables = generateCssVariables(tokens)
+
+      // Intro variant 선택
+      const introSkeleton = getSkeleton('intro')
+      if (!introSkeleton) {
+        throw new Error('Intro 스켈레톤을 찾을 수 없습니다')
+      }
+
+      // variantHints를 고려한 프롬프트 생성
+      const fillerPrompt = buildFillerPrompt({
+        prompt: enhancedPrompt,
+        mood,
+        sections: [
+          {
+            sectionType: 'intro',
+            variants: introSkeleton.variants.map(variantToSummary),
+          },
+        ],
+        tokens,
+      })
+
+      // variant 선택 시 힌트 전달
+      const hintedPrompt = variantHints.length > 0
+        ? `${fillerPrompt}\n\n# 추천 Variant (우선 고려)\n${variantHints.join(', ')}`
+        : fillerPrompt
+
+      const response = await aiProvider.selectVariants(enhancedPrompt, hintedPrompt)
+      const introSelection = response.sections.find(s => s.sectionType === 'intro') ?? {
+        sectionType: 'intro' as const,
+        variantId: introSkeleton.defaultVariant,
+      }
+
+      const introScreen = resolveSkeletonToScreen('intro', tokens, introSelection)
+      if (!introScreen) {
+        throw new Error('Intro 화면 생성에 실패했습니다')
+      }
+
+      return {
+        success: true,
+        data: {
+          style,
+          tokens,
+          cssVariables,
+          introScreen,
+        },
+      }
+    }
+
+    // 기존 방식 (구조화된 입력 없음)
+    const aiProvider = createGeminiProvider()
     const options: GenerationOptions = {
-      prompt: input.prompt,
-      mood: input.mood,
+      prompt: enhancedPrompt,
+      mood,
     }
 
     const result = await generateIntroOnly(options, aiProvider)
