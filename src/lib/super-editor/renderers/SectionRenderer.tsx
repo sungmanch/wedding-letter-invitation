@@ -20,9 +20,11 @@ interface SectionRendererProps {
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
   className?: string
-  // Variant switcher props (dev mode only)
+  // Variant switcher props
   currentVariantId?: string
   onVariantChange?: (sectionType: SectionType, variantId: string) => void
+  // 섹션 내부 VariantSwitcher 표시 여부 (false면 외부 패널 사용)
+  showVariantSwitcher?: boolean
 }
 
 export function SectionRenderer({
@@ -34,6 +36,7 @@ export function SectionRenderer({
   className,
   currentVariantId,
   onVariantChange,
+  showVariantSwitcher: showVariantSwitcherProp = true,
 }: SectionRendererProps) {
   // 렌더 컨텍스트 생성 - userData가 변경될 때마다 새로 생성
   const context: RenderContext = createNodeRenderer({
@@ -46,12 +49,12 @@ export function SectionRenderer({
   // Screen의 root 노드 렌더링
   const rendered = renderPrimitiveNode(screen.root, context)
 
-  // 개발 모드에서 variant switcher 표시 여부
-  const showVariantSwitcher =
-    process.env.NODE_ENV === 'development' &&
-    mode === 'edit' &&
-    currentVariantId &&
-    onVariantChange
+  // variant switcher 표시 여부
+  // - showVariantSwitcherProp이 true이고
+  // - 편집 모드이고
+  // - currentVariantId와 onVariantChange가 있을 때
+  const shouldShowSwitcher =
+    showVariantSwitcherProp && mode === 'edit' && currentVariantId && onVariantChange
 
   return (
     <section
@@ -60,7 +63,7 @@ export function SectionRenderer({
       data-screen-id={screen.id}
       className={`relative ${className ?? ''}`}
     >
-      {showVariantSwitcher && (
+      {shouldShowSwitcher && (
         <VariantSwitcher
           sectionType={screen.sectionType}
           currentVariantId={currentVariantId}

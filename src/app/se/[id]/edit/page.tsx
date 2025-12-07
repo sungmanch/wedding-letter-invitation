@@ -130,18 +130,16 @@ function EditPageContent() {
           brideName,
         })
 
-        // Initialize section variants from layout or defaults (dev mode only)
-        if (process.env.NODE_ENV === 'development') {
-          const layout = template.layoutSchema as LayoutSchema
-          const initialVariants: Record<SectionType, string> = {} as Record<SectionType, string>
-          for (const screen of layout.screens) {
-            const sectionType = screen.sectionType as SectionType
-            // Try to get variant from screen name or use default
-            const defaultVar = getDefaultVariant(sectionType)
-            initialVariants[sectionType] = defaultVar?.id ?? 'default'
-          }
-          setSectionVariants(initialVariants)
+        // Initialize section variants from layout or defaults
+        const layout = template.layoutSchema as LayoutSchema
+        const initialVariants: Record<SectionType, string> = {} as Record<SectionType, string>
+        for (const screen of layout.screens) {
+          const sectionType = screen.sectionType as SectionType
+          // Try to get variant from screen name or use default
+          const defaultVar = getDefaultVariant(sectionType)
+          initialVariants[sectionType] = defaultVar?.id ?? 'default'
         }
+        setSectionVariants(initialVariants)
       } catch (err) {
         console.error('Failed to load invitation:', err)
         setError('청첩장을 불러오는데 실패했습니다.')
@@ -300,10 +298,10 @@ function EditPageContent() {
     [setStyle]
   )
 
-  // Variant change handler (dev mode only)
+  // Variant change handler - Host가 섹션 스타일 변경 가능
   const handleVariantChange = useCallback(
     (sectionType: SectionType, variantId: string) => {
-      if (process.env.NODE_ENV !== 'development' || !state.layout) return
+      if (!state.layout) return
 
       setSectionVariants((prev) => ({ ...prev, [sectionType]: variantId }))
 
