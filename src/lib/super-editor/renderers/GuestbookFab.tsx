@@ -12,9 +12,11 @@ interface GuestbookFabProps {
   onClick?: () => void
   /** 편집 모드 여부 */
   mode?: 'preview' | 'edit' | 'build'
+  /** 투명도 (0~1) */
+  opacity?: number
 }
 
-export function GuestbookFab({ onClick, mode = 'preview' }: GuestbookFabProps) {
+export function GuestbookFab({ onClick, mode = 'preview', opacity = 1 }: GuestbookFabProps) {
   // 프리뷰: PhoneFrame 내 고정 (absolute), 실제 화면: 화면 하단 고정 (fixed)
   const isViewer = mode === 'build'
 
@@ -45,7 +47,9 @@ export function GuestbookFab({ onClick, mode = 'preview' }: GuestbookFabProps) {
         fontSize: 15,
         fontWeight: 500,
         whiteSpace: 'nowrap',
-        pointerEvents: 'auto',
+        pointerEvents: opacity > 0 ? 'auto' : 'none',
+        opacity,
+        transition: 'opacity 0.3s ease',
       }}
       aria-label="축하 메시지 남기기"
     >
