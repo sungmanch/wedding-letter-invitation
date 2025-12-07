@@ -248,6 +248,7 @@ export function resolveStandardVariable(path: string): VariableDeclaration | nul
     minItems: standard.minItems,
     fields: standard.fields,
     itemLabel: standard.itemLabel,
+    order: standard.order,
   }
 }
 
