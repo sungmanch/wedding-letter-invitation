@@ -150,11 +150,75 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     type: 'date',
     label: '예식 날짜',
     required: true,
+    defaultValue: '2025-03-15',
   },
   'wedding.time': {
     type: 'time',
     label: '예식 시간',
     required: true,
+    defaultValue: '14:00',
+  },
+  // 화면 표시용 날짜/시간 (한글 형식 - 스켈레톤 템플릿에서 사용)
+  'wedding.dateDisplay': {
+    type: 'text',
+    label: '예식 날짜',
+    required: true,
+    placeholder: '2025년 3월 15일 토요일',
+    defaultValue: '2025년 3월 15일 토요일',
+    helpText: '예: 2025년 3월 15일 토요일',
+  },
+  'wedding.timeDisplay': {
+    type: 'text',
+    label: '예식 시간',
+    required: true,
+    placeholder: '오후 2시',
+    defaultValue: '오후 2시',
+    helpText: '예: 오후 2시, 낮 12시',
+  },
+  'wedding.dday': {
+    type: 'number',
+    label: 'D-Day',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
+  },
+  // Calendar variant용 파생 필드 (wedding.date에서 자동 계산)
+  'wedding.month': {
+    type: 'text',
+    label: '예식 월',
+    required: false,
+    description: '__HIDDEN__',
+  },
+  'wedding.day': {
+    type: 'text',
+    label: '예식 일',
+    required: false,
+    description: '__HIDDEN__',
+  },
+  'wedding.weekday': {
+    type: 'text',
+    label: '예식 요일',
+    required: false,
+    description: '__HIDDEN__',
+  },
+
+  // Countdown (자동 계산값 - 에디터에서 숨김)
+  'countdown.days': {
+    type: 'number',
+    label: 'D-Day',
+    required: false,
+    description: '__HIDDEN__',
+  },
+  'countdown.hours': {
+    type: 'number',
+    label: '시간',
+    required: false,
+    description: '__HIDDEN__',
+  },
+  'countdown.minutes': {
+    type: 'number',
+    label: '분',
+    required: false,
+    description: '__HIDDEN__',
   },
 
   // Venue
@@ -169,12 +233,14 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     label: '예식장 이름',
     required: true,
     placeholder: '그랜드 웨딩홀',
+    defaultValue: '그랜드 웨딩홀',
   },
   'venue.hall': {
     type: 'text',
     label: '홀 이름',
     required: false,
     placeholder: '3층 그랜드볼룸',
+    defaultValue: '3층 그랜드볼룸',
   },
   'venue.address': {
     type: 'text',

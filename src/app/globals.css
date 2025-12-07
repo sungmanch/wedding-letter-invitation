@@ -192,6 +192,35 @@ body {
 }
 
 /* ==========================================
+   Gold Theme Scrollbar (Editor)
+   ========================================== */
+
+/* 에디터 패널용 골드 스크롤바 */
+.scrollbar-gold {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 98, 0.3) transparent;
+}
+
+.scrollbar-gold::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-gold::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-gold::-webkit-scrollbar-thumb {
+  background-color: rgba(201, 169, 98, 0.3);
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.scrollbar-gold::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(201, 169, 98, 0.6);
+  box-shadow: 0 0 8px rgba(201, 169, 98, 0.3);
+}
+
+/* ==========================================
    Scrollytelling Landing Page Styles
    ========================================== */
 

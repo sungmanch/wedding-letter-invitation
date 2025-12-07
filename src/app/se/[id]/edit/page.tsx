@@ -13,9 +13,7 @@ import {
 } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import {
-  EditorPanel,
-  EditorToolbar,
-  SectionManager,
+  ContentTab,
   StyleEditor,
   InvitationPreview,
   OgMetadataEditor,
@@ -26,7 +24,6 @@ import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/previe
 import {
   DEFAULT_SECTION_ORDER,
   DEFAULT_SECTION_ENABLED,
-  REORDERABLE_SECTIONS,
 } from '@/lib/super-editor/schema/section-types'
 import {
   replaceScreenVariant,
@@ -40,7 +37,7 @@ import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 
-type EditorTab = 'fields' | 'style' | 'sections' | 'share'
+type EditorTab = 'content' | 'design' | 'share'
 
 function EditPageContent() {
   const params = useParams()
@@ -57,7 +54,9 @@ function EditPageContent() {
   const [sectionEnabled, setSectionEnabled] =
     useState<Record<SectionType, boolean>>(DEFAULT_SECTION_ENABLED)
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>()
-  const [activeTab, setActiveTab] = useState<EditorTab>('fields')
+  const [activeTab, setActiveTab] = useState<EditorTab>('content')
+  // 현재 펼쳐진 섹션 (ContentTab용)
+  const [expandedSection, setExpandedSection] = useState<SectionType | null>('intro')
   // 변수 선언 (에디터 필드 생성용)
   const [variablesSchema, setVariablesSchema] = useState<VariablesSchema | undefined>()
   // Variant switcher state (dev mode only)
@@ -362,6 +361,12 @@ function EditPageContent() {
     [state.layout, state.style, setTemplate, sectionOrder]
   )
 
+  // 프리뷰에서 섹션 클릭 시 해당 섹션으로 이동
+  const handleSectionClick = useCallback((sectionType: SectionType) => {
+    setExpandedSection(sectionType)
+    setActiveTab('content')
+  }, [])
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#0A0806]">
@@ -453,41 +458,31 @@ function EditPageContent() {
           {/* 탭 네비게이션 */}
           <div className="flex border-b border-white/10 shrink-0">
             <button
-              onClick={() => setActiveTab('fields')}
+              onClick={() => setActiveTab('content')}
               className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'fields'
+                activeTab === 'content'
                   ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
                   : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
               }`}
             >
-              내용
+              콘텐츠
             </button>
             <button
-              onClick={() => setActiveTab('style')}
+              onClick={() => setActiveTab('design')}
               className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'style'
+                activeTab === 'design'
                   ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
                   : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
               }`}
             >
-              스타일
-            </button>
-            <button
-              onClick={() => setActiveTab('sections')}
-              className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'sections'
-                  ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
-                  : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
-              }`}
-            >
-              섹션
+              디자인
             </button>
             <button
               onClick={() => setActiveTab('share')}
               className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'share'
-                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
+                  : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
               }`}
             >
               공유
@@ -495,35 +490,21 @@ function EditPageContent() {
           </div>
 
           {/* 탭 콘텐츠 */}
-          {activeTab === 'fields' && (
-            <>
-              <EditorToolbar />
-              <EditorPanel
-                className="flex-1 overflow-y-auto"
-                layout={state.layout ?? undefined}
-                declarations={variablesSchema?.declarations}
-                enabledSections={
-                  ['intro', ...sectionOrder.filter((s) => sectionEnabled[s])] as SectionType[]
-                }
-              />
-            </>
+          {activeTab === 'content' && (
+            <ContentTab
+              sectionOrder={sectionOrder}
+              sectionEnabled={sectionEnabled}
+              onOrderChange={handleSectionOrderChange}
+              onEnabledChange={handleSectionEnabledChange}
+              layout={state.layout ?? undefined}
+              declarations={variablesSchema?.declarations}
+              expandedSection={expandedSection}
+              onExpandedSectionChange={setExpandedSection}
+              className="flex-1"
+            />
           )}
-          {activeTab === 'style' && state.style && (
-            <StyleEditor style={state.style} onStyleChange={handleStyleChange} className="flex-1" />
-          )}
-          {activeTab === 'sections' && (
-            <div className="flex-1 overflow-y-auto">
-              <SectionManager
-                sectionOrder={sectionOrder.filter((s): s is SectionType =>
-                  REORDERABLE_SECTIONS.includes(s as (typeof REORDERABLE_SECTIONS)[number])
-                )}
-                sectionEnabled={sectionEnabled}
-                onOrderChange={handleSectionOrderChange}
-                onEnabledChange={handleSectionEnabledChange}
-                layout={state.layout ?? undefined}
-                onAddSection={handleAddSection}
-              />
-            </div>
+          {activeTab === 'design' && state.style && (
+            <StyleEditor style={state.style} onStyleChange={handleStyleChange} className="flex-1 scrollbar-gold" />
           )}
           {activeTab === 'share' && (
             <OgMetadataEditor
@@ -533,7 +514,7 @@ function EditPageContent() {
               mainImageUrl={ogDefaults.mainImageUrl}
               groomName={ogDefaults.groomName}
               brideName={ogDefaults.brideName}
-              className="flex-1 overflow-y-auto"
+              className="flex-1 overflow-y-auto scrollbar-gold"
               onChange={setOgValues}
               saveMessage={ogSaveMessage}
             />
@@ -543,7 +524,7 @@ function EditPageContent() {
         {/* 중앙: 미리보기 */}
         {activeTab === 'share' ? (
           // 공유 탭: 배경 전체가 스크롤되는 레이아웃
-          <div className="flex-1 bg-[#0A0806] overflow-y-auto">
+          <div className="flex-1 bg-[#0A0806] overflow-y-auto scrollbar-gold">
             <SharePreview
               ogTitle={ogValues.title || ogDefaults.title}
               ogDescription={ogValues.description || ogDefaults.description}
@@ -564,6 +545,8 @@ function EditPageContent() {
                   mode="edit"
                   selectedNodeId={selectedNodeId}
                   onSelectNode={handleSelectNode}
+                  onSectionClick={handleSectionClick}
+                  highlightedSection={expandedSection}
                   sectionVariants={sectionVariants}
                   onVariantChange={handleVariantChange}
                   withFrame

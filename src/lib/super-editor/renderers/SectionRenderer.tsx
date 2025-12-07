@@ -20,6 +20,10 @@ interface SectionRendererProps {
   mode?: 'preview' | 'edit' | 'build'
   selectedNodeId?: string
   onSelectNode?: (id: string) => void
+  // 섹션 클릭 핸들러 (에디터 연동)
+  onSectionClick?: (sectionType: SectionType) => void
+  // 하이라이트 여부 (에디터에서 펼쳐진 섹션)
+  isHighlighted?: boolean
   className?: string
   // Variant switcher props
   currentVariantId?: string
@@ -34,6 +38,8 @@ export function SectionRenderer({
   mode = 'preview',
   selectedNodeId,
   onSelectNode,
+  onSectionClick,
+  isHighlighted = false,
   className,
   currentVariantId,
   onVariantChange,
@@ -62,12 +68,26 @@ export function SectionRenderer({
   const shouldShowSwitcher =
     showVariantSwitcherProp && mode === 'edit' && currentVariantId && onVariantChange
 
+  // 클릭 핸들러 (편집 모드에서만)
+  const handleClick = (e: React.MouseEvent) => {
+    if (mode === 'edit' && onSectionClick) {
+      e.stopPropagation()
+      onSectionClick(screen.sectionType)
+    }
+  }
+
   return (
     <section
       id={`section-${screen.sectionType}`}
       data-section-type={screen.sectionType}
       data-screen-id={screen.id}
       className={`relative ${className ?? ''}`}
+      onClick={handleClick}
+      style={{
+        cursor: mode === 'edit' && onSectionClick ? 'pointer' : undefined,
+        outline: isHighlighted ? '2px solid #C9A962' : undefined,
+        outlineOffset: isHighlighted ? '-2px' : undefined,
+      }}
     >
       {shouldShowSwitcher && (
         <VariantSwitcher
