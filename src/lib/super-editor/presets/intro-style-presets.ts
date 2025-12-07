@@ -1,0 +1,225 @@
+/**
+ * Intro Style Presets
+ * 인트로 타입별 추천 스타일 데이터 (StyleEditor용)
+ */
+
+import type { LegacyIntroType } from './legacy/types'
+import type { StyleSchema } from '../schema/style'
+
+// ============================================
+// Types
+// ============================================
+
+export interface IntroStylePreset {
+  introType: LegacyIntroType
+  label: string
+  description: string
+  colors: {
+    primary: string
+    background: string
+    text: string
+    accent: string
+  }
+  fonts: {
+    title: { family: string; weight: number }
+    body: { family: string; weight: number }
+  }
+}
+
+// ============================================
+// Preset Data
+// ============================================
+
+export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
+  cinematic: {
+    introType: 'cinematic',
+    label: '시네마틱 무드',
+    description: '화양연화 스타일의 감성적인 분위기',
+    colors: {
+      primary: '#C9A962',
+      background: '#1A1A1A',
+      text: '#F5F5DC',
+      accent: '#E6C068',
+    },
+    fonts: {
+      title: { family: 'Nanum Myeongjo', weight: 400 },
+      body: { family: 'Noto Sans KR', weight: 300 },
+    },
+  },
+
+  exhibition: {
+    introType: 'exhibition',
+    label: '버추얼 갤러리',
+    description: '예술적이고 정적인 우아함',
+    colors: {
+      primary: '#2C2C2C',
+      background: '#FAFAFA',
+      text: '#1A1A1A',
+      accent: '#000000',
+    },
+    fonts: {
+      title: { family: 'Cormorant Garamond', weight: 300 },
+      body: { family: 'Pretendard', weight: 300 },
+    },
+  },
+
+  magazine: {
+    introType: 'magazine',
+    label: '매거진',
+    description: '보그/킨포크 스타일의 에디토리얼',
+    colors: {
+      primary: '#000000',
+      background: '#F8F6F3',
+      text: '#1A1A1A',
+      accent: '#C4A77D',
+    },
+    fonts: {
+      title: { family: 'Playfair Display', weight: 700 },
+      body: { family: 'Pretendard', weight: 300 },
+    },
+  },
+
+  'gothic-romance': {
+    introType: 'gothic-romance',
+    label: '고딕 로맨스',
+    description: '버건디와 에메랄드의 드라마틱한 분위기',
+    colors: {
+      primary: '#722F37',
+      background: '#0D0D0D',
+      text: '#F5E6D3',
+      accent: '#C9A962',
+    },
+    fonts: {
+      title: { family: 'Cormorant Garamond', weight: 500 },
+      body: { family: 'Noto Sans KR', weight: 300 },
+    },
+  },
+
+  'old-money': {
+    introType: 'old-money',
+    label: '올드 머니',
+    description: '레터프레스 질감의 Quiet Luxury',
+    colors: {
+      primary: '#D4AF37',
+      background: '#FFFEF5',
+      text: '#36454F',
+      accent: '#D4AF37',
+    },
+    fonts: {
+      title: { family: 'Cormorant Garamond', weight: 500 },
+      body: { family: 'Noto Sans KR', weight: 300 },
+    },
+  },
+
+  monogram: {
+    introType: 'monogram',
+    label: '모노그램 크레스트',
+    description: '네이비와 골드의 로열 프리미엄',
+    colors: {
+      primary: '#1E3A5F',
+      background: '#F5E6D3',
+      text: '#1E3A5F',
+      accent: '#C9A962',
+    },
+    fonts: {
+      title: { family: 'Playfair Display', weight: 600 },
+      body: { family: 'Noto Sans KR', weight: 300 },
+    },
+  },
+
+  'jewel-velvet': {
+    introType: 'jewel-velvet',
+    label: '주얼 벨벳',
+    description: '에메랄드와 버건디의 깊은 주얼톤',
+    colors: {
+      primary: '#2F4538',
+      background: '#0D0D0D',
+      text: '#F5E6D3',
+      accent: '#C9A962',
+    },
+    fonts: {
+      title: { family: 'Nanum Myeongjo', weight: 400 },
+      body: { family: 'Noto Sans KR', weight: 300 },
+    },
+  },
+}
+
+// ============================================
+// Utility Functions
+// ============================================
+
+/**
+ * 인트로 타입에 맞는 추천 스타일 프리셋 가져오기
+ */
+export function getIntroStylePreset(introType: LegacyIntroType): IntroStylePreset | undefined {
+  return INTRO_STYLE_PRESETS[introType]
+}
+
+/**
+ * IntroStylePreset을 StyleSchema에 적용
+ * 기존 StyleSchema를 복사하고 색상/폰트만 교체
+ */
+export function applyIntroStyleToSchema(
+  currentStyle: StyleSchema,
+  preset: IntroStylePreset
+): StyleSchema {
+  const newStyle = JSON.parse(JSON.stringify(currentStyle)) as StyleSchema
+  const { colors, fonts } = preset
+
+  // Primary color scale (500 기준, 400/600 자동 계산)
+  if (newStyle.theme.colors.primary) {
+    newStyle.theme.colors.primary[500] = colors.primary
+    newStyle.theme.colors.primary[400] = lightenColor(colors.primary, 0.15)
+    newStyle.theme.colors.primary[600] = darkenColor(colors.primary, 0.15)
+  }
+
+  // Accent color
+  if (newStyle.theme.colors.accent) {
+    newStyle.theme.colors.accent[500] = colors.accent
+  } else if (newStyle.theme.colors.secondary) {
+    newStyle.theme.colors.secondary[500] = colors.accent
+  }
+
+  // Background
+  newStyle.theme.colors.background.default = colors.background
+
+  // Text
+  newStyle.theme.colors.text.primary = colors.text
+
+  // Fonts
+  if (newStyle.theme.typography?.fonts) {
+    newStyle.theme.typography.fonts.heading.family = fonts.title.family
+    newStyle.theme.typography.fonts.body.family = fonts.body.family
+  }
+
+  // Font weights
+  if (newStyle.theme.typography?.weights) {
+    newStyle.theme.typography.weights.bold = fonts.title.weight
+    newStyle.theme.typography.weights.semibold = Math.max(400, fonts.title.weight - 100)
+    newStyle.theme.typography.weights.regular = fonts.body.weight
+  }
+
+  return newStyle
+}
+
+// ============================================
+// Color Utilities
+// ============================================
+
+function lightenColor(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16)
+  const amt = Math.round(255 * percent)
+  const R = Math.min(255, (num >> 16) + amt)
+  const G = Math.min(255, ((num >> 8) & 0x00ff) + amt)
+  const B = Math.min(255, (num & 0x0000ff) + amt)
+  return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`
+}
+
+function darkenColor(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16)
+  const amt = Math.round(255 * percent)
+  const R = Math.max(0, (num >> 16) - amt)
+  const G = Math.max(0, ((num >> 8) & 0x00ff) - amt)
+  const B = Math.max(0, (num & 0x0000ff) - amt)
+  return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`
+}
