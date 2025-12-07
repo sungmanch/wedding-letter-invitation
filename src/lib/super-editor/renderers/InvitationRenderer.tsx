@@ -20,7 +20,6 @@ import {
 } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
 import { MusicPlayer } from './MusicPlayer'
-import { GuestbookFab } from './GuestbookFab'
 import { TokenStyleProvider } from '../context/TokenStyleContext'
 
 // ============================================
@@ -208,16 +207,6 @@ function InvitationContent({
 
       {/* Music FAB (플로팅) */}
       {showMusic && music && <MusicPlayer screen={music} userData={userData} mode={mode} />}
-
-      {/* Guestbook FAB (플로팅) */}
-      {guestbookFab && (
-        <GuestbookFab
-          onClick={() => {
-            // TODO: 방명록 모달 열기
-            console.log('Open guestbook modal')
-          }}
-        />
-      )}
     </div>
   )
 }
