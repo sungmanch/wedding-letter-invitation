@@ -5,6 +5,42 @@ import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, getValueByPath } from '../types'
 import { renderPrimitiveNode } from '../render-node'
 
+// relation → relationLabel 매핑
+const GROOM_RELATION_LABELS: Record<string, string> = {
+  self: '신랑',
+  father: '신랑 부',
+  mother: '신랑 모',
+}
+
+const BRIDE_RELATION_LABELS: Record<string, string> = {
+  self: '신부',
+  father: '신부 부',
+  mother: '신부 모',
+}
+
+/**
+ * 계좌 데이터에 relationLabel 추가
+ */
+function addRelationLabel(
+  item: unknown,
+  dataPath: string
+): unknown {
+  if (typeof item !== 'object' || item === null) return item
+  const record = item as Record<string, unknown>
+
+  // relation 필드가 있으면 relationLabel 추가
+  if ('relation' in record && typeof record.relation === 'string') {
+    const isGroom = dataPath.includes('groom')
+    const labelMap = isGroom ? GROOM_RELATION_LABELS : BRIDE_RELATION_LABELS
+    return {
+      ...record,
+      relationLabel: labelMap[record.relation] || record.relation,
+    }
+  }
+
+  return item
+}
+
 export function Repeat({
   node,
   context,
@@ -53,10 +89,13 @@ export function Repeat({
 
   // 반복 렌더링
   const renderItems = slicedItems.map((item, index) => {
+    // relationLabel 자동 추가 (accounts.groom/bride용)
+    const enhancedItem = addRelationLabel(item, dataPath || '')
+
     // 컨텍스트에 반복 변수 추가
     const itemData = {
       ...context.data,
-      [props.as]: item,
+      [props.as]: enhancedItem,
       [`${props.as}Index`]: index,
       [`${props.as}First`]: index === 0,
       [`${props.as}Last`]: index === slicedItems.length - 1,
