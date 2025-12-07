@@ -482,17 +482,53 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
-                                    id: 'groom-compact-text',
-                                    type: 'text',
+                                    id: 'groom-account-info',
+                                    type: 'column',
                                     tokenStyle: {
-                                      fontFamily: '$token.typography.bodySm.fontFamily',
-                                      fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.primary',
+                                      gap: '$token.spacing.xs',
                                     },
-                                    props: {
-                                      content: '{{account.bank}} {{account.number}} (예금주: {{account.holder}})',
-                                      as: 'p',
-                                    },
+                                    children: [
+                                      {
+                                        id: 'groom-account-relation',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.headingSm.fontFamily',
+                                          fontSize: '$token.typography.headingSm.fontSize',
+                                          fontWeight: '$token.typography.headingSm.fontWeight',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.relationLabel}}',
+                                          as: 'h4',
+                                        },
+                                      },
+                                      {
+                                        id: 'groom-account-bank',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodySm.fontFamily',
+                                          fontSize: '$token.typography.bodySm.fontSize',
+                                          color: '$token.colors.text.secondary',
+                                        },
+                                        props: {
+                                          content: '{{account.bank}} (예금주: {{account.holder}})',
+                                          as: 'span',
+                                        },
+                                      },
+                                      {
+                                        id: 'groom-account-number',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                                          fontSize: '$token.typography.bodyMd.fontSize',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.number}}',
+                                          as: 'p',
+                                        },
+                                      },
+                                    ],
                                   },
                                   {
                                     id: 'groom-compact-copy',
@@ -585,17 +621,53 @@ export const accountsSkeleton: SectionSkeleton = {
                                 },
                                 children: [
                                   {
-                                    id: 'bride-compact-text',
-                                    type: 'text',
+                                    id: 'bride-account-info',
+                                    type: 'column',
                                     tokenStyle: {
-                                      fontFamily: '$token.typography.bodySm.fontFamily',
-                                      fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.text.primary',
+                                      gap: '$token.spacing.xs',
                                     },
-                                    props: {
-                                      content: '{{account.bank}} {{account.number}} (예금주: {{account.holder}})',
-                                      as: 'p',
-                                    },
+                                    children: [
+                                      {
+                                        id: 'bride-account-relation',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.headingSm.fontFamily',
+                                          fontSize: '$token.typography.headingSm.fontSize',
+                                          fontWeight: '$token.typography.headingSm.fontWeight',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.relationLabel}}',
+                                          as: 'h4',
+                                        },
+                                      },
+                                      {
+                                        id: 'bride-account-bank',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodySm.fontFamily',
+                                          fontSize: '$token.typography.bodySm.fontSize',
+                                          color: '$token.colors.text.secondary',
+                                        },
+                                        props: {
+                                          content: '{{account.bank}} (예금주: {{account.holder}})',
+                                          as: 'span',
+                                        },
+                                      },
+                                      {
+                                        id: 'bride-account-number',
+                                        type: 'text',
+                                        tokenStyle: {
+                                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                                          fontSize: '$token.typography.bodyMd.fontSize',
+                                          color: '$token.colors.text.primary',
+                                        },
+                                        props: {
+                                          content: '{{account.number}}',
+                                          as: 'p',
+                                        },
+                                      },
+                                    ],
                                   },
                                   {
                                     id: 'bride-compact-copy',

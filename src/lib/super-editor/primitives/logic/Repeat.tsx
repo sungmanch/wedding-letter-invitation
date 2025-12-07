@@ -32,13 +32,19 @@ function addRelationLabel(
   if ('relation' in record && typeof record.relation === 'string') {
     const isGroom = dataPath.includes('groom')
     const labelMap = isGroom ? GROOM_RELATION_LABELS : BRIDE_RELATION_LABELS
+    const label = labelMap[record.relation] || record.relation
     return {
       ...record,
-      relationLabel: labelMap[record.relation] || record.relation,
+      relationLabel: label,
     }
   }
 
-  return item
+  // relation 필드가 없으면 기본값 추가
+  const isGroom = dataPath.includes('groom')
+  return {
+    ...record,
+    relationLabel: isGroom ? '신랑' : '신부',
+  }
 }
 
 export function Repeat({
