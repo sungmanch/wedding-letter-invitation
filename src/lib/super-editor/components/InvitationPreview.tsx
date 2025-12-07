@@ -87,7 +87,7 @@ function PhoneFrame({
       <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
         {/* Notch */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-100" />
-        {/* Screen */}
+        {/* Screen - transform으로 새 containing block 생성 (fixed FAB이 프레임 안에 표시됨) */}
         <div
           ref={scrollRef}
           onScroll={onScroll}
@@ -97,6 +97,7 @@ function PhoneFrame({
               width,
               height,
               '--preview-screen-height': `${height}px`,
+              transform: 'translateZ(0)',
             } as React.CSSProperties
           }
         >
