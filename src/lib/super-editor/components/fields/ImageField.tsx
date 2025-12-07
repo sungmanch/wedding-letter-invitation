@@ -1,38 +1,87 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { ImageField as ImageFieldType } from '../../schema/editor'
 import { useSuperEditor } from '../../context'
+import { uploadGalleryImages, deleteGalleryImage } from '../../actions'
 
 interface ImageFieldProps {
   field: ImageFieldType
 }
 
 export function ImageField({ field }: ImageFieldProps) {
-  const { getFieldValue, updateField } = useSuperEditor()
+  const { getFieldValue, updateField, invitationId } = useSuperEditor()
   const value = (getFieldValue(field.dataPath) as string) || ''
   const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // 파일 크기 체크
-    if (field.maxSize && file.size > field.maxSize) {
-      alert(`파일 크기는 ${Math.round(field.maxSize / 1024 / 1024)}MB 이하여야 합니다.`)
+    // invitationId가 없으면 업로드 불가
+    if (!invitationId) {
+      alert('청첩장 ID가 없습니다. 페이지를 새로고침해주세요.')
       return
     }
 
-    // TODO: 실제 업로드 로직 구현
-    // 임시로 Data URL 사용
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      updateField(field.dataPath, event.target?.result as string)
+    // 파일 크기 체크 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('파일 크기는 10MB 이하여야 합니다.')
+      return
     }
-    reader.readAsDataURL(file)
+
+    setUploading(true)
+
+    try {
+      // 파일을 base64로 변환
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (event) => resolve(event.target?.result as string)
+        reader.readAsDataURL(file)
+      })
+
+      // S3에 업로드
+      const result = await uploadGalleryImages(invitationId, [{
+        data: dataUrl,
+        filename: file.name,
+        mimeType: file.type,
+      }])
+
+      if (!result.success || !result.urls || result.urls.length === 0) {
+        alert(result.errors?.join('\n') || '업로드에 실패했습니다.')
+        return
+      }
+
+      // 기존 이미지가 있으면 삭제 시도
+      if (value && value.includes('supabase')) {
+        try {
+          await deleteGalleryImage(invitationId, value)
+        } catch (error) {
+          console.error('Failed to delete old image:', error)
+        }
+      }
+
+      // 새 URL 저장
+      updateField(field.dataPath, result.urls[0])
+    } catch (error) {
+      console.error('Image upload failed:', error)
+      alert('이미지 업로드에 실패했습니다.')
+    } finally {
+      setUploading(false)
+    }
   }
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    // S3에서 삭제 시도
+    if (invitationId && value && value.includes('supabase')) {
+      try {
+        await deleteGalleryImage(invitationId, value)
+      } catch (error) {
+        console.error('Failed to delete from storage:', error)
+      }
+    }
+
     updateField(field.dataPath, '')
     if (inputRef.current) {
       inputRef.current.value = ''
@@ -53,12 +102,23 @@ export function ImageField({ field }: ImageFieldProps) {
         type="file"
         accept={field.accept?.join(',') || 'image/*'}
         onChange={handleFileChange}
-        disabled={field.disabled}
+        disabled={field.disabled || uploading}
         className="hidden"
         id={`file-${field.id}`}
       />
 
-      {value ? (
+      {uploading ? (
+        <div
+          className={`
+            flex flex-col items-center justify-center w-full border-2
+            border-dashed border-[#C9A962]/30 rounded-lg bg-white/5
+            ${field.aspectRatio === '1:1' ? 'aspect-square' : 'py-12'}
+          `}
+        >
+          <div className="w-8 h-8 border-2 border-[#C9A962]/30 border-t-[#C9A962] rounded-full animate-spin mb-2" />
+          <span className="text-sm text-[#F5E6D3]/50">업로드 중...</span>
+        </div>
+      ) : value ? (
         <div className="relative group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
