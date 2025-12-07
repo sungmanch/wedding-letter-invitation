@@ -85,9 +85,7 @@ export function MapEmbed({
           <span style={{ color: '#6b7280', fontSize: '14px' }}>{name || '장소명'}</span>
           <span style={{ color: '#9ca3af', fontSize: '12px' }}>{address || '주소'}</span>
           <span style={{ color: '#9ca3af', fontSize: '11px' }}>
-            {provider === 'naver' && '네이버 지도'}
-            {provider === 'kakao' && '카카오맵'}
-            {provider === 'google' && '구글맵'}
+            네이버 지도
           </span>
         </div>
       </div>
