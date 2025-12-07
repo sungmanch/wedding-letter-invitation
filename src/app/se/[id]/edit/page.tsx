@@ -366,10 +366,10 @@ function EditPageContent() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-100">
+      <div className="h-screen flex items-center justify-center bg-[#0A0806]">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">로딩 중...</p>
+          <div className="w-8 h-8 border-4 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#F5E6D3]/60">로딩 중...</p>
         </div>
       </div>
     )
@@ -377,12 +377,12 @@ function EditPageContent() {
 
   if (error) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-100">
+      <div className="h-screen flex items-center justify-center bg-[#0A0806]">
         <div className="text-center p-8">
-          <p className="text-lg font-medium text-gray-900">{error}</p>
+          <p className="text-lg font-medium text-[#F5E6D3]">{error}</p>
           <button
             onClick={() => router.push('/super-editor')}
-            className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600"
+            className="mt-4 px-4 py-2 bg-[#C9A962] text-[#0A0806] rounded-lg hover:bg-[#B8A052]"
           >
             새로 만들기
           </button>
@@ -392,36 +392,36 @@ function EditPageContent() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div className="h-screen flex flex-col bg-[#0A0806]">
       {/* 헤더 */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 shrink-0">
+      <header className="bg-[#0A0806] border-b border-white/10 px-4 py-3 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900">청첩장 편집</h1>
+            <h1 className="text-xl font-bold text-[#F5E6D3]">청첩장 편집</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 text-sm font-medium"
+              className="px-4 py-2 bg-white/10 text-[#F5E6D3] rounded-lg hover:bg-white/20 disabled:opacity-50 text-sm font-medium"
             >
               {saving ? '저장 중...' : '저장'}
             </button>
             <button
               onClick={handleGenerateShareUrl}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
+              className="px-4 py-2 bg-[#C9A962] text-[#0A0806] rounded-lg hover:bg-[#B8A052] text-sm font-medium"
             >
               공유 링크 생성
             </button>
             <button
               onClick={handlePreview}
-              className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 text-sm font-medium"
+              className="px-4 py-2 bg-white/10 text-[#F5E6D3] rounded-lg hover:bg-white/20 text-sm font-medium"
             >
               미리보기
             </button>
             <button
               onClick={() => router.push(`/paywall?type=2&id=${invitationId}`)}
-              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-sm font-medium"
+              className="px-4 py-2 bg-[#C9A962] text-[#0A0806] rounded-lg hover:bg-[#B8A052] text-sm font-medium"
             >
               결제하기
             </button>
@@ -430,20 +430,20 @@ function EditPageContent() {
 
         {/* 공유 링크 표시 */}
         {shareUrl && (
-          <div className="mt-3 p-3 bg-blue-50 rounded-lg flex items-center gap-2">
+          <div className="mt-3 p-3 bg-[#C9A962]/10 rounded-lg flex items-center gap-2">
             <input
               type="text"
               value={shareUrl}
               readOnly
-              className="flex-1 px-3 py-1.5 bg-white border border-blue-200 rounded text-sm"
+              className="flex-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded text-sm text-[#F5E6D3]"
             />
             <button
               onClick={handleCopyShareUrl}
-              className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-3 py-1.5 bg-[#C9A962] text-[#0A0806] rounded text-sm hover:bg-[#B8A052]"
             >
               {copySuccess ? '복사됨!' : '복사'}
             </button>
-            <span className="text-xs text-blue-600">1시간 동안 유효</span>
+            <span className="text-xs text-[#C9A962]">1시간 동안 유효</span>
           </div>
         )}
       </header>
@@ -451,15 +451,15 @@ function EditPageContent() {
       {/* 메인 콘텐츠 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 왼쪽: 에디터 패널 */}
-        <div className="w-[400px] flex flex-col bg-white border-r border-gray-200 shrink-0">
+        <div className="w-[400px] flex flex-col bg-[#1A1A1A] border-r border-white/10 shrink-0">
           {/* 탭 네비게이션 */}
-          <div className="flex border-b border-gray-200 shrink-0">
+          <div className="flex border-b border-white/10 shrink-0">
             <button
               onClick={() => setActiveTab('fields')}
               className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'fields'
-                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
+                  : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
               }`}
             >
               내용
@@ -468,8 +468,8 @@ function EditPageContent() {
               onClick={() => setActiveTab('style')}
               className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'style'
-                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
+                  : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
               }`}
             >
               스타일
@@ -478,8 +478,8 @@ function EditPageContent() {
               onClick={() => setActiveTab('sections')}
               className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'sections'
-                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
+                  : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
               }`}
             >
               섹션
@@ -545,7 +545,7 @@ function EditPageContent() {
         {/* 중앙: 미리보기 */}
         {activeTab === 'share' ? (
           // 공유 탭: 배경 전체가 스크롤되는 레이아웃
-          <div className="flex-1 bg-gray-200 overflow-y-auto">
+          <div className="flex-1 bg-[#0A0806] overflow-y-auto">
             <SharePreview
               ogTitle={ogValues.title || ogDefaults.title}
               ogDescription={ogValues.description || ogDefaults.description}
@@ -554,7 +554,7 @@ function EditPageContent() {
           </div>
         ) : (
           // 다른 탭: 중앙 정렬된 PhoneFrame 레이아웃
-          <div className="flex-1 flex flex-col bg-gray-200">
+          <div className="flex-1 flex flex-col bg-[#0A0806]">
             <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
               {state.layout && state.style && state.userData ? (
                 <InvitationPreview
@@ -573,7 +573,7 @@ function EditPageContent() {
                   frameHeight={667}
                 />
               ) : (
-                <div className="text-center text-gray-500">
+                <div className="text-center text-[#F5E6D3]/60">
                   <p className="text-lg font-medium">미리보기 로딩 중...</p>
                 </div>
               )}

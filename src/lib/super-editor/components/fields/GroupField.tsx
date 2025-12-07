@@ -14,24 +14,24 @@ export function GroupField({ field }: GroupFieldProps) {
   const canCollapse = field.collapsible ?? false
 
   return (
-    <div className="group-field border border-gray-200 rounded-lg overflow-hidden">
+    <div className="group-field border border-white/10 rounded-lg overflow-hidden bg-white/5">
       {/* 그룹 헤더 */}
       <div
-        className={`px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between ${
-          canCollapse ? 'cursor-pointer hover:bg-gray-100' : ''
+        className={`px-4 py-3 bg-white/5 border-b border-white/10 flex items-center justify-between ${
+          canCollapse ? 'cursor-pointer hover:bg-white/10' : ''
         }`}
         onClick={() => canCollapse && setIsCollapsed(!isCollapsed)}
       >
         <div>
-          <h4 className="font-medium text-gray-900">{field.label}</h4>
+          <h4 className="font-medium text-[#F5E6D3]">{field.label}</h4>
           {field.description && (
-            <p className="text-sm text-gray-500 mt-0.5">{field.description}</p>
+            <p className="text-sm text-[#F5E6D3]/50 mt-0.5">{field.description}</p>
           )}
         </div>
 
         {canCollapse && (
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${
+            className={`w-5 h-5 text-[#F5E6D3]/50 transition-transform ${
               isCollapsed ? '' : 'rotate-180'
             }`}
             fill="none"

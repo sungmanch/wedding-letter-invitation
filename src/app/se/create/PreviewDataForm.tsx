@@ -57,17 +57,17 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
   const currentImage = data.mainImage || DEFAULT_IMAGE
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div className="bg-[#1A1A1A] border border-white/10 rounded-xl overflow-hidden">
       {/* Header - Collapsible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 bg-white/5 hover:bg-white/10 transition-colors"
       >
-        <span className="text-sm font-medium text-gray-700">프리뷰 정보 입력</span>
+        <span className="text-sm font-medium text-[#F5E6D3]">프리뷰 정보 입력</span>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
+          <ChevronUp className="w-4 h-4 text-[#F5E6D3]/50" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-[#F5E6D3]/50" />
         )}
       </button>
 
@@ -76,10 +76,10 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
         <div className="p-4 space-y-4">
           {/* 배경 이미지 */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">배경 사진</label>
+            <label className="block text-xs font-medium text-[#F5E6D3]/70 mb-2">배경 사진</label>
             <div className="flex items-center gap-3">
               {/* 이미지 미리보기 */}
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/10 shrink-0">
                 <img
                   src={currentImage}
                   alt="배경 미리보기"
@@ -106,12 +106,12 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
                 />
                 <label
                   htmlFor="preview-image-upload"
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                 >
-                  <ImagePlus className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600">사진 변경</span>
+                  <ImagePlus className="w-4 h-4 text-[#F5E6D3]/60" />
+                  <span className="text-[#F5E6D3]/80">사진 변경</span>
                 </label>
-                <p className="text-xs text-gray-400 mt-1">프리뷰 확인용 (저장되지 않음)</p>
+                <p className="text-xs text-[#F5E6D3]/40 mt-1">프리뷰 확인용 (저장되지 않음)</p>
               </div>
             </div>
           </div>
@@ -119,23 +119,23 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
           {/* 신랑/신부 이름 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">신랑 이름</label>
+              <label className="block text-xs font-medium text-[#F5E6D3]/70 mb-1">신랑 이름</label>
               <input
                 type="text"
                 value={data.groomName}
                 onChange={handleChange('groomName')}
                 placeholder="김신랑"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">신부 이름</label>
+              <label className="block text-xs font-medium text-[#F5E6D3]/70 mb-1">신부 이름</label>
               <input
                 type="text"
                 value={data.brideName}
                 onChange={handleChange('brideName')}
                 placeholder="이신부"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent"
               />
             </div>
           </div>
@@ -143,21 +143,21 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
           {/* 예식 날짜/시간 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">예식 날짜</label>
+              <label className="block text-xs font-medium text-[#F5E6D3]/70 mb-1">예식 날짜</label>
               <input
                 type="date"
                 value={data.weddingDate}
                 onChange={handleChange('weddingDate')}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm bg-white/10 text-[#F5E6D3] border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent [color-scheme:dark]"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">예식 시간</label>
+              <label className="block text-xs font-medium text-[#F5E6D3]/70 mb-1">예식 시간</label>
               <input
                 type="time"
                 value={data.weddingTime}
                 onChange={handleChange('weddingTime')}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm bg-white/10 text-[#F5E6D3] border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent [color-scheme:dark]"
               />
             </div>
           </div>
@@ -165,11 +165,11 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
           {/* 오버레이 문구 */}
           <div>
             <div className="flex items-center gap-1 mb-1">
-              <label className="text-xs font-medium text-gray-600">오버레이 문구</label>
+              <label className="text-xs font-medium text-[#F5E6D3]/70">오버레이 문구</label>
               {!supportsOverlay && (
                 <div className="group relative">
-                  <Info className="w-3.5 h-3.5 text-gray-400" />
-                  <div className="absolute left-0 bottom-full mb-1 hidden group-hover:block w-48 p-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
+                  <Info className="w-3.5 h-3.5 text-[#F5E6D3]/40" />
+                  <div className="absolute left-0 bottom-full mb-1 hidden group-hover:block w-48 p-2 bg-[#0A0806] text-[#F5E6D3] text-xs rounded-lg shadow-lg z-10 border border-white/10">
                     현재 선택된 템플릿/스타일은 오버레이 문구를 지원하지 않습니다.
                   </div>
                 </div>
@@ -181,14 +181,14 @@ export function PreviewDataForm({ data, onChange, supportsOverlay = false }: Pre
               placeholder={supportsOverlay ? "저희 결혼합니다" : "이 템플릿은 오버레이 문구를 지원하지 않습니다"}
               disabled={!supportsOverlay}
               rows={2}
-              className={`w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-none ${
-                !supportsOverlay ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
+              className={`w-full px-3 py-2 text-sm bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent resize-none ${
+                !supportsOverlay ? 'bg-white/5 text-[#F5E6D3]/40 cursor-not-allowed' : ''
               }`}
             />
           </div>
 
           {/* 안내 메시지 */}
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-[#F5E6D3]/40">
             입력한 정보는 프리뷰에만 반영됩니다. 실제 청첩장은 나중에 편집할 수 있어요.
           </p>
         </div>

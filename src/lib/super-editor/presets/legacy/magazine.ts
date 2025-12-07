@@ -3,9 +3,9 @@
  * 매거진 스타일 - 에디토리얼 레이아웃, 페이지 플립, 인터뷰 포맷
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const magazinePreset: LegacyTemplatePreset = {
+export const magazinePreset: PredefinedTemplatePreset = {
   id: 'magazine',
   version: '1.0.0',
   source: 'static',

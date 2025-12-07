@@ -141,13 +141,13 @@ export function StyleEditor({
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* 섹션 탭 */}
-      <div className="flex border-b border-gray-100 px-2 gap-1 py-2 flex-shrink-0">
+      <div className="flex border-b border-white/10 px-2 gap-1 py-2 flex-shrink-0">
         <button
           onClick={() => setActiveSection('presets')}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
             activeSection === 'presets'
-              ? 'bg-rose-100 text-rose-700'
-              : 'text-gray-500 hover:bg-gray-100'
+              ? 'bg-[#C9A962]/20 text-[#C9A962]'
+              : 'text-[#F5E6D3]/60 hover:bg-white/5'
           }`}
         >
           프리셋
@@ -156,8 +156,8 @@ export function StyleEditor({
           onClick={() => setActiveSection('colors')}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
             activeSection === 'colors'
-              ? 'bg-rose-100 text-rose-700'
-              : 'text-gray-500 hover:bg-gray-100'
+              ? 'bg-[#C9A962]/20 text-[#C9A962]'
+              : 'text-[#F5E6D3]/60 hover:bg-white/5'
           }`}
         >
           색상
@@ -166,8 +166,8 @@ export function StyleEditor({
           onClick={() => setActiveSection('typography')}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
             activeSection === 'typography'
-              ? 'bg-rose-100 text-rose-700'
-              : 'text-gray-500 hover:bg-gray-100'
+              ? 'bg-[#C9A962]/20 text-[#C9A962]'
+              : 'text-[#F5E6D3]/60 hover:bg-white/5'
           }`}
         >
           글꼴
@@ -178,7 +178,7 @@ export function StyleEditor({
       <div className="flex-1 overflow-y-auto p-4">
         {activeSection === 'presets' && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-[#F5E6D3]/60">
               색상 조합을 선택하세요
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -186,23 +186,23 @@ export function StyleEditor({
                 <button
                   key={preset.name}
                   onClick={() => applyPreset(preset)}
-                  className="p-3 rounded-lg border border-gray-200 hover:border-rose-300 hover:shadow-sm transition-all text-left"
+                  className="p-3 rounded-lg border border-white/10 hover:border-[#C9A962]/50 hover:bg-white/5 transition-all text-left bg-white/5"
                 >
                   <div className="flex gap-1 mb-2">
                     <div
-                      className="w-6 h-6 rounded-full border border-white shadow-sm"
+                      className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: preset.primary }}
                     />
                     <div
-                      className="w-6 h-6 rounded-full border border-white shadow-sm"
+                      className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: preset.accent }}
                     />
                     <div
-                      className="w-6 h-6 rounded-full border border-gray-200"
+                      className="w-6 h-6 rounded-full border border-white/10"
                       style={{ backgroundColor: preset.background }}
                     />
                   </div>
-                  <span className="text-xs font-medium text-gray-700">{preset.name}</span>
+                  <span className="text-xs font-medium text-[#F5E6D3]">{preset.name}</span>
                 </button>
               ))}
             </div>
@@ -213,7 +213,7 @@ export function StyleEditor({
           <div className="space-y-6">
             {/* 메인 색상 */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">메인 색상</h4>
+              <h4 className="text-sm font-medium text-[#F5E6D3]">메인 색상</h4>
               <ColorPicker
                 label="기본 색상"
                 value={localStyle.theme.colors.primary?.[500] ?? '#e11d48'}
@@ -237,7 +237,7 @@ export function StyleEditor({
 
             {/* 배경 색상 */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">배경</h4>
+              <h4 className="text-sm font-medium text-[#F5E6D3]">배경</h4>
               <ColorPicker
                 label="기본 배경"
                 value={localStyle.theme.colors.background?.default ?? '#ffffff'}
@@ -254,7 +254,7 @@ export function StyleEditor({
 
             {/* 텍스트 색상 */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-700">텍스트</h4>
+              <h4 className="text-sm font-medium text-[#F5E6D3]">텍스트</h4>
               <ColorPicker
                 label="기본 텍스트"
                 value={localStyle.theme.colors.text?.primary ?? '#1f2937'}
@@ -276,15 +276,15 @@ export function StyleEditor({
             {/* ========== 제목 설정 ========== */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-gray-900">제목 설정</h3>
-                <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                <h3 className="text-sm font-semibold text-[#F5E6D3]">제목 설정</h3>
+                <span className="text-[10px] text-[#F5E6D3]/40 bg-white/5 px-1.5 py-0.5 rounded">
                   메인 타이틀, 섹션 제목
                 </span>
               </div>
 
               {/* 제목 글꼴 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">글꼴</label>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
                 <FontSelector
                   value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
                   onChange={(family) => updateTypography((typo) => {
@@ -295,7 +295,7 @@ export function StyleEditor({
 
               {/* 제목 굵기 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">굵기</label>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>
                 <div className="grid grid-cols-3 gap-2">
                   {HEADING_WEIGHT_OPTIONS.map((opt) => (
                     <button
@@ -310,8 +310,8 @@ export function StyleEditor({
                       })}
                       className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                         localStyle.theme.typography?.weights?.bold === opt.value
-                          ? 'border-rose-500 bg-rose-50 text-rose-700'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
                       }`}
                       style={{ fontWeight: opt.value }}
                     >
@@ -322,20 +322,20 @@ export function StyleEditor({
               </div>
             </div>
 
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-white/10" />
 
             {/* ========== 본문 설정 ========== */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-gray-900">본문 설정</h3>
-                <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                <h3 className="text-sm font-semibold text-[#F5E6D3]">본문 설정</h3>
+                <span className="text-[10px] text-[#F5E6D3]/40 bg-white/5 px-1.5 py-0.5 rounded">
                   설명 텍스트, 내용
                 </span>
               </div>
 
               {/* 본문 글꼴 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">글꼴</label>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
                 <FontSelector
                   value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
                   onChange={(family) => updateTypography((typo) => {
@@ -347,8 +347,8 @@ export function StyleEditor({
               {/* 본문 크기 */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-600">기본 크기</label>
-                  <span className="text-[10px] text-gray-400">본문(대), 소제목</span>
+                  <label className="text-xs font-medium text-[#F5E6D3]/60">기본 크기</label>
+                  <span className="text-[10px] text-[#F5E6D3]/40">본문(대), 소제목</span>
                 </div>
                 <SizeSelector
                   value={localStyle.theme.typography?.sizes?.base ?? '1rem'}
@@ -361,7 +361,7 @@ export function StyleEditor({
 
               {/* 본문 굵기 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">굵기</label>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>
                 <div className="grid grid-cols-3 gap-2">
                   {FONT_WEIGHT_OPTIONS.map((opt) => (
                     <button
@@ -371,8 +371,8 @@ export function StyleEditor({
                       })}
                       className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                         localStyle.theme.typography?.weights?.regular === opt.value
-                          ? 'border-rose-500 bg-rose-50 text-rose-700'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
                       }`}
                       style={{ fontWeight: opt.value }}
                     >
@@ -384,7 +384,7 @@ export function StyleEditor({
 
               {/* 줄 간격 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">줄 간격</label>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">줄 간격</label>
                 <div className="grid grid-cols-2 gap-2">
                   {LINE_HEIGHT_OPTIONS.map((opt) => (
                     <button
@@ -394,8 +394,8 @@ export function StyleEditor({
                       })}
                       className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
                         localStyle.theme.typography?.lineHeights?.relaxed === opt.value
-                          ? 'border-rose-500 bg-rose-50 text-rose-700'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
                       }`}
                     >
                       {opt.label}
@@ -405,19 +405,19 @@ export function StyleEditor({
               </div>
             </div>
 
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-white/10" />
 
             {/* ========== 공통 설정 ========== */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-gray-900">공통 설정</h3>
+                <h3 className="text-sm font-semibold text-[#F5E6D3]">공통 설정</h3>
               </div>
 
               {/* 자간 */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-600">자간</label>
-                  <span className="text-[10px] text-gray-400">메인 타이틀</span>
+                  <label className="text-xs font-medium text-[#F5E6D3]/60">자간</label>
+                  <span className="text-[10px] text-[#F5E6D3]/40">메인 타이틀</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {LETTER_SPACING_OPTIONS.map((opt) => (
@@ -428,8 +428,8 @@ export function StyleEditor({
                       })}
                       className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
                         localStyle.theme.typography?.letterSpacing?.tight === opt.value
-                          ? 'border-rose-500 bg-rose-50 text-rose-700'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
                       }`}
                     >
                       {opt.label}
@@ -462,16 +462,16 @@ function ColorPicker({
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-10 h-10 rounded-lg cursor-pointer border border-gray-200"
+          className="w-10 h-10 rounded-lg cursor-pointer border border-white/20"
         />
       </div>
       <div className="flex-1">
-        <label className="text-xs text-gray-500">{label}</label>
+        <label className="text-xs text-[#F5E6D3]/50">{label}</label>
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full text-sm font-mono text-gray-700 bg-transparent border-none p-0 focus:outline-none"
+          className="w-full text-sm font-mono text-[#F5E6D3] bg-transparent border-none p-0 focus:outline-none"
         />
       </div>
     </div>
@@ -537,10 +537,10 @@ function FontSelector({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+      className="w-full px-3 py-2 text-sm border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50 focus:border-transparent"
     >
       {FONT_OPTIONS.map((font) => (
-        <option key={font.value} value={font.value}>
+        <option key={font.value} value={font.value} className="bg-[#1A1A1A] text-[#F5E6D3]">
           {font.label}
         </option>
       ))}
@@ -585,8 +585,8 @@ function SizeSelector({
           onClick={() => onChange(opt.value)}
           className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
             value === opt.value
-              ? 'border-rose-500 bg-rose-50 text-rose-700'
-              : 'border-gray-200 hover:border-gray-300 text-gray-600'
+              ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+              : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
           }`}
         >
           {opt.label}

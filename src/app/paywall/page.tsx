@@ -18,14 +18,6 @@ function PaywallLoading() {
   )
 }
 
-export default function PaywallPage() {
-  return (
-    <Suspense fallback={<PaywallLoading />}>
-      <PaywallContent />
-    </Suspense>
-  )
-}
-
 function PaywallContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -165,5 +157,13 @@ function FeatureItem({ children }: { children: React.ReactNode }) {
       <Check className="h-4 w-4 text-[#D4768A]" />
       {children}
     </li>
+  )
+}
+
+export default function PaywallPage() {
+  return (
+    <Suspense fallback={<PaywallLoading />}>
+      <PaywallContent />
+    </Suspense>
   )
 }

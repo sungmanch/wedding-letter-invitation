@@ -24,7 +24,7 @@ import {
 } from './PreviewDataForm'
 
 // 레거시 템플릿
-import { legacyPresets, categoryLabels } from '@/lib/super-editor/presets/legacy'
+import { predefinedPresets, categoryLabels } from '@/lib/super-editor/presets/legacy'
 import {
   buildLegacyIntro,
   getLegacyPresetPreviews,
@@ -84,8 +84,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-3 ${
           isUser
-            ? 'bg-rose-500 text-white rounded-br-sm'
-            : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+            ? 'bg-[#C9A962] text-[#0A0806] rounded-br-sm'
+            : 'bg-white/10 text-[#F5E6D3] rounded-bl-sm'
         }`}
       >
         <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
@@ -97,18 +97,18 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 function LoadingDots() {
   return (
     <div className="flex justify-start">
-      <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
+      <div className="bg-white/10 rounded-2xl rounded-bl-sm px-4 py-3">
         <div className="flex gap-1.5">
           <span
-            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            className="w-2 h-2 bg-[#F5E6D3]/50 rounded-full animate-bounce"
             style={{ animationDelay: '0ms' }}
           />
           <span
-            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            className="w-2 h-2 bg-[#F5E6D3]/50 rounded-full animate-bounce"
             style={{ animationDelay: '150ms' }}
           />
           <span
-            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            className="w-2 h-2 bg-[#F5E6D3]/50 rounded-full animate-bounce"
             style={{ animationDelay: '300ms' }}
           />
         </div>
@@ -142,7 +142,7 @@ function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGallery
   const newTemplates = useMemo(() => getAllTemplates(), [])
 
   // 레거시 템플릿
-  const previews = useMemo(() => getLegacyPresetPreviews(legacyPresets), [])
+  const previews = useMemo(() => getLegacyPresetPreviews(predefinedPresets), [])
 
   const grouped = useMemo(() => {
     const groups: Record<string, typeof previews> = {}
@@ -168,12 +168,12 @@ function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGallery
       {/* 새 템플릿 섹션 */}
       <div className="mb-2">
         <div className="flex items-center gap-2 mb-4">
-          <span className="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-600 rounded-full">NEW</span>
-          <span className="text-xs text-gray-500">super-editor 템플릿</span>
+          <span className="px-2 py-0.5 text-xs font-medium bg-[#C9A962]/20 text-[#C9A962] rounded-full">NEW</span>
+          <span className="text-xs text-[#F5E6D3]/50">super-editor 템플릿</span>
         </div>
         {Object.entries(newGrouped).map(([category, templates]) => (
           <div key={`new-${category}`} className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            <h3 className="text-sm font-semibold text-[#F5E6D3]/80 mb-3">
               {newTemplateCategoryLabels[category] || category}
             </h3>
             <div className="grid grid-cols-2 gap-3">
@@ -183,32 +183,32 @@ function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGallery
                   onClick={() => onSelect(t.id, true)}
                   className={`p-3 rounded-xl border-2 text-left transition-all ${
                     selectedId === t.id && selectedType === 'new'
-                      ? 'border-rose-500 bg-rose-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-[#C9A962] bg-[#C9A962]/10'
+                      : 'border-white/10 bg-white/5 hover:border-white/20'
                   }`}
                 >
                   <div className="flex gap-1 mb-2">
                     {/* 색상 미리보기 (StyleSchema에서 추출) */}
                     <div
-                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: t.style.theme.colors.primary[500] }}
                     />
                     <div
-                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: t.style.theme.colors.neutral[50] }}
                     />
                     <div
-                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: t.style.theme.colors.background.default }}
                     />
                   </div>
-                  <p className="font-medium text-gray-900 text-sm">{t.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.category}</p>
+                  <p className="font-medium text-[#F5E6D3] text-sm">{t.name}</p>
+                  <p className="text-xs text-[#F5E6D3]/60 mt-0.5 line-clamp-1">{t.category}</p>
                   <div className="flex gap-1 mt-2">
                     {(t.style.meta.mood || []).slice(0, 2).map((m) => (
                       <span
                         key={m}
-                        className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded"
+                        className="px-1.5 py-0.5 text-[10px] bg-white/10 text-[#F5E6D3]/70 rounded"
                       >
                         {m}
                       </span>
@@ -222,14 +222,14 @@ function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGallery
       </div>
 
       {/* 구분선 */}
-      <div className="border-t border-gray-200 pt-4">
-        <span className="text-xs text-gray-400">레거시 템플릿</span>
+      <div className="border-t border-white/10 pt-4">
+        <span className="text-xs text-[#F5E6D3]/40">레거시 템플릿</span>
       </div>
 
       {/* 레거시 템플릿 섹션 */}
       {Object.entries(grouped).map(([category, templates]) => (
         <div key={category}>
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+          <h3 className="text-sm font-semibold text-[#F5E6D3]/80 mb-3">
             {categoryLabels[category as keyof typeof categoryLabels]?.ko || category}
           </h3>
           <div className="grid grid-cols-2 gap-3">
@@ -239,26 +239,26 @@ function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGallery
                 onClick={() => onSelect(t.id, false)}
                 className={`p-3 rounded-xl border-2 text-left transition-all ${
                   selectedId === t.id && selectedType === 'legacy'
-                    ? 'border-rose-500 bg-rose-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-[#C9A962] bg-[#C9A962]/10'
+                    : 'border-white/10 bg-white/5 hover:border-white/20'
                 }`}
               >
                 <div className="flex gap-1 mb-2">
                   {[t.colors.primary, t.colors.accent, t.colors.background].map((c, i) => (
                     <div
                       key={i}
-                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: c }}
                     />
                   ))}
                 </div>
-                <p className="font-medium text-gray-900 text-sm">{t.nameKo}</p>
-                <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.descriptionKo}</p>
+                <p className="font-medium text-[#F5E6D3] text-sm">{t.nameKo}</p>
+                <p className="text-xs text-[#F5E6D3]/60 mt-0.5 line-clamp-1">{t.descriptionKo}</p>
                 <div className="flex gap-1 mt-2">
                   {t.mood.slice(0, 2).map((m) => (
                     <span
                       key={m}
-                      className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded"
+                      className="px-1.5 py-0.5 text-[10px] bg-white/10 text-[#F5E6D3]/70 rounded"
                     >
                       {m}
                     </span>
@@ -275,9 +275,9 @@ function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGallery
 
 function EmptyPreview() {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-gray-400 px-8">
-      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-        <Sparkles className="w-10 h-10 text-gray-300" />
+    <div className="flex flex-col items-center justify-center h-full text-[#F5E6D3]/50 px-8">
+      <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mb-4">
+        <Sparkles className="w-10 h-10 text-[#F5E6D3]/30" />
       </div>
       <p className="text-center text-sm font-medium">템플릿을 선택하거나</p>
       <p className="text-center text-sm font-medium">AI에게 스타일을 요청해보세요</p>
@@ -356,7 +356,7 @@ export default function SuperEditorCreatePage() {
         setIntroResult(null)
         setNewTemplateScreen(null)
         setNewTemplateStyle(null)
-        const preset = legacyPresets[presetId]
+        const preset = predefinedPresets[presetId]
         if (preset) {
           const result = buildLegacyIntro(preset, legacyBuilderData)
           setLegacyResult(result)
@@ -369,7 +369,7 @@ export default function SuperEditorCreatePage() {
   // 레거시 템플릿 선택 시 폼 데이터 변경에 따라 결과 업데이트
   useEffect(() => {
     if (selectedTemplateId && selectedTemplateType === 'legacy') {
-      const preset = legacyPresets[selectedTemplateId]
+      const preset = predefinedPresets[selectedTemplateId]
       if (preset) {
         const result = buildLegacyIntro(preset, legacyBuilderData)
         setLegacyResult(result)
@@ -500,6 +500,7 @@ export default function SuperEditorCreatePage() {
         // Stage 3: DB 저장
         const saveResponse = await saveInvitationAction({
           generationResult: completeResponse.data,
+          newTemplateId: selectedTemplateId,
           previewData: {
             groomName: previewFormData.groomName,
             brideName: previewFormData.brideName,
@@ -521,7 +522,7 @@ export default function SuperEditorCreatePage() {
       // 레거시 결과를 IntroGenerationResult로 변환 (통합 처리)
       let targetIntroResult = introResult
       if (legacyResult && selectedTemplateId) {
-        const preset = legacyPresets[selectedTemplateId]
+        const preset = predefinedPresets[selectedTemplateId]
         if (preset) {
           targetIntroResult = convertLegacyToIntroResult(legacyResult, preset)
         }
@@ -568,25 +569,25 @@ export default function SuperEditorCreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#0A0806]">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white border-b border-gray-200">
+      <header className="sticky top-0 z-20 bg-[#0A0806]/95 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => router.back()}
-                className="p-2 -ml-2 rounded-full hover:bg-gray-100"
+                className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
+                <ArrowLeft className="w-5 h-5 text-[#F5E6D3]/70" />
               </button>
-              <h1 className="text-lg font-semibold text-gray-900">새 청첩장 만들기</h1>
+              <h1 className="text-lg font-semibold text-[#F5E6D3]">새 청첩장 만들기</h1>
             </div>
             {(introResult || legacyResult || newTemplateScreen) && (
               <button
                 onClick={handleStartEditing}
                 disabled={isLoading}
-                className="px-4 py-2 bg-rose-500 text-white text-sm font-medium rounded-lg hover:bg-rose-600 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-[#C9A962] text-[#0A0806] text-sm font-medium rounded-lg hover:bg-[#B8A052] disabled:opacity-50 transition-colors"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -606,15 +607,15 @@ export default function SuperEditorCreatePage() {
       <main className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)]">
           {/* Left Panel - Tabs */}
-          <div className="flex-1 lg:max-w-xl flex flex-col bg-white border-r border-gray-200">
+          <div className="flex-1 lg:max-w-xl flex flex-col bg-[#1A1A1A] border-r border-white/10">
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-white/10">
               <button
                 onClick={() => setMode('chat')}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
                   mode === 'chat'
-                    ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
+                    : 'text-[#F5E6D3]/50 hover:text-[#F5E6D3]/80'
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
@@ -624,8 +625,8 @@ export default function SuperEditorCreatePage() {
                 onClick={() => setMode('template')}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
                   mode === 'template'
-                    ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
+                    : 'text-[#F5E6D3]/50 hover:text-[#F5E6D3]/80'
                 }`}
               >
                 <Grid className="w-4 h-4" />
@@ -637,13 +638,13 @@ export default function SuperEditorCreatePage() {
             {mode === 'chat' && (
               <>
                 {/* Chat Header */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-                  <div className="w-10 h-10 bg-linear-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#B8A052] rounded-full flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-[#0A0806]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900">디자인 어시스턴트</h3>
-                    <p className="text-xs text-gray-500">AI가 인트로를 디자인해드려요</p>
+                    <h3 className="text-sm font-semibold text-[#F5E6D3]">디자인 어시스턴트</h3>
+                    <p className="text-xs text-[#F5E6D3]/60">AI가 인트로를 디자인해드려요</p>
                   </div>
                 </div>
 
@@ -659,13 +660,13 @@ export default function SuperEditorCreatePage() {
                 {/* Quick Prompts */}
                 {messages.length === 1 && (
                   <div className="px-4 pb-2">
-                    <p className="text-xs text-gray-500 mb-2">빠른 시작:</p>
+                    <p className="text-xs text-[#F5E6D3]/50 mb-2">빠른 시작:</p>
                     <div className="flex flex-wrap gap-2">
                       {QUICK_PROMPTS.map((item) => (
                         <button
                           key={item.label}
                           onClick={() => handleSend(item.prompt)}
-                          className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                          className="px-3 py-1.5 text-sm bg-white/10 text-[#F5E6D3]/80 rounded-full hover:bg-white/20 transition-colors"
                         >
                           {item.label}
                         </button>
@@ -675,7 +676,7 @@ export default function SuperEditorCreatePage() {
                 )}
 
                 {/* Input */}
-                <div className="p-4 border-t border-gray-100">
+                <div className="p-4 border-t border-white/10">
                   <div className="flex items-end gap-2">
                     <div className="flex-1 relative">
                       <textarea
@@ -686,14 +687,14 @@ export default function SuperEditorCreatePage() {
                         placeholder="원하는 스타일을 설명해주세요..."
                         rows={1}
                         disabled={isLoading}
-                        className="w-full px-4 py-3 bg-gray-100 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-colors text-sm disabled:opacity-50"
+                        className="w-full px-4 py-3 bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:bg-white/15 transition-colors text-sm disabled:opacity-50"
                         style={{ maxHeight: '100px' }}
                       />
                     </div>
                     <button
                       onClick={() => handleSend()}
                       disabled={!input.trim() || isLoading}
-                      className="p-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                      className="p-3 bg-[#C9A962] text-[#0A0806] rounded-full hover:bg-[#B8A052] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     >
                       {isLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -702,7 +703,7 @@ export default function SuperEditorCreatePage() {
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2 text-center">Shift + Enter로 줄바꿈</p>
+                  <p className="text-xs text-[#F5E6D3]/40 mt-2 text-center">Shift + Enter로 줄바꿈</p>
                 </div>
               </>
             )}
@@ -718,7 +719,7 @@ export default function SuperEditorCreatePage() {
           </div>
 
           {/* Right Panel - Preview (Intro Only) */}
-          <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-8 bg-gray-50 overflow-y-auto">
+          <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-8 bg-[#0A0806] overflow-y-auto">
             <div className="flex flex-col items-center w-full max-w-md">
               {/* 프리뷰 데이터 입력 폼 */}
               <div className="w-full mb-6">
@@ -729,11 +730,11 @@ export default function SuperEditorCreatePage() {
                 />
               </div>
 
-              <div className="text-sm text-gray-500 mb-4">인트로 미리보기</div>
+              <div className="text-sm text-[#F5E6D3]/60 mb-4">인트로 미리보기</div>
               {legacyResult && selectedTemplateId ? (
                 // 레거시 템플릿
                 (() => {
-                  const preset = legacyPresets[selectedTemplateId]
+                  const preset = predefinedPresets[selectedTemplateId]
                   if (!preset) return <EmptyPreview />
                   const converted = convertLegacyToIntroResult(legacyResult, preset)
                   return (
@@ -787,7 +788,7 @@ export default function SuperEditorCreatePage() {
               {(introResult || legacyResult || newTemplateScreen) && (
                 <button
                   onClick={handleRegenerate}
-                  className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />
                   다시 생성하기
@@ -805,7 +806,7 @@ export default function SuperEditorCreatePage() {
             onClick={() => {
               /* TODO: 모바일 프리뷰 모달 */
             }}
-            className="w-14 h-14 bg-rose-500 text-white rounded-full shadow-lg flex items-center justify-center"
+            className="w-14 h-14 bg-[#C9A962] text-[#0A0806] rounded-full shadow-lg flex items-center justify-center"
           >
             <Sparkles className="w-6 h-6" />
           </button>

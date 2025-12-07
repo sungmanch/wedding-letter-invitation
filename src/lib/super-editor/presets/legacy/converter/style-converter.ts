@@ -4,7 +4,7 @@
  */
 
 import type { StyleSchema, ColorScale, FontFamily } from '../../../schema/style'
-import type { LegacyTemplatePreset, LegacyColorPalette, LegacyFontConfig } from '../types'
+import type { PredefinedTemplatePreset, LegacyColorPalette, LegacyFontConfig } from '../types'
 import type { StyleOverrides } from './types'
 
 // ============================================
@@ -118,7 +118,7 @@ function isGoogleFont(fontName: string): boolean {
  * 레거시 프리셋을 StyleSchema로 변환
  */
 export function convertToStyleSchema(
-  preset: LegacyTemplatePreset,
+  preset: PredefinedTemplatePreset,
   overrides?: StyleOverrides
 ): StyleSchema {
   const colors = { ...preset.defaultColors, ...overrides?.colors }

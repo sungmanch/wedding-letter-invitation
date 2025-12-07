@@ -3,9 +3,9 @@
  * 버추얼 갤러리 스타일 - 가로 스크롤, 액자 구성, 도슨트 오디오
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const exhibitionPreset: LegacyTemplatePreset = {
+export const exhibitionPreset: PredefinedTemplatePreset = {
   id: 'exhibition',
   version: '1.0.0',
   source: 'static',

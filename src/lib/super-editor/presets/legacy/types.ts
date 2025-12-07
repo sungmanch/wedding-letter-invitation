@@ -1,6 +1,6 @@
 /**
- * Legacy Template Preset Types
- * templates.json에서 마이그레이션된 레거시 템플릿 프리셋 타입 정의
+ * Predefined Template Preset Types
+ * 사전 정의된 청첩장 템플릿 프리셋 타입 정의
  */
 
 import type { LayoutCategory } from '../../schema/layout'
@@ -8,32 +8,25 @@ import type { StyleMood } from '../../schema/style'
 import type { AnimationPreset, TransitionPreset } from '../../schema/primitives'
 
 // ============================================
-// Legacy Template Category
+// Predefined Template Category
 // ============================================
 
-export type LegacyTemplateCategory =
-  | 'modern'      // keynote, magazine, glassmorphism
-  | 'cinematic'   // cinematic
-  | 'artistic'    // exhibition, typography
-  | 'retro'       // vinyl
-  | 'playful'     // chat, pixel
-  | 'classic'     // passport
+export type PredefinedTemplateCategory =
+  | 'modern'      // magazine
+  | 'cinematic'   // cinematic, gothic-romance, jewel-velvet
+  | 'artistic'    // exhibition
+  | 'retro'       // (unused)
+  | 'playful'     // (unused)
+  | 'classic'     // old-money, monogram
 
 // ============================================
 // Legacy Intro Types
 // ============================================
 
 export type LegacyIntroType =
-  | 'keynote'         // Apple Keynote 스타일
   | 'cinematic'       // 영화 스타일
   | 'exhibition'      // 갤러리 스타일
   | 'magazine'        // 매거진 스타일
-  | 'vinyl'           // LP 레코드 스타일
-  | 'chat'            // 채팅 스타일
-  | 'glassmorphism'   // 글래스모피즘 스타일
-  | 'passport'        // 여권 스타일
-  | 'pixel'           // 픽셀 아트 스타일
-  | 'typography'      // 타이포그래피 스타일
 
 // ============================================
 // Legacy Interaction Types
@@ -180,10 +173,10 @@ export interface LegacyFontConfig {
 }
 
 // ============================================
-// Legacy Template Preset
+// Predefined Template Preset
 // ============================================
 
-export interface LegacyTemplatePreset {
+export interface PredefinedTemplatePreset {
   id: string
   version: string
   source: 'static' | 'ai-generated'
@@ -191,7 +184,7 @@ export interface LegacyTemplatePreset {
   // 메타 정보
   name: string
   nameKo: string
-  category: LegacyTemplateCategory
+  category: PredefinedTemplateCategory
   description: string
   descriptionKo: string
   matchKeywords: string[]
@@ -280,10 +273,10 @@ export function mapLegacyTransition(legacyType: string): TransitionPreset {
 }
 
 /**
- * Legacy category를 Super Editor LayoutCategory로 변환
+ * Predefined category를 Super Editor LayoutCategory로 변환
  */
-export function mapLegacyCategory(category: LegacyTemplateCategory): LayoutCategory {
-  const mapping: Record<LegacyTemplateCategory, LayoutCategory> = {
+export function mapPredefinedCategory(category: PredefinedTemplateCategory): LayoutCategory {
+  const mapping: Record<PredefinedTemplateCategory, LayoutCategory> = {
     'modern': 'minimal',
     'cinematic': 'story',
     'artistic': 'album',

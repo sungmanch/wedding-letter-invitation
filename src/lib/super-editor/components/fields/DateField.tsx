@@ -16,10 +16,10 @@ export function DateField({ field }: DateFieldProps) {
       {field.label && (
         <label
           htmlFor={field.id}
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-[#F5E6D3]/80 mb-1"
         >
           {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-red-400 ml-1">*</span>}
         </label>
       )}
 
@@ -32,14 +32,16 @@ export function DateField({ field }: DateFieldProps) {
         min={field.min}
         max={field.max}
         className={`
-          w-full px-3 py-2 border border-gray-300 rounded-lg
-          focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-          disabled:bg-gray-100 disabled:cursor-not-allowed
+          w-full px-3 py-2 border border-white/10 rounded-lg
+          bg-white/5 text-[#F5E6D3]
+          focus:ring-2 focus:ring-[#C9A962]/50 focus:border-[#C9A962]/30
+          disabled:bg-white/[0.02] disabled:cursor-not-allowed
+          [&::-webkit-calendar-picker-indicator]:invert
         `}
       />
 
       {field.helpText && (
-        <p className="mt-1 text-sm text-gray-500">{field.helpText}</p>
+        <p className="mt-1 text-sm text-[#F5E6D3]/50">{field.helpText}</p>
       )}
     </div>
   )

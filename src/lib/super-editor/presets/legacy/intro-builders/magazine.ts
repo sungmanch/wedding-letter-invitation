@@ -11,9 +11,16 @@ import { uid, formatDate } from './types'
 export const buildMagazineIntro: IntroBuilder = (ctx: IntroBuilderContext): IntroBuilderResult => {
   const { preset, data } = ctx
   const { groomName, brideName, weddingDate, mainImage } = data
-  const { formatted: dateFormatted } = formatDate(weddingDate)
   const colors = preset.defaultColors
   const fonts = preset.defaultFonts
+
+  // 데이터 바인딩 표현식인지 확인
+  const isBinding = (val: string) => val.startsWith('{{')
+
+  // 날짜 포맷: 바인딩 표현식이면 그대로 사용
+  const dateFormatted = isBinding(weddingDate)
+    ? '{{wedding.dateDisplay}}'
+    : formatDate(weddingDate).formatted
 
   const root: PrimitiveNode = {
     id: uid('magazine-root'),
@@ -23,28 +30,24 @@ export const buildMagazineIntro: IntroBuilder = (ctx: IntroBuilderContext): Intr
       position: 'relative',
     },
     children: [
-      // Background image (subtle)
-      ...(mainImage
-        ? [
-            {
-              id: uid('bg-img'),
-              type: 'image' as const,
-              style: {
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                opacity: 0.3,
-              },
-              props: {
-                src: mainImage,
-                alt: 'Background',
-                objectFit: 'cover' as const,
-              },
-            },
-          ]
-        : []),
+      // Background image (subtle) - 항상 생성, 바인딩 표현식은 런타임에 치환됨
+      {
+        id: uid('bg-img'),
+        type: 'image' as const,
+        style: {
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          opacity: 0.3,
+        },
+        props: {
+          src: mainImage || '',
+          alt: 'Background',
+          objectFit: 'cover' as const,
+        },
+      },
 
       // Content overlay
       {

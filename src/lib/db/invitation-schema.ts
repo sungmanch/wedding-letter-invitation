@@ -16,6 +16,7 @@ import {
 import { sql } from 'drizzle-orm'
 import { relations } from 'drizzle-orm'
 import { designTemplates } from './template-schema'
+import { superEditorInvitations } from './super-editor-schema'
 
 // ============================================
 // 청첩장 (Invitations)
@@ -64,6 +65,10 @@ export const invitations = pgTable('invitations', {
   templateId: uuid('template_id'), // design_templates 참조
   isTemplateReuse: boolean('is_template_reuse').default(false), // 이미지만 교체한 재사용 여부
 
+  // Super Editor 마이그레이션 관련
+  seInvitationId: uuid('se_invitation_id'), // super_editor_invitations 참조
+  editorType: varchar('editor_type', { length: 20 }).default('legacy'), // 'legacy' | 'super-editor'
+
   // 배포 URL (S3 정적 배포 시)
   publishedUrl: varchar('published_url', { length: 500 }),
 
@@ -81,6 +86,12 @@ export const invitations = pgTable('invitations', {
   index('idx_invitations_user_id').on(table.userId),
   index('idx_invitations_status').on(table.status),
   index('idx_invitations_payment_id').on(table.paymentId),
+  index('idx_invitations_se_invitation_id').on(table.seInvitationId),
+  foreignKey({
+    columns: [table.seInvitationId],
+    foreignColumns: [superEditorInvitations.id],
+    name: 'invitations_se_invitation_id_fkey'
+  }).onDelete('set null'),
   pgPolicy('Anyone can view published invitations', { as: 'permissive', for: 'select', to: ['public'], using: sql`((status)::text = 'published'::text)` }),
   pgPolicy('Users can manage their own invitations', { as: 'permissive', for: 'all', to: ['public'] }),
 ]).enableRLS()
@@ -223,6 +234,10 @@ export const invitationsRelations = relations(invitations, ({ many, one }) => ({
   template: one(designTemplates, {
     fields: [invitations.templateId],
     references: [designTemplates.id],
+  }),
+  seInvitation: one(superEditorInvitations, {
+    fields: [invitations.seInvitationId],
+    references: [superEditorInvitations.id],
   }),
 }))
 

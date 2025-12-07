@@ -6,12 +6,12 @@
 import type { LayoutSchema, Screen, LayoutCategory } from '../../../schema/layout'
 import type { StyleSchema } from '../../../schema/style'
 import type { SectionType } from '../../../schema/section-types'
-import type { LegacyTemplatePreset } from '../types'
+import type { PredefinedTemplatePreset } from '../types'
 import type { ConvertOptions, ConvertResult } from './types'
 import { LEGACY_TO_SE_SECTION_TYPE } from './types'
 import { buildSection } from './section-builders'
 import { convertToStyleSchema } from './style-converter'
-import { getLegacyPreset } from '../index'
+import { getPredefinedPreset } from '../index'
 
 // Re-export types
 export * from './types'
@@ -35,7 +35,7 @@ export { buildSection, getSectionBuilder, sectionBuilders } from './section-buil
  * ```
  */
 export function convertLegacyPreset(options: ConvertOptions): ConvertResult {
-  const preset = getLegacyPreset(options.presetId)
+  const preset = getPredefinedPreset(options.presetId)
 
   if (!preset) {
     throw new Error(`Legacy preset not found: ${options.presetId}`)
@@ -151,7 +151,7 @@ export function convertPresetById(
  * 프리셋 객체를 직접 변환
  */
 export function convertPresetDirect(
-  preset: LegacyTemplatePreset,
+  preset: PredefinedTemplatePreset,
   options?: Omit<ConvertOptions, 'presetId'>
 ): ConvertResult {
   const fullOptions: ConvertOptions = {
@@ -278,6 +278,7 @@ export function convertAllPresets(): Record<string, ConvertResult> {
   const presetIds = [
     'keynote', 'cinematic', 'exhibition', 'magazine', 'vinyl',
     'chat', 'glassmorphism', 'passport', 'pixel', 'typography',
+    'gothic-romance', 'old-money', 'monogram', 'jewel-velvet',
   ]
 
   const results: Record<string, ConvertResult> = {}

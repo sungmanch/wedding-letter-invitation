@@ -8,6 +8,9 @@ import type { LegacySectionDefinition } from '../types'
 import type { SectionBuilderContext, SectionBuilder } from './types'
 import { LEGACY_LAYOUT_STYLES, LEGACY_PADDING_VALUES } from './types'
 import { mapLegacyAnimation } from '../types'
+import { introBuilders, resetIdCounter } from '../intro-builders'
+import type { IntroBuilderData, IntroBuilderContext } from '../intro-builders/types'
+import type { LegacyIntroType } from '../types'
 
 // ============================================
 // Helper Functions
@@ -50,8 +53,47 @@ function buildAnimatedWrapper(
 
 /**
  * Hero / Intro 섹션 빌더
+ *
+ * preset.intro.type에 따라 적절한 인트로 빌더를 호출합니다.
+ * - cinematic, exhibition, magazine 등 각각 고유한 스타일 적용
+ * - 데이터 바인딩 표현식({{...}})을 사용하여 런타임에 값 치환
  */
 export function buildHeroSection(ctx: SectionBuilderContext): PrimitiveNode {
+  const { preset } = ctx
+  const introType = preset.intro.type as LegacyIntroType
+
+  // 인트로 빌더가 있으면 사용
+  const introBuilder = introBuilders[introType]
+  if (introBuilder) {
+    // ID 카운터 리셋 (깨끗한 상태로 시작)
+    resetIdCounter()
+
+    // 데이터 바인딩 표현식 사용 (런타임에 실제 값으로 치환됨)
+    const introData: IntroBuilderData = {
+      groomName: '{{couple.groom.name}}',
+      brideName: '{{couple.bride.name}}',
+      weddingDate: '{{wedding.date}}',
+      venueName: '{{venue.name}}',
+      mainImage: '{{photos.main}}',
+    }
+
+    const introCtx: IntroBuilderContext = {
+      preset,
+      data: introData,
+    }
+
+    const result = introBuilder(introCtx)
+    return result.root
+  }
+
+  // Fallback: 인트로 빌더가 없는 경우 기본 hero 섹션 생성
+  return buildDefaultHeroSection(ctx)
+}
+
+/**
+ * 기본 Hero 섹션 (인트로 빌더가 없는 경우 fallback)
+ */
+function buildDefaultHeroSection(ctx: SectionBuilderContext): PrimitiveNode {
   const { section, preset } = ctx
   const themeSpecific = section.content?.themeSpecific ?? {}
 

@@ -29,10 +29,10 @@ export function UrlField({ field }: UrlFieldProps) {
       {field.label && (
         <label
           htmlFor={field.id}
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-[#F5E6D3]/80 mb-1"
         >
           {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-red-400 ml-1">*</span>}
         </label>
       )}
 
@@ -44,10 +44,10 @@ export function UrlField({ field }: UrlFieldProps) {
           onChange={(e) => updateField(field.dataPath, e.target.value)}
           placeholder={field.placeholder ?? 'https://example.com'}
           disabled={field.disabled}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+          className={`w-full px-3 py-2 border rounded-lg bg-white/5 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 focus:ring-2 disabled:bg-white/[0.02] disabled:cursor-not-allowed ${
             value && !isValid
-              ? 'border-red-300 focus:ring-red-500'
-              : 'border-gray-300 focus:ring-blue-500'
+              ? 'border-red-400/50 focus:ring-red-400/50 focus:border-red-400/30'
+              : 'border-white/10 focus:ring-[#C9A962]/50 focus:border-[#C9A962]/30'
           }`}
         />
 
@@ -56,7 +56,7 @@ export function UrlField({ field }: UrlFieldProps) {
             href={value}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F5E6D3]/40 hover:text-[#C9A962]"
             title="링크 열기"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,11 +67,11 @@ export function UrlField({ field }: UrlFieldProps) {
       </div>
 
       {value && !isValid && (
-        <p className="mt-1 text-sm text-red-500">유효한 URL을 입력하세요</p>
+        <p className="mt-1 text-sm text-red-400">유효한 URL을 입력하세요</p>
       )}
 
       {field.helpText && (
-        <p className="mt-1 text-sm text-gray-500">{field.helpText}</p>
+        <p className="mt-1 text-sm text-[#F5E6D3]/50">{field.helpText}</p>
       )}
     </div>
   )
