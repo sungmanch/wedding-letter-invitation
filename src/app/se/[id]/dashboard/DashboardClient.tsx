@@ -1,0 +1,53 @@
+'use client'
+
+import { InvitationPreview } from '@/lib/super-editor/components'
+import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
+import type { StyleSchema } from '@/lib/super-editor/schema/style'
+import type { UserData } from '@/lib/super-editor/schema/user-data'
+import type { SectionType } from '@/lib/super-editor/schema/section-types'
+
+interface DashboardClientProps {
+  layout: LayoutSchema
+  style: StyleSchema
+  userData: UserData
+}
+
+// 인트로만 활성화된 섹션 설정
+const INTRO_ONLY_ENABLED: Record<SectionType, boolean> = {
+  intro: true,
+  greeting: false,
+  contact: false,
+  venue: false,
+  date: false,
+  gallery: false,
+  parents: false,
+  accounts: false,
+  guestbook: false,
+  music: false,
+}
+
+export function DashboardClient({ layout, style, userData }: DashboardClientProps) {
+  return (
+    <div className="flex justify-center">
+      {/* 아이폰 프레임 */}
+      <div className="relative w-[280px] h-[560px] bg-black rounded-[40px] p-3 shadow-xl">
+        {/* 노치 */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[28px] bg-black rounded-b-2xl z-10" />
+
+        {/* 스크린 */}
+        <div className="w-full h-full bg-white rounded-[32px] overflow-hidden">
+          <div className="w-full h-full overflow-y-auto">
+            <InvitationPreview
+              layout={layout}
+              style={style}
+              userData={userData}
+              sectionOrder={[]}
+              sectionEnabled={INTRO_ONLY_ENABLED}
+              mode="preview"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
