@@ -567,6 +567,14 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     ],
   },
 
+  // Guestbook (DB에서 가져오는 데이터 - 에디터에서 숨김)
+  'guestbook.messages': {
+    type: 'text',
+    label: '방명록 메시지',
+    required: false,
+    description: '__HIDDEN__', // DB에서 조회, 에디터 입력 불필요
+  },
+
   // BGM
   'bgm.trackId': {
     type: 'select',

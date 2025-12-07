@@ -133,14 +133,18 @@ function EditPageContent() {
           brideName,
         })
 
-        // Initialize section variants from layout or defaults
+        // Initialize section variants from layout (saved variantId) or defaults
         const layout = template.layoutSchema as LayoutSchema
         const initialVariants: Record<SectionType, string> = {} as Record<SectionType, string>
         for (const screen of layout.screens) {
           const sectionType = screen.sectionType as SectionType
-          // Try to get variant from screen name or use default
-          const defaultVar = getDefaultVariant(sectionType)
-          initialVariants[sectionType] = defaultVar?.id ?? 'default'
+          // Use saved variantId from screen, fallback to default
+          if (screen.variantId) {
+            initialVariants[sectionType] = screen.variantId
+          } else {
+            const defaultVar = getDefaultVariant(sectionType)
+            initialVariants[sectionType] = defaultVar?.id ?? 'default'
+          }
         }
         setSectionVariants(initialVariants)
       } catch (err) {
