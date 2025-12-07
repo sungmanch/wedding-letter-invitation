@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState, useCallback } from 'react'
 import type { PrimitiveNode, ContainerProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, mergeNodeStyles, getNodeEventHandlers } from '../types'
@@ -10,6 +11,11 @@ interface ExtendedNode extends PrimitiveNode {
   events?: import('../../context/EventContext').NodeEventHandler[]
 }
 
+// showAfterScroll prop을 포함한 확장 props
+interface ExtendedContainerProps extends ContainerProps {
+  showAfterScroll?: number
+}
+
 export function Container({
   node,
   context,
@@ -18,7 +24,30 @@ export function Container({
   context: RenderContext
 }) {
   const extNode = node as ExtendedNode
-  const props = getNodeProps<ContainerProps>(node)
+  const props = getNodeProps<ExtendedContainerProps>(node)
+  const showAfterScroll = props.showAfterScroll
+
+  // 스크롤 후 표시 상태
+  const [isVisible, setIsVisible] = useState(showAfterScroll === undefined)
+
+  // 스크롤 이벤트 핸들러
+  const handleScroll = useCallback(() => {
+    if (showAfterScroll === undefined) return
+
+    const scrollY = window.scrollY || window.pageYOffset
+    setIsVisible(scrollY >= showAfterScroll)
+  }, [showAfterScroll])
+
+  // 스크롤 이벤트 리스너 등록
+  useEffect(() => {
+    if (showAfterScroll === undefined || context.mode === 'edit') return
+
+    // 초기 체크
+    handleScroll()
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [showAfterScroll, handleScroll, context.mode])
 
   // 토큰 스타일 + 직접 스타일 병합
   const mergedStyle = mergeNodeStyles(extNode, context)
@@ -36,6 +65,16 @@ export function Container({
       }
     : eventHandlers.onClick
 
+  // showAfterScroll이 있으면 표시/숨김 스타일 적용
+  const visibilityStyle = showAfterScroll !== undefined
+    ? {
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        pointerEvents: isVisible ? 'auto' as const : 'none' as const,
+      }
+    : {}
+
   return (
     <div
       data-node-id={node.id}
@@ -43,6 +82,7 @@ export function Container({
       className={props.className}
       style={{
         ...mergedStyle,
+        ...visibilityStyle,
         outline: isSelected ? '2px solid #3b82f6' : undefined,
       }}
       onClick={handleClick}
