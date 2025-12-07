@@ -26,6 +26,20 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-07: OG 메타데이터 커스터마이징 기능
+- **이유**: 카카오톡/문자 공유 시 청첩장 인트로를 OG 이미지로 표시하고 제목/설명 수정 가능
+- **변경**:
+  - `superEditorInvitations` 테이블에 `ogTitle`, `ogDescription`, `ogImageUrl` 필드 추가
+  - html2canvas로 인트로 화면을 1200x630 JPG 이미지로 캡처 후 Supabase Storage 업로드
+  - 편집 페이지에 "공유" 탭 추가 (OgMetadataEditor 컴포넌트)
+  - 뷰어 페이지 generateMetadata에서 커스텀 OG 데이터 우선 사용
+- **파일**:
+  - `src/lib/db/super-editor-schema.ts` - OG 필드 추가
+  - `src/lib/super-editor/actions/index.ts` - uploadOgImage, updateOgMetadata, getOgMetadata 액션
+  - `src/lib/super-editor/components/OgMetadataEditor.tsx` - OG 편집 UI
+  - `src/app/se/[id]/page.tsx` - 동적 OG 메타데이터 적용
+  - `src/app/se/[id]/edit/page.tsx` - 공유 탭 추가
+
 ### 2025-12-06: 스크롤텔링 랜딩 페이지 리디자인
 - **이유**: 영화적 스토리텔링으로 전환율 극대화, Wong Kar-wai 화양연화 톤앤매너
 - **변경**:
