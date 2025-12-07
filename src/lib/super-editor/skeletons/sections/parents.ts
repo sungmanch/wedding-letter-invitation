@@ -432,6 +432,533 @@ export const parentsSkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Elegant Variant (세로 배치 + 영문 이름)
+    // ============================================
+    {
+      id: 'elegant',
+      name: '엘레강스',
+      description: '세로 배치, 영문 이름 포함',
+      tags: ['elegant', 'vertical', 'english'],
+      structure: {
+        id: 'parents-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'parents-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.xl',
+            },
+            children: [
+              // 신랑측 섹션
+              {
+                id: 'groom-section',
+                type: 'column',
+                tokenStyle: {
+                  gap: '$token.spacing.md',
+                },
+                style: {
+                  alignItems: 'center',
+                },
+                children: [
+                  // 부모 이름 행: 아버지 · 어머니 의 아들
+                  {
+                    id: 'groom-parents-row',
+                    type: 'row',
+                    tokenStyle: {
+                      gap: '$token.spacing.xs',
+                    },
+                    style: {
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                    },
+                    children: [
+                      // 아버지 (故 표시 포함)
+                      {
+                        id: 'groom-father-deceased',
+                        type: 'conditional',
+                        props: {
+                          condition: 'parents.groom.father.deceased',
+                          operator: 'equals',
+                          value: true,
+                        },
+                        children: [
+                          {
+                            id: 'groom-father-deceased-icon',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            props: {
+                              content: '✿',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        id: 'groom-father-name',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.primary',
+                        },
+                        props: {
+                          content: '{{parents.groom.father.name}}',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'groom-parents-separator',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.muted',
+                        },
+                        style: {
+                          margin: '0 4px',
+                        },
+                        props: {
+                          content: '·',
+                          as: 'span',
+                        },
+                      },
+                      // 어머니 (故 표시 포함)
+                      {
+                        id: 'groom-mother-deceased',
+                        type: 'conditional',
+                        props: {
+                          condition: 'parents.groom.mother.deceased',
+                          operator: 'equals',
+                          value: true,
+                        },
+                        children: [
+                          {
+                            id: 'groom-mother-deceased-icon',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            props: {
+                              content: '✿',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        id: 'groom-mother-name',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.primary',
+                        },
+                        props: {
+                          content: '{{parents.groom.mother.name}}',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'groom-relation',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          marginLeft: '8px',
+                        },
+                        props: {
+                          content: '의 아들',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                  // 신랑 정보 행: 신랑 라벨 + 이름 + 영문이름
+                  {
+                    id: 'groom-info-row',
+                    type: 'row',
+                    tokenStyle: {
+                      gap: '$token.spacing.xl',
+                    },
+                    style: {
+                      justifyContent: 'center',
+                      alignItems: 'baseline',
+                      width: '100%',
+                    },
+                    children: [
+                      {
+                        id: 'groom-label',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.muted',
+                        },
+                        props: {
+                          content: '신랑',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'groom-name-group',
+                        type: 'row',
+                        tokenStyle: {
+                          gap: '$token.spacing.xs',
+                        },
+                        style: {
+                          alignItems: 'baseline',
+                        },
+                        children: [
+                          {
+                            id: 'groom-name',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.headingMd.fontFamily',
+                              fontSize: '$token.typography.headingMd.fontSize',
+                              fontWeight: '$token.typography.headingMd.fontWeight',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{couple.groom.name}}',
+                              as: 'span',
+                            },
+                          },
+                          {
+                            id: 'groom-name-en',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.caption.fontFamily',
+                              fontSize: '$token.typography.caption.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            style: {
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.1em',
+                            },
+                            props: {
+                              content: '{{couple.groom.nameEn}}',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              // 구분선
+              {
+                id: 'parents-divider',
+                type: 'divider',
+                tokenStyle: {
+                  backgroundColor: '$token.colors.divider',
+                },
+                props: {
+                  orientation: 'horizontal',
+                  thickness: 1,
+                },
+              },
+              // 신부측 섹션
+              {
+                id: 'bride-section',
+                type: 'column',
+                tokenStyle: {
+                  gap: '$token.spacing.md',
+                },
+                style: {
+                  alignItems: 'center',
+                },
+                children: [
+                  // 부모 이름 행: 아버지 · 어머니 의 딸
+                  {
+                    id: 'bride-parents-row',
+                    type: 'row',
+                    tokenStyle: {
+                      gap: '$token.spacing.xs',
+                    },
+                    style: {
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                    },
+                    children: [
+                      // 아버지 (故 표시 포함)
+                      {
+                        id: 'bride-father-deceased',
+                        type: 'conditional',
+                        props: {
+                          condition: 'parents.bride.father.deceased',
+                          operator: 'equals',
+                          value: true,
+                        },
+                        children: [
+                          {
+                            id: 'bride-father-deceased-icon',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            props: {
+                              content: '✿',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        id: 'bride-father-name',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.primary',
+                        },
+                        props: {
+                          content: '{{parents.bride.father.name}}',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'bride-parents-separator',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.muted',
+                        },
+                        style: {
+                          margin: '0 4px',
+                        },
+                        props: {
+                          content: '·',
+                          as: 'span',
+                        },
+                      },
+                      // 어머니 (故 표시 포함)
+                      {
+                        id: 'bride-mother-deceased',
+                        type: 'conditional',
+                        props: {
+                          condition: 'parents.bride.mother.deceased',
+                          operator: 'equals',
+                          value: true,
+                        },
+                        children: [
+                          {
+                            id: 'bride-mother-deceased-icon',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.bodyMd.fontFamily',
+                              fontSize: '$token.typography.bodyMd.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            props: {
+                              content: '✿',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        id: 'bride-mother-name',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.primary',
+                        },
+                        props: {
+                          content: '{{parents.bride.mother.name}}',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'bride-relation',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          marginLeft: '8px',
+                        },
+                        props: {
+                          content: '의 딸',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                  // 신부 정보 행: 신부 라벨 + 이름 + 영문이름
+                  {
+                    id: 'bride-info-row',
+                    type: 'row',
+                    tokenStyle: {
+                      gap: '$token.spacing.xl',
+                    },
+                    style: {
+                      justifyContent: 'center',
+                      alignItems: 'baseline',
+                      width: '100%',
+                    },
+                    children: [
+                      {
+                        id: 'bride-label',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          fontSize: '$token.typography.bodyMd.fontSize',
+                          color: '$token.colors.text.muted',
+                        },
+                        props: {
+                          content: '신부',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'bride-name-group',
+                        type: 'row',
+                        tokenStyle: {
+                          gap: '$token.spacing.xs',
+                        },
+                        style: {
+                          alignItems: 'baseline',
+                        },
+                        children: [
+                          {
+                            id: 'bride-name',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.headingMd.fontFamily',
+                              fontSize: '$token.typography.headingMd.fontSize',
+                              fontWeight: '$token.typography.headingMd.fontWeight',
+                              color: '$token.colors.text.primary',
+                            },
+                            props: {
+                              content: '{{couple.bride.name}}',
+                              as: 'span',
+                            },
+                          },
+                          {
+                            id: 'bride-name-en',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.caption.fontFamily',
+                              fontSize: '$token.typography.caption.fontSize',
+                              color: '$token.colors.text.muted',
+                            },
+                            style: {
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.1em',
+                            },
+                            props: {
+                              content: '{{couple.bride.nameEn}}',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'groom-father',
+          path: 'parents.groom.father.name',
+          type: 'text',
+          required: true,
+          description: '신랑 아버지 성함',
+          defaultValue: '정동석',
+        },
+        {
+          id: 'groom-mother',
+          path: 'parents.groom.mother.name',
+          type: 'text',
+          required: true,
+          description: '신랑 어머니 성함',
+          defaultValue: '윤혜진',
+        },
+        {
+          id: 'bride-father',
+          path: 'parents.bride.father.name',
+          type: 'text',
+          required: true,
+          description: '신부 아버지 성함',
+          defaultValue: '김재현',
+        },
+        {
+          id: 'bride-mother',
+          path: 'parents.bride.mother.name',
+          type: 'text',
+          required: true,
+          description: '신부 어머니 성함',
+          defaultValue: '서수진',
+        },
+        {
+          id: 'groom-name',
+          path: 'couple.groom.name',
+          type: 'text',
+          required: true,
+          description: '신랑 이름',
+          defaultValue: '세진',
+        },
+        {
+          id: 'groom-name-en',
+          path: 'couple.groom.nameEn',
+          type: 'text',
+          required: false,
+          description: '신랑 영문 이름',
+          defaultValue: 'SEJIN',
+        },
+        {
+          id: 'bride-name',
+          path: 'couple.bride.name',
+          type: 'text',
+          required: true,
+          description: '신부 이름',
+          defaultValue: '유정',
+        },
+        {
+          id: 'bride-name-en',
+          path: 'couple.bride.nameEn',
+          type: 'text',
+          required: false,
+          description: '신부 영문 이름',
+          defaultValue: 'YUJUNG',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+      },
+    },
+
+    // ============================================
     // Modern Variant
     // ============================================
     {
