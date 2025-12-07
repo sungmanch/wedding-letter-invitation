@@ -23,7 +23,7 @@ export const venueSkeleton: SectionSkeleton = {
         id: 'venue-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -124,7 +124,7 @@ export const venueSkeleton: SectionSkeleton = {
                 tokenStyle: {
                   gap: '$token.spacing.xs',
                   padding: '$token.spacing.md',
-                  backgroundColor: '$token.colors.surface',
+                  backgroundColor: '$token.colors.background',
                   borderRadius: '$token.borders.radiusMd',
                 },
                 children: [
@@ -225,7 +225,7 @@ export const venueSkeleton: SectionSkeleton = {
         id: 'venue-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -272,7 +272,7 @@ export const venueSkeleton: SectionSkeleton = {
                 type: 'column',
                 tokenStyle: {
                   padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.surface',
+                  backgroundColor: '$token.colors.background',
                   borderRadius: '$token.borders.radiusMd',
                   gap: '$token.spacing.md',
                 },
@@ -437,7 +437,7 @@ export const venueSkeleton: SectionSkeleton = {
         id: 'venue-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -671,7 +671,7 @@ export const venueSkeleton: SectionSkeleton = {
                 tokenStyle: {
                   gap: '$token.spacing.md',
                   padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.surface',
+                  backgroundColor: '$token.colors.background',
                   borderRadius: '$token.borders.radiusMd',
                 },
                 children: [
@@ -680,7 +680,7 @@ export const venueSkeleton: SectionSkeleton = {
                     id: 'transport-bus',
                     type: 'conditional',
                     props: {
-                      condition: '{{venue.transport.bus}}',
+                      condition: '{{venue.transportation.bus}}',
                     },
                     children: [
                       {
@@ -716,7 +716,7 @@ export const venueSkeleton: SectionSkeleton = {
                               whiteSpace: 'pre-line',
                             },
                             props: {
-                              content: '{{venue.transport.bus}}',
+                              content: '{{venue.transportation.bus}}',
                               as: 'p',
                             },
                           },
@@ -729,7 +729,7 @@ export const venueSkeleton: SectionSkeleton = {
                     id: 'transport-car',
                     type: 'conditional',
                     props: {
-                      condition: '{{venue.transport.car}}',
+                      condition: '{{venue.transportation.parking}}',
                     },
                     children: [
                       {
@@ -765,7 +765,7 @@ export const venueSkeleton: SectionSkeleton = {
                               whiteSpace: 'pre-line',
                             },
                             props: {
-                              content: '{{venue.transport.car}}',
+                              content: '{{venue.transportation.parking}}',
                               as: 'p',
                             },
                           },
@@ -778,7 +778,7 @@ export const venueSkeleton: SectionSkeleton = {
                     id: 'transport-subway',
                     type: 'conditional',
                     props: {
-                      condition: '{{venue.transport.subway}}',
+                      condition: '{{venue.transportation.subway}}',
                     },
                     children: [
                       {
@@ -814,7 +814,7 @@ export const venueSkeleton: SectionSkeleton = {
                               whiteSpace: 'pre-line',
                             },
                             props: {
-                              content: '{{venue.transport.subway}}',
+                              content: '{{venue.transportation.subway}}',
                               as: 'p',
                             },
                           },
@@ -867,7 +867,7 @@ export const venueSkeleton: SectionSkeleton = {
         },
         {
           id: 'transport-bus',
-          path: 'venue.transport.bus',
+          path: 'venue.transportation.bus',
           type: 'text',
           required: false,
           description: '버스 안내',
@@ -875,7 +875,7 @@ export const venueSkeleton: SectionSkeleton = {
         },
         {
           id: 'transport-car',
-          path: 'venue.transport.car',
+          path: 'venue.transportation.parking',
           type: 'text',
           required: false,
           description: '자가용 안내',
@@ -883,7 +883,7 @@ export const venueSkeleton: SectionSkeleton = {
         },
         {
           id: 'transport-subway',
-          path: 'venue.transport.subway',
+          path: 'venue.transportation.subway',
           type: 'text',
           required: false,
           description: '지하철 안내',

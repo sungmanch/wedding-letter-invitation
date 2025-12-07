@@ -44,6 +44,44 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-08: 다양한 폰트 지원을 위한 폰트 시스템 구축
+- **이유**: 9개 고정 폰트만 사용 가능했고, 새 폰트 추가 시 여러 파일 수동 수정 필요
+- **변경**:
+  - `fonts/presets.ts`: 30+ 폰트 프리셋 (한글 고딕/명조/손글씨, 영문 세리프/산세리프/디스플레이)
+  - `fonts/loader.ts`: Google Fonts URL 동적 생성, CDN 링크 자동 로드
+  - StyleEditor: 카테고리별 그룹화된 폰트 선택기 (폰트 선택 시 실시간 로드)
+  - HtmlBuilder: 사용된 폰트만 동적으로 CDN 링크 생성
+  - TokenStyleContext: 스타일 변경 시 자동 폰트 로드
+- **파일**: `src/lib/super-editor/fonts/` (presets.ts, loader.ts, index.ts)
+- **새 폰트 추가 방법**: `fonts/presets.ts`의 `FONT_PRESETS` 배열에 추가
+
+### 2025-12-08: Color System 60-30-10 법칙 적용
+- **이유**: Surface(카드) 색상이 배경 변경에 반응하지 않고, 예술적 감성 부족
+- **변경**:
+  - 60-30-10 법칙 적용 (Background 60%, Surface 30%, Accent 10%)
+  - `deriveSurfaceColor(bg, accent?)` - Alpha Blend로 Surface 자동 계산
+  - 따뜻한 중립 톤: 크림/웜브라운 블렌딩 (기본)
+  - 테마 통일 모드: accent 색상으로 블렌딩 (테마 적용 시)
+  - 제목/본문 스타일 섹션 분리 (각각 상세설정 가능)
+- **파일**:
+  - `src/lib/super-editor/presets/intro-style-presets.ts` - `isDark()`, `deriveSurfaceColor()` 추가
+  - `src/lib/super-editor/components/StyleEditor.tsx` - 제목/본문 분리, surface 자동 계산
+- **문서**: [Color System 상세](./src/lib/super-editor/CLAUDE.md#4-color-system-60-30-10-법칙)
+
+### 2025-12-07: StyleEditor UX 개선 - 탭 제거 및 섹션 기반 구조
+- **이유**: 프리셋이 인트로 스타일과 불일치, 색상/글꼴 탭 분리가 비전문가에게 복잡
+- **변경**:
+  - 3개 탭(프리셋/색상/글꼴) 제거 → 단일 스크롤 뷰
+  - "추천 스타일 적용" 버튼 최상단 배치 (인트로 타입별 색상/폰트 원클릭 적용)
+  - 글 스타일 섹션: 제목/본문 글꼴 분리, ColorChipSelector (6개 프리셋 + 직접 선택)
+  - 배경 스타일 섹션: 배경 색상 ColorChipSelector
+  - 고급 옵션 접기/펼치기 (DisclosurePanel)
+- **파일**:
+  - `src/lib/super-editor/presets/intro-style-presets.ts` - 신규: 7개 인트로별 스타일 프리셋
+  - `src/lib/super-editor/components/StyleEditor.tsx` - 전면 리팩토링
+  - `src/app/se/[id]/edit/page.tsx` - introType props 전달
+- **계획**: [StyleEditor UX 계획](./.claude/plans/starry-twirling-popcorn.md)
+
 ### 2025-12-07: 편집 패널 UX 리디자인 - Section-First 패턴
 - **이유**: "내용"과 "섹션" 탭이 분리되어 사용자 인지 부하 발생, 점진적 공개 UX 개선
 - **변경**:

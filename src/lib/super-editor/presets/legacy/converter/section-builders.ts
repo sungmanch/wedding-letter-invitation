@@ -483,7 +483,7 @@ export function buildAccountSection(ctx: SectionBuilderContext): PrimitiveNode {
                   {
                     id: generateId(),
                     type: 'text',
-                    props: { content: '{{account.bank}} {{account.accountNumber}}' },
+                    props: { content: '{{account.bank}} {{account.number}}' },
                     style: { fontSize: '14px', color: preset.defaultColors.text },
                   },
                   {
@@ -493,7 +493,7 @@ export function buildAccountSection(ctx: SectionBuilderContext): PrimitiveNode {
                       label: '복사',
                       variant: 'outline',
                       size: 'sm',
-                      action: { type: 'copy', value: '{{account.accountNumber}}', toast: '계좌번호가 복사되었습니다' },
+                      action: { type: 'copy', value: '{{account.number}}', toast: '계좌번호가 복사되었습니다' },
                     },
                   },
                 ],
@@ -540,7 +540,7 @@ export function buildAccountSection(ctx: SectionBuilderContext): PrimitiveNode {
                   {
                     id: generateId(),
                     type: 'text',
-                    props: { content: '{{account.bank}} {{account.accountNumber}}' },
+                    props: { content: '{{account.bank}} {{account.number}}' },
                     style: { fontSize: '14px', color: preset.defaultColors.text },
                   },
                   {
@@ -550,7 +550,7 @@ export function buildAccountSection(ctx: SectionBuilderContext): PrimitiveNode {
                       label: '복사',
                       variant: 'outline',
                       size: 'sm',
-                      action: { type: 'copy', value: '{{account.accountNumber}}', toast: '계좌번호가 복사되었습니다' },
+                      action: { type: 'copy', value: '{{account.number}}', toast: '계좌번호가 복사되었습니다' },
                     },
                   },
                 ],

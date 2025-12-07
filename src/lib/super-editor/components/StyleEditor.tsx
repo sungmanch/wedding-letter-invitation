@@ -1,7 +1,11 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { StyleSchema } from '../schema/style'
+import type { LegacyIntroType } from '../presets/legacy/types'
+import { INTRO_STYLE_PRESETS, applyIntroStyleToSchema, deriveSurfaceColor } from '../presets/intro-style-presets'
+import { getFontOptionsGrouped, buildFontFamily, type FontPreset } from '../fonts'
+import { loadFontDynamically } from '../fonts/loader'
 
 interface StyleEditorProps {
   style: StyleSchema
@@ -11,18 +15,58 @@ interface StyleEditorProps {
   liveUpdate?: boolean
   /** 디바운스 시간 (ms, 기본: 300) */
   debounceMs?: number
+  /** 현재 선택된 인트로 타입 (추천 스타일용) */
+  introType?: LegacyIntroType
 }
 
-// 색상 프리셋
-const COLOR_PRESETS = [
-  { name: '로즈 골드', primary: '#e11d48', accent: '#f43f5e', background: '#fff1f2' },
-  { name: '라벤더', primary: '#8b5cf6', accent: '#a78bfa', background: '#faf5ff' },
-  { name: '민트', primary: '#14b8a6', accent: '#2dd4bf', background: '#f0fdfa' },
-  { name: '네이비', primary: '#1e40af', accent: '#3b82f6', background: '#eff6ff' },
-  { name: '골드', primary: '#b45309', accent: '#d97706', background: '#fffbeb' },
-  { name: '블러쉬', primary: '#ec4899', accent: '#f472b6', background: '#fdf2f8' },
-  { name: '세이지', primary: '#65a30d', accent: '#84cc16', background: '#f7fee7' },
-  { name: '버건디', primary: '#9f1239', accent: '#be123c', background: '#fff1f2' },
+// 컬러 칩 프리셋
+const TEXT_COLOR_PRESETS = [
+  '#1f2937',  // 차콜 (기본)
+  '#F5E6D3',  // 크림 (다크 배경용)
+  '#722F37',  // 버건디
+  '#1E3A5F',  // 네이비
+  '#2F4538',  // 에메랄드
+  '#36454F',  // 차콜 그레이
+]
+
+const BG_COLOR_PRESETS = [
+  '#FFFFFF',  // 화이트
+  '#1A1A1A',  // 다크
+  '#FAFAFA',  // 라이트 그레이
+  '#F5E6D3',  // 크림
+  '#FFFEF5',  // 아이보리
+  '#0D0D0D',  // 블랙
+]
+
+// 폰트 옵션 (프리셋에서 가져옴)
+const FONT_OPTIONS_GROUPED = getFontOptionsGrouped()
+
+// 굵기 옵션
+const TITLE_WEIGHT_OPTIONS = [
+  { value: 400, label: '보통' },
+  { value: 600, label: '굵게' },
+  { value: 700, label: '매우 굵게' },
+]
+
+const BODY_WEIGHT_OPTIONS = [
+  { value: 300, label: '얇게' },
+  { value: 400, label: '보통' },
+  { value: 500, label: '굵게' },
+]
+
+// 자간 옵션
+const LETTER_SPACING_OPTIONS = [
+  { value: '-0.025em', label: '좁게' },
+  { value: '0', label: '기본' },
+  { value: '0.05em', label: '넓게' },
+]
+
+// 줄 간격 옵션
+const LINE_HEIGHT_OPTIONS = [
+  { value: 1.4, label: '좁게' },
+  { value: 1.6, label: '기본' },
+  { value: 1.8, label: '넓게' },
+  { value: 2.0, label: '여유' },
 ]
 
 export function StyleEditor({
@@ -31,11 +75,14 @@ export function StyleEditor({
   className = '',
   liveUpdate = true,
   debounceMs = 300,
+  introType,
 }: StyleEditorProps) {
-  const [activeSection, setActiveSection] = useState<'colors' | 'typography' | 'presets'>('presets')
-  // 로컬 상태로 스타일 관리 (실시간 변경용)
   const [localStyle, setLocalStyle] = useState<StyleSchema>(style)
   const [isDirty, setIsDirty] = useState(false)
+  const [titleAdvancedOpen, setTitleAdvancedOpen] = useState(false)
+  const [bodyAdvancedOpen, setBodyAdvancedOpen] = useState(false)
+  const [bgAdvancedOpen, setBgAdvancedOpen] = useState(false)
+
   const localStyleRef = useRef(localStyle)
   const isDirtyRef = useRef(isDirty)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -64,7 +111,7 @@ export function StyleEditor({
     }, debounceMs)
   }, [liveUpdate, debounceMs, onStyleChange])
 
-  // 컴포넌트 언마운트 시 변경사항 저장 (디바운스 취소 후 즉시 저장)
+  // 컴포넌트 언마운트 시 변경사항 저장
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
@@ -76,6 +123,7 @@ export function StyleEditor({
     }
   }, [onStyleChange])
 
+  // 색상 업데이트
   const updateColor = useCallback((path: string, value: string) => {
     setLocalStyle(prev => {
       const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
@@ -88,42 +136,19 @@ export function StyleEditor({
       }
       current[parts[parts.length - 1]] = value
 
-      // 실시간 프리뷰 업데이트
+      // 배경색 변경 시 surface 색상 자동 계산 (Alpha Blend with Accent)
+      if (path === 'background.default') {
+        const accentColor = newStyle.theme.colors.accent?.[500] ?? newStyle.theme.colors.primary?.[500]
+        newStyle.theme.colors.background.paper = deriveSurfaceColor(value, accentColor)
+      }
+
       debouncedStyleChange(newStyle)
       return newStyle
     })
     setIsDirty(true)
   }, [debouncedStyleChange])
 
-  const applyPreset = useCallback((preset: typeof COLOR_PRESETS[0]) => {
-    setLocalStyle(prev => {
-      const newStyle = JSON.parse(JSON.stringify(prev)) as StyleSchema
-
-      // Primary 색상 스케일 업데이트
-      if (newStyle.theme.colors.primary) {
-        newStyle.theme.colors.primary[500] = preset.primary
-        newStyle.theme.colors.primary[400] = lightenColor(preset.primary, 0.2)
-        newStyle.theme.colors.primary[600] = darkenColor(preset.primary, 0.2)
-      }
-
-      // Accent 색상
-      if (newStyle.theme.colors.accent) {
-        newStyle.theme.colors.accent[500] = preset.accent
-      } else if (newStyle.theme.colors.secondary) {
-        newStyle.theme.colors.secondary[500] = preset.accent
-      }
-
-      // 배경 색상
-      newStyle.theme.colors.background.default = preset.background
-
-      // 실시간 프리뷰 업데이트
-      debouncedStyleChange(newStyle)
-      return newStyle
-    })
-    setIsDirty(true)
-  }, [debouncedStyleChange])
-
-  // 타이포그래피 업데이트 헬퍼
+  // 타이포그래피 업데이트
   const updateTypography = useCallback((
     updater: (typography: StyleSchema['theme']['typography']) => void
   ) => {
@@ -138,174 +163,90 @@ export function StyleEditor({
     setIsDirty(true)
   }, [debouncedStyleChange])
 
+  // 추천 스타일 적용
+  const applyRecommendedStyle = useCallback(() => {
+    if (!introType) return
+    const preset = INTRO_STYLE_PRESETS[introType]
+    if (!preset) return
+
+    const newStyle = applyIntroStyleToSchema(localStyle, preset)
+    setLocalStyle(newStyle)
+    debouncedStyleChange(newStyle)
+    setIsDirty(true)
+  }, [introType, localStyle, debouncedStyleChange])
+
+  const currentPreset = introType ? INTRO_STYLE_PRESETS[introType] : null
+
   return (
     <div className={`flex flex-col h-full ${className}`}>
-      {/* 섹션 탭 */}
-      <div className="flex border-b border-white/10 px-2 gap-1 py-2 flex-shrink-0">
-        <button
-          onClick={() => setActiveSection('presets')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            activeSection === 'presets'
-              ? 'bg-[#C9A962]/20 text-[#C9A962]'
-              : 'text-[#F5E6D3]/60 hover:bg-white/5'
-          }`}
-        >
-          프리셋
-        </button>
-        <button
-          onClick={() => setActiveSection('colors')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            activeSection === 'colors'
-              ? 'bg-[#C9A962]/20 text-[#C9A962]'
-              : 'text-[#F5E6D3]/60 hover:bg-white/5'
-          }`}
-        >
-          색상
-        </button>
-        <button
-          onClick={() => setActiveSection('typography')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            activeSection === 'typography'
-              ? 'bg-[#C9A962]/20 text-[#C9A962]'
-              : 'text-[#F5E6D3]/60 hover:bg-white/5'
-          }`}
-        >
-          글꼴
-        </button>
-      </div>
-
-      {/* 콘텐츠 */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {activeSection === 'presets' && (
-          <div className="space-y-4">
-            <p className="text-sm text-[#F5E6D3]/60">
-              색상 조합을 선택하세요
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {/* 추천 스타일 적용 */}
+        {currentPreset && (
+          <div className="p-4 bg-gradient-to-r from-[#C9A962]/10 to-[#C9A962]/5 rounded-xl border border-[#C9A962]/30">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">✨</span>
+              <span className="text-sm font-medium text-[#C9A962]">
+                {currentPreset.label}
+              </span>
+            </div>
+            <p className="text-xs text-[#F5E6D3]/60 mb-3">
+              {currentPreset.description}
             </p>
-            <div className="grid grid-cols-2 gap-3">
-              {COLOR_PRESETS.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => applyPreset(preset)}
-                  className="p-3 rounded-lg border border-white/10 hover:border-[#C9A962]/50 hover:bg-white/5 transition-all text-left bg-white/5"
-                >
-                  <div className="flex gap-1 mb-2">
-                    <div
-                      className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: preset.primary }}
-                    />
-                    <div
-                      className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: preset.accent }}
-                    />
-                    <div
-                      className="w-6 h-6 rounded-full border border-white/10"
-                      style={{ backgroundColor: preset.background }}
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-[#F5E6D3]">{preset.name}</span>
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={applyRecommendedStyle}
+              className="w-full py-2.5 bg-[#C9A962] text-[#0A0806] rounded-lg text-sm font-medium hover:bg-[#B8A052] transition-colors"
+            >
+              추천 스타일 적용
+            </button>
           </div>
         )}
 
-        {activeSection === 'colors' && (
-          <div className="space-y-6">
-            {/* 메인 색상 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-[#F5E6D3]">메인 색상</h4>
-              <ColorPicker
-                label="기본 색상"
-                value={localStyle.theme.colors.primary?.[500] ?? '#e11d48'}
-                onChange={(v) => updateColor('primary.500', v)}
-              />
-              {localStyle.theme.colors.accent && (
-                <ColorPicker
-                  label="강조 색상"
-                  value={localStyle.theme.colors.accent?.[500] ?? '#f43f5e'}
-                  onChange={(v) => updateColor('accent.500', v)}
-                />
-              )}
-              {localStyle.theme.colors.secondary && !localStyle.theme.colors.accent && (
-                <ColorPicker
-                  label="보조 색상"
-                  value={localStyle.theme.colors.secondary?.[500] ?? '#6b7280'}
-                  onChange={(v) => updateColor('secondary.500', v)}
-                />
-              )}
-            </div>
+        {/* 제목 스타일 섹션 */}
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-[#F5E6D3] flex items-center gap-2">
+            <span>✏️</span>
+            제목 스타일
+          </h3>
 
-            {/* 배경 색상 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-[#F5E6D3]">배경</h4>
-              <ColorPicker
-                label="기본 배경"
-                value={localStyle.theme.colors.background?.default ?? '#ffffff'}
-                onChange={(v) => updateColor('background.default', v)}
-              />
-              {localStyle.theme.colors.background?.paper && (
-                <ColorPicker
-                  label="카드 배경"
-                  value={localStyle.theme.colors.background.paper}
-                  onChange={(v) => updateColor('background.paper', v)}
-                />
-              )}
-            </div>
-
-            {/* 텍스트 색상 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-[#F5E6D3]">텍스트</h4>
-              <ColorPicker
-                label="기본 텍스트"
-                value={localStyle.theme.colors.text?.primary ?? '#1f2937'}
-                onChange={(v) => updateColor('text.primary', v)}
-              />
-              {localStyle.theme.colors.text?.secondary && (
-                <ColorPicker
-                  label="보조 텍스트"
-                  value={localStyle.theme.colors.text.secondary}
-                  onChange={(v) => updateColor('text.secondary', v)}
-                />
-              )}
-            </div>
+          {/* 제목 글꼴 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
+            <FontSelector
+              value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
+              onChange={(family) => updateTypography((typo) => {
+                if (typo?.fonts?.heading) typo.fonts.heading.family = family
+              })}
+            />
           </div>
-        )}
 
-        {activeSection === 'typography' && (
-          <div className="space-y-6">
-            {/* ========== 제목 설정 ========== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-[#F5E6D3]">제목 설정</h3>
-                <span className="text-[10px] text-[#F5E6D3]/40 bg-white/5 px-1.5 py-0.5 rounded">
-                  메인 타이틀, 섹션 제목
-                </span>
-              </div>
+          {/* 제목 색상 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">색상</label>
+            <ColorChipSelector
+              value={localStyle.theme.colors.text?.primary ?? '#1f2937'}
+              presets={TEXT_COLOR_PRESETS}
+              onChange={(color) => updateColor('text.primary', color)}
+            />
+          </div>
 
-              {/* 제목 글꼴 */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
-                <FontSelector
-                  value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
-                  onChange={(family) => updateTypography((typo) => {
-                    if (typo?.fonts?.heading) typo.fonts.heading.family = family
-                  })}
-                />
-              </div>
-
+          {/* 제목 상세 설정 */}
+          <DisclosurePanel
+            label="상세 설정"
+            isOpen={titleAdvancedOpen}
+            onToggle={() => setTitleAdvancedOpen(!titleAdvancedOpen)}
+          >
+            <div className="space-y-4 pt-2">
               {/* 제목 굵기 */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {HEADING_WEIGHT_OPTIONS.map((opt) => (
+                  {TITLE_WEIGHT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       onClick={() => updateTypography((typo) => {
                         if (typo?.weights) {
-                          // bold, semibold, medium 모두 업데이트 (제목 전체에 적용)
                           typo.weights.bold = opt.value
-                          typo.weights.semibold = opt.semibold
-                          typo.weights.medium = opt.medium
+                          typo.weights.semibold = Math.max(400, opt.value - 100)
                         }
                       })}
                       className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
@@ -320,50 +261,74 @@ export function StyleEditor({
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-white/10" />
-
-            {/* ========== 본문 설정 ========== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-[#F5E6D3]">본문 설정</h3>
-                <span className="text-[10px] text-[#F5E6D3]/40 bg-white/5 px-1.5 py-0.5 rounded">
-                  설명 텍스트, 내용
-                </span>
-              </div>
-
-              {/* 본문 글꼴 */}
+              {/* 자간 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
-                <FontSelector
-                  value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
-                  onChange={(family) => updateTypography((typo) => {
-                    if (typo?.fonts?.body) typo.fonts.body.family = family
-                  })}
-                />
-              </div>
-
-              {/* 본문 크기 */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-[#F5E6D3]/60">기본 크기</label>
-                  <span className="text-[10px] text-[#F5E6D3]/40">본문(대), 소제목</span>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">자간</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {LETTER_SPACING_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.letterSpacing) typo.letterSpacing.tight = opt.value
+                      })}
+                      className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
+                        localStyle.theme.typography?.letterSpacing?.tight === opt.value
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
-                <SizeSelector
-                  value={localStyle.theme.typography?.sizes?.base ?? '1rem'}
-                  options={FONT_SIZE_OPTIONS}
-                  onChange={(size) => updateTypography((typo) => {
-                    if (typo?.sizes) typo.sizes.base = size
-                  })}
-                />
               </div>
+            </div>
+          </DisclosurePanel>
+        </section>
 
+        <div className="border-t border-white/10" />
+
+        {/* 본문 스타일 섹션 */}
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-[#F5E6D3] flex items-center gap-2">
+            <span>📝</span>
+            본문 스타일
+          </h3>
+
+          {/* 본문 글꼴 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
+            <FontSelector
+              value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
+              onChange={(family) => updateTypography((typo) => {
+                if (typo?.fonts?.body) typo.fonts.body.family = family
+              })}
+            />
+          </div>
+
+          {/* 본문 색상 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">색상</label>
+            <ColorChipSelector
+              value={localStyle.theme.colors.text?.secondary ?? localStyle.theme.colors.text?.primary ?? '#1f2937'}
+              presets={TEXT_COLOR_PRESETS}
+              onChange={(color) => updateColor('text.secondary', color)}
+            />
+          </div>
+
+          {/* 본문 상세 설정 */}
+          <DisclosurePanel
+            label="상세 설정"
+            isOpen={bodyAdvancedOpen}
+            onToggle={() => setBodyAdvancedOpen(!bodyAdvancedOpen)}
+          >
+            <div className="space-y-4 pt-2">
               {/* 본문 굵기 */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {FONT_WEIGHT_OPTIONS.map((opt) => (
+                  {BODY_WEIGHT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       onClick={() => updateTypography((typo) => {
@@ -381,7 +346,36 @@ export function StyleEditor({
                   ))}
                 </div>
               </div>
+            </div>
+          </DisclosurePanel>
+        </section>
 
+        <div className="border-t border-white/10" />
+
+        {/* 배경 스타일 섹션 */}
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-[#F5E6D3] flex items-center gap-2">
+            <span>🎨</span>
+            배경 스타일
+          </h3>
+
+          {/* 배경 색상 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">배경 색상</label>
+            <ColorChipSelector
+              value={localStyle.theme.colors.background?.default ?? '#ffffff'}
+              presets={BG_COLOR_PRESETS}
+              onChange={(color) => updateColor('background.default', color)}
+            />
+          </div>
+
+          {/* 고급 설정 토글 */}
+          <DisclosurePanel
+            label="상세 설정"
+            isOpen={bgAdvancedOpen}
+            onToggle={() => setBgAdvancedOpen(!bgAdvancedOpen)}
+          >
+            <div className="space-y-4 pt-2">
               {/* 줄 간격 */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-[#F5E6D3]/60">줄 간격</label>
@@ -403,195 +397,166 @@ export function StyleEditor({
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-white/10" />
-
-            {/* ========== 공통 설정 ========== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-[#F5E6D3]">공통 설정</h3>
-              </div>
-
-              {/* 자간 */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-[#F5E6D3]/60">자간</label>
-                  <span className="text-[10px] text-[#F5E6D3]/40">메인 타이틀</span>
+              {/* 강조 색상 */}
+              {localStyle.theme.colors.accent && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-[#F5E6D3]/60">강조 색상</label>
+                  <ColorChipSelector
+                    value={localStyle.theme.colors.accent?.[500] ?? '#C9A962'}
+                    presets={['#C9A962', '#e11d48', '#8b5cf6', '#14b8a6', '#1e40af', '#ec4899']}
+                    onChange={(color) => updateColor('accent.500', color)}
+                  />
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {LETTER_SPACING_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => updateTypography((typo) => {
-                        if (typo?.letterSpacing) typo.letterSpacing.tight = opt.value
-                      })}
-                      className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
-                        localStyle.theme.typography?.letterSpacing?.tight === opt.value
-                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
-                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
-          </div>
-        )}
+          </DisclosurePanel>
+        </section>
       </div>
     </div>
   )
 }
 
-// 색상 선택기 컴포넌트
-function ColorPicker({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="relative">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-10 h-10 rounded-lg cursor-pointer border border-white/20"
-        />
-      </div>
-      <div className="flex-1">
-        <label className="text-xs text-[#F5E6D3]/50">{label}</label>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full text-sm font-mono text-[#F5E6D3] bg-transparent border-none p-0 focus:outline-none"
-        />
-      </div>
-    </div>
-  )
-}
+// ============================================
+// Sub Components
+// ============================================
 
-// 글꼴 선택기 컴포넌트
-const FONT_OPTIONS = [
-  { value: 'Pretendard', label: 'Pretendard (기본)' },
-  { value: 'Noto Sans KR', label: '노토 산스' },
-  { value: 'Nanum Myeongjo', label: '나눔명조' },
-  { value: 'Nanum Gothic', label: '나눔고딕' },
-  { value: 'Gowun Dodum', label: '고운돋움' },
-  { value: 'Gowun Batang', label: '고운바탕' },
-  { value: 'Noto Serif KR', label: '노토 세리프' },
-  { value: 'Gothic A1', label: 'Gothic A1' },
-]
-
-// 폰트 크기 옵션
-const FONT_SIZE_OPTIONS = [
-  { value: '0.875rem', label: '작게 (14px)' },
-  { value: '1rem', label: '기본 (16px)' },
-  { value: '1.125rem', label: '크게 (18px)' },
-]
-
-// 자간 옵션
-const LETTER_SPACING_OPTIONS = [
-  { value: '-0.025em', label: '좁게' },
-  { value: '0', label: '기본' },
-  { value: '0.05em', label: '넓게' },
-]
-
-// 줄 간격 옵션
-const LINE_HEIGHT_OPTIONS = [
-  { value: 1.4, label: '좁게 (1.4)' },
-  { value: 1.6, label: '기본 (1.6)' },
-  { value: 1.8, label: '넓게 (1.8)' },
-  { value: 2.0, label: '여유 (2.0)' },
-]
-
-// 본문 굵기 옵션
-const FONT_WEIGHT_OPTIONS = [
-  { value: 300, label: '얇게' },
-  { value: 400, label: '기본' },
-  { value: 500, label: '굵게' },
-]
-
-// 제목 굵기 옵션 (bold: 메인 타이틀, semibold: 섹션 제목, medium: 섹션 영문 타이틀)
-const HEADING_WEIGHT_OPTIONS = [
-  { value: 600, semibold: 500, medium: 400, label: '보통' },
-  { value: 700, semibold: 600, medium: 500, label: '굵게' },
-  { value: 800, semibold: 700, medium: 600, label: '매우 굵게' },
-]
-
+// 글꼴 선택기 (그룹화된 목록)
 function FontSelector({
   value,
   onChange,
+  usage,
 }: {
   value: string
   onChange: (value: string) => void
+  usage?: 'title' | 'body' | 'accent'
 }) {
+  // 현재 값에서 폰트 이름 추출 (fallback 제거)
+  const currentFont = value.split(',')[0].replace(/["']/g, '').trim()
+
+  const handleChange = async (fontFamily: string) => {
+    // 폰트 동적 로드
+    await loadFontDynamically(fontFamily)
+    onChange(fontFamily)
+  }
+
   return (
     <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 text-sm border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50 focus:border-transparent"
+      value={currentFont}
+      onChange={(e) => handleChange(e.target.value)}
+      className="w-full px-3 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50 focus:border-transparent"
+      style={{ fontFamily: currentFont }}
     >
-      {FONT_OPTIONS.map((font) => (
-        <option key={font.value} value={font.value} className="bg-[#1A1A1A] text-[#F5E6D3]">
-          {font.label}
-        </option>
+      {FONT_OPTIONS_GROUPED.map((group) => (
+        <optgroup key={group.category} label={group.label} className="bg-[#1A1A1A]">
+          {group.fonts
+            .filter(font => !usage || font.recommended?.includes(usage))
+            .map((font) => (
+              <option
+                key={font.id}
+                value={font.family}
+                className="bg-[#1A1A1A] text-[#F5E6D3]"
+                style={{ fontFamily: font.family }}
+              >
+                {font.label}
+              </option>
+            ))}
+        </optgroup>
       ))}
     </select>
   )
 }
 
-// 색상 유틸리티 함수
-function lightenColor(hex: string, percent: number): string {
-  const num = parseInt(hex.replace('#', ''), 16)
-  const amt = Math.round(255 * percent)
-  const R = Math.min(255, (num >> 16) + amt)
-  const G = Math.min(255, ((num >> 8) & 0x00ff) + amt)
-  const B = Math.min(255, (num & 0x0000ff) + amt)
-  return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`
-}
-
-function darkenColor(hex: string, percent: number): string {
-  const num = parseInt(hex.replace('#', ''), 16)
-  const amt = Math.round(255 * percent)
-  const R = Math.max(0, (num >> 16) - amt)
-  const G = Math.max(0, ((num >> 8) & 0x00ff) - amt)
-  const B = Math.max(0, (num & 0x0000ff) - amt)
-  return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`
-}
-
-// 크기 선택기 컴포넌트
-function SizeSelector({
+// 컬러 칩 선택기
+function ColorChipSelector({
   value,
-  options,
+  presets,
   onChange,
 }: {
   value: string
-  options: { value: string; label: string }[]
-  onChange: (value: string) => void
+  presets: string[]
+  onChange: (color: string) => void
+}) {
+  const [showPicker, setShowPicker] = useState(false)
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        {presets.map((color) => (
+          <button
+            key={color}
+            onClick={() => onChange(color)}
+            className={`w-8 h-8 rounded-lg border-2 transition-all ${
+              value.toLowerCase() === color.toLowerCase()
+                ? 'border-[#C9A962] ring-2 ring-[#C9A962]/30 scale-110'
+                : 'border-white/20 hover:border-white/40'
+            }`}
+            style={{ backgroundColor: color }}
+            title={color}
+          />
+        ))}
+        <button
+          onClick={() => setShowPicker(!showPicker)}
+          className={`w-8 h-8 rounded-lg border-2 transition-all flex items-center justify-center text-xs ${
+            showPicker
+              ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+              : 'border-white/20 hover:border-white/40 text-[#F5E6D3]/60'
+          }`}
+          title="직접 선택"
+        >
+          +
+        </button>
+      </div>
+
+      {showPicker && (
+        <div className="flex items-center gap-3 p-2 bg-white/5 rounded-lg border border-white/10">
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-10 h-10 rounded-lg cursor-pointer border border-white/20"
+          />
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="flex-1 px-2 py-1 text-sm font-mono text-[#F5E6D3] bg-transparent border border-white/10 rounded focus:outline-none focus:border-[#C9A962]/50"
+            placeholder="#000000"
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// 접기/펼치기 패널
+function DisclosurePanel({
+  label,
+  isOpen,
+  onToggle,
+  children,
+}: {
+  label: string
+  isOpen: boolean
+  onToggle: () => void
+  children: React.ReactNode
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${
-            value === opt.value
-              ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
-              : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className="border border-white/10 rounded-lg overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full px-3 py-2.5 flex items-center justify-between text-xs font-medium text-[#F5E6D3]/60 hover:bg-white/5 transition-colors"
+      >
+        <span>{isOpen ? '▾' : '▸'} {label}</span>
+        <span className="text-[10px] text-[#F5E6D3]/40">
+          {isOpen ? '접기' : '펼치기'}
+        </span>
+      </button>
+      {isOpen && (
+        <div className="px-3 pb-3 border-t border-white/10">
+          {children}
+        </div>
+      )}
     </div>
   )
 }

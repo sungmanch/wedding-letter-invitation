@@ -23,7 +23,7 @@ export const parentsSkeleton: SectionSkeleton = {
         id: 'parents-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [

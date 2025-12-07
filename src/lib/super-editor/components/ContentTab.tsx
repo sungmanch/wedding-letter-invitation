@@ -103,16 +103,6 @@ export function ContentTab({
     [expandedSection, onExpandedSectionChange]
   )
 
-  // 펼쳐진 섹션으로 스크롤
-  useEffect(() => {
-    if (expandedSection && sectionRefs.current[expandedSection]) {
-      sectionRefs.current[expandedSection]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
-    }
-  }, [expandedSection])
-
   // ref 설정 함수
   const setRef = useCallback(
     (sectionType: SectionType) => (el: HTMLDivElement | null) => {
@@ -122,7 +112,7 @@ export function ContentTab({
   )
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex flex-col ${className}`}>
       {/* 툴바 */}
       <EditorToolbar />
 

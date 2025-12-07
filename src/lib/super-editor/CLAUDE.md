@@ -108,7 +108,72 @@ StyleSchema.theme.typography.weights
 | **줄 간격** | `lineHeights.relaxed` | bodyLg, bodyMd |
 | **자간** | `letterSpacing.tight` | displayLg, displayMd |
 
-### 4. 전체 CSS 변수 목록
+### 4. Color System (60-30-10 법칙)
+
+청첩장 업계 표준 색상 시스템 적용:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  60% Background  │  30% Surface  │  10% Accent     │
+│  (메인 배경)      │  (카드/컨테이너) │  (버튼/장식)    │
+└─────────────────────────────────────────────────────┘
+```
+
+#### 5색 팔레트 구조
+
+| 역할 | StyleSchema 경로 | 용도 |
+|-----|------------------|------|
+| **Background** | `colors.background.default` | 전체 배경 (60%) |
+| **Surface** | `colors.background.paper` | 카드, 방명록 등 (30%) |
+| **Primary** | `colors.primary[500]` | 브랜드 색상 |
+| **Accent** | `colors.accent[500]` | 강조, 버튼 (10%) |
+| **Text** | `colors.text.primary/secondary` | 제목/본문 텍스트 |
+
+#### Surface 자동 계산 (Alpha Blend)
+
+`deriveSurfaceColor(background, accent?)` - 배경색에서 Surface 자동 도출:
+
+| 모드 | 조건 | 블렌딩 |
+|-----|------|--------|
+| **따뜻한 중립** | accent 없음 | Dark: 크림 10%, Light: 웜브라운 4% |
+| **테마 통일** | accent 있음 | Dark: accent 8%, Light: 다크accent 5% |
+
+```typescript
+// 사용 예시
+import { deriveSurfaceColor } from '../presets/intro-style-presets'
+
+// 따뜻한 중립 톤
+const surface = deriveSurfaceColor('#1A1A1A')  // → 따뜻한 다크
+
+// 테마 accent 활용 (골드 틴트)
+const surface = deriveSurfaceColor('#1A1A1A', '#C9A962')  // → 골드 틴트 다크
+```
+
+#### 관련 파일
+
+| 파일 | 함수 |
+|-----|------|
+| `presets/intro-style-presets.ts` | `isDark()`, `deriveSurfaceColor()`, `deriveSurfaceColorWithAccent()` |
+| `components/StyleEditor.tsx` | 배경색 변경 시 자동 surface 계산 |
+
+#### 섹션별 배경색 배치 규칙
+
+콘텐츠 유형에 따라 배경색 결정 (경쟁사 분석 기반):
+
+| 섹션 | root 배경 | 내부 카드 | 이유 |
+|-----|----------|----------|------|
+| intro, greeting, date | `background` | - | 텍스트 집중형, 가독성 |
+| gallery | `surface` | - | 이미지 컬렉션이 돋보임 |
+| venue | `surface` | `background` | 지도 임베드 분리감 |
+| accounts | `surface` | `background` | 탭/카드 UI 계층 |
+| parents | `surface` | `background` | 혼주 카드 돋보임 |
+| guestbook | `surface` | `background` | 폼/카드 구분감 |
+
+**원칙**:
+- 카드/지도/미디어 포함 → `surface` (카드가 떠 보이는 효과)
+- 텍스트 중심/복잡한 정보 → `background` (가독성, 인지 부하 감소)
+
+### 5. 전체 CSS 변수 목록
 
 #### Colors (10개)
 ```css

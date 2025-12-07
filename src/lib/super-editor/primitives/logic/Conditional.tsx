@@ -17,9 +17,6 @@ export function Conditional({
 
   // 조건 평가
   const evaluateCondition = (): boolean => {
-    // 편집 모드에서는 항상 표시
-    if (context.mode === 'edit') return true
-
     const condition = props.condition
     const operator = props.operator || 'exists'
     const compareValue = props.value
