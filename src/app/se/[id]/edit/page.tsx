@@ -317,6 +317,12 @@ function EditPageContent() {
             >
               미리보기
             </button>
+            <button
+              onClick={() => router.push(`/paywall?type=2&id=${invitationId}`)}
+              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-sm font-medium"
+            >
+              결제하기
+            </button>
           </div>
         </div>
 
