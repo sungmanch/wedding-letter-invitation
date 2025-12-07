@@ -103,7 +103,7 @@ export const rendererCategories = {
   content: {
     label: '콘텐츠',
     renderers: contentRenderers,
-    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed'],
+    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed', 'calendar'],
   },
   imageCollection: {
     label: '이미지 컬렉션',
@@ -147,8 +147,8 @@ export const primitiveStats = {
   custom: Object.keys(customRenderers).length,
 }
 
-// 30개 확인 (29 + custom)
+// 31개 확인 (30 + custom)
 console.assert(
-  primitiveStats.total === 30,
-  `Expected 30 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 31,
+  `Expected 31 primitives, got ${primitiveStats.total}`
 )
