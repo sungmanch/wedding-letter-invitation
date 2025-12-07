@@ -115,14 +115,18 @@ function groupDeclarationsIntoSections(
   groups.forEach((groupDecls, groupId) => {
     const meta = getSectionGroupMeta(groupDecls[0].path)
 
+    // 표준 그룹은 meta.id 사용, 비표준은 원래 groupId 사용 (중복 키 방지)
+    const isStandardGroup = groupId in SECTION_GROUP_META
+    const sectionId = isStandardGroup ? meta.id : groupId
+
     // 그룹 내 선언을 EditorField로 변환
     const fields: EditorField[] = groupDecls.map((decl, index) =>
       declarationToField(decl, index + 1)
     )
 
     sections.push({
-      id: meta.id,
-      title: meta.title,
+      id: sectionId,
+      title: isStandardGroup ? meta.title : groupId,
       icon: meta.icon,
       order: meta.order,
       fields,

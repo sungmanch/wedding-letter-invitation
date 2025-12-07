@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TemplateGrid } from '@/components/invitation/TemplateGrid'
-import { CustomThemeDialog } from '@/components/invitation/CustomThemeDialog'
 import { GeneratingLoader } from '@/components/invitation/GeneratingLoader'
 import { Button } from '@/components/ui/button'
-import { getTemplatePreviews, type ThemePreview } from '@/lib/themes'
-import { createDraftInvitation } from '@/lib/actions/wedding'
-import type { DesignPreview } from '@/lib/actions/ai-design'
+import { getTemplatePreviews } from '@/lib/themes'
+import { createFromLegacyTemplateAction } from '@/lib/super-editor/actions/create-from-legacy'
 
 type CreateStep = 'themes' | 'creating'
 
@@ -18,8 +16,6 @@ export function CreateFlow() {
   const router = useRouter()
   const [step, setStep] = React.useState<CreateStep>('themes')
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(null)
-  const [customDialogOpen, setCustomDialogOpen] = React.useState(false)
-  const [customPreviews, setCustomPreviews] = React.useState<DesignPreview[] | null>(null)
   const [error, setError] = React.useState<string | null>(null)
 
   // Get static templates
@@ -27,15 +23,11 @@ export function CreateFlow() {
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId)
-    setCustomPreviews(null) // Clear custom previews when selecting static template
   }
 
-  const handleCustomGenerated = (previews: DesignPreview[]) => {
-    setCustomPreviews(previews)
-    // Select first custom preview
-    if (previews.length > 0) {
-      setSelectedTemplateId(`custom-${previews[0].id}`)
-    }
+  // Custom 버튼 클릭 시 SE create 페이지로 이동
+  const handleCustomClick = () => {
+    router.push('/se/create')
   }
 
   const handleCreate = async () => {
@@ -48,13 +40,14 @@ export function CreateFlow() {
     setError(null)
 
     try {
-      const result = await createDraftInvitation(
-        selectedTemplateId,
-        undefined
-      )
+      // Legacy 템플릿 → SE 시스템으로 생성
+      const result = await createFromLegacyTemplateAction({
+        legacyTemplateId: selectedTemplateId,
+      })
 
       if (result.success && result.data) {
-        router.push(`/${result.data.invitationId}/edit`)
+        // SE 편집 페이지로 이동
+        router.push(`/se/${result.data.invitationId}/edit`)
       } else {
         setError(result.error || '청첩장 생성에 실패했습니다')
         setStep('themes')
@@ -106,7 +99,7 @@ export function CreateFlow() {
               templates={templates}
               selectedTemplateId={selectedTemplateId}
               onSelect={handleTemplateSelect}
-              onCustomClick={() => setCustomDialogOpen(true)}
+              onCustomClick={handleCustomClick}
               className="mb-8"
             />
 
@@ -131,12 +124,6 @@ export function CreateFlow() {
         )}
       </main>
 
-      {/* Custom Theme Dialog */}
-      <CustomThemeDialog
-        open={customDialogOpen}
-        onOpenChange={setCustomDialogOpen}
-        onGenerated={handleCustomGenerated}
-      />
     </div>
   )
 }
