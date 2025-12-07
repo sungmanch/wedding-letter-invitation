@@ -1,6 +1,6 @@
 /**
  * Super Editor - Guestbook Section Skeleton
- * 방명록 섹션
+ * 축하 메시지 섹션
  */
 
 import type { SectionSkeleton } from '../types'
@@ -9,16 +9,87 @@ export const guestbookSkeleton: SectionSkeleton = {
   sectionType: 'guestbook',
   name: '축하 메시지',
   description: '방명록과 축하 메시지를 표시합니다.',
-  defaultVariant: 'card',
+  defaultVariant: 'block',
   variants: [
     // ============================================
-    // Card Variant
+    // FAB (Floating Action Button) Variant
     // ============================================
     {
-      id: 'card',
-      name: '카드',
-      description: '카드 형태의 메시지 목록',
-      tags: ['modern', 'clean', 'elegant'],
+      id: 'fab',
+      name: 'FAB',
+      description: '하단 플로팅 버튼 형태 (스크롤 후 노출)',
+      tags: ['minimal', 'modern', 'clean'],
+      structure: {
+        id: 'guestbook-fab-root',
+        type: 'container',
+        style: {
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 1000,
+        },
+        props: {
+          // 스크롤 후 나타남 - 렌더러/빌더에서 처리
+          showAfterScroll: 200,
+        },
+        children: [
+          {
+            id: 'guestbook-fab-btn',
+            type: 'button',
+            tokenStyle: {
+              backgroundColor: '$token.colors.brand',
+              color: '$token.colors.text.onBrand',
+              borderRadius: '$token.borders.radiusFull',
+              boxShadow: '$token.shadows.lg',
+            },
+            style: {
+              width: '56px',
+              height: '56px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+            },
+            props: {
+              label: '💬',
+              variant: 'primary',
+              size: 'lg',
+              action: {
+                type: 'custom',
+                handler: 'openGuestbookModal',
+              },
+            },
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'guestbook-messages',
+          path: 'guestbook.messages',
+          type: 'text',
+          required: false,
+          description: '방명록 메시지 목록',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'scale', name: '스케일 인', preset: 'scale-in', trigger: 'mount', duration: 300 },
+          { id: 'slide-up', name: '슬라이드 업', preset: 'slide-up', trigger: 'mount', duration: 300 },
+        ],
+      },
+    },
+
+    // ============================================
+    // Block Variant
+    // ============================================
+    {
+      id: 'block',
+      name: '블록',
+      description: '인라인 폼과 메시지 카드 목록',
+      tags: ['elegant', 'detailed', 'modern'],
       structure: {
         id: 'guestbook-root',
         type: 'container',
@@ -49,7 +120,7 @@ export const guestbookSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: '방명록',
+                  content: '축하 메시지',
                   as: 'h2',
                 },
               },
@@ -243,182 +314,6 @@ export const guestbookSkeleton: SectionSkeleton = {
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
           { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
-        ],
-      },
-    },
-
-    // ============================================
-    // Minimal Variant
-    // ============================================
-    {
-      id: 'minimal',
-      name: '미니멀',
-      description: '간결한 목록 형태',
-      tags: ['minimal', 'simple', 'clean'],
-      structure: {
-        id: 'guestbook-root',
-        type: 'container',
-        tokenStyle: {
-          backgroundColor: '$token.colors.surface',
-          padding: '$token.spacing.section',
-        },
-        children: [
-          {
-            id: 'guestbook-content',
-            type: 'column',
-            tokenStyle: {
-              gap: '$token.spacing.lg',
-            },
-            children: [
-              {
-                id: 'guestbook-title',
-                type: 'text',
-                tokenStyle: {
-                  fontFamily: '$token.typography.sectionTitle.fontFamily',
-                  fontSize: '$token.typography.sectionTitle.fontSize',
-                  fontWeight: '$token.typography.sectionTitle.fontWeight',
-                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
-                  color: '$token.colors.text.primary',
-                },
-                style: {
-                  textAlign: 'center',
-                  textTransform: 'uppercase',
-                },
-                props: {
-                  content: '방명록',
-                  as: 'h2',
-                },
-              },
-              // 간단한 입력 폼
-              {
-                id: 'guestbook-simple-form',
-                type: 'row',
-                tokenStyle: {
-                  gap: '$token.spacing.sm',
-                },
-                children: [
-                  {
-                    id: 'guestbook-input',
-                    type: 'input',
-                    tokenStyle: {
-                      borderRadius: '$token.borders.radiusSm',
-                      borderColor: '$token.colors.border',
-                    },
-                    style: {
-                      flex: 1,
-                    },
-                    props: {
-                      type: 'text',
-                      name: 'message',
-                      placeholder: '축하 메시지를 남겨주세요',
-                      required: true,
-                      maxLength: 100,
-                    },
-                  },
-                  {
-                    id: 'guestbook-btn',
-                    type: 'button',
-                    tokenStyle: {
-                      backgroundColor: '$token.colors.brand',
-                      color: '$token.colors.text.onBrand',
-                      borderRadius: '$token.borders.radiusSm',
-                    },
-                    props: {
-                      label: '등록',
-                      variant: 'primary',
-                      size: 'md',
-                      action: {
-                        type: 'custom',
-                        handler: 'submitGuestbook',
-                      },
-                    },
-                  },
-                ],
-              },
-              // 메시지 목록 (간단)
-              {
-                id: 'guestbook-list-minimal',
-                type: 'column',
-                tokenStyle: {
-                  gap: '$token.spacing.sm',
-                },
-                children: [
-                  {
-                    id: 'messages-repeat',
-                    type: 'repeat',
-                    props: {
-                      dataPath: 'guestbook.messages',
-                      as: 'msg',
-                      limit: 5,
-                    },
-                    children: [
-                      {
-                        id: 'msg-row',
-                        type: 'row',
-                        tokenStyle: {
-                          gap: '$token.spacing.sm',
-                          padding: '$token.spacing.sm',
-                          borderRadius: '$token.borders.radiusSm',
-                        },
-                        style: {
-                          borderBottom: '1px solid var(--color-divider)',
-                        },
-                        children: [
-                          {
-                            id: 'msg-name',
-                            type: 'text',
-                            tokenStyle: {
-                              fontFamily: '$token.typography.bodySm.fontFamily',
-                              fontSize: '$token.typography.bodySm.fontSize',
-                              color: '$token.colors.brand',
-                            },
-                            style: {
-                              minWidth: '60px',
-                            },
-                            props: {
-                              content: '{{msg.name}}',
-                              as: 'span',
-                            },
-                          },
-                          {
-                            id: 'msg-text',
-                            type: 'text',
-                            tokenStyle: {
-                              fontFamily: '$token.typography.bodyMd.fontFamily',
-                              fontSize: '$token.typography.bodyMd.fontSize',
-                              color: '$token.colors.text.primary',
-                            },
-                            style: {
-                              flex: 1,
-                            },
-                            props: {
-                              content: '{{msg.message}}',
-                              as: 'p',
-                            },
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      slots: [
-        {
-          id: 'guestbook-messages',
-          path: 'guestbook.messages',
-          type: 'text',
-          required: false,
-          description: '방명록 메시지 목록',
-        },
-      ],
-      options: {
-        animations: [
-          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
-          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 400 },
         ],
       },
     },
