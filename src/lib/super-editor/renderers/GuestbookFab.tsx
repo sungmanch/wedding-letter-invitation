@@ -20,7 +20,7 @@ export function GuestbookFab({ onClick }: GuestbookFabProps) {
       onClick={onClick}
       className="guestbook-fab"
       style={{
-        position: 'fixed',
+        position: 'absolute',
         bottom: 24,
         left: '50%',
         transform: 'translateX(-50%)',
@@ -42,6 +42,7 @@ export function GuestbookFab({ onClick }: GuestbookFabProps) {
         fontSize: 15,
         fontWeight: 500,
         whiteSpace: 'nowrap',
+        pointerEvents: 'auto',
       }}
       aria-label="축하 메시지 남기기"
     >
