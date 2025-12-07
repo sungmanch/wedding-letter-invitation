@@ -48,6 +48,8 @@ export interface VariableDeclaration {
   placeholder?: string
   /** 도움말 텍스트 */
   helpText?: string
+  /** 그룹 내 정렬 순서 (낮을수록 위) */
+  order?: number
 
   // ============================================
   // 타입별 속성
@@ -372,7 +374,7 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       '서로를 향한 마음을 모아\n평생을 함께하고자 합니다.\n\n귀한 걸음 하시어\n저희의 새 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.',
   },
 
-  // Parents - Deceased Icon
+  // Parents - Deceased Icon (order: 0 = 제일 위)
   'parents.deceasedIcon': {
     type: 'select',
     label: '고인 표시',
@@ -384,6 +386,7 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       { value: '✿', label: '✿ (백합 꽃)' },
     ],
     helpText: '고인을 나타내는 표시 방식을 선택하세요',
+    order: 0,
   },
 
   // Parents - Groom
