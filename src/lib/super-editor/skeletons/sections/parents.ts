@@ -119,7 +119,7 @@ export const parentsSkeleton: SectionSkeleton = {
                                   color: '$token.colors.text.muted',
                                 },
                                 props: {
-                                  content: '故',
+                                  content: '{{parents.deceasedIcon}}',
                                   as: 'span',
                                 },
                               },
@@ -168,7 +168,7 @@ export const parentsSkeleton: SectionSkeleton = {
                                   color: '$token.colors.text.muted',
                                 },
                                 props: {
-                                  content: '故',
+                                  content: '{{parents.deceasedIcon}}',
                                   as: 'span',
                                 },
                               },
@@ -277,7 +277,7 @@ export const parentsSkeleton: SectionSkeleton = {
                                   color: '$token.colors.text.muted',
                                 },
                                 props: {
-                                  content: '故',
+                                  content: '{{parents.deceasedIcon}}',
                                   as: 'span',
                                 },
                               },
@@ -326,7 +326,7 @@ export const parentsSkeleton: SectionSkeleton = {
                                   color: '$token.colors.text.muted',
                                 },
                                 props: {
-                                  content: '故',
+                                  content: '{{parents.deceasedIcon}}',
                                   as: 'span',
                                 },
                               },
