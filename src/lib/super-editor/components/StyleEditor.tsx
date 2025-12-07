@@ -87,7 +87,8 @@ export function StyleEditor({
 }: StyleEditorProps) {
   const [localStyle, setLocalStyle] = useState<StyleSchema>(style)
   const [isDirty, setIsDirty] = useState(false)
-  const [textAdvancedOpen, setTextAdvancedOpen] = useState(false)
+  const [titleAdvancedOpen, setTitleAdvancedOpen] = useState(false)
+  const [bodyAdvancedOpen, setBodyAdvancedOpen] = useState(false)
   const [bgAdvancedOpen, setBgAdvancedOpen] = useState(false)
 
   const localStyleRef = useRef(localStyle)
@@ -207,16 +208,16 @@ export function StyleEditor({
           </div>
         )}
 
-        {/* 글 스타일 섹션 */}
+        {/* 제목 스타일 섹션 */}
         <section className="space-y-4">
           <h3 className="text-sm font-semibold text-[#F5E6D3] flex items-center gap-2">
-            <span>📝</span>
-            글 스타일
+            <span>✏️</span>
+            제목 스타일
           </h3>
 
           {/* 제목 글꼴 */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-[#F5E6D3]/60">제목 글꼴</label>
+            <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
             <FontSelector
               value={localStyle.theme.typography?.fonts?.heading?.family ?? 'Pretendard'}
               onChange={(family) => updateTypography((typo) => {
@@ -225,20 +226,9 @@ export function StyleEditor({
             />
           </div>
 
-          {/* 본문 글꼴 */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-[#F5E6D3]/60">본문 글꼴</label>
-            <FontSelector
-              value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
-              onChange={(family) => updateTypography((typo) => {
-                if (typo?.fonts?.body) typo.fonts.body.family = family
-              })}
-            />
-          </div>
-
           {/* 제목 색상 */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-[#F5E6D3]/60">제목 색상</label>
+            <label className="text-xs font-medium text-[#F5E6D3]/60">색상</label>
             <ColorChipSelector
               value={localStyle.theme.colors.text?.primary ?? '#1f2937'}
               presets={TEXT_COLOR_PRESETS}
@@ -246,26 +236,16 @@ export function StyleEditor({
             />
           </div>
 
-          {/* 본문 색상 */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-[#F5E6D3]/60">본문 색상</label>
-            <ColorChipSelector
-              value={localStyle.theme.colors.text?.secondary ?? localStyle.theme.colors.text?.primary ?? '#1f2937'}
-              presets={TEXT_COLOR_PRESETS}
-              onChange={(color) => updateColor('text.secondary', color)}
-            />
-          </div>
-
-          {/* 고급 설정 토글 */}
+          {/* 제목 상세 설정 */}
           <DisclosurePanel
             label="상세 설정"
-            isOpen={textAdvancedOpen}
-            onToggle={() => setTextAdvancedOpen(!textAdvancedOpen)}
+            isOpen={titleAdvancedOpen}
+            onToggle={() => setTitleAdvancedOpen(!titleAdvancedOpen)}
           >
             <div className="space-y-4 pt-2">
               {/* 제목 굵기 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-[#F5E6D3]/60">제목 굵기</label>
+                <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>
                 <div className="grid grid-cols-3 gap-2">
                   {TITLE_WEIGHT_OPTIONS.map((opt) => (
                     <button
@@ -278,29 +258,6 @@ export function StyleEditor({
                       })}
                       className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                         localStyle.theme.typography?.weights?.bold === opt.value
-                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
-                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
-                      }`}
-                      style={{ fontWeight: opt.value }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 본문 굵기 */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[#F5E6D3]/60">본문 굵기</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {BODY_WEIGHT_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => updateTypography((typo) => {
-                        if (typo?.weights) typo.weights.regular = opt.value
-                      })}
-                      className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
-                        localStyle.theme.typography?.weights?.regular === opt.value
                           ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
                           : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
                       }`}
@@ -327,6 +284,69 @@ export function StyleEditor({
                           ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
                           : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
                       }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </DisclosurePanel>
+        </section>
+
+        <div className="border-t border-white/10" />
+
+        {/* 본문 스타일 섹션 */}
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-[#F5E6D3] flex items-center gap-2">
+            <span>📝</span>
+            본문 스타일
+          </h3>
+
+          {/* 본문 글꼴 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">글꼴</label>
+            <FontSelector
+              value={localStyle.theme.typography?.fonts?.body?.family ?? 'Pretendard'}
+              onChange={(family) => updateTypography((typo) => {
+                if (typo?.fonts?.body) typo.fonts.body.family = family
+              })}
+            />
+          </div>
+
+          {/* 본문 색상 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">색상</label>
+            <ColorChipSelector
+              value={localStyle.theme.colors.text?.secondary ?? localStyle.theme.colors.text?.primary ?? '#1f2937'}
+              presets={TEXT_COLOR_PRESETS}
+              onChange={(color) => updateColor('text.secondary', color)}
+            />
+          </div>
+
+          {/* 본문 상세 설정 */}
+          <DisclosurePanel
+            label="상세 설정"
+            isOpen={bodyAdvancedOpen}
+            onToggle={() => setBodyAdvancedOpen(!bodyAdvancedOpen)}
+          >
+            <div className="space-y-4 pt-2">
+              {/* 본문 굵기 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {BODY_WEIGHT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.weights) typo.weights.regular = opt.value
+                      })}
+                      className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                        localStyle.theme.typography?.weights?.regular === opt.value
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962]'
+                          : 'border-white/10 hover:border-white/20 text-[#F5E6D3]/60'
+                      }`}
+                      style={{ fontWeight: opt.value }}
                     >
                       {opt.label}
                     </button>
