@@ -231,13 +231,23 @@ export function StyleEditor({
             />
           </div>
 
-          {/* 글씨 색상 */}
+          {/* 제목 색상 */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-[#F5E6D3]/60">글씨 색상</label>
+            <label className="text-xs font-medium text-[#F5E6D3]/60">제목 색상</label>
             <ColorChipSelector
               value={localStyle.theme.colors.text?.primary ?? '#1f2937'}
               presets={TEXT_COLOR_PRESETS}
               onChange={(color) => updateColor('text.primary', color)}
+            />
+          </div>
+
+          {/* 본문 색상 */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-[#F5E6D3]/60">본문 색상</label>
+            <ColorChipSelector
+              value={localStyle.theme.colors.text?.secondary ?? localStyle.theme.colors.text?.primary ?? '#1f2937'}
+              presets={TEXT_COLOR_PRESETS}
+              onChange={(color) => updateColor('text.secondary', color)}
             />
           </div>
 

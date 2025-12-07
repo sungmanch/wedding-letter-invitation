@@ -17,7 +17,8 @@ export interface IntroStylePreset {
   colors: {
     primary: string
     background: string
-    text: string
+    titleText: string    // 제목 색상
+    bodyText: string     // 본문 색상
     accent: string
   }
   fonts: {
@@ -38,7 +39,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#C9A962',
       background: '#1A1A1A',
-      text: '#F5F5DC',
+      titleText: '#F5F5DC',
+      bodyText: '#A0A0A0',
       accent: '#E6C068',
     },
     fonts: {
@@ -54,7 +56,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#2C2C2C',
       background: '#FAFAFA',
-      text: '#1A1A1A',
+      titleText: '#1A1A1A',
+      bodyText: '#4A4A4A',
       accent: '#000000',
     },
     fonts: {
@@ -70,7 +73,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#000000',
       background: '#F8F6F3',
-      text: '#1A1A1A',
+      titleText: '#1A1A1A',
+      bodyText: '#6B6B6B',
       accent: '#C4A77D',
     },
     fonts: {
@@ -86,7 +90,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#722F37',
       background: '#0D0D0D',
-      text: '#F5E6D3',
+      titleText: '#F5E6D3',
+      bodyText: '#A89F91',
       accent: '#C9A962',
     },
     fonts: {
@@ -102,7 +107,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#D4AF37',
       background: '#FFFEF5',
-      text: '#36454F',
+      titleText: '#36454F',
+      bodyText: '#6B7280',
       accent: '#D4AF37',
     },
     fonts: {
@@ -118,7 +124,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#1E3A5F',
       background: '#F5E6D3',
-      text: '#1E3A5F',
+      titleText: '#1E3A5F',
+      bodyText: '#4A5568',
       accent: '#C9A962',
     },
     fonts: {
@@ -134,7 +141,8 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
     colors: {
       primary: '#2F4538',
       background: '#0D0D0D',
-      text: '#F5E6D3',
+      titleText: '#F5E6D3',
+      bodyText: '#A89F91',
       accent: '#C9A962',
     },
     fonts: {
@@ -183,8 +191,9 @@ export function applyIntroStyleToSchema(
   // Background
   newStyle.theme.colors.background.default = colors.background
 
-  // Text
-  newStyle.theme.colors.text.primary = colors.text
+  // Text - 제목/본문 분리
+  newStyle.theme.colors.text.primary = colors.titleText
+  newStyle.theme.colors.text.secondary = colors.bodyText
 
   // Fonts
   if (newStyle.theme.typography?.fonts) {
