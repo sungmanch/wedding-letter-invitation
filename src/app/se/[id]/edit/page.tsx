@@ -8,6 +8,8 @@ import {
   updateInvitationSections,
   updateTemplateStyle,
   updateTemplateLayout,
+  uploadOgImage,
+  updateOgMetadata,
 } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import {
@@ -18,6 +20,7 @@ import {
   InvitationPreview,
   OgMetadataEditor,
   SharePreview,
+  type OgMetadataValues,
 } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import {
@@ -69,8 +72,16 @@ function EditPageContent() {
     groomName: '신랑',
     brideName: '신부',
   })
-  // OG 현재값 (실시간 미리보기용)
-  const [ogValues, setOgValues] = useState({ title: '', description: '', imageUrl: '' })
+  // OG 현재값 (저장에 필요한 데이터 포함)
+  const [ogValues, setOgValues] = useState<OgMetadataValues>({
+    title: '',
+    description: '',
+    imageUrl: '',
+    pendingImageData: null,
+    savedImageUrl: null,
+  })
+  // OG 저장 결과 메시지
+  const [ogSaveMessage, setOgSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -174,6 +185,10 @@ function EditPageContent() {
     if (!state.userData) return
 
     setSaving(true)
+    setOgSaveMessage(null)
+
+    const ogErrors: string[] = []
+
     try {
       // userData 저장
       await updateInvitationData(invitationId, state.userData)
@@ -190,13 +205,37 @@ function EditPageContent() {
       if (state.style) {
         await updateTemplateStyle(invitationId, state.style)
       }
+
+      // OG 이미지 저장 (pendingImageData가 있는 경우)
+      if (ogValues.pendingImageData) {
+        const imageResult = await uploadOgImage(invitationId, ogValues.pendingImageData)
+        if (!imageResult.success) {
+          ogErrors.push(imageResult.error || '이미지 저장 실패')
+        }
+      }
+
+      // OG 메타데이터 저장
+      const ogResult = await updateOgMetadata(invitationId, {
+        ogTitle: ogValues.title,
+        ogDescription: ogValues.description,
+      })
+      if (!ogResult.success) {
+        ogErrors.push(ogResult.error || '메타데이터 저장 실패')
+      }
+
+      // OG 저장 결과 메시지 설정
+      if (ogErrors.length > 0) {
+        setOgSaveMessage({ type: 'error', text: ogErrors.join(', ') })
+      } else {
+        setOgSaveMessage({ type: 'success', text: '저장되었습니다' })
+      }
     } catch (err) {
       console.error('Failed to save:', err)
       alert('저장에 실패했습니다.')
     } finally {
       setSaving(false)
     }
-  }, [invitationId, state.userData, state.layout, state.style, sectionOrder, sectionEnabled])
+  }, [invitationId, state.userData, state.layout, state.style, sectionOrder, sectionEnabled, ogValues])
 
   const handleGenerateShareUrl = useCallback(async () => {
     try {
@@ -498,6 +537,7 @@ function EditPageContent() {
               brideName={ogDefaults.brideName}
               className="flex-1 overflow-y-auto"
               onChange={setOgValues}
+              saveMessage={ogSaveMessage}
             />
           )}
         </div>

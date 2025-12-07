@@ -1,8 +1,18 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect, ChangeEvent } from 'react'
-import { uploadOgImage, updateOgMetadata, getOgMetadata } from '../actions'
+import { getOgMetadata } from '../actions'
 import { cn } from '@/lib/utils'
+
+export interface OgMetadataValues {
+  title: string
+  description: string
+  imageUrl: string
+  /** 업로드가 필요한 이미지 데이터 (base64) */
+  pendingImageData: string | null
+  /** 이미 저장된 OG 이미지 URL */
+  savedImageUrl: string | null
+}
 
 interface OgMetadataEditorProps {
   invitationId: string
@@ -12,7 +22,9 @@ interface OgMetadataEditorProps {
   groomName?: string
   brideName?: string
   className?: string
-  onChange?: (values: { title: string; description: string; imageUrl: string }) => void
+  onChange?: (values: OgMetadataValues) => void
+  /** 외부에서 저장 결과 메시지 전달 */
+  saveMessage?: { type: 'success' | 'error'; text: string } | null
 }
 
 const OG_WIDTH = 1200
@@ -27,6 +39,7 @@ export function OgMetadataEditor({
   brideName = '신부',
   className,
   onChange,
+  saveMessage,
 }: OgMetadataEditorProps) {
   const [ogTitle, setOgTitle] = useState(defaultTitle)
   const [ogDescription, setOgDescription] = useState(defaultDescription)
@@ -34,9 +47,6 @@ export function OgMetadataEditor({
   const [localImageData, setLocalImageData] = useState<string | null>(null)
   const [defaultImageData, setDefaultImageData] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 메인 이미지에서 기본 OG 이미지 생성 (30% 오버레이 + 텍스트)
@@ -124,48 +134,48 @@ export function OgMetadataEditor({
     loadOgData()
   }, [invitationId, mainImageUrl, generateDefaultImage])
 
-  // 값 변경 시 부모에게 알림
+  // 값 변경 시 부모에게 알림 (저장에 필요한 데이터 포함)
   useEffect(() => {
+    const pendingImageData = localImageData || (!ogImageUrl && defaultImageData) || null
     onChange?.({
       title: ogTitle,
       description: ogDescription,
       imageUrl: localImageData || ogImageUrl || defaultImageData || mainImageUrl || '',
+      pendingImageData,
+      savedImageUrl: ogImageUrl,
     })
   }, [ogTitle, ogDescription, ogImageUrl, localImageData, defaultImageData, mainImageUrl, onChange])
 
   // 기본 이미지 생성 버튼 핸들러
   const handleGenerateDefault = useCallback(async () => {
-    if (!mainImageUrl) {
-      setMessage({ type: 'error', text: '메인 이미지가 없습니다.' })
-      return
-    }
+    if (!mainImageUrl) return
 
     setIsGenerating(true)
-    setMessage(null)
 
     try {
       const imageData = await generateDefaultImage()
       if (imageData) {
         setLocalImageData(imageData)
-        setHasUnsavedChanges(true)
-        setMessage({ type: 'success', text: '이미지가 생성되었습니다. 저장 버튼을 눌러 반영하세요.' })
       }
     } catch (error) {
       console.error('Failed to generate OG image:', error)
-      setMessage({ type: 'error', text: '이미지 생성 중 오류가 발생했습니다' })
     } finally {
       setIsGenerating(false)
     }
   }, [mainImageUrl, generateDefaultImage])
 
   // 이미지 업로드 핸들러
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
   const handleImageUpload = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    setUploadError(null)
+
     // 파일 크기 체크 (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setMessage({ type: 'error', text: '이미지 크기는 5MB 이하여야 합니다.' })
+      setUploadError('이미지 크기는 5MB 이하여야 합니다.')
       return
     }
 
@@ -180,7 +190,7 @@ export function OgMetadataEditor({
         const ctx = canvas.getContext('2d')
 
         if (!ctx) {
-          setMessage({ type: 'error', text: '이미지 처리 중 오류가 발생했습니다.' })
+          setUploadError('이미지 처리 중 오류가 발생했습니다.')
           return
         }
 
@@ -201,8 +211,6 @@ export function OgMetadataEditor({
 
         const imageData = canvas.toDataURL('image/jpeg', 0.92)
         setLocalImageData(imageData)
-        setHasUnsavedChanges(true)
-        setMessage({ type: 'success', text: '이미지가 선택되었습니다. 저장 버튼을 눌러 반영하세요.' })
       }
       img.src = event.target?.result as string
     }
@@ -211,57 +219,6 @@ export function OgMetadataEditor({
     // input 초기화 (같은 파일 재선택 가능하게)
     e.target.value = ''
   }, [])
-
-  // OG 메타데이터 및 이미지 저장
-  const handleSave = useCallback(async () => {
-    setIsSaving(true)
-    setMessage(null)
-
-    const errors: string[] = []
-
-    try {
-      // 1. 로컬 이미지가 있으면 업로드 시도 (실패해도 메타데이터는 저장)
-      const imageToUpload = localImageData || (!ogImageUrl && defaultImageData)
-      if (imageToUpload) {
-        const imageResult = await uploadOgImage(invitationId, imageToUpload)
-        if (imageResult.success && imageResult.url) {
-          setOgImageUrl(imageResult.url)
-          setLocalImageData(null)
-          setDefaultImageData(null)
-        } else {
-          errors.push(imageResult.error || '이미지 저장 실패')
-        }
-      }
-
-      // 2. 메타데이터 저장 (이미지 실패와 무관하게 진행)
-      const result = await updateOgMetadata(invitationId, {
-        ogTitle,
-        ogDescription,
-      })
-
-      if (!result.success) {
-        errors.push(result.error || '메타데이터 저장 실패')
-      }
-
-      // 3. 결과 메시지 표시
-      if (errors.length === 0) {
-        setHasUnsavedChanges(false)
-        setMessage({ type: 'success', text: '저장되었습니다' })
-      } else if (result.success) {
-        // 이미지만 실패, 메타데이터는 성공
-        setHasUnsavedChanges(false)
-        setMessage({ type: 'error', text: `제목/설명은 저장됨. 이미지 오류: ${errors.join(', ')}` })
-      } else {
-        // 모두 실패
-        setMessage({ type: 'error', text: errors.join(', ') })
-      }
-    } catch (error) {
-      console.error('Failed to save OG data:', error)
-      setMessage({ type: 'error', text: '저장 중 오류가 발생했습니다' })
-    } finally {
-      setIsSaving(false)
-    }
-  }, [invitationId, ogTitle, ogDescription, localImageData, ogImageUrl, defaultImageData])
 
   // 현재 표시할 이미지
   const displayImageUrl = localImageData || ogImageUrl || defaultImageData
@@ -332,10 +289,7 @@ export function OgMetadataEditor({
         <input
           type="text"
           value={ogTitle}
-          onChange={(e) => {
-            setOgTitle(e.target.value)
-            setHasUnsavedChanges(true)
-          }}
+          onChange={(e) => setOgTitle(e.target.value)}
           placeholder="예: 홍길동 ♥ 김영희 결혼합니다"
           maxLength={100}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
@@ -348,10 +302,7 @@ export function OgMetadataEditor({
         <label className="block text-sm font-medium text-gray-700">공유 설명</label>
         <textarea
           value={ogDescription}
-          onChange={(e) => {
-            setOgDescription(e.target.value)
-            setHasUnsavedChanges(true)
-          }}
+          onChange={(e) => setOgDescription(e.target.value)}
           placeholder="예: 2025년 3월 15일 토요일 오후 2시, 그랜드볼룸에서 축하해주세요"
           maxLength={200}
           rows={3}
@@ -360,31 +311,22 @@ export function OgMetadataEditor({
         <p className="text-xs text-gray-500">{ogDescription.length}/200자</p>
       </div>
 
-      {/* 저장 버튼 */}
-      <button
-        onClick={handleSave}
-        disabled={isSaving}
-        className={cn(
-          "w-full px-4 py-2.5 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors",
-          hasUnsavedChanges || (!ogImageUrl && defaultImageData)
-            ? "bg-rose-600 hover:bg-rose-700"
-            : "bg-gray-900 hover:bg-gray-800"
-        )}
-      >
-        {isSaving ? '저장 중...' : (hasUnsavedChanges || (!ogImageUrl && defaultImageData)) ? '변경사항 저장' : '저장'}
-      </button>
-
-      {/* 메시지 */}
-      {message && (
+      {/* 메시지 (업로드 에러 또는 외부 저장 결과) */}
+      {uploadError && (
+        <div className="p-3 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200">
+          {uploadError}
+        </div>
+      )}
+      {saveMessage && (
         <div
           className={cn(
             'p-3 rounded-lg text-sm',
-            message.type === 'success'
+            saveMessage.type === 'success'
               ? 'bg-green-50 text-green-700 border border-green-200'
               : 'bg-red-50 text-red-700 border border-red-200'
           )}
         >
-          {message.text}
+          {saveMessage.text}
         </div>
       )}
     </div>
