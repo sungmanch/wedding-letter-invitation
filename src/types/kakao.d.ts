@@ -26,10 +26,22 @@ interface KakaoShare {
   sendDefault: (template: KakaoFeedTemplate) => void
 }
 
+interface KakaoNaviOptions {
+  name: string
+  x: number
+  y: number
+  coordType?: 'wgs84' | 'katec'
+}
+
+interface KakaoNavi {
+  start: (options: KakaoNaviOptions) => void
+}
+
 interface Kakao {
   init: (appKey: string) => void
   isInitialized: () => boolean
   Share: KakaoShare
+  Navi?: KakaoNavi
 }
 
 declare global {

@@ -37,6 +37,7 @@ export type EventActionType =
   | 'call'          // 전화걸기
   | 'sms'           // 문자보내기
   | 'map'           // 지도 열기
+  | 'kakao-navi'    // 카카오내비 실행
   | 'play-audio'    // 오디오 재생
   | 'pause-audio'   // 오디오 일시정지
   | 'toggle-audio'  // 오디오 토글

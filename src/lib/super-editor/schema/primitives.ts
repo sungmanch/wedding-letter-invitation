@@ -145,6 +145,7 @@ export interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link'
   size?: 'sm' | 'md' | 'lg'
   icon?: string
+  iconSrc?: string // 이미지 URL 아이콘 (icon 대신 사용)
   iconPosition?: 'left' | 'right'
   action?: ButtonAction
 }
@@ -157,6 +158,7 @@ export type ButtonAction =
   | { type: 'map'; provider: 'kakao' | 'naver' | 'tmap'; address: string; lat?: number; lng?: number }
   | { type: 'scroll'; target: string }
   | { type: 'custom'; handler: string }
+  | { type: 'kakao-navi'; name: string; lat: string | number; lng: string | number }
 
 export interface SpacerProps {
   height?: number | string
