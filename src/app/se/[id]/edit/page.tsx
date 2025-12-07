@@ -80,7 +80,10 @@ function EditPageContent() {
     savedImageUrl: null,
   })
   // OG 저장 결과 메시지
-  const [ogSaveMessage, setOgSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [ogSaveMessage, setOgSaveMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -92,10 +95,7 @@ function EditPageContent() {
         }
 
         const { invitation, template } = data
-        setTemplate(
-          template.layoutSchema as LayoutSchema,
-          template.styleSchema as StyleSchema
-        )
+        setTemplate(template.layoutSchema as LayoutSchema, template.styleSchema as StyleSchema)
         setUserData(invitation.userData as UserData)
         // 변수 선언 저장 (에디터 필드 생성에 사용)
         if (template.variablesSchema) {
@@ -108,12 +108,14 @@ function EditPageContent() {
 
         // OG 기본값 설정
         const userData = invitation.userData as UserData
-        const weddingData = userData.data as {
-          couple?: { groom?: { name?: string }; bride?: { name?: string } }
-          wedding?: { dateDisplay?: string }
-          venue?: { name?: string }
-          photos?: { main?: string; cover?: string }
-        } | undefined
+        const weddingData = userData.data as
+          | {
+              couple?: { groom?: { name?: string }; bride?: { name?: string } }
+              wedding?: { dateDisplay?: string }
+              venue?: { name?: string }
+              photos?: { main?: string; cover?: string }
+            }
+          | undefined
         const groomName = weddingData?.couple?.groom?.name || '신랑'
         const brideName = weddingData?.couple?.bride?.name || '신부'
         const dateDisplay = weddingData?.wedding?.dateDisplay || ''
@@ -121,9 +123,10 @@ function EditPageContent() {
         const mainImageUrl = weddingData?.photos?.main || weddingData?.photos?.cover || ''
         setOgDefaults({
           title: `${groomName} ♥ ${brideName} 결혼합니다`,
-          description: dateDisplay && venueName
-            ? `${dateDisplay} | ${venueName}에서 축하해주세요`
-            : '모바일 청첩장',
+          description:
+            dateDisplay && venueName
+              ? `${dateDisplay} | ${venueName}에서 축하해주세요`
+              : '모바일 청첩장',
           mainImageUrl,
           groomName,
           brideName,
@@ -154,12 +157,14 @@ function EditPageContent() {
   useEffect(() => {
     if (!state.userData) return
 
-    const weddingData = state.userData.data as {
-      couple?: { groom?: { name?: string }; bride?: { name?: string } }
-      wedding?: { dateDisplay?: string }
-      venue?: { name?: string }
-      photos?: { main?: string; cover?: string }
-    } | undefined
+    const weddingData = state.userData.data as
+      | {
+          couple?: { groom?: { name?: string }; bride?: { name?: string } }
+          wedding?: { dateDisplay?: string }
+          venue?: { name?: string }
+          photos?: { main?: string; cover?: string }
+        }
+      | undefined
 
     const groomName = weddingData?.couple?.groom?.name || '신랑'
     const brideName = weddingData?.couple?.bride?.name || '신부'
@@ -169,9 +174,10 @@ function EditPageContent() {
 
     setOgDefaults({
       title: `${groomName} ♥ ${brideName} 결혼합니다`,
-      description: dateDisplay && venueName
-        ? `${dateDisplay} | ${venueName}에서 축하해주세요`
-        : '모바일 청첩장',
+      description:
+        dateDisplay && venueName
+          ? `${dateDisplay} | ${venueName}에서 축하해주세요`
+          : '모바일 청첩장',
       mainImageUrl,
       groomName,
       brideName,
@@ -232,7 +238,15 @@ function EditPageContent() {
     } finally {
       setSaving(false)
     }
-  }, [invitationId, state.userData, state.layout, state.style, sectionOrder, sectionEnabled, ogValues])
+  }, [
+    invitationId,
+    state.userData,
+    state.layout,
+    state.style,
+    sectionOrder,
+    sectionEnabled,
+    ogValues,
+  ])
 
   const handleGenerateShareUrl = useCallback(async () => {
     try {
@@ -395,9 +409,9 @@ function EditPageContent() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0A0806]">
+    <div className="min-w-5xl h-screen grid grid-rows-[auto_1fr] bg-[#0A0806]">
       {/* 헤더 */}
-      <header className="bg-[#0A0806] border-b border-white/10 px-4 py-3 shrink-0">
+      <header className="bg-[#0A0806] border-b border-white/10 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-[#F5E6D3]">청첩장 편집</h1>
@@ -452,9 +466,9 @@ function EditPageContent() {
       </header>
 
       {/* 메인 콘텐츠 */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex min-h-0 flex-1">
         {/* 왼쪽: 에디터 패널 */}
-        <div className="w-[400px] flex flex-col bg-[#1A1A1A] border-r border-white/10 shrink-0">
+        <div className="w-[400px] flex flex-col bg-[#1A1A1A] border-r border-white/10 shrink-0 min-h-0 overflow-auto">
           {/* 탭 네비게이션 */}
           <div className="flex border-b border-white/10 shrink-0">
             <button
@@ -504,7 +518,11 @@ function EditPageContent() {
             />
           )}
           {activeTab === 'design' && state.style && (
-            <StyleEditor style={state.style} onStyleChange={handleStyleChange} className="flex-1 scrollbar-gold" />
+            <StyleEditor
+              style={state.style}
+              onStyleChange={handleStyleChange}
+              className="flex-1 scrollbar-gold"
+            />
           )}
           {activeTab === 'share' && (
             <OgMetadataEditor
