@@ -372,10 +372,8 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       { value: 'coverflow', label: '커버플로우' },
       { value: 'cards', label: '카드 스택' },
       { value: 'cube', label: '큐브' },
-      { value: 'flip', label: '플립' },
-      { value: 'film-strip', label: '필름 스트립' },
     ],
-    helpText: '캐러셀/필름 스트립 갤러리의 전환 효과',
+    helpText: '캐러셀 갤러리의 전환 효과',
   },
 
   // Greeting
