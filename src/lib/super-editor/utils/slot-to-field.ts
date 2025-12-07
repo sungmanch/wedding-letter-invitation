@@ -296,6 +296,16 @@ const PATH_REPLACEMENT_RULES: Array<{
     triggers: ['venue.address', 'venue.lat', 'venue.lng'],
     replacement: 'venue',
   },
+  {
+    // wedding.dateDisplay, wedding.dateEn 등 → wedding.date (date 타입 입력 필드)
+    triggers: ['wedding.dateDisplay', 'wedding.dateEn', 'wedding.month', 'wedding.day', 'wedding.weekday'],
+    replacement: 'wedding.date',
+  },
+  {
+    // wedding.timeDisplay, wedding.timeEn → wedding.time (time 타입 입력 필드)
+    triggers: ['wedding.timeDisplay', 'wedding.timeEn'],
+    replacement: 'wedding.time',
+  },
 ]
 
 /**
