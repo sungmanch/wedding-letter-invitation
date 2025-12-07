@@ -54,7 +54,7 @@ export function OgMetadataEditor({
   // OG 이미지 생성
   const handleGenerateImage = useCallback(async () => {
     if (!previewRef?.current) {
-      setMessage({ type: 'error', text: '미리보기를 찾을 수 없습니다' })
+      setMessage({ type: 'error', text: '미리보기를 찾을 수 없습니다. 잠시 후 다시 시도해주세요.' })
       return
     }
 
@@ -62,32 +62,56 @@ export function OgMetadataEditor({
     setMessage(null)
 
     try {
-      // 인트로 섹션을 캡처 (첫 번째 화면)
-      const previewElement = previewRef.current
-      const introSection = previewElement.querySelector('[data-section="intro"]') as HTMLElement
-      const targetElement = introSection || previewElement
+      const targetElement = previewRef.current
 
-      // html2canvas로 캡처 (1200x630 OG 이미지 사이즈)
-      const canvas = await html2canvas(targetElement, {
-        width: 1200,
-        height: 630,
-        scale: 2, // 고해상도
+      // 1. 원본 크기로 캡처 (scale: 2로 고해상도)
+      const originalCanvas = await html2canvas(targetElement, {
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        // 요소를 1200x630 비율로 맞추기 위한 설정
-        onclone: (clonedDoc, element) => {
-          element.style.width = '1200px'
-          element.style.height = '630px'
-          element.style.overflow = 'hidden'
-        },
       })
 
-      // Canvas를 JPG base64로 변환
-      const imageData = canvas.toDataURL('image/jpeg', 0.9)
+      // 2. 1200x630으로 리사이즈 (OG 이미지 표준 크기)
+      const OG_WIDTH = 1200
+      const OG_HEIGHT = 630
 
-      // 서버에 업로드
+      const resizedCanvas = document.createElement('canvas')
+      resizedCanvas.width = OG_WIDTH
+      resizedCanvas.height = OG_HEIGHT
+      const ctx = resizedCanvas.getContext('2d')
+
+      if (!ctx) {
+        throw new Error('Canvas context not available')
+      }
+
+      // 원본 이미지를 OG 비율에 맞게 크롭하면서 리사이즈
+      const srcRatio = originalCanvas.width / originalCanvas.height
+      const dstRatio = OG_WIDTH / OG_HEIGHT
+
+      let srcX = 0, srcY = 0, srcW = originalCanvas.width, srcH = originalCanvas.height
+
+      if (srcRatio > dstRatio) {
+        // 원본이 더 넓음 - 좌우 크롭
+        srcW = originalCanvas.height * dstRatio
+        srcX = (originalCanvas.width - srcW) / 2
+      } else {
+        // 원본이 더 높음 - 상단 기준으로 하단 크롭
+        srcH = originalCanvas.width / dstRatio
+        srcY = 0 // 상단 기준
+      }
+
+      ctx.drawImage(
+        originalCanvas,
+        srcX, srcY, srcW, srcH,
+        0, 0, OG_WIDTH, OG_HEIGHT
+      )
+
+      // 3. Canvas를 JPG base64로 변환
+      const imageData = resizedCanvas.toDataURL('image/jpeg', 0.92)
+
+      // 4. 서버에 업로드
       const result = await uploadOgImage(invitationId, imageData)
 
       if (result.success && result.url) {
