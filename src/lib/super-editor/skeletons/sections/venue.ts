@@ -137,8 +137,8 @@ export const venueSkeleton: SectionSkeleton = {
                       size: 'md',
                       action: {
                         type: 'link',
-                        value:
-                          'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                        url: 'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                        target: '_blank',
                       },
                     },
                   },
@@ -436,8 +436,8 @@ export const venueSkeleton: SectionSkeleton = {
                       size: 'md',
                       action: {
                         type: 'link',
-                        value:
-                          'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                        url: 'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                        target: '_blank',
                       },
                     },
                   },
@@ -705,8 +705,8 @@ export const venueSkeleton: SectionSkeleton = {
                       size: 'md',
                       action: {
                         type: 'link',
-                        value:
-                          'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                        url: 'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                        target: '_blank',
                       },
                     },
                   },

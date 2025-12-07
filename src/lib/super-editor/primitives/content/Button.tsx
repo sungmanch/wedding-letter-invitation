@@ -137,6 +137,23 @@ function renderIcon(iconName: string, size: string = 'md') {
   return <IconComponent size={iconSizeMap[size] || 20} />
 }
 
+// 이미지 아이콘 렌더링 함수
+function renderImageIcon(iconSrc: string, size: string = 'md') {
+  const iconSize = iconSizeMap[size] || 20
+  return (
+    <img
+      src={iconSrc}
+      alt=""
+      width={iconSize}
+      height={iconSize}
+      style={{
+        objectFit: 'contain',
+        borderRadius: '4px',
+      }}
+    />
+  )
+}
+
 function handleAction(action: ButtonAction | undefined) {
   if (!action) return
 
@@ -174,6 +191,23 @@ function handleAction(action: ButtonAction | undefined) {
       // 커스텀 핸들러는 런타임에서 처리
       console.log('Custom action:', action.handler)
       break
+    case 'kakao-navi':
+      // 카카오내비 앱 실행
+      if (typeof window !== 'undefined' && window.Kakao?.Navi) {
+        window.Kakao.Navi.start({
+          name: action.name,
+          x: Number(action.lng),
+          y: Number(action.lat),
+          coordType: 'wgs84',
+        })
+      } else {
+        // Kakao SDK가 없으면 카카오맵 웹으로 대체
+        window.open(
+          `https://map.kakao.com/link/to/${encodeURIComponent(action.name)},${action.lat},${action.lng}`,
+          '_blank'
+        )
+      }
+      break
   }
 }
 
@@ -202,7 +236,8 @@ export function Button({
   const size = props.size || 'md'
 
   // 아이콘만 있는 버튼인지 확인
-  const isIconOnly = props.icon && !label
+  const hasIcon = props.icon || props.iconSrc
+  const isIconOnly = hasIcon && !label
 
   const buttonStyle: React.CSSProperties = {
     display: 'inline-flex',
@@ -251,9 +286,13 @@ export function Button({
       onMouseEnter={eventHandlers.onMouseEnter}
       onMouseLeave={eventHandlers.onMouseLeave}
     >
-      {props.icon && props.iconPosition !== 'right' && renderIcon(props.icon, size)}
+      {hasIcon && props.iconPosition !== 'right' && (
+        props.iconSrc ? renderImageIcon(props.iconSrc, size) : renderIcon(props.icon!, size)
+      )}
       {label}
-      {props.icon && props.iconPosition === 'right' && renderIcon(props.icon, size)}
+      {hasIcon && props.iconPosition === 'right' && (
+        props.iconSrc ? renderImageIcon(props.iconSrc, size) : renderIcon(props.icon!, size)
+      )}
     </button>
   )
 }
@@ -275,6 +314,8 @@ function convertLegacyAction(action: ButtonAction): import('../../context/EventC
       return { type: 'map', payload: { address: action.address, provider: action.provider } }
     case 'scroll':
       return { type: 'scroll-to', payload: { target: action.target } }
+    case 'kakao-navi':
+      return { type: 'kakao-navi', payload: { name: action.name, lat: action.lat, lng: action.lng } }
     default:
       return null
   }
