@@ -8,18 +8,18 @@
 // ============================================
 
 export type FontCategory =
-  | 'serif-ko'      // 한글 세리프 (명조)
-  | 'sans-ko'       // 한글 산세리프 (고딕)
+  | 'serif-ko' // 한글 세리프 (명조)
+  | 'sans-ko' // 한글 산세리프 (고딕)
   | 'handwriting-ko' // 한글 손글씨
-  | 'serif-en'      // 영문 세리프
-  | 'sans-en'       // 영문 산세리프
-  | 'display-en'    // 영문 디스플레이/장식
+  | 'serif-en' // 영문 세리프
+  | 'sans-en' // 영문 산세리프
+  | 'display-en' // 영문 디스플레이/장식
 
 export type FontSource =
-  | 'google'        // Google Fonts
-  | 'cdn'           // 기타 CDN (jsdelivr, cdnjs 등)
-  | 'fontface'      // @font-face CSS (projectnoonnu 등)
-  | 'local'         // 로컬 호스팅 (public/fonts/)
+  | 'google' // Google Fonts
+  | 'cdn' // 기타 CDN (jsdelivr, cdnjs 등)
+  | 'fontface' // @font-face CSS (projectnoonnu 등)
+  | 'local' // 로컬 호스팅 (public/fonts/)
 
 export interface FontWeight {
   value: number
@@ -28,34 +28,36 @@ export interface FontWeight {
 
 export interface FontPreset {
   id: string
-  family: string            // CSS font-family 값
-  label: string             // UI 표시명
-  labelEn?: string          // 영문 표시명
+  family: string // CSS font-family 값
+  label: string // UI 표시명
+  labelEn?: string // 영문 표시명
   category: FontCategory
   source: FontSource
 
   // 폰트 로드 정보
-  googleFontsId?: string    // Google Fonts ID (예: 'Noto+Serif+KR')
-  cdnUrl?: string           // CDN URL (@import 또는 <link>)
-  fontFace?: {              // @font-face 정의 (projectnoonnu 등)
-    src: string             // woff/woff2 URL
+  googleFontsId?: string // Google Fonts ID (예: 'Noto+Serif+KR')
+  cdnUrl?: string // CDN URL (@import 또는 <link>)
+  fontFace?: {
+    // @font-face 정의 (projectnoonnu 등)
+    src: string // woff/woff2 URL
     format: 'woff' | 'woff2'
   }
-  localFiles?: {            // 로컬 파일 경로 (public/fonts/ 기준)
+  localFiles?: {
+    // 로컬 파일 경로 (public/fonts/ 기준)
     weight: number
     style: 'normal' | 'italic'
     path: string
   }[]
 
   // 폰트 속성
-  weights: FontWeight[]     // 지원 굵기
-  defaultWeight: number     // 기본 굵기
-  fallback: string          // 폴백 폰트
+  weights: FontWeight[] // 지원 굵기
+  defaultWeight: number // 기본 굵기
+  fallback: string // 폴백 폰트
 
   // 메타데이터
-  license: string           // 라이선스 (예: 'OFL', 'Apache 2.0', 'Commercial')
-  description?: string      // 폰트 설명
-  recommended?: ('title' | 'body' | 'accent')[]  // 추천 용도
+  license: string // 라이선스 (예: 'OFL', 'Apache 2.0', 'Commercial')
+  description?: string // 폰트 설명
+  recommended?: ('title' | 'body' | 'accent')[] // 추천 용도
 }
 
 // ============================================
@@ -73,7 +75,8 @@ export const FONT_PRESETS: FontPreset[] = [
     labelEn: 'Pretendard',
     category: 'sans-ko',
     source: 'cdn',
-    cdnUrl: 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css',
+    cdnUrl:
+      'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css',
     weights: [
       { value: 300, label: '얇게' },
       { value: 400, label: '보통' },
@@ -134,9 +137,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'sans-ko',
     source: 'google',
     googleFontsId: 'Gowun+Dodum',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'sans-serif',
     license: 'OFL',
@@ -239,9 +240,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'handwriting-ko',
     source: 'google',
     googleFontsId: 'Nanum+Pen+Script',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -256,9 +255,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'handwriting-ko',
     source: 'google',
     googleFontsId: 'Nanum+Brush+Script',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -292,9 +289,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'handwriting-ko',
     source: 'google',
     googleFontsId: 'Cute+Font',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -309,9 +304,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'handwriting-ko',
     source: 'google',
     googleFontsId: 'Hi+Melody',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -326,9 +319,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'handwriting-ko',
     source: 'google',
     googleFontsId: 'Poor+Story',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -558,9 +549,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'display-en',
     source: 'google',
     googleFontsId: 'Great+Vibes',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -595,9 +584,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'display-en',
     source: 'google',
     googleFontsId: 'Alex+Brush',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -612,9 +599,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'display-en',
     source: 'google',
     googleFontsId: 'Parisienne',
-    weights: [
-      { value: 400, label: '보통' },
-    ],
+    weights: [{ value: 400, label: '보통' }],
     defaultWeight: 400,
     fallback: 'cursive',
     license: 'OFL',
@@ -839,7 +824,7 @@ export const FONT_PRESETS: FontPreset[] = [
     category: 'serif-en',
     source: 'fontface',
     fontFace: {
-      src: 'https://jtfqjfpvwikcvtoigufi.supabase.co/storage/v1/object/public/webfont/lt-museum/LTMuseum-Regular.woff2',
+      src: 'https://jtfqjfpvwikcvtoigufi.supabase.co/storage/v1/object/public/webfont/lt-museum/LTMuseum-Medium.woff2',
       format: 'woff2',
     },
     weights: [
@@ -898,30 +883,38 @@ export const FONT_PRESETS: FontPreset[] = [
 
 /** ID로 폰트 프리셋 찾기 */
 export function getFontById(id: string): FontPreset | undefined {
-  return FONT_PRESETS.find(f => f.id === id)
+  return FONT_PRESETS.find((f) => f.id === id)
 }
 
 /** family 이름으로 폰트 프리셋 찾기 */
 export function getFontByFamily(family: string): FontPreset | undefined {
-  return FONT_PRESETS.find(f => f.family === family)
+  return FONT_PRESETS.find((f) => f.family === family)
 }
 
 /** 카테고리별 폰트 목록 */
 export function getFontsByCategory(category: FontCategory): FontPreset[] {
-  return FONT_PRESETS.filter(f => f.category === category)
+  return FONT_PRESETS.filter((f) => f.category === category)
 }
 
 /** 추천 용도별 폰트 목록 */
 export function getFontsForUsage(usage: 'title' | 'body' | 'accent'): FontPreset[] {
-  return FONT_PRESETS.filter(f => f.recommended?.includes(usage))
+  return FONT_PRESETS.filter((f) => f.recommended?.includes(usage))
 }
 
 /** StyleEditor용 옵션 목록 (카테고리별 그룹화) */
-export function getFontOptionsGrouped(): { category: string; label: string; fonts: FontPreset[] }[] {
+export function getFontOptionsGrouped(): {
+  category: string
+  label: string
+  fonts: FontPreset[]
+}[] {
   return [
     { category: 'serif-ko', label: '한글 명조', fonts: getFontsByCategory('serif-ko') },
     { category: 'sans-ko', label: '한글 고딕', fonts: getFontsByCategory('sans-ko') },
-    { category: 'handwriting-ko', label: '한글 손글씨', fonts: getFontsByCategory('handwriting-ko') },
+    {
+      category: 'handwriting-ko',
+      label: '한글 손글씨',
+      fonts: getFontsByCategory('handwriting-ko'),
+    },
     { category: 'serif-en', label: '영문 세리프', fonts: getFontsByCategory('serif-en') },
     { category: 'sans-en', label: '영문 산세리프', fonts: getFontsByCategory('sans-en') },
     { category: 'display-en', label: '영문 디스플레이', fonts: getFontsByCategory('display-en') },
