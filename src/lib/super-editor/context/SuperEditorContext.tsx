@@ -110,6 +110,23 @@ function setValueByPath(
 }
 
 /**
+ * 데이터에서 값을 path로 가져오기
+ */
+function getValueByPath(obj: Record<string, unknown>, path: string): unknown {
+  const parts = path.split('.')
+  let current: unknown = obj
+  for (const part of parts) {
+    if (current === null || current === undefined) return undefined
+    if (typeof current === 'object') {
+      current = (current as Record<string, unknown>)[part]
+    } else {
+      return undefined
+    }
+  }
+  return current
+}
+
+/**
  * wedding.date 또는 wedding.time 변경 시 파생 필드 자동 계산
  */
 function computeDerivedFields(
@@ -120,7 +137,7 @@ function computeDerivedFields(
   let result = data
 
   // wedding.date 변경 시 날짜 관련 파생 필드 계산
-  if (fieldPath === 'wedding.date' && typeof value === 'string') {
+  if (fieldPath === 'wedding.date' && typeof value === 'string' && value) {
     try {
       const date = parseISO(value)
       const today = new Date()
@@ -149,7 +166,7 @@ function computeDerivedFields(
   }
 
   // wedding.time 변경 시 시간 관련 파생 필드 계산
-  if (fieldPath === 'wedding.time' && typeof value === 'string') {
+  if (fieldPath === 'wedding.time' && typeof value === 'string' && value) {
     try {
       const [hours, minutes] = value.split(':').map(Number)
       const period = hours >= 12 ? '오후' : '오전'
@@ -173,6 +190,27 @@ function computeDerivedFields(
   return result
 }
 
+/**
+ * 초기 데이터 로드 시 모든 파생 필드 계산
+ */
+function computeAllDerivedFields(data: Record<string, unknown>): Record<string, unknown> {
+  let result = data
+
+  // wedding.date에서 파생 필드 계산
+  const weddingDate = getValueByPath(data, 'wedding.date')
+  if (weddingDate && typeof weddingDate === 'string') {
+    result = computeDerivedFields(result, 'wedding.date', weddingDate)
+  }
+
+  // wedding.time에서 파생 필드 계산
+  const weddingTime = getValueByPath(data, 'wedding.time')
+  if (weddingTime && typeof weddingTime === 'string') {
+    result = computeDerivedFields(result, 'wedding.time', weddingTime)
+  }
+
+  return result
+}
+
 function superEditorReducer(
   state: SuperEditorState,
   action: SuperEditorAction
@@ -187,13 +225,21 @@ function superEditorReducer(
         error: null,
       }
 
-    case 'SET_USER_DATA':
+    case 'SET_USER_DATA': {
+      // 초기 데이터 로드 시 파생 필드 계산
+      const computedData = computeAllDerivedFields(
+        action.userData.data as Record<string, unknown>
+      )
+      const userDataWithDerived: UserData = {
+        ...action.userData,
+        data: computedData,
+      }
       return {
         ...state,
-        userData: action.userData,
+        userData: userDataWithDerived,
         history: [
           {
-            userData: action.userData,
+            userData: userDataWithDerived,
             timestamp: Date.now(),
             description: 'Initial load',
           },
@@ -201,6 +247,7 @@ function superEditorReducer(
         historyIndex: 0,
         dirty: false,
       }
+    }
 
     case 'SET_STYLE':
       return {

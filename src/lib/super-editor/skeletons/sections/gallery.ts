@@ -97,6 +97,88 @@ export const gallerySkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Grid Seamless Variant (여백 없는 꽉 찬 그리드)
+    // ============================================
+    {
+      id: 'grid-seamless',
+      name: '꽉 찬 그리드',
+      description: '여백 없이 꽉 채워진 인스타그램 스타일 그리드',
+      tags: ['instagram', 'seamless', 'modern', 'full-bleed'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-grid-seamless',
+                type: 'gallery',
+                style: {
+                  borderRadius: 0,
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  layout: 'grid',
+                  columns: 3,
+                  gap: 0,
+                  aspectRatio: '1:1',
+                  objectFit: 'cover',
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
+        ],
+        layouts: [
+          { id: '2col', name: '2열', props: { columns: 2 } },
+          { id: '3col', name: '3열', props: { columns: 3 } },
+          { id: '4col', name: '4열', props: { columns: 4 } },
+        ],
+      },
+    },
+
+    // ============================================
     // Masonry Variant
     // ============================================
     {
@@ -265,6 +347,98 @@ export const gallerySkeleton: SectionSkeleton = {
           { id: 'slide', name: '슬라이드', props: { effect: 'slide' } },
           { id: 'fade', name: '페이드', props: { effect: 'fade' } },
           { id: 'coverflow', name: '커버플로우', props: { effect: 'coverflow' } },
+          { id: 'cards', name: '카드 스택', props: { effect: 'cards' } },
+          { id: 'cube', name: '큐브', props: { effect: 'cube' } },
+          { id: 'flip', name: '플립', props: { effect: 'flip' } },
+        ],
+      },
+    },
+
+    // ============================================
+    // Film Strip Variant (필름 롤 스타일)
+    // ============================================
+    {
+      id: 'film-strip',
+      name: '필름 스트립',
+      description: '복고풍 영화 필름 롤 스타일 갤러리',
+      tags: ['retro', 'cinematic', 'vintage', 'film'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-film-strip',
+                type: 'carousel',
+                style: {
+                  overflow: 'hidden',
+                  position: 'relative',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  aspectRatio: '3:4',
+                  objectFit: 'cover',
+                  autoplay: true,
+                  autoplayInterval: 3000,
+                  infinite: true,
+                  showDots: false,
+                  showArrows: false,
+                  effect: 'film-strip',
+                  slidesToShow: 2,
+                  spacing: 12,
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+        layouts: [
+          { id: 'horizontal', name: '가로 스크롤', props: { direction: 'horizontal' } },
+          { id: 'continuous', name: '연속 흐름', props: { direction: 'horizontal', continuous: true } },
         ],
       },
     },
