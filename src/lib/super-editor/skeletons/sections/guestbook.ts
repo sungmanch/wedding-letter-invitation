@@ -64,15 +64,7 @@ export const guestbookSkeleton: SectionSkeleton = {
           },
         ],
       },
-      slots: [
-        {
-          id: 'guestbook-messages',
-          path: 'guestbook.messages',
-          type: 'text',
-          required: false,
-          description: '방명록 메시지 목록',
-        },
-      ],
+      slots: [],
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
@@ -202,118 +194,15 @@ export const guestbookSkeleton: SectionSkeleton = {
                   },
                 ],
               },
-              // 메시지 목록
-              {
-                id: 'guestbook-messages',
-                type: 'column',
-                tokenStyle: {
-                  gap: '$token.spacing.md',
-                },
-                children: [
-                  {
-                    id: 'guestbook-list',
-                    type: 'repeat',
-                    props: {
-                      dataPath: 'guestbook.messages',
-                      as: 'msg',
-                      limit: 10,
-                    },
-                    children: [
-                      {
-                        id: 'message-card',
-                        type: 'container',
-                        tokenStyle: {
-                          padding: '$token.spacing.md',
-                          backgroundColor: '$token.colors.background',
-                          borderRadius: '$token.borders.radiusMd',
-                          boxShadow: '$token.shadows.sm',
-                        },
-                        children: [
-                          {
-                            id: 'message-content',
-                            type: 'column',
-                            tokenStyle: {
-                              gap: '$token.spacing.sm',
-                            },
-                            children: [
-                              {
-                                id: 'message-text',
-                                type: 'text',
-                                tokenStyle: {
-                                  fontFamily: '$token.typography.bodyMd.fontFamily',
-                                  fontSize: '$token.typography.bodyMd.fontSize',
-                                  color: '$token.colors.text.primary',
-                                },
-                                props: {
-                                  content: '{{msg.message}}',
-                                  as: 'p',
-                                },
-                              },
-                              {
-                                id: 'message-meta',
-                                type: 'row',
-                                tokenStyle: {
-                                  gap: '$token.spacing.sm',
-                                },
-                                style: {
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                },
-                                children: [
-                                  {
-                                    id: 'message-author',
-                                    type: 'text',
-                                    tokenStyle: {
-                                      fontFamily: '$token.typography.bodySm.fontFamily',
-                                      fontSize: '$token.typography.bodySm.fontSize',
-                                      color: '$token.colors.brand',
-                                    },
-                                    props: {
-                                      content: '{{msg.name}}',
-                                      as: 'span',
-                                    },
-                                  },
-                                  {
-                                    id: 'message-date',
-                                    type: 'text',
-                                    tokenStyle: {
-                                      fontFamily: '$token.typography.caption.fontFamily',
-                                      fontSize: '$token.typography.caption.fontSize',
-                                      color: '$token.colors.text.muted',
-                                    },
-                                    props: {
-                                      content: '{{msg.createdAt}}',
-                                      as: 'span',
-                                    },
-                                  },
-                                ],
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
             ],
           },
         ],
       },
-      slots: [
-        {
-          id: 'guestbook-messages',
-          path: 'guestbook.messages',
-          type: 'text',
-          required: false,
-          description: '방명록 메시지 목록',
-        },
-      ],
+      slots: [],
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
-          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
         ],
       },
     },

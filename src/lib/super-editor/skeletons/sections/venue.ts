@@ -115,8 +115,50 @@ export const venueSkeleton: SectionSkeleton = {
                   zoom: 16,
                   provider: 'kakao',
                   showMarker: true,
-                  navigationButtons: ['kakao', 'naver', 'tmap'],
                 },
+              },
+              {
+                id: 'venue-nav-buttons',
+                type: 'row',
+                tokenStyle: {
+                  gap: '$token.spacing.md',
+                },
+                style: {
+                  justifyContent: 'center',
+                },
+                children: [
+                  {
+                    id: 'nav-naver-map',
+                    type: 'button',
+                    props: {
+                      label: '네이버지도',
+                      iconSrc: '/navermap.jpg',
+                      variant: 'outline',
+                      size: 'md',
+                      action: {
+                        type: 'link',
+                        value:
+                          'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                      },
+                    },
+                  },
+                  {
+                    id: 'nav-kakao-navi',
+                    type: 'button',
+                    props: {
+                      label: '카카오내비',
+                      iconSrc: '/kakaonav.png',
+                      variant: 'outline',
+                      size: 'md',
+                      action: {
+                        type: 'kakao-navi',
+                        name: '{{venue.name}}',
+                        lat: '{{venue.lat}}',
+                        lng: '{{venue.lng}}',
+                      },
+                    },
+                  },
+                ],
               },
               {
                 id: 'venue-address',
@@ -372,8 +414,50 @@ export const venueSkeleton: SectionSkeleton = {
                   zoom: 15,
                   provider: 'kakao',
                   showMarker: true,
-                  navigationButtons: ['kakao', 'naver', 'tmap'],
                 },
+              },
+              {
+                id: 'venue-nav-buttons',
+                type: 'row',
+                tokenStyle: {
+                  gap: '$token.spacing.md',
+                },
+                style: {
+                  justifyContent: 'center',
+                },
+                children: [
+                  {
+                    id: 'nav-naver-map',
+                    type: 'button',
+                    props: {
+                      label: '네이버지도',
+                      iconSrc: '/navermap.jpg',
+                      variant: 'outline',
+                      size: 'md',
+                      action: {
+                        type: 'link',
+                        value:
+                          'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
+                      },
+                    },
+                  },
+                  {
+                    id: 'nav-kakao-navi',
+                    type: 'button',
+                    props: {
+                      label: '카카오내비',
+                      iconSrc: '/kakaonav.png',
+                      variant: 'outline',
+                      size: 'md',
+                      action: {
+                        type: 'kakao-navi',
+                        name: '{{venue.name}}',
+                        lat: '{{venue.lat}}',
+                        lng: '{{venue.lng}}',
+                      },
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -602,7 +686,7 @@ export const venueSkeleton: SectionSkeleton = {
               },
               // 네비게이션 버튼
               {
-                id: 'venue-navigation',
+                id: 'venue-nav-buttons',
                 type: 'row',
                 tokenStyle: {
                   gap: '$token.spacing.md',
@@ -612,51 +696,31 @@ export const venueSkeleton: SectionSkeleton = {
                 },
                 children: [
                   {
-                    id: 'nav-tmap',
+                    id: 'nav-naver-map',
                     type: 'button',
                     props: {
-                      label: '티맵',
-                      icon: 'navigation',
-                      variant: 'ghost',
-                      size: 'sm',
+                      label: '네이버지도',
+                      iconSrc: '/navermap.jpg',
+                      variant: 'outline',
+                      size: 'md',
                       action: {
-                        type: 'navigation',
-                        provider: 'tmap',
-                        address: '{{venue.address}}',
-                        lat: '{{venue.lat}}',
-                        lng: '{{venue.lng}}',
+                        type: 'link',
+                        value:
+                          'https://m.map.naver.com/search2/search.nhn?query={{venue.address}}',
                       },
                     },
                   },
                   {
-                    id: 'nav-kakao',
+                    id: 'nav-kakao-navi',
                     type: 'button',
                     props: {
                       label: '카카오내비',
-                      icon: 'navigation',
-                      variant: 'ghost',
-                      size: 'sm',
+                      iconSrc: '/kakaonav.png',
+                      variant: 'outline',
+                      size: 'md',
                       action: {
-                        type: 'navigation',
-                        provider: 'kakao',
-                        address: '{{venue.address}}',
-                        lat: '{{venue.lat}}',
-                        lng: '{{venue.lng}}',
-                      },
-                    },
-                  },
-                  {
-                    id: 'nav-naver',
-                    type: 'button',
-                    props: {
-                      label: '네이버 지도',
-                      icon: 'navigation',
-                      variant: 'ghost',
-                      size: 'sm',
-                      action: {
-                        type: 'navigation',
-                        provider: 'naver',
-                        address: '{{venue.address}}',
+                        type: 'kakao-navi',
+                        name: '{{venue.name}}',
                         lat: '{{venue.lat}}',
                         lng: '{{venue.lng}}',
                       },
