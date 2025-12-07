@@ -5,12 +5,13 @@
  * 디자인 토큰을 React 컴포넌트에 제공하는 컨텍스트
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, useEffect, type ReactNode } from 'react'
 import type { SemanticDesignTokens } from '../tokens/schema'
 import type { StyleSchema, CustomStyles, CustomKeyframe, CustomClassDefinition } from '../schema/style'
 import { resolveTokens } from '../tokens/resolver'
 import { generateCssVariables, tokenRefToCssVar } from '../tokens/css-generator'
 import { DEFAULT_TOKENS } from '../tokens/schema'
+import { extractFontsFromStyle, loadFontsDynamically } from '../fonts/loader'
 
 // ============================================
 // Context Type
@@ -65,6 +66,14 @@ export function TokenStyleProvider({ style, children }: TokenStyleProviderProps)
       customStyles,
       customKeyframeNames: customStyles?.keyframes ? Object.keys(customStyles.keyframes) : [],
       customClassNames: customStyles?.classes ? Object.keys(customStyles.classes) : [],
+    }
+  }, [style])
+
+  // 스타일 변경 시 사용된 폰트 동적 로드
+  useEffect(() => {
+    const fonts = extractFontsFromStyle(style)
+    if (fonts.length > 0) {
+      loadFontsDynamically(fonts).catch(console.error)
     }
   }, [style])
 
