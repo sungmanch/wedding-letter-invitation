@@ -93,6 +93,10 @@ export interface ScrollContainerProps {
 export interface OverlayProps {
   position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
   inset?: string | number
+  // 모달 관련 props
+  visible?: boolean // 초기 표시 여부 (기본: true, modal용은 false)
+  title?: string // 모달 제목
+  showClose?: boolean // 닫기 버튼 표시
 }
 
 export interface FullscreenProps {
@@ -159,6 +163,7 @@ export type ButtonAction =
   | { type: 'scroll'; target: string }
   | { type: 'custom'; handler: string }
   | { type: 'kakao-navi'; name: string; lat: string | number; lng: string | number }
+  | { type: 'modal'; target: string } // 모달 열기 (target = overlay node id)
 
 export interface SpacerProps {
   height?: number | string
