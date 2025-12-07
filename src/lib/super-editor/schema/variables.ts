@@ -158,6 +158,12 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
   },
 
   // Venue
+  venue: {
+    type: 'location',
+    label: '주소',
+    required: true,
+    helpText: '주소 검색 버튼을 클릭하여 주소를 입력하세요',
+  },
   'venue.name': {
     type: 'text',
     label: '예식장 이름',
@@ -173,8 +179,8 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
   'venue.address': {
     type: 'text',
     label: '주소',
-    required: true,
-    placeholder: '서울특별시 강남구 테헤란로 123',
+    required: false,
+    description: '__HIDDEN__', // LocationField(venue)에서 자동 채움
   },
   'venue.tel': {
     type: 'phone',
@@ -208,6 +214,20 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     label: '예식장 위치',
     required: false,
     helpText: '지도에서 예식장 위치를 선택하세요 (위도/경도 자동 설정)',
+  },
+
+  // Venue - Coordinates (Hidden - 주소 검색으로 자동 설정됨)
+  'venue.lat': {
+    type: 'number',
+    label: '위도',
+    required: false,
+    description: '__HIDDEN__', // 에디터에서 숨김 처리
+  },
+  'venue.lng': {
+    type: 'number',
+    label: '경도',
+    required: false,
+    description: '__HIDDEN__', // 에디터에서 숨김 처리
   },
 
   // Venue - Transportation

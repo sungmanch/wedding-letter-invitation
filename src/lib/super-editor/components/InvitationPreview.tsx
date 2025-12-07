@@ -10,7 +10,7 @@
  * - /se/[id] - withFrame=false
  */
 
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useMemo, useState, useCallback, useRef } from 'react'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
@@ -61,12 +61,16 @@ interface PhoneFrameProps {
   width?: number
   height?: number
   children: React.ReactNode
+  scrollRef?: React.RefObject<HTMLDivElement | null>
+  onScroll?: () => void
 }
 
 function PhoneFrame({
   width = DEFAULT_FRAME_WIDTH,
   height = DEFAULT_FRAME_HEIGHT,
   children,
+  scrollRef,
+  onScroll,
 }: PhoneFrameProps) {
   const allStyles = useMemo(() => collectAllIntroStyles(), [])
 
@@ -80,6 +84,8 @@ function PhoneFrame({
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-10" />
         {/* Screen */}
         <div
+          ref={scrollRef}
+          onScroll={onScroll}
           className="bg-white rounded-[2rem] overflow-hidden overflow-y-auto mobile-scrollbar"
           style={
             {
@@ -119,9 +125,52 @@ export function InvitationPreview({
 }: InvitationPreviewProps) {
   // 활성 섹션 추적 (스크롤에 따라 변경)
   const [activeSection, setActiveSection] = useState<SectionType | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const handleActiveSectionChange = useCallback((sectionType: SectionType | null) => {
-    setActiveSection(sectionType)
+  // PhoneFrame 스크롤 시 중앙에 위치한 섹션 감지
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    // 스크롤이 끝에 도달했는지 확인 (5px 여유)
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < 5
+
+    // 모든 섹션 요소 가져오기
+    const sectionElements = container.querySelectorAll('[data-section-type]')
+    if (sectionElements.length === 0) return
+
+    // 스크롤이 끝에 도달하면 마지막 섹션 활성화
+    if (isAtBottom) {
+      const lastSection = sectionElements[sectionElements.length - 1]
+      const sectionType = lastSection.getAttribute('data-section-type') as SectionType
+      if (sectionType) {
+        setActiveSection(sectionType)
+        return
+      }
+    }
+
+    // 일반적인 경우: 중앙에 가장 가까운 섹션 찾기
+    const containerRect = container.getBoundingClientRect()
+    const containerCenter = containerRect.top + containerRect.height / 2
+
+    let closestSection: SectionType | null = null
+    let closestDistance = Infinity
+
+    sectionElements.forEach((el) => {
+      const rect = el.getBoundingClientRect()
+      const sectionCenter = rect.top + rect.height / 2
+      const distance = Math.abs(sectionCenter - containerCenter)
+
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestSection = el.getAttribute('data-section-type') as SectionType
+      }
+    })
+
+    if (closestSection) {
+      setActiveSection(closestSection)
+    }
   }, [])
 
   const renderer = (
@@ -137,7 +186,6 @@ export function InvitationPreview({
       onSelectNode={onSelectNode}
       sectionVariants={sectionVariants}
       onVariantChange={onVariantChange}
-      onActiveSectionChange={handleActiveSectionChange}
       showVariantSwitcher={false}
       className={className}
     />
@@ -146,23 +194,36 @@ export function InvitationPreview({
   if (withFrame) {
     // 편집 모드에서는 PhoneFrame 옆에 VariantControlPanel 표시
     const showVariantPanel = mode === 'edit' && onVariantChange && sectionVariants
+    const frameH = frameHeight ?? DEFAULT_FRAME_HEIGHT
 
     return (
       <div className="relative flex items-start gap-4">
         {/* PhoneFrame */}
-        <PhoneFrame width={frameWidth} height={frameHeight}>
+        <PhoneFrame
+          width={frameWidth}
+          height={frameHeight}
+          scrollRef={scrollContainerRef}
+          onScroll={handleScroll}
+        >
           {renderer}
         </PhoneFrame>
 
-        {/* 오른쪽 Variant Control Panel */}
+        {/* 오른쪽 Variant Control Panel - PhoneFrame과 동일한 높이로 고정 */}
         {showVariantPanel && (
-          <VariantControlPanel
-            activeSection={activeSection}
-            sectionVariants={sectionVariants}
-            onVariantChange={onVariantChange}
-            layout={layout}
-            className="sticky top-8"
-          />
+          <div
+            className="flex-shrink-0"
+            style={{ height: frameH + 16 /* bezel padding */ }}
+          >
+            <VariantControlPanel
+              activeSection={activeSection}
+              sectionVariants={sectionVariants}
+              onVariantChange={onVariantChange}
+              layout={layout}
+              sectionOrder={sectionOrder}
+              sectionEnabled={sectionEnabled}
+              className="h-full overflow-y-auto"
+            />
+          </div>
         )}
       </div>
     )

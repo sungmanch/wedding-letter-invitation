@@ -9,7 +9,7 @@
  * - visibleSections로 렌더링 섹션 제어 (개방-폐쇄)
  */
 
-import React, { useEffect, useRef, useCallback } from 'react'
+import React from 'react'
 import type { LayoutSchema, Screen } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
@@ -50,9 +50,6 @@ interface InvitationRendererProps {
 
   // 섹션 내부 VariantSwitcher 표시 여부 (false면 외부 패널 사용)
   showVariantSwitcher?: boolean
-
-  // 활성 섹션 변경 콜백 (스크롤에 따라)
-  onActiveSectionChange?: (sectionType: SectionType | null) => void
 
   className?: string
 }
@@ -113,11 +110,8 @@ function InvitationContent({
   sectionVariants,
   onVariantChange,
   showVariantSwitcher = true,
-  onActiveSectionChange,
   className,
 }: InvitationContentProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-
   // 섹션 정렬
   const { intro, sections, music } = React.useMemo(
     () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections),
@@ -137,46 +131,8 @@ function InvitationContent({
   // 편집 모드일 때만 섹션 간 간격 적용
   const sectionGap = mode === 'edit' ? '48px' : '0px'
 
-  // Intersection Observer로 활성 섹션 감지
-  useEffect(() => {
-    if (!onActiveSectionChange) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // 가장 많이 보이는 섹션 찾기
-        const visibleEntries = entries.filter((e) => e.isIntersecting)
-        if (visibleEntries.length > 0) {
-          // intersectionRatio가 가장 높은 것 선택
-          const mostVisible = visibleEntries.reduce((prev, curr) =>
-            curr.intersectionRatio > prev.intersectionRatio ? curr : prev
-          )
-          const sectionType = mostVisible.target.getAttribute('data-section-type')
-          if (sectionType) {
-            onActiveSectionChange(sectionType as SectionType)
-          }
-        }
-      },
-      {
-        threshold: [0.1, 0.3, 0.5, 0.7],
-        root: containerRef.current?.parentElement, // PhoneFrame의 스크롤 컨테이너
-      }
-    )
-
-    // 약간의 지연 후 관찰 시작 (DOM 렌더링 대기)
-    const timeoutId = setTimeout(() => {
-      const sectionElements = containerRef.current?.querySelectorAll('[data-section-type]')
-      sectionElements?.forEach((el) => observer.observe(el))
-    }, 100)
-
-    return () => {
-      clearTimeout(timeoutId)
-      observer.disconnect()
-    }
-  }, [onActiveSectionChange, sections])
-
   return (
     <div
-      ref={containerRef}
       className={`invitation-renderer ${className ?? ''}`}
       style={{
         minHeight: '100vh',
