@@ -114,6 +114,352 @@ export function Carousel({
     )
   }
 
+  // Coverflow 효과
+  if (effect === 'coverflow') {
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{ ...containerStyle, perspective: '1000px' }}
+        onClick={
+          context.mode === 'edit'
+            ? (e) => {
+                e.stopPropagation()
+                context.onSelectNode?.(node.id)
+              }
+            : undefined
+        }
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '300px',
+            position: 'relative',
+          }}
+        >
+          {images.map((src, index) => {
+            const offset = index - currentIndex
+            const isActive = offset === 0
+            const translateX = offset * 60
+            const rotateY = offset * -35
+            const scale = isActive ? 1 : 0.75
+            const zIndex = images.length - Math.abs(offset)
+            const opacity = Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.2
+
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={index}
+                src={src}
+                alt={`슬라이드 ${index + 1}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  goTo(index)
+                }}
+                style={{
+                  position: 'absolute',
+                  width: '65%',
+                  aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
+                  objectFit: props.objectFit || 'cover',
+                  borderRadius: '12px',
+                  boxShadow: isActive ? '0 20px 40px rgba(0,0,0,0.3)' : '0 10px 20px rgba(0,0,0,0.2)',
+                  transform: `translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
+                  transition: 'all 0.5s ease',
+                  zIndex,
+                  opacity,
+                  cursor: 'pointer',
+                }}
+              />
+            )
+          })}
+        </div>
+
+        <CarouselControls />
+      </div>
+    )
+  }
+
+  // Cards 효과 (카드 스택)
+  if (effect === 'cards') {
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{ ...containerStyle, perspective: '1200px' }}
+        onClick={
+          context.mode === 'edit'
+            ? (e) => {
+                e.stopPropagation()
+                context.onSelectNode?.(node.id)
+              }
+            : undefined
+        }
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '350px',
+            position: 'relative',
+          }}
+        >
+          {images.map((src, index) => {
+            const offset = index - currentIndex
+            const isActive = offset === 0
+            const translateY = isActive ? 0 : 20
+            const translateX = offset * 30
+            const scale = isActive ? 1 : 0.9
+            const zIndex = images.length - Math.abs(offset)
+            const opacity = Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.15
+
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={index}
+                src={src}
+                alt={`슬라이드 ${index + 1}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  goTo(index)
+                }}
+                style={{
+                  position: 'absolute',
+                  width: '75%',
+                  aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
+                  objectFit: props.objectFit || 'cover',
+                  borderRadius: '16px',
+                  boxShadow: isActive
+                    ? '0 25px 50px rgba(0,0,0,0.25)'
+                    : '0 10px 30px rgba(0,0,0,0.15)',
+                  transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale})`,
+                  transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  zIndex,
+                  opacity,
+                  cursor: 'pointer',
+                }}
+              />
+            )
+          })}
+        </div>
+
+        <CarouselControls />
+      </div>
+    )
+  }
+
+  // Cube 효과 (3D 큐브)
+  if (effect === 'cube') {
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{
+          ...containerStyle,
+          perspective: '1200px',
+          perspectiveOrigin: '50% 50%',
+        }}
+        onClick={
+          context.mode === 'edit'
+            ? (e) => {
+                e.stopPropagation()
+                context.onSelectNode?.(node.id)
+              }
+            : undefined
+        }
+      >
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
+            position: 'relative',
+            transformStyle: 'preserve-3d',
+            transform: `rotateY(${-currentIndex * 90}deg)`,
+            transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          }}
+        >
+          {images.slice(0, 4).map((src, index) => {
+            const rotations = [0, 90, 180, 270]
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={index}
+                src={src}
+                alt={`슬라이드 ${index + 1}`}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: props.objectFit || 'cover',
+                  backfaceVisibility: 'hidden',
+                  transform: `rotateY(${rotations[index]}deg) translateZ(calc(50% - 1px))`,
+                }}
+              />
+            )
+          })}
+        </div>
+
+        <CarouselControls maxIndex={Math.min(images.length, 4)} />
+      </div>
+    )
+  }
+
+  // Flip 효과
+  if (effect === 'flip') {
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{
+          ...containerStyle,
+          perspective: '1200px',
+        }}
+        onClick={
+          context.mode === 'edit'
+            ? (e) => {
+                e.stopPropagation()
+                context.onSelectNode?.(node.id)
+              }
+            : undefined
+        }
+      >
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
+            position: 'relative',
+            transformStyle: 'preserve-3d',
+          }}
+        >
+          {images.map((src, index) => {
+            const isActive = index === currentIndex
+            const isPrev = index === (currentIndex - 1 + images.length) % images.length
+            const rotateY = isActive ? 0 : isPrev ? -180 : 180
+
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={index}
+                src={src}
+                alt={`슬라이드 ${index + 1}`}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: props.objectFit || 'cover',
+                  borderRadius: '12px',
+                  backfaceVisibility: 'hidden',
+                  transform: `rotateY(${rotateY}deg)`,
+                  transition: 'transform 0.6s ease',
+                  zIndex: isActive ? 1 : 0,
+                }}
+              />
+            )
+          })}
+        </div>
+
+        <CarouselControls />
+      </div>
+    )
+  }
+
+  // Film Strip 효과 (필름 롤 스타일)
+  if (effect === 'film-strip') {
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{
+          ...containerStyle,
+          backgroundColor: '#1a1a1a',
+          padding: '0',
+        }}
+        onClick={
+          context.mode === 'edit'
+            ? (e) => {
+                e.stopPropagation()
+                context.onSelectNode?.(node.id)
+              }
+            : undefined
+        }
+      >
+        {/* 상단 필름 구멍 */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '8px 4px',
+          backgroundColor: '#1a1a1a',
+        }}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={`top-${i}`}
+              style={{
+                width: '12px',
+                height: '8px',
+                backgroundColor: '#333',
+                borderRadius: '2px',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* 이미지 슬라이더 */}
+        <div style={{ overflow: 'hidden' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: `${props.spacing || 12}px`,
+              padding: '4px 12px',
+              transform: `translateX(calc(-${currentIndex * (100 / slidesToShow)}% - ${currentIndex * (props.spacing || 12)}px))`,
+              transition: 'transform 0.5s ease',
+            }}
+          >
+            {images.map((src, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={index}
+                src={src}
+                alt={`슬라이드 ${index + 1}`}
+                style={{
+                  flex: `0 0 calc(${100 / slidesToShow}% - ${((slidesToShow - 1) * (props.spacing || 12)) / slidesToShow}px)`,
+                  aspectRatio: props.aspectRatio?.replace(':', '/') || '3/4',
+                  objectFit: props.objectFit || 'cover',
+                  borderRadius: '4px',
+                  border: '3px solid #f5f5f0',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 하단 필름 구멍 */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '8px 4px',
+          backgroundColor: '#1a1a1a',
+        }}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={`bottom-${i}`}
+              style={{
+                width: '12px',
+                height: '8px',
+                backgroundColor: '#333',
+                borderRadius: '2px',
+              }}
+            />
+          ))}
+        </div>
+
+        <CarouselControls darkMode />
+      </div>
+    )
+  }
+
   // Slide 효과 (기본)
   return (
     <div
@@ -157,11 +503,17 @@ export function Carousel({
     </div>
   )
 
-  function CarouselControls() {
+  function CarouselControls({ maxIndex, darkMode }: { maxIndex?: number; darkMode?: boolean } = {}) {
+    const totalSlides = maxIndex || images.length
+    const arrowBg = darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.8)'
+    const arrowColor = darkMode ? '#fff' : '#000'
+    const dotActiveColor = darkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,1)'
+    const dotInactiveColor = darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'
+
     return (
       <>
         {/* 화살표 */}
-        {props.showArrows !== false && images.length > 1 && (
+        {props.showArrows !== false && totalSlides > 1 && (
           <>
             <button
               onClick={(e) => {
@@ -174,7 +526,8 @@ export function Carousel({
                 top: '50%',
                 transform: 'translateY(-50%)',
                 padding: '8px 12px',
-                backgroundColor: 'rgba(255,255,255,0.8)',
+                backgroundColor: arrowBg,
+                color: arrowColor,
                 border: 'none',
                 borderRadius: '50%',
                 fontSize: '18px',
@@ -195,7 +548,8 @@ export function Carousel({
                 top: '50%',
                 transform: 'translateY(-50%)',
                 padding: '8px 12px',
-                backgroundColor: 'rgba(255,255,255,0.8)',
+                backgroundColor: arrowBg,
+                color: arrowColor,
                 border: 'none',
                 borderRadius: '50%',
                 fontSize: '18px',
@@ -209,7 +563,7 @@ export function Carousel({
         )}
 
         {/* 도트 인디케이터 */}
-        {props.showDots !== false && images.length > 1 && (
+        {props.showDots !== false && totalSlides > 1 && (
           <div
             style={{
               position: 'absolute',
@@ -221,7 +575,7 @@ export function Carousel({
               zIndex: 10,
             }}
           >
-            {images.map((_, index) => (
+            {Array.from({ length: totalSlides }).map((_, index) => (
               <button
                 key={index}
                 onClick={(e) => {
@@ -235,8 +589,8 @@ export function Carousel({
                   border: 'none',
                   backgroundColor:
                     index === currentIndex
-                      ? 'rgba(255,255,255,1)'
-                      : 'rgba(255,255,255,0.5)',
+                      ? dotActiveColor
+                      : dotInactiveColor,
                   cursor: 'pointer',
                   transition: 'background-color 0.2s',
                 }}
@@ -280,6 +634,11 @@ export const carouselRenderer: PrimitiveRenderer<CarouselProps> = {
       options: [
         { value: 'slide', label: '슬라이드' },
         { value: 'fade', label: '페이드' },
+        { value: 'coverflow', label: '커버플로우' },
+        { value: 'cards', label: '카드 스택' },
+        { value: 'cube', label: '큐브' },
+        { value: 'flip', label: '플립' },
+        { value: 'film-strip', label: '필름 스트립' },
       ],
       defaultValue: 'slide',
     },
