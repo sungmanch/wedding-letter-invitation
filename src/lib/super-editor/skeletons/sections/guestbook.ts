@@ -49,7 +49,7 @@ export const guestbookSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GUESTBOOK',
+                  content: '방명록',
                   as: 'h2',
                 },
               },
@@ -285,7 +285,7 @@ export const guestbookSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GUESTBOOK',
+                  content: '방명록',
                   as: 'h2',
                 },
               },

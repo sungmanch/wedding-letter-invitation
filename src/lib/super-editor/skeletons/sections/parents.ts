@@ -49,7 +49,7 @@ export const parentsSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'FAMILY',
+                  content: '혼주 소개',
                   as: 'h2',
                 },
               },
@@ -380,6 +380,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신랑 아버지 성함',
+          defaultValue: '홍판서',
         },
         {
           id: 'groom-mother',
@@ -387,6 +388,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신랑 어머니 성함',
+          defaultValue: '김순자',
         },
         {
           id: 'bride-father',
@@ -394,6 +396,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신부 아버지 성함',
+          defaultValue: '김철수',
         },
         {
           id: 'bride-mother',
@@ -401,6 +404,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신부 어머니 성함',
+          defaultValue: '이영희',
         },
         {
           id: 'groom-name',
@@ -408,6 +412,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신랑 이름',
+          defaultValue: '홍길동',
         },
         {
           id: 'bride-name',
@@ -415,6 +420,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신부 이름',
+          defaultValue: '김영희',
         },
       ],
       options: {
@@ -463,7 +469,7 @@ export const parentsSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'FAMILY',
+                  content: '혼주 소개',
                   as: 'h2',
                 },
               },
@@ -595,6 +601,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신랑 아버지 성함',
+          defaultValue: '홍판서',
         },
         {
           id: 'groom-mother',
@@ -602,6 +609,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신랑 어머니 성함',
+          defaultValue: '김순자',
         },
         {
           id: 'bride-father',
@@ -609,6 +617,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신부 아버지 성함',
+          defaultValue: '김철수',
         },
         {
           id: 'bride-mother',
@@ -616,6 +625,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신부 어머니 성함',
+          defaultValue: '이영희',
         },
         {
           id: 'groom-name',
@@ -623,6 +633,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신랑 이름',
+          defaultValue: '홍길동',
         },
         {
           id: 'bride-name',
@@ -630,6 +641,7 @@ export const parentsSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '신부 이름',
+          defaultValue: '김영희',
         },
       ],
       options: {

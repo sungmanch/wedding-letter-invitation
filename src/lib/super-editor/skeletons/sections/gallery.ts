@@ -49,7 +49,7 @@ export const gallerySkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GALLERY',
+                  content: '갤러리',
                   as: 'h2',
                 },
               },
@@ -134,7 +134,7 @@ export const gallerySkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GALLERY',
+                  content: '갤러리',
                   as: 'h2',
                 },
               },
@@ -217,7 +217,7 @@ export const gallerySkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GALLERY',
+                  content: '갤러리',
                   as: 'h2',
                 },
               },
@@ -304,7 +304,7 @@ export const gallerySkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'GALLERY',
+                  content: '갤러리',
                   as: 'h2',
                 },
               },
