@@ -178,21 +178,29 @@ export function ImageListField({ field }: ImageListFieldProps) {
         {canAddMore && (
           <label
             htmlFor={`file-${field.id}`}
-            className="aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition-colors flex flex-col items-center justify-center"
+            className={`aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors ${
+              uploading
+                ? 'border-gray-200 bg-gray-50 cursor-wait'
+                : 'border-gray-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50'
+            }`}
           >
-            <svg
-              className="w-8 h-8 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
+            {uploading ? (
+              <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            ) : (
+              <svg
+                className="w-8 h-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            )}
           </label>
         )}
       </div>

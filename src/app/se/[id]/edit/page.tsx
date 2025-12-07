@@ -591,8 +591,11 @@ function EditPageContent() {
 }
 
 export default function SuperEditorEditPage() {
+  const params = useParams()
+  const invitationId = params.id as string
+
   return (
-    <SuperEditorProvider>
+    <SuperEditorProvider invitationId={invitationId}>
       <EditPageContent />
     </SuperEditorProvider>
   )
