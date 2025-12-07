@@ -1,49 +1,48 @@
 /**
- * Passport Template Preset
- * 여권 스타일 - 여권 오프닝, 스탬프 효과, 여행 지도 타임라인
+ * Monogram Crest Template Preset
+ * 커플 이니셜 모노그램 엠블럼, 네이비와 골드의 로열 프리미엄 디자인
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const passportPreset: LegacyTemplatePreset = {
-  id: 'passport',
+export const monogramPreset: PredefinedTemplatePreset = {
+  id: 'monogram',
   version: '1.0.0',
   source: 'static',
 
   // 메타 정보
-  name: 'The Passport',
-  nameKo: '패스포트',
+  name: 'Monogram Crest',
+  nameKo: '모노그램 크레스트',
   category: 'classic',
-  description: 'Travel-themed with passport opening animation, stamp effects, and journey map timeline',
-  descriptionKo: '인생이라는 긴 여행을 함께 떠나는 컨셉, 여권 애니메이션과 입국 도장 효과',
-  matchKeywords: ['여행', '여권', '패스포트', '비행기', '도장', '스탬프', '지도', '어드벤처', '장거리연애'],
-  recommendedFor: 'Couples who love travel or met through long-distance relationship',
-  recommendedForKo: '여행을 좋아하거나, 장거리 연애를 끝내고 결혼하는 커플',
+  description: 'Royal emblem design with couple\'s monogram, navy and gold palette, and premium foil accents',
+  descriptionKo: '커플 이니셜 모노그램 엠블럼, 네이비와 골드의 로열 프리미엄 디자인',
+  matchKeywords: ['모노그램', '크레스트', '엠블럼', '로얄', '네이비', '골드', '프리미엄', '이니셜', '포일', '왕실'],
+  recommendedFor: 'Couples who want a personalized royal emblem representing their union',
+  recommendedForKo: '두 사람의 결합을 상징하는 개인화된 로열 엠블럼을 원하는 커플',
 
   // 프리뷰 정보
   preview: {
     colors: {
       primary: '#1E3A5F',
       secondary: '#C9A962',
-      background: '#F5F1E8',
+      background: '#F5E6D3',
       surface: '#FFFFFF',
       text: '#1E3A5F',
-      textMuted: '#6B7B8C',
-      accent: '#B8860B',
+      textMuted: '#6B7280',
+      accent: '#C9A962',
     },
-    mood: ['여행', '모험적인', '클래식'],
+    mood: ['로열', '프리미엄', '클래식'],
   },
 
   // 인트로 설정
   intro: {
-    type: 'passport',
-    duration: 4000,
+    type: 'cinematic', // monogram uses cinematic intro type
+    duration: 3500,
     skipEnabled: true,
     skipDelay: 2000,
     settings: {
-      passportColor: 'navy',
-      stampStyle: 'vintage',
-      showMap: true,
+      emblemStyle: 'shield',
+      foilEffect: true,
     },
   },
 
@@ -54,26 +53,28 @@ export const passportPreset: LegacyTemplatePreset = {
   defaultColors: {
     primary: '#1E3A5F',
     secondary: '#C9A962',
-    background: '#F5F1E8',
+    background: '#F5E6D3',
     surface: '#FFFFFF',
     text: '#1E3A5F',
-    textMuted: '#6B7B8C',
-    accent: '#B8860B',
+    textMuted: '#6B7280',
+    accent: '#C9A962',
   },
 
   // 기본 폰트
   defaultFonts: {
     title: {
-      family: 'Courier Prime, monospace',
-      weight: 700,
+      family: 'Playfair Display, serif',
+      weight: 600,
+      letterSpacing: '0.05em',
     },
     body: {
-      family: 'Pretendard, sans-serif',
-      weight: 400,
+      family: 'Noto Sans KR, sans-serif',
+      weight: 300,
     },
     accent: {
-      family: 'Special Elite, cursive',
-      weight: 400,
+      family: 'Cormorant Garamond, serif',
+      weight: 500,
+      style: 'italic',
     },
   },
 
@@ -86,40 +87,34 @@ export const passportPreset: LegacyTemplatePreset = {
       order: 0,
       layout: 'centered',
       animation: {
-        type: 'flip',
+        type: 'scale',
         trigger: 'on-enter',
         duration: 1500,
       },
       style: {
-        padding: 'large',
+        padding: 'xlarge',
       },
       content: {
         titleSize: 'large',
         themeSpecific: {
-          passportCover: true,
-          stampAnimation: true,
+          monogramEmblem: true,
+          foilAccent: true,
         },
       },
     },
     {
-      id: 'story',
-      type: 'story',
+      id: 'greeting',
+      type: 'greeting',
       enabled: true,
       order: 1,
-      layout: 'stack',
+      layout: 'centered',
       animation: {
-        type: 'stamp',
+        type: 'fade',
         trigger: 'on-scroll',
-        stagger: 300,
+        duration: 1200,
       },
       style: {
-        padding: 'large',
-      },
-      content: {
-        themeSpecific: {
-          mapTimeline: true,
-          locationStamps: true,
-        },
+        padding: 'xlarge',
       },
     },
     {
@@ -127,21 +122,18 @@ export const passportPreset: LegacyTemplatePreset = {
       type: 'gallery',
       enabled: true,
       order: 2,
-      layout: 'carousel',
+      layout: 'frame',
       animation: {
-        type: 'slide-left',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
-        padding: 'medium',
-      },
-      content: {
-        decorationType: 'stamp',
+        padding: 'large',
       },
     },
     {
-      id: 'greeting',
-      type: 'greeting',
+      id: 'calendar',
+      type: 'calendar',
       enabled: true,
       order: 3,
       layout: 'centered',
@@ -150,52 +142,28 @@ export const passportPreset: LegacyTemplatePreset = {
         trigger: 'on-scroll',
       },
       style: {
-        padding: 'xlarge',
-      },
-    },
-    {
-      id: 'calendar',
-      type: 'calendar',
-      enabled: true,
-      order: 4,
-      layout: 'centered',
-      animation: {
-        type: 'stamp',
-        trigger: 'on-scroll',
-      },
-      style: {
         padding: 'large',
-      },
-      content: {
-        themeSpecific: {
-          boardingPassStyle: true,
-        },
       },
     },
     {
       id: 'location',
       type: 'location',
       enabled: true,
-      order: 5,
+      order: 4,
       layout: 'centered',
       animation: {
-        type: 'zoom-in',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
         padding: 'large',
-      },
-      content: {
-        themeSpecific: {
-          earthZoomIn: true,
-        },
       },
     },
     {
       id: 'account',
       type: 'account',
       enabled: true,
-      order: 6,
+      order: 5,
       layout: 'centered',
       animation: {
         type: 'fade',
@@ -209,30 +177,26 @@ export const passportPreset: LegacyTemplatePreset = {
       id: 'message',
       type: 'message',
       enabled: true,
-      order: 7,
+      order: 6,
       layout: 'centered',
       animation: {
-        type: 'stamp',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
         padding: 'large',
-      },
-      content: {
-        themeSpecific: {
-          guestbookStamps: true,
-        },
       },
     },
     {
       id: 'closing',
       type: 'closing',
       enabled: true,
-      order: 8,
+      order: 7,
       layout: 'centered',
       animation: {
         type: 'fade',
         trigger: 'on-scroll',
+        duration: 1500,
       },
       style: {
         padding: 'xlarge',
@@ -243,13 +207,12 @@ export const passportPreset: LegacyTemplatePreset = {
   // 효과 설정
   effects: {
     background: {
-      type: 'pattern',
-      value: 'passport-texture',
+      type: 'solid',
+      value: '#F5E6D3',
     },
     scrollBehavior: {
       smooth: true,
-      indicator: true,
-      indicatorStyle: 'dot',
+      indicator: false,
     },
   },
 

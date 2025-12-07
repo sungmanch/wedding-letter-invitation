@@ -4,14 +4,14 @@
  */
 
 import type { PrimitiveNode } from '../../../schema/primitives'
-import type { LegacyTemplatePreset, LegacyColorPalette, LegacyFontConfig } from '../types'
+import type { PredefinedTemplatePreset, LegacyColorPalette, LegacyFontConfig } from '../types'
 
 // ============================================
 // Builder Context
 // ============================================
 
 export interface IntroBuilderContext {
-  preset: LegacyTemplatePreset
+  preset: PredefinedTemplatePreset
   data: IntroBuilderData
 }
 

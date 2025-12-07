@@ -1,50 +1,48 @@
 /**
- * Glassmorphism Template Preset
- * 글래스모피즘 스타일 - 3D 오브젝트, 유리 질감, 오로라 그라데이션
+ * Jewel Velvet Template Preset
+ * 에메랄드와 버건디의 깊은 주얼톤, 벨벳 텍스처의 드라마틱 럭셔리
  */
 
-import type { LegacyTemplatePreset } from './types'
+import type { PredefinedTemplatePreset } from './types'
 
-export const glassmorphismPreset: LegacyTemplatePreset = {
-  id: 'glassmorphism',
+export const jewelVelvetPreset: PredefinedTemplatePreset = {
+  id: 'jewel-velvet',
   version: '1.0.0',
   source: 'static',
 
   // 메타 정보
-  name: 'Glassmorphism',
-  nameKo: '글래스모피즘',
-  category: 'modern',
-  description: 'Framer-style 3D objects with glass-like textures, aurora gradients, and fluid motion',
-  descriptionKo: '유리 같은 질감과 3D 오브젝트가 둥둥 떠다니는 몽환적인 스타일, 오로라 그라데이션',
-  matchKeywords: ['글래스', '3D', '프레이머', '모던', '테크', '오로라', '투명', '몽환적', '부드러운'],
-  recommendedFor: 'Young, tech-savvy couples who love trendy design',
-  recommendedForKo: '트렌디한 디자인과 IT/테크에 친숙한 젊은 커플',
+  name: 'Jewel Velvet',
+  nameKo: '주얼 벨벳',
+  category: 'cinematic',
+  description: 'Deep jewel tones with velvet texture, emerald and burgundy gradient, dramatic luxury',
+  descriptionKo: '에메랄드와 버건디의 깊은 주얼톤, 벨벳 텍스처의 드라마틱 럭셔리',
+  matchKeywords: ['주얼톤', '벨벳', '에메랄드', '버건디', '드라마틱', '럭셔리', '무디', '보석', '질감', '깊은'],
+  recommendedFor: 'Couples who love rich, dramatic aesthetics with deep jewel tones',
+  recommendedForKo: '깊고 드라마틱한 주얼톤의 럭셔리한 분위기를 원하는 커플',
 
   // 프리뷰 정보
   preview: {
     colors: {
-      primary: '#A855F7',
-      secondary: '#3B82F6',
-      background: '#0F0F23',
-      surface: 'rgba(255,255,255,0.1)',
-      text: '#FFFFFF',
-      textMuted: 'rgba(255,255,255,0.6)',
-      accent: '#EC4899',
-      overlay: 'rgba(255,255,255,0.05)',
+      primary: '#2F4538',
+      secondary: '#722F37',
+      background: '#0D0D0D',
+      surface: '#1A1A1A',
+      text: '#F5E6D3',
+      textMuted: '#A89F91',
+      accent: '#C9A962',
     },
-    mood: ['몽환적인', '트렌디한', '미래적인'],
+    mood: ['드라마틱', '무디', '럭셔리'],
   },
 
   // 인트로 설정
   intro: {
-    type: 'glassmorphism',
-    duration: 4000,
+    type: 'cinematic', // jewel-velvet uses cinematic intro type
+    duration: 4500,
     skipEnabled: true,
-    skipDelay: 2000,
+    skipDelay: 2500,
     settings: {
-      glassOpacity: 0.1,
-      gradientColors: ['#A855F7', '#3B82F6', '#EC4899'],
-      floatingObjects: ['heart', 'ring', 'star'],
+      gradientStyle: 'emerald-burgundy',
+      velvetTexture: true,
     },
   },
 
@@ -53,25 +51,30 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
 
   // 기본 색상
   defaultColors: {
-    primary: '#A855F7',
-    secondary: '#3B82F6',
-    background: '#0F0F23',
-    surface: 'rgba(255,255,255,0.1)',
-    text: '#FFFFFF',
-    textMuted: 'rgba(255,255,255,0.6)',
-    accent: '#EC4899',
-    overlay: 'rgba(255,255,255,0.05)',
+    primary: '#2F4538',
+    secondary: '#722F37',
+    background: '#0D0D0D',
+    surface: '#1A1A1A',
+    text: '#F5E6D3',
+    textMuted: '#A89F91',
+    accent: '#C9A962',
   },
 
   // 기본 폰트
   defaultFonts: {
     title: {
-      family: 'Outfit, sans-serif',
-      weight: 600,
+      family: 'Nanum Myeongjo, serif',
+      weight: 400,
+      letterSpacing: '0.1em',
     },
     body: {
-      family: 'Inter, sans-serif',
+      family: 'Noto Sans KR, sans-serif',
+      weight: 300,
+    },
+    accent: {
+      family: 'Cormorant Garamond, serif',
       weight: 400,
+      style: 'italic',
     },
   },
 
@@ -84,17 +87,20 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       order: 0,
       layout: 'fullscreen',
       animation: {
-        type: 'scale',
+        type: 'fade',
         trigger: 'on-enter',
-        duration: 1500,
+        duration: 2000,
       },
       style: {
-        padding: 'xlarge',
-        glassmorphism: true,
-        backgroundEffect: 'aurora',
+        padding: 'none',
+        backgroundEffect: 'gradient',
       },
       content: {
-        titleSize: 'xlarge',
+        titleSize: 'large',
+        themeSpecific: {
+          velvetGradient: true,
+          jewelOverlay: true,
+        },
       },
     },
     {
@@ -106,10 +112,10 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       animation: {
         type: 'fade',
         trigger: 'on-scroll',
+        duration: 1200,
       },
       style: {
         padding: 'xlarge',
-        glassmorphism: true,
       },
     },
     {
@@ -117,15 +123,13 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       type: 'gallery',
       enabled: true,
       order: 2,
-      layout: 'grid',
+      layout: 'masonry',
       animation: {
-        type: 'scale',
+        type: 'fade',
         trigger: 'on-scroll',
-        stagger: 100,
       },
       style: {
         padding: 'large',
-        glassmorphism: true,
       },
     },
     {
@@ -140,7 +144,6 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       },
       style: {
         padding: 'large',
-        glassmorphism: true,
       },
     },
     {
@@ -150,12 +153,11 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       order: 4,
       layout: 'centered',
       animation: {
-        type: 'slide-up',
+        type: 'fade',
         trigger: 'on-scroll',
       },
       style: {
         padding: 'large',
-        glassmorphism: true,
       },
     },
     {
@@ -170,7 +172,6 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       },
       style: {
         padding: 'large',
-        glassmorphism: true,
       },
     },
     {
@@ -185,7 +186,6 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       },
       style: {
         padding: 'large',
-        glassmorphism: true,
       },
     },
     {
@@ -197,6 +197,7 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
       animation: {
         type: 'fade',
         trigger: 'on-scroll',
+        duration: 1500,
       },
       style: {
         padding: 'xlarge',
@@ -207,19 +208,12 @@ export const glassmorphismPreset: LegacyTemplatePreset = {
   // 효과 설정
   effects: {
     background: {
-      type: 'aurora',
-      value: 'linear-gradient(135deg, #A855F7, #3B82F6, #EC4899)',
-      animation: 'aurora-flow',
-    },
-    particles: {
-      enabled: true,
-      type: 'sparkle',
-      density: 'low',
+      type: 'gradient',
+      value: 'linear-gradient(135deg, #2F4538 0%, #0D0D0D 50%, #722F37 100%)',
     },
     scrollBehavior: {
       smooth: true,
-      indicator: true,
-      indicatorStyle: 'line',
+      indicator: false,
     },
   },
 

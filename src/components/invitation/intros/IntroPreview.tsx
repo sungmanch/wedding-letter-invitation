@@ -72,14 +72,6 @@ export function IntroPreview({
         userImageUrl={userImageUrl}
       />
 
-    case 'chat':
-      return <ChatPreview
-        groomName={groomName}
-        brideName={brideName}
-        dateFormatted={dateFormatted}
-        isCompact={isCompact}
-      />
-
     case 'gothic-romance':
       return <GothicRomancePreview
         colors={colors}

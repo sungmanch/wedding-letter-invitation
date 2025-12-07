@@ -19,8 +19,23 @@ const WKW_COLORS = {
 export const buildCinematicIntro: IntroBuilder = (ctx: IntroBuilderContext): IntroBuilderResult => {
   const { preset, data } = ctx
   const { groomName, brideName, weddingDate, venueName, mainImage } = data
-  const { formatted: dateFormatted, weekday } = formatDate(weddingDate)
   const fonts = preset.defaultFonts
+
+  // 데이터 바인딩 표현식인지 확인 (런타임에 치환될 경우)
+  const isBinding = (val: string) => val.startsWith('{{')
+
+  // 날짜 포맷: 바인딩 표현식이면 그대로 사용, 아니면 포맷팅
+  let dateFormatted: string
+  let weekday: string
+  if (isBinding(weddingDate)) {
+    // 바인딩 표현식 사용 시 런타임에 치환되므로 표현식 그대로 사용
+    dateFormatted = '{{wedding.dateDisplay}}'
+    weekday = '{{wedding.weekday}}'
+  } else {
+    const formatted = formatDate(weddingDate)
+    dateFormatted = formatted.formatted
+    weekday = formatted.weekday
+  }
 
   // Root: fullscreen with black background
   const root: PrimitiveNode = {
@@ -33,7 +48,8 @@ export const buildCinematicIntro: IntroBuilder = (ctx: IntroBuilderContext): Int
     },
     children: [
       // 1. Background Image (with film flicker class)
-      ...(mainImage ? [createBackgroundImage(mainImage)] : []),
+      // 항상 이미지 컨테이너 생성 (바인딩 표현식은 런타임에 치환됨)
+      createBackgroundImage(mainImage || ''),
 
       // 2. Red/Teal Gradient Overlay (Wong Kar-wai signature)
       createColorOverlay(),

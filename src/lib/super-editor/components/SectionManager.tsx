@@ -77,9 +77,9 @@ export function SectionManager({
 
   return (
     <div className={`section-manager ${className}`}>
-      <div className="px-4 py-3 border-b border-gray-200">
-        <h3 className="font-medium text-gray-900">섹션 관리</h3>
-        <p className="text-sm text-gray-500 mt-0.5">
+      <div className="px-4 py-3 border-b border-white/10">
+        <h3 className="font-medium text-[#F5E6D3]">섹션 관리</h3>
+        <p className="text-sm text-[#F5E6D3]/50 mt-0.5">
           섹션 순서를 변경하거나 표시/숨김을 설정하세요
         </p>
       </div>
@@ -87,20 +87,20 @@ export function SectionManager({
       <div className="p-4 space-y-2">
         {/* 고정 섹션: intro */}
         {hasIntro && (
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 flex items-center justify-center text-gray-400">
+            <div className="w-6 h-6 flex items-center justify-center text-[#F5E6D3]/40">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-700">{SECTION_META.intro.label}</p>
-              <p className="text-xs text-gray-500">항상 첫 번째</p>
+              <p className="font-medium text-[#F5E6D3]">{SECTION_META.intro.label}</p>
+              <p className="text-xs text-[#F5E6D3]/50">항상 첫 번째</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 px-2 py-1 bg-gray-100 rounded">고정</span>
+            <span className="text-xs text-[#F5E6D3]/40 px-2 py-1 bg-white/5 rounded">고정</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -108,7 +108,7 @@ export function SectionManager({
                 onChange={() => toggleSection('intro')}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500" />
+              <div className="w-9 h-5 bg-white/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#C9A962]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A962]" />
             </label>
           </div>
         </div>
@@ -124,8 +124,8 @@ export function SectionManager({
               key={sectionType}
               className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                 isEnabled
-                  ? 'bg-white border-gray-200'
-                  : 'bg-gray-50 border-gray-100 opacity-60'
+                  ? 'bg-white/5 border-white/10'
+                  : 'bg-white/[0.02] border-white/5 opacity-60'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -135,7 +135,7 @@ export function SectionManager({
                     type="button"
                     onClick={() => moveSection(index, index - 1)}
                     disabled={index === 0}
-                    className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-0.5 text-[#F5E6D3]/40 hover:text-[#F5E6D3] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -145,7 +145,7 @@ export function SectionManager({
                     type="button"
                     onClick={() => moveSection(index, index + 1)}
                     disabled={index === displayOrder.length - 1}
-                    className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-0.5 text-[#F5E6D3]/40 hover:text-[#F5E6D3] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -154,8 +154,8 @@ export function SectionManager({
                 </div>
 
                 <div>
-                  <p className="font-medium text-gray-700">{meta.label}</p>
-                  <p className="text-xs text-gray-500">{meta.description}</p>
+                  <p className="font-medium text-[#F5E6D3]">{meta.label}</p>
+                  <p className="text-xs text-[#F5E6D3]/50">{meta.description}</p>
                 </div>
               </div>
 
@@ -167,7 +167,7 @@ export function SectionManager({
                   onChange={() => toggleSection(sectionType)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500" />
+                <div className="w-9 h-5 bg-white/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#C9A962]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A962]" />
               </label>
             </div>
           )
@@ -175,24 +175,24 @@ export function SectionManager({
 
         {/* 플로팅 섹션: music */}
         {hasMusic && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <p className="text-xs text-gray-500 mb-2">플로팅 섹션</p>
+        <div className="mt-4 pt-4 border-t border-white/10">
+          <p className="text-xs text-[#F5E6D3]/50 mb-2">플로팅 섹션</p>
           <div
             className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
               sectionEnabled.music
-                ? 'bg-white border-gray-200'
-                : 'bg-gray-50 border-gray-100 opacity-60'
+                ? 'bg-white/5 border-white/10'
+                : 'bg-white/[0.02] border-white/5 opacity-60'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 flex items-center justify-center text-gray-400">
+              <div className="w-6 h-6 flex items-center justify-center text-[#F5E6D3]/40">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-700">{SECTION_META.music.label}</p>
-                <p className="text-xs text-gray-500">화면 우측 하단 버튼</p>
+                <p className="font-medium text-[#F5E6D3]">{SECTION_META.music.label}</p>
+                <p className="text-xs text-[#F5E6D3]/50">화면 우측 하단 버튼</p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -202,7 +202,7 @@ export function SectionManager({
                 onChange={() => toggleSection('music')}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500" />
+              <div className="w-9 h-5 bg-white/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#C9A962]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A962]" />
             </label>
           </div>
         </div>
@@ -210,17 +210,17 @@ export function SectionManager({
 
         {/* Layout에 섹션이 없는 경우 안내 */}
         {availableSections && availableSections.size === 0 && (
-          <div className="p-4 text-center text-gray-500">
+          <div className="p-4 text-center text-[#F5E6D3]/50">
             <p className="text-sm">레이아웃에 정의된 섹션이 없습니다</p>
           </div>
         )}
 
         {/* 개발 모드: 추가 가능한 섹션 */}
         {process.env.NODE_ENV === 'development' && missingSections.length > 0 && onAddSection && (
-          <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
+          <div className="mt-4 pt-4 border-t border-dashed border-white/20">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded">DEV</span>
-              <p className="text-xs text-gray-500">추가 가능한 섹션</p>
+              <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">DEV</span>
+              <p className="text-xs text-[#F5E6D3]/50">추가 가능한 섹션</p>
             </div>
             <div className="space-y-2">
               {missingSections.map((sectionType) => {
@@ -228,21 +228,21 @@ export function SectionManager({
                 return (
                   <div
                     key={sectionType}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-blue-300 hover:bg-blue-50/50 transition-colors"
+                    className="flex items-center justify-between p-3 bg-white/[0.02] rounded-lg border border-dashed border-white/20 hover:border-[#C9A962]/50 hover:bg-white/5 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 flex items-center justify-center text-gray-400">
+                      <div className="w-6 h-6 flex items-center justify-center text-[#F5E6D3]/40">
                         <PlusCircleIcon />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-600">{meta.label}</p>
-                        <p className="text-xs text-gray-400">{meta.description}</p>
+                        <p className="font-medium text-[#F5E6D3]/60">{meta.label}</p>
+                        <p className="text-xs text-[#F5E6D3]/40">{meta.description}</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => onAddSection(sectionType)}
-                      className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium text-[#C9A962] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 rounded-lg transition-colors"
                     >
                       추가
                     </button>

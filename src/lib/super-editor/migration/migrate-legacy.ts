@@ -16,7 +16,7 @@ import {
   superEditorInvitations,
 } from '@/lib/db/super-editor-schema'
 import { eq } from 'drizzle-orm'
-import { legacyPresets } from '../presets/legacy'
+import { predefinedPresets } from '../presets/legacy'
 import { convertLegacyToIntroResult } from '../actions/legacy-converter'
 import { completeTemplateWithDefaults } from '../services/generation-service'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
@@ -196,12 +196,12 @@ export async function migrateInvitationToSE(
       : 'cinematic'
 
     // 5. Legacy 프리셋 가져오기
-    const preset = legacyPresets[templateId]
+    const preset = predefinedPresets[templateId]
     if (!preset) {
       // 프리셋이 없으면 기본 cinematic 사용
       console.warn(`Preset not found for ${templateId}, using cinematic`)
     }
-    const activePreset = preset || legacyPresets['cinematic']
+    const activePreset = preset || predefinedPresets['cinematic']
 
     // 6. IntroGenerationResult 생성
     const introResult = convertLegacyToIntroResult(activePreset, {

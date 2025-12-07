@@ -9,9 +9,9 @@ import { db } from '@/lib/db'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { legacyPresets } from '../presets/legacy'
-import { convertLegacyToIntroResult } from './legacy-converter'
-import { completeTemplateWithDefaults } from '../services/generation-service'
+import { predefinedPresets } from '../presets/legacy'
+import { convertPresetDirect } from '../presets/legacy/converter'
+import { getTemplateDefaultImage } from '../presets/legacy/template-preview-data'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
 
 // ============================================
@@ -63,10 +63,9 @@ function getDefaultWeddingDate(): string {
 /**
  * 레거시 템플릿에서 Super Editor 청첩장 생성
  *
- * 1. legacyPresets에서 템플릿 조회
- * 2. IntroGenerationResult로 변환
- * 3. 기본 섹션들로 전체 템플릿 완성
- * 4. DB에 저장 (superEditorTemplates + superEditorInvitations)
+ * 1. predefinedPresets에서 템플릿 조회
+ * 2. convertPresetDirect로 전체 템플릿 변환 (모든 섹션 포함)
+ * 3. DB에 저장 (superEditorTemplates + superEditorInvitations)
  */
 export async function createFromLegacyTemplateAction(
   input: CreateFromLegacyInput
@@ -82,34 +81,31 @@ export async function createFromLegacyTemplateAction(
 
     const { legacyTemplateId, previewData = {} } = input
 
-    // 2. 레거시 프리셋 조회
-    const legacyPreset = legacyPresets[legacyTemplateId]
-    if (!legacyPreset) {
+    // 2. 프리셋 조회
+    const preset = predefinedPresets[legacyTemplateId]
+    if (!preset) {
       return {
         success: false,
         error: `템플릿 '${legacyTemplateId}'을(를) 찾을 수 없습니다`
       }
     }
 
-    // 3. IntroGenerationResult로 변환
-    const introResult = convertLegacyToIntroResult(legacyPreset)
+    // 3. 전체 템플릿 변환 (모든 섹션에 템플릿 스타일 적용)
+    const { layout, style } = convertPresetDirect(preset)
 
-    // 4. 기본 섹션들로 전체 템플릿 완성
-    const generationResult = completeTemplateWithDefaults(introResult)
-
-    // 5. 프리뷰 데이터 병합
+    // 4. 프리뷰 데이터 병합
     const mergedPreviewData = {
       ...DEFAULT_PREVIEW_DATA,
       ...previewData,
     }
 
-    // 6. Template 생성 (DB 저장)
+    // 5. Template 생성 (DB 저장)
     const [template] = await db.insert(superEditorTemplates).values({
-      name: `${legacyPreset.nameKo}`,
-      description: legacyPreset.descriptionKo,
+      name: `${preset.nameKo}`,
+      description: preset.descriptionKo,
       category: 'wedding',
-      layoutSchema: generationResult.layout,
-      styleSchema: generationResult.style,
+      layoutSchema: layout,
+      styleSchema: style,
       status: 'draft',
       generationContext: {
         prompt: legacyTemplateId,
@@ -118,7 +114,11 @@ export async function createFromLegacyTemplateAction(
       },
     }).returning()
 
-    // 7. UserData 구성
+    // 6. UserData 구성
+    // 템플릿별 예시 이미지를 fallback으로 사용
+    const defaultImage = getTemplateDefaultImage(legacyTemplateId)
+    const mainImage = mergedPreviewData.mainImage || defaultImage || ''
+
     const weddingData: WeddingInvitationData = {
       couple: {
         groom: { name: mergedPreviewData.groomName },
@@ -135,8 +135,8 @@ export async function createFromLegacyTemplateAction(
         lng: 0,
       },
       photos: {
-        main: mergedPreviewData.mainImage || '',
-        gallery: mergedPreviewData.mainImage ? [mergedPreviewData.mainImage] : [],
+        main: mainImage,
+        gallery: mainImage ? [mainImage] : [],
       },
       greeting: {
         content: '',
@@ -157,7 +157,7 @@ export async function createFromLegacyTemplateAction(
       data: weddingData as unknown as Record<string, unknown>,
     }
 
-    // 8. Invitation 생성
+    // 7. Invitation 생성
     const [invitation] = await db.insert(superEditorInvitations).values({
       templateId: template.id,
       userId: user.id,
