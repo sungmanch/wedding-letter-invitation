@@ -358,6 +358,20 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       '서로를 향한 마음을 모아\n평생을 함께하고자 합니다.\n\n귀한 걸음 하시어\n저희의 새 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.',
   },
 
+  // Parents - Deceased Icon
+  'parents.deceasedIcon': {
+    type: 'select',
+    label: '고인 표시',
+    required: false,
+    defaultValue: '故',
+    options: [
+      { value: '고', label: '고 (한글)' },
+      { value: '故', label: '故 (한문)' },
+      { value: '✿', label: '✿ (백합 꽃)' },
+    ],
+    helpText: '고인을 나타내는 표시 방식을 선택하세요',
+  },
+
   // Parents - Groom
   'parents.groom.father.name': {
     type: 'text',

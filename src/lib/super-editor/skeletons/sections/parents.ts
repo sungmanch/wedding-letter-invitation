@@ -483,9 +483,9 @@ export const parentsSkeleton: SectionSkeleton = {
                         id: 'groom-father-deceased',
                         type: 'conditional',
                         props: {
-                          condition: 'parents.groom.father.deceased',
+                          condition: 'parents.groom.father.status',
                           operator: 'equals',
-                          value: true,
+                          value: 'deceased',
                         },
                         children: [
                           {
@@ -537,9 +537,9 @@ export const parentsSkeleton: SectionSkeleton = {
                         id: 'groom-mother-deceased',
                         type: 'conditional',
                         props: {
-                          condition: 'parents.groom.mother.deceased',
+                          condition: 'parents.groom.mother.status',
                           operator: 'equals',
-                          value: true,
+                          value: 'deceased',
                         },
                         children: [
                           {
@@ -673,9 +673,9 @@ export const parentsSkeleton: SectionSkeleton = {
                         id: 'bride-father-deceased',
                         type: 'conditional',
                         props: {
-                          condition: 'parents.bride.father.deceased',
+                          condition: 'parents.bride.father.status',
                           operator: 'equals',
-                          value: true,
+                          value: 'deceased',
                         },
                         children: [
                           {
@@ -727,9 +727,9 @@ export const parentsSkeleton: SectionSkeleton = {
                         id: 'bride-mother-deceased',
                         type: 'conditional',
                         props: {
-                          condition: 'parents.bride.mother.deceased',
+                          condition: 'parents.bride.mother.status',
                           operator: 'equals',
-                          value: true,
+                          value: 'deceased',
                         },
                         children: [
                           {
