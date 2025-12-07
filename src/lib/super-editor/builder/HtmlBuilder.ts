@@ -13,6 +13,7 @@ import { getScrollPreset, type ScrollKeyframe } from '../animations/scroll-prese
 import { getBgmById } from '../audio/bgm-presets'
 import { resolveTokens } from '../tokens/resolver'
 import { generateCssVariables } from '../tokens/css-generator'
+import { extractFontsFromStyle, buildFontLinkTags } from '../fonts/loader'
 
 // ============================================
 // Build Context
@@ -1049,6 +1050,14 @@ ${scrollMotionJs}
 ${bgmJs}
   `.trim()
 
+  // 사용된 폰트 추출 및 로드 태그 생성
+  const usedFonts = extractFontsFromStyle(style)
+  // Pretendard를 기본으로 항상 포함
+  if (!usedFonts.some(f => f.includes('Pretendard'))) {
+    usedFonts.push('Pretendard')
+  }
+  const fontLinks = buildFontLinkTags(usedFonts)
+
   // 최종 HTML (모바일 최적화)
   const html = `
 <!DOCTYPE html>
@@ -1059,8 +1068,7 @@ ${bgmJs}
   <meta name="format-detection" content="telephone=no">
   <meta name="theme-color" content="${style.theme?.colors?.background?.default || '#FFFBFC'}">
   <title>${layout.meta?.name || '청첩장'}</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+  ${fontLinks}
   <style>${baseCss}</style>
 </head>
 <body>

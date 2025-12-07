@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import type { StyleSchema } from '../schema/style'
 import type { LegacyIntroType } from '../presets/legacy/types'
 import { INTRO_STYLE_PRESETS, applyIntroStyleToSchema, deriveSurfaceColor } from '../presets/intro-style-presets'
+import { getFontOptionsGrouped, buildFontFamily, type FontPreset } from '../fonts'
+import { loadFontDynamically } from '../fonts/loader'
 
 interface StyleEditorProps {
   style: StyleSchema
@@ -36,18 +38,8 @@ const BG_COLOR_PRESETS = [
   '#0D0D0D',  // 블랙
 ]
 
-// 글꼴 옵션
-const FONT_OPTIONS = [
-  { value: 'Pretendard', label: 'Pretendard (기본)' },
-  { value: 'Noto Sans KR', label: '노토 산스' },
-  { value: 'Nanum Myeongjo', label: '나눔명조' },
-  { value: 'Nanum Gothic', label: '나눔고딕' },
-  { value: 'Gowun Dodum', label: '고운돋움' },
-  { value: 'Gowun Batang', label: '고운바탕' },
-  { value: 'Noto Serif KR', label: '노토 세리프' },
-  { value: 'Cormorant Garamond', label: 'Cormorant Garamond' },
-  { value: 'Playfair Display', label: 'Playfair Display' },
-]
+// 폰트 옵션 (프리셋에서 가져옴)
+const FONT_OPTIONS_GROUPED = getFontOptionsGrouped()
 
 // 굵기 옵션
 const TITLE_WEIGHT_OPTIONS = [
@@ -429,30 +421,47 @@ export function StyleEditor({
 // Sub Components
 // ============================================
 
-// 글꼴 선택기
+// 글꼴 선택기 (그룹화된 목록)
 function FontSelector({
   value,
   onChange,
+  usage,
 }: {
   value: string
   onChange: (value: string) => void
+  usage?: 'title' | 'body' | 'accent'
 }) {
+  // 현재 값에서 폰트 이름 추출 (fallback 제거)
+  const currentFont = value.split(',')[0].replace(/["']/g, '').trim()
+
+  const handleChange = async (fontFamily: string) => {
+    // 폰트 동적 로드
+    await loadFontDynamically(fontFamily)
+    onChange(fontFamily)
+  }
+
   return (
     <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
+      value={currentFont}
+      onChange={(e) => handleChange(e.target.value)}
       className="w-full px-3 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-[#F5E6D3] focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50 focus:border-transparent"
-      style={{ fontFamily: value }}
+      style={{ fontFamily: currentFont }}
     >
-      {FONT_OPTIONS.map((font) => (
-        <option
-          key={font.value}
-          value={font.value}
-          className="bg-[#1A1A1A] text-[#F5E6D3]"
-          style={{ fontFamily: font.value }}
-        >
-          {font.label}
-        </option>
+      {FONT_OPTIONS_GROUPED.map((group) => (
+        <optgroup key={group.category} label={group.label} className="bg-[#1A1A1A]">
+          {group.fonts
+            .filter(font => !usage || font.recommended?.includes(usage))
+            .map((font) => (
+              <option
+                key={font.id}
+                value={font.family}
+                className="bg-[#1A1A1A] text-[#F5E6D3]"
+                style={{ fontFamily: font.family }}
+              >
+                {font.label}
+              </option>
+            ))}
+        </optgroup>
       ))}
     </select>
   )
