@@ -212,8 +212,6 @@ function InvitationContent({
       {/* Guestbook FAB (플로팅) */}
       {guestbookFab && (
         <GuestbookFab
-          showAfterScroll={200}
-          mode={mode}
           onClick={() => {
             // TODO: 방명록 모달 열기
             console.log('Open guestbook modal')
