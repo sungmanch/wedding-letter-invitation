@@ -2,14 +2,14 @@
 
 /**
  * Super Editor - Create Page
- * 탭으로 템플릿 선택 또는 AI 채팅으로 인트로 생성
+ * AI 채팅(Letty)으로 인트로 생성
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Send, Loader2, Sparkles, RefreshCw, Grid } from 'lucide-react'
+import { ArrowLeft, Loader2, Sparkles, RefreshCw } from 'lucide-react'
 import { InvitationPreview } from '@/lib/super-editor/components'
-import { introResultToLayout, extractIntroLayout } from '@/lib/super-editor/adapters'
+import { introResultToLayout } from '@/lib/super-editor/adapters'
 import {
   generateIntroOnlyAction,
   completeTemplateAction,
@@ -23,266 +23,80 @@ import {
   type PreviewFormData,
 } from './PreviewDataForm'
 
-// 레거시 템플릿
-import { predefinedPresets, categoryLabels } from '@/lib/super-editor/presets/legacy'
-import {
-  buildLegacyIntro,
-  getLegacyPresetPreviews,
-  convertLegacyToIntroResult,
-  type LegacyIntroResult,
-} from '@/lib/super-editor/presets/legacy/intro-builders'
-import type { IntroBuilderData } from '@/lib/super-editor/presets/legacy/intro-builders'
-
-// 새 super-editor 템플릿
-import { getAllTemplates, getTemplate, type TemplateId } from '@/lib/super-editor/templates'
-import type { Screen } from '@/lib/super-editor/schema/layout'
-import type { StyleSchema } from '@/lib/super-editor/schema/style'
-
-type CreateMode = 'template' | 'chat'
-
-const SAMPLE_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
-
-// ============================================
-// Types
-// ============================================
-
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
-
-// ============================================
-// Constants
-// ============================================
-
-const QUICK_PROMPTS = [
-  { label: '모던 미니멀', prompt: '모던하고 미니멀한 스타일로 만들어주세요' },
-  { label: '로맨틱 플라워', prompt: '꽃과 함께 로맨틱한 분위기로 만들어주세요' },
-  { label: '우아한 클래식', prompt: '우아하고 클래식한 스타일이 좋아요' },
-  { label: '따뜻한 감성', prompt: '따뜻하고 포근한 느낌으로 부탁해요' },
-]
-
-const INITIAL_MESSAGE: ChatMessage = {
-  id: 'welcome',
-  role: 'assistant',
-  content:
-    '안녕하세요! 청첩장 디자인을 도와드릴게요.\n\n어떤 분위기의 청첩장을 원하시나요? 색상, 스타일, 느낌 등 자유롭게 말씀해주세요.',
-  timestamp: new Date(),
-}
-
-// ============================================
-// Components
-// ============================================
-
-function MessageBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.role === 'user'
-
-  return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-          isUser
-            ? 'bg-[#C9A962] text-[#0A0806] rounded-br-sm'
-            : 'bg-white/10 text-[#F5E6D3] rounded-bl-sm'
-        }`}
-      >
-        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-      </div>
-    </div>
-  )
-}
-
-function LoadingDots() {
-  return (
-    <div className="flex justify-start">
-      <div className="bg-white/10 rounded-2xl rounded-bl-sm px-4 py-3">
-        <div className="flex gap-1.5">
-          <span
-            className="w-2 h-2 bg-[#F5E6D3]/50 rounded-full animate-bounce"
-            style={{ animationDelay: '0ms' }}
-          />
-          <span
-            className="w-2 h-2 bg-[#F5E6D3]/50 rounded-full animate-bounce"
-            style={{ animationDelay: '150ms' }}
-          />
-          <span
-            className="w-2 h-2 bg-[#F5E6D3]/50 rounded-full animate-bounce"
-            style={{ animationDelay: '300ms' }}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
+// Letty 대화 컴포넌트
+import { LettyChat } from './components/LettyChat'
+import type { CollectedData } from './hooks/useLettyConversation'
 
 // PhoneFrame 크기 설정
 const PHONE_FRAME_WIDTH = 320
 const PHONE_FRAME_HEIGHT = 580
 
-// ============================================
-// Template Gallery
-// ============================================
-
-interface TemplateGalleryProps {
-  onSelect: (presetId: string, isNewTemplate?: boolean) => void
-  selectedId: string | null
-  selectedType: 'legacy' | 'new' | null
-}
-
-// 새 템플릿 카테고리 라벨
-const newTemplateCategoryLabels: Record<string, string> = {
-  letter: '레터 스타일',
-  chat: '채팅 스타일',
-}
-
-function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGalleryProps) {
-  // 새 super-editor 템플릿
-  const newTemplates = useMemo(() => getAllTemplates(), [])
-
-  // 레거시 템플릿
-  const previews = useMemo(() => getLegacyPresetPreviews(predefinedPresets), [])
-
-  const grouped = useMemo(() => {
-    const groups: Record<string, typeof previews> = {}
-    previews.forEach((p) => {
-      if (!groups[p.category]) groups[p.category] = []
-      groups[p.category].push(p)
-    })
-    return groups
-  }, [previews])
-
-  // 새 템플릿 카테고리별 그룹화
-  const newGrouped = useMemo(() => {
-    const groups: Record<string, typeof newTemplates> = {}
-    newTemplates.forEach((t) => {
-      if (!groups[t.category]) groups[t.category] = []
-      groups[t.category].push(t)
-    })
-    return groups
-  }, [newTemplates])
-
-  return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-6">
-      {/* 새 템플릿 섹션 */}
-      <div className="mb-2">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="px-2 py-0.5 text-xs font-medium bg-[#C9A962]/20 text-[#C9A962] rounded-full">NEW</span>
-          <span className="text-xs text-[#F5E6D3]/50">super-editor 템플릿</span>
-        </div>
-        {Object.entries(newGrouped).map(([category, templates]) => (
-          <div key={`new-${category}`} className="mb-4">
-            <h3 className="text-sm font-semibold text-[#F5E6D3]/80 mb-3">
-              {newTemplateCategoryLabels[category] || category}
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {templates.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => onSelect(t.id, true)}
-                  className={`p-3 rounded-xl border-2 text-left transition-all ${
-                    selectedId === t.id && selectedType === 'new'
-                      ? 'border-[#C9A962] bg-[#C9A962]/10'
-                      : 'border-white/10 bg-white/5 hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex gap-1 mb-2">
-                    {/* 색상 미리보기 (StyleSchema에서 추출) */}
-                    <div
-                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: t.style.theme.colors.primary[500] }}
-                    />
-                    <div
-                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: t.style.theme.colors.neutral[50] }}
-                    />
-                    <div
-                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: t.style.theme.colors.background.default }}
-                    />
-                  </div>
-                  <p className="font-medium text-[#F5E6D3] text-sm">{t.name}</p>
-                  <p className="text-xs text-[#F5E6D3]/60 mt-0.5 line-clamp-1">{t.category}</p>
-                  <div className="flex gap-1 mt-2">
-                    {(t.style.meta.mood || []).slice(0, 2).map((m) => (
-                      <span
-                        key={m}
-                        className="px-1.5 py-0.5 text-[10px] bg-white/10 text-[#F5E6D3]/70 rounded"
-                      >
-                        {m}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 구분선 */}
-      <div className="border-t border-white/10 pt-4">
-        <span className="text-xs text-[#F5E6D3]/40">레거시 템플릿</span>
-      </div>
-
-      {/* 레거시 템플릿 섹션 */}
-      {Object.entries(grouped).map(([category, templates]) => (
-        <div key={category}>
-          <h3 className="text-sm font-semibold text-[#F5E6D3]/80 mb-3">
-            {categoryLabels[category as keyof typeof categoryLabels]?.ko || category}
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {templates.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => onSelect(t.id, false)}
-                className={`p-3 rounded-xl border-2 text-left transition-all ${
-                  selectedId === t.id && selectedType === 'legacy'
-                    ? 'border-[#C9A962] bg-[#C9A962]/10'
-                    : 'border-white/10 bg-white/5 hover:border-white/20'
-                }`}
-              >
-                <div className="flex gap-1 mb-2">
-                  {[t.colors.primary, t.colors.accent, t.colors.background].map((c, i) => (
-                    <div
-                      key={i}
-                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </div>
-                <p className="font-medium text-[#F5E6D3] text-sm">{t.nameKo}</p>
-                <p className="text-xs text-[#F5E6D3]/60 mt-0.5 line-clamp-1">{t.descriptionKo}</p>
-                <div className="flex gap-1 mt-2">
-                  {t.mood.slice(0, 2).map((m) => (
-                    <span
-                      key={m}
-                      className="px-1.5 py-0.5 text-[10px] bg-white/10 text-[#F5E6D3]/70 rounded"
-                    >
-                      {m}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function EmptyPreview() {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-[#F5E6D3]/50 px-8">
+    <div className="flex flex-col items-center justify-center text-[#F5E6D3]/50 px-8 py-16 border border-[#C9A962]/30 rounded-xl bg-[#1A1A1A]/50">
       <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mb-4">
         <Sparkles className="w-10 h-10 text-[#F5E6D3]/30" />
       </div>
-      <p className="text-center text-sm font-medium">템플릿을 선택하거나</p>
-      <p className="text-center text-sm font-medium">AI에게 스타일을 요청해보세요</p>
+      <p className="text-center text-sm font-medium">Letty와 대화하며</p>
+      <p className="text-center text-sm font-medium">청첩장을 디자인해보세요</p>
     </div>
   )
+}
+
+// ============================================
+// 색상 프리셋 라벨 (프롬프트용)
+// ============================================
+
+const COLOR_LABELS: Record<string, string> = {
+  'white-gold': '화이트 & 골드',
+  'blush-pink': '블러쉬 핑크',
+  'deep-navy': '딥 네이비',
+  'natural-green': '내추럴 그린',
+  'terracotta': '테라코타',
+}
+
+const MOOD_LABELS: Record<string, string> = {
+  romantic: '로맨틱',
+  elegant: '우아한',
+  minimal: '미니멀',
+  modern: '모던',
+  warm: '따뜻한',
+  luxury: '럭셔리',
+}
+
+// CollectedData → 프롬프트 문자열 변환
+function buildPromptFromCollectedData(data: CollectedData): string {
+  const parts: string[] = []
+
+  // 분위기
+  if (data.moods.length > 0) {
+    const moodLabels = data.moods
+      .map(m => MOOD_LABELS[m] || m)
+      .filter(Boolean)
+    parts.push(`${moodLabels.join(', ')} 분위기`)
+  }
+
+  // 색상
+  if (data.color) {
+    const colorLabel = COLOR_LABELS[data.color]
+    if (colorLabel) {
+      parts.push(`${colorLabel} 색상`)
+    }
+  } else if (data.customColor) {
+    parts.push(`${data.customColor} 색상`)
+  }
+
+  // 키워드
+  if (data.keyword) {
+    parts.push(`"${data.keyword}" 느낌`)
+  }
+
+  // 기본값 (모두 Letty에게 맡긴 경우)
+  if (parts.length === 0) {
+    return '우아하고 세련된 스타일로 만들어주세요'
+  }
+
+  return `${parts.join(', ')}의 청첩장을 만들어주세요`
 }
 
 // ============================================
@@ -292,22 +106,9 @@ function EmptyPreview() {
 export default function SuperEditorCreatePage() {
   const router = useRouter()
 
-  // Mode: template or chat
-  const [mode, setMode] = useState<CreateMode>('chat')
-
-  // Template selection
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
-  const [selectedTemplateType, setSelectedTemplateType] = useState<'legacy' | 'new' | null>(null)
-  const [legacyResult, setLegacyResult] = useState<LegacyIntroResult | null>(null)
-
-  // 새 템플릿용 상태 (Screen 타입 직접 사용)
-  const [newTemplateScreen, setNewTemplateScreen] = useState<Screen | null>(null)
-  const [newTemplateStyle, setNewTemplateStyle] = useState<StyleSchema | null>(null)
-
-  // Chat state
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE])
-  const [input, setInput] = useState('')
+  // Chat/Loading state
   const [isLoading, setIsLoading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   // Stage 1 결과: Style + Intro (AI 생성용)
   const [introResult, setIntroResult] = useState<IntroGenerationResult | null>(null)
@@ -316,225 +117,49 @@ export default function SuperEditorCreatePage() {
   const [previewFormData, setPreviewFormData] = useState<PreviewFormData>(DEFAULT_PREVIEW_FORM_DATA)
   const previewUserData = useMemo(() => formDataToUserData(previewFormData), [previewFormData])
 
-  // Refs
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  // AI 생성 핸들러 (LettyChat에서 호출)
+  const handleGenerate = useCallback(async (data: CollectedData) => {
+    setIsGenerating(true)
 
-  // previewFormData를 IntroBuilderData로 변환
-  const legacyBuilderData = useMemo<IntroBuilderData>(
-    () => ({
-      groomName: previewFormData.groomName || '신랑',
-      brideName: previewFormData.brideName || '신부',
-      weddingDate: previewFormData.weddingDate || '2025년 3월 15일',
-      venueName: '웨딩홀',
-      mainImage: previewFormData.mainImage || SAMPLE_IMAGE,
-    }),
-    [previewFormData]
-  )
+    try {
+      const prompt = buildPromptFromCollectedData(data)
 
-  // 템플릿 선택 핸들러
-  const handleTemplateSelect = useCallback(
-    (presetId: string, isNewTemplate: boolean = false) => {
-      setSelectedTemplateId(presetId)
-      setSelectedTemplateType(isNewTemplate ? 'new' : 'legacy')
+      const response = await generateIntroOnlyAction({
+        prompt,
+        mood: data.moods.length > 0 ? data.moods : undefined,
+        colorPreset: data.color || undefined,
+        customColor: data.customColor || undefined,
+        keyword: data.keyword || undefined,
+      })
 
-      if (isNewTemplate) {
-        // 새 super-editor 템플릿
-        const template = getTemplate(presetId as TemplateId)
-        if (template) {
-          // LayoutSchema의 첫 번째 screen을 intro로 사용 (Screen 타입 그대로 사용)
-          const screen = template.layout.screens[0]
-          if (screen) {
-            setNewTemplateScreen(screen)
-            setNewTemplateStyle(template.style)
-            setIntroResult(null)
-            setLegacyResult(null)
-          }
-        }
-      } else {
-        // 레거시 템플릿
-        setIntroResult(null)
-        setNewTemplateScreen(null)
-        setNewTemplateStyle(null)
-        const preset = predefinedPresets[presetId]
-        if (preset) {
-          const result = buildLegacyIntro(preset, legacyBuilderData)
-          setLegacyResult(result)
-        }
+      if (!response.success || !response.data) {
+        throw new Error(response.error ?? 'AI 생성에 실패했습니다')
       }
-    },
-    [legacyBuilderData]
-  )
 
-  // 레거시 템플릿 선택 시 폼 데이터 변경에 따라 결과 업데이트
-  useEffect(() => {
-    if (selectedTemplateId && selectedTemplateType === 'legacy') {
-      const preset = predefinedPresets[selectedTemplateId]
-      if (preset) {
-        const result = buildLegacyIntro(preset, legacyBuilderData)
-        setLegacyResult(result)
-      }
+      setIntroResult(response.data)
+    } catch (err) {
+      console.error('Generation failed:', err)
+      throw err // LettyChat에서 에러 처리
+    } finally {
+      setIsGenerating(false)
     }
-  }, [selectedTemplateId, selectedTemplateType, legacyBuilderData])
-
-  // Auto scroll
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  // Auto resize textarea
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = 'auto'
-      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 100)}px`
-    }
-  }, [input])
-
-  // Send message - Stage 1: Intro 생성
-  const handleSend = useCallback(
-    async (messageText?: string) => {
-      const text = messageText ?? input.trim()
-      if (!text || isLoading) return
-
-      // Add user message
-      const userMessage: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: text,
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, userMessage])
-      setInput('')
-      setIsLoading(true)
-      setSelectedTemplateId(null) // 채팅 시 템플릿 선택 해제
-      setLegacyResult(null) // 레거시 결과 초기화
-
-      try {
-        // Stage 1: Style + Intro만 생성
-        const response = await generateIntroOnlyAction({
-          prompt: text,
-          mood: [],
-        })
-
-        if (!response.success || !response.data) {
-          throw new Error(response.error ?? 'AI 생성에 실패했습니다')
-        }
-
-        // Update intro result
-        setIntroResult(response.data)
-
-        // Add assistant message
-        const assistantMessage: ChatMessage = {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content:
-            '인트로 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요.\n다른 스타일을 원하시면 다시 말씀해주세요.',
-          timestamp: new Date(),
-        }
-        setMessages((prev) => [...prev, assistantMessage])
-      } catch (err) {
-        console.error('Generation failed:', err)
-
-        const errorMessage: ChatMessage = {
-          id: `error-${Date.now()}`,
-          role: 'assistant',
-          content: '죄송해요, 디자인 생성 중 문제가 발생했어요. 다시 시도해주시겠어요?',
-          timestamp: new Date(),
-        }
-        setMessages((prev) => [...prev, errorMessage])
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [input, isLoading]
-  )
-
-  // Handle key down
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
+  }, [])
 
   // Regenerate / Reset
   const handleRegenerate = () => {
     setIntroResult(null)
-    setLegacyResult(null)
-    setNewTemplateScreen(null)
-    setNewTemplateStyle(null)
-    setSelectedTemplateId(null)
-    setSelectedTemplateType(null)
-    if (mode === 'chat') {
-      setMessages([
-        INITIAL_MESSAGE,
-        {
-          id: `regen-${Date.now()}`,
-          role: 'assistant',
-          content: '새로운 디자인을 만들어볼까요? 원하는 스타일을 알려주세요!',
-          timestamp: new Date(),
-        },
-      ])
-    }
   }
 
   // Stage 2 & 3: 기본 섹션 추가 후 DB 저장 및 편집 화면으로 이동
   const handleStartEditing = async () => {
-    // 레거시 템플릿, AI 결과, 또는 새 템플릿 중 하나가 있어야 함
-    if (!introResult && !legacyResult && !newTemplateScreen) return
+    if (!introResult) return
 
     setIsLoading(true)
 
     try {
-      // 새 super-editor 템플릿: completeTemplateAction으로 기본 섹션 추가 후 저장
-      if (newTemplateScreen && newTemplateStyle && selectedTemplateId) {
-        // Stage 2: 기본 섹션들로 전체 템플릿 완성
-        const completeResponse = await completeTemplateAction({
-          newTemplateId: selectedTemplateId,
-        })
-
-        if (!completeResponse.success || !completeResponse.data) {
-          throw new Error(completeResponse.error ?? '템플릿 완성에 실패했습니다')
-        }
-
-        // Stage 3: DB 저장
-        const saveResponse = await saveInvitationAction({
-          generationResult: completeResponse.data,
-          newTemplateId: selectedTemplateId,
-          previewData: {
-            groomName: previewFormData.groomName,
-            brideName: previewFormData.brideName,
-            weddingDate: previewFormData.weddingDate,
-            weddingTime: previewFormData.weddingTime,
-            mainImage: previewFormData.mainImage,
-          },
-        })
-
-        if (!saveResponse.success || !saveResponse.data) {
-          throw new Error(saveResponse.error ?? '저장에 실패했습니다')
-        }
-
-        // 편집 페이지로 이동
-        router.push(`/se/${saveResponse.data.invitationId}/edit`)
-        return
-      }
-
-      // 레거시 결과를 IntroGenerationResult로 변환 (통합 처리)
-      let targetIntroResult = introResult
-      if (legacyResult && selectedTemplateId) {
-        const preset = predefinedPresets[selectedTemplateId]
-        if (preset) {
-          targetIntroResult = convertLegacyToIntroResult(legacyResult, preset)
-        }
-      }
-
-      if (!targetIntroResult) {
-        throw new Error('인트로 결과가 없습니다')
-      }
-
       // Stage 2: 기본 섹션들로 전체 템플릿 완성
       const completeResponse = await completeTemplateAction({
-        introResult: targetIntroResult,
+        introResult: introResult,
       })
 
       if (!completeResponse.success || !completeResponse.data) {
@@ -551,7 +176,6 @@ export default function SuperEditorCreatePage() {
           weddingTime: previewFormData.weddingTime,
           mainImage: previewFormData.mainImage,
         },
-        legacyPresetId: selectedTemplateId || undefined,
       })
 
       if (!saveResponse.success || !saveResponse.data) {
@@ -583,7 +207,7 @@ export default function SuperEditorCreatePage() {
               </button>
               <h1 className="text-lg font-semibold text-[#F5E6D3]">새 청첩장 만들기</h1>
             </div>
-            {(introResult || legacyResult || newTemplateScreen) && (
+            {introResult && (
               <button
                 onClick={handleStartEditing}
                 disabled={isLoading}
@@ -606,116 +230,9 @@ export default function SuperEditorCreatePage() {
       {/* Main Content - 2 Panel Layout */}
       <main className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)]">
-          {/* Left Panel - Tabs */}
+          {/* Left Panel - Letty Chat */}
           <div className="flex-1 lg:max-w-xl flex flex-col bg-[#1A1A1A] border-r border-white/10">
-            {/* Tab Navigation */}
-            <div className="flex border-b border-white/10">
-              <button
-                onClick={() => setMode('chat')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  mode === 'chat'
-                    ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
-                    : 'text-[#F5E6D3]/50 hover:text-[#F5E6D3]/80'
-                }`}
-              >
-                <Sparkles className="w-4 h-4" />
-                AI 생성
-              </button>
-              <button
-                onClick={() => setMode('template')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  mode === 'template'
-                    ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
-                    : 'text-[#F5E6D3]/50 hover:text-[#F5E6D3]/80'
-                }`}
-              >
-                <Grid className="w-4 h-4" />
-                템플릿 선택
-              </button>
-            </div>
-
-            {/* Chat Mode */}
-            {mode === 'chat' && (
-              <>
-                {/* Chat Header */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#B8A052] rounded-full flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-[#0A0806]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-[#F5E6D3]">디자인 어시스턴트</h3>
-                    <p className="text-xs text-[#F5E6D3]/60">AI가 인트로를 디자인해드려요</p>
-                  </div>
-                </div>
-
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
-                    <MessageBubble key={message.id} message={message} />
-                  ))}
-                  {isLoading && <LoadingDots />}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Quick Prompts */}
-                {messages.length === 1 && (
-                  <div className="px-4 pb-2">
-                    <p className="text-xs text-[#F5E6D3]/50 mb-2">빠른 시작:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {QUICK_PROMPTS.map((item) => (
-                        <button
-                          key={item.label}
-                          onClick={() => handleSend(item.prompt)}
-                          className="px-3 py-1.5 text-sm bg-white/10 text-[#F5E6D3]/80 rounded-full hover:bg-white/20 transition-colors"
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Input */}
-                <div className="p-4 border-t border-white/10">
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 relative">
-                      <textarea
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="원하는 스타일을 설명해주세요..."
-                        rows={1}
-                        disabled={isLoading}
-                        className="w-full px-4 py-3 bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:bg-white/15 transition-colors text-sm disabled:opacity-50"
-                        style={{ maxHeight: '100px' }}
-                      />
-                    </div>
-                    <button
-                      onClick={() => handleSend()}
-                      disabled={!input.trim() || isLoading}
-                      className="p-3 bg-[#C9A962] text-[#0A0806] rounded-full hover:bg-[#B8A052] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <Send className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="text-xs text-[#F5E6D3]/40 mt-2 text-center">Shift + Enter로 줄바꿈</p>
-                </div>
-              </>
-            )}
-
-            {/* Template Mode */}
-            {mode === 'template' && (
-              <TemplateGallery
-                onSelect={handleTemplateSelect}
-                selectedId={selectedTemplateId}
-                selectedType={selectedTemplateType}
-              />
-            )}
+            <LettyChat onGenerate={handleGenerate} isGenerating={isGenerating} />
           </div>
 
           {/* Right Panel - Preview (Intro Only) */}
@@ -726,66 +243,29 @@ export default function SuperEditorCreatePage() {
                 <PreviewDataForm
                   data={previewFormData}
                   onChange={setPreviewFormData}
-                  supportsOverlay={false} // TODO: 템플릿별 오버레이 지원 여부 확인
                 />
               </div>
 
               <div className="text-sm text-[#F5E6D3]/60 mb-4">인트로 미리보기</div>
-              {legacyResult && selectedTemplateId ? (
-                // 레거시 템플릿
-                (() => {
-                  const preset = predefinedPresets[selectedTemplateId]
-                  if (!preset) return <EmptyPreview />
-                  const converted = convertLegacyToIntroResult(legacyResult, preset)
-                  return (
-                    <InvitationPreview
-                      layout={introResultToLayout(converted)}
-                      style={converted.style}
-                      userData={previewUserData}
-                      mode="preview"
-                      visibleSections={['intro']}
-                      withFrame
-                      frameWidth={PHONE_FRAME_WIDTH}
-                      frameHeight={PHONE_FRAME_HEIGHT}
-                    />
-                  )
-                })()
-              ) : newTemplateScreen && newTemplateStyle && selectedTemplateId ? (
-                // 새 super-editor 템플릿
-                (() => {
-                  const template = getTemplate(selectedTemplateId as TemplateId)
-                  if (!template) return <EmptyPreview />
-                  return (
-                    <InvitationPreview
-                      layout={extractIntroLayout(template.layout)}
-                      style={newTemplateStyle}
-                      userData={previewUserData}
-                      mode="preview"
-                      visibleSections={['intro']}
-                      withFrame
-                      frameWidth={PHONE_FRAME_WIDTH}
-                      frameHeight={PHONE_FRAME_HEIGHT}
-                    />
-                  )
-                })()
-              ) : introResult ? (
-                // AI 생성 결과
-                <InvitationPreview
-                  layout={introResultToLayout(introResult)}
-                  style={introResult.style}
-                  userData={previewUserData}
-                  mode="preview"
-                  visibleSections={['intro']}
-                  withFrame
-                  frameWidth={PHONE_FRAME_WIDTH}
-                  frameHeight={PHONE_FRAME_HEIGHT}
-                />
+              {introResult ? (
+                <div className="p-4 border border-[#C9A962]/30 rounded-xl bg-[#1A1A1A]/50">
+                  <InvitationPreview
+                    layout={introResultToLayout(introResult)}
+                    style={introResult.style}
+                    userData={previewUserData}
+                    mode="preview"
+                    visibleSections={['intro']}
+                    withFrame
+                    frameWidth={PHONE_FRAME_WIDTH}
+                    frameHeight={PHONE_FRAME_HEIGHT}
+                  />
+                </div>
               ) : (
                 <EmptyPreview />
               )}
 
               {/* Regenerate button */}
-              {(introResult || legacyResult || newTemplateScreen) && (
+              {introResult && (
                 <button
                   onClick={handleRegenerate}
                   className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/10 rounded-lg transition-colors"
@@ -800,7 +280,7 @@ export default function SuperEditorCreatePage() {
       </main>
 
       {/* Mobile Preview FAB */}
-      {(introResult || legacyResult || newTemplateScreen) && (
+      {introResult && (
         <div className="fixed bottom-20 right-4 lg:hidden">
           <button
             onClick={() => {
