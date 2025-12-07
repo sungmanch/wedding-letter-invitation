@@ -91,14 +91,23 @@ export function extractVariablesFromNode(
       }
     }
 
-    // repeat 노드의 items도 직접 경로일 수 있음
+    // repeat 노드의 items 또는 dataPath도 직접 경로일 수 있음
     if (n.type === 'repeat' && n.props) {
-      const props = n.props as { items?: string }
+      const props = n.props as { items?: string; dataPath?: string }
+      // items 속성 처리
       if (props.items && typeof props.items === 'string') {
         if (props.items.includes('{{')) {
           extractVariablesFromString(props.items).forEach((v) => variables.add(v))
         } else {
           variables.add(props.items)
+        }
+      }
+      // dataPath 속성 처리 (accounts 스켈레톤 등에서 사용)
+      if (props.dataPath && typeof props.dataPath === 'string') {
+        if (props.dataPath.includes('{{')) {
+          extractVariablesFromString(props.dataPath).forEach((v) => variables.add(v))
+        } else {
+          variables.add(props.dataPath)
         }
       }
     }
