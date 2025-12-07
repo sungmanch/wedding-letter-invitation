@@ -142,6 +142,34 @@ function EditPageContent() {
     loadData()
   }, [invitationId, setTemplate, setUserData])
 
+  // userData 변경 시 OG 기본값 업데이트 (실시간 반영)
+  useEffect(() => {
+    if (!state.userData) return
+
+    const weddingData = state.userData.data as {
+      couple?: { groom?: { name?: string }; bride?: { name?: string } }
+      wedding?: { dateDisplay?: string }
+      venue?: { name?: string }
+      photos?: { main?: string; cover?: string }
+    } | undefined
+
+    const groomName = weddingData?.couple?.groom?.name || '신랑'
+    const brideName = weddingData?.couple?.bride?.name || '신부'
+    const dateDisplay = weddingData?.wedding?.dateDisplay || ''
+    const venueName = weddingData?.venue?.name || ''
+    const mainImageUrl = weddingData?.photos?.main || weddingData?.photos?.cover || ''
+
+    setOgDefaults({
+      title: `${groomName} ♥ ${brideName} 결혼합니다`,
+      description: dateDisplay && venueName
+        ? `${dateDisplay} | ${venueName}에서 축하해주세요`
+        : '모바일 청첩장',
+      mainImageUrl,
+      groomName,
+      brideName,
+    })
+  }, [state.userData])
+
   const handleSave = useCallback(async () => {
     if (!state.userData) return
 
