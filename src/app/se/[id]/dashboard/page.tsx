@@ -58,7 +58,8 @@ export default async function DashboardPage({ params }: PageProps) {
   // 상태 정보
   const isPaid = invitation.isPaid
   const isPublished = invitation.status === 'published'
-  const viewCount = invitation.viewCount ?? 0
+  // TODO: 조회수 기능 추후 구현
+  // const viewCount = invitation.viewCount ?? 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,8 +134,8 @@ export default async function DashboardPage({ params }: PageProps) {
         </div>
 
         {/* 통계 카드 */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* 조회수 */}
+        <div className="grid grid-cols-1 gap-4">
+          {/* TODO: 조회수 카드 (추후 구현)
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -149,6 +150,7 @@ export default async function DashboardPage({ params }: PageProps) {
               </div>
             </div>
           </div>
+          */}
 
           {/* 축하 메시지 */}
           <Link
