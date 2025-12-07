@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type { StyleSchema } from '../schema/style'
 import type { LegacyIntroType } from '../presets/legacy/types'
-import { INTRO_STYLE_PRESETS, applyIntroStyleToSchema } from '../presets/intro-style-presets'
+import { INTRO_STYLE_PRESETS, applyIntroStyleToSchema, deriveSurfaceColor } from '../presets/intro-style-presets'
 
 interface StyleEditorProps {
   style: StyleSchema
@@ -142,6 +142,11 @@ export function StyleEditor({
         current = current[parts[i]]
       }
       current[parts[parts.length - 1]] = value
+
+      // 배경색 변경 시 surface 색상 자동 계산 (Alpha Blend)
+      if (path === 'background.default') {
+        newStyle.theme.colors.background.paper = deriveSurfaceColor(value)
+      }
 
       debouncedStyleChange(newStyle)
       return newStyle
