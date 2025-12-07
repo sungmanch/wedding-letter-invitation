@@ -11,6 +11,7 @@ interface OgMetadataEditorProps {
   defaultDescription: string
   previewRef?: React.RefObject<HTMLDivElement | null>
   className?: string
+  onChange?: (values: { title: string; description: string; imageUrl: string }) => void
 }
 
 export function OgMetadataEditor({
@@ -19,6 +20,7 @@ export function OgMetadataEditor({
   defaultDescription,
   previewRef,
   className,
+  onChange,
 }: OgMetadataEditorProps) {
   const [ogTitle, setOgTitle] = useState(defaultTitle)
   const [ogDescription, setOgDescription] = useState(defaultDescription)
@@ -39,6 +41,15 @@ export function OgMetadataEditor({
     }
     loadOgData()
   }, [invitationId])
+
+  // 값 변경 시 부모에게 알림
+  useEffect(() => {
+    onChange?.({
+      title: ogTitle,
+      description: ogDescription,
+      imageUrl: ogImageUrl || '',
+    })
+  }, [ogTitle, ogDescription, ogImageUrl, onChange])
 
   // OG 이미지 생성
   const handleGenerateImage = useCallback(async () => {
@@ -205,31 +216,6 @@ export function OgMetadataEditor({
           {message.text}
         </div>
       )}
-
-      {/* 미리보기 카드 */}
-      <div className="space-y-2 pt-4 border-t border-gray-200">
-        <label className="block text-sm font-medium text-gray-700">카카오톡 미리보기</label>
-        <div className="bg-gray-100 rounded-lg p-3">
-          <div className="bg-white rounded-lg overflow-hidden shadow-sm max-w-[280px]">
-            {ogImageUrl && (
-              <img
-                src={ogImageUrl}
-                alt="Preview"
-                className="w-full aspect-[1200/630] object-cover"
-              />
-            )}
-            <div className="p-3">
-              <h4 className="text-sm font-medium text-gray-900 line-clamp-1">
-                {ogTitle || '제목이 표시됩니다'}
-              </h4>
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                {ogDescription || '설명이 표시됩니다'}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">maisondletter.com</p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
