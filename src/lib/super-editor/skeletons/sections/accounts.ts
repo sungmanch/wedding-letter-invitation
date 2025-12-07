@@ -780,9 +780,9 @@ export const accountsSkeleton: SectionSkeleton = {
                           paddingBottom: '16px',
                         },
                         children: [
-                          // 계좌 라벨 (신랑 계좌 / 신랑 부 계좌 등)
+                          // 계좌 라벨 (relation에서 렌더링 시 변환: self→신랑/신부 계좌, father→부 계좌, mother→모 계좌)
                           {
-                            id: 'account-label',
+                            id: 'account-relation',
                             type: 'text',
                             tokenStyle: {
                               fontFamily: '$token.typography.headingSm.fontFamily',
@@ -791,7 +791,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.primary',
                             },
                             props: {
-                              content: '{{account.label}}',
+                              content: '{{account.relation}}',
                               as: 'h4',
                             },
                           },
@@ -893,9 +893,9 @@ export const accountsSkeleton: SectionSkeleton = {
                           paddingBottom: '16px',
                         },
                         children: [
-                          // 계좌 라벨
+                          // 계좌 라벨 (relation에서 렌더링 시 변환)
                           {
-                            id: 'account-label',
+                            id: 'account-relation',
                             type: 'text',
                             tokenStyle: {
                               fontFamily: '$token.typography.headingSm.fontFamily',
@@ -904,7 +904,7 @@ export const accountsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.primary',
                             },
                             props: {
-                              content: '{{account.label}}',
+                              content: '{{account.relation}}',
                               as: 'h4',
                             },
                           },

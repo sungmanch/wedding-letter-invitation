@@ -7,8 +7,14 @@ import type { EditorSection, EditorField } from '../schema/editor'
 import type { LayoutSchema } from '../schema/layout'
 import type { VariableDeclaration, SectionGroupMeta } from '../schema/variables'
 import type { SectionScreen } from '../skeletons/types'
+import type { SectionType } from '../schema/section-types'
 import { SECTION_GROUP_META, getSectionGroupId, getSectionGroupMeta } from '../schema/variables'
-import { extractVariablesFromLayout, extractVariablesFromSections } from './variable-extractor'
+import { SECTION_META } from '../schema/section-types'
+import {
+  extractVariablesFromLayout,
+  extractVariablesFromSections,
+  extractVariablesBySectionType,
+} from './variable-extractor'
 import { pathsToDeclarations, declarationToField } from './slot-to-field'
 
 // ============================================
@@ -137,6 +143,73 @@ function groupDeclarationsIntoSections(
   sections.sort((a, b) => a.order - b.order)
 
   return sections
+}
+
+// ============================================
+// SectionType-based Editor Generation
+// ============================================
+
+/**
+ * Layout에서 sectionType별로 EditorSection 생성
+ * 각 screen의 sectionType을 기준으로 해당 screen에서 사용하는 변수들을 필드로 변환
+ * 그룹화 없이 screen에 있는 모든 변수가 해당 섹션에 표시됨
+ */
+export function generateEditorSectionsBySectionType(
+  options: Omit<EditorGeneratorOptions, 'groupBySection'>
+): EditorSection[] {
+  const { layout, declarations = [], fallbackToStandard = true, inferUnknown = true } = options
+
+  if (!layout) return []
+
+  // 1. sectionType별로 변수 추출
+  const variablesBySection = extractVariablesBySectionType(layout)
+  const sections: EditorSection[] = []
+
+  variablesBySection.forEach((paths, sectionType) => {
+    // 2. 경로를 VariableDeclaration으로 변환
+    const resolvedDeclarations = pathsToDeclarations(
+      paths,
+      fallbackToStandard || inferUnknown ? declarations : undefined
+    )
+
+    if (resolvedDeclarations.length === 0) return
+
+    // 3. 필드 생성
+    const fields: EditorField[] = resolvedDeclarations.map((decl, index) =>
+      declarationToField(decl, index + 1)
+    )
+
+    // 4. 섹션 메타데이터
+    const meta = SECTION_META[sectionType as SectionType]
+
+    sections.push({
+      id: sectionType,
+      title: meta?.label || sectionType,
+      icon: 'edit',
+      order: sections.length,
+      fields,
+    })
+  })
+
+  return sections
+}
+
+/**
+ * 특정 sectionType에 해당하는 필드만 가져오기
+ */
+export function getFieldsForSectionType(
+  layout: LayoutSchema,
+  sectionType: string,
+  declarations?: VariableDeclaration[]
+): EditorField[] {
+  const variablesBySection = extractVariablesBySectionType(layout)
+  const paths = variablesBySection.get(sectionType)
+
+  if (!paths || paths.length === 0) return []
+
+  const resolvedDeclarations = pathsToDeclarations(paths, declarations)
+
+  return resolvedDeclarations.map((decl, index) => declarationToField(decl, index + 1))
 }
 
 // ============================================
