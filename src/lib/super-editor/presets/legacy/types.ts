@@ -24,9 +24,13 @@ export type PredefinedTemplateCategory =
 // ============================================
 
 export type LegacyIntroType =
-  | 'cinematic'       // 영화 스타일
+  | 'cinematic'       // 영화 스타일 (화양연화)
   | 'exhibition'      // 갤러리 스타일
   | 'magazine'        // 매거진 스타일
+  | 'gothic-romance'  // 고딕 로맨스 (버건디/에메랄드, 빅토리안)
+  | 'old-money'       // 올드 머니 (레터프레스, 왁스씰)
+  | 'monogram'        // 모노그램 (쉴드 엠블럼, 포일)
+  | 'jewel-velvet'    // 주얼 벨벳 (에메랄드/버건디, 벨벳 텍스처)
 
 // ============================================
 // Legacy Interaction Types

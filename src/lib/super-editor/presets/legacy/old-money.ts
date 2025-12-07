@@ -36,7 +36,7 @@ export const oldMoneyPreset: PredefinedTemplatePreset = {
 
   // 인트로 설정
   intro: {
-    type: 'cinematic', // old-money uses cinematic intro type
+    type: 'old-money',
     duration: 4000,
     skipEnabled: true,
     skipDelay: 2000,

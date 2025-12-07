@@ -36,7 +36,7 @@ export const jewelVelvetPreset: PredefinedTemplatePreset = {
 
   // 인트로 설정
   intro: {
-    type: 'cinematic', // jewel-velvet uses cinematic intro type
+    type: 'jewel-velvet',
     duration: 4500,
     skipEnabled: true,
     skipDelay: 2500,
