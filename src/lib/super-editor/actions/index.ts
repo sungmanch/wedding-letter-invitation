@@ -388,7 +388,7 @@ export async function buildInvitation(invitationId: string) {
 const OG_BUCKET_NAME = 'og-images'
 
 /**
- * OG 이미지 업로드 (클라이언트에서 html2canvas로 생성한 이미지)
+ * OG 이미지 업로드 (1200x630 JPG 이미지)
  */
 export async function uploadOgImage(
   invitationId: string,
