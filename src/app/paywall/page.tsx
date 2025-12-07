@@ -74,12 +74,8 @@ function PaywallContent() {
       <main className="flex-1 p-6">
         {/* Product Info */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-charcoal mb-2">
-            Maison de Letter
-          </h1>
-          <p className="text-gray-500">
-            결제 후 청첩장을 친구들에게 공유할 수 있습니다
-          </p>
+          <h1 className="text-2xl font-bold text-charcoal mb-2">Maison de Letter</h1>
+          <p className="text-gray-500">결제 후 청첩장을 친구들에게 공유할 수 있습니다</p>
         </div>
 
         {/* Features */}
@@ -98,9 +94,7 @@ function PaywallContent() {
         <div className="border border-gray-200 rounded-2xl p-4 mb-8">
           <div className="flex items-center justify-between">
             <span className="text-gray-500">결제 금액</span>
-            <span className="text-2xl font-bold text-charcoal">
-              {PRICE.toLocaleString()}원
-            </span>
+            <span className="text-2xl font-bold text-charcoal">{PRICE.toLocaleString()}원</span>
           </div>
         </div>
 
@@ -154,11 +148,13 @@ function FeatureItem({ children }: { children: React.ReactNode }) {
 
 export default function PaywallPage() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-col min-h-screen bg-white lg:max-w-2xl lg:mx-auto lg:shadow-xl items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex flex-col min-h-screen bg-white lg:max-w-2xl lg:mx-auto lg:shadow-xl items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      }
+    >
       <PaywallContent />
     </Suspense>
   )
