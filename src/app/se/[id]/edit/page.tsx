@@ -36,6 +36,7 @@ import type { UserData } from '@/lib/super-editor/schema/user-data'
 import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
+import type { LegacyIntroType } from '@/lib/super-editor/presets/legacy/types'
 
 type EditorTab = 'content' | 'design' | 'share'
 
@@ -521,6 +522,7 @@ function EditPageContent() {
             <StyleEditor
               style={state.style}
               onStyleChange={handleStyleChange}
+              introType={'cinematic' as LegacyIntroType}
               className="flex-1 scrollbar-gold"
             />
           )}
