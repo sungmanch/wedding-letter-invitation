@@ -103,138 +103,12 @@ export const dateSkeleton: SectionSkeleton = {
               },
               {
                 id: 'date-countdown',
-                type: 'row',
-                tokenStyle: {
-                  gap: '$token.spacing.md',
-                  padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.background',
-                  borderRadius: '$token.borders.radiusMd',
+                type: 'countdown',
+                props: {
+                  date: '{{wedding.date}}',
+                  time: '{{wedding.time}}',
+                  showCards: true,
                 },
-                style: {
-                  justifyContent: 'center',
-                },
-                children: [
-                  {
-                    id: 'countdown-days',
-                    type: 'column',
-                    tokenStyle: {
-                      gap: '$token.spacing.xs',
-                    },
-                    style: {
-                      alignItems: 'center',
-                      minWidth: '60px',
-                    },
-                    children: [
-                      {
-                        id: 'days-value',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.displayLg.fontFamily',
-                          fontSize: '$token.typography.displayLg.fontSize',
-                          fontWeight: '$token.typography.displayLg.fontWeight',
-                          color: '$token.colors.brand',
-                        },
-                        props: {
-                          content: '{{countdown.days}}',
-                          as: 'span',
-                        },
-                      },
-                      {
-                        id: 'days-label',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.caption.fontFamily',
-                          fontSize: '$token.typography.caption.fontSize',
-                          color: '$token.colors.text.muted',
-                        },
-                        props: {
-                          content: 'DAYS',
-                          as: 'span',
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    id: 'countdown-hours',
-                    type: 'column',
-                    tokenStyle: {
-                      gap: '$token.spacing.xs',
-                    },
-                    style: {
-                      alignItems: 'center',
-                      minWidth: '60px',
-                    },
-                    children: [
-                      {
-                        id: 'hours-value',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.displayLg.fontFamily',
-                          fontSize: '$token.typography.displayLg.fontSize',
-                          fontWeight: '$token.typography.displayLg.fontWeight',
-                          color: '$token.colors.brand',
-                        },
-                        props: {
-                          content: '{{countdown.hours}}',
-                          as: 'span',
-                        },
-                      },
-                      {
-                        id: 'hours-label',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.caption.fontFamily',
-                          fontSize: '$token.typography.caption.fontSize',
-                          color: '$token.colors.text.muted',
-                        },
-                        props: {
-                          content: 'HOURS',
-                          as: 'span',
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    id: 'countdown-mins',
-                    type: 'column',
-                    tokenStyle: {
-                      gap: '$token.spacing.xs',
-                    },
-                    style: {
-                      alignItems: 'center',
-                      minWidth: '60px',
-                    },
-                    children: [
-                      {
-                        id: 'mins-value',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.displayLg.fontFamily',
-                          fontSize: '$token.typography.displayLg.fontSize',
-                          fontWeight: '$token.typography.displayLg.fontWeight',
-                          color: '$token.colors.brand',
-                        },
-                        props: {
-                          content: '{{countdown.minutes}}',
-                          as: 'span',
-                        },
-                      },
-                      {
-                        id: 'mins-label',
-                        type: 'text',
-                        tokenStyle: {
-                          fontFamily: '$token.typography.caption.fontFamily',
-                          fontSize: '$token.typography.caption.fontSize',
-                          color: '$token.colors.text.muted',
-                        },
-                        props: {
-                          content: 'MINS',
-                          as: 'span',
-                        },
-                      },
-                    ],
-                  },
-                ],
               },
             ],
           },
@@ -246,16 +120,16 @@ export const dateSkeleton: SectionSkeleton = {
           path: 'wedding.date',
           type: 'date',
           required: true,
-          description: '결혼 날짜',
-          defaultValue: '2025년 3월 15일',
+          description: '예식 날짜',
+          defaultValue: '2025-03-15',
         },
         {
           id: 'wedding-time',
           path: 'wedding.time',
-          type: 'text',
-          required: false,
-          description: '결혼 시간',
-          defaultValue: '오후 2시',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
         },
       ],
       options: {
