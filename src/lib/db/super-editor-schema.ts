@@ -105,6 +105,11 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   // S3 배포 URL
   publishedUrl: varchar('published_url', { length: 500 }),
 
+  // Open Graph 메타데이터 (카카오톡/문자 공유 시 표시)
+  ogTitle: varchar('og_title', { length: 100 }), // 기본값: "{신랑} ♥ {신부} 결혼합니다"
+  ogDescription: varchar('og_description', { length: 200 }), // 기본값: "{일시} {장소}에서 축하해주세요"
+  ogImageUrl: varchar('og_image_url', { length: 500 }), // OG 공유용 이미지 URL (1200x630 JPG)
+
   // 상태
   status: varchar('status', { length: 20 }).default('draft').notNull(), // 'draft' | 'building' | 'published' | 'error'
   errorMessage: text('error_message'),
