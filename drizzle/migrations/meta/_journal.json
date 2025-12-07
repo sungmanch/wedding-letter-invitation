@@ -43,6 +43,13 @@
       "when": 1765080787473,
       "tag": "0005_parched_vertigo",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1765083100100,
+      "tag": "0006_awesome_havok",
+      "breakpoints": true
     }
   ]
 }
