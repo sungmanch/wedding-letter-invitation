@@ -51,8 +51,9 @@ export const contactSkeleton: SectionSkeleton = {
             id: 'contact-row',
             type: 'row',
             style: {
-              justifyContent: 'space-around',
+              justifyContent: 'center',
               alignItems: 'flex-start',
+              gap: '48px',
             },
             children: [
               // 신랑 영역
@@ -99,8 +100,8 @@ export const contactSkeleton: SectionSkeleton = {
                           variant: 'ghost',
                           ariaLabel: '신랑에게 전화',
                           action: {
-                            type: 'tel',
-                            value: '{{couple.groom.phone}}',
+                            type: 'call',
+                            phone: '{{couple.groom.phone}}',
                           },
                         },
                       },
@@ -117,7 +118,7 @@ export const contactSkeleton: SectionSkeleton = {
                           ariaLabel: '신랑에게 문자',
                           action: {
                             type: 'sms',
-                            value: '{{couple.groom.phone}}',
+                            phone: '{{couple.groom.phone}}',
                           },
                         },
                       },
@@ -169,8 +170,8 @@ export const contactSkeleton: SectionSkeleton = {
                           variant: 'ghost',
                           ariaLabel: '신부에게 전화',
                           action: {
-                            type: 'tel',
-                            value: '{{couple.bride.phone}}',
+                            type: 'call',
+                            phone: '{{couple.bride.phone}}',
                           },
                         },
                       },
@@ -187,7 +188,7 @@ export const contactSkeleton: SectionSkeleton = {
                           ariaLabel: '신부에게 문자',
                           action: {
                             type: 'sms',
-                            value: '{{couple.bride.phone}}',
+                            phone: '{{couple.bride.phone}}',
                           },
                         },
                       },
@@ -263,8 +264,9 @@ export const contactSkeleton: SectionSkeleton = {
             id: 'contact-row',
             type: 'row',
             style: {
-              justifyContent: 'space-around',
+              justifyContent: 'center',
               alignItems: 'flex-start',
+              gap: '48px',
             },
             children: [
               // 신랑 영역
@@ -326,8 +328,8 @@ export const contactSkeleton: SectionSkeleton = {
                           size: 'sm',
                           variant: 'ghost',
                           action: {
-                            type: 'tel',
-                            value: '{{couple.groom.phone}}',
+                            type: 'call',
+                            phone: '{{couple.groom.phone}}',
                           },
                         },
                       },
@@ -343,7 +345,7 @@ export const contactSkeleton: SectionSkeleton = {
                           variant: 'ghost',
                           action: {
                             type: 'sms',
-                            value: '{{couple.groom.phone}}',
+                            phone: '{{couple.groom.phone}}',
                           },
                         },
                       },
@@ -410,8 +412,8 @@ export const contactSkeleton: SectionSkeleton = {
                           size: 'sm',
                           variant: 'ghost',
                           action: {
-                            type: 'tel',
-                            value: '{{couple.bride.phone}}',
+                            type: 'call',
+                            phone: '{{couple.bride.phone}}',
                           },
                         },
                       },
@@ -427,7 +429,7 @@ export const contactSkeleton: SectionSkeleton = {
                           variant: 'ghost',
                           action: {
                             type: 'sms',
-                            value: '{{couple.bride.phone}}',
+                            phone: '{{couple.bride.phone}}',
                           },
                         },
                       },

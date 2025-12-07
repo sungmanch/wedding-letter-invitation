@@ -43,23 +43,30 @@ export function extractVariablesFromString(value: string): string[] {
 }
 
 /**
- * 노드의 props에서 변수 추출
+ * 노드의 props에서 변수 추출 (중첩 객체 포함)
  */
 function extractFromProps(props: Record<string, unknown> | undefined): string[] {
   if (!props) return []
 
   const paths: string[] = []
 
-  for (const value of Object.values(props)) {
+  function extractFromValue(value: unknown): void {
     if (typeof value === 'string') {
       paths.push(...extractVariablesFromString(value))
     } else if (Array.isArray(value)) {
       for (const item of value) {
-        if (typeof item === 'string') {
-          paths.push(...extractVariablesFromString(item))
-        }
+        extractFromValue(item)
+      }
+    } else if (value && typeof value === 'object') {
+      // 중첩 객체 순회 (action, style 등)
+      for (const nestedValue of Object.values(value)) {
+        extractFromValue(nestedValue)
       }
     }
+  }
+
+  for (const value of Object.values(props)) {
+    extractFromValue(value)
   }
 
   return paths

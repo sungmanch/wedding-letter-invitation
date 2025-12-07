@@ -8,6 +8,8 @@ import {
   useMemo,
   type ReactNode,
 } from 'react'
+import { format, parseISO, differenceInDays } from 'date-fns'
+import { ko } from 'date-fns/locale'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
@@ -107,6 +109,70 @@ function setValueByPath(
   return result
 }
 
+/**
+ * wedding.date 또는 wedding.time 변경 시 파생 필드 자동 계산
+ */
+function computeDerivedFields(
+  data: Record<string, unknown>,
+  fieldPath: string,
+  value: unknown
+): Record<string, unknown> {
+  let result = data
+
+  // wedding.date 변경 시 날짜 관련 파생 필드 계산
+  if (fieldPath === 'wedding.date' && typeof value === 'string') {
+    try {
+      const date = parseISO(value)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // 한글 날짜 표시 (2025년 3월 15일 토요일)
+      const dateDisplay = format(date, 'yyyy년 M월 d일 EEEE', { locale: ko })
+      result = setValueByPath(result, 'wedding.dateDisplay', dateDisplay)
+
+      // 영문 날짜 표시 (Saturday, March 15, 2025)
+      const dateEn = format(date, 'EEEE, MMMM d, yyyy')
+      result = setValueByPath(result, 'wedding.dateEn', dateEn)
+
+      // Calendar variant용 파생 필드
+      result = setValueByPath(result, 'wedding.month', format(date, 'yyyy년 M월', { locale: ko }))
+      result = setValueByPath(result, 'wedding.day', format(date, 'd'))
+      result = setValueByPath(result, 'wedding.weekday', format(date, 'EEEE', { locale: ko }))
+
+      // D-Day 계산
+      const dday = differenceInDays(date, today)
+      result = setValueByPath(result, 'wedding.dday', dday)
+      result = setValueByPath(result, 'countdown.days', dday)
+    } catch (e) {
+      console.error('Failed to compute date derived fields:', e)
+    }
+  }
+
+  // wedding.time 변경 시 시간 관련 파생 필드 계산
+  if (fieldPath === 'wedding.time' && typeof value === 'string') {
+    try {
+      const [hours, minutes] = value.split(':').map(Number)
+      const period = hours >= 12 ? '오후' : '오전'
+      const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours
+
+      // 한글 시간 표시 (오후 2시)
+      const timeDisplay = minutes === 0
+        ? `${period} ${displayHours}시`
+        : `${period} ${displayHours}시 ${minutes}분`
+      result = setValueByPath(result, 'wedding.timeDisplay', timeDisplay)
+
+      // 영문 시간 표시 (PM 2:00)
+      const periodEn = hours >= 12 ? 'PM' : 'AM'
+      const timeEn = `${periodEn} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+      result = setValueByPath(result, 'wedding.timeEn', timeEn)
+    } catch (e) {
+      console.error('Failed to compute time derived fields:', e)
+    }
+  }
+
+  return result
+}
+
 function superEditorReducer(
   state: SuperEditorState,
   action: SuperEditorAction
@@ -146,11 +212,15 @@ function superEditorReducer(
     case 'UPDATE_FIELD': {
       if (!state.userData) return state
 
-      const newData = setValueByPath(
+      // 먼저 기본 필드 업데이트
+      let newData = setValueByPath(
         state.userData.data as Record<string, unknown>,
         action.fieldPath,
         action.value
       )
+
+      // 파생 필드 자동 계산 (wedding.date → dateDisplay 등)
+      newData = computeDerivedFields(newData, action.fieldPath, action.value)
 
       const newUserData: UserData = {
         ...state.userData,

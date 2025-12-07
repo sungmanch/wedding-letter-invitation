@@ -3,6 +3,54 @@
 import type { PrimitiveNode, ButtonProps, ButtonAction } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, resolveDataBinding, mergeNodeStyles, getNodeEventHandlers } from '../types'
+import {
+  Phone,
+  MessageCircle,
+  Copy,
+  MapPin,
+  Calendar,
+  Heart,
+  Share2,
+  ExternalLink,
+  Check,
+  X,
+  Play,
+  Pause,
+  Music,
+  Image,
+  User,
+  Mail,
+  ChevronLeft,
+  ChevronRight,
+  type LucideIcon,
+} from 'lucide-react'
+
+// 아이콘 이름 → 컴포넌트 매핑
+const iconMap: Record<string, LucideIcon> = {
+  phone: Phone,
+  call: Phone,
+  message: MessageCircle,
+  sms: MessageCircle,
+  mail: Mail,
+  copy: Copy,
+  'map-pin': MapPin,
+  map: MapPin,
+  location: MapPin,
+  calendar: Calendar,
+  heart: Heart,
+  share: Share2,
+  'external-link': ExternalLink,
+  check: Check,
+  close: X,
+  x: X,
+  play: Play,
+  pause: Pause,
+  music: Music,
+  image: Image,
+  user: User,
+  'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
+}
 
 // 확장된 노드 타입 (tokenStyle, events 포함)
 interface ExtendedNode extends PrimitiveNode {
@@ -54,6 +102,39 @@ const sizeStyles: Record<string, React.CSSProperties> = {
     padding: '14px 28px',
     fontSize: '18px',
   },
+}
+
+// 아이콘 전용 버튼 (라벨 없음) 스타일
+const iconOnlySizeStyles: Record<string, React.CSSProperties> = {
+  sm: {
+    padding: '8px',
+    fontSize: '14px',
+  },
+  md: {
+    padding: '10px',
+    fontSize: '16px',
+  },
+  lg: {
+    padding: '12px',
+    fontSize: '18px',
+  },
+}
+
+// 아이콘 크기 매핑
+const iconSizeMap: Record<string, number> = {
+  sm: 16,
+  md: 20,
+  lg: 24,
+}
+
+// 아이콘 렌더링 함수
+function renderIcon(iconName: string, size: string = 'md') {
+  const IconComponent = iconMap[iconName.toLowerCase()]
+  if (!IconComponent) {
+    console.warn(`[Button] Unknown icon: ${iconName}`)
+    return null
+  }
+  return <IconComponent size={iconSizeMap[size] || 20} />
 }
 
 function handleAction(action: ButtonAction | undefined) {
@@ -120,17 +201,20 @@ export function Button({
   const variant = props.variant || 'primary'
   const size = props.size || 'md'
 
+  // 아이콘만 있는 버튼인지 확인
+  const isIconOnly = props.icon && !label
+
   const buttonStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 'var(--spacing-xs, 8px)',
-    borderRadius: 'var(--radius-md, 6px)',
+    borderRadius: isIconOnly ? 'var(--radius-full, 9999px)' : 'var(--radius-md, 6px)',
     cursor: 'pointer',
     fontWeight: 500,
     transition: `all var(--duration-fast, 150ms) var(--easing-default, ease-out)`,
     ...variantStyles[variant],
-    ...sizeStyles[size],
+    ...(isIconOnly ? iconOnlySizeStyles[size] : sizeStyles[size]),
     ...mergedStyle,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
   }
@@ -167,13 +251,9 @@ export function Button({
       onMouseEnter={eventHandlers.onMouseEnter}
       onMouseLeave={eventHandlers.onMouseLeave}
     >
-      {props.icon && props.iconPosition !== 'right' && (
-        <span className="button-icon">{props.icon}</span>
-      )}
+      {props.icon && props.iconPosition !== 'right' && renderIcon(props.icon, size)}
       {label}
-      {props.icon && props.iconPosition === 'right' && (
-        <span className="button-icon">{props.icon}</span>
-      )}
+      {props.icon && props.iconPosition === 'right' && renderIcon(props.icon, size)}
     </button>
   )
 }

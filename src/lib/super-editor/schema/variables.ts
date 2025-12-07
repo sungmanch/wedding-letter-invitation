@@ -158,22 +158,30 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     required: true,
     defaultValue: '14:00',
   },
-  // 화면 표시용 날짜/시간 (한글 형식 - 스켈레톤 템플릿에서 사용)
+  // 화면 표시용 날짜/시간 (파생 필드 - wedding.date/time에서 자동 계산)
   'wedding.dateDisplay': {
     type: 'text',
-    label: '예식 날짜',
-    required: true,
-    placeholder: '2025년 3월 15일 토요일',
-    defaultValue: '2025년 3월 15일 토요일',
-    helpText: '예: 2025년 3월 15일 토요일',
+    label: '예식 날짜 표시',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
   },
   'wedding.timeDisplay': {
     type: 'text',
-    label: '예식 시간',
-    required: true,
-    placeholder: '오후 2시',
-    defaultValue: '오후 2시',
-    helpText: '예: 오후 2시, 낮 12시',
+    label: '예식 시간 표시',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
+  },
+  'wedding.dateEn': {
+    type: 'text',
+    label: '예식 날짜 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
+  },
+  'wedding.timeEn': {
+    type: 'text',
+    label: '예식 시간 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산
   },
   'wedding.dday': {
     type: 'number',
@@ -217,6 +225,12 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
   'countdown.minutes': {
     type: 'number',
     label: '분',
+    required: false,
+    description: '__HIDDEN__',
+  },
+  'countdown.seconds': {
+    type: 'number',
+    label: '초',
     required: false,
     description: '__HIDDEN__',
   },
