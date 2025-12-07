@@ -306,6 +306,16 @@ const PATH_REPLACEMENT_RULES: Array<{
     triggers: ['wedding.timeDisplay', 'wedding.timeEn'],
     replacement: 'wedding.time',
   },
+  {
+    // parents 관련 필드가 있으면 → parents.deceasedIcon 추가
+    triggers: [
+      'parents.groom.father.name',
+      'parents.groom.mother.name',
+      'parents.bride.father.name',
+      'parents.bride.mother.name',
+    ],
+    replacement: 'parents.deceasedIcon',
+  },
 ]
 
 /**
