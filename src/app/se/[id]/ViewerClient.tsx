@@ -1,11 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  InvitationPreview,
-  GuestbookFab,
-  GuestbookModal,
-} from '@/lib/super-editor/components'
+import { InvitationPreview, GuestbookModal } from '@/lib/super-editor/components'
+import { GuestbookFab } from '@/lib/super-editor/renderers/GuestbookFab'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
