@@ -15,7 +15,7 @@ export type PrimitiveType =
   | 'scroll-container'
   | 'overlay'
   | 'fullscreen'
-  // 콘텐츠 (10개)
+  // 콘텐츠 (11개)
   | 'text'
   | 'image'
   | 'video'
@@ -26,6 +26,7 @@ export type PrimitiveType =
   | 'input'
   | 'map-embed'
   | 'calendar'
+  | 'countdown'
   // 이미지 컬렉션 (6개)
   | 'gallery'
   | 'carousel'
