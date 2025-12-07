@@ -269,27 +269,33 @@ export function isDark(hex: string): boolean {
   return luminance < 0.5
 }
 
+// 따뜻한 중립 톤 상수
+const WARM_CREAM = [245, 230, 211] as const  // #F5E6D3
+const WARM_BROWN = [61, 52, 40] as const     // #3D3428
+
 /**
- * Alpha Blend로 Surface 색상 계산
- * - Dark 배경: 흰색 12% 블렌딩
- * - Light 배경: 검정 5% 블렌딩
+ * Alpha Blend로 Surface 색상 계산 (따뜻한 중립 톤)
+ * - Dark 배경: 크림색 10% 블렌딩 → 따뜻한 다크 서피스
+ * - Light 배경: 웜브라운 4% 블렌딩 → 은은한 아이보리 서피스
  */
 export function deriveSurfaceColor(background: string): string {
   const [bgR, bgG, bgB] = hexToRgb(background)
 
   if (isDark(background)) {
-    // Dark 배경: 흰색(255,255,255)과 12% 블렌딩
-    const alpha = 0.12
-    const r = Math.round(bgR + (255 - bgR) * alpha)
-    const g = Math.round(bgG + (255 - bgG) * alpha)
-    const b = Math.round(bgB + (255 - bgB) * alpha)
+    // Dark 배경: 크림색(#F5E6D3)과 10% 블렌딩
+    const alpha = 0.10
+    const [blendR, blendG, blendB] = WARM_CREAM
+    const r = Math.round(bgR + (blendR - bgR) * alpha)
+    const g = Math.round(bgG + (blendG - bgG) * alpha)
+    const b = Math.round(bgB + (blendB - bgB) * alpha)
     return rgbToHex(r, g, b)
   } else {
-    // Light 배경: 검정(0,0,0)과 5% 블렌딩
-    const alpha = 0.05
-    const r = Math.round(bgR * (1 - alpha))
-    const g = Math.round(bgG * (1 - alpha))
-    const b = Math.round(bgB * (1 - alpha))
+    // Light 배경: 웜브라운(#3D3428)과 4% 블렌딩
+    const alpha = 0.04
+    const [blendR, blendG, blendB] = WARM_BROWN
+    const r = Math.round(bgR + (blendR - bgR) * alpha)
+    const g = Math.round(bgG + (blendG - bgG) * alpha)
+    const b = Math.round(bgB + (blendB - bgB) * alpha)
     return rgbToHex(r, g, b)
   }
 }
