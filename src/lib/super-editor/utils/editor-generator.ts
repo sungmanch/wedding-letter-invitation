@@ -216,7 +216,14 @@ export function getFieldsForSectionType(
 
   const resolvedDeclarations = pathsToDeclarations(paths, declarations)
 
-  return resolvedDeclarations.map((decl, index) => declarationToField(decl, index + 1))
+  // order로 정렬 (order가 있으면 그 값으로, 없으면 Infinity)
+  const sortedDeclarations = [...resolvedDeclarations].sort((a, b) => {
+    const orderA = a.order ?? Infinity
+    const orderB = b.order ?? Infinity
+    return orderA - orderB
+  })
+
+  return sortedDeclarations.map((decl, index) => declarationToField(decl, index + 1))
 }
 
 // ============================================
