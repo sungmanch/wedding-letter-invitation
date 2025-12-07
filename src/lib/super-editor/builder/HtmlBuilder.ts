@@ -9,10 +9,33 @@ import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
 import { getAnimationPreset } from '../animations/presets'
 import { getTransitionPreset } from '../animations/transitions'
+import { getScrollPreset, type ScrollKeyframe } from '../animations/scroll-presets'
+import { getBgmById } from '../audio/bgm-presets'
+import { resolveTokens } from '../tokens/resolver'
+import { generateCssVariables } from '../tokens/css-generator'
 
 // ============================================
 // Build Context
 // ============================================
+
+interface ScrollTriggerConfig {
+  elementId: string
+  keyframes: ScrollKeyframe[]
+  scrub: boolean
+}
+
+interface BgmConfig {
+  elementId: string
+  src: string
+  volume: number
+  fadeIn: number
+  loop: boolean
+  syncWithScroll?: {
+    enabled: boolean
+    startVolume: number
+    endVolume: number
+  }
+}
 
 interface BuildContext {
   data: Record<string, unknown>
@@ -20,6 +43,8 @@ interface BuildContext {
   animations: Set<string>
   assets: Map<string, string>
   idCounter: number
+  scrollTriggers: ScrollTriggerConfig[]
+  bgmConfigs: BgmConfig[]
 }
 
 function createBuildContext(data: Record<string, unknown>): BuildContext {
@@ -29,6 +54,8 @@ function createBuildContext(data: Record<string, unknown>): BuildContext {
     animations: new Set(),
     assets: new Map(),
     idCounter: 0,
+    scrollTriggers: [],
+    bgmConfigs: [],
   }
 }
 
@@ -154,6 +181,12 @@ function buildNode(node: PrimitiveNode, ctx: BuildContext): string {
     case 'sequence':
     case 'parallel':
       return buildAnimationWrapper(node, ctx)
+    case 'scroll-trigger':
+      return buildScrollTrigger(node, ctx)
+
+    // Audio
+    case 'bgm-player':
+      return buildBgmPlayer(node, ctx)
 
     // Logic
     case 'conditional':
@@ -468,6 +501,134 @@ function buildAnimationWrapper(node: PrimitiveNode, ctx: BuildContext): string {
   return `<div>${buildChildren(node, ctx)}</div>`
 }
 
+function buildScrollTrigger(node: PrimitiveNode, ctx: BuildContext): string {
+  const props = node.props as Record<string, unknown> || {}
+  const animation = props.animation as Record<string, unknown> | undefined
+  const presetName = animation?.preset as string
+  const scrub = props.scrub !== false
+
+  const elementId = `scroll-${++ctx.idCounter}`
+
+  // 스크롤 프리셋 또는 일반 프리셋에서 keyframes 가져오기
+  let keyframes: ScrollKeyframe[] = []
+
+  const scrollPreset = presetName
+    ? getScrollPreset(presetName as Parameters<typeof getScrollPreset>[0])
+    : null
+
+  if (scrollPreset) {
+    keyframes = scrollPreset.keyframes
+  } else if (presetName) {
+    const animPreset = getAnimationPreset(presetName as Parameters<typeof getAnimationPreset>[0])
+    if (animPreset) {
+      keyframes = animPreset.keyframes.map((kf) => ({
+        offset: (kf as { offset?: number }).offset ?? 0,
+        opacity: kf.opacity as number | undefined,
+        transform: kf.transform as string | undefined,
+        filter: kf.filter as string | undefined,
+        clipPath: kf.clipPath as string | undefined,
+      }))
+    }
+  }
+
+  // 초기 스타일 (keyframes[0])
+  let initialStyles = ''
+  if (keyframes.length > 0) {
+    const firstFrame = keyframes[0]
+    const styleProps: string[] = []
+    if (firstFrame.opacity !== undefined) styleProps.push(`opacity: ${firstFrame.opacity}`)
+    if (firstFrame.transform) styleProps.push(`transform: ${firstFrame.transform}`)
+    if (firstFrame.filter) styleProps.push(`filter: ${firstFrame.filter}`)
+    if (firstFrame.clipPath) {
+      styleProps.push(`clip-path: ${firstFrame.clipPath}`)
+      styleProps.push(`-webkit-clip-path: ${firstFrame.clipPath}`)
+    }
+    initialStyles = styleProps.join('; ')
+  }
+
+  // 컨텍스트에 스크롤 트리거 설정 추가
+  if (keyframes.length > 0) {
+    ctx.scrollTriggers.push({
+      elementId,
+      keyframes,
+      scrub,
+    })
+  }
+
+  const style = toCssString(node.style)
+  const combinedStyle = [style, initialStyles].filter(Boolean).join('; ')
+
+  return `<div id="${elementId}" data-scroll-trigger style="${combinedStyle}">${buildChildren(node, ctx)}</div>`
+}
+
+function buildBgmPlayer(node: PrimitiveNode, ctx: BuildContext): string {
+  const props = node.props as Record<string, unknown> || {}
+
+  // 오디오 소스 결정
+  let audioSrc = ''
+  if (props.trackId) {
+    const preset = getBgmById(props.trackId as string)
+    audioSrc = preset?.url || ''
+  } else if (props.src) {
+    audioSrc = resolveBinding(props.src as string, ctx.data)
+  }
+
+  if (!audioSrc) return ''
+
+  const elementId = `bgm-${++ctx.idCounter}`
+  const volume = (props.volume as number) ?? 0.5
+  const fadeIn = (props.fadeIn as number) ?? 1000
+  const loop = props.loop !== false
+  const showControls = props.showControls !== false
+  const controlsPosition = (props.controlsPosition as string) || 'bottom-right'
+  const controlsStyle = (props.controlsStyle as string) || 'minimal'
+
+  // 스크롤 연동 설정
+  const syncWithScroll = props.syncWithScroll as Record<string, unknown> | undefined
+
+  // 컨텍스트에 BGM 설정 추가
+  ctx.bgmConfigs.push({
+    elementId,
+    src: audioSrc,
+    volume,
+    fadeIn,
+    loop,
+    syncWithScroll: syncWithScroll?.enabled
+      ? {
+          enabled: true,
+          startVolume: (syncWithScroll.startVolume as number) ?? 1,
+          endVolume: (syncWithScroll.endVolume as number) ?? 0.3,
+        }
+      : undefined,
+  })
+
+  // 컨트롤 위치 스타일
+  const positionStyles: Record<string, string> = {
+    'top-right': 'top:16px;right:16px',
+    'top-left': 'top:16px;left:16px',
+    'bottom-right': 'bottom:16px;right:16px',
+    'bottom-left': 'bottom:16px;left:16px',
+  }
+
+  // 바이닐 스타일 여부
+  const isVinyl = controlsStyle === 'vinyl'
+
+  const buttonStyle = isVinyl
+    ? `position:fixed;${positionStyles[controlsPosition]};z-index:9999;width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:linear-gradient(145deg,#1a1a1a,#2d2d2d);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;`
+    : `position:fixed;${positionStyles[controlsPosition]};z-index:9999;width:44px;height:44px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;font-size:18px;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;`
+
+  const buttonContent = isVinyl
+    ? `<div style="width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;border-radius:50%;background:#1a1a1a;"></div></div>`
+    : '🔇'
+
+  return `
+    <div id="${elementId}" data-bgm-player>
+      <audio id="${elementId}-audio" src="${audioSrc}" ${loop ? 'loop' : ''} preload="metadata"></audio>
+      ${showControls ? `<button id="${elementId}-btn" style="${buttonStyle}" aria-label="음악 재생">${buttonContent}</button>` : ''}
+    </div>
+  `
+}
+
 // Logic Builders
 function buildConditional(node: PrimitiveNode, ctx: BuildContext): string {
   const props = node.props as Record<string, unknown> || {}
@@ -563,6 +724,10 @@ export function buildHtml(
   const startTime = Date.now()
   const ctx = createBuildContext(userData.data as Record<string, unknown>)
 
+  // Design Tokens 해석 및 CSS Variables 생성
+  const tokens = resolveTokens(style)
+  const cssVariables = generateCssVariables(tokens)
+
   // 모든 화면 빌드
   const screensHtml = layout.screens
     .map((screen) => {
@@ -580,6 +745,9 @@ export function buildHtml(
 
   // 기본 CSS (모바일 최적화)
   const baseCss = `
+/* Design Tokens (CSS Variables) */
+${cssVariables}
+
 /* Reset & Base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html {
@@ -587,10 +755,11 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 body {
-  font-family: ${style.theme?.typography?.fonts?.body?.family || '"Pretendard", "Apple SD Gothic Neo", sans-serif'};
-  line-height: 1.5;
-  color: ${style.theme?.colors?.text?.primary || '#1F2937'};
-  background-color: ${style.theme?.colors?.background?.default || '#FFFBFC'};
+  font-family: var(--typo-body-font-family, "Pretendard", "Apple SD Gothic Neo", sans-serif);
+  font-size: var(--typo-body-font-size, 16px);
+  line-height: var(--typo-body-line-height, 1.5);
+  color: var(--color-text-primary, #1F2937);
+  background-color: var(--color-background, #FFFBFC);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -641,6 +810,231 @@ button {
 ${customStyles}
   `.trim()
 
+  // 스크롤 모션 런타임 JS
+  const scrollMotionJs = ctx.scrollTriggers.length > 0 ? `
+// Scroll Motion Runtime
+(function() {
+  var triggers = ${JSON.stringify(ctx.scrollTriggers)};
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function parseTransform(str) {
+    if (!str) return {};
+    var result = {};
+    var patterns = [
+      ['translateX', /translateX\\(([\\-\\d.]+)(px|%)?\\)/],
+      ['translateY', /translateY\\(([\\-\\d.]+)(px|%)?\\)/],
+      ['scale', /scale\\(([\\d.]+)\\)/],
+      ['rotate', /rotate\\(([\\-\\d.]+)(deg)?\\)/],
+      ['rotateX', /rotateX\\(([\\-\\d.]+)(deg)?\\)/],
+      ['perspective', /perspective\\(([\\d.]+)(px)?\\)/]
+    ];
+    patterns.forEach(function(p) {
+      var m = str.match(p[1]);
+      if (m) result[p[0]] = { value: parseFloat(m[1]), unit: m[2] || '' };
+    });
+    return result;
+  }
+
+  function interpolateTransform(from, to, t) {
+    var fromT = parseTransform(from);
+    var toT = parseTransform(to);
+    var result = [];
+    var keys = Object.keys(Object.assign({}, fromT, toT));
+    keys.forEach(function(k) {
+      var f = fromT[k] || { value: k === 'scale' ? 1 : 0, unit: '' };
+      var e = toT[k] || { value: k === 'scale' ? 1 : 0, unit: '' };
+      var v = lerp(f.value, e.value, t);
+      if (k === 'scale') result.push(k + '(' + v + ')');
+      else result.push(k + '(' + v + (f.unit || e.unit || 'px') + ')');
+    });
+    return result.join(' ');
+  }
+
+  function parseFilter(str) {
+    if (!str) return {};
+    var result = {};
+    var m = str.match(/blur\\(([\\d.]+)(px)?\\)/);
+    if (m) result.blur = { value: parseFloat(m[1]), unit: m[2] || 'px' };
+    return result;
+  }
+
+  function interpolateFilter(from, to, t) {
+    var fromF = parseFilter(from);
+    var toF = parseFilter(to);
+    if (fromF.blur || toF.blur) {
+      var f = (fromF.blur || { value: 0 }).value;
+      var e = (toF.blur || { value: 0 }).value;
+      return 'blur(' + lerp(f, e, t) + 'px)';
+    }
+    return '';
+  }
+
+  function parseClipPath(str) {
+    if (!str) return null;
+    var inset = str.match(/inset\\(([\\d.]+)%?\\s+([\\d.]+)%?\\s+([\\d.]+)%?\\s+([\\d.]+)%?\\)/);
+    if (inset) return { type: 'inset', values: [parseFloat(inset[1]), parseFloat(inset[2]), parseFloat(inset[3]), parseFloat(inset[4])] };
+    var circle = str.match(/circle\\(([\\d.]+)%\\s+at\\s+([\\d.]+)%\\s+([\\d.]+)%\\)/);
+    if (circle) return { type: 'circle', values: [parseFloat(circle[1]), parseFloat(circle[2]), parseFloat(circle[3])] };
+    return null;
+  }
+
+  function interpolateClipPath(from, to, t) {
+    var fromC = parseClipPath(from);
+    var toC = parseClipPath(to);
+    if (!fromC || !toC || fromC.type !== toC.type) return t > 0.5 ? to : from;
+    if (fromC.type === 'inset') {
+      var vals = fromC.values.map(function(v, i) { return lerp(v, toC.values[i], t); });
+      return 'inset(' + vals.join('% ') + '%)';
+    }
+    if (fromC.type === 'circle') {
+      return 'circle(' + lerp(fromC.values[0], toC.values[0], t) + '% at ' + lerp(fromC.values[1], toC.values[1], t) + '% ' + lerp(fromC.values[2], toC.values[2], t) + '%)';
+    }
+    return from;
+  }
+
+  function applyStyle(el, from, to, t) {
+    if (from.opacity !== undefined || to.opacity !== undefined) {
+      el.style.opacity = lerp(from.opacity !== undefined ? from.opacity : 1, to.opacity !== undefined ? to.opacity : 1, t);
+    }
+    if (from.transform || to.transform) {
+      el.style.transform = interpolateTransform(from.transform, to.transform, t);
+    }
+    if (from.filter || to.filter) {
+      el.style.filter = interpolateFilter(from.filter, to.filter, t);
+    }
+    if (from.clipPath || to.clipPath) {
+      var cp = interpolateClipPath(from.clipPath, to.clipPath, t);
+      el.style.clipPath = cp;
+      el.style.webkitClipPath = cp;
+    }
+  }
+
+  function initScrollTriggers() {
+    triggers.forEach(function(cfg) {
+      var el = document.getElementById(cfg.elementId);
+      if (!el || cfg.keyframes.length < 2) return;
+
+      var from = cfg.keyframes[0];
+      var to = cfg.keyframes[cfg.keyframes.length - 1];
+
+      if (cfg.scrub) {
+        // Scrub 모드: 스크롤 연동
+        var ticking = false;
+        window.addEventListener('scroll', function() {
+          if (!ticking) {
+            requestAnimationFrame(function() {
+              var rect = el.getBoundingClientRect();
+              var wh = window.innerHeight;
+              var progress = Math.max(0, Math.min(1, (wh - rect.top) / (wh + rect.height)));
+              applyStyle(el, from, to, progress);
+              ticking = false;
+            });
+            ticking = true;
+          }
+        }, { passive: true });
+        // 초기 상태
+        applyStyle(el, from, to, 0);
+      } else {
+        // 일반 모드: IntersectionObserver
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              el.style.transition = 'all 0.6s ease-out';
+              applyStyle(el, to, to, 1);
+              observer.unobserve(el);
+            }
+          });
+        }, { threshold: 0.1 });
+        observer.observe(el);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initScrollTriggers);
+})();
+  ` : ''
+
+  // BGM 런타임 JS
+  const bgmJs = ctx.bgmConfigs.length > 0 ? `
+// BGM Runtime
+(function() {
+  var configs = ${JSON.stringify(ctx.bgmConfigs)};
+  var hasInteracted = false;
+
+  function fadeVolume(audio, target, duration, onComplete) {
+    var start = audio.volume;
+    var startTime = performance.now();
+    function animate(time) {
+      var elapsed = time - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      audio.volume = start + (target - start) * progress;
+      if (progress < 1) requestAnimationFrame(animate);
+      else if (onComplete) onComplete();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function initBgm() {
+    configs.forEach(function(cfg) {
+      var audio = document.getElementById(cfg.elementId + '-audio');
+      var btn = document.getElementById(cfg.elementId + '-btn');
+      if (!audio) return;
+
+      var isPlaying = false;
+
+      function play() {
+        audio.volume = 0;
+        audio.play().then(function() {
+          isPlaying = true;
+          fadeVolume(audio, cfg.volume, cfg.fadeIn);
+          if (btn) btn.innerHTML = '🔊';
+        }).catch(function() {});
+      }
+
+      function pause() {
+        fadeVolume(audio, 0, 300, function() {
+          audio.pause();
+          isPlaying = false;
+          if (btn) btn.innerHTML = '🔇';
+        });
+      }
+
+      // 첫 인터랙션 후 자동 재생
+      function onInteraction() {
+        if (hasInteracted) return;
+        hasInteracted = true;
+        play();
+      }
+      document.addEventListener('touchstart', onInteraction, { once: true });
+      document.addEventListener('click', onInteraction, { once: true });
+
+      // 컨트롤 버튼
+      if (btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (isPlaying) pause();
+          else play();
+        });
+      }
+
+      // 스크롤 연동 볼륨
+      if (cfg.syncWithScroll && cfg.syncWithScroll.enabled) {
+        window.addEventListener('scroll', function() {
+          if (!isPlaying) return;
+          var scrollH = document.documentElement.scrollHeight - window.innerHeight;
+          var progress = scrollH > 0 ? window.scrollY / scrollH : 0;
+          var vol = cfg.syncWithScroll.startVolume + (cfg.syncWithScroll.endVolume - cfg.syncWithScroll.startVolume) * progress;
+          audio.volume = Math.max(0, Math.min(1, vol * cfg.volume));
+        }, { passive: true });
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initBgm);
+})();
+  ` : ''
+
   // 기본 JS
   const baseJs = `
 document.addEventListener('DOMContentLoaded', function() {
@@ -651,6 +1045,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+${scrollMotionJs}
+${bgmJs}
   `.trim()
 
   // 최종 HTML (모바일 최적화)

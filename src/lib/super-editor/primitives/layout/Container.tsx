@@ -2,7 +2,13 @@
 
 import type { PrimitiveNode, ContainerProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
-import { toInlineStyle, getNodeProps } from '../types'
+import { getNodeProps, mergeNodeStyles, getNodeEventHandlers } from '../types'
+
+// 확장된 노드 타입 (tokenStyle, events 포함)
+interface ExtendedNode extends PrimitiveNode {
+  tokenStyle?: Record<string, unknown>
+  events?: import('../../context/EventContext').NodeEventHandler[]
+}
 
 export function Container({
   node,
@@ -11,10 +17,24 @@ export function Container({
   node: PrimitiveNode
   context: RenderContext
 }) {
+  const extNode = node as ExtendedNode
   const props = getNodeProps<ContainerProps>(node)
-  const style = toInlineStyle(node.style)
+
+  // 토큰 스타일 + 직접 스타일 병합
+  const mergedStyle = mergeNodeStyles(extNode, context)
+
+  // 이벤트 핸들러 생성
+  const eventHandlers = getNodeEventHandlers(extNode, context)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
+
+  // 편집 모드 클릭 핸들러
+  const handleClick = context.mode === 'edit'
+    ? (e: React.MouseEvent) => {
+        e.stopPropagation()
+        context.onSelectNode?.(node.id)
+      }
+    : eventHandlers.onClick
 
   return (
     <div
@@ -22,17 +42,13 @@ export function Container({
       data-node-type="container"
       className={props.className}
       style={{
-        ...style,
+        ...mergedStyle,
         outline: isSelected ? '2px solid #3b82f6' : undefined,
       }}
-      onClick={
-        context.mode === 'edit'
-          ? (e) => {
-              e.stopPropagation()
-              context.onSelectNode?.(node.id)
-            }
-          : undefined
-      }
+      onClick={handleClick}
+      onScroll={eventHandlers.onScroll}
+      onMouseEnter={eventHandlers.onMouseEnter}
+      onMouseLeave={eventHandlers.onMouseLeave}
     >
       {node.children?.map((child) => context.renderNode(child))}
     </div>

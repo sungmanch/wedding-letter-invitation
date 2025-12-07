@@ -11,7 +11,7 @@ export * from './layout'
 // Style Schema
 export * from './style'
 
-// Editor Schema
+// Editor Field Types (동적 에디터용)
 export * from './editor'
 
 // User Data Schema
@@ -23,12 +23,17 @@ export * from './user-data'
 
 import type { LayoutSchema } from './layout'
 import type { StyleSchema } from './style'
-import type { EditorSchema } from './editor'
 import type { UserData } from './user-data'
 
 /**
  * 전체 템플릿 구조
  * DB에 저장되는 단위
+ *
+ * 핵심 스키마 (2가지):
+ * - LayoutSchema: UI 트리 구조 (Screen + PrimitiveNode)
+ * - StyleSchema: 테마/색상/타이포그래피
+ *
+ * 에디터 UI는 Layout의 {{변수}}에서 동적 생성됨
  */
 export interface SuperEditorTemplate {
   id: string
@@ -37,10 +42,9 @@ export interface SuperEditorTemplate {
   thumbnail?: string
   category: string
   tags?: string[]
-  // LLM 생성 스키마
+  // LLM 생성 스키마 (2가지)
   layout: LayoutSchema
   style: StyleSchema
-  editor: EditorSchema
   // 메타데이터
   version: string
   createdAt: string
@@ -116,14 +120,9 @@ export function validateTemplate(template: SuperEditorTemplate): string[] {
   if (!template.name) errors.push('Template name is required')
   if (!template.layout) errors.push('Layout schema is required')
   if (!template.style) errors.push('Style schema is required')
-  if (!template.editor) errors.push('Editor schema is required')
 
   if (template.layout && !template.layout.screens?.length) {
     errors.push('At least one screen is required in layout')
-  }
-
-  if (template.editor && !template.editor.sections?.length) {
-    errors.push('At least one section is required in editor')
   }
 
   return errors

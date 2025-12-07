@@ -3,6 +3,8 @@
  */
 
 import type { PrimitiveNode, CSSProperties } from '../schema/primitives'
+import type { SemanticDesignTokens } from '../tokens/schema'
+import type { EventAction, NodeEventHandler } from '../context/EventContext'
 
 // ============================================
 // Renderer Context
@@ -11,7 +13,7 @@ import type { PrimitiveNode, CSSProperties } from '../schema/primitives'
 export interface RenderContext {
   // 데이터 바인딩용
   data: Record<string, unknown>
-  // 이벤트 핸들러
+  // 이벤트 핸들러 (레거시)
   handlers?: Record<string, () => void>
   // 현재 모드
   mode: 'preview' | 'edit' | 'build'
@@ -21,6 +23,21 @@ export interface RenderContext {
   selectedNodeId?: string
   // 노드 선택 핸들러
   onSelectNode?: (id: string) => void
+
+  // ====== 토큰 시스템 (v2) ======
+  // 디자인 토큰
+  tokens?: SemanticDesignTokens
+  // 토큰 참조를 CSS var()로 변환
+  resolveTokenRef?: (ref: string) => string
+
+  // ====== 이벤트 시스템 (v2) ======
+  // 이벤트 액션 실행
+  executeAction?: (action: EventAction) => void
+  // 노드 이벤트 핸들러 생성
+  createEventHandlers?: (
+    nodeId: string,
+    events: NodeEventHandler[] | undefined
+  ) => Record<string, (e?: React.SyntheticEvent) => void>
 }
 
 // ============================================
@@ -215,4 +232,132 @@ export function isNodeType<T extends string>(
  */
 export function getNodeProps<T>(node: PrimitiveNode): T {
   return (node.props || {}) as T
+}
+
+// ============================================
+// Token Style Helpers
+// ============================================
+
+/**
+ * tokenStyle 객체를 React CSSProperties로 변환
+ * $token.xxx 참조를 var(--xxx)로 변환
+ */
+export function resolveTokenStyle(
+  tokenStyle: Record<string, unknown> | undefined,
+  context?: RenderContext
+): React.CSSProperties {
+  if (!tokenStyle) return {}
+
+  const result: React.CSSProperties = {}
+
+  for (const [key, value] of Object.entries(tokenStyle)) {
+    if (typeof value === 'string' && value.startsWith('$token.')) {
+      // 컨텍스트의 resolveTokenRef 사용 또는 기본 변환
+      if (context?.resolveTokenRef) {
+        (result as Record<string, unknown>)[key] = context.resolveTokenRef(value)
+      } else {
+        (result as Record<string, unknown>)[key] = defaultTokenRefToCssVar(value)
+      }
+    } else if (value !== undefined) {
+      (result as Record<string, unknown>)[key] = value
+    }
+  }
+
+  return result
+}
+
+/**
+ * 기본 토큰 참조 → CSS Variable 변환
+ */
+function defaultTokenRefToCssVar(value: string): string {
+  if (!value.startsWith('$token.')) return value
+
+  const path = value.replace('$token.', '')
+  const parts = path.split('.')
+
+  // 경로별 변환 규칙
+  if (parts[0] === 'colors') {
+    if (parts[1] === 'text') {
+      return `var(--color-text-${toKebabCase(parts[2])})`
+    }
+    return `var(--color-${toKebabCase(parts[1])})`
+  }
+
+  if (parts[0] === 'typography') {
+    const typoName = toKebabCase(parts[1])
+    const prop = parts[2]
+    const propMap: Record<string, string> = {
+      fontFamily: 'font-family',
+      fontSize: 'font-size',
+      fontWeight: 'font-weight',
+      lineHeight: 'line-height',
+      letterSpacing: 'letter-spacing',
+    }
+    return `var(--typo-${typoName}-${propMap[prop] ?? prop})`
+  }
+
+  if (parts[0] === 'spacing') {
+    return `var(--spacing-${toKebabCase(parts[1])})`
+  }
+
+  if (parts[0] === 'borders') {
+    const borderProp = parts[1]
+    if (borderProp.startsWith('radius')) {
+      const size = borderProp.replace('radius', '')
+      return `var(--radius-${toKebabCase(size)})`
+    }
+  }
+
+  if (parts[0] === 'shadows') {
+    return `var(--shadow-${toKebabCase(parts[1])})`
+  }
+
+  if (parts[0] === 'animation') {
+    const propMap: Record<string, string> = {
+      durationFast: 'duration-fast',
+      durationNormal: 'duration-normal',
+      durationSlow: 'duration-slow',
+      easing: 'easing-default',
+      staggerDelay: 'stagger-delay',
+    }
+    return `var(--${propMap[parts[1]] ?? parts[1]})`
+  }
+
+  return value
+}
+
+/**
+ * camelCase를 kebab-case로 변환
+ */
+function toKebabCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
+/**
+ * style과 tokenStyle을 병합
+ */
+export function mergeNodeStyles(
+  node: PrimitiveNode & { tokenStyle?: Record<string, unknown> },
+  context?: RenderContext
+): React.CSSProperties {
+  const tokenStyles = resolveTokenStyle(node.tokenStyle, context)
+  const directStyles = toInlineStyle(node.style)
+
+  return {
+    ...tokenStyles,
+    ...directStyles, // 직접 스타일이 우선
+  }
+}
+
+/**
+ * 노드의 이벤트 핸들러 가져오기
+ */
+export function getNodeEventHandlers(
+  node: PrimitiveNode & { events?: NodeEventHandler[] },
+  context: RenderContext
+): Record<string, (e?: React.SyntheticEvent) => void> {
+  if (!context.createEventHandlers || !node.events) {
+    return {}
+  }
+  return context.createEventHandlers(node.id, node.events)
 }

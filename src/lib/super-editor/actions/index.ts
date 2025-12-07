@@ -2,12 +2,14 @@
 
 import { db } from '@/lib/db'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { buildHtml } from '../builder'
+import { createClient } from '@/lib/supabase/server'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
+import type { VariablesSchema } from '../schema/variables'
 import type { UserData } from '../schema/user-data'
+import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '../schema/section-types'
 
 // ============================================
 // Template Actions
@@ -35,7 +37,7 @@ export async function createTemplate(data: {
   category: string
   layout: LayoutSchema
   style: StyleSchema
-  editor: EditorSchema
+  variables?: VariablesSchema
 }) {
   const [template] = await db.insert(superEditorTemplates).values({
     name: data.name,
@@ -43,12 +45,31 @@ export async function createTemplate(data: {
     category: data.category,
     layoutSchema: data.layout,
     styleSchema: data.style,
-    editorSchema: data.editor,
+    variablesSchema: data.variables,
     status: 'draft',
     isPublic: false,
   }).returning()
 
   return template
+}
+
+/**
+ * 템플릿의 variablesSchema 업데이트
+ */
+export async function updateTemplateVariables(
+  templateId: string,
+  variablesSchema: VariablesSchema
+) {
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      variablesSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, templateId))
+    .returning()
+
+  return updated
 }
 
 // ============================================
@@ -63,15 +84,116 @@ export async function getInvitation(invitationId: string) {
   return invitation
 }
 
+/**
+ * 청첩장 + 템플릿 함께 조회 (편집 페이지용)
+ * 인증된 사용자 본인의 청첩장만 조회 가능
+ */
+export async function getInvitationWithTemplate(invitationId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
+/**
+ * 미리보기용 청첩장 조회
+ * 토큰이 있으면 토큰 검증 후 조회, 없으면 인증된 사용자 본인 것만 조회
+ */
+export async function getInvitationForPreview(invitationId: string, hasValidToken: boolean) {
+  if (hasValidToken) {
+    // 토큰이 유효하면 청첩장 조회 (소유자 확인 없이)
+    const invitation = await db.query.superEditorInvitations.findFirst({
+      where: eq(superEditorInvitations.id, invitationId),
+    })
+    return invitation
+  }
+
+  // 토큰이 없으면 인증된 사용자 본인 것만
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  return invitation
+}
+
+/**
+ * 공개된 청첩장 조회 (결제 완료된 것만)
+ * 템플릿 정보도 함께 반환
+ */
+export async function getPublishedInvitation(invitationId: string) {
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.status, 'published')
+    ),
+  })
+
+  if (!invitation) {
+    return null
+  }
+
+  const template = await db.query.superEditorTemplates.findFirst({
+    where: eq(superEditorTemplates.id, invitation.templateId),
+  })
+
+  if (!template) {
+    return null
+  }
+
+  return { invitation, template }
+}
+
 export async function createInvitation(data: {
   templateId: string
-  userId: string
   userData: UserData
 }) {
+  // 인증된 사용자 가져오기
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
   const [invitation] = await db.insert(superEditorInvitations).values({
     templateId: data.templateId,
-    userId: data.userId,
+    userId: user.id,
     userData: data.userData,
+    sectionOrder: DEFAULT_SECTION_ORDER,
+    sectionEnabled: DEFAULT_SECTION_ENABLED,
     status: 'draft',
   }).returning()
 
@@ -89,6 +211,106 @@ export async function updateInvitationData(
       updatedAt: new Date(),
     })
     .where(eq(superEditorInvitations.id, invitationId))
+    .returning()
+
+  return updated
+}
+
+export async function updateInvitationSections(
+  invitationId: string,
+  sectionOrder: string[],
+  sectionEnabled: Record<string, boolean>
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const [updated] = await db
+    .update(superEditorInvitations)
+    .set({
+      sectionOrder,
+      sectionEnabled,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ))
+    .returning()
+
+  return updated
+}
+
+export async function updateTemplateStyle(
+  invitationId: string,
+  styleSchema: StyleSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 styleSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      styleSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
+    .returning()
+
+  return updated
+}
+
+export async function updateTemplateLayout(
+  invitationId: string,
+  layoutSchema: LayoutSchema
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 먼저 invitation에서 templateId 조회
+  const invitation = await db.query.superEditorInvitations.findFirst({
+    where: and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ),
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // 템플릿의 layoutSchema 업데이트
+  const [updated] = await db
+    .update(superEditorTemplates)
+    .set({
+      layoutSchema,
+      updatedAt: new Date(),
+    })
+    .where(eq(superEditorTemplates.id, invitation.templateId))
     .returning()
 
   return updated
@@ -180,6 +402,7 @@ export async function generateTemplateWithLLM(prompt: string) {
       {
         id: 'intro',
         type: 'intro',
+        sectionType: 'intro',
         root: {
           id: 'root',
           type: 'fullscreen',
@@ -312,95 +535,10 @@ export async function generateTemplateWithLLM(prompt: string) {
     components: {},
   }
 
-  const sampleEditor: EditorSchema = {
-    version: '1.0',
-    meta: {
-      id: 'sample-editor',
-      name: '청첩장 편집기',
-      layoutId: 'sample-template',
-      styleId: 'sample-style',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    sections: [
-      {
-        id: 'couple',
-        title: '신랑신부 정보',
-        order: 0,
-        fields: [
-          {
-            id: 'groom-name',
-            type: 'text',
-            label: '신랑 이름',
-            dataPath: 'couple.groom.name',
-            placeholder: '신랑 이름을 입력하세요',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'bride-name',
-            type: 'text',
-            label: '신부 이름',
-            dataPath: 'couple.bride.name',
-            placeholder: '신부 이름을 입력하세요',
-            required: true,
-            order: 1,
-          },
-        ],
-      },
-      {
-        id: 'wedding',
-        title: '예식 정보',
-        order: 1,
-        fields: [
-          {
-            id: 'wedding-date',
-            type: 'date',
-            label: '예식 날짜',
-            dataPath: 'wedding.date',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'wedding-time',
-            type: 'time',
-            label: '예식 시간',
-            dataPath: 'wedding.time',
-            required: true,
-            order: 1,
-          },
-        ],
-      },
-      {
-        id: 'photos',
-        title: '사진',
-        order: 2,
-        fields: [
-          {
-            id: 'main-photo',
-            type: 'image',
-            label: '메인 사진',
-            dataPath: 'photos.main',
-            required: true,
-            order: 0,
-          },
-          {
-            id: 'gallery',
-            type: 'imageList',
-            label: '갤러리',
-            dataPath: 'photos.gallery',
-            maxItems: 10,
-            sortable: true,
-            order: 1,
-          },
-        ],
-      },
-    ],
-  }
+  // EditorSchema는 Layout의 {{변수}}에서 동적 생성됨
 
   return {
     layout: sampleLayout,
     style: sampleStyle,
-    editor: sampleEditor,
   }
 }

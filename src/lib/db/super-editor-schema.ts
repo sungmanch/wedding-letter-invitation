@@ -12,12 +12,13 @@ import {
 
 import type { LayoutSchema } from '../super-editor/schema/layout'
 import type { StyleSchema } from '../super-editor/schema/style'
-import type { EditorSchema } from '../super-editor/schema/editor'
+import type { VariablesSchema } from '../super-editor/schema/variables'
 import type { UserData } from '../super-editor/schema/user-data'
 
 // ============================================
 // Super Editor Templates
-// LLM이 생성한 레이아웃, 스타일, 에디터 스키마 저장
+// LLM이 생성한 레이아웃, 스타일 스키마 저장
+// (EditorSchema는 Layout의 {{변수}}에서 동적 생성됨)
 // ============================================
 
 export const superEditorTemplates = pgTable('super_editor_templates', {
@@ -35,7 +36,10 @@ export const superEditorTemplates = pgTable('super_editor_templates', {
   // LLM 생성 스키마 (핵심!)
   layoutSchema: jsonb('layout_schema').$type<LayoutSchema>().notNull(),
   styleSchema: jsonb('style_schema').$type<StyleSchema>().notNull(),
-  editorSchema: jsonb('editor_schema').$type<EditorSchema>().notNull(),
+  // 변수 선언 (에디터 필드 생성 + 기본값 제공)
+  variablesSchema: jsonb('variables_schema').$type<VariablesSchema>(),
+  // editorSchema는 deprecated (variablesSchema로 대체)
+  editorSchema: jsonb('editor_schema').$type<Record<string, unknown>>(),
 
   // 버전 관리
   version: varchar('version', { length: 20 }).default('1.0').notNull(),
@@ -104,6 +108,13 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   // 상태
   status: varchar('status', { length: 20 }).default('draft').notNull(), // 'draft' | 'building' | 'published' | 'error'
   errorMessage: text('error_message'),
+
+  // 섹션 관리
+  sectionOrder: jsonb('section_order').$type<string[]>(), // 섹션 순서 (intro 제외)
+  sectionEnabled: jsonb('section_enabled').$type<Record<string, boolean>>(), // 섹션 활성화 상태
+
+  // 결제
+  isPaid: boolean('is_paid').default(false).notNull(),
 
   // 접근 설정
   slug: varchar('slug', { length: 100 }), // 커스텀 URL slug

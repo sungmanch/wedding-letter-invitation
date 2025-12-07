@@ -42,40 +42,42 @@ export const STYLE_MODE_PROMPT = `${BASE_INSTRUCTION}
 \`\`\`typescript
 interface StyleSchema {
   version: '1.0'
-  meta: { id, name, mood?: string[] }
+  meta: { id, name, mood?: string[], createdAt, updatedAt }
   theme: {
     colors: {
-      primary: { 50-950 } // 색상 팔레트
-      secondary: { 50-950 }
-      neutral: { 50-950 }
-      background: string
-      surface: string
-      text: { primary, secondary, muted, inverse }
-      accent: string
-      success/warning/error: string
+      primary: { 50?, 100?, ..., 500, ..., 900? }  // 500은 필수
+      neutral: { 50?, 100?, ..., 500, ..., 900? }
+      background: { default: string, paper?: string, subtle?: string }
+      text: { primary: string, secondary?: string, muted?: string, inverse?: string }
     }
     typography: {
-      fontFamily: { display, body, accent }
-      fontSize: { xs-4xl }
-      fontWeight: { light-black }
-      lineHeight: { tight-loose }
-      letterSpacing: { tight-wide }
+      fonts: {
+        heading: { family: string, fallback?: string }
+        body: { family: string, fallback?: string }
+      }
+      sizes: { xs, sm, base, lg, xl, '2xl', '3xl', '4xl' }
+      weights: { regular: number, bold: number, medium?: number, semibold?: number }
+      lineHeights: { tight, normal, relaxed }
+      letterSpacing: { tight, normal, wide }
     }
-    spacing: { 0-20 }
-    borderRadius: { none-full }
-    shadows: { none-2xl }
+    spacing: { unit: number, scale: { 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16 } }
+    borders: { radius: { none, sm, md, lg, xl, full }, width: { thin, default, thick }, style, color }
+    shadows: { none, sm, md, lg, xl }
+    animation: { duration: { fast, normal, slow, slower }, easing: { default, in, out, inOut } }
   }
-  animations?: { ... }
+  tokens: { [category]: { [token]: string | number } }
+  components: { container?, text?, image?, button?, custom?: { [name]: CSSProperties } }
 }
 \`\`\`
 
 ## 수정 가능 항목
-- 색상 (primary, secondary, background, text 등)
-- 폰트 (fontFamily, fontSize, fontWeight)
-- 간격, 둥글기, 그림자
-- 애니메이션 설정
+- 색상 (primary, neutral, background, text)
+- 폰트 (fonts.heading, fonts.body)
+- 타이포그래피 (sizes, weights, lineHeights)
+- 간격, 테두리, 그림자, 애니메이션
 
 ## 응답 예시
+배경색 변경:
 \`\`\`json
 {
   "message": "배경색을 따뜻한 크림색으로 변경했어요!",
@@ -84,7 +86,43 @@ interface StyleSchema {
     "style": {
       "theme": {
         "colors": {
-          "background": "#FFF8F5"
+          "background": { "default": "#FFF8F5", "paper": "#ffffff", "subtle": "#FFF0EB" }
+        }
+      }
+    }
+  }
+}
+\`\`\`
+
+폰트 변경:
+\`\`\`json
+{
+  "message": "우아한 세리프 폰트로 변경했어요!",
+  "changes": {
+    "type": "partial",
+    "style": {
+      "theme": {
+        "typography": {
+          "fonts": {
+            "heading": { "family": "'Noto Serif KR', serif", "fallback": "Georgia, serif" }
+          }
+        }
+      }
+    }
+  }
+}
+\`\`\`
+
+메인 색상 변경:
+\`\`\`json
+{
+  "message": "로맨틱한 핑크톤으로 변경했어요!",
+  "changes": {
+    "type": "partial",
+    "style": {
+      "theme": {
+        "colors": {
+          "primary": { "500": "#EC4899", "400": "#F472B6", "600": "#DB2777" }
         }
       }
     }
@@ -107,16 +145,30 @@ export const LAYOUT_MODE_PROMPT = `${BASE_INSTRUCTION}
 \`\`\`typescript
 interface LayoutSchema {
   version: '1.0'
-  meta: { id, name, category, description? }
+  meta: {
+    id: string
+    name: string
+    description?: string
+    category: 'chat' | 'story' | 'letter' | 'album' | 'scroll' | 'slide' | 'magazine' | 'minimal' | 'classic' | 'custom'
+    tags?: string[]
+    createdAt: string
+    updatedAt: string
+  }
   screens: Screen[]
-  globals?: { header?, footer?, navigation? }
+  globals?: {
+    fonts?: { heading?, body?, accent? }
+    colors?: { primary?, secondary?, background?, text? }
+    scroll?: { snap?: boolean, smoothScroll?: boolean }
+    background?: { type: 'color' | 'gradient' | 'image', value: string }
+  }
 }
 
 interface Screen {
   id: string
-  type: 'intro' | 'content' | 'gallery' | 'form' | 'map' | 'outro'
+  name?: string
+  type: 'intro' | 'content' | 'gallery' | 'form' | 'map' | 'outro' | 'custom'
   root: PrimitiveNode
-  transition?: { preset, duration, easing }
+  transition?: { preset: TransitionPreset, duration?: number, easing?: string }
 }
 
 interface PrimitiveNode {
@@ -128,102 +180,92 @@ interface PrimitiveNode {
 }
 \`\`\`
 
-## 주요 Primitive 타입
-- container, section, stack, grid, scroll-area, spacer (레이아웃)
-- text, heading, paragraph, label, link (텍스트)
-- image, avatar, icon, background-image (이미지)
-- animated-text, animated-container, parallax-layer (애니메이션)
-- if, for-each, switch (로직)
+## Primitive 타입 (28개)
+
+레이아웃:
+- container: 기본 컨테이너
+- row: 가로 정렬 (props: gap, align, justify, wrap)
+- column: 세로 정렬 (props: gap, align, justify)
+- scroll-container: 스크롤 영역 (props: direction, snap)
+- overlay: 오버레이 레이어
+- fullscreen: 전체화면
+
+콘텐츠:
+- text: 텍스트 (props: content, as: 'p'|'h1'|'h2'|'h3'|'h4'|'span'|'div')
+- image: 이미지 (props: src, alt, aspectRatio, objectFit)
+- video: 비디오 (props: src, autoplay, muted, loop)
+- avatar: 프로필 이미지 (props: src, size, shape: 'circle'|'square'|'rounded')
+- button: 버튼 (props: label, variant, action)
+- spacer: 여백 (props: height, width)
+- divider: 구분선 (props: orientation, variant)
+- input: 입력 필드 (props: type, placeholder, name)
+- map-embed: 지도 (props: lat, lng, address, provider)
+
+이미지 컬렉션:
+- gallery: 갤러리 (props: images, layout, columns)
+- carousel: 캐러셀 (props: images, autoplay, effect)
+- grid: 그리드 (props: images, columns, gap, pattern)
+- collage: 콜라주 (props: images, template)
+- masonry: 메이슨리 (props: images, columns)
+- vinyl-selector: 바이닐 선택기 (props: images, style)
+
+애니메이션:
+- animated: 애니메이션 래퍼 (props: animation, trigger: 'mount'|'inView'|'hover')
+- sequence: 순차 실행 (props: staggerDelay)
+- parallel: 동시 실행
+- scroll-trigger: 스크롤 트리거 (props: animation, start, end)
+- transition: 화면 전환 (props: preset)
+
+로직:
+- conditional: 조건부 렌더링 (props: condition, operator, value)
+- repeat: 반복 렌더링 (props: dataPath, as, limit)
 
 ## 데이터 바인딩
 \`{{path.to.data}}\` 형식으로 사용자 데이터 참조
-예: \`{{groom.name}}\`, \`{{wedding.date}}\`, \`{{gallery.photos}}\`
-
-## 수정 가능 항목
-- 섹션 추가/삭제/순서 변경
-- 레이아웃 구조 변경
-- 화면 전환 효과
+예: \`{{couple.groom.name}}\`, \`{{wedding.date}}\`, \`{{photos.gallery}}\`
 
 ## 응답 예시
+갤러리 섹션 추가:
 \`\`\`json
 {
   "message": "갤러리 섹션을 추가했어요!",
   "changes": {
     "type": "partial",
     "layout": {
-      "screens": [
-        { "id": "gallery", "type": "gallery", "root": { ... } }
-      ]
+      "screens": [{
+        "id": "gallery-screen",
+        "type": "gallery",
+        "root": {
+          "id": "gallery-container",
+          "type": "container",
+          "style": { "padding": "16px" },
+          "children": [{
+            "id": "gallery-grid",
+            "type": "grid",
+            "props": { "images": "{{photos.gallery}}", "columns": 3, "gap": 8 }
+          }]
+        }
+      }]
     }
   }
 }
 \`\`\`
-`
 
-// ============================================
-// 에디터 모드 프롬프트
-// ============================================
-
-export const EDITOR_MODE_PROMPT = `${BASE_INSTRUCTION}
-
-# 에디터 수정 모드
-
-당신은 EditorSchema만 수정합니다.
-
-## EditorSchema 구조
-\`\`\`typescript
-interface EditorSchema {
-  version: '1.0'
-  meta: { id, name, layoutId, styleId }
-  sections: EditorSection[]
-  validation?: ValidationRules
-}
-
-interface EditorSection {
-  id: string
-  title: string
-  icon?: string
-  description?: string
-  collapsed?: boolean
-  fields: EditorField[]
-}
-
-interface EditorField {
-  id: string
-  type: 'text' | 'textarea' | 'number' | 'date' | 'time' | 'datetime' |
-        'select' | 'radio' | 'checkbox' | 'switch' | 'color' |
-        'image' | 'images' | 'file' | 'url' | 'email' | 'phone' |
-        'address' | 'bank-account' | 'person' | 'group' | 'array'
-  label: string
-  dataPath: string  // userData에서의 경로 (예: "groom.name")
-  placeholder?: string
-  required?: boolean
-  validation?: FieldValidation
-}
-\`\`\`
-
-## 수정 가능 항목
-- 편집 섹션 추가/삭제/순서 변경
-- 입력 필드 추가/수정/삭제
-- 필드 유형 변경
-- 유효성 검사 규칙
-
-## 응답 예시
+텍스트 스타일 변경:
 \`\`\`json
 {
-  "message": "신랑 정보에 직업 필드를 추가했어요!",
+  "message": "제목 스타일을 변경했어요!",
   "changes": {
     "type": "partial",
-    "editor": {
-      "sections": [{
-        "id": "groom",
-        "fields": [{
-          "id": "groom-job",
+    "layout": {
+      "screens": [{
+        "id": "intro",
+        "root": {
+          "id": "title",
           "type": "text",
-          "label": "직업",
-          "dataPath": "groom.job",
-          "placeholder": "신랑 직업을 입력하세요"
-        }]
+          "props": { "content": "{{couple.groom.name}} ♥ {{couple.bride.name}}", "as": "h1" },
+          "style": { "fontSize": 24, "fontWeight": 700, "textAlign": "center" }
+        }
       }]
     }
   }
@@ -235,7 +277,7 @@ interface EditorField {
 // 모드별 프롬프트 선택 함수
 // ============================================
 
-export type EditMode = 'style' | 'layout' | 'editor' | 'all'
+export type EditMode = 'style' | 'layout' | 'all'
 
 export function getPromptForMode(mode: EditMode): string {
   switch (mode) {
@@ -243,21 +285,18 @@ export function getPromptForMode(mode: EditMode): string {
       return STYLE_MODE_PROMPT
     case 'layout':
       return LAYOUT_MODE_PROMPT
-    case 'editor':
-      return EDITOR_MODE_PROMPT
     case 'all':
       // 전체 모드는 기존 전체 프롬프트 사용
       return `${BASE_INSTRUCTION}
 
 # 전체 수정 모드
 
-모든 스키마(Layout, Style, Editor)를 수정할 수 있습니다.
+Layout과 Style 스키마를 수정할 수 있습니다.
 현재 컨텍스트를 참고하여 적절한 변경사항을 생성하세요.
 
 ## 변경 시 주의사항
 - layout: 화면 구조, 섹션, 노드 트리
 - style: 색상, 폰트, 애니메이션
-- editor: 편집 가능한 필드 구성
 
 변경된 스키마만 changes에 포함하세요.
 `

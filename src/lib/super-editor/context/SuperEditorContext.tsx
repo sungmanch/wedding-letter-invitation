@@ -10,7 +10,6 @@ import {
 } from 'react'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
 import type { UserData } from '../schema/user-data'
 import type { PrimitiveNode } from '../schema/primitives'
 
@@ -22,7 +21,7 @@ export interface SuperEditorState {
   // 스키마 데이터
   layout: LayoutSchema | null
   style: StyleSchema | null
-  editor: EditorSchema | null
+  // editor는 더 이상 저장하지 않음 (Layout의 {{변수}}에서 동적 생성)
   userData: UserData | null
 
   // UI 상태
@@ -52,8 +51,9 @@ export interface HistoryEntry {
 // ============================================
 
 export type SuperEditorAction =
-  | { type: 'SET_TEMPLATE'; layout: LayoutSchema; style: StyleSchema; editor: EditorSchema }
+  | { type: 'SET_TEMPLATE'; layout: LayoutSchema; style: StyleSchema }
   | { type: 'SET_USER_DATA'; userData: UserData }
+  | { type: 'SET_STYLE'; style: StyleSchema }
   | { type: 'UPDATE_FIELD'; fieldPath: string; value: unknown }
   | { type: 'SELECT_NODE'; nodeId: string | null }
   | { type: 'SELECT_FIELD'; fieldId: string | null }
@@ -72,7 +72,6 @@ export type SuperEditorAction =
 const initialState: SuperEditorState = {
   layout: null,
   style: null,
-  editor: null,
   userData: null,
   selectedNodeId: null,
   selectedFieldId: null,
@@ -118,7 +117,6 @@ function superEditorReducer(
         ...state,
         layout: action.layout,
         style: action.style,
-        editor: action.editor,
         loading: false,
         error: null,
       }
@@ -136,6 +134,13 @@ function superEditorReducer(
         ],
         historyIndex: 0,
         dirty: false,
+      }
+
+    case 'SET_STYLE':
+      return {
+        ...state,
+        style: action.style,
+        dirty: true,
       }
 
     case 'UPDATE_FIELD': {
@@ -243,8 +248,9 @@ interface SuperEditorContextValue {
   state: SuperEditorState
   dispatch: React.Dispatch<SuperEditorAction>
   // 편의 함수들
-  setTemplate: (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => void
+  setTemplate: (layout: LayoutSchema, style: StyleSchema) => void
   setUserData: (userData: UserData) => void
+  setStyle: (style: StyleSchema) => void
   updateField: (fieldPath: string, value: unknown) => void
   selectNode: (nodeId: string | null) => void
   selectField: (fieldId: string | null) => void
@@ -270,7 +276,6 @@ interface SuperEditorProviderProps {
   initialTemplate?: {
     layout: LayoutSchema
     style: StyleSchema
-    editor: EditorSchema
   }
   initialUserData?: UserData
 }
@@ -284,7 +289,6 @@ export function SuperEditorProvider({
     ...initialState,
     layout: initialTemplate?.layout || null,
     style: initialTemplate?.style || null,
-    editor: initialTemplate?.editor || null,
     userData: initialUserData || null,
     history: initialUserData
       ? [{ userData: initialUserData, timestamp: Date.now(), description: 'Initial' }]
@@ -294,14 +298,18 @@ export function SuperEditorProvider({
 
   // 편의 함수들
   const setTemplate = useCallback(
-    (layout: LayoutSchema, style: StyleSchema, editor: EditorSchema) => {
-      dispatch({ type: 'SET_TEMPLATE', layout, style, editor })
+    (layout: LayoutSchema, style: StyleSchema) => {
+      dispatch({ type: 'SET_TEMPLATE', layout, style })
     },
     []
   )
 
   const setUserData = useCallback((userData: UserData) => {
     dispatch({ type: 'SET_USER_DATA', userData })
+  }, [])
+
+  const setStyle = useCallback((style: StyleSchema) => {
+    dispatch({ type: 'SET_STYLE', style })
   }, [])
 
   const updateField = useCallback((fieldPath: string, value: unknown) => {
@@ -365,6 +373,7 @@ export function SuperEditorProvider({
       dispatch,
       setTemplate,
       setUserData,
+      setStyle,
       updateField,
       selectNode,
       selectField,
@@ -381,6 +390,7 @@ export function SuperEditorProvider({
       state,
       setTemplate,
       setUserData,
+      setStyle,
       updateField,
       selectNode,
       selectField,
@@ -429,11 +439,6 @@ export function useSuperEditorLayout() {
 export function useSuperEditorStyle() {
   const { state } = useSuperEditor()
   return state.style
-}
-
-export function useSuperEditorEditor() {
-  const { state } = useSuperEditor()
-  return state.editor
 }
 
 export function useSuperEditorUserData() {

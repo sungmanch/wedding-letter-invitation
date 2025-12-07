@@ -1,15 +1,65 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useSuperEditor } from '../context'
 import { SectionRenderer } from './fields/FieldRenderer'
+import { generateEditorSections } from '../utils/dynamic-editor'
+import { generateEditorSectionsFromLayout } from '../utils/editor-generator'
+import type { SectionType, SectionScreen } from '../skeletons/types'
+import type { EditorSection } from '../schema/editor'
+import type { LayoutSchema } from '../schema/layout'
+import type { VariableDeclaration } from '../schema/variables'
 
 interface EditorPanelProps {
   className?: string
+  /** 활성화된 섹션 목록 - 제공되면 동적으로 에디터 필드 생성 (레거시) */
+  enabledSections?: SectionType[]
+  /** 커스텀 섹션 (동적 생성 대신 직접 제공) */
+  customSections?: EditorSection[]
+  /** Layout 스키마 - 제공되면 변수 기반 동적 에디터 생성 */
+  layout?: LayoutSchema
+  /** 섹션 스크린 배열 - layout 대신 사용 가능 */
+  screens?: SectionScreen[]
+  /** AI/Skeleton이 제공한 변수 선언 */
+  declarations?: VariableDeclaration[]
 }
 
-export function EditorPanel({ className = '' }: EditorPanelProps) {
+export function EditorPanel({
+  className = '',
+  enabledSections,
+  customSections,
+  layout,
+  screens,
+  declarations,
+}: EditorPanelProps) {
   const { state } = useSuperEditor()
-  const { editor, loading, error } = state
+  const { loading, error } = state
+
+  // 동적으로 에디터 섹션 생성
+  // 우선순위: customSections > layout/screens 기반 > enabledSections(레거시)
+  const sections = useMemo(() => {
+    // 1. 커스텀 섹션 직접 제공
+    if (customSections) return customSections
+
+    // 2. 새 방식: Layout/Screens에서 변수 추출하여 동적 생성
+    if (layout || screens) {
+      return generateEditorSectionsFromLayout({
+        layout,
+        screens,
+        declarations,
+        fallbackToStandard: true,
+        inferUnknown: true,
+        groupBySection: true,
+      })
+    }
+
+    // 3. 레거시 방식: enabledSections 기반 정적 매핑
+    if (enabledSections && enabledSections.length > 0) {
+      return generateEditorSections(enabledSections)
+    }
+
+    return []
+  }, [enabledSections, customSections, layout, screens, declarations])
 
   if (loading) {
     return (
@@ -30,10 +80,10 @@ export function EditorPanel({ className = '' }: EditorPanelProps) {
     )
   }
 
-  if (!editor) {
+  if (sections.length === 0) {
     return (
       <div className={`flex items-center justify-center p-8 text-gray-500 ${className}`}>
-        <p>에디터를 불러오는 중...</p>
+        <p>편집할 필드가 없습니다</p>
       </div>
     )
   }
@@ -41,20 +91,8 @@ export function EditorPanel({ className = '' }: EditorPanelProps) {
   return (
     <div className={`overflow-auto ${className}`}>
       <div className="p-4 space-y-4">
-        {/* 에디터 헤더 */}
-        <div className="pb-3 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {editor.meta.name}
-          </h2>
-          {editor.meta.description && (
-            <p className="text-sm text-gray-500 mt-1">
-              {editor.meta.description}
-            </p>
-          )}
-        </div>
-
         {/* 섹션들 */}
-        {editor.sections
+        {sections
           .sort((a, b) => a.order - b.order)
           .map((section) => (
             <SectionRenderer key={section.id} section={section} />

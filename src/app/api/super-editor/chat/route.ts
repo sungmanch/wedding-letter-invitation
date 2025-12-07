@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getPromptForMode, type EditMode } from '@/lib/super-editor/prompts/mode-prompts'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
-import type { EditorSchema } from '@/lib/super-editor/schema/editor'
+
 
 // ============================================
 // Types
@@ -14,7 +14,6 @@ interface ChatRequest {
   editMode?: EditMode
   currentLayout?: LayoutSchema
   currentStyle?: StyleSchema
-  currentEditor?: EditorSchema
   history?: Array<{
     role: 'user' | 'assistant'
     content: string
@@ -27,7 +26,6 @@ interface ChatResponse {
     type: 'full' | 'partial'
     layout?: LayoutSchema
     style?: StyleSchema
-    editor?: EditorSchema
     description?: string
     affectedNodes?: string[]
   }
@@ -56,7 +54,7 @@ function buildUserMessage(request: ChatRequest): string {
   const mode = request.editMode || 'style'
 
   // 현재 템플릿 상태 (모드에 따라 필요한 것만)
-  const hasContext = request.currentLayout || request.currentStyle || request.currentEditor
+  const hasContext = request.currentLayout || request.currentStyle
   if (hasContext) {
     parts.push('## 현재 상태\n')
 
@@ -74,25 +72,13 @@ function buildUserMessage(request: ChatRequest): string {
       // 레이아웃은 구조만 요약
       const layoutSummary = {
         meta: request.currentLayout.meta,
-        screens: request.currentLayout.screens?.map(s => ({
+        screens: request.currentLayout.screens?.map((s) => ({
           id: s.id,
           type: s.type,
           name: s.name,
         })),
       }
       parts.push(`### Layout\n\`\`\`json\n${JSON.stringify(layoutSummary, null, 2)}\n\`\`\`\n`)
-    }
-
-    if (request.currentEditor && (mode === 'editor' || mode === 'all')) {
-      // 에디터는 섹션 목록만 요약
-      const editorSummary = {
-        sections: request.currentEditor.sections?.map(s => ({
-          id: s.id,
-          title: s.title,
-          fieldCount: s.fields?.length || 0,
-        })),
-      }
-      parts.push(`### Editor\n\`\`\`json\n${JSON.stringify(editorSummary, null, 2)}\n\`\`\`\n`)
     }
   }
 
@@ -133,25 +119,25 @@ export async function POST(request: NextRequest) {
     const body: ChatRequest = await request.json()
 
     if (!body.message) {
-      return NextResponse.json(
-        { error: '메시지가 필요합니다.' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '메시지가 필요합니다.' }, { status: 400 })
     }
-
-    // Gemini 모델 초기화
-    const model = genAI.getGenerativeModel({ model: MODEL })
-
     // 모드별 시스템 프롬프트 선택
     const editMode = body.editMode || 'style'
     const systemPrompt = getPromptForMode(editMode)
+
+    // Gemini 모델 초기화 (시스템 프롬프트 포함)
+    const model = genAI.getGenerativeModel({
+      model: MODEL,
+      systemInstruction: systemPrompt,
+    })
 
     // 대화 히스토리 구성 (Gemini 형식)
     const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = []
 
     // 이전 대화 히스토리 추가 (최근 것만)
     if (body.history && body.history.length > 0) {
-      for (const msg of body.history.slice(-4)) { // 최근 4개만
+      for (const msg of body.history.slice(-4)) {
+        // 최근 4개만
         contents.push({
           role: msg.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: msg.content }],
@@ -159,22 +145,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 현재 사용자 메시지 추가 (시스템 프롬프트 포함)
+    // 현재 사용자 메시지 추가
     const userMessage = buildUserMessage(body)
-    const fullPrompt = contents.length === 0
-      ? `${systemPrompt}\n\n${userMessage}`
-      : userMessage
-
     contents.push({
       role: 'user',
-      parts: [{ text: fullPrompt }],
+      parts: [{ text: userMessage }],
     })
-
+    console.log(contents)
     // Gemini API 호출
     const result = await model.generateContent({
       contents,
       generationConfig: {
-        maxOutputTokens: 4096, // 컨텍스트 절약
+        maxOutputTokens: 4096,
         temperature: 0.7,
       },
     })
@@ -189,13 +171,9 @@ export async function POST(request: NextRequest) {
     const parsed = parseAIResponse(text)
 
     return NextResponse.json(parsed)
-
   } catch (error: unknown) {
     console.error('Super Editor Chat API Error:', error)
 
-    return NextResponse.json(
-      { error: '요청을 처리하는 중 오류가 발생했습니다.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '요청을 처리하는 중 오류가 발생했습니다.' }, { status: 500 })
   }
 }

@@ -1,0 +1,816 @@
+'use client'
+
+/**
+ * Super Editor - Create Page
+ * 탭으로 템플릿 선택 또는 AI 채팅으로 인트로 생성
+ */
+
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Send, Loader2, Sparkles, RefreshCw, Grid } from 'lucide-react'
+import { InvitationPreview } from '@/lib/super-editor/components'
+import { introResultToLayout, extractIntroLayout } from '@/lib/super-editor/adapters'
+import {
+  generateIntroOnlyAction,
+  completeTemplateAction,
+  saveInvitationAction,
+} from '@/lib/super-editor/actions/generate'
+import type { IntroGenerationResult } from '@/lib/super-editor/services'
+import {
+  PreviewDataForm,
+  formDataToUserData,
+  DEFAULT_PREVIEW_FORM_DATA,
+  type PreviewFormData,
+} from './PreviewDataForm'
+
+// 레거시 템플릿
+import { legacyPresets, categoryLabels } from '@/lib/super-editor/presets/legacy'
+import {
+  buildLegacyIntro,
+  getLegacyPresetPreviews,
+  convertLegacyToIntroResult,
+  type LegacyIntroResult,
+} from '@/lib/super-editor/presets/legacy/intro-builders'
+import type { IntroBuilderData } from '@/lib/super-editor/presets/legacy/intro-builders'
+
+// 새 super-editor 템플릿
+import { getAllTemplates, getTemplate, type TemplateId } from '@/lib/super-editor/templates'
+import type { Screen } from '@/lib/super-editor/schema/layout'
+import type { StyleSchema } from '@/lib/super-editor/schema/style'
+
+type CreateMode = 'template' | 'chat'
+
+const SAMPLE_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
+
+// ============================================
+// Types
+// ============================================
+
+interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+}
+
+// ============================================
+// Constants
+// ============================================
+
+const QUICK_PROMPTS = [
+  { label: '모던 미니멀', prompt: '모던하고 미니멀한 스타일로 만들어주세요' },
+  { label: '로맨틱 플라워', prompt: '꽃과 함께 로맨틱한 분위기로 만들어주세요' },
+  { label: '우아한 클래식', prompt: '우아하고 클래식한 스타일이 좋아요' },
+  { label: '따뜻한 감성', prompt: '따뜻하고 포근한 느낌으로 부탁해요' },
+]
+
+const INITIAL_MESSAGE: ChatMessage = {
+  id: 'welcome',
+  role: 'assistant',
+  content:
+    '안녕하세요! 청첩장 디자인을 도와드릴게요.\n\n어떤 분위기의 청첩장을 원하시나요? 색상, 스타일, 느낌 등 자유롭게 말씀해주세요.',
+  timestamp: new Date(),
+}
+
+// ============================================
+// Components
+// ============================================
+
+function MessageBubble({ message }: { message: ChatMessage }) {
+  const isUser = message.role === 'user'
+
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+          isUser
+            ? 'bg-rose-500 text-white rounded-br-sm'
+            : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+        }`}
+      >
+        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+      </div>
+    </div>
+  )
+}
+
+function LoadingDots() {
+  return (
+    <div className="flex justify-start">
+      <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
+        <div className="flex gap-1.5">
+          <span
+            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '0ms' }}
+          />
+          <span
+            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '150ms' }}
+          />
+          <span
+            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '300ms' }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// PhoneFrame 크기 설정
+const PHONE_FRAME_WIDTH = 320
+const PHONE_FRAME_HEIGHT = 580
+
+// ============================================
+// Template Gallery
+// ============================================
+
+interface TemplateGalleryProps {
+  onSelect: (presetId: string, isNewTemplate?: boolean) => void
+  selectedId: string | null
+  selectedType: 'legacy' | 'new' | null
+}
+
+// 새 템플릿 카테고리 라벨
+const newTemplateCategoryLabels: Record<string, string> = {
+  letter: '레터 스타일',
+  chat: '채팅 스타일',
+}
+
+function TemplateGallery({ onSelect, selectedId, selectedType }: TemplateGalleryProps) {
+  // 새 super-editor 템플릿
+  const newTemplates = useMemo(() => getAllTemplates(), [])
+
+  // 레거시 템플릿
+  const previews = useMemo(() => getLegacyPresetPreviews(legacyPresets), [])
+
+  const grouped = useMemo(() => {
+    const groups: Record<string, typeof previews> = {}
+    previews.forEach((p) => {
+      if (!groups[p.category]) groups[p.category] = []
+      groups[p.category].push(p)
+    })
+    return groups
+  }, [previews])
+
+  // 새 템플릿 카테고리별 그룹화
+  const newGrouped = useMemo(() => {
+    const groups: Record<string, typeof newTemplates> = {}
+    newTemplates.forEach((t) => {
+      if (!groups[t.category]) groups[t.category] = []
+      groups[t.category].push(t)
+    })
+    return groups
+  }, [newTemplates])
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* 새 템플릿 섹션 */}
+      <div className="mb-2">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-600 rounded-full">NEW</span>
+          <span className="text-xs text-gray-500">super-editor 템플릿</span>
+        </div>
+        {Object.entries(newGrouped).map(([category, templates]) => (
+          <div key={`new-${category}`} className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              {newTemplateCategoryLabels[category] || category}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {templates.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => onSelect(t.id, true)}
+                  className={`p-3 rounded-xl border-2 text-left transition-all ${
+                    selectedId === t.id && selectedType === 'new'
+                      ? 'border-rose-500 bg-rose-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex gap-1 mb-2">
+                    {/* 색상 미리보기 (StyleSchema에서 추출) */}
+                    <div
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: t.style.theme.colors.primary[500] }}
+                    />
+                    <div
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: t.style.theme.colors.neutral[50] }}
+                    />
+                    <div
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: t.style.theme.colors.background.default }}
+                    />
+                  </div>
+                  <p className="font-medium text-gray-900 text-sm">{t.name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.category}</p>
+                  <div className="flex gap-1 mt-2">
+                    {(t.style.meta.mood || []).slice(0, 2).map((m) => (
+                      <span
+                        key={m}
+                        className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded"
+                      >
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 구분선 */}
+      <div className="border-t border-gray-200 pt-4">
+        <span className="text-xs text-gray-400">레거시 템플릿</span>
+      </div>
+
+      {/* 레거시 템플릿 섹션 */}
+      {Object.entries(grouped).map(([category, templates]) => (
+        <div key={category}>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            {categoryLabels[category as keyof typeof categoryLabels]?.ko || category}
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {templates.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => onSelect(t.id, false)}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${
+                  selectedId === t.id && selectedType === 'legacy'
+                    ? 'border-rose-500 bg-rose-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex gap-1 mb-2">
+                  {[t.colors.primary, t.colors.accent, t.colors.background].map((c, i) => (
+                    <div
+                      key={i}
+                      className="w-4 h-4 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+                <p className="font-medium text-gray-900 text-sm">{t.nameKo}</p>
+                <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.descriptionKo}</p>
+                <div className="flex gap-1 mt-2">
+                  {t.mood.slice(0, 2).map((m) => (
+                    <span
+                      key={m}
+                      className="px-1.5 py-0.5 text-[10px] bg-gray-100 text-gray-600 rounded"
+                    >
+                      {m}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function EmptyPreview() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full text-gray-400 px-8">
+      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+        <Sparkles className="w-10 h-10 text-gray-300" />
+      </div>
+      <p className="text-center text-sm font-medium">템플릿을 선택하거나</p>
+      <p className="text-center text-sm font-medium">AI에게 스타일을 요청해보세요</p>
+    </div>
+  )
+}
+
+// ============================================
+// Main Component
+// ============================================
+
+export default function SuperEditorCreatePage() {
+  const router = useRouter()
+
+  // Mode: template or chat
+  const [mode, setMode] = useState<CreateMode>('chat')
+
+  // Template selection
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  const [selectedTemplateType, setSelectedTemplateType] = useState<'legacy' | 'new' | null>(null)
+  const [legacyResult, setLegacyResult] = useState<LegacyIntroResult | null>(null)
+
+  // 새 템플릿용 상태 (Screen 타입 직접 사용)
+  const [newTemplateScreen, setNewTemplateScreen] = useState<Screen | null>(null)
+  const [newTemplateStyle, setNewTemplateStyle] = useState<StyleSchema | null>(null)
+
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Stage 1 결과: Style + Intro (AI 생성용)
+  const [introResult, setIntroResult] = useState<IntroGenerationResult | null>(null)
+
+  // 프리뷰 데이터 폼
+  const [previewFormData, setPreviewFormData] = useState<PreviewFormData>(DEFAULT_PREVIEW_FORM_DATA)
+  const previewUserData = useMemo(() => formDataToUserData(previewFormData), [previewFormData])
+
+  // Refs
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // previewFormData를 IntroBuilderData로 변환
+  const legacyBuilderData = useMemo<IntroBuilderData>(
+    () => ({
+      groomName: previewFormData.groomName || '신랑',
+      brideName: previewFormData.brideName || '신부',
+      weddingDate: previewFormData.weddingDate || '2025년 3월 15일',
+      venueName: '웨딩홀',
+      mainImage: previewFormData.mainImage || SAMPLE_IMAGE,
+    }),
+    [previewFormData]
+  )
+
+  // 템플릿 선택 핸들러
+  const handleTemplateSelect = useCallback(
+    (presetId: string, isNewTemplate: boolean = false) => {
+      setSelectedTemplateId(presetId)
+      setSelectedTemplateType(isNewTemplate ? 'new' : 'legacy')
+
+      if (isNewTemplate) {
+        // 새 super-editor 템플릿
+        const template = getTemplate(presetId as TemplateId)
+        if (template) {
+          // LayoutSchema의 첫 번째 screen을 intro로 사용 (Screen 타입 그대로 사용)
+          const screen = template.layout.screens[0]
+          if (screen) {
+            setNewTemplateScreen(screen)
+            setNewTemplateStyle(template.style)
+            setIntroResult(null)
+            setLegacyResult(null)
+          }
+        }
+      } else {
+        // 레거시 템플릿
+        setIntroResult(null)
+        setNewTemplateScreen(null)
+        setNewTemplateStyle(null)
+        const preset = legacyPresets[presetId]
+        if (preset) {
+          const result = buildLegacyIntro(preset, legacyBuilderData)
+          setLegacyResult(result)
+        }
+      }
+    },
+    [legacyBuilderData]
+  )
+
+  // 레거시 템플릿 선택 시 폼 데이터 변경에 따라 결과 업데이트
+  useEffect(() => {
+    if (selectedTemplateId && selectedTemplateType === 'legacy') {
+      const preset = legacyPresets[selectedTemplateId]
+      if (preset) {
+        const result = buildLegacyIntro(preset, legacyBuilderData)
+        setLegacyResult(result)
+      }
+    }
+  }, [selectedTemplateId, selectedTemplateType, legacyBuilderData])
+
+  // Auto scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Auto resize textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 100)}px`
+    }
+  }, [input])
+
+  // Send message - Stage 1: Intro 생성
+  const handleSend = useCallback(
+    async (messageText?: string) => {
+      const text = messageText ?? input.trim()
+      if (!text || isLoading) return
+
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, userMessage])
+      setInput('')
+      setIsLoading(true)
+      setSelectedTemplateId(null) // 채팅 시 템플릿 선택 해제
+      setLegacyResult(null) // 레거시 결과 초기화
+
+      try {
+        // Stage 1: Style + Intro만 생성
+        const response = await generateIntroOnlyAction({
+          prompt: text,
+          mood: [],
+        })
+
+        if (!response.success || !response.data) {
+          throw new Error(response.error ?? 'AI 생성에 실패했습니다')
+        }
+
+        // Update intro result
+        setIntroResult(response.data)
+
+        // Add assistant message
+        const assistantMessage: ChatMessage = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content:
+            '인트로 디자인을 만들었어요! 오른쪽 미리보기를 확인해주세요.\n\n마음에 드시면 "이 디자인으로 시작" 버튼을 눌러주세요.\n다른 스타일을 원하시면 다시 말씀해주세요.',
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, assistantMessage])
+      } catch (err) {
+        console.error('Generation failed:', err)
+
+        const errorMessage: ChatMessage = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: '죄송해요, 디자인 생성 중 문제가 발생했어요. 다시 시도해주시겠어요?',
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, errorMessage])
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [input, isLoading]
+  )
+
+  // Handle key down
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  // Regenerate / Reset
+  const handleRegenerate = () => {
+    setIntroResult(null)
+    setLegacyResult(null)
+    setNewTemplateScreen(null)
+    setNewTemplateStyle(null)
+    setSelectedTemplateId(null)
+    setSelectedTemplateType(null)
+    if (mode === 'chat') {
+      setMessages([
+        INITIAL_MESSAGE,
+        {
+          id: `regen-${Date.now()}`,
+          role: 'assistant',
+          content: '새로운 디자인을 만들어볼까요? 원하는 스타일을 알려주세요!',
+          timestamp: new Date(),
+        },
+      ])
+    }
+  }
+
+  // Stage 2 & 3: 기본 섹션 추가 후 DB 저장 및 편집 화면으로 이동
+  const handleStartEditing = async () => {
+    // 레거시 템플릿, AI 결과, 또는 새 템플릿 중 하나가 있어야 함
+    if (!introResult && !legacyResult && !newTemplateScreen) return
+
+    setIsLoading(true)
+
+    try {
+      // 새 super-editor 템플릿: completeTemplateAction으로 기본 섹션 추가 후 저장
+      if (newTemplateScreen && newTemplateStyle && selectedTemplateId) {
+        // Stage 2: 기본 섹션들로 전체 템플릿 완성
+        const completeResponse = await completeTemplateAction({
+          newTemplateId: selectedTemplateId,
+        })
+
+        if (!completeResponse.success || !completeResponse.data) {
+          throw new Error(completeResponse.error ?? '템플릿 완성에 실패했습니다')
+        }
+
+        // Stage 3: DB 저장
+        const saveResponse = await saveInvitationAction({
+          generationResult: completeResponse.data,
+          previewData: {
+            groomName: previewFormData.groomName,
+            brideName: previewFormData.brideName,
+            weddingDate: previewFormData.weddingDate,
+            weddingTime: previewFormData.weddingTime,
+            mainImage: previewFormData.mainImage,
+          },
+        })
+
+        if (!saveResponse.success || !saveResponse.data) {
+          throw new Error(saveResponse.error ?? '저장에 실패했습니다')
+        }
+
+        // 편집 페이지로 이동
+        router.push(`/se/${saveResponse.data.invitationId}/edit`)
+        return
+      }
+
+      // 레거시 결과를 IntroGenerationResult로 변환 (통합 처리)
+      let targetIntroResult = introResult
+      if (legacyResult && selectedTemplateId) {
+        const preset = legacyPresets[selectedTemplateId]
+        if (preset) {
+          targetIntroResult = convertLegacyToIntroResult(legacyResult, preset)
+        }
+      }
+
+      if (!targetIntroResult) {
+        throw new Error('인트로 결과가 없습니다')
+      }
+
+      // Stage 2: 기본 섹션들로 전체 템플릿 완성
+      const completeResponse = await completeTemplateAction({
+        introResult: targetIntroResult,
+      })
+
+      if (!completeResponse.success || !completeResponse.data) {
+        throw new Error(completeResponse.error ?? '템플릿 완성에 실패했습니다')
+      }
+
+      // Stage 3: DB 저장
+      const saveResponse = await saveInvitationAction({
+        generationResult: completeResponse.data,
+        previewData: {
+          groomName: previewFormData.groomName,
+          brideName: previewFormData.brideName,
+          weddingDate: previewFormData.weddingDate,
+          weddingTime: previewFormData.weddingTime,
+          mainImage: previewFormData.mainImage,
+        },
+        legacyPresetId: selectedTemplateId || undefined,
+      })
+
+      if (!saveResponse.success || !saveResponse.data) {
+        throw new Error(saveResponse.error ?? '저장에 실패했습니다')
+      }
+
+      // 편집 페이지로 이동
+      router.push(`/se/${saveResponse.data.invitationId}/edit`)
+    } catch (err) {
+      console.error('Template save failed:', err)
+      alert(err instanceof Error ? err.message : '저장에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="sticky top-0 z-20 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.back()}
+                className="p-2 -ml-2 rounded-full hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <h1 className="text-lg font-semibold text-gray-900">새 청첩장 만들기</h1>
+            </div>
+            {(introResult || legacyResult || newTemplateScreen) && (
+              <button
+                onClick={handleStartEditing}
+                disabled={isLoading}
+                className="px-4 py-2 bg-rose-500 text-white text-sm font-medium rounded-lg hover:bg-rose-600 disabled:opacity-50 transition-colors"
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    준비 중...
+                  </span>
+                ) : (
+                  '이 디자인으로 시작'
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content - 2 Panel Layout */}
+      <main className="max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)]">
+          {/* Left Panel - Tabs */}
+          <div className="flex-1 lg:max-w-xl flex flex-col bg-white border-r border-gray-200">
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setMode('chat')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+                  mode === 'chat'
+                    ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                AI 생성
+              </button>
+              <button
+                onClick={() => setMode('template')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+                  mode === 'template'
+                    ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Grid className="w-4 h-4" />
+                템플릿 선택
+              </button>
+            </div>
+
+            {/* Chat Mode */}
+            {mode === 'chat' && (
+              <>
+                {/* Chat Header */}
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+                  <div className="w-10 h-10 bg-linear-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">디자인 어시스턴트</h3>
+                    <p className="text-xs text-gray-500">AI가 인트로를 디자인해드려요</p>
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <MessageBubble key={message.id} message={message} />
+                  ))}
+                  {isLoading && <LoadingDots />}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Quick Prompts */}
+                {messages.length === 1 && (
+                  <div className="px-4 pb-2">
+                    <p className="text-xs text-gray-500 mb-2">빠른 시작:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_PROMPTS.map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => handleSend(item.prompt)}
+                          className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Input */}
+                <div className="p-4 border-t border-gray-100">
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1 relative">
+                      <textarea
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="원하는 스타일을 설명해주세요..."
+                        rows={1}
+                        disabled={isLoading}
+                        className="w-full px-4 py-3 bg-gray-100 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-colors text-sm disabled:opacity-50"
+                        style={{ maxHeight: '100px' }}
+                      />
+                    </div>
+                    <button
+                      onClick={() => handleSend()}
+                      disabled={!input.trim() || isLoading}
+                      className="p-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2 text-center">Shift + Enter로 줄바꿈</p>
+                </div>
+              </>
+            )}
+
+            {/* Template Mode */}
+            {mode === 'template' && (
+              <TemplateGallery
+                onSelect={handleTemplateSelect}
+                selectedId={selectedTemplateId}
+                selectedType={selectedTemplateType}
+              />
+            )}
+          </div>
+
+          {/* Right Panel - Preview (Intro Only) */}
+          <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-8 bg-gray-50 overflow-y-auto">
+            <div className="flex flex-col items-center w-full max-w-md">
+              {/* 프리뷰 데이터 입력 폼 */}
+              <div className="w-full mb-6">
+                <PreviewDataForm
+                  data={previewFormData}
+                  onChange={setPreviewFormData}
+                  supportsOverlay={false} // TODO: 템플릿별 오버레이 지원 여부 확인
+                />
+              </div>
+
+              <div className="text-sm text-gray-500 mb-4">인트로 미리보기</div>
+              {legacyResult && selectedTemplateId ? (
+                // 레거시 템플릿
+                (() => {
+                  const preset = legacyPresets[selectedTemplateId]
+                  if (!preset) return <EmptyPreview />
+                  const converted = convertLegacyToIntroResult(legacyResult, preset)
+                  return (
+                    <InvitationPreview
+                      layout={introResultToLayout(converted)}
+                      style={converted.style}
+                      userData={previewUserData}
+                      mode="preview"
+                      visibleSections={['intro']}
+                      withFrame
+                      frameWidth={PHONE_FRAME_WIDTH}
+                      frameHeight={PHONE_FRAME_HEIGHT}
+                    />
+                  )
+                })()
+              ) : newTemplateScreen && newTemplateStyle && selectedTemplateId ? (
+                // 새 super-editor 템플릿
+                (() => {
+                  const template = getTemplate(selectedTemplateId as TemplateId)
+                  if (!template) return <EmptyPreview />
+                  return (
+                    <InvitationPreview
+                      layout={extractIntroLayout(template.layout)}
+                      style={newTemplateStyle}
+                      userData={previewUserData}
+                      mode="preview"
+                      visibleSections={['intro']}
+                      withFrame
+                      frameWidth={PHONE_FRAME_WIDTH}
+                      frameHeight={PHONE_FRAME_HEIGHT}
+                    />
+                  )
+                })()
+              ) : introResult ? (
+                // AI 생성 결과
+                <InvitationPreview
+                  layout={introResultToLayout(introResult)}
+                  style={introResult.style}
+                  userData={previewUserData}
+                  mode="preview"
+                  visibleSections={['intro']}
+                  withFrame
+                  frameWidth={PHONE_FRAME_WIDTH}
+                  frameHeight={PHONE_FRAME_HEIGHT}
+                />
+              ) : (
+                <EmptyPreview />
+              )}
+
+              {/* Regenerate button */}
+              {(introResult || legacyResult || newTemplateScreen) && (
+                <button
+                  onClick={handleRegenerate}
+                  className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  다시 생성하기
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Mobile Preview FAB */}
+      {(introResult || legacyResult || newTemplateScreen) && (
+        <div className="fixed bottom-20 right-4 lg:hidden">
+          <button
+            onClick={() => {
+              /* TODO: 모바일 프리뷰 모달 */
+            }}
+            className="w-14 h-14 bg-rose-500 text-white rounded-full shadow-lg flex items-center justify-center"
+          >
+            <Sparkles className="w-6 h-6" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

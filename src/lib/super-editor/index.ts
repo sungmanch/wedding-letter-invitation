@@ -6,7 +6,7 @@
  * - 28개 Primitives (기본 블록)
  * - 30+ Animation Presets
  * - 15+ Transition Presets
- * - Schema Types (Layout, Style, Editor, UserData)
+ * - Schema Types (Layout, Style, UserData)
  */
 
 // Schema Types
@@ -68,7 +68,6 @@ export type {
 } from './schema/style'
 
 export type {
-  EditorSchema,
   EditorSection,
   EditorField,
   FieldType,

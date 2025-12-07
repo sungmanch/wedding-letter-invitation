@@ -24,7 +24,6 @@ interface ChatPanelProps {
 const EDIT_MODES: { mode: EditMode; label: string; icon: string; description: string }[] = [
   { mode: 'style', label: '스타일', icon: '🎨', description: '색상, 폰트, 테마' },
   { mode: 'layout', label: '레이아웃', icon: '📐', description: '섹션 구조, 순서' },
-  { mode: 'editor', label: '입력필드', icon: '✏️', description: '편집 가능 항목' },
   { mode: 'all', label: '전체', icon: '🔧', description: '모든 항목 수정' },
 ]
 

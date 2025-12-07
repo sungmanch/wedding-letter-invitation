@@ -22,6 +22,20 @@
       "when": 1764870210733,
       "tag": "0002_light_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1764946097057,
+      "tag": "0003_opposite_impossible_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765076076808,
+      "tag": "0004_curious_electro",
+      "breakpoints": true
     }
   ]
 }

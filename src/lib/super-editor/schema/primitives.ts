@@ -1,6 +1,6 @@
 /**
  * Super Editor - Primitives Schema
- * 기본 빌딩 블록 타입 정의 (28개)
+ * 기본 빌딩 블록 타입 정의 (29개)
  */
 
 // ============================================
@@ -41,6 +41,10 @@ export type PrimitiveType =
   // 로직 (2개)
   | 'conditional'
   | 'repeat'
+  // 오디오 (1개)
+  | 'bgm-player'
+  // 확장 (1개)
+  | 'custom'
 
 // ============================================
 // Base Node Interface
@@ -305,11 +309,47 @@ export interface RepeatProps {
 }
 
 // ============================================
+// Audio Primitives Props
+// ============================================
+
+export interface BgmPlayerProps {
+  src?: string // 커스텀 오디오 URL 또는 데이터 바인딩 ({{bgm.url}})
+  trackId?: string // 프리셋 BGM ID
+  autoplay?: boolean // 기본: true
+  loop?: boolean // 기본: true
+  volume?: number // 0-1, 기본: 0.5
+  fadeIn?: number // 페이드 인 (ms)
+  fadeOut?: number // 페이드 아웃 (ms)
+  syncWithScroll?: {
+    enabled: boolean
+    startVolume?: number // 기본: 1
+    endVolume?: number // 기본: 0.3
+  }
+  showControls?: boolean // 기본: true
+  controlsPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+  controlsStyle?: 'minimal' | 'vinyl'
+}
+
+// ============================================
 // Animation Config Types
 // ============================================
 
 export interface AnimationConfig {
-  preset: AnimationPreset
+  /**
+   * 프리셋 애니메이션 (미리 정의된 효과)
+   * preset 또는 keyframes 중 하나 필수
+   */
+  preset?: AnimationPreset
+  /**
+   * 커스텀 키프레임 (프리셋 대신 직접 정의)
+   * 예: [{ offset: 0, opacity: 0 }, { offset: 1, opacity: 1 }]
+   */
+  keyframes?: CustomAnimationKeyframe[]
+  /**
+   * StyleSchema.customStyles.keyframes에 정의된 이름 참조
+   * 예: 'grain', 'flicker'
+   */
+  keyframesRef?: string
   duration?: number
   delay?: number
   easing?: EasingType
@@ -322,6 +362,18 @@ export interface AnimationConfig {
   // 스태거 애니메이션용
   staggerDelay?: number
   staggerFrom?: 'start' | 'center' | 'end' | 'random'
+}
+
+/**
+ * 커스텀 애니메이션 키프레임
+ */
+export interface CustomAnimationKeyframe {
+  offset: number // 0-1
+  opacity?: number
+  transform?: string
+  filter?: string
+  clipPath?: string
+  [property: string]: string | number | undefined
 }
 
 export type AnimationPreset =
@@ -430,3 +482,49 @@ export type PrimitiveProps =
   | TransitionProps
   | ConditionalProps
   | RepeatProps
+  | BgmPlayerProps
+  | CustomProps
+
+// ============================================
+// Custom Primitive Props (확장용)
+// ============================================
+
+/**
+ * Custom primitive - 가상 요소, 원시 CSS, 확장 기능 지원
+ */
+export interface CustomProps {
+  /**
+   * StyleSchema.customStyles.classes에 정의된 클래스 이름
+   * 가상 요소(::before, ::after) 포함 가능
+   */
+  className?: string
+
+  /**
+   * 인라인 커스텀 CSS (해당 요소에만 적용)
+   */
+  inlineCss?: string
+
+  /**
+   * 가상 요소 직접 정의 (className 없이 사용 시)
+   */
+  pseudoElements?: {
+    before?: PseudoElementConfig
+    after?: PseudoElementConfig
+  }
+
+  /**
+   * 애니메이션 설정 (커스텀 keyframes 포함)
+   */
+  animation?: AnimationConfig
+
+  /**
+   * 컴포넌트 태그 (기본: div)
+   */
+  as?: 'div' | 'span' | 'section' | 'article'
+}
+
+export interface PseudoElementConfig {
+  content?: string
+  style?: CSSProperties
+  animation?: string
+}
