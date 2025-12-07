@@ -432,13 +432,13 @@ export const parentsSkeleton: SectionSkeleton = {
     },
 
     // ============================================
-    // Elegant Variant (세로 배치 + 영문 이름)
+    // Elegant Variant (세로 배치)
     // ============================================
     {
       id: 'elegant',
       name: '엘레강스',
-      description: '세로 배치, 영문 이름 포함',
-      tags: ['elegant', 'vertical', 'english'],
+      description: '세로 배치, 한 줄 부모 소개',
+      tags: ['elegant', 'vertical', 'clean'],
       structure: {
         id: 'parents-root',
         type: 'container',
@@ -497,7 +497,7 @@ export const parentsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.muted',
                             },
                             props: {
-                              content: '✿',
+                              content: '{{parents.deceasedIcon}}',
                               as: 'span',
                             },
                           },
@@ -551,7 +551,7 @@ export const parentsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.muted',
                             },
                             props: {
-                              content: '✿',
+                              content: '{{parents.deceasedIcon}}',
                               as: 'span',
                             },
                           },
@@ -588,7 +588,7 @@ export const parentsSkeleton: SectionSkeleton = {
                       },
                     ],
                   },
-                  // 신랑 정보 행: 신랑 라벨 + 이름 + 영문이름
+                  // 신랑 정보 행: 신랑 라벨 + 이름
                   {
                     id: 'groom-info-row',
                     type: 'row',
@@ -615,47 +615,18 @@ export const parentsSkeleton: SectionSkeleton = {
                         },
                       },
                       {
-                        id: 'groom-name-group',
-                        type: 'row',
+                        id: 'groom-name',
+                        type: 'text',
                         tokenStyle: {
-                          gap: '$token.spacing.xs',
+                          fontFamily: '$token.typography.headingMd.fontFamily',
+                          fontSize: '$token.typography.headingMd.fontSize',
+                          fontWeight: '$token.typography.headingMd.fontWeight',
+                          color: '$token.colors.text.primary',
                         },
-                        style: {
-                          alignItems: 'baseline',
+                        props: {
+                          content: '{{couple.groom.name}}',
+                          as: 'span',
                         },
-                        children: [
-                          {
-                            id: 'groom-name',
-                            type: 'text',
-                            tokenStyle: {
-                              fontFamily: '$token.typography.headingMd.fontFamily',
-                              fontSize: '$token.typography.headingMd.fontSize',
-                              fontWeight: '$token.typography.headingMd.fontWeight',
-                              color: '$token.colors.text.primary',
-                            },
-                            props: {
-                              content: '{{couple.groom.name}}',
-                              as: 'span',
-                            },
-                          },
-                          {
-                            id: 'groom-name-en',
-                            type: 'text',
-                            tokenStyle: {
-                              fontFamily: '$token.typography.caption.fontFamily',
-                              fontSize: '$token.typography.caption.fontSize',
-                              color: '$token.colors.text.muted',
-                            },
-                            style: {
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.1em',
-                            },
-                            props: {
-                              content: '{{couple.groom.nameEn}}',
-                              as: 'span',
-                            },
-                          },
-                        ],
                       },
                     ],
                   },
@@ -716,7 +687,7 @@ export const parentsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.muted',
                             },
                             props: {
-                              content: '✿',
+                              content: '{{parents.deceasedIcon}}',
                               as: 'span',
                             },
                           },
@@ -770,7 +741,7 @@ export const parentsSkeleton: SectionSkeleton = {
                               color: '$token.colors.text.muted',
                             },
                             props: {
-                              content: '✿',
+                              content: '{{parents.deceasedIcon}}',
                               as: 'span',
                             },
                           },
@@ -807,7 +778,7 @@ export const parentsSkeleton: SectionSkeleton = {
                       },
                     ],
                   },
-                  // 신부 정보 행: 신부 라벨 + 이름 + 영문이름
+                  // 신부 정보 행: 신부 라벨 + 이름
                   {
                     id: 'bride-info-row',
                     type: 'row',
@@ -834,47 +805,18 @@ export const parentsSkeleton: SectionSkeleton = {
                         },
                       },
                       {
-                        id: 'bride-name-group',
-                        type: 'row',
+                        id: 'bride-name',
+                        type: 'text',
                         tokenStyle: {
-                          gap: '$token.spacing.xs',
+                          fontFamily: '$token.typography.headingMd.fontFamily',
+                          fontSize: '$token.typography.headingMd.fontSize',
+                          fontWeight: '$token.typography.headingMd.fontWeight',
+                          color: '$token.colors.text.primary',
                         },
-                        style: {
-                          alignItems: 'baseline',
+                        props: {
+                          content: '{{couple.bride.name}}',
+                          as: 'span',
                         },
-                        children: [
-                          {
-                            id: 'bride-name',
-                            type: 'text',
-                            tokenStyle: {
-                              fontFamily: '$token.typography.headingMd.fontFamily',
-                              fontSize: '$token.typography.headingMd.fontSize',
-                              fontWeight: '$token.typography.headingMd.fontWeight',
-                              color: '$token.colors.text.primary',
-                            },
-                            props: {
-                              content: '{{couple.bride.name}}',
-                              as: 'span',
-                            },
-                          },
-                          {
-                            id: 'bride-name-en',
-                            type: 'text',
-                            tokenStyle: {
-                              fontFamily: '$token.typography.caption.fontFamily',
-                              fontSize: '$token.typography.caption.fontSize',
-                              color: '$token.colors.text.muted',
-                            },
-                            style: {
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.1em',
-                            },
-                            props: {
-                              content: '{{couple.bride.nameEn}}',
-                              as: 'span',
-                            },
-                          },
-                        ],
                       },
                     ],
                   },
@@ -885,6 +827,14 @@ export const parentsSkeleton: SectionSkeleton = {
         ],
       },
       slots: [
+        {
+          id: 'deceased-icon',
+          path: 'parents.deceasedIcon',
+          type: 'text',
+          required: false,
+          description: '고인 표시 아이콘',
+          defaultValue: '故',
+        },
         {
           id: 'groom-father',
           path: 'parents.groom.father.name',
@@ -926,28 +876,12 @@ export const parentsSkeleton: SectionSkeleton = {
           defaultValue: '세진',
         },
         {
-          id: 'groom-name-en',
-          path: 'couple.groom.nameEn',
-          type: 'text',
-          required: false,
-          description: '신랑 영문 이름',
-          defaultValue: 'SEJIN',
-        },
-        {
           id: 'bride-name',
           path: 'couple.bride.name',
           type: 'text',
           required: true,
           description: '신부 이름',
           defaultValue: '유정',
-        },
-        {
-          id: 'bride-name-en',
-          path: 'couple.bride.nameEn',
-          type: 'text',
-          required: false,
-          description: '신부 영문 이름',
-          defaultValue: 'YUJUNG',
         },
       ],
       options: {
