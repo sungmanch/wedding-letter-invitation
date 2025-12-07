@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useSuperEditor } from '../context'
 import { FieldRenderer } from './fields/FieldRenderer'
-import { generateEditorSectionsFromLayout } from '../utils/editor-generator'
+import { getFieldsForSectionType } from '../utils/editor-generator'
 import { SECTION_META } from '../schema/section-types'
 import type { SectionType } from '../schema/section-types'
 import type { LayoutSchema } from '../schema/layout'
@@ -52,29 +52,13 @@ export function SectionAccordion({
   const { state } = useSuperEditor()
   const meta = SECTION_META[sectionType]
 
-  // 해당 섹션의 필드들만 생성
+  // 해당 섹션의 필드들만 생성 (sectionType 기준 직접 추출)
   const sectionFields = useMemo(() => {
     if (!layout) return []
 
-    const allSections = generateEditorSectionsFromLayout({
-      layout,
-      declarations,
-      fallbackToStandard: true,
-      inferUnknown: true,
-      groupBySection: true,
-    })
-
-    // 해당 sectionType에 해당하는 섹션만 필터
-    const matchingSections = allSections.filter((section) => {
-      // section.id가 sectionType과 일치하거나
-      // section.id가 sectionType으로 시작하는 경우 (예: intro-basic)
-      const sectionId = section.id.toLowerCase()
-      const targetType = sectionType.toLowerCase()
-      return sectionId === targetType || sectionId.startsWith(`${targetType}-`)
-    })
-
-    // 모든 매칭 섹션의 필드들을 합침
-    return matchingSections.flatMap((section) => section.fields)
+    // sectionType에 해당하는 screen에서 사용하는 모든 변수를 필드로 변환
+    // 그룹화 없이 해당 screen의 모든 변수가 노출됨
+    return getFieldsForSectionType(layout, sectionType, declarations)
   }, [layout, declarations, sectionType])
 
   const handleToggleExpand = () => {
@@ -87,9 +71,7 @@ export function SectionAccordion({
     <div
       ref={accordionRef}
       className={`border rounded-lg overflow-hidden transition-all ${
-        enabled
-          ? 'bg-white/5 border-white/10'
-          : 'bg-white/[0.02] border-white/5 opacity-60'
+        enabled ? 'bg-white/5 border-white/10' : 'bg-white/[0.02] border-white/5 opacity-60'
       } ${expanded && enabled ? 'ring-1 ring-[#C9A962]/30' : ''}`}
     >
       {/* 헤더 */}
@@ -102,10 +84,7 @@ export function SectionAccordion({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* 순서 변경 버튼 (고정/플로팅이 아닌 경우) */}
           {!fixed && !floating && (
-            <div
-              className="flex flex-col gap-0.5"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
                 onClick={onMoveUp}
@@ -114,7 +93,12 @@ export function SectionAccordion({
                 title="위로 이동"
               >
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 15l7-7 7 7"
+                  />
                 </svg>
               </button>
               <button
@@ -125,7 +109,12 @@ export function SectionAccordion({
                 title="아래로 이동"
               >
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
             </div>
@@ -135,7 +124,12 @@ export function SectionAccordion({
           {fixed && (
             <div className="w-6 h-6 flex items-center justify-center text-[#F5E6D3]/40">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             </div>
           )}
@@ -144,7 +138,12 @@ export function SectionAccordion({
           {floating && (
             <div className="w-6 h-6 flex items-center justify-center text-[#F5E6D3]/40">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                />
               </svg>
             </div>
           )}
@@ -152,23 +151,17 @@ export function SectionAccordion({
           {/* 섹션 정보 */}
           <div className="flex-1 min-w-0">
             <p className="font-medium text-[#F5E6D3] truncate">{meta.label}</p>
-            {!expanded && (
-              <p className="text-xs text-[#F5E6D3]/50 truncate">{meta.description}</p>
-            )}
+            {!expanded && <p className="text-xs text-[#F5E6D3]/50 truncate">{meta.description}</p>}
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {/* 고정/플로팅 뱃지 */}
           {fixed && (
-            <span className="text-xs text-[#F5E6D3]/40 px-2 py-0.5 bg-white/5 rounded">
-              고정
-            </span>
+            <span className="text-xs text-[#F5E6D3]/40 px-2 py-0.5 bg-white/5 rounded">고정</span>
           )}
           {floating && (
-            <span className="text-xs text-[#F5E6D3]/40 px-2 py-0.5 bg-white/5 rounded">
-              플로팅
-            </span>
+            <span className="text-xs text-[#F5E6D3]/40 px-2 py-0.5 bg-white/5 rounded">플로팅</span>
           )}
 
           {/* 활성화 토글 */}
@@ -176,12 +169,7 @@ export function SectionAccordion({
             className="relative inline-flex items-center cursor-pointer"
             onClick={(e) => e.stopPropagation()}
           >
-            <input
-              type="checkbox"
-              checked={enabled}
-              onChange={onToggle}
-              className="sr-only peer"
-            />
+            <input type="checkbox" checked={enabled} onChange={onToggle} className="sr-only peer" />
             <div className="w-9 h-5 bg-white/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#C9A962]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A962]" />
           </label>
 
@@ -194,7 +182,12 @@ export function SectionAccordion({
             } ${!enabled ? 'opacity-30' : ''}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
         </div>

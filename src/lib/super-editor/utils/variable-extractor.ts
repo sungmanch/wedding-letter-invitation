@@ -139,6 +139,33 @@ export function extractVariablesFromSections(
 }
 
 // ============================================
+// Section-based Variable Extraction
+// ============================================
+
+/**
+ * LayoutSchema에서 sectionType별로 변수 추출
+ * 각 screen의 sectionType을 기준으로 해당 screen에서 사용하는 변수들을 그룹화
+ */
+export function extractVariablesBySectionType(
+  layout: LayoutSchema
+): Map<string, string[]> {
+  const result = new Map<string, string[]>()
+
+  for (const screen of layout.screens) {
+    const sectionType =
+      (screen as { sectionType?: string }).sectionType ?? screen.type
+    if (!sectionType) continue
+
+    const screenVars = Array.from(extractVariablesFromScreen(screen))
+    const existing = result.get(sectionType) || []
+    // 중복 제거하면서 병합
+    result.set(sectionType, [...new Set([...existing, ...screenVars])])
+  }
+
+  return result
+}
+
+// ============================================
 // Section Extraction
 // ============================================
 
