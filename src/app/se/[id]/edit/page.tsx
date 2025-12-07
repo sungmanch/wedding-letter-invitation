@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   getInvitationWithTemplate,
@@ -16,6 +16,7 @@ import {
   SectionManager,
   StyleEditor,
   InvitationPreview,
+  OgMetadataEditor,
 } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import {
@@ -35,7 +36,7 @@ import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 
-type EditorTab = 'fields' | 'style' | 'sections'
+type EditorTab = 'fields' | 'style' | 'sections' | 'share'
 
 function EditPageContent() {
   const params = useParams()
@@ -59,6 +60,10 @@ function EditPageContent() {
   const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>(
     {} as Record<SectionType, string>
   )
+  // 미리보기 ref (OG 이미지 생성용)
+  const previewRef = useRef<HTMLDivElement>(null)
+  // OG 기본값
+  const [ogDefaults, setOgDefaults] = useState({ title: '', description: '' })
 
   useEffect(() => {
     async function loadData() {
@@ -83,6 +88,24 @@ function EditPageContent() {
         setSectionEnabled(
           (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
         )
+
+        // OG 기본값 설정
+        const userData = invitation.userData as UserData
+        const weddingData = userData.data as {
+          couple?: { groom?: { name?: string }; bride?: { name?: string } }
+          wedding?: { dateDisplay?: string }
+          venue?: { name?: string }
+        } | undefined
+        const groomName = weddingData?.couple?.groom?.name || '신랑'
+        const brideName = weddingData?.couple?.bride?.name || '신부'
+        const dateDisplay = weddingData?.wedding?.dateDisplay || ''
+        const venueName = weddingData?.venue?.name || ''
+        setOgDefaults({
+          title: `${groomName} ♥ ${brideName} 결혼합니다`,
+          description: dateDisplay && venueName
+            ? `${dateDisplay} | ${venueName}에서 축하해주세요`
+            : '모바일 청첩장',
+        })
 
         // Initialize section variants from layout or defaults (dev mode only)
         if (process.env.NODE_ENV === 'development') {
@@ -382,6 +405,16 @@ function EditPageContent() {
             >
               섹션
             </button>
+            <button
+              onClick={() => setActiveTab('share')}
+              className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'share'
+                  ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              공유
+            </button>
           </div>
 
           {/* 탭 콘텐츠 */}
@@ -415,12 +448,22 @@ function EditPageContent() {
               />
             </div>
           )}
+          {activeTab === 'share' && (
+            <OgMetadataEditor
+              invitationId={invitationId}
+              defaultTitle={ogDefaults.title}
+              defaultDescription={ogDefaults.description}
+              previewRef={previewRef}
+              className="flex-1 overflow-y-auto"
+            />
+          )}
         </div>
 
         {/* 중앙: 미리보기 */}
         <div className="flex-1 flex flex-col bg-gray-200">
           <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
             {state.layout && state.style && state.userData ? (
+              <div ref={previewRef}>
               <InvitationPreview
                 layout={state.layout}
                 style={state.style}
@@ -436,6 +479,7 @@ function EditPageContent() {
                 frameWidth={375}
                 frameHeight={667}
               />
+              </div>
             ) : (
               <div className="text-center text-gray-500">
                 <p className="text-lg font-medium">미리보기 로딩 중...</p>
