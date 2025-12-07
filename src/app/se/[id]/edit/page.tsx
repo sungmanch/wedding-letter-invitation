@@ -17,6 +17,7 @@ import {
   StyleEditor,
   InvitationPreview,
   OgMetadataEditor,
+  SharePreview,
 } from '@/lib/super-editor/components'
 import { generatePreviewToken, getShareablePreviewUrl } from '@/lib/utils/preview-token'
 import {
@@ -64,6 +65,8 @@ function EditPageContent() {
   const previewRef = useRef<HTMLDivElement>(null)
   // OG 기본값
   const [ogDefaults, setOgDefaults] = useState({ title: '', description: '' })
+  // OG 현재값 (실시간 미리보기용)
+  const [ogValues, setOgValues] = useState({ title: '', description: '', imageUrl: '' })
 
   useEffect(() => {
     async function loadData() {
@@ -455,6 +458,7 @@ function EditPageContent() {
               defaultDescription={ogDefaults.description}
               previewRef={previewRef}
               className="flex-1 overflow-y-auto"
+              onChange={setOgValues}
             />
           )}
         </div>
@@ -462,7 +466,13 @@ function EditPageContent() {
         {/* 중앙: 미리보기 */}
         <div className="flex-1 flex flex-col bg-gray-200">
           <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-            {state.layout && state.style && state.userData ? (
+            {activeTab === 'share' ? (
+              <SharePreview
+                ogTitle={ogValues.title || ogDefaults.title}
+                ogDescription={ogValues.description || ogDefaults.description}
+                ogImageUrl={ogValues.imageUrl || null}
+              />
+            ) : state.layout && state.style && state.userData ? (
               <div ref={previewRef}>
               <InvitationPreview
                 layout={state.layout}
