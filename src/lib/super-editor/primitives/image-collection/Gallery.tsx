@@ -38,7 +38,7 @@ export function Gallery({
 
   const layout = props.layout || 'horizontal'
   const columns = props.columns || 3
-  const gap = props.gap || 8
+  const gap = props.gap ?? 8
 
   const containerStyle: React.CSSProperties = {
     width: '100%',
@@ -90,7 +90,7 @@ export function Gallery({
                 aspectRatio: props.aspectRatio?.replace(':', '/') || '1/1',
                 objectFit: props.objectFit || 'cover',
                 cursor: props.onClick !== 'none' ? 'pointer' : undefined,
-                borderRadius: '4px',
+                borderRadius: gap === 0 ? 0 : '4px',
               }}
               onClick={() => handleImageClick(index)}
             />
