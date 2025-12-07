@@ -23,7 +23,7 @@ export const accountsSkeleton: SectionSkeleton = {
         id: 'accounts-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -107,7 +107,7 @@ export const accountsSkeleton: SectionSkeleton = {
                         type: 'container',
                         tokenStyle: {
                           padding: '$token.spacing.md',
-                          backgroundColor: '$token.colors.surface',
+                          backgroundColor: '$token.colors.background',
                           borderRadius: '$token.borders.radiusMd',
                         },
                         children: [
@@ -222,7 +222,7 @@ export const accountsSkeleton: SectionSkeleton = {
                         type: 'container',
                         tokenStyle: {
                           padding: '$token.spacing.md',
-                          backgroundColor: '$token.colors.surface',
+                          backgroundColor: '$token.colors.background',
                           borderRadius: '$token.borders.radiusMd',
                         },
                         children: [
