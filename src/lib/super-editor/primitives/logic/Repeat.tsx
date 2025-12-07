@@ -3,7 +3,7 @@
 import type { PrimitiveNode, RepeatProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, getValueByPath } from '../types'
-import { renderPrimitiveNode } from '../index'
+import { renderPrimitiveNode } from '../render-node'
 
 export function Repeat({
   node,
@@ -33,8 +33,16 @@ export function Repeat({
     }
   }
 
-  // 데이터가 없을 때 defaultValue 사용
-  if (items.length === 0 && props.defaultValue && Array.isArray(props.defaultValue)) {
+  // 데이터가 없거나 비어있을 때 defaultValue 사용
+  // - items.length === 0: 데이터 배열이 비어있음
+  // - items가 있지만 모든 item이 빈 객체 (필수 필드가 없음)
+  const hasValidData = items.length > 0 && items.some(item => {
+    if (typeof item !== 'object' || item === null) return false
+    const values = Object.values(item as Record<string, unknown>)
+    return values.some(v => v !== '' && v !== undefined && v !== null)
+  })
+
+  if (!hasValidData && props.defaultValue && Array.isArray(props.defaultValue)) {
     items = props.defaultValue
   }
 

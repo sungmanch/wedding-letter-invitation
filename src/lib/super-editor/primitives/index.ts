@@ -6,6 +6,15 @@
 // Types
 export * from './types'
 
+// Render utilities (circular import 방지를 위해 분리)
+export {
+  renderPrimitiveNode,
+  createNodeRenderer,
+  getRenderer,
+  setRenderers,
+} from './render-node'
+import { setRenderers } from './render-node'
+
 // Layout (6개)
 export * from './layout'
 import { layoutRenderers } from './layout'
@@ -40,8 +49,7 @@ const customRenderers = { custom: customRenderer }
 // All Renderers Combined
 // ============================================
 
-import type { PrimitiveNode } from '../schema/primitives'
-import type { RenderContext, PrimitiveRenderer } from './types'
+import type { PrimitiveRenderer } from './types'
 
 export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...layoutRenderers,
@@ -53,42 +61,8 @@ export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...customRenderers,
 }
 
-/**
- * 노드 타입에 따른 렌더러 가져오기
- */
-export function getRenderer(type: string): PrimitiveRenderer | undefined {
-  return allRenderers[type]
-}
-
-/**
- * 노드 렌더링 함수
- */
-export function renderPrimitiveNode(
-  node: PrimitiveNode,
-  context: RenderContext
-): React.ReactNode {
-  const renderer = getRenderer(node.type)
-
-  if (!renderer) {
-    console.warn(`Unknown primitive type: ${node.type}`)
-    return null
-  }
-
-  return renderer.render(node, context)
-}
-
-/**
- * 컨텍스트와 함께 렌더링 함수 생성
- */
-export function createNodeRenderer(
-  baseContext: Omit<RenderContext, 'renderNode'>
-): RenderContext {
-  const context: RenderContext = {
-    ...baseContext,
-    renderNode: (node: PrimitiveNode) => renderPrimitiveNode(node, context),
-  }
-  return context
-}
+// 렌더러 레지스트리 초기화
+setRenderers(allRenderers)
 
 // ============================================
 // Renderer Categories
