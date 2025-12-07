@@ -86,7 +86,7 @@ function PhoneFrame({
       {/* Phone bezel */}
       <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
         {/* Notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-10" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-gray-900 rounded-b-2xl z-100" />
         {/* Screen */}
         <div
           ref={scrollRef}
@@ -140,8 +140,7 @@ export function InvitationPreview({
     if (!container) return
 
     // 스크롤이 끝에 도달했는지 확인 (5px 여유)
-    const isAtBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < 5
+    const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 5
 
     // 모든 섹션 요소 가져오기
     const sectionElements = container.querySelectorAll('[data-section-type]')
@@ -219,10 +218,7 @@ export function InvitationPreview({
 
         {/* 오른쪽 Variant Control Panel - PhoneFrame과 동일한 높이로 고정 */}
         {showVariantPanel && (
-          <div
-            className="flex-shrink-0"
-            style={{ height: frameH + 16 /* bezel padding */ }}
-          >
+          <div className="flex-shrink-0" style={{ height: frameH + 16 /* bezel padding */ }}>
             <VariantControlPanel
               activeSection={activeSection}
               sectionVariants={sectionVariants}

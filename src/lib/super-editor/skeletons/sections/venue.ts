@@ -23,7 +23,7 @@ export const venueSkeleton: SectionSkeleton = {
         id: 'venue-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -124,7 +124,7 @@ export const venueSkeleton: SectionSkeleton = {
                 tokenStyle: {
                   gap: '$token.spacing.xs',
                   padding: '$token.spacing.md',
-                  backgroundColor: '$token.colors.surface',
+                  backgroundColor: '$token.colors.background',
                   borderRadius: '$token.borders.radiusMd',
                 },
                 children: [
@@ -225,7 +225,7 @@ export const venueSkeleton: SectionSkeleton = {
         id: 'venue-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -272,7 +272,7 @@ export const venueSkeleton: SectionSkeleton = {
                 type: 'column',
                 tokenStyle: {
                   padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.surface',
+                  backgroundColor: '$token.colors.background',
                   borderRadius: '$token.borders.radiusMd',
                   gap: '$token.spacing.md',
                 },
@@ -437,7 +437,7 @@ export const venueSkeleton: SectionSkeleton = {
         id: 'venue-root',
         type: 'container',
         tokenStyle: {
-          backgroundColor: '$token.colors.background',
+          backgroundColor: '$token.colors.surface',
           padding: '$token.spacing.section',
         },
         children: [
@@ -671,7 +671,7 @@ export const venueSkeleton: SectionSkeleton = {
                 tokenStyle: {
                   gap: '$token.spacing.md',
                   padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.surface',
+                  backgroundColor: '$token.colors.background',
                   borderRadius: '$token.borders.radiusMd',
                 },
                 children: [

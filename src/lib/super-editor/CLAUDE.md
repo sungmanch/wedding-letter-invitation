@@ -156,6 +156,23 @@ const surface = deriveSurfaceColor('#1A1A1A', '#C9A962')  // → 골드 틴트 �
 | `presets/intro-style-presets.ts` | `isDark()`, `deriveSurfaceColor()`, `deriveSurfaceColorWithAccent()` |
 | `components/StyleEditor.tsx` | 배경색 변경 시 자동 surface 계산 |
 
+#### 섹션별 배경색 배치 규칙
+
+콘텐츠 유형에 따라 배경색 결정 (경쟁사 분석 기반):
+
+| 섹션 | root 배경 | 내부 카드 | 이유 |
+|-----|----------|----------|------|
+| intro, greeting, date | `background` | - | 텍스트 집중형, 가독성 |
+| gallery | `surface` | - | 이미지 컬렉션이 돋보임 |
+| venue | `surface` | `background` | 지도 임베드 분리감 |
+| accounts | `surface` | `background` | 탭/카드 UI 계층 |
+| parents | `surface` | `background` | 혼주 카드 돋보임 |
+| guestbook | `surface` | `background` | 폼/카드 구분감 |
+
+**원칙**:
+- 카드/지도/미디어 포함 → `surface` (카드가 떠 보이는 효과)
+- 텍스트 중심/복잡한 정보 → `background` (가독성, 인지 부하 감소)
+
 ### 5. 전체 CSS 변수 목록
 
 #### Colors (10개)
