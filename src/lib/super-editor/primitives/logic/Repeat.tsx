@@ -3,6 +3,7 @@
 import type { PrimitiveNode, RepeatProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, getValueByPath } from '../types'
+import { renderPrimitiveNode } from '../index'
 
 export function Repeat({
   node,
@@ -45,16 +46,24 @@ export function Repeat({
   // 반복 렌더링
   const renderItems = slicedItems.map((item, index) => {
     // 컨텍스트에 반복 변수 추가
+    const itemData = {
+      ...context.data,
+      [props.as]: item,
+      [`${props.as}Index`]: index,
+      [`${props.as}First`]: index === 0,
+      [`${props.as}Last`]: index === slicedItems.length - 1,
+    }
+
+    // 새로운 renderNode 함수를 생성하여 itemData를 사용하도록 함
     const itemContext: RenderContext = {
       ...context,
-      data: {
-        ...context.data,
-        [props.as]: item,
-        [`${props.as}Index`]: index,
-        [`${props.as}First`]: index === 0,
-        [`${props.as}Last`]: index === slicedItems.length - 1,
-      },
+      data: itemData,
+      renderNode: (childNode: PrimitiveNode) =>
+        renderPrimitiveNode(childNode, { ...context, data: itemData, renderNode: itemContext.renderNode }),
     }
+    // renderNode가 자기 자신을 참조하도록 재할당
+    itemContext.renderNode = (childNode: PrimitiveNode) =>
+      renderPrimitiveNode(childNode, itemContext)
 
     // 고유 키 생성
     const key = props.key && typeof item === 'object' && item !== null
