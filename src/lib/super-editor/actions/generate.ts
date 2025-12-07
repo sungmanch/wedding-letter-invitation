@@ -16,6 +16,7 @@ import {
 import { createGeminiProvider } from '../services/gemini-provider'
 import type { StyleSchema } from '../schema/style'
 import type { LayoutSchema } from '../schema/layout'
+import type { VariablesSchema } from '../schema/variables'
 import { db } from '@/lib/db'
 import { getTemplate, type TemplateId } from '../templates'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
@@ -23,8 +24,6 @@ import { eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
-import type { EditorSchema } from '../schema/editor'
-import { generateEditorSectionsFromLayout } from '../utils/editor-generator'
 
 // ============================================
 // AI Template Generation
@@ -301,6 +300,8 @@ export interface SaveInvitationInput {
   }
   // 레거시 프리셋 사용 시
   legacyPresetId?: string
+  // 변수 선언 (에디터 필드 생성용)
+  variablesSchema?: VariablesSchema
 }
 
 export interface SaveInvitationOutput {
@@ -324,13 +325,14 @@ export async function saveInvitationAction(
       return { success: false, error: '로그인이 필요합니다' }
     }
 
-    const { generationResult, newTemplateId, previewData, legacyPresetId } = input
+    const { generationResult, newTemplateId, previewData, legacyPresetId, variablesSchema } = input
 
     // 새 템플릿 또는 생성 결과에서 layout/style 추출
     let layoutSchema: LayoutSchema
     let styleSchema: StyleSchema
     let templateName: string
     let templateDescription: string
+    let variables: VariablesSchema | undefined = variablesSchema
 
     if (newTemplateId) {
       // 새 super-editor 템플릿 사용
@@ -352,38 +354,15 @@ export async function saveInvitationAction(
       return { success: false, error: 'generationResult 또는 newTemplateId가 필요합니다' }
     }
 
-    // 1. Template 생성 (레이아웃, 스타일, 에디터 스키마 저장)
-    // Layout이 있으면 변수 기반 동적 에디터 생성, 없으면 레거시 방식
-    const editorSections = layoutSchema
-      ? generateEditorSectionsFromLayout({
-          layout: layoutSchema,
-          declarations: generationResult?.variables?.declarations,
-          fallbackToStandard: true,
-          inferUnknown: true,
-        })
-      : getDefaultEditorSections()
-
-    const editorSchema: EditorSchema = {
-      version: '1.0',
-      meta: {
-        id: 'default',
-        name: '청첩장 편집',
-        description: '청첩장의 모든 내용을 편집할 수 있습니다.',
-        layoutId: 'default',
-        styleId: 'default',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      sections: editorSections,
-    }
-
+    // 1. Template 생성 (레이아웃, 스타일, 변수 선언 저장)
+    // 에디터 필드는 variablesSchema + Layout의 {{변수}}에서 동적 생성됨
     const [template] = await db.insert(superEditorTemplates).values({
       name: templateName,
       description: templateDescription,
       category: 'wedding',
       layoutSchema,
       styleSchema,
-      editorSchema,
+      variablesSchema: variables,
       status: 'draft',
       generationContext: {
         prompt: newTemplateId || legacyPresetId || 'super-editor',
@@ -452,148 +431,5 @@ export async function saveInvitationAction(
 // ============================================
 // Default Editor Sections
 // ============================================
-
-/**
- * 청첩장 기본 에디터 섹션 생성
- */
-function getDefaultEditorSections(): EditorSchema['sections'] {
-  return [
-    {
-      id: 'couple',
-      title: '신랑/신부 정보',
-      icon: 'heart',
-      order: 1,
-      fields: [
-        {
-          id: 'groom-name',
-          type: 'text',
-          label: '신랑 이름',
-          dataPath: 'couple.groom.name',
-          required: true,
-          order: 1,
-          placeholder: '신랑 이름을 입력하세요',
-        },
-        {
-          id: 'bride-name',
-          type: 'text',
-          label: '신부 이름',
-          dataPath: 'couple.bride.name',
-          required: true,
-          order: 2,
-          placeholder: '신부 이름을 입력하세요',
-        },
-      ],
-    },
-    {
-      id: 'wedding',
-      title: '예식 정보',
-      icon: 'calendar',
-      order: 2,
-      fields: [
-        {
-          id: 'wedding-date',
-          type: 'date',
-          label: '예식 날짜',
-          dataPath: 'wedding.date',
-          required: true,
-          order: 1,
-        },
-        {
-          id: 'wedding-time',
-          type: 'time',
-          label: '예식 시간',
-          dataPath: 'wedding.time',
-          required: true,
-          order: 2,
-        },
-      ],
-    },
-    {
-      id: 'venue',
-      title: '예식장 정보',
-      icon: 'map-pin',
-      order: 3,
-      fields: [
-        {
-          id: 'venue-name',
-          type: 'text',
-          label: '예식장 이름',
-          dataPath: 'venue.name',
-          required: true,
-          order: 1,
-          placeholder: '예: 그랜드 웨딩홀',
-        },
-        {
-          id: 'venue-hall',
-          type: 'text',
-          label: '홀 이름',
-          dataPath: 'venue.hall',
-          required: false,
-          order: 2,
-          placeholder: '예: 3층 그랜드볼룸',
-        },
-        {
-          id: 'venue-address',
-          type: 'text',
-          label: '주소',
-          dataPath: 'venue.address',
-          required: true,
-          order: 3,
-          placeholder: '예: 서울특별시 강남구...',
-        },
-        {
-          id: 'venue-tel',
-          type: 'phone',
-          label: '전화번호',
-          dataPath: 'venue.tel',
-          required: false,
-          order: 4,
-        },
-      ],
-    },
-    {
-      id: 'photos',
-      title: '사진',
-      icon: 'image',
-      order: 4,
-      fields: [
-        {
-          id: 'main-photo',
-          type: 'image',
-          label: '대표 사진',
-          dataPath: 'photos.main',
-          required: false,
-          order: 1,
-          aspectRatio: '3:4',
-        },
-        {
-          id: 'gallery-photos',
-          type: 'imageList',
-          label: '갤러리',
-          dataPath: 'photos.gallery',
-          required: false,
-          order: 2,
-          maxItems: 20,
-        },
-      ],
-    },
-    {
-      id: 'greeting',
-      title: '인사말',
-      icon: 'message-square',
-      order: 5,
-      fields: [
-        {
-          id: 'greeting-content',
-          type: 'textarea',
-          label: '인사말',
-          dataPath: 'greeting.content',
-          required: false,
-          order: 1,
-          rows: 5,
-          placeholder: '하객들에게 전할 인사말을 작성해주세요.',
-        },
-      ],
-    },
-  ]
-}
+// EditorSchema는 Layout의 {{변수}}에서 동적 생성됨
+// (editor-generator.ts 참조)

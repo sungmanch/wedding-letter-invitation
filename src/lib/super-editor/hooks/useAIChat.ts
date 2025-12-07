@@ -6,14 +6,14 @@ import { useState, useCallback, useRef } from 'react'
 import { useSuperEditor } from '../context'
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
+
 
 // ============================================
 // Types
 // ============================================
 
 export type MessageRole = 'user' | 'assistant' | 'system'
-export type EditMode = 'style' | 'layout' | 'editor' | 'all'
+export type EditMode = 'style' | 'layout' | 'all'
 
 export interface ChatMessage {
   id: string
@@ -30,7 +30,6 @@ export interface TemplateChanges {
   type: 'full' | 'partial'
   layout?: LayoutSchema
   style?: StyleSchema
-  editor?: EditorSchema
   // 변경 설명
   description?: string
   // 추가/수정/삭제된 노드 ID들
@@ -124,16 +123,6 @@ function isValidStyle(style: unknown): style is StyleSchema {
   return hasMeta || hasTheme
 }
 
-function isValidEditor(editor: unknown): editor is EditorSchema {
-  if (!editor || typeof editor !== 'object') return false
-  const e = editor as Record<string, unknown>
-  return (
-    e.meta !== undefined &&
-    typeof e.meta === 'object' &&
-    Array.isArray(e.sections)
-  )
-}
-
 // ============================================
 // Hook Implementation
 // ============================================
@@ -149,7 +138,6 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
   const previousStates = useRef<Map<string, {
     layout?: LayoutSchema
     style?: StyleSchema
-    editor?: EditorSchema
   }>>(new Map())
 
   const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -180,9 +168,6 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
       }
       if (editMode === 'layout' || editMode === 'all') {
         requestBody.currentLayout = state.layout
-      }
-      if (editMode === 'editor' || editMode === 'all') {
-        requestBody.currentEditor = state.editor
       }
 
       // AI API 호출
@@ -242,17 +227,15 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
     // AI 변경사항이 빈 객체인 경우 무시
     const hasValidLayout = changes.layout && !isEmptyObject(changes.layout)
     const hasValidStyle = changes.style && !isEmptyObject(changes.style)
-    const hasValidEditor = changes.editor && !isEmptyObject(changes.editor)
 
     // 변경사항 적용할 새 스키마 결정 (부분 업데이트 병합)
     const newLayout = hasValidLayout ? changes.layout : state.layout
     const newStyle = hasValidStyle
       ? deepMerge(state.style || {}, changes.style!) as StyleSchema
       : state.style
-    const newEditor = hasValidEditor ? changes.editor : state.editor
 
     // 변경사항이 없으면 종료
-    if (!hasValidLayout && !hasValidStyle && !hasValidEditor) {
+    if (!hasValidLayout && !hasValidStyle) {
       console.warn('No valid changes from AI to apply')
       return
     }
@@ -268,22 +251,16 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
       options.onError?.(new Error('AI가 생성한 스타일 스키마가 유효하지 않습니다.'))
       return
     }
-    if (newEditor && !isValidEditor(newEditor)) {
-      console.error('Invalid editor schema from AI:', newEditor)
-      options.onError?.(new Error('AI가 생성한 에디터 스키마가 유효하지 않습니다.'))
-      return
-    }
 
     // 현재 상태 저장 (되돌리기용)
     previousStates.current.set(messageId, {
       layout: state.layout ?? undefined,
       style: state.style ?? undefined,
-      editor: state.editor ?? undefined,
     })
 
     // 변경사항 적용
-    if (newLayout && newStyle && newEditor) {
-      setTemplate(newLayout, newStyle, newEditor)
+    if (newLayout && newStyle) {
+      setTemplate(newLayout, newStyle)
     }
 
     // 메시지 상태 업데이트
@@ -297,8 +274,8 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
   // 변경사항 되돌리기
   const revertChanges = useCallback((messageId: string) => {
     const previousState = previousStates.current.get(messageId)
-    if (previousState?.layout && previousState?.style && previousState?.editor) {
-      setTemplate(previousState.layout, previousState.style, previousState.editor)
+    if (previousState?.layout && previousState?.style) {
+      setTemplate(previousState.layout, previousState.style)
 
       // 메시지 상태 업데이트
       setMessages(prev => prev.map(msg =>
@@ -328,7 +305,6 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
         body: JSON.stringify({
           layout: state.layout,
           style: state.style,
-          editor: state.editor,
           userData: state.userData,
         }),
       })

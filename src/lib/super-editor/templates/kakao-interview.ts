@@ -8,7 +8,6 @@
 
 import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
-import type { EditorSchema } from '../schema/editor'
 
 // ============================================
 // Layout Schema - 카카오톡 인터뷰 UI 구조
@@ -910,7 +909,7 @@ export const kakaoInterviewStyleSchema: StyleSchema = {
 // Editor Schema - 사용자 입력 필드 정의
 // ============================================
 
-export const kakaoInterviewEditorSchema: EditorSchema = {
+export const kakaoInterviewEditorSchema = {
   version: '1.0',
   meta: {
     id: 'kakao-interview-editor-v1',
@@ -1141,7 +1140,6 @@ export const kakaoInterviewSampleData = {
 export const kakaoInterviewTemplate = {
   layout: kakaoInterviewLayoutSchema,
   style: kakaoInterviewStyleSchema,
-  editor: kakaoInterviewEditorSchema,
   sampleData: kakaoInterviewSampleData,
 }
 

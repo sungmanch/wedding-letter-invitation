@@ -31,13 +31,13 @@ function SuperEditorContent() {
 
   // 카카오톡 템플릿 로드
   const handleLoadKakao = () => {
-    setTemplate(kakaoTemplate.layout, kakaoTemplate.style, kakaoTemplate.editor)
+    setTemplate(kakaoTemplate.layout, kakaoTemplate.style)
     setUserData(createUserData(kakaoSampleData))
   }
 
   // 청첩장 생성 및 편집 페이지로 이동
   const handleCreateInvitation = async () => {
-    if (!state.layout || !state.style || !state.editor || !state.userData) {
+    if (!state.layout || !state.style || !state.userData) {
       alert('먼저 템플릿을 생성해주세요.')
       return
     }
@@ -51,7 +51,6 @@ function SuperEditorContent() {
         category: state.layout.meta.category,
         layout: state.layout,
         style: state.style,
-        editor: state.editor,
       })
 
       // 2. 청첩장 생성 (userId는 서버에서 인증을 통해 가져옴)
@@ -144,10 +143,10 @@ function SuperEditorContent() {
               />
             ) : (
               <div className="flex flex-col h-full overflow-hidden">
-                {state.editor ? (
+                {state.layout ? (
                   <>
                     <EditorToolbar />
-                    <EditorPanel className="flex-1 overflow-y-auto" />
+                    <EditorPanel className="flex-1 overflow-y-auto" layout={state.layout} />
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-gray-500">

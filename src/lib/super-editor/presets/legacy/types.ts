@@ -3,10 +3,9 @@
  * templates.json에서 마이그레이션된 레거시 템플릿 프리셋 타입 정의
  */
 
-import type { LayoutSchema, LayoutCategory } from '../../schema/layout'
-import type { StyleSchema, StyleMood } from '../../schema/style'
-import type { EditorSchema } from '../../schema/editor'
-import type { AnimationPreset, TransitionPreset, EasingType } from '../../schema/primitives'
+import type { LayoutCategory } from '../../schema/layout'
+import type { StyleMood } from '../../schema/style'
+import type { AnimationPreset, TransitionPreset } from '../../schema/primitives'
 
 // ============================================
 // Legacy Template Category

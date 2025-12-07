@@ -29,6 +29,13 @@
       "when": 1764946097057,
       "tag": "0003_opposite_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765076076808,
+      "tag": "0004_curious_electro",
+      "breakpoints": true
     }
   ]
 }

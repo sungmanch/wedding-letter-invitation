@@ -1,31 +1,11 @@
 /**
- * Super Editor - Editor Schema
- * LLM이 생성하는 에디터 UI 구조 정의
+ * Super Editor - Editor Field Types
+ * 동적 에디터 UI를 위한 필드 타입 정의
+ * (Layout의 {{변수}}에서 자동 생성됨)
  */
 
 // ============================================
-// Editor Schema (LLM Generated)
-// ============================================
-
-export interface EditorSchema {
-  version: '1.0'
-  meta: EditorMeta
-  sections: EditorSection[]
-  validation?: ValidationConfig
-}
-
-export interface EditorMeta {
-  id: string
-  name: string
-  description?: string
-  layoutId: string   // 연결된 LayoutSchema ID
-  styleId: string    // 연결된 StyleSchema ID
-  createdAt: string
-  updatedAt: string
-}
-
-// ============================================
-// Editor Section
+// Editor Section (동적 생성)
 // ============================================
 
 export interface EditorSection {
@@ -404,21 +384,6 @@ export type ValidationType =
   | 'phone'
   | 'date'
   | 'custom'
-
-// ============================================
-// Global Validation Config
-// ============================================
-
-export interface ValidationConfig {
-  mode: 'onBlur' | 'onChange' | 'onSubmit'
-  showErrors: 'inline' | 'toast' | 'summary'
-  scrollToError?: boolean
-  messages?: {
-    required?: string
-    invalid?: string
-    [key: string]: string | undefined
-  }
-}
 
 // ============================================
 // Editor Events

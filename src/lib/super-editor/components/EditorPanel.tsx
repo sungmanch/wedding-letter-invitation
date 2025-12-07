@@ -33,11 +33,11 @@ export function EditorPanel({
   declarations,
 }: EditorPanelProps) {
   const { state } = useSuperEditor()
-  const { editor, loading, error } = state
+  const { loading, error } = state
 
   // 동적으로 에디터 섹션 생성
   // 우선순위: customSections > layout/screens 기반 > enabledSections(레거시)
-  const dynamicSections = useMemo(() => {
+  const sections = useMemo(() => {
     // 1. 커스텀 섹션 직접 제공
     if (customSections) return customSections
 
@@ -58,11 +58,8 @@ export function EditorPanel({
       return generateEditorSections(enabledSections)
     }
 
-    return null
+    return []
   }, [enabledSections, customSections, layout, screens, declarations])
-
-  // 사용할 섹션 결정: 동적 > editor.sections
-  const sections = dynamicSections || editor?.sections || []
 
   if (loading) {
     return (

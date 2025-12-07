@@ -29,12 +29,12 @@ function TestPageContent() {
 
   // 카카오톡 템플릿 자동 로드
   const handleLoadKakao = () => {
-    setTemplate(kakaoTemplate.layout, kakaoTemplate.style, kakaoTemplate.editor)
+    setTemplate(kakaoTemplate.layout, kakaoTemplate.style)
     setUserData(createUserData(kakaoSampleData))
   }
 
   const handleSaveTemplate = async () => {
-    if (!state.layout || !state.style || !state.editor) {
+    if (!state.layout || !state.style) {
       alert('먼저 템플릿을 생성해주세요.')
       return
     }
@@ -46,7 +46,6 @@ function TestPageContent() {
         category: state.layout.meta.category,
         layout: state.layout,
         style: state.style,
-        editor: state.editor,
       })
       alert(`템플릿 저장 완료! ID: ${template.id}`)
     } catch (error) {
@@ -153,10 +152,10 @@ function TestPageContent() {
               />
             ) : (
               <div className="flex flex-col h-full overflow-hidden">
-                {state.editor ? (
+                {state.layout ? (
                   <>
                     <EditorToolbar />
-                    <EditorPanel className="flex-1 overflow-y-auto" />
+                    <EditorPanel className="flex-1 overflow-y-auto" layout={state.layout} />
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-gray-500">
