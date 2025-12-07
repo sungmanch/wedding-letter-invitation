@@ -32,13 +32,9 @@ export function Repeat({
     }
   }
 
-  // 편집 모드에서는 샘플 데이터 표시
-  if (context.mode === 'edit' && items.length === 0) {
-    items = [
-      { __sample: true, index: 0 },
-      { __sample: true, index: 1 },
-      { __sample: true, index: 2 },
-    ]
+  // 데이터가 없을 때 defaultValue 사용
+  if (items.length === 0 && props.defaultValue && Array.isArray(props.defaultValue)) {
+    items = props.defaultValue
   }
 
   // limit, offset 적용

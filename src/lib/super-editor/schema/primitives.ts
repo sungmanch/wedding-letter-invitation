@@ -327,6 +327,7 @@ export interface RepeatProps {
   key?: string // 고유 키 필드
   limit?: number
   offset?: number
+  defaultValue?: unknown[] // 데이터가 없을 때 사용할 기본값
 }
 
 // ============================================
