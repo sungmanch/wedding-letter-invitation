@@ -52,7 +52,7 @@ export const dateSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'WEDDING DATE',
+                  content: '예식 일시',
                   as: 'h2',
                 },
               },
@@ -247,6 +247,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'date',
           required: true,
           description: '결혼 날짜',
+          defaultValue: '2025년 3월 15일',
         },
         {
           id: 'wedding-time',
@@ -254,6 +255,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '결혼 시간',
+          defaultValue: '오후 2시',
         },
       ],
       options: {
@@ -306,7 +308,7 @@ export const dateSkeleton: SectionSkeleton = {
                   textTransform: 'uppercase',
                 },
                 props: {
-                  content: 'WEDDING DATE',
+                  content: '예식 일시',
                   as: 'h2',
                 },
               },
@@ -424,6 +426,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'date',
           required: true,
           description: '결혼 날짜',
+          defaultValue: '2025년 3월 15일',
         },
         {
           id: 'wedding-month',
@@ -431,6 +434,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '월 (예: 2024년 12월)',
+          defaultValue: '2025년 3월',
         },
         {
           id: 'wedding-day',
@@ -438,6 +442,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '일 (예: 25)',
+          defaultValue: '15',
         },
         {
           id: 'wedding-weekday',
@@ -445,6 +450,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'text',
           required: true,
           description: '요일 (예: 토요일)',
+          defaultValue: '토요일',
         },
         {
           id: 'wedding-time',
@@ -452,6 +458,7 @@ export const dateSkeleton: SectionSkeleton = {
           type: 'text',
           required: false,
           description: '결혼 시간',
+          defaultValue: '오후 2시',
         },
       ],
       options: {
