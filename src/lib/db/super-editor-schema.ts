@@ -115,6 +115,7 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
 
   // 결제
   isPaid: boolean('is_paid').default(false).notNull(),
+  paymentId: uuid('payment_id'), // invitation_payments 참조
 
   // 접근 설정
   slug: varchar('slug', { length: 100 }), // 커스텀 URL slug
@@ -133,6 +134,7 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   index('idx_se_invitations_user').on(table.userId),
   index('idx_se_invitations_status').on(table.status),
   index('idx_se_invitations_slug').on(table.slug),
+  index('idx_se_invitations_payment').on(table.paymentId),
 ]).enableRLS()
 
 // ============================================

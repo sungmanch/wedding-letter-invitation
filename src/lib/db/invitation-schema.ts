@@ -71,12 +71,16 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).default('draft').notNull(), // draft, published, deleted
   isPaid: boolean('is_paid').default(false).notNull(),
 
+  // 결제 참조
+  paymentId: uuid('payment_id'), // invitation_payments 참조
+
   // 메타
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   index('idx_invitations_user_id').on(table.userId),
   index('idx_invitations_status').on(table.status),
+  index('idx_invitations_payment_id').on(table.paymentId),
   pgPolicy('Anyone can view published invitations', { as: 'permissive', for: 'select', to: ['public'], using: sql`((status)::text = 'published'::text)` }),
   pgPolicy('Users can manage their own invitations', { as: 'permissive', for: 'all', to: ['public'] }),
 ]).enableRLS()
@@ -176,11 +180,11 @@ export const invitationMessages = pgTable('invitation_messages', {
 ]).enableRLS()
 
 // ============================================
-// 결제 (Invitation Payments)
+// 결제 (Invitation Payments) - 범용 결제 테이블
+// invitations, superEditorInvitations 등에서 paymentId로 참조
 // ============================================
 export const invitationPayments = pgTable('invitation_payments', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invitationId: uuid('invitation_id').notNull(),
   userId: uuid('user_id').notNull(), // auth.users 참조
 
   polarCheckoutId: varchar('polar_checkout_id', { length: 100 }),
@@ -191,13 +195,7 @@ export const invitationPayments = pgTable('invitation_payments', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
 }, (table) => [
-  index('idx_invitation_payments_invitation_id').on(table.invitationId),
   index('idx_invitation_payments_user_id').on(table.userId),
-  foreignKey({
-    columns: [table.invitationId],
-    foreignColumns: [invitations.id],
-    name: 'invitation_payments_invitation_id_fkey'
-  }).onDelete('cascade'),
   pgPolicy('Users can manage their own payments', {
     as: 'permissive',
     for: 'all',
@@ -214,7 +212,10 @@ export const invitationsRelations = relations(invitations, ({ many, one }) => ({
   designs: many(invitationDesigns),
   photos: many(invitationPhotos),
   messages: many(invitationMessages),
-  payments: many(invitationPayments),
+  payment: one(invitationPayments, {
+    fields: [invitations.paymentId],
+    references: [invitationPayments.id],
+  }),
   selectedDesign: one(invitationDesigns, {
     fields: [invitations.selectedDesignId],
     references: [invitationDesigns.id],
@@ -246,12 +247,8 @@ export const invitationMessagesRelations = relations(invitationMessages, ({ one 
   }),
 }))
 
-export const invitationPaymentsRelations = relations(invitationPayments, ({ one }) => ({
-  invitation: one(invitations, {
-    fields: [invitationPayments.invitationId],
-    references: [invitations.id],
-  }),
-}))
+// invitationPayments는 범용 테이블로 역방향 relation 없음
+// invitations, superEditorInvitations에서 paymentId로 참조
 
 export const designTemplatesRelations = relations(designTemplates, ({ many }) => ({
   invitations: many(invitations),

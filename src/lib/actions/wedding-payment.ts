@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache'
 
 const POLAR_API_URL = 'https://api.polar.sh/v1'
 const POLAR_ACCESS_TOKEN = process.env.POLAR_ACCESS_TOKEN
-const POLAR_PRODUCT_ID = process.env.POLAR_PRODUCT_ID
+const POLAR_PRODUCT_ID = '16b0afe4-9a42-4d54-a859-67a63f1fa983'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 // Price in KRW
@@ -20,7 +20,9 @@ export async function createCheckoutSession(
 ): Promise<{ success: boolean; checkoutUrl?: string; error?: string }> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
       return { success: false, error: '로그인이 필요합니다' }
@@ -28,10 +30,7 @@ export async function createCheckoutSession(
 
     // Verify ownership and get invitation
     const invitation = await db.query.invitations.findFirst({
-      where: and(
-        eq(invitations.id, invitationId),
-        eq(invitations.userId, user.id)
-      ),
+      where: and(eq(invitations.id, invitationId), eq(invitations.userId, user.id)),
     })
 
     if (!invitation) {
@@ -43,18 +42,26 @@ export async function createCheckoutSession(
     }
 
     // Create payment record
-    const [payment] = await db.insert(invitationPayments).values({
-      invitationId,
-      userId: user.id,
-      amount: INVITATION_PRICE,
-      status: 'pending',
-    }).returning()
+    const [payment] = await db
+      .insert(invitationPayments)
+      .values({
+        userId: user.id,
+        amount: INVITATION_PRICE,
+        status: 'pending',
+      })
+      .returning()
+
+    // Link payment to invitation
+    await db
+      .update(invitations)
+      .set({ paymentId: payment.id })
+      .where(eq(invitations.id, invitationId))
 
     // Create Polar checkout session
     const checkoutResponse = await fetch(`${POLAR_API_URL}/checkouts/custom`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${POLAR_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -79,7 +86,8 @@ export async function createCheckoutSession(
     const checkoutData = await checkoutResponse.json()
 
     // Update payment with checkout ID
-    await db.update(invitationPayments)
+    await db
+      .update(invitationPayments)
       .set({ polarCheckoutId: checkoutData.id })
       .where(eq(invitationPayments.id, payment.id))
 
@@ -109,7 +117,8 @@ export async function updateWeddingPaymentStatus(
     }
 
     // Update payment
-    await db.update(invitationPayments)
+    await db
+      .update(invitationPayments)
       .set({
         status,
         polarOrderId: polarOrderId || payment.polarOrderId,
@@ -117,17 +126,24 @@ export async function updateWeddingPaymentStatus(
       })
       .where(eq(invitationPayments.id, paymentId))
 
-    // If completed, update invitation
+    // If completed, update invitation (find by paymentId)
     if (status === 'completed') {
-      await db.update(invitations)
-        .set({
-          isPaid: true,
-          status: 'published',
-          updatedAt: new Date(),
-        })
-        .where(eq(invitations.id, payment.invitationId))
+      const invitation = await db.query.invitations.findFirst({
+        where: eq(invitations.paymentId, paymentId),
+      })
 
-      revalidatePath(`/${payment.invitationId}`)
+      if (invitation) {
+        await db
+          .update(invitations)
+          .set({
+            isPaid: true,
+            status: 'published',
+            updatedAt: new Date(),
+          })
+          .where(eq(invitations.id, invitation.id))
+
+        revalidatePath(`/${invitation.id}`)
+      }
     }
 
     return { success: true }
@@ -142,12 +158,13 @@ export async function getWeddingPayment(
   invitationId: string
 ): Promise<{ success: boolean; data?: InvitationPayment | null; error?: string }> {
   try {
-    const payment = await db.query.invitationPayments.findFirst({
-      where: eq(invitationPayments.invitationId, invitationId),
-      orderBy: (payments, { desc }) => [desc(payments.createdAt)],
+    // Find invitation first, then get linked payment
+    const invitation = await db.query.invitations.findFirst({
+      where: eq(invitations.id, invitationId),
+      with: { payment: true },
     })
 
-    return { success: true, data: payment }
+    return { success: true, data: invitation?.payment ?? null }
   } catch (error) {
     console.error('Failed to get payment:', error)
     return { success: false, error: '결제 정보 조회에 실패했습니다' }
@@ -160,7 +177,9 @@ export async function publishInvitation(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
       return { success: false, error: '로그인이 필요합니다' }
@@ -168,17 +187,15 @@ export async function publishInvitation(
 
     // Verify ownership
     const invitation = await db.query.invitations.findFirst({
-      where: and(
-        eq(invitations.id, invitationId),
-        eq(invitations.userId, user.id)
-      ),
+      where: and(eq(invitations.id, invitationId), eq(invitations.userId, user.id)),
     })
 
     if (!invitation) {
       return { success: false, error: '청첩장을 찾을 수 없습니다' }
     }
 
-    await db.update(invitations)
+    await db
+      .update(invitations)
       .set({
         isPaid: true,
         status: 'published',
