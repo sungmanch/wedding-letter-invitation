@@ -208,6 +208,10 @@ function handleAction(action: ButtonAction | undefined) {
         )
       }
       break
+    case 'modal':
+      // 모달은 context.openModal로 처리 (handleAction에서는 무시)
+      console.log('Modal action should be handled via context.openModal:', action.target)
+      break
   }
 }
 
@@ -260,6 +264,12 @@ export function Button({
     if (context.mode === 'edit') {
       context.onSelectNode?.(node.id)
     } else {
+      // modal 액션은 context.openModal로 직접 처리
+      if (props.action?.type === 'modal' && context.openModal) {
+        context.openModal(props.action.target)
+        return
+      }
+
       // v2 이벤트 시스템 우선, 없으면 레거시 action 처리
       if (eventHandlers.onClick) {
         eventHandlers.onClick(e)
