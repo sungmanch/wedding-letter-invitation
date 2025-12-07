@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { superEditorInvitations, superEditorTemplates, guestbookMessages } from '@/lib/db/super-editor-schema'
 import { eq, count } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
-import { DashboardClient } from './DashboardClient'
+import { DashboardClient, ShareLinkCard } from './DashboardClient'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { UserData } from '@/lib/super-editor/schema/user-data'
@@ -172,24 +172,7 @@ export default async function DashboardPage({ params }: PageProps) {
 
         {/* 공유 링크 */}
         {isPaid && isPublished && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h3 className="font-semibold text-gray-900 mb-3">공유 링크</h3>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                readOnly
-                value={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://maisondletter.com'}/se/${id}`}
-                className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600"
-              />
-              <button
-                type="button"
-                onClick={() => {}}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                복사
-              </button>
-            </div>
-          </div>
+          <ShareLinkCard invitationId={id} />
         )}
 
         {/* 결제 안내 (미결제 시) */}
