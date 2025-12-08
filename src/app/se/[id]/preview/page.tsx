@@ -124,15 +124,15 @@ export default function SuperEditorPreviewPage() {
 
   // 미리보기 배너 (공유된 링크인 경우)
   const PreviewBanner = token ? (
-    <div className="fixed top-0 left-0 right-0 bg-blue-600 text-white text-center py-2 text-sm z-50">
+    <div className="fixed top-0 left-0 right-0 bg-[#0A0806] border-b border-[#C9A962]/30 text-[#F5E6D3] text-center py-2 text-sm z-50">
       미리보기 모드 - 이 링크는 1시간 동안 유효합니다
     </div>
   ) : (
-    <div className="fixed top-0 left-0 right-0 bg-rose-600 text-white text-center py-2 text-sm z-50 flex items-center justify-center gap-4">
+    <div className="fixed top-0 left-0 right-0 bg-[#0A0806] border-b border-[#C9A962]/30 text-[#F5E6D3] text-center py-2 text-sm z-50 flex items-center justify-center gap-4">
       <span>미리보기 모드</span>
       <button
         onClick={() => router.push(`/se/${invitationId}/edit`)}
-        className="px-3 py-1 bg-white text-rose-600 rounded text-xs font-medium hover:bg-rose-50"
+        className="px-3 py-1 bg-[#C9A962] text-[#0A0806] rounded text-xs font-medium hover:bg-[#B8A052]"
       >
         편집하기
       </button>
@@ -140,9 +140,9 @@ export default function SuperEditorPreviewPage() {
   )
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#0A0806]">
       {PreviewBanner}
-      <div className={token ? 'pt-8' : 'pt-10'}>
+      <div className={`${token ? 'pt-8' : 'pt-10'} flex justify-center`}>
         <InvitationPreview
           layout={template.layoutSchema as LayoutSchema}
           style={template.styleSchema as StyleSchema}
@@ -150,6 +150,9 @@ export default function SuperEditorPreviewPage() {
           sectionOrder={sectionOrder}
           sectionEnabled={sectionEnabled}
           mode="preview"
+          withFrame={true}
+          frameWidth={430}
+          frameHeight={932}
         />
       </div>
     </div>

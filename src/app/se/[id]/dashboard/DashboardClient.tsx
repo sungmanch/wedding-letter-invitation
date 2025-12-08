@@ -61,7 +61,7 @@ export function ShareLinkCard({ invitationId }: ShareLinkCardProps) {
   const [copied, setCopied] = useState(false)
   const shareUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/se/${invitationId}`
-    : `https://maisondletter.com/se/${invitationId}`
+    : `https://maisondeletter.com/se/${invitationId}`
 
   const handleCopy = useCallback(async () => {
     try {
