@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   getInvitationWithTemplate,
@@ -342,7 +342,7 @@ function EditPageContent() {
   )
 
   // Add section handler (dev mode only)
-  const handleAddSection = useCallback(
+  const _handleAddSection = useCallback(
     (sectionType: SectionType) => {
       if (process.env.NODE_ENV !== 'development' || !state.layout) return
 

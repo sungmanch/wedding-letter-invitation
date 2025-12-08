@@ -1,16 +1,18 @@
 'use server'
 
+interface SlackBlock {
+  type: string
+  text?: {
+    type: string
+    text: string
+  }
+  elements?: unknown[]
+  fields?: unknown[]
+}
+
 interface SlackMessage {
   text: string
-  blocks?: Array<{
-    type: string
-    text?: {
-      type: string
-      text: string
-    }
-    elements?: any[]
-    fields?: any[]
-  }>
+  blocks?: SlackBlock[]
 }
 
 export async function sendSlackNotification(message: SlackMessage): Promise<boolean> {

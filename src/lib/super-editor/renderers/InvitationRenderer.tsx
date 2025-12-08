@@ -122,7 +122,7 @@ function getSortedSections(
 // Inner Content Component
 // ============================================
 
-interface InvitationContentProps extends InvitationRendererProps {}
+type InvitationContentProps = InvitationRendererProps
 
 function InvitationContent({
   layout,
@@ -141,7 +141,7 @@ function InvitationContent({
   className,
 }: InvitationContentProps) {
   // 섹션 정렬
-  const { intro, sections, music, guestbookFab } = React.useMemo(
+  const { intro, sections } = React.useMemo(
     () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants),
     [layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants]
   )
@@ -150,11 +150,6 @@ function InvitationContent({
   const showIntro = visibleSections
     ? visibleSections.includes('intro') && intro
     : sectionEnabled.intro && intro
-
-  // music 표시 여부
-  const showMusic = visibleSections
-    ? visibleSections.includes('music') && music
-    : sectionEnabled.music && music
 
   // 편집 모드일 때만 섹션 간 간격 적용
   const sectionGap = mode === 'edit' ? '48px' : '0px'

@@ -279,7 +279,7 @@ export function OgMetadataEditor({
           />
         </div>
         <p className="text-xs text-gray-500">
-          기본 이미지: 메인 사진에 어두운 오버레이와 "{groomName} 🩷 {brideName}" 텍스트가 추가됩니다.
+          기본 이미지: 메인 사진에 어두운 오버레이와 &quot;{groomName} 🩷 {brideName}&quot; 텍스트가 추가됩니다.
         </p>
       </div>
 

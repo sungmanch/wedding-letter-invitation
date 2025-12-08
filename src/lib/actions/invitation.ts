@@ -123,7 +123,7 @@ export async function updateInvitation(
     }
 
     // Update invitation data
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, string | null> = {
       updated_at: new Date().toISOString(),
     }
 

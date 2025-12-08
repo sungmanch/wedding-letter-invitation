@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               .catch(console.error)
           }
         }
-      } catch (error) {
+      } catch {
         setUser(null)
       } finally {
         setIsLoading(false)

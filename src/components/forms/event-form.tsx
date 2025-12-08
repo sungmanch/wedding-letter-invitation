@@ -80,7 +80,7 @@ export function EventForm() {
           {...form.register('groupName')}
         />
         <p className="mt-2 text-xs text-charcoal/50">
-          💡 "OO의 △△ 청모" 형태로 지으면 더 친근해요!
+          💡 &quot;OO의 △△ 청모&quot; 형태로 지으면 더 친근해요!
         </p>
       </Card>
 

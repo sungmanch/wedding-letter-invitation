@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { Send, Loader2, Sparkles } from 'lucide-react'
+import { Send, Loader2 } from 'lucide-react'
 import { MessageBubble, TypingBubble, type ChatMessage } from './MessageBubble'
 import { LettyAvatar } from './LettyAvatar'
 import { useLettyConversation, type CollectedData } from '../hooks/useLettyConversation'

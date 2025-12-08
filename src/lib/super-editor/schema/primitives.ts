@@ -295,9 +295,9 @@ export interface SequenceProps {
   direction?: 'forward' | 'reverse'
 }
 
-export interface ParallelProps {
-  // 모든 자식이 동시에 실행
-}
+// ParallelProps - 모든 자식이 동시에 실행
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ParallelProps {}
 
 export interface ScrollTriggerProps {
   animation: AnimationConfig

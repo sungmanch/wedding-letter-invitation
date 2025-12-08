@@ -208,7 +208,7 @@ export function HeroWithLivePreview() {
 
         {/* Main Copy */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-          <span className="text-[#D4768A]">"이거 어디서 만들었어?"</span>
+          <span className="text-[#D4768A]">&quot;이거 어디서 만들었어?&quot;</span>
         </h1>
         <p className="text-gray-600 mb-6 max-w-xl mx-auto">
           LP가 돌고, 채팅이 흐르고, 당신의 사진이 빛나는

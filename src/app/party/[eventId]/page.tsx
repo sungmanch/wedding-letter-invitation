@@ -60,7 +60,7 @@ interface LetterData {
 
 export default function EventDashboardPage() {
   const params = useParams()
-  const router = useRouter()
+  useRouter()
   const eventId = params.eventId as string
   const [activeTab, setActiveTab] = useState('overview')
   const { user, isLoading, logout } = useAuth(true)
