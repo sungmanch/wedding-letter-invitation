@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect, ChangeEvent } from 'react'
+import NextImage from 'next/image'
 import { getOgMetadata } from '../actions'
 import { cn } from '@/lib/utils'
 
@@ -243,11 +244,15 @@ export function OgMetadataEditor({
         </div>
         <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
           {displayImageUrl ? (
-            <img
-              src={displayImageUrl}
-              alt="OG Preview"
-              className="w-full aspect-[1200/630] object-cover"
-            />
+            <div className="relative w-full aspect-[1200/630]">
+              <NextImage
+                src={displayImageUrl}
+                alt="OG Preview"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
           ) : (
             <div className="w-full aspect-[1200/630] flex items-center justify-center text-gray-400 text-sm">
               메인 이미지가 없습니다
