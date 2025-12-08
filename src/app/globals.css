@@ -230,17 +230,44 @@ body {
    ========================================== */
 
 :root {
-  /* Wong Kar-wai Signature Colors */
+  /* Wong Kar-wai Signature Colors (legacy - keep for other pages) */
   --wkw-gold: #c9a962;
   --wkw-gold-dark: #b8a052;
   --wkw-red: #8b2635;
   --wkw-teal: #1a4d4d;
   --wkw-cream: #f5e6d3;
 
-  /* Stage Backgrounds */
+  /* Stage Backgrounds (legacy) */
   --bg-dark: #0a0806;
   --bg-cinema: #1a1a1a;
   --bg-exhibition: #2d2d2d;
+
+  /* ==========================================
+     Fresh Natural Theme - Ivory/Sage Palette
+     ========================================== */
+
+  /* Primary - Ivory/Sand */
+  --ivory-50: #fffcf5;
+  --ivory-100: #faf6ee;
+  --ivory-200: #f5efe3;
+  --sand-100: #e8dfd0;
+  --sand-200: #d4c9b8;
+
+  /* Accent - Sage Green */
+  --sage-50: #f1f5f1;
+  --sage-100: #dce8dc;
+  --sage-200: #c5d9c5;
+  --sage-300: #a8c5a8;
+  --sage-400: #8fad8f;
+  --sage-500: #6b9b6b;
+  --sage-600: #5a8a5a;
+  --sage-700: #4a7a4a;
+
+  /* Text Colors - Fresh Natural */
+  --text-primary: #3d4f3d;
+  --text-body: #4a4a4a;
+  --text-muted: #7a7a7a;
+  --text-light: #9a9a8a;
 }
 
 /* Fade up animation */
