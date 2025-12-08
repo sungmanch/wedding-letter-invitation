@@ -67,7 +67,7 @@ export function SharePreview({
                 <p className="text-xs text-gray-500 line-clamp-2 mb-1">
                   {ogDescription || '설명이 표시됩니다'}
                 </p>
-                <p className="text-xs text-gray-400">maisondletter.com</p>
+                <p className="text-xs text-gray-400">maisondeletter.com</p>
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@ export function SharePreview({
                 <p className="text-sm font-medium text-gray-900 line-clamp-1">
                   {ogTitle || '제목'}
                 </p>
-                <p className="text-xs text-blue-600 mt-0.5">maisondletter.com</p>
+                <p className="text-xs text-blue-600 mt-0.5">maisondeletter.com</p>
               </div>
             </div>
           </div>
