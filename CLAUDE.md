@@ -45,17 +45,15 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
-### 2025-12-09: 랜딩 페이지 & AI 채팅 UX 리디자인
-- **이유**: Black & Gold 테마가 20-30대 여성에게 올드하게 느껴짐, AI 채팅 정보 수집 부족
+### 2025-12-09: 랜딩 페이지 Split Hero 리디자인
+- **이유**: Black & Gold 테마가 20-30대 여성에게 올드하게 느껴짐, 전환율 개선 필요
 - **변경**:
   - 컬러 팔레트: Black & Gold → Ivory/Sand + Sage Green
-  - 랜딩: 6단계 스크롤텔링 → 단일 히어로 (캐치프레이즈 + AI영상 + 템플릿 프리뷰)
-  - AI 채팅: 3단계 → 8단계 (이름, 날짜, 시간, 장소, 부모님, 사진, 분위기, 색상)
-- **파일**:
-  - `src/app/globals.css` - 신규 컬러 변수
-  - `src/components/landing/NaturalHeroLanding.tsx` - 신규 랜딩
-  - `src/app/se/create/hooks/useLettyConversation.ts` - 확장된 대화 흐름
-- **계획**: [UX 리디자인 계획](./.claude/plans/compiled-discovering-minsky.md)
+  - 레이아웃: Split Hero (왼쪽 텍스트/CTA + 오른쪽 템플릿 캐러셀)
+  - 폰트: Playfair Display(영문) + Noto Serif KR(한글) + Pretendard(본문)
+  - 템플릿 3종: 매거진, 올드 머니, 미니멀 (자동 4초 슬라이드)
+  - CTA: Above-the-fold + 모바일 플로팅 (스크롤 300px 후 표시)
+- **파일**: `src/components/landing/NaturalHeroLanding.tsx`
 
 ### 2025-12-08: 다양한 폰트 지원을 위한 폰트 시스템 구축
 - **이유**: 9개 고정 폰트만 사용 가능했고, 새 폰트 추가 시 여러 파일 수동 수정 필요
