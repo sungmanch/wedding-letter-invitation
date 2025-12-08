@@ -4,7 +4,8 @@ AI 기반 개인화 청첩장 서비스입니다.
 사용자가 본인의 웨딩 이미지를 업로드하면 해당 이미지를 바탕으로 꾸며진 청첩장 프리뷰를 보여주고 사용자에게 선택을 유도합니다.
 
 - **도메인**: maisondeletter.com
-- **브랜드 톤**: Black & Gold 럭셔리, Wong Kar-wai 화양연화 무드
+- **브랜드 톤**: Ivory/Sage 내추럴, Fresh & Elegant
+- **캐치프레이즈**: "원하는 분위기를 말하면, AI가 바로 시안을 만들어 드립니다"
 
 ## 중요 규칙
 1. 모든 작업은 마이크로 단위로 작업에 대한 commit을 합니다.
@@ -43,6 +44,18 @@ AI 기반 개인화 청첩장 서비스입니다.
 - **`__HIDDEN__` description**: 자동 계산 필드를 에디터에서 숨김
 
 ## 변경 이력
+
+### 2025-12-09: 랜딩 페이지 & AI 채팅 UX 리디자인
+- **이유**: Black & Gold 테마가 20-30대 여성에게 올드하게 느껴짐, AI 채팅 정보 수집 부족
+- **변경**:
+  - 컬러 팔레트: Black & Gold → Ivory/Sand + Sage Green
+  - 랜딩: 6단계 스크롤텔링 → 단일 히어로 (캐치프레이즈 + AI영상 + 템플릿 프리뷰)
+  - AI 채팅: 3단계 → 8단계 (이름, 날짜, 시간, 장소, 부모님, 사진, 분위기, 색상)
+- **파일**:
+  - `src/app/globals.css` - 신규 컬러 변수
+  - `src/components/landing/NaturalHeroLanding.tsx` - 신규 랜딩
+  - `src/app/se/create/hooks/useLettyConversation.ts` - 확장된 대화 흐름
+- **계획**: [UX 리디자인 계획](./.claude/plans/compiled-discovering-minsky.md)
 
 ### 2025-12-08: 다양한 폰트 지원을 위한 폰트 시스템 구축
 - **이유**: 9개 고정 폰트만 사용 가능했고, 새 폰트 추가 시 여러 파일 수동 수정 필요
