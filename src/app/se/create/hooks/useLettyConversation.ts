@@ -13,18 +13,36 @@ import type { ChatMessage } from '../components/MessageBubble'
 // ============================================
 
 export type ConversationStep =
-  | 'greeting'    // 초기 인사
-  | 'mood'        // 분위기 질문
-  | 'color'       // 색상 질문
-  | 'keyword'     // 키워드 질문
-  | 'generating'  // 생성 중
-  | 'complete'    // 완료
+  | 'greeting'        // 초기 인사
+  | 'names'           // 신랑/신부 이름
+  | 'date'            // 결혼 날짜
+  | 'time'            // 결혼 시간
+  | 'venue'           // 장소명
+  | 'groom_parents'   // 신랑측 부모님 (선택)
+  | 'bride_parents'   // 신부측 부모님 (선택)
+  | 'mood'            // 분위기 질문
+  | 'color'           // 색상 질문
+  | 'generating'      // 생성 중
+  | 'complete'        // 완료
 
 export interface CollectedData {
+  // 커플 정보
+  groomName: string
+  brideName: string
+  // 결혼 일시
+  weddingDate: string      // YYYY-MM-DD
+  weddingTime: string      // HH:mm
+  // 장소
+  venueName: string
+  // 부모님 이름
+  groomFatherName: string
+  groomMotherName: string
+  brideFatherName: string
+  brideMotherName: string
+  // 스타일
   moods: string[]
   color: string | null
   customColor: string
-  keyword: string
 }
 
 export interface ConversationState {
@@ -59,6 +77,236 @@ const COLOR_KEYWORDS: Record<string, string[]> = {
 }
 
 const SKIP_PATTERNS = ['맡길게', '맡겨', '알아서', '추천', '골라줘', '니가', '네가', '레티가', 'letty']
+
+// ============================================
+// Constants - 새로운 단계 건너뛰기 패턴
+// ============================================
+
+const PARENTS_SKIP_PATTERNS = ['나중에', '건너뛰', '스킵', '다음', '패스', '넘어가']
+
+// ============================================
+// Utility Functions - 이름 파싱
+// ============================================
+
+/**
+ * 신랑/신부 이름을 자연어에서 파싱
+ * 예: "김민수, 이영희", "김민수랑 이영희", "신랑 김민수 신부 이영희"
+ */
+function parseNames(input: string): { groom: string; bride: string } | null {
+  const normalized = input.trim()
+
+  // 패턴 1: "신랑 OOO 신부 OOO" 또는 "신랑 OOO, 신부 OOO"
+  const rolePattern = /신랑\s*[:]?\s*([가-힣a-zA-Z]{2,10})\s*[,.]?\s*신부\s*[:]?\s*([가-힣a-zA-Z]{2,10})/
+  let match = normalized.match(rolePattern)
+  if (match) {
+    return { groom: match[1], bride: match[2] }
+  }
+
+  // 패턴 2: 쉼표로 구분 "김민수, 이영희"
+  const commaPattern = /^([가-힣a-zA-Z]{2,10})\s*[,，]\s*([가-힣a-zA-Z]{2,10})$/
+  match = normalized.match(commaPattern)
+  if (match) {
+    return { groom: match[1], bride: match[2] }
+  }
+
+  // 패턴 3: 한글 접속사 "김민수랑 이영희", "김민수와 이영희", "김민수 그리고 이영희"
+  const connectorPattern = /^([가-힣a-zA-Z]{2,10})\s*(?:랑|와|과|그리고|&)\s*([가-힣a-zA-Z]{2,10})$/
+  match = normalized.match(connectorPattern)
+  if (match) {
+    return { groom: match[1], bride: match[2] }
+  }
+
+  // 패턴 4: 공백으로만 구분 "김민수 이영희"
+  const spacePattern = /^([가-힣a-zA-Z]{2,10})\s+([가-힣a-zA-Z]{2,10})$/
+  match = normalized.match(spacePattern)
+  if (match) {
+    return { groom: match[1], bride: match[2] }
+  }
+
+  return null
+}
+
+// ============================================
+// Utility Functions - 날짜 파싱
+// ============================================
+
+/**
+ * 결혼 날짜를 자연어에서 파싱하여 YYYY-MM-DD 형식으로 변환
+ * 예: "2025년 3월 15일", "3월 15일", "2025-03-15", "25년 3월 15일"
+ */
+function parseDate(input: string): string | null {
+  const normalized = input.trim()
+  const currentYear = new Date().getFullYear()
+
+  // 패턴 1: 2025년 3월 15일
+  let match = normalized.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  }
+
+  // 패턴 2: 25년 3월 15일 (2자리 연도)
+  match = normalized.match(/(\d{2})년\s*(\d{1,2})월\s*(\d{1,2})일/)
+  if (match) {
+    const [, shortYear, month, day] = match
+    const year = 2000 + parseInt(shortYear, 10)
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  }
+
+  // 패턴 3: 3월 15일 (연도 없음 - 올해 또는 내년으로 추정)
+  match = normalized.match(/(\d{1,2})월\s*(\d{1,2})일/)
+  if (match) {
+    const [, month, day] = match
+    const monthNum = parseInt(month, 10)
+    const dayNum = parseInt(day, 10)
+    const currentMonth = new Date().getMonth() + 1
+
+    // 이미 지난 달이면 내년으로
+    const year = monthNum < currentMonth ? currentYear + 1 : currentYear
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  }
+
+  // 패턴 4: 2025-03-15 (ISO 형식)
+  match = normalized.match(/(\d{4})-(\d{2})-(\d{2})/)
+  if (match) {
+    return match[0]
+  }
+
+  // 패턴 5: 2025.03.15 또는 2025/03/15
+  match = normalized.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  }
+
+  return null
+}
+
+/**
+ * 날짜를 한글 형식으로 변환
+ * "2025-03-15" -> "2025년 3월 15일 토요일"
+ */
+function formatDateKorean(dateStr: string): string {
+  const date = new Date(dateStr)
+  const weekdays = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const weekday = weekdays[date.getDay()]
+  return `${year}년 ${month}월 ${day}일 ${weekday}`
+}
+
+// ============================================
+// Utility Functions - 시간 파싱
+// ============================================
+
+/**
+ * 결혼 시간을 자연어에서 파싱하여 HH:mm 형식으로 변환
+ * 예: "오후 2시", "14시 30분", "2:30", "낮 12시"
+ */
+function parseTime(input: string): string | null {
+  const normalized = input.trim()
+
+  // 패턴 1: 오전/오후 X시 Y분
+  let match = normalized.match(/(오전|오후|낮|저녁)\s*(\d{1,2})시(?:\s*(\d{1,2})분)?/)
+  if (match) {
+    const [, period, hourStr, minStr] = match
+    let hour = parseInt(hourStr, 10)
+    const min = minStr ? parseInt(minStr, 10) : 0
+
+    if (period === '오후' && hour !== 12) {
+      hour += 12
+    } else if (period === '오전' && hour === 12) {
+      hour = 0
+    } else if (period === '낮' && hour === 12) {
+      // 낮 12시 그대로
+    } else if (period === '저녁' && hour < 12) {
+      hour += 12
+    }
+
+    return `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+  }
+
+  // 패턴 2: X시 Y분 (24시간 형식)
+  match = normalized.match(/(\d{1,2})시(?:\s*(\d{1,2})분)?/)
+  if (match) {
+    const [, hourStr, minStr] = match
+    const hour = parseInt(hourStr, 10)
+    const min = minStr ? parseInt(minStr, 10) : 0
+    return `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+  }
+
+  // 패턴 3: HH:mm 형식
+  match = normalized.match(/(\d{1,2}):(\d{2})/)
+  if (match) {
+    const [, hourStr, minStr] = match
+    return `${hourStr.padStart(2, '0')}:${minStr}`
+  }
+
+  return null
+}
+
+/**
+ * 시간을 한글 형식으로 변환
+ * "14:30" -> "오후 2시 30분"
+ */
+function formatTimeKorean(timeStr: string): string {
+  const [hourStr, minStr] = timeStr.split(':')
+  const hour = parseInt(hourStr, 10)
+  const min = parseInt(minStr, 10)
+
+  const period = hour < 12 ? '오전' : '오후'
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+
+  if (min === 0) {
+    return `${period} ${displayHour}시`
+  }
+  return `${period} ${displayHour}시 ${min}분`
+}
+
+// ============================================
+// Utility Functions - 부모님 이름 파싱
+// ============================================
+
+/**
+ * 부모님 이름을 파싱
+ * 예: "김철수, 박영희" -> { father: "김철수", mother: "박영희" }
+ * 예: "아버지 김철수 어머니 박영희"
+ */
+function parseParentsNames(input: string): { father: string; mother: string } | null {
+  const normalized = input.trim()
+
+  // 패턴 1: 아버지/어머니 라벨 있는 경우
+  const rolePattern = /아버(?:지|님)\s*[:]?\s*([가-힣a-zA-Z]{2,10})\s*[,.]?\s*어머(?:니|님)\s*[:]?\s*([가-힣a-zA-Z]{2,10})/
+  let match = normalized.match(rolePattern)
+  if (match) {
+    return { father: match[1], mother: match[2] }
+  }
+
+  // 패턴 2: 쉼표로 구분 (아버지, 어머니 순서 가정)
+  const commaPattern = /^([가-힣a-zA-Z]{2,10})\s*[,，]\s*([가-힣a-zA-Z]{2,10})$/
+  match = normalized.match(commaPattern)
+  if (match) {
+    return { father: match[1], mother: match[2] }
+  }
+
+  // 패턴 3: 접속사로 구분
+  const connectorPattern = /^([가-힣a-zA-Z]{2,10})\s*(?:랑|와|과|&)\s*([가-힣a-zA-Z]{2,10})$/
+  match = normalized.match(connectorPattern)
+  if (match) {
+    return { father: match[1], mother: match[2] }
+  }
+
+  return null
+}
+
+/**
+ * 부모님 건너뛰기 여부 확인
+ */
+function isParentsSkip(input: string): boolean {
+  const normalized = input.toLowerCase()
+  return PARENTS_SKIP_PATTERNS.some(pattern => normalized.includes(pattern))
+}
 
 // ============================================
 // Constants - 타이핑 딜레이
@@ -307,88 +555,6 @@ function getColorFeedbackMessages(color: string | null, customColor: string): { 
 }
 
 /**
- * 키워드 피드백 메시지들 반환 (여러 메시지)
- */
-function getKeywordFeedbackMessages(keyword: string): { content: string; delay?: number }[] {
-  if (!keyword) {
-    return [
-      { content: '알겠어요! 그럼 바로 시작해볼게요 😊', delay: TYPING_DELAYS.medium },
-    ]
-  }
-
-  const messages: { content: string; delay?: number }[] = []
-
-  // 키워드별 상세 피드백
-  const keywordFeedback: Record<string, { quick: string; detail: string }> = {
-    박물관: {
-      quick: '박물관! 고요하고 품격 있는 느낌이네요 🏛️',
-      detail: '박물관의 고즈넉한 분위기와\n예술적 감성을 담아드릴게요.\n클래식한 타이포와 여백의 미를 살릴게요.',
-    },
-    바다: {
-      quick: '바다! 시원하고 자유로운 느낌이에요 🌊',
-      detail: '탁 트인 바다의 시원함과\n파도 소리가 느껴지는 디자인을 만들게요.\n블루 톤의 시원한 색감을 활용할게요.',
-    },
-    벚꽃: {
-      quick: '벚꽃! 로맨틱하고 아름다운 느낌이에요 🌸',
-      detail: '벚꽃이 흩날리는 봄날의 설렘을 담을게요.\n연핑크와 화이트의 부드러운 조화가\n사랑스러운 분위기를 만들어줄 거예요.',
-    },
-    뉴욕: {
-      quick: '뉴욕! 세련되고 도시적인 느낌이네요 🗽',
-      detail: '뉴욕의 세련된 감성을 담아드릴게요.\n모던한 타이포와 도시적인 레이아웃으로\n스타일리시한 청첩장을 만들게요.',
-    },
-    파리: {
-      quick: '파리! 로맨틱하고 우아한 느낌이에요 🗼',
-      detail: '파리의 로맨틱한 감성을 담을게요.\n에펠탑 아래 카페처럼\n우아하고 감성적인 디자인을 만들게요.',
-    },
-    교회: {
-      quick: '교회! 경건하고 아름다운 느낌이에요 ⛪',
-      detail: '교회의 신성한 분위기를 담아드릴게요.\n클래식한 서체와 차분한 색감으로\n경건한 아름다움을 표현할게요.',
-    },
-    성당: {
-      quick: '성당! 신성하고 품격 있는 느낌이네요 🕯️',
-      detail: '성당의 장엄한 분위기를 담을게요.\n스테인드글라스처럼 빛이 스미는\n신비로운 느낌을 표현해드릴게요.',
-    },
-    숲: {
-      quick: '숲! 자연스럽고 평화로운 느낌이에요 🌲',
-      detail: '숲의 평화로운 분위기를 담아드릴게요.\n그린 톤과 자연스러운 텍스처로\n편안하고 싱그러운 느낌을 줄게요.',
-    },
-    정원: {
-      quick: '정원! 우아하고 자연스러운 느낌이네요 🌷',
-      detail: '정원의 우아한 분위기를 담을게요.\n플로럴 요소와 자연스러운 레이아웃으로\n가든 파티 같은 느낌을 연출할게요.',
-    },
-    호텔: {
-      quick: '호텔! 럭셔리하고 세련된 느낌이에요 ✨',
-      detail: '호텔의 럭셔리한 분위기를 담아드릴게요.\n골드 악센트와 프리미엄 서체로\n격조 있는 청첩장을 만들게요.',
-    },
-    가을: {
-      quick: '가을! 따뜻하고 감성적인 느낌이에요 🍂',
-      detail: '가을의 포근한 감성을 담을게요.\n오렌지, 브라운 톤의 따뜻한 색감으로\n낙엽이 물드는 계절감을 표현할게요.',
-    },
-    겨울: {
-      quick: '겨울! 깨끗하고 순수한 느낌이네요 ❄️',
-      detail: '겨울의 순백의 아름다움을 담을게요.\n화이트와 실버의 깨끗한 조화로\n눈 내리는 날의 설렘을 표현할게요.',
-    },
-  }
-
-  const feedback = keywordFeedback[keyword]
-  if (feedback) {
-    messages.push({ content: feedback.quick, delay: TYPING_DELAYS.medium })
-    messages.push({ content: feedback.detail, delay: TYPING_DELAYS.long })
-  } else {
-    messages.push({
-      content: `"${keyword}"! 특별한 느낌이 담기겠네요 ✨`,
-      delay: TYPING_DELAYS.medium,
-    })
-    messages.push({
-      content: `"${keyword}"에서 느껴지는 이미지를\n청첩장에 녹여드릴게요.\n두 분만의 특별한 감성이 담길 거예요.`,
-      delay: TYPING_DELAYS.long,
-    })
-  }
-
-  return messages
-}
-
-/**
  * 생성 전 요약 메시지 생성
  */
 function buildSummaryMessage(data: CollectedData): string | null {
@@ -416,6 +582,22 @@ function buildSummaryMessage(data: CollectedData): string | null {
     'charcoal': '차콜',
   }
 
+  // 커플 정보
+  if (data.groomName && data.brideName) {
+    parts.push(`✦ 신랑 · 신부: ${data.groomName} & ${data.brideName}`)
+  }
+
+  // 날짜/시간/장소
+  if (data.weddingDate) {
+    const dateKorean = formatDateKorean(data.weddingDate)
+    const timeKorean = data.weddingTime ? formatTimeKorean(data.weddingTime) : ''
+    parts.push(`✦ 일시: ${dateKorean}${timeKorean ? ` ${timeKorean}` : ''}`)
+  }
+
+  if (data.venueName) {
+    parts.push(`✦ 장소: ${data.venueName}`)
+  }
+
   // 분위기
   if (data.moods.length > 0) {
     const labels = data.moods.map(m => moodLabels[m] || m)
@@ -427,11 +609,6 @@ function buildSummaryMessage(data: CollectedData): string | null {
     parts.push(`✦ 색상: ${colorLabels[data.color] || data.color}`)
   } else if (data.customColor) {
     parts.push(`✦ 색상: ${data.customColor}`)
-  }
-
-  // 키워드
-  if (data.keyword) {
-    parts.push(`✦ 키워드: ${data.keyword}`)
   }
 
   // 아무것도 선택하지 않은 경우
@@ -457,10 +634,18 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
   const [currentStep, setCurrentStep] = useState<ConversationStep>('greeting')
   const [isTyping, setIsTyping] = useState(false)
   const [collectedData, setCollectedData] = useState<CollectedData>({
+    groomName: '',
+    brideName: '',
+    weddingDate: '',
+    weddingTime: '',
+    venueName: '',
+    groomFatherName: '',
+    groomMotherName: '',
+    brideFatherName: '',
+    brideMotherName: '',
     moods: [],
     color: null,
     customColor: '',
-    keyword: '',
   })
 
   // 메시지 시퀀스 진행 중인지 추적
@@ -492,7 +677,7 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
     }
   }, [sendLettyMessage])
 
-  // 초기 인사 시퀀스
+  // 초기 인사 시퀀스 - 이름부터 질문
   const startConversation = useCallback(async () => {
     if (isProcessingRef.current) return
     isProcessingRef.current = true
@@ -500,12 +685,12 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
     await sendLettyMessages([
       { content: '안녕하세요! 청첩장 디자인을 도와드릴 Letty예요 ✨', delay: TYPING_DELAYS.long },
       {
-        content: '어떤 분위기를 원하세요?\n로맨틱, 우아한, 미니멀, 모던... 자유롭게 말씀해주세요! 💭',
+        content: '먼저, 결혼하시는 두 분의 성함을 알려주세요!\n신랑님, 신부님 순서로요 💒\n\n예: 김민수, 이영희',
         delay: TYPING_DELAYS.medium,
       },
     ])
 
-    setCurrentStep('mood')
+    setCurrentStep('names')
     isProcessingRef.current = false
   }, [sendLettyMessages])
 
@@ -520,6 +705,197 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
     const isSkip = isSkipInput(input)
 
     switch (currentStep) {
+      // Step 1: 신랑/신부 이름
+      case 'names': {
+        const names = parseNames(input)
+        if (!names) {
+          await sendLettyMessage(
+            '두 분의 성함을 함께 알려주세요!\n예: 김민수, 이영희 또는 김민수랑 이영희',
+            TYPING_DELAYS.medium
+          )
+          isProcessingRef.current = false
+          return
+        }
+
+        setCollectedData(prev => ({
+          ...prev,
+          groomName: names.groom,
+          brideName: names.bride,
+        }))
+
+        await sendLettyMessages([
+          { content: `${names.groom}님과 ${names.bride}님! 아름다운 이름이네요 💕`, delay: TYPING_DELAYS.medium },
+          {
+            content: '결혼식 날짜는 언제인가요? 📅\n\n예: 2025년 5월 24일',
+            delay: TYPING_DELAYS.medium,
+          },
+        ])
+
+        setCurrentStep('date')
+        break
+      }
+
+      // Step 2: 결혼 날짜
+      case 'date': {
+        const dateStr = parseDate(input)
+        if (!dateStr) {
+          await sendLettyMessage(
+            '날짜 형식을 확인해주세요!\n예: 2025년 5월 24일 또는 5월 24일',
+            TYPING_DELAYS.medium
+          )
+          isProcessingRef.current = false
+          return
+        }
+
+        setCollectedData(prev => ({ ...prev, weddingDate: dateStr }))
+
+        const dateKorean = formatDateKorean(dateStr)
+        await sendLettyMessages([
+          { content: `${dateKorean}! 정말 설레는 날이네요 🎊`, delay: TYPING_DELAYS.medium },
+          {
+            content: '예식 시간은 몇 시인가요? ⏰\n\n예: 오후 2시 또는 14시 30분',
+            delay: TYPING_DELAYS.medium,
+          },
+        ])
+
+        setCurrentStep('time')
+        break
+      }
+
+      // Step 3: 결혼 시간
+      case 'time': {
+        const timeStr = parseTime(input)
+        if (!timeStr) {
+          await sendLettyMessage(
+            '시간 형식을 확인해주세요!\n예: 오후 2시 또는 14:30',
+            TYPING_DELAYS.medium
+          )
+          isProcessingRef.current = false
+          return
+        }
+
+        setCollectedData(prev => ({ ...prev, weddingTime: timeStr }))
+
+        const timeKorean = formatTimeKorean(timeStr)
+        await sendLettyMessages([
+          { content: `${timeKorean}이요! 알겠습니다 ✨`, delay: TYPING_DELAYS.medium },
+          {
+            content: '예식 장소는 어디인가요? 🏛️\n장소 이름만 알려주세요!\n\n예: 그랜드 웨딩홀',
+            delay: TYPING_DELAYS.medium,
+          },
+        ])
+
+        setCurrentStep('venue')
+        break
+      }
+
+      // Step 4: 장소명
+      case 'venue': {
+        const venueName = input.trim()
+        if (venueName.length < 2) {
+          await sendLettyMessage(
+            '장소 이름을 알려주세요!\n예: 더채플앳청담, 그랜드 인터컨티넨탈',
+            TYPING_DELAYS.medium
+          )
+          isProcessingRef.current = false
+          return
+        }
+
+        setCollectedData(prev => ({ ...prev, venueName }))
+
+        await sendLettyMessages([
+          { content: `${venueName}! 좋은 장소네요 🌟`, delay: TYPING_DELAYS.medium },
+          {
+            content: '신랑측 혼주 (부모님) 성함을 알려주세요 🙏\n\n예: 아버지 김철수, 어머니 박영희\n\n(나중에 입력하시려면 "나중에"라고 해주세요)',
+            delay: TYPING_DELAYS.medium,
+          },
+        ])
+
+        setCurrentStep('groom_parents')
+        break
+      }
+
+      // Step 5: 신랑측 부모님 이름 (선택)
+      case 'groom_parents': {
+        if (isParentsSkip(input)) {
+          await sendLettyMessages([
+            { content: '알겠어요! 나중에 편집 페이지에서 추가하시면 돼요 👍', delay: TYPING_DELAYS.medium },
+            {
+              content: '이제 청첩장 분위기를 정해볼까요? 🎨\n로맨틱, 우아한, 미니멀, 모던, 따뜻한, 럭셔리...\n원하시는 느낌을 말씀해주세요! 💭',
+              delay: TYPING_DELAYS.long,
+            },
+          ])
+
+          setCurrentStep('mood')
+        } else {
+          const groomParents = parseParentsNames(input)
+          if (groomParents) {
+            setCollectedData(prev => ({
+              ...prev,
+              groomFatherName: groomParents.father,
+              groomMotherName: groomParents.mother,
+            }))
+
+            await sendLettyMessages([
+              { content: `신랑측 혼주님 성함 확인했어요! 👨‍👩‍👦`, delay: TYPING_DELAYS.medium },
+              {
+                content: '이제 신부측 부모님 성함을 알려주세요!\n\n예: 아버지 이철수, 어머니 김영희\n\n(건너뛰시려면 "나중에"라고 해주세요)',
+                delay: TYPING_DELAYS.medium,
+              },
+            ])
+
+            setCurrentStep('bride_parents')
+          } else {
+            await sendLettyMessage(
+              '아버지, 어머니 성함을 함께 알려주세요!\n예: 아버지 김철수, 어머니 박영희\n\n(건너뛰시려면 "나중에"라고 해주세요)',
+              TYPING_DELAYS.medium
+            )
+          }
+        }
+        break
+      }
+
+      // Step 6: 신부측 부모님 이름 (선택)
+      case 'bride_parents': {
+        if (isParentsSkip(input)) {
+          await sendLettyMessages([
+            { content: '알겠어요! 나중에 편집 페이지에서 추가하시면 돼요 👍', delay: TYPING_DELAYS.medium },
+            {
+              content: '이제 청첩장 분위기를 정해볼까요? 🎨\n로맨틱, 우아한, 미니멀, 모던, 따뜻한, 럭셔리...\n원하시는 느낌을 말씀해주세요! 💭',
+              delay: TYPING_DELAYS.long,
+            },
+          ])
+
+          setCurrentStep('mood')
+        } else {
+          const brideParents = parseParentsNames(input)
+          if (brideParents) {
+            setCollectedData(prev => ({
+              ...prev,
+              brideFatherName: brideParents.father,
+              brideMotherName: brideParents.mother,
+            }))
+
+            await sendLettyMessages([
+              { content: `신부측 혼주님 성함도 확인했어요! 👨‍👩‍👧`, delay: TYPING_DELAYS.medium },
+              {
+                content: '이제 청첩장 분위기를 정해볼까요? 🎨\n로맨틱, 우아한, 미니멀, 모던, 따뜻한, 럭셔리...\n원하시는 느낌을 말씀해주세요! 💭',
+                delay: TYPING_DELAYS.long,
+              },
+            ])
+
+            setCurrentStep('mood')
+          } else {
+            await sendLettyMessage(
+              '아버지, 어머니 성함을 함께 알려주세요!\n예: 아버지 이철수, 어머니 김영희\n\n(건너뛰시려면 "나중에"라고 해주세요)',
+              TYPING_DELAYS.medium
+            )
+          }
+        }
+        break
+      }
+
+      // Step 6: 분위기
       case 'mood': {
         const moods = isSkip ? [] : parseMoods(input)
         setCollectedData(prev => ({ ...prev, moods }))
@@ -538,6 +914,7 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
         break
       }
 
+      // Step 7: 색상
       case 'color': {
         let color: string | null = null
         let customColor = ''
@@ -552,31 +929,13 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
 
         // 색상에 대한 상세 피드백 메시지들
         const colorFeedbackMessages = getColorFeedbackMessages(color, customColor)
-        await sendLettyMessages([
-          ...colorFeedbackMessages,
-          {
-            content: '마지막으로, 두 분의 결혼식을 떠올리게 하는\n한 단어가 있을까요?\n예를 들어 \'뉴욕\', \'박물관\', \'바다\' 같은 거요 🌊',
-            delay: TYPING_DELAYS.medium,
-          },
-        ])
-
-        setCurrentStep('keyword')
-        break
-      }
-
-      case 'keyword': {
-        const keyword = isSkip ? '' : input.trim()
-        const updatedData = { ...collectedData, keyword }
-        setCollectedData(updatedData)
-
-        // 키워드에 대한 상세 피드백 메시지들
-        const keywordFeedbackMessages = getKeywordFeedbackMessages(keyword)
 
         // 생성 전 요약 메시지 추가
+        const updatedData = { ...collectedData, color, customColor }
         const summaryMessage = buildSummaryMessage(updatedData)
 
         await sendLettyMessages([
-          ...keywordFeedbackMessages,
+          ...colorFeedbackMessages,
           ...(summaryMessage ? [{ content: summaryMessage, delay: TYPING_DELAYS.long }] : []),
           {
             content: '그럼 지금 바로 디자인 시작할게요!\n잠시만 기다려주세요... ⏳',
@@ -601,7 +960,6 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
               '앗, 문제가 생겼어요 😢\n다시 시도해볼까요? 처음부터 다시 시작해주세요.',
               TYPING_DELAYS.medium
             )
-            // 에러 시 처음으로 리셋하지 않고 현재 상태 유지
           }
         }
         break
@@ -621,10 +979,18 @@ export function useLettyConversation(options: UseLettyConversationOptions = {}) 
     setCurrentStep('greeting')
     setIsTyping(false)
     setCollectedData({
+      groomName: '',
+      brideName: '',
+      weddingDate: '',
+      weddingTime: '',
+      venueName: '',
+      groomFatherName: '',
+      groomMotherName: '',
+      brideFatherName: '',
+      brideMotherName: '',
       moods: [],
       color: null,
       customColor: '',
-      keyword: '',
     })
     isProcessingRef.current = false
   }, [])
