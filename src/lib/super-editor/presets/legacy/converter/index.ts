@@ -1,6 +1,10 @@
 /**
  * Legacy Preset Converter
  * 레거시 프리셋을 LayoutSchema + StyleSchema로 변환
+ *
+ * NOTE: 프로덕션 번들링(Webpack/Turbopack)에서 클로저/호이스팅 문제를 방지하기 위해
+ * 1. 모든 헬퍼 함수는 사용되기 전에 정의
+ * 2. .map() 대신 for 루프 사용하여 클로저 의존성 제거
  */
 
 import type { LayoutSchema, Screen, LayoutCategory } from '../../../schema/layout'
@@ -14,10 +18,35 @@ import { convertToStyleSchema } from './style-converter'
 import { getPredefinedPreset } from '../index'
 
 // ============================================
-// Helper: Section to Screen Builder
-// (클로저 문제 방지를 위해 명시적 인자 전달)
+// Helpers (반드시 사용하는 함수보다 먼저 정의)
 // ============================================
 
+/**
+ * 레거시 섹션 타입을 Super Editor 섹션 타입으로 매핑
+ */
+function mapToSectionType(legacyType: string): SectionType | undefined {
+  return LEGACY_TO_SE_SECTION_TYPE[legacyType] as SectionType | undefined
+}
+
+/**
+ * 카테고리 매핑 헬퍼
+ */
+function mapToLayoutCategory(category: string): LayoutCategory {
+  const mapping: Record<string, LayoutCategory> = {
+    'modern': 'minimal',
+    'cinematic': 'story',
+    'artistic': 'album',
+    'retro': 'album',
+    'playful': 'chat',
+    'classic': 'letter',
+  }
+  return mapping[category] ?? 'scroll'
+}
+
+/**
+ * 섹션을 Screen으로 변환하는 헬퍼 함수
+ * 클로저 문제 방지를 위해 모든 의존성을 명시적 인자로 전달
+ */
 function buildScreenFromSection(
   thePreset: PredefinedTemplatePreset,
   section: LegacySectionDefinition,
@@ -43,6 +72,27 @@ function buildScreenFromSection(
       options,
     }),
   }
+}
+
+/**
+ * 섹션 배열을 Screen 배열로 변환 (for 루프 사용)
+ * 클로저 의존성을 완전히 제거하기 위해 .map() 대신 for 루프 사용
+ */
+function buildScreensFromSections(
+  thePreset: PredefinedTemplatePreset,
+  sections: LegacySectionDefinition[],
+  options: ConvertOptions,
+  warnings: string[]
+): Screen[] {
+  const screens: Screen[] = []
+
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i]
+    const screen = buildScreenFromSection(thePreset, section, i, options, warnings)
+    screens.push(screen)
+  }
+
+  return screens
 }
 
 // Re-export types
@@ -87,10 +137,8 @@ export function convertLegacyPreset(options: ConvertOptions): ConvertResult {
     sections = sections.filter(s => !options.excludeSections!.includes(s.type))
   }
 
-  // Screen 빌드 (클로저 문제 방지를 위해 helper 함수 사용)
-  const screens: Screen[] = sections.map((section, index) =>
-    buildScreenFromSection(preset, section, index, options, warnings)
-  )
+  // Screen 빌드 (for 루프로 클로저 문제 방지)
+  const screens = buildScreensFromSections(preset, sections, options, warnings)
 
   // LayoutSchema 생성
   const layout: LayoutSchema = {
@@ -187,10 +235,8 @@ export function convertPresetDirect(
     sections = sections.filter(s => !fullOptions.excludeSections!.includes(s.type))
   }
 
-  // Screen 빌드 (클로저 문제 방지를 위해 helper 함수 사용)
-  const screens: Screen[] = sections.map((section, index) =>
-    buildScreenFromSection(preset, section, index, fullOptions, warnings)
-  )
+  // Screen 빌드 (for 루프로 클로저 문제 방지)
+  const screens = buildScreensFromSections(preset, sections, fullOptions, warnings)
 
   const layout: LayoutSchema = {
     version: '1.0',
@@ -247,26 +293,6 @@ export function convertPresetDirect(
 }
 
 // ============================================
-// Helpers
-// ============================================
-
-function mapToSectionType(legacyType: string): SectionType | undefined {
-  return LEGACY_TO_SE_SECTION_TYPE[legacyType] as SectionType | undefined
-}
-
-function mapToLayoutCategory(category: string): LayoutCategory {
-  const mapping: Record<string, LayoutCategory> = {
-    'modern': 'minimal',
-    'cinematic': 'story',
-    'artistic': 'album',
-    'retro': 'album',
-    'playful': 'chat',
-    'classic': 'letter',
-  }
-  return mapping[category] ?? 'scroll'
-}
-
-// ============================================
 // Convenience Functions
 // ============================================
 
@@ -297,12 +323,16 @@ export function convertAllPresets(): Record<string, ConvertResult> {
  * 프리셋 ID 목록에서 Layout/Style 쌍 배열 생성
  */
 export function getConvertedPresets(ids: string[]): Array<{ id: string; layout: LayoutSchema; style: StyleSchema }> {
-  return ids.map(id => {
+  const results: Array<{ id: string; layout: LayoutSchema; style: StyleSchema }> = []
+
+  for (const id of ids) {
     const result = convertLegacyPreset({ presetId: id })
-    return {
+    results.push({
       id,
       layout: result.layout,
       style: result.style,
-    }
-  })
+    })
+  }
+
+  return results
 }
