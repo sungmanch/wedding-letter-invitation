@@ -57,7 +57,7 @@ function AIChatVideo() {
     <div className="relative">
       {/* Phone mockup frame */}
       <div className="relative w-[260px] sm:w-[300px] lg:w-[320px] mx-auto">
-        <div className="bg-[var(--blush-pink-200)] rounded-[2.5rem] p-1 shadow-xl">
+        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[3/4] rounded-[2.25rem] overflow-hidden bg-black">
             <video
               ref={videoRef}
@@ -287,7 +287,7 @@ function TemplateCarousel() {
     >
       {/* Phone mockup frame */}
       <div className="relative w-[220px] sm:w-[260px] lg:w-[280px] mx-auto">
-        <div className="bg-[var(--blush-pink-200)] rounded-[2.5rem] p-1 shadow-xl">
+        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[9/16] rounded-[2.25rem] overflow-hidden relative">
             {renderTemplate(currentIndex)}
           </div>
