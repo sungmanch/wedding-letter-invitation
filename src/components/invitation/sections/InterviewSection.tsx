@@ -4,7 +4,7 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { ChevronDown, MessageCircle } from 'lucide-react'
 import type { ColorPalette, FontSet } from '@/lib/themes/schema'
-import type { InterviewSettings, InterviewQuestion } from '@/lib/types/invitation-design'
+import type { InterviewSettings } from '@/lib/types/invitation-design'
 
 interface InterviewSectionProps {
   settings: InterviewSettings
@@ -171,7 +171,7 @@ export function InterviewSection({
         style={{ backgroundColor: `${colors.primary}30` }}
       />
       <div className="space-y-6">
-        {enabledQuestions.map((question, index) => (
+        {enabledQuestions.map((question) => (
           <div key={question.id} className="relative pl-10">
             {/* Timeline dot */}
             <div

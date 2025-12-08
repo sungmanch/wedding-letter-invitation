@@ -115,7 +115,6 @@ export function Transition({
   // 트랜지션 스타일 계산
   const getChildStyle = (index: number): React.CSSProperties => {
     const isEntering = index === currentIndex
-    const isExiting = index === currentIndex - 1
 
     if (!preset) {
       return {

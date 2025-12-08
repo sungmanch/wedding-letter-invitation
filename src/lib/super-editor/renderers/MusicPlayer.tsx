@@ -16,7 +16,7 @@ interface MusicPlayerProps {
   mode?: 'preview' | 'edit' | 'build'
 }
 
-export function MusicPlayer({ screen, userData, mode = 'preview' }: MusicPlayerProps) {
+export function MusicPlayer({ screen: _screen, userData, mode = 'preview' }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)

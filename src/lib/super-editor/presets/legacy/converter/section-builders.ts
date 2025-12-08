@@ -4,7 +4,6 @@
  */
 
 import type { PrimitiveNode } from '../../../schema/primitives'
-import type { LegacySectionDefinition } from '../types'
 import type { SectionBuilderContext, SectionBuilder } from './types'
 import { LEGACY_LAYOUT_STYLES, LEGACY_PADDING_VALUES } from './types'
 import { mapLegacyAnimation } from '../types'
@@ -661,7 +660,6 @@ export function buildClosingSection(ctx: SectionBuilderContext): PrimitiveNode {
  */
 export function buildStorySection(ctx: SectionBuilderContext): PrimitiveNode {
   const { section, preset } = ctx
-  const themeSpecific = section.content?.themeSpecific ?? {}
 
   const content: PrimitiveNode = {
     id: generateId(),

@@ -4,7 +4,7 @@
  */
 
 import type { PredefinedTemplatePreset, LegacySectionDefinition } from '../types'
-import type { LayoutSchema, Screen } from '../../../schema/layout'
+import type { LayoutSchema } from '../../../schema/layout'
 import type { StyleSchema } from '../../../schema/style'
 import type { PrimitiveNode } from '../../../schema/primitives'
 import type { SectionType } from '../../../schema/section-types'

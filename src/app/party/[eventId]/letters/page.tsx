@@ -33,7 +33,6 @@ export default function LettersPage() {
   const [daysUntilUnlock, setDaysUntilUnlock] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [paymentPending, setPaymentPending] = useState(false)
-  const [, setGuestName] = useState('')
 
   useEffect(() => {
     async function fetchData() {

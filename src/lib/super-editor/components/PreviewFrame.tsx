@@ -3,7 +3,6 @@
 import { useMemo } from 'react'
 import { useSuperEditor } from '../context'
 import { createNodeRenderer } from '../primitives'
-import type { PrimitiveNode } from '../schema/primitives'
 
 interface PreviewFrameProps {
   className?: string

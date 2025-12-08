@@ -6,7 +6,7 @@
 
 import type { PrimitiveNode } from '../../../schema/primitives'
 import type { IntroBuilder, IntroBuilderResult, IntroBuilderContext } from './types'
-import { uid, formatDate, withOpacity } from './types'
+import { uid, formatDate } from './types'
 
 // Old Money 고유 색상 (IntroPreview.tsx 기준)
 const OLD_MONEY_COLORS = {

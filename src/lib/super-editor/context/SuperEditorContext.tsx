@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/immutability, react-hooks/purity */
+/* eslint-disable react-hooks/purity */
 'use client'
 
 import {

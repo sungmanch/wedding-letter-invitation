@@ -8,7 +8,6 @@ import type { LayoutSchema } from '../schema/layout'
 import type { StyleSchema } from '../schema/style'
 import type { UserData } from '../schema/user-data'
 import { getAnimationPreset } from '../animations/presets'
-import { getTransitionPreset } from '../animations/transitions'
 import { getScrollPreset, type ScrollKeyframe } from '../animations/scroll-presets'
 import { getBgmById } from '../audio/bgm-presets'
 import { resolveTokens } from '../tokens/resolver'
@@ -409,7 +408,7 @@ function buildButton(node: PrimitiveNode, ctx: BuildContext): string {
   return `<button style="${style}" onclick="${onclick}">${escapeHtml(label)}</button>`
 }
 
-function buildSpacer(node: PrimitiveNode, ctx: BuildContext): string {
+function buildSpacer(node: PrimitiveNode, _ctx: BuildContext): string {
   const props = node.props as Record<string, unknown> || {}
   const height = typeof props.height === 'number' || typeof props.height === 'string' ? props.height : 16
   const width = typeof props.width === 'number' || typeof props.width === 'string' ? props.width : undefined
@@ -423,7 +422,7 @@ function buildSpacer(node: PrimitiveNode, ctx: BuildContext): string {
   return `<div style="${style}"></div>`
 }
 
-function buildDivider(node: PrimitiveNode, ctx: BuildContext): string {
+function buildDivider(node: PrimitiveNode, _ctx: BuildContext): string {
   const props = node.props as Record<string, unknown> || {}
   const isHorizontal = props.orientation !== 'vertical'
   const thickness = (props.thickness as number) || 1

@@ -198,7 +198,7 @@ function classDefinitionToCss(name: string, def: CustomClassDefinition): string 
   if (def.before) {
     const content = def.before.content ? `content: "${def.before.content}";` : 'content: "";'
     const animation = def.before.animation ? `animation: ${def.before.animation};` : ''
-    const { content: _, animation: __, ...restBefore } = def.before
+    const { content: _contentBefore, animation: _animBefore, ...restBefore } = def.before
     const beforeStyles = cssPropertiesToString(restBefore)
     rules.push(`.${name}::before { ${content} ${beforeStyles} ${animation} }`)
   }
@@ -207,7 +207,7 @@ function classDefinitionToCss(name: string, def: CustomClassDefinition): string 
   if (def.after) {
     const content = def.after.content ? `content: "${def.after.content}";` : 'content: "";'
     const animation = def.after.animation ? `animation: ${def.after.animation};` : ''
-    const { content: _, animation: __, ...restAfter } = def.after
+    const { content: _contentAfter, animation: _animAfter, ...restAfter } = def.after
     const afterStyles = cssPropertiesToString(restAfter)
     rules.push(`.${name}::after { ${content} ${afterStyles} ${animation} }`)
   }

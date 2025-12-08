@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import type { StyleSchema } from '../schema/style'
 import type { LegacyIntroType } from '../presets/legacy/types'
 import { INTRO_STYLE_PRESETS, applyIntroStyleToSchema, deriveSurfaceColor } from '../presets/intro-style-presets'
-import { getFontOptionsGrouped, buildFontFamily, type FontPreset } from '../fonts'
+import { getFontOptionsGrouped } from '../fonts'
 import { loadFontDynamically } from '../fonts/loader'
 
 interface StyleEditorProps {

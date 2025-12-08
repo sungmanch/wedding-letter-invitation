@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import type { PrimitiveNode, OverlayProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
-import { toInlineStyle, getNodeProps, mergeNodeStyles } from '../types'
+import { getNodeProps, mergeNodeStyles } from '../types'
 import { X } from 'lucide-react'
 
 // 확장된 노드 타입 (tokenStyle 포함)

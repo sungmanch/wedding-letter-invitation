@@ -284,7 +284,6 @@ export async function createUnifiedCheckoutSession(
     }
 
     // Create Polar checkout session
-    const successPath = type === 1 ? `/${id}` : `/se/${id}`
     const cancelPath = type === 1 ? `/${id}/preview` : `/se/${id}/edit`
 
     const requestBody = {
@@ -341,7 +340,7 @@ export async function updateUnifiedPaymentStatus(
   paymentId: string,
   status: 'completed' | 'failed' | 'refunded',
   polarOrderId?: string,
-  invitationType?: InvitationType
+  _invitationType?: InvitationType
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const payment = await db.query.invitationPayments.findFirst({

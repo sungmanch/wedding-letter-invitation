@@ -5,7 +5,7 @@ import { invitations, invitationDesigns, invitationPhotos, type NewInvitation, t
 import { eq, and, desc } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { getTemplateById, createInvitationThemeData } from '@/lib/themes'
+import { createInvitationThemeData } from '@/lib/themes'
 
 // Create a new invitation (draft)
 export async function createInvitation(data: Partial<NewInvitation>): Promise<{ success: boolean; data?: Invitation; error?: string }> {

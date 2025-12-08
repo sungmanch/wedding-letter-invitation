@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { PrimitiveNode, GalleryProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
-import { toInlineStyle, getNodeProps, resolveDataBinding, getValueByPath } from '../types'
+import { toInlineStyle, getNodeProps, getValueByPath } from '../types'
 
 export function Gallery({
   node,

@@ -780,7 +780,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
 // LLM Generation Action (Placeholder)
 // ============================================
 
-export async function generateTemplateWithLLM(prompt: string) {
+export async function generateTemplateWithLLM(_prompt: string) {
   // TODO: 실제 LLM API 호출 구현
   // 현재는 샘플 템플릿 반환
 
