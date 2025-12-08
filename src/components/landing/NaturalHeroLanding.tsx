@@ -68,8 +68,8 @@ function AIChatVideo() {
               playsInline
               poster="/examples/chat-poster.jpg"
             >
-              <source src="/examples/chat.webm" type="video/webm" />
-              <source src="/examples/chat.mp4" type="video/mp4" />
+              <source src="/examples/1208_AICHAT.webm" type="video/webm" />
+              <source src="/examples/1208_AICHAT.mp4" type="video/mp4" />
             </video>
           </div>
         </div>
@@ -375,27 +375,19 @@ export function NaturalHeroLanding() {
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-8">
           {/* Top: Hero Text (Centered) */}
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-            {/* Tagline */}
-            <p
-              className="text-sm sm:text-base tracking-[0.2em] uppercase text-[var(--sage-500)] mb-3"
-              style={{ fontFamily: 'Playfair Display, serif', fontWeight: 500 }}
-            >
-              AI Wedding Invitation
-            </p>
-
             {/* Main Headline */}
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4">
               <span
                 className="block text-[var(--text-primary)]"
                 style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 300 }}
               >
-                원하는 분위기를 말하면,
+                원하는 분위기의 청첩장을,
               </span>
               <span
                 className="block text-[var(--sage-600)] mt-1"
                 style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 500 }}
               >
-                AI가 바로 시안을 만들어 드립니다
+                AI와 함께 손쉽게 만들어보세요
               </span>
             </h1>
 
@@ -404,9 +396,9 @@ export function NaturalHeroLanding() {
               className="text-sm sm:text-base text-[var(--text-muted)] leading-relaxed"
               style={{ fontFamily: 'Pretendard, sans-serif' }}
             >
-              30가지 이상의 프리미엄 템플릿과 AI 디자인 엔진으로
+              AI 도우미 Letty와 함께,
               <br className="hidden sm:block" />
-              단 5분 만에 완성하는 나만의 청첩장
+              대화하며 완성하는 나만의 청첩장
             </p>
           </div>
 
@@ -443,15 +435,6 @@ export function NaturalHeroLanding() {
                 >
                   무료로 시작하기
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="#templates">
-                <Button
-                  variant="outline"
-                  className="border-[var(--sage-300)] text-[var(--sage-600)] hover:bg-[var(--sage-50)] px-8 py-3.5 text-base rounded-full h-auto w-full sm:w-auto"
-                  style={{ fontFamily: 'Pretendard, sans-serif' }}
-                >
-                  템플릿 둘러보기
                 </Button>
               </Link>
             </div>
