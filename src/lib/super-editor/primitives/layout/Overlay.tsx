@@ -81,17 +81,20 @@ export function Overlay({
 
   // 편집 모드에서는 항상 표시 (but 축소된 형태)
   if (context.mode === 'edit' && isModal && !isVisible) {
+    // 사용자 친화적인 레이블 생성
+    const friendlyLabel = props.title
+      ? `${props.title} 정보를 입력하세요`
+      : '계좌 정보를 입력하세요'
+
     return (
       <div
         data-node-id={node.id}
         data-node-type="overlay"
         style={{
-          padding: '8px 12px',
-          backgroundColor: '#f3f4f6',
-          border: '1px dashed #9ca3af',
-          borderRadius: '4px',
-          fontSize: '12px',
-          color: '#6b7280',
+          padding: '12px 16px',
+          backgroundColor: '#fefce8',
+          border: '1px dashed #ca8a04',
+          borderRadius: '8px',
           cursor: 'pointer',
           outline: isSelected ? '2px solid #3b82f6' : undefined,
         }}
@@ -100,7 +103,12 @@ export function Overlay({
           context.onSelectNode?.(node.id)
         }}
       >
-        🔲 모달: {props.title || node.id}
+        <div style={{ fontSize: '13px', fontWeight: 500, color: '#854d0e', marginBottom: '4px' }}>
+          📝 {friendlyLabel}
+        </div>
+        <div style={{ fontSize: '11px', color: '#a16207' }}>
+          버튼 클릭 시 팝업으로 표시됩니다
+        </div>
       </div>
     )
   }
