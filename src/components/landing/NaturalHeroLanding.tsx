@@ -1,51 +1,60 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { ArrowRight } from 'lucide-react'
 
 /**
- * AI Chat Video Placeholder
- * Shows a phone mockup with simulated chat conversation
+ * AI Chat Video
+ * Shows a phone mockup with real chat demo video
  */
-function AIVideoPlaceholder() {
+function AIChatVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    // 뷰포트에 들어오면 자동 재생
+    const video = videoRef.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {
+              // 자동 재생 실패 시 무시 (사용자 상호작용 필요)
+            })
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div className="relative">
       {/* Phone mockup frame */}
       <div className="relative w-[200px] sm:w-[240px] mx-auto">
         <div className="bg-[var(--sand-200)] rounded-[2rem] p-2 shadow-xl">
-          {/* Screen area */}
-          <div className="w-full aspect-[9/16] bg-[var(--ivory-50)] rounded-[1.5rem] overflow-hidden">
-            {/* Chat content */}
-            <div className="p-4 space-y-3 h-full flex flex-col justify-center">
-              {/* Letty message */}
-              <div className="animate-fade-in-1">
-                <div className="bg-[var(--sage-100)] rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%]">
-                  <p className="text-xs text-[var(--text-body)]">어떤 분위기로 만들어 드릴까요?</p>
-                </div>
-              </div>
-
-              {/* User message */}
-              <div className="animate-fade-in-2 flex justify-end">
-                <div className="bg-[var(--sage-500)] rounded-2xl rounded-tr-sm px-3 py-2 max-w-[75%]">
-                  <p className="text-xs text-white">우아하고 클래식하게요</p>
-                </div>
-              </div>
-
-              {/* Letty response */}
-              <div className="animate-fade-in-3">
-                <div className="bg-[var(--sage-100)] rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%]">
-                  <p className="text-xs text-[var(--text-body)]">완벽해요! 청첩장을 만들고 있어요...</p>
-                </div>
-              </div>
-
-              {/* Loading indicator */}
-              <div className="animate-fade-in-4 flex gap-1 px-2">
-                <div className="w-1.5 h-1.5 bg-[var(--sage-400)] rounded-full animate-bounce [animation-delay:0ms]" />
-                <div className="w-1.5 h-1.5 bg-[var(--sage-400)] rounded-full animate-bounce [animation-delay:150ms]" />
-                <div className="w-1.5 h-1.5 bg-[var(--sage-400)] rounded-full animate-bounce [animation-delay:300ms]" />
-              </div>
-            </div>
+          {/* Screen area with video */}
+          <div className="w-full aspect-[9/16] rounded-[1.5rem] overflow-hidden bg-black">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster="/examples/chat-poster.jpg"
+            >
+              <source src="/examples/chat.webm" type="video/webm" />
+              <source src="/examples/chat.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
       </div>
@@ -159,9 +168,9 @@ export function NaturalHeroLanding() {
 
         {/* Two-column Preview Area */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 max-w-5xl mx-auto items-center justify-center">
-          {/* Left: AI Chat Video Placeholder */}
+          {/* Left: AI Chat Video */}
           <div className="flex-shrink-0">
-            <AIVideoPlaceholder />
+            <AIChatVideo />
           </div>
 
           {/* Right: Template Previews (Magazine + Old Money) */}
@@ -185,39 +194,6 @@ export function NaturalHeroLanding() {
         </div>
       </div>
 
-      {/* CSS for staggered animations */}
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in-1 {
-          animation: fadeInUp 0.5s ease-out 0.5s forwards;
-          opacity: 0;
-        }
-
-        .animate-fade-in-2 {
-          animation: fadeInUp 0.5s ease-out 1.5s forwards;
-          opacity: 0;
-        }
-
-        .animate-fade-in-3 {
-          animation: fadeInUp 0.5s ease-out 2.5s forwards;
-          opacity: 0;
-        }
-
-        .animate-fade-in-4 {
-          animation: fadeInUp 0.5s ease-out 3.5s forwards;
-          opacity: 0;
-        }
-      `}</style>
     </section>
   )
 }
