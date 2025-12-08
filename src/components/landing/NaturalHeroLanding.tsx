@@ -56,9 +56,9 @@ function AIChatVideo() {
   return (
     <div className="relative">
       {/* Phone mockup frame */}
-      <div className="relative w-[200px] sm:w-[240px] lg:w-[260px] mx-auto">
-        <div className="bg-[var(--sand-200)] rounded-[2rem] p-1.5 shadow-xl">
-          <div className="w-full aspect-[9/19] rounded-[1.5rem] overflow-hidden bg-black">
+      <div className="relative w-[260px] sm:w-[300px] lg:w-[320px] mx-auto">
+        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-2 shadow-xl">
+          <div className="w-full aspect-[3/4] rounded-[2rem] overflow-hidden bg-black">
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
@@ -69,7 +69,6 @@ function AIChatVideo() {
               poster="/examples/chat-poster.jpg"
             >
               <source src="/examples/1208_AICHAT.webm" type="video/webm" />
-              <source src="/examples/1208_AICHAT.mp4" type="video/mp4" />
             </video>
           </div>
         </div>
@@ -286,10 +285,10 @@ function TemplateCarousel() {
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
-      {/* Phone mockup frame - smaller */}
-      <div className="relative w-[200px] sm:w-[240px] lg:w-[260px] mx-auto">
-        <div className="bg-[var(--sand-200)] rounded-[2rem] p-1.5 shadow-xl">
-          <div className="w-full aspect-[9/16] rounded-[1.5rem] overflow-hidden relative">
+      {/* Phone mockup frame */}
+      <div className="relative w-[220px] sm:w-[260px] lg:w-[280px] mx-auto">
+        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-2 shadow-xl">
+          <div className="w-full aspect-[9/16] rounded-[2rem] overflow-hidden relative">
             {renderTemplate(currentIndex)}
           </div>
         </div>
@@ -390,16 +389,6 @@ export function NaturalHeroLanding() {
                 AI와 함께 손쉽게 만들어보세요
               </span>
             </h1>
-
-            {/* Subheadline */}
-            <p
-              className="text-sm sm:text-base text-[var(--text-muted)] leading-relaxed"
-              style={{ fontFamily: 'Pretendard, sans-serif' }}
-            >
-              AI 도우미 Letty와 함께,
-              <br className="hidden sm:block" />
-              대화하며 완성하는 나만의 청첩장
-            </p>
           </div>
 
           {/* Middle: Video + Arrow + Template (Side by Side) */}
