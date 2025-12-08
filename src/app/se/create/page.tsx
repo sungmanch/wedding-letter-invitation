@@ -86,11 +86,6 @@ function buildPromptFromCollectedData(data: CollectedData): string {
     parts.push(`${data.customColor} 색상`)
   }
 
-  // 키워드
-  if (data.keyword) {
-    parts.push(`"${data.keyword}" 느낌`)
-  }
-
   // 기본값 (모두 Letty에게 맡긴 경우)
   if (parts.length === 0) {
     return '우아하고 세련된 스타일로 만들어주세요'
@@ -129,7 +124,6 @@ export default function SuperEditorCreatePage() {
         mood: data.moods.length > 0 ? data.moods : undefined,
         colorPreset: data.color || undefined,
         customColor: data.customColor || undefined,
-        keyword: data.keyword || undefined,
       })
 
       if (!response.success || !response.data) {

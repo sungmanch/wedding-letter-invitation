@@ -390,6 +390,13 @@ export interface SaveInvitationInput {
     weddingDate: string // YYYY-MM-DD
     weddingTime: string // HH:mm
     mainImage?: string // base64 data URL 또는 URL
+    // 장소
+    venueName?: string
+    // 부모님 이름
+    groomFatherName?: string
+    groomMotherName?: string
+    brideFatherName?: string
+    brideMotherName?: string
   }
   // 레거시 프리셋 사용 시
   legacyPresetId?: string
@@ -481,7 +488,7 @@ export async function saveInvitationAction(
         time: previewData.weddingTime || '12:00',
       },
       venue: {
-        name: '',
+        name: previewData.venueName || '',
         address: '',
         lat: 0,
         lng: 0,
@@ -492,6 +499,17 @@ export async function saveInvitationAction(
       },
       greeting: {
         content: '',
+      },
+      // 부모님 정보 (AI 채팅에서 수집된 경우)
+      parents: {
+        groom: {
+          father: previewData.groomFatherName ? { name: previewData.groomFatherName } : undefined,
+          mother: previewData.groomMotherName ? { name: previewData.groomMotherName } : undefined,
+        },
+        bride: {
+          father: previewData.brideFatherName ? { name: previewData.brideFatherName } : undefined,
+          mother: previewData.brideMotherName ? { name: previewData.brideMotherName } : undefined,
+        },
       },
     }
 
