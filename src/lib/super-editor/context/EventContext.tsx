@@ -223,7 +223,8 @@ export function EventProvider({
         if (audio) {
           if (action.type === 'play-audio') audio.play()
           else if (action.type === 'pause-audio') audio.pause()
-          else audio.paused ? audio.play() : audio.pause()
+          else if (audio.paused) audio.play()
+          else audio.pause()
         }
         break
 

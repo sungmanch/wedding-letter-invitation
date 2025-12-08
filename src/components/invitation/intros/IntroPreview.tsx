@@ -620,6 +620,8 @@ export function ChatPreview({ groomName, brideName, dateFormatted, isCompact }: 
 
     const resetTimer = setTimeout(() => setVisibleMessages(0), 1500)
     return () => clearTimeout(resetTimer)
+  // messages는 컴포넌트 내 상수 배열이므로 totalMessages만 의존성으로 충분
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleMessages, totalMessages])
 
   // 태그 색상

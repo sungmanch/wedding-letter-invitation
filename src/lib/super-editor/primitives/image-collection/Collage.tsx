@@ -23,21 +23,24 @@ export function Collage({
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
-  // 이미지 배열 해결
-  let images: string[] = []
-  if (typeof props.images === 'string') {
-    if (props.images.startsWith('{{')) {
-      const path = props.images.replace(/^\{\{|\}\}$/g, '').trim()
-      const resolved = getValueByPath(context.data, path)
-      if (Array.isArray(resolved)) {
-        images = resolved as string[]
+  // 이미지 배열 해결 (useMemo로 참조 안정성 확보)
+  const images = useMemo<string[]>(() => {
+    if (typeof props.images === 'string') {
+      if (props.images.startsWith('{{')) {
+        const path = props.images.replace(/^\{\{|\}\}$/g, '').trim()
+        const resolved = getValueByPath(context.data, path)
+        if (Array.isArray(resolved)) {
+          return resolved as string[]
+        }
+        return []
       }
-    } else {
-      images = [props.images]
+      return [props.images]
     }
-  } else if (Array.isArray(props.images)) {
-    images = props.images
-  }
+    if (Array.isArray(props.images)) {
+      return props.images
+    }
+    return []
+  }, [props.images, context.data])
 
   const template = props.template || 'polaroid'
   const rotationRange = props.rotationRange || 10

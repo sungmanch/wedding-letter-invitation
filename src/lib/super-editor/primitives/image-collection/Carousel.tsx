@@ -75,6 +75,15 @@ export function Carousel({
     }
   }, [props.autoplay, props.autoplayInterval, props.infinite, images.length, context.mode, isDragging])
 
+  // 네비게이션 함수 (goTo를 먼저 선언하여 handleDragEnd에서 참조 가능)
+  const goTo = useCallback((index: number) => {
+    if (props.infinite) {
+      setCurrentIndex((index + images.length) % images.length)
+    } else {
+      setCurrentIndex(Math.max(0, Math.min(index, images.length - 1)))
+    }
+  }, [props.infinite, images.length])
+
   // 스와이프 핸들러
   const handleDragStart = useCallback((clientX: number) => {
     if (context.mode === 'edit') return
@@ -102,7 +111,7 @@ export function Carousel({
       goTo(currentIndex + 1)
     }
     setDragOffset(0)
-  }, [isDragging, dragOffset, currentIndex])
+  }, [isDragging, dragOffset, currentIndex, goTo])
 
   // 터치 이벤트
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -128,14 +137,6 @@ export function Carousel({
   }
   const handleMouseLeave = () => {
     if (isDragging) handleDragEnd()
-  }
-
-  const goTo = (index: number) => {
-    if (props.infinite) {
-      setCurrentIndex((index + images.length) % images.length)
-    } else {
-      setCurrentIndex(Math.max(0, Math.min(index, images.length - 1)))
-    }
   }
 
   const containerStyle: React.CSSProperties = {
