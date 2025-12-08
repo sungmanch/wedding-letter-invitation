@@ -38,11 +38,11 @@ function AIChatVideo() {
 
   return (
     <div className="relative">
-      {/* Phone mockup frame */}
-      <div className="relative w-[200px] sm:w-[240px] mx-auto">
-        <div className="bg-[var(--sand-200)] rounded-[2rem] p-2 shadow-xl">
+      {/* Phone mockup frame - 더 큰 사이즈 */}
+      <div className="relative w-[260px] sm:w-[300px] mx-auto">
+        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-2.5 shadow-xl">
           {/* Screen area with video */}
-          <div className="w-full aspect-[9/16] rounded-[1.5rem] overflow-hidden bg-black">
+          <div className="w-full aspect-[9/19] rounded-[2rem] overflow-hidden bg-black">
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
@@ -155,15 +155,12 @@ export function NaturalHeroLanding() {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 pt-8 sm:pt-16">
         {/* Hero Text */}
-        <div className="text-center mb-10 sm:mb-16">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] mb-4 sm:mb-6 leading-tight">
+        <div className="text-center mb-10 sm:mb-14">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] leading-tight">
             원하는 분위기를 말하면,
             <br />
             <span className="text-[var(--sage-600)] font-medium">AI가 바로 시안을 만들어 드립니다</span>
           </h1>
-          <p className="text-[var(--text-muted)] max-w-md mx-auto text-sm sm:text-base">
-            3분만에 나만의 특별한 청첩장을 완성하세요
-          </p>
         </div>
 
         {/* Two-column Preview Area */}
