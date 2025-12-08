@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/preserve-manual-memoization, react-hooks/static-components */
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
 
 export function AudioController() {
@@ -8,7 +8,8 @@ export function AudioController() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
 
-  useEffect(() => {
+  // audio 요소의 onCanPlay 이벤트로 로드 상태 관리
+  const handleCanPlay = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.volume = 0.3
       setIsLoaded(true)
@@ -38,6 +39,7 @@ export function AudioController() {
         src="/examples/A_Promise_of_Eternity.mp3"
         loop
         preload="auto"
+        onCanPlay={handleCanPlay}
       />
       <button
         onClick={toggleAudio}
