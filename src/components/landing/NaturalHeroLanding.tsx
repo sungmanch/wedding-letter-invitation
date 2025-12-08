@@ -392,14 +392,14 @@ export function NaturalHeroLanding() {
           </div>
 
           {/* Middle: Video + Arrow + Template (Side by Side) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-12 mb-10 sm:mb-12">
+          <div className="flex flex-col sm:flex-row items-start justify-center gap-6 sm:gap-8 lg:gap-12 mb-10 sm:mb-12">
             {/* Left: AI Chat Video */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex flex-col items-center">
               <AIChatVideo />
             </div>
 
-            {/* Arrow */}
-            <div className="hidden sm:flex flex-col items-center gap-1">
+            {/* Arrow - vertically centered with mockups */}
+            <div className="hidden sm:flex flex-col items-center justify-center self-center">
               <ArrowRight className="w-6 h-6 lg:w-8 lg:h-8 text-[var(--sage-400)]" />
               <span className="text-xs text-[var(--text-light)]">생성</span>
             </div>
@@ -408,9 +408,8 @@ export function NaturalHeroLanding() {
             </div>
 
             {/* Right: Template Carousel */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex flex-col items-center">
               <TemplateCarousel />
-              <p className="text-center mt-1 text-sm text-[var(--text-muted)]">생성된 청첩장</p>
             </div>
           </div>
 
