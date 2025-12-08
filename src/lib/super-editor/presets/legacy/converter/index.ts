@@ -6,12 +6,44 @@
 import type { LayoutSchema, Screen, LayoutCategory } from '../../../schema/layout'
 import type { StyleSchema } from '../../../schema/style'
 import type { SectionType } from '../../../schema/section-types'
-import type { PredefinedTemplatePreset } from '../types'
+import type { PredefinedTemplatePreset, LegacySectionDefinition } from '../types'
 import type { ConvertOptions, ConvertResult } from './types'
 import { LEGACY_TO_SE_SECTION_TYPE } from './types'
 import { buildSection } from './section-builders'
 import { convertToStyleSchema } from './style-converter'
 import { getPredefinedPreset } from '../index'
+
+// ============================================
+// Helper: Section to Screen Builder
+// (클로저 문제 방지를 위해 명시적 인자 전달)
+// ============================================
+
+function buildScreenFromSection(
+  thePreset: PredefinedTemplatePreset,
+  section: LegacySectionDefinition,
+  sectionIndex: number,
+  options: ConvertOptions,
+  warnings: string[]
+): Screen {
+  const sectionType = mapToSectionType(section.type)
+
+  if (!sectionType) {
+    warnings.push(`Unknown section type mapping: ${section.type}`)
+  }
+
+  return {
+    id: `screen_${section.id}`,
+    name: section.id,
+    type: section.type === 'hero' ? 'intro' : 'content',
+    sectionType: sectionType ?? 'intro',
+    root: buildSection({
+      preset: thePreset,
+      section,
+      sectionIndex,
+      options,
+    }),
+  }
+}
 
 // Re-export types
 export * from './types'
@@ -55,27 +87,10 @@ export function convertLegacyPreset(options: ConvertOptions): ConvertResult {
     sections = sections.filter(s => !options.excludeSections!.includes(s.type))
   }
 
-  // Screen 빌드
-  const screens: Screen[] = sections.map((section, index) => {
-    const sectionType = mapToSectionType(section.type)
-
-    if (!sectionType) {
-      warnings.push(`Unknown section type mapping: ${section.type}`)
-    }
-
-    return {
-      id: `screen_${section.id}`,
-      name: section.id,
-      type: section.type === 'hero' ? 'intro' : 'content',
-      sectionType: sectionType ?? 'intro',
-      root: buildSection({
-        preset,
-        section,
-        sectionIndex: index,
-        options,
-      }),
-    }
-  })
+  // Screen 빌드 (클로저 문제 방지를 위해 helper 함수 사용)
+  const screens: Screen[] = sections.map((section, index) =>
+    buildScreenFromSection(preset, section, index, options, warnings)
+  )
 
   // LayoutSchema 생성
   const layout: LayoutSchema = {
@@ -172,26 +187,10 @@ export function convertPresetDirect(
     sections = sections.filter(s => !fullOptions.excludeSections!.includes(s.type))
   }
 
-  const screens: Screen[] = sections.map((section, index) => {
-    const sectionType = mapToSectionType(section.type)
-
-    if (!sectionType) {
-      warnings.push(`Unknown section type mapping: ${section.type}`)
-    }
-
-    return {
-      id: `screen_${section.id}`,
-      name: section.id,
-      type: section.type === 'hero' ? 'intro' : 'content',
-      sectionType: sectionType ?? 'intro',
-      root: buildSection({
-        preset,
-        section,
-        sectionIndex: index,
-        options: fullOptions,
-      }),
-    }
-  })
+  // Screen 빌드 (클로저 문제 방지를 위해 helper 함수 사용)
+  const screens: Screen[] = sections.map((section, index) =>
+    buildScreenFromSection(preset, section, index, fullOptions, warnings)
+  )
 
   const layout: LayoutSchema = {
     version: '1.0',
