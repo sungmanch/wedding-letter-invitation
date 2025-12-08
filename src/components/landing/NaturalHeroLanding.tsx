@@ -56,7 +56,7 @@ function AIChatVideo() {
   return (
     <div className="relative">
       {/* Phone mockup frame */}
-      <div className="relative w-[260px] sm:w-[300px] lg:w-[320px] mx-auto">
+      <div className="relative w-[295px] sm:w-[347px] lg:w-[373px] mx-auto">
         <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[3/4] rounded-[2.25rem] overflow-hidden bg-black">
             <video
