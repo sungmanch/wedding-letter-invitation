@@ -504,33 +504,25 @@ body {
 /* Photo Overlay - Inset/Pressed Text Effect */
 /* ========================================== */
 
+/* 유리에 눌린 것처럼 보이는 투명 텍스트 효과 */
 .inset-text {
-  position: relative;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-}
-
-.inset-text::before {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
-  /* 위쪽 하이라이트 */
+  /* 텍스트를 거의 투명하게 */
+  color: rgba(255, 255, 255, 0.12);
+  /* 윤곽선만 살짝 보이게 */
+  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.25);
+  /*
+   * Neumorphism 인셋 효과 시뮬레이션:
+   * 1. 오른쪽 아래 하이라이트 (빛 반사)
+   * 2. 왼쪽 위 그림자 (눌린 느낌)
+   * 3. 부드러운 글로우
+   */
   text-shadow:
-    1px 1px 0 rgba(255, 255, 255, 0.15),
-    2px 2px 2px rgba(255, 255, 255, 0.1);
-}
-
-.inset-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: transparent;
-  /* 아래쪽 그림자 (눌린 느낌) */
-  text-shadow:
-    -1px -1px 0 rgba(0, 0, 0, 0.25),
-    -2px -2px 3px rgba(0, 0, 0, 0.15);
+    /* 하이라이트 - 오른쪽 아래 */
+    1px 1px 0 rgba(255, 255, 255, 0.2),
+    2px 2px 1px rgba(255, 255, 255, 0.1),
+    /* 그림자 - 왼쪽 위 (눌린 효과) */
+    -1px -1px 0 rgba(0, 0, 0, 0.15),
+    -2px -2px 2px rgba(0, 0, 0, 0.1),
+    /* 전체 부드러운 글로우 */
+    0 0 8px rgba(255, 255, 255, 0.05);
 }
