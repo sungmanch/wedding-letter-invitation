@@ -102,6 +102,7 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'parents',
   'accounts',
   'guestbook',
+  'invitation',
 ]
 
 /**

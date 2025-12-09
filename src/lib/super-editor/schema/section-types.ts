@@ -172,6 +172,7 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'venue',
   'accounts',
   'guestbook',
+  'invitation',
 ]
 
 /**
@@ -186,6 +187,7 @@ export const REORDERABLE_SECTIONS: SectionType[] = [
   'parents',
   'accounts',
   'guestbook',
+  'invitation',
 ]
 
 /**
