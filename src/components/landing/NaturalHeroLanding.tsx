@@ -375,19 +375,12 @@ export function NaturalHeroLanding() {
           {/* Top: Hero Text (Centered) */}
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
             {/* Main Headline */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4">
-              <span
-                className="block text-[var(--text-primary)]"
-                style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 300 }}
-              >
-                친구와 톡하듯 편하게 대화하세요
-              </span>
-              <span
-                className="block text-[var(--sage-600)] mt-1"
-                style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 500 }}
-              >
-                청첩장의 모든 빈칸, AI가 알아서 채워드릴게요
-              </span>
+            <h1
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4"
+              style={{ fontFamily: 'Noto Serif KR, serif' }}
+            >
+              <span className="text-[var(--sage-600)] font-medium">대화로</span>
+              <span className="text-[var(--text-primary)] font-light"> 만드는 청첩장</span>
             </h1>
           </div>
 
