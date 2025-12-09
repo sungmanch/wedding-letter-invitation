@@ -355,6 +355,89 @@ export const gallerySkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Film Strip Variant (무한 스크롤 + 양끝 페이드)
+    // ============================================
+    {
+      id: 'film-strip',
+      name: '필름 스트립',
+      description: '양쪽이 흐릿하게 페이드되며 자동으로 흘러가는 갤러리',
+      tags: ['cinematic', 'film', 'marquee', 'auto-scroll'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-film-strip',
+                type: 'film-strip',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  direction: 'left',
+                  speed: 30,
+                  gap: 12,
+                  imageHeight: 200,
+                  borderRadius: 12,
+                  fadeWidth: 60,
+                  pauseOnHover: true,
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+        layouts: [
+          { id: 'slow', name: '느리게', props: { speed: 20 } },
+          { id: 'normal', name: '보통', props: { speed: 30 } },
+          { id: 'fast', name: '빠르게', props: { speed: 50 } },
+        ],
+      },
+    },
+
+    // ============================================
     // Vertical Swipe Variant (샘플 2-4.png 참고)
     // ============================================
     {

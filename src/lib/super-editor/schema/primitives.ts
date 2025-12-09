@@ -45,8 +45,9 @@ export type PrimitiveType =
   | 'repeat'
   // 오디오 (1개)
   | 'bgm-player'
-  // 인터랙티브 (1개)
+  // 인터랙티브 (2개)
   | 'photobooth'
+  | 'envelope'
   // 확장 (1개)
   | 'custom'
 

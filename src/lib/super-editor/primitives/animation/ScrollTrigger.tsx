@@ -314,8 +314,10 @@ export function ScrollTrigger({
       const relativeTop = rect.top - viewportTop
 
       // 요소가 화면에 들어오는 비율 계산
-      const start = viewportHeight // 화면 하단에서 시작
-      const end = -rect.height // 화면 상단을 벗어날 때 종료
+      // start: 화면 하단에서 시작 (progress = 0)
+      // end: 화면 70% 지점에서 완료 (progress = 1)
+      const start = viewportHeight // 요소 상단이 화면 하단에 있을 때
+      const end = viewportHeight * 0.3 // 요소 상단이 화면 70% 지점(상단에서 30%)에 있을 때
 
       const currentProgress = (start - relativeTop) / (start - end)
       const clampedProgress = Math.max(0, Math.min(1, currentProgress))
