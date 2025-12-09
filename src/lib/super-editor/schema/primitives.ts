@@ -223,6 +223,8 @@ export interface CalendarProps {
   weekOnly?: boolean
   /** 월 표시 여부 (weekOnly 사용 시) */
   showMonth?: boolean
+  /** 캘린더 스타일 변형 */
+  variant?: 'default' | 'letterpress'
 }
 
 // ============================================

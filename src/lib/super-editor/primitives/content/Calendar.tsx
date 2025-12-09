@@ -66,7 +66,29 @@ export function Calendar({
     showSaturdayColor = true,
     weekOnly = false,
     showMonth = true,
+    variant = 'default',
   } = props
+
+  // 레터프레스 스타일 (클래식 음각 효과)
+  const isLetterpress = variant === 'letterpress'
+  const letterpressColors = {
+    background: '#F5F0E6', // 오래된 종이 색
+    text: '#3D3D3D', // 잉크 색
+    textMuted: '#8B8680', // 흐린 잉크
+    accent: '#2C2C2C', // 진한 잉크
+    highlight: '#E8E2D6', // 눌린 부분 배경
+  }
+
+  // 레터프레스 텍스트 스타일 (음각 효과)
+  const getLetterpressTextStyle = (isHighlight = false): React.CSSProperties => {
+    if (!isLetterpress) return {}
+    return {
+      textShadow: isHighlight
+        ? '0 1px 0 rgba(255,255,255,0.3), 0 -1px 1px rgba(0,0,0,0.15)'
+        : '0 1px 0 rgba(255,255,255,0.4), 0 -1px 1px rgba(0,0,0,0.1)',
+      letterSpacing: '0.05em',
+    }
+  }
 
   // 달력 날짜 계산
   const calendarDays = useMemo(() => {
@@ -114,6 +136,11 @@ export function Calendar({
 
   // 요일 색상 결정
   const getDayColor = (date: Date, isCurrentMonth: boolean): string | undefined => {
+    // 레터프레스 스타일인 경우 단색 사용
+    if (isLetterpress) {
+      return isCurrentMonth ? letterpressColors.text : letterpressColors.textMuted
+    }
+
     if (!isCurrentMonth) return 'var(--color-text-muted)'
 
     const dayOfWeek = getDay(date)
@@ -145,6 +172,13 @@ export function Calendar({
       data-node-type="calendar"
       style={{
         width: '100%',
+        ...(isLetterpress && {
+          backgroundColor: letterpressColors.background,
+          padding: '24px',
+          borderRadius: '4px',
+          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06), inset 0 -1px 0 rgba(255,255,255,0.5)',
+          border: '1px solid rgba(0,0,0,0.08)',
+        }),
         ...mergedStyle,
       }}
     >
@@ -153,12 +187,14 @@ export function Calendar({
         <div
           style={{
             textAlign: 'center',
-            fontSize: 'var(--typo-heading-md-font-size, 18px)',
-            fontFamily: 'var(--typo-heading-md-font-family)',
-            fontWeight: 400,
+            fontSize: isLetterpress ? '14px' : 'var(--typo-heading-md-font-size, 18px)',
+            fontFamily: isLetterpress ? 'Georgia, "Times New Roman", serif' : 'var(--typo-heading-md-font-family)',
+            fontWeight: isLetterpress ? 600 : 400,
             letterSpacing: '0.2em',
-            color: 'var(--color-text-secondary)',
+            color: isLetterpress ? letterpressColors.text : 'var(--color-text-secondary)',
             marginBottom: '24px',
+            textTransform: isLetterpress ? 'uppercase' : undefined,
+            ...getLetterpressTextStyle(),
           }}
         >
           {monthName}
@@ -171,26 +207,38 @@ export function Calendar({
           gridTemplateColumns: 'repeat(7, 1fr)',
           gap: weekOnly ? '16px' : '8px',
           marginBottom: weekOnly ? '16px' : '12px',
-          borderBottom: weekOnly ? 'none' : '1px solid var(--color-divider)',
+          borderBottom: weekOnly
+            ? 'none'
+            : isLetterpress
+              ? `1px solid ${letterpressColors.textMuted}40`
+              : '1px solid var(--color-divider)',
           paddingBottom: weekOnly ? '0' : '12px',
         }}
       >
         {weekdays.map((day, index) => {
           const dayIndex = (weekStartsOn + index) % 7
-          let color = 'var(--color-text-secondary)'
-          if (showHolidayColor && dayIndex === 0) color = '#EF4444'
-          if (showSaturdayColor && dayIndex === 6) color = '#3B82F6'
+          let color = isLetterpress ? letterpressColors.textMuted : 'var(--color-text-secondary)'
+          if (!isLetterpress) {
+            if (showHolidayColor && dayIndex === 0) color = '#EF4444'
+            if (showSaturdayColor && dayIndex === 6) color = '#3B82F6'
+          }
 
           return (
             <div
               key={day + index}
               style={{
                 textAlign: 'center',
-                fontSize: weekOnly ? 'var(--typo-body-sm-font-size, 12px)' : 'var(--typo-body-md-font-size, 14px)',
-                fontFamily: 'var(--typo-body-md-font-family)',
-                fontWeight: 400,
-                fontStyle: weekOnly ? 'italic' : 'normal',
+                fontSize: isLetterpress
+                  ? '11px'
+                  : weekOnly
+                    ? 'var(--typo-body-sm-font-size, 12px)'
+                    : 'var(--typo-body-md-font-size, 14px)',
+                fontFamily: isLetterpress ? 'Georgia, "Times New Roman", serif' : 'var(--typo-body-md-font-family)',
+                fontWeight: isLetterpress ? 500 : 400,
+                fontStyle: weekOnly && !isLetterpress ? 'italic' : 'normal',
                 color,
+                textTransform: isLetterpress ? 'uppercase' : undefined,
+                ...getLetterpressTextStyle(),
               }}
             >
               {day}
@@ -213,6 +261,9 @@ export function Calendar({
           const isWeddingDay = isSameDay(day, weddingDate)
           const dayColor = getDayColor(day, isCurrentMonth)
 
+          // 레터프레스 하이라이트 스타일 결정
+          const showLetterpressHighlight = isLetterpress && isWeddingDay
+
           return (
             <div
               key={day.toISOString()}
@@ -225,7 +276,22 @@ export function Calendar({
                 minHeight: weekOnly ? '48px' : '36px',
               }}
             >
-              {isWeddingDay && highlightStyle === 'circle' && (
+              {/* 레터프레스 하이라이트 (음각 원형) */}
+              {showLetterpressHighlight && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '34px',
+                    height: '34px',
+                    backgroundColor: letterpressColors.highlight,
+                    borderRadius: '50%',
+                    boxShadow:
+                      'inset 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 2px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6)',
+                  }}
+                />
+              )}
+              {/* 기본 하이라이트 스타일들 (레터프레스가 아닐 때) */}
+              {!isLetterpress && isWeddingDay && highlightStyle === 'circle' && (
                 <div
                   style={{
                     position: 'absolute',
@@ -236,7 +302,7 @@ export function Calendar({
                   }}
                 />
               )}
-              {isWeddingDay && highlightStyle === 'filled' && (
+              {!isLetterpress && isWeddingDay && highlightStyle === 'filled' && (
                 <div
                   style={{
                     position: 'absolute',
@@ -247,7 +313,7 @@ export function Calendar({
                   }}
                 />
               )}
-              {isWeddingDay && highlightStyle === 'ring' && (
+              {!isLetterpress && isWeddingDay && highlightStyle === 'ring' && (
                 <div
                   style={{
                     position: 'absolute',
@@ -258,7 +324,7 @@ export function Calendar({
                   }}
                 />
               )}
-              {isWeddingDay && highlightStyle === 'heart' && (
+              {!isLetterpress && isWeddingDay && highlightStyle === 'heart' && (
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -277,7 +343,7 @@ export function Calendar({
                   />
                 </svg>
               )}
-              {isWeddingDay && highlightStyle === 'heart-filled' && (
+              {!isLetterpress && isWeddingDay && highlightStyle === 'heart-filled' && (
                 <svg
                   viewBox="0 0 24 24"
                   fill="var(--color-brand, #3B82F6)"
@@ -293,17 +359,22 @@ export function Calendar({
               <span
                 style={{
                   position: 'relative',
-                  fontSize: 'var(--typo-body-md-font-size, 14px)',
-                  fontFamily: 'var(--typo-body-md-font-family)',
-                  fontWeight: isWeddingDay ? 600 : 400,
-                  color: isWeddingDay
-                    ? highlightStyle === 'ring' || highlightStyle === 'heart'
-                      ? 'var(--color-brand, #3B82F6)'
-                      : highlightStyle === 'heart-filled'
-                        ? '#FFFFFF'
-                        : '#FFFFFF'
-                    : dayColor,
+                  fontSize: isLetterpress ? '13px' : 'var(--typo-body-md-font-size, 14px)',
+                  fontFamily: isLetterpress ? 'Georgia, "Times New Roman", serif' : 'var(--typo-body-md-font-family)',
+                  fontWeight: isWeddingDay ? (isLetterpress ? 700 : 600) : 400,
+                  color: isLetterpress
+                    ? isWeddingDay
+                      ? letterpressColors.accent
+                      : dayColor
+                    : isWeddingDay
+                      ? highlightStyle === 'ring' || highlightStyle === 'heart'
+                        ? 'var(--color-brand, #3B82F6)'
+                        : highlightStyle === 'heart-filled'
+                          ? '#FFFFFF'
+                          : '#FFFFFF'
+                      : dayColor,
                   zIndex: 1,
+                  ...getLetterpressTextStyle(isWeddingDay),
                 }}
               >
                 {format(day, 'd')}
@@ -324,6 +395,16 @@ export const calendarRenderer: PrimitiveRenderer<CalendarProps> = {
       key: 'date',
       label: '결혼 날짜',
       type: 'text',
+    },
+    {
+      key: 'variant',
+      label: '캘린더 스타일',
+      type: 'select',
+      options: [
+        { value: 'default', label: '기본' },
+        { value: 'letterpress', label: '레터프레스' },
+      ],
+      defaultValue: 'default',
     },
     {
       key: 'locale',

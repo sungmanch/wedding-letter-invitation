@@ -1262,6 +1262,122 @@ export const dateSkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Letterpress Variant
+    // ============================================
+    {
+      id: 'letterpress',
+      name: '레터프레스',
+      description: '활판 인쇄 스타일의 빈티지 캘린더 (클래식 음각 효과)',
+      tags: ['vintage', 'classic', 'letterpress', 'elegant', 'retro'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              // 레터프레스 타이틀
+              {
+                id: 'letterpress-title',
+                type: 'text',
+                style: {
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  letterSpacing: '0.25em',
+                  textTransform: 'uppercase',
+                  color: '#8B8680',
+                  textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                },
+                props: {
+                  content: 'SAVE THE DATE',
+                  as: 'p',
+                },
+              },
+              // 레터프레스 캘린더
+              {
+                id: 'letterpress-calendar-wrapper',
+                type: 'column',
+                style: {
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '360px',
+                },
+                children: [
+                  {
+                    id: 'letterpress-calendar',
+                    type: 'calendar',
+                    props: {
+                      date: '{{wedding.date}}',
+                      locale: 'en',
+                      variant: 'letterpress',
+                      highlightStyle: 'circle',
+                      showHolidayColor: false,
+                      showSaturdayColor: false,
+                    },
+                  },
+                ],
+              },
+              // 날짜 텍스트 (레터프레스 스타일)
+              {
+                id: 'letterpress-date-text',
+                type: 'text',
+                style: {
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  letterSpacing: '0.15em',
+                  color: '#3D3D3D',
+                  textShadow: '0 1px 0 rgba(255,255,255,0.3), 0 -1px 1px rgba(0,0,0,0.1)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  textAlign: 'center',
+                },
+                props: {
+                  content: '{{wedding.dateDisplay}} | {{wedding.timeDisplay}}',
+                  as: 'p',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2025-09-20',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 700 },
+        ],
+      },
+    },
+
+    // ============================================
     // Week Heart Variant
     // ============================================
     {
