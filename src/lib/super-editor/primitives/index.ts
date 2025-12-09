@@ -87,7 +87,7 @@ export const rendererCategories = {
   imageCollection: {
     label: '이미지 컬렉션',
     renderers: imageCollectionRenderers,
-    types: ['gallery', 'carousel', 'grid', 'collage', 'masonry', 'vinyl-selector', 'film-strip'],
+    types: ['gallery', 'carousel', 'grid', 'collage', 'masonry', 'vinyl-selector', 'film-strip', 'accordion-stack'],
   },
   animation: {
     label: '애니메이션',
@@ -132,8 +132,8 @@ export const primitiveStats = {
   custom: Object.keys(customRenderers).length,
 }
 
-// 34개 확인 (33 + envelope)
+// 35개 확인 (34 + envelope)
 console.assert(
-  primitiveStats.total === 34,
-  `Expected 34 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 35,
+  `Expected 35 primitives, got ${primitiveStats.total}`
 )

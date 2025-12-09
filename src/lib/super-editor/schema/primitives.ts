@@ -27,7 +27,7 @@ export type PrimitiveType =
   | 'map-embed'
   | 'calendar'
   | 'countdown'
-  // 이미지 컬렉션 (7개)
+  // 이미지 컬렉션 (8개)
   | 'gallery'
   | 'carousel'
   | 'grid'
@@ -35,6 +35,7 @@ export type PrimitiveType =
   | 'masonry'
   | 'vinyl-selector'
   | 'film-strip'
+  | 'accordion-stack'
   // 애니메이션 (5개)
   | 'animated'
   | 'sequence'
@@ -218,6 +219,10 @@ export interface CalendarProps {
   showHolidayColor?: boolean
   /** 토요일 색상 표시 */
   showSaturdayColor?: boolean
+  /** 결혼식 주만 표시 (week-heart variant용) */
+  weekOnly?: boolean
+  /** 월 표시 여부 (weekOnly 사용 시) */
+  showMonth?: boolean
 }
 
 // ============================================

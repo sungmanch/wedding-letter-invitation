@@ -279,6 +279,110 @@ export const gallerySkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Accordion Stack Variant (클릭 확장)
+    // ============================================
+    {
+      id: 'accordion-stack',
+      name: '아코디언 스택',
+      description: '클릭하면 이미지가 확장되는 세로 스택 갤러리',
+      tags: ['interactive', 'film', 'elegant', 'dark'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        style: {
+          backgroundColor: '#1a1a1a',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              {
+                id: 'gallery-header',
+                type: 'column',
+                style: {
+                  padding: '48px 24px 24px',
+                  alignItems: 'center',
+                  gap: '8px',
+                },
+                children: [
+                  {
+                    id: 'gallery-title',
+                    type: 'text',
+                    style: {
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: '38px',
+                      fontWeight: '400',
+                      fontStyle: 'italic',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                    },
+                    props: {
+                      content: 'Film Photos',
+                      as: 'h2',
+                    },
+                  },
+                  {
+                    id: 'gallery-subtitle',
+                    type: 'text',
+                    style: {
+                      fontSize: '13px',
+                      fontWeight: '300',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      textAlign: 'center',
+                    },
+                    props: {
+                      content: '클릭하면 확장이 가능합니다',
+                      as: 'p',
+                    },
+                  },
+                ],
+              },
+              {
+                id: 'gallery-accordion',
+                type: 'accordion-stack',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  collapsedHeight: 140,
+                  expandedHeight: 320,
+                  gap: 4,
+                  duration: 400,
+                  onClick: 'expand',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+        layouts: [
+          { id: 'compact', name: '컴팩트', props: { collapsedHeight: 100, expandedHeight: 250 } },
+          { id: 'normal', name: '보통', props: { collapsedHeight: 140, expandedHeight: 320 } },
+          { id: 'tall', name: '크게', props: { collapsedHeight: 180, expandedHeight: 400 } },
+        ],
+      },
+    },
+
+    // ============================================
     // Masonry Variant
     // ============================================
     {
