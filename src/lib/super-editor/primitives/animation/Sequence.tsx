@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, Children, cloneElement, isValidElement } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PrimitiveNode, SequenceProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps } from '../types'

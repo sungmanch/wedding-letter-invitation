@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Users, Calendar, CreditCard } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'

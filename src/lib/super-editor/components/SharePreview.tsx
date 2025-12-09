@@ -1,5 +1,6 @@
 'use client'
 
+import NextImage from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface SharePreviewProps {
@@ -47,10 +48,12 @@ export function SharePreview({
               {/* OG 이미지 */}
               <div className="aspect-[1200/630] bg-gray-100 relative">
                 {ogImageUrl ? (
-                  <img
+                  <NextImage
                     src={ogImageUrl}
                     alt="OG Preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
@@ -106,11 +109,15 @@ export function SharePreview({
             {/* 링크 프리뷰 (MMS 스타일) */}
             <div className="bg-gray-100 rounded-2xl rounded-tl-sm overflow-hidden max-w-[85%]">
               {ogImageUrl ? (
-                <img
-                  src={ogImageUrl}
-                  alt="Preview"
-                  className="w-full aspect-[1200/630] object-cover"
-                />
+                <div className="relative w-full aspect-[1200/630]">
+                  <NextImage
+                    src={ogImageUrl}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
               ) : (
                 <div className="w-full aspect-[1200/630] bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
                   이미지 없음

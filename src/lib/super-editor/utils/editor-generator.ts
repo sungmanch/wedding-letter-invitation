@@ -5,7 +5,7 @@
 
 import type { EditorSection, EditorField } from '../schema/editor'
 import type { LayoutSchema } from '../schema/layout'
-import type { VariableDeclaration, SectionGroupMeta } from '../schema/variables'
+import type { VariableDeclaration } from '../schema/variables'
 import type { SectionScreen } from '../skeletons/types'
 import type { SectionType } from '../schema/section-types'
 import { SECTION_GROUP_META, getSectionGroupId, getSectionGroupMeta } from '../schema/variables'

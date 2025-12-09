@@ -52,6 +52,7 @@ export interface RenderContext {
 // Primitive Renderer Interface
 // ============================================
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface PrimitiveRenderer<P = unknown> {
   type: string
   render: (node: PrimitiveNode, context: RenderContext) => React.ReactNode

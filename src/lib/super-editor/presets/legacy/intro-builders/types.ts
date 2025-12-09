@@ -4,7 +4,7 @@
  */
 
 import type { PrimitiveNode } from '../../../schema/primitives'
-import type { PredefinedTemplatePreset, LegacyColorPalette, LegacyFontConfig } from '../types'
+import type { PredefinedTemplatePreset } from '../types'
 
 // ============================================
 // Builder Context

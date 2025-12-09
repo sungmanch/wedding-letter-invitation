@@ -58,7 +58,7 @@ export function CustomThemeDialog({
       } else {
         setError(result.error || '테마 생성에 실패했습니다')
       }
-    } catch (err) {
+    } catch {
       setError('테마 생성 중 오류가 발생했습니다')
     } finally {
       setIsGenerating(false)

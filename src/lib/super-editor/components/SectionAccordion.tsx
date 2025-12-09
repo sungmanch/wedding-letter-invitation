@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useSuperEditor } from '../context'
 import { FieldRenderer } from './fields/FieldRenderer'
 import { getFieldsForSectionType } from '../utils/editor-generator'
 import { SECTION_META } from '../schema/section-types'
@@ -49,7 +48,6 @@ export function SectionAccordion({
   canMoveDown = true,
   accordionRef,
 }: SectionAccordionProps) {
-  const { state } = useSuperEditor()
   const meta = SECTION_META[sectionType]
 
   // 해당 섹션의 필드들만 생성 (sectionType 기준 직접 추출)

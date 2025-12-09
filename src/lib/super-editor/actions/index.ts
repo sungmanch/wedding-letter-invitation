@@ -1,5 +1,6 @@
 'use server'
 
+import { createHash } from 'crypto'
 import { db } from '@/lib/db'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
 import { eq, and } from 'drizzle-orm'
@@ -444,14 +445,31 @@ export async function uploadGalleryImages(
 
       // 파일 확장자 결정
       const ext = image.mimeType.split('/')[1] === 'jpeg' ? 'jpg' : image.mimeType.split('/')[1]
-      const filename = `se/${invitationId}/gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+      // MD5 해시로 파일명 생성 (중복 이미지 방지)
+      const md5Hash = createHash('md5').update(buffer).digest('hex')
+      const filename = `se/gallery/${md5Hash}.${ext}`
+
+      // 이미 존재하는지 확인
+      const { data: existingFile } = await supabase.storage
+        .from(GALLERY_BUCKET_NAME)
+        .list('se/gallery', { search: `${md5Hash}.${ext}` })
+
+      // 이미 존재하면 업로드 스킵하고 URL만 반환
+      if (existingFile && existingFile.length > 0) {
+        const { data: urlData } = supabase.storage
+          .from(GALLERY_BUCKET_NAME)
+          .getPublicUrl(filename)
+        uploadedUrls.push(urlData.publicUrl)
+        continue
+      }
 
       // Supabase Storage에 업로드
       const { error: uploadError } = await supabase.storage
         .from(GALLERY_BUCKET_NAME)
         .upload(filename, buffer, {
           contentType: image.mimeType,
-          cacheControl: '3600',
+          cacheControl: '31536000', // 1년 캐시 (해시 기반이므로 변경 없음)
           upsert: false,
         })
 
@@ -762,7 +780,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
 // LLM Generation Action (Placeholder)
 // ============================================
 
-export async function generateTemplateWithLLM(prompt: string) {
+export async function generateTemplateWithLLM(_prompt: string) {
   // TODO: 실제 LLM API 호출 구현
   // 현재는 샘플 템플릿 반환
 

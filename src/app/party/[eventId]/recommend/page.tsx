@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Check, Sparkles, Mail } from 'lucide-react'
 import { Button, Card, Badge } from '@/components/ui'
@@ -244,11 +245,13 @@ export default function RestaurantRecommendPage() {
                 >
                   {/* Image */}
                   {restaurant.imageUrl && (
-                    <div className="h-40 w-full overflow-hidden">
-                      <img
+                    <div className="h-40 w-full overflow-hidden relative">
+                      <Image
                         src={restaurant.imageUrl}
                         alt={restaurant.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     </div>
                   )}

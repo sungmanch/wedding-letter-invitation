@@ -423,7 +423,7 @@ async function sendPaymentApprovalNotification(userId: string) {
  */
 export async function rejectPayment(
   paymentId: string,
-  reason?: string
+  _reason?: string
 ): Promise<ApiResponse<{ success: boolean }>> {
   try {
     // Use admin client for admin-only operations

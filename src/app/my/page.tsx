@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Plus, Users, ArrowRight, LogOut, Trash2, Share2, Mail } from 'lucide-react'
 import { Card, CardContent, Calendar } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
-import { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 
@@ -56,14 +56,23 @@ export default function MyEventsPage() {
       }
 
       // 데이터 변환
-      const formattedEvents: EventWithCount[] = (eventsData || []).map((event: any) => ({
+      interface EventResponse {
+        id: string
+        group_name: string
+        status: string
+        created_at: string
+        meeting_date: string | null
+        survey_responses: { count: number }[] | null
+        letters: { id: string; is_read: boolean }[] | null
+      }
+      const formattedEvents: EventWithCount[] = (eventsData || []).map((event: EventResponse) => ({
         id: event.id,
         groupName: event.group_name,
         status: event.status,
         createdAt: new Date(event.created_at).toLocaleDateString('ko-KR'),
         meetingDate: event.meeting_date,
         responseCount: event.survey_responses?.[0]?.count || 0,
-        unreadLetterCount: event.letters?.filter((l: any) => !l.is_read).length || 0,
+        unreadLetterCount: event.letters?.filter((l) => !l.is_read).length || 0,
       }))
 
       setEvents(formattedEvents)
@@ -83,10 +92,10 @@ export default function MyEventsPage() {
   }
 
   // KST 기준 날짜 문자열 (YYYY-MM-DD) 추출
-  const getKSTDateString = (dateString: string): string => {
+  const getKSTDateString = React.useCallback((dateString: string): string => {
     const kstDate = toKSTDate(dateString)
     return format(kstDate, 'yyyy-MM-dd')
-  }
+  }, [])
 
   // 이벤트가 있는 날짜들 (KST 기준)
   const eventDates = useMemo(() => {
@@ -100,7 +109,7 @@ export default function MyEventsPage() {
     return events.filter(
       (e) => e.meetingDate && getKSTDateString(e.meetingDate) === selectedDateString
     )
-  }, [events, selectedDate])
+  }, [events, selectedDate, getKSTDateString])
 
   // 날짜 미선택 이벤트들
   const undatedEvents = useMemo(() => {

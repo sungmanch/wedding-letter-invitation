@@ -7,7 +7,7 @@ import type { PrimitiveNode, CSSProperties } from '../schema/primitives'
 import type { SemanticDesignTokens } from '../tokens/schema'
 import type { SkeletonNode, SectionFillResult, SectionScreen, SectionType } from '../skeletons/types'
 import { getVariant, getDefaultVariant } from '../skeletons/registry'
-import { resolveTokenRef, getTokenValue } from '../tokens/resolver'
+import { resolveTokenRef } from '../tokens/resolver'
 
 // ============================================
 // Skeleton to Screen Resolver
@@ -33,7 +33,7 @@ export function resolveSkeletonToScreen(
   const structure = applyOptions(variant.structure, fillResult, variant)
 
   // SkeletonNode를 PrimitiveNode로 변환
-  const root = resolveNode(structure, tokens)
+  resolveNode(structure, tokens)
 
   return {
     id: `${sectionType}-screen`,

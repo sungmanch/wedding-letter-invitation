@@ -9,7 +9,6 @@ import {
   Clock,
   MapPin,
   Copy,
-  Check,
   MessageCircle,
   Eye,
   ExternalLink,

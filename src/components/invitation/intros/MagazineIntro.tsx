@@ -9,6 +9,9 @@ import type { IntroProps } from './types'
  * MagazineIntro - Vogue/Kinfolk editorial style
  * Features: Bold typography overlay, magazine cover layout
  */
+// 바코드 높이를 미리 계산 (순수함수로 생성)
+const BARCODE_HEIGHTS = Array.from({ length: 20 }, (_, i) => 8 + ((i * 7 + 3) % 16))
+
 export function MagazineIntro({
   config,
   colors,
@@ -147,12 +150,12 @@ export function MagazineIntro({
           phase >= 4 ? 'opacity-30' : 'opacity-0'
         )}
       >
-        {Array.from({ length: 20 }).map((_, i) => (
+        {BARCODE_HEIGHTS.map((height, i) => (
           <div
             key={i}
             className="w-0.5 bg-current"
             style={{
-              height: `${8 + Math.random() * 16}px`,
+              height: `${height}px`,
               color: colors.text,
             }}
           />

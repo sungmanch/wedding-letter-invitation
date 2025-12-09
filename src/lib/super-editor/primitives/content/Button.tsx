@@ -3,6 +3,7 @@
 import type { PrimitiveNode, ButtonProps, ButtonAction } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, resolveDataBinding, mergeNodeStyles, getNodeEventHandlers } from '../types'
+import NextImage from 'next/image'
 import {
   Phone,
   MessageCircle,
@@ -141,7 +142,7 @@ function renderIcon(iconName: string, size: string = 'md') {
 function renderImageIcon(iconSrc: string, size: string = 'md') {
   const iconSize = iconSizeMap[size] || 20
   return (
-    <img
+    <NextImage
       src={iconSrc}
       alt=""
       width={iconSize}
@@ -150,6 +151,7 @@ function renderImageIcon(iconSrc: string, size: string = 'md') {
         objectFit: 'contain',
         borderRadius: '4px',
       }}
+      unoptimized
     />
   )
 }

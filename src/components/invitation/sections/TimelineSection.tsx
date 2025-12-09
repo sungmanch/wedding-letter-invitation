@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Heart, Calendar } from 'lucide-react'
 import type { ColorPalette, FontSet } from '@/lib/themes/schema'
-import type { TimelineSettings, TimelineEvent } from '@/lib/types/invitation-design'
+import type { TimelineSettings } from '@/lib/types/invitation-design'
 
 interface TimelineSectionProps {
   settings: TimelineSettings
@@ -53,7 +53,7 @@ export function TimelineSection({
         />
       )}
       <div className="space-y-6">
-        {events.map((event, index) => (
+        {events.map((event) => (
           <div key={event.id} className="relative pl-12">
             {/* Timeline dot */}
             <div
@@ -152,7 +152,7 @@ export function TimelineSection({
 
   const renderCardTimeline = () => (
     <div className="grid grid-cols-1 gap-4">
-      {events.map((event, index) => (
+      {events.map((event) => (
         <div
           key={event.id}
           className="bg-white rounded-xl overflow-hidden shadow-sm"

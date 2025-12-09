@@ -9,7 +9,7 @@ import type { SemanticDesignTokens } from '../tokens/schema'
 import type { SectionType, SectionFillResult, SectionScreen } from '../skeletons/types'
 import type { FillerResponse } from '../prompts/filler-prompt'
 import type { DesignPatterns } from '../utils/design-pattern-extractor'
-import type { VariableDeclaration, VariablesSchema } from '../schema/variables'
+import type { VariablesSchema } from '../schema/variables'
 
 import { resolveTokens } from '../tokens/resolver'
 import { generateCssVariables } from '../tokens/css-generator'
@@ -20,7 +20,7 @@ import {
   DEFAULT_SECTION_ORDER,
 } from '../skeletons/registry'
 import { resolveSkeletonToScreen, resolveAllSections } from '../builder/skeleton-resolver'
-import { extractPatternsFromSkeleton, patternsToPromptContext } from '../utils/design-pattern-extractor'
+import { extractPatternsFromSkeleton } from '../utils/design-pattern-extractor'
 import { buildFillerPrompt, variantToSummary } from '../prompts/filler-prompt'
 import { getMoodVariantHints } from '../prompts/prompt-hints'
 
@@ -273,9 +273,9 @@ async function generateSectionsInParallel(
  * Music 섹션 생성 (별도 처리)
  */
 async function generateMusicSection(
-  prompt: string,
-  mood: string[] | undefined,
-  aiProvider: AIProvider
+  _prompt: string,
+  _mood: string[] | undefined,
+  _aiProvider: AIProvider
 ): Promise<SectionFillResult> {
   const musicSkeleton = getSkeleton('music')
   if (!musicSkeleton) {

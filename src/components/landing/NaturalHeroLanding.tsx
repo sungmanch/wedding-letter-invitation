@@ -56,7 +56,11 @@ function AIChatVideo() {
   return (
     <div className="relative">
       {/* Phone mockup frame */}
+<<<<<<< HEAD
       <div className="relative w-[295px] sm:w-[347px] lg:w-[373px] mx-auto">
+=======
+      <div className="relative w-[340px] sm:w-[400px] lg:w-[430px] mx-auto">
+>>>>>>> 3637f8473fd5fbfd455fe326ab75cb36880a1895
         <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[3/4] rounded-[2.25rem] overflow-hidden bg-black">
             <video
@@ -286,7 +290,11 @@ function TemplateCarousel() {
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       {/* Phone mockup frame */}
+<<<<<<< HEAD
       <div className="relative w-[220px] sm:w-[260px] lg:w-[280px] mx-auto">
+=======
+      <div className="relative w-[255px] sm:w-[300px] lg:w-[322px] mx-auto">
+>>>>>>> 3637f8473fd5fbfd455fe326ab75cb36880a1895
         <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[9/16] rounded-[2.25rem] overflow-hidden relative">
             {renderTemplate(currentIndex)}
@@ -453,22 +461,6 @@ export function NaturalHeroLanding() {
           </div>
         </div>
 
-        {/* Mobile Floating CTA */}
-        <div
-          className={`fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm border-t border-[var(--sand-100)] z-50 lg:hidden transition-transform duration-300 ${
-            showMobileCTA ? 'translate-y-0' : 'translate-y-full'
-          }`}
-        >
-          <Link href="/se/create" className="block">
-            <Button
-              className="w-full bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white py-3.5 text-base rounded-full shadow-lg h-auto"
-              style={{ fontFamily: 'Pretendard, sans-serif' }}
-            >
-              무료로 시작하기
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
       </section>
     </>
   )

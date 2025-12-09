@@ -13,7 +13,6 @@ import {
   parseISO,
   getDay,
 } from 'date-fns'
-import { ko, enUS } from 'date-fns/locale'
 import type { PrimitiveNode, CalendarProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, resolveDataBinding, mergeNodeStyles } from '../types'
@@ -65,8 +64,6 @@ export function Calendar({
     showHolidayColor = true,
     showSaturdayColor = true,
   } = props
-
-  const dateLocale = locale === 'ko' ? ko : enUS
 
   // 달력 날짜 계산
   const calendarDays = useMemo(() => {

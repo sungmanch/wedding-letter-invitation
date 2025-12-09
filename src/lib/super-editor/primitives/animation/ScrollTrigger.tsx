@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/preserve-manual-memoization */
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
@@ -6,6 +7,246 @@ import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps } from '../types'
 import { getAnimationPreset } from '../../animations/presets'
 import { getScrollPreset, type ScrollKeyframe } from '../../animations/scroll-presets'
+
+// ============================================
+// 모듈 레벨 순수 함수들 (참조 안정성 보장)
+// ============================================
+
+// 숫자 보간
+function lerp(start: number, end: number, t: number): number {
+  return start + (end - start) * t
+}
+
+// Transform 문자열 파싱
+function parseTransform(
+  transform: string
+): Map<string, { value: number; unit: string }> {
+  const result = new Map<string, { value: number; unit: string }>()
+  if (!transform) return result
+
+  const patterns = [
+    /translateX\(([-\d.]+)(px|%|rem|em)?\)/,
+    /translateY\(([-\d.]+)(px|%|rem|em)?\)/,
+    /translateZ\(([-\d.]+)(px|%|rem|em)?\)/,
+    /scale\(([\d.]+)\)/,
+    /scaleX\(([\d.]+)\)/,
+    /scaleY\(([\d.]+)\)/,
+    /rotate\(([-\d.]+)(deg|rad|turn)?\)/,
+    /rotateX\(([-\d.]+)(deg|rad|turn)?\)/,
+    /rotateY\(([-\d.]+)(deg|rad|turn)?\)/,
+    /skewX\(([-\d.]+)(deg)?\)/,
+    /skewY\(([-\d.]+)(deg)?\)/,
+    /perspective\(([-\d.]+)(px)?\)/,
+  ]
+
+  const names = [
+    'translateX',
+    'translateY',
+    'translateZ',
+    'scale',
+    'scaleX',
+    'scaleY',
+    'rotate',
+    'rotateX',
+    'rotateY',
+    'skewX',
+    'skewY',
+    'perspective',
+  ]
+
+  patterns.forEach((pattern, i) => {
+    const match = transform.match(pattern)
+    if (match) {
+      result.set(names[i], {
+        value: parseFloat(match[1]),
+        unit: match[2] || (names[i].includes('scale') ? '' : 'px'),
+      })
+    }
+  })
+
+  return result
+}
+
+// Transform Map을 문자열로 변환
+function transformToString(
+  transforms: Map<string, { value: number; unit: string }>
+): string {
+  const parts: string[] = []
+  transforms.forEach(({ value, unit }, name) => {
+    if (name === 'scale' || name === 'scaleX' || name === 'scaleY') {
+      parts.push(`${name}(${value})`)
+    } else {
+      parts.push(`${name}(${value}${unit})`)
+    }
+  })
+  return parts.join(' ')
+}
+
+// Transform 보간
+function interpolateTransform(
+  start: string | undefined,
+  end: string | undefined,
+  t: number
+): string {
+  if (!start && !end) return ''
+  if (!start) return end || ''
+  if (!end) return start
+
+  const startMap = parseTransform(start)
+  const endMap = parseTransform(end)
+  const result = new Map<string, { value: number; unit: string }>()
+
+  startMap.forEach(({ value: startVal, unit }, name) => {
+    const endEntry = endMap.get(name)
+    if (endEntry) {
+      result.set(name, { value: lerp(startVal, endEntry.value, t), unit })
+    } else {
+      const defaultVal =
+        name === 'scale' || name === 'scaleX' || name === 'scaleY' ? 1 : 0
+      result.set(name, { value: lerp(startVal, defaultVal, t), unit })
+    }
+  })
+
+  endMap.forEach(({ value: endVal, unit }, name) => {
+    if (!startMap.has(name)) {
+      const defaultVal =
+        name === 'scale' || name === 'scaleX' || name === 'scaleY' ? 1 : 0
+      result.set(name, { value: lerp(defaultVal, endVal, t), unit })
+    }
+  })
+
+  return transformToString(result)
+}
+
+// Filter 파싱
+function parseFilter(
+  filter: string
+): Map<string, { value: number; unit: string }> {
+  const result = new Map<string, { value: number; unit: string }>()
+  if (!filter) return result
+
+  const patterns = [
+    /blur\(([\d.]+)(px)?\)/,
+    /brightness\(([\d.]+)\)/,
+    /contrast\(([\d.]+)%?\)/,
+    /grayscale\(([\d.]+)%?\)/,
+    /saturate\(([\d.]+)%?\)/,
+    /sepia\(([\d.]+)%?\)/,
+    /hue-rotate\(([\d.]+)(deg)?\)/,
+  ]
+
+  const names = [
+    'blur',
+    'brightness',
+    'contrast',
+    'grayscale',
+    'saturate',
+    'sepia',
+    'hue-rotate',
+  ]
+
+  patterns.forEach((pattern, i) => {
+    const match = filter.match(pattern)
+    if (match) {
+      result.set(names[i], {
+        value: parseFloat(match[1]),
+        unit: match[2] || (names[i] === 'blur' ? 'px' : ''),
+      })
+    }
+  })
+
+  return result
+}
+
+function filterToString(
+  filters: Map<string, { value: number; unit: string }>
+): string {
+  const parts: string[] = []
+  filters.forEach(({ value, unit }, name) => {
+    parts.push(`${name}(${value}${unit})`)
+  })
+  return parts.join(' ')
+}
+
+function interpolateFilter(
+  start: string | undefined,
+  end: string | undefined,
+  t: number
+): string {
+  if (!start && !end) return ''
+  if (!start) return end || ''
+  if (!end) return start
+
+  const startMap = parseFilter(start)
+  const endMap = parseFilter(end)
+  const result = new Map<string, { value: number; unit: string }>()
+
+  startMap.forEach(({ value: startVal, unit }, name) => {
+    const endEntry = endMap.get(name)
+    if (endEntry) {
+      result.set(name, { value: lerp(startVal, endEntry.value, t), unit })
+    } else {
+      const defaultVal = name === 'blur' ? 0 : 1
+      result.set(name, { value: lerp(startVal, defaultVal, t), unit })
+    }
+  })
+
+  endMap.forEach(({ value: endVal, unit }, name) => {
+    if (!startMap.has(name)) {
+      const defaultVal = name === 'blur' ? 0 : 1
+      result.set(name, { value: lerp(defaultVal, endVal, t), unit })
+    }
+  })
+
+  return filterToString(result)
+}
+
+// ClipPath 보간 (inset, circle 지원)
+function interpolateClipPath(
+  start: string | undefined,
+  end: string | undefined,
+  t: number
+): string {
+  if (!start && !end) return ''
+  if (!start) return end || ''
+  if (!end) return start
+
+  // inset(100% 0 0 0) → inset(0 0 0 0)
+  const insetMatch = (str: string) =>
+    str.match(/inset\(([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)%?\)/)
+  const startInset = insetMatch(start)
+  const endInset = insetMatch(end)
+
+  if (startInset && endInset) {
+    const values = [1, 2, 3, 4].map((i) =>
+      lerp(parseFloat(startInset[i]), parseFloat(endInset[i]), t)
+    )
+    return `inset(${values[0]}% ${values[1]}% ${values[2]}% ${values[3]}%)`
+  }
+
+  // circle(0% at 50% 50%) → circle(100% at 50% 50%)
+  const circleMatch = (str: string) =>
+    str.match(/circle\(([\d.]+)%\s+at\s+([\d.]+)%\s+([\d.]+)%\)/)
+  const startCircle = circleMatch(start)
+  const endCircle = circleMatch(end)
+
+  if (startCircle && endCircle) {
+    const radius = lerp(
+      parseFloat(startCircle[1]),
+      parseFloat(endCircle[1]),
+      t
+    )
+    const x = lerp(parseFloat(startCircle[2]), parseFloat(endCircle[2]), t)
+    const y = lerp(parseFloat(startCircle[3]), parseFloat(endCircle[3]), t)
+    return `circle(${radius}% at ${x}% ${y}%)`
+  }
+
+  return t > 0.5 ? end : start
+}
+
+// ============================================
+// 컴포넌트
+// ============================================
 
 export function ScrollTrigger({
   node,
@@ -51,247 +292,6 @@ export function ScrollTrigger({
   const preset = props.animation?.preset
     ? getAnimationPreset(props.animation.preset)
     : null
-
-  // ============================================
-  // 향상된 보간 엔진
-  // ============================================
-
-  // 숫자 보간
-  const lerp = (start: number, end: number, t: number): number => {
-    return start + (end - start) * t
-  }
-
-  // Transform 문자열 파싱
-  const parseTransform = (
-    transform: string
-  ): Map<string, { value: number; unit: string }> => {
-    const result = new Map<string, { value: number; unit: string }>()
-    if (!transform) return result
-
-    // translateX, translateY, scale, rotate, perspective, rotateX 등
-    const patterns = [
-      /translateX\(([-\d.]+)(px|%|rem|em)?\)/,
-      /translateY\(([-\d.]+)(px|%|rem|em)?\)/,
-      /translateZ\(([-\d.]+)(px|%|rem|em)?\)/,
-      /scale\(([\d.]+)\)/,
-      /scaleX\(([\d.]+)\)/,
-      /scaleY\(([\d.]+)\)/,
-      /rotate\(([-\d.]+)(deg|rad|turn)?\)/,
-      /rotateX\(([-\d.]+)(deg|rad|turn)?\)/,
-      /rotateY\(([-\d.]+)(deg|rad|turn)?\)/,
-      /skewX\(([-\d.]+)(deg)?\)/,
-      /skewY\(([-\d.]+)(deg)?\)/,
-      /perspective\(([-\d.]+)(px)?\)/,
-    ]
-
-    const names = [
-      'translateX',
-      'translateY',
-      'translateZ',
-      'scale',
-      'scaleX',
-      'scaleY',
-      'rotate',
-      'rotateX',
-      'rotateY',
-      'skewX',
-      'skewY',
-      'perspective',
-    ]
-
-    patterns.forEach((pattern, i) => {
-      const match = transform.match(pattern)
-      if (match) {
-        result.set(names[i], {
-          value: parseFloat(match[1]),
-          unit: match[2] || (names[i].includes('scale') ? '' : 'px'),
-        })
-      }
-    })
-
-    return result
-  }
-
-  // Transform Map을 문자열로 변환
-  const transformToString = (
-    transforms: Map<string, { value: number; unit: string }>
-  ): string => {
-    const parts: string[] = []
-    transforms.forEach(({ value, unit }, name) => {
-      if (name === 'scale' || name === 'scaleX' || name === 'scaleY') {
-        parts.push(`${name}(${value})`)
-      } else {
-        parts.push(`${name}(${value}${unit})`)
-      }
-    })
-    return parts.join(' ')
-  }
-
-  // Transform 보간
-  const interpolateTransform = (
-    start: string | undefined,
-    end: string | undefined,
-    t: number
-  ): string => {
-    if (!start && !end) return ''
-    if (!start) return end || ''
-    if (!end) return start
-
-    const startMap = parseTransform(start)
-    const endMap = parseTransform(end)
-    const result = new Map<string, { value: number; unit: string }>()
-
-    // start에 있는 모든 transform 보간
-    startMap.forEach(({ value: startVal, unit }, name) => {
-      const endEntry = endMap.get(name)
-      if (endEntry) {
-        result.set(name, { value: lerp(startVal, endEntry.value, t), unit })
-      } else {
-        // end에 없으면 기본값으로 보간
-        const defaultVal =
-          name === 'scale' || name === 'scaleX' || name === 'scaleY' ? 1 : 0
-        result.set(name, { value: lerp(startVal, defaultVal, t), unit })
-      }
-    })
-
-    // end에만 있는 transform 추가
-    endMap.forEach(({ value: endVal, unit }, name) => {
-      if (!startMap.has(name)) {
-        const defaultVal =
-          name === 'scale' || name === 'scaleX' || name === 'scaleY' ? 1 : 0
-        result.set(name, { value: lerp(defaultVal, endVal, t), unit })
-      }
-    })
-
-    return transformToString(result)
-  }
-
-  // Filter 파싱 및 보간
-  const parseFilter = (
-    filter: string
-  ): Map<string, { value: number; unit: string }> => {
-    const result = new Map<string, { value: number; unit: string }>()
-    if (!filter) return result
-
-    const patterns = [
-      /blur\(([\d.]+)(px)?\)/,
-      /brightness\(([\d.]+)\)/,
-      /contrast\(([\d.]+)%?\)/,
-      /grayscale\(([\d.]+)%?\)/,
-      /saturate\(([\d.]+)%?\)/,
-      /sepia\(([\d.]+)%?\)/,
-      /hue-rotate\(([\d.]+)(deg)?\)/,
-    ]
-
-    const names = [
-      'blur',
-      'brightness',
-      'contrast',
-      'grayscale',
-      'saturate',
-      'sepia',
-      'hue-rotate',
-    ]
-
-    patterns.forEach((pattern, i) => {
-      const match = filter.match(pattern)
-      if (match) {
-        result.set(names[i], {
-          value: parseFloat(match[1]),
-          unit: match[2] || (names[i] === 'blur' ? 'px' : ''),
-        })
-      }
-    })
-
-    return result
-  }
-
-  const filterToString = (
-    filters: Map<string, { value: number; unit: string }>
-  ): string => {
-    const parts: string[] = []
-    filters.forEach(({ value, unit }, name) => {
-      parts.push(`${name}(${value}${unit})`)
-    })
-    return parts.join(' ')
-  }
-
-  const interpolateFilter = (
-    start: string | undefined,
-    end: string | undefined,
-    t: number
-  ): string => {
-    if (!start && !end) return ''
-    if (!start) return end || ''
-    if (!end) return start
-
-    const startMap = parseFilter(start)
-    const endMap = parseFilter(end)
-    const result = new Map<string, { value: number; unit: string }>()
-
-    startMap.forEach(({ value: startVal, unit }, name) => {
-      const endEntry = endMap.get(name)
-      if (endEntry) {
-        result.set(name, { value: lerp(startVal, endEntry.value, t), unit })
-      } else {
-        // 기본값으로 보간 (blur는 0, 나머지는 1 또는 0)
-        const defaultVal = name === 'blur' ? 0 : 1
-        result.set(name, { value: lerp(startVal, defaultVal, t), unit })
-      }
-    })
-
-    endMap.forEach(({ value: endVal, unit }, name) => {
-      if (!startMap.has(name)) {
-        const defaultVal = name === 'blur' ? 0 : 1
-        result.set(name, { value: lerp(defaultVal, endVal, t), unit })
-      }
-    })
-
-    return filterToString(result)
-  }
-
-  // ClipPath 보간 (inset, circle 지원)
-  const interpolateClipPath = (
-    start: string | undefined,
-    end: string | undefined,
-    t: number
-  ): string => {
-    if (!start && !end) return ''
-    if (!start) return end || ''
-    if (!end) return start
-
-    // inset(100% 0 0 0) → inset(0 0 0 0)
-    const insetMatch = (str: string) =>
-      str.match(/inset\(([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)%?\)/)
-    const startInset = insetMatch(start)
-    const endInset = insetMatch(end)
-
-    if (startInset && endInset) {
-      const values = [1, 2, 3, 4].map((i) =>
-        lerp(parseFloat(startInset[i]), parseFloat(endInset[i]), t)
-      )
-      return `inset(${values[0]}% ${values[1]}% ${values[2]}% ${values[3]}%)`
-    }
-
-    // circle(0% at 50% 50%) → circle(100% at 50% 50%)
-    const circleMatch = (str: string) =>
-      str.match(/circle\(([\d.]+)%\s+at\s+([\d.]+)%\s+([\d.]+)%\)/)
-    const startCircle = circleMatch(start)
-    const endCircle = circleMatch(end)
-
-    if (startCircle && endCircle) {
-      const radius = lerp(
-        parseFloat(startCircle[1]),
-        parseFloat(endCircle[1]),
-        t
-      )
-      const x = lerp(parseFloat(startCircle[2]), parseFloat(endCircle[2]), t)
-      const y = lerp(parseFloat(startCircle[3]), parseFloat(endCircle[3]), t)
-      return `circle(${radius}% at ${x}% ${y}%)`
-    }
-
-    return t > 0.5 ? end : start
-  }
 
   // Scrub 모드에서 스타일 계산
   const getScrubStyle = useCallback((): React.CSSProperties => {

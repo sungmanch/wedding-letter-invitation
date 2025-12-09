@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, X } from 'lucide-react'
-import { Button, Card, CardContent, Input, Textarea, Badge } from '@/components/ui'
+import { Button, Card, CardContent, Input, Badge } from '@/components/ui'
 import {
   getEventDetails,
   addRestaurantRecommendations,
@@ -116,7 +116,7 @@ export default function AdminEventDetailPage() {
     setCurrentReasonInputs(currentReasonInputs.filter((_, i) => i !== index))
   }
 
-  const updateRestaurant = (index: number, field: keyof RestaurantInput, value: any) => {
+  const updateRestaurant = (index: number, field: keyof RestaurantInput, value: string | number | string[]) => {
     const updated = [...restaurants]
     updated[index] = { ...updated[index], [field]: value }
     setRestaurants(updated)

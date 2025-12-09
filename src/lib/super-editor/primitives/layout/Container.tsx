@@ -42,11 +42,16 @@ export function Container({
   useEffect(() => {
     if (showAfterScroll === undefined || context.mode === 'edit') return
 
-    // 초기 체크
-    handleScroll()
+    // 초기 체크 - requestAnimationFrame으로 다음 프레임에 실행
+    const frameId = requestAnimationFrame(() => {
+      handleScroll()
+    })
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      cancelAnimationFrame(frameId)
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [showAfterScroll, handleScroll, context.mode])
 
   // 토큰 스타일 + 직접 스타일 병합

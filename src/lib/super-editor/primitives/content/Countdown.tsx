@@ -87,9 +87,6 @@ export function Countdown({
       setTimeLeft(calculateTimeLeft(targetDate))
     }, 1000)
 
-    // 초기값 즉시 계산
-    setTimeLeft(calculateTimeLeft(targetDate))
-
     return () => clearInterval(timer)
   }, [targetDate])
 

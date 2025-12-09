@@ -28,6 +28,7 @@ export function ChatIntro({
     { sender: 'bot', text: '축하드립니다! 🎉' },
   ]
 
+  // 채팅 메시지 애니메이션 - 마운트 시 한 번만 실행 (chatMessages는 컴포넌트 내 상수)
   React.useEffect(() => {
     let currentIndex = 0
     const showNextMessage = () => {
@@ -44,6 +45,7 @@ export function ChatIntro({
       }
     }
     setTimeout(showNextMessage, 500)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getBubbleStyle = (sender: string) => {

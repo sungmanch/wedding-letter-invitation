@@ -12,7 +12,7 @@ export function Parallel({
   node: PrimitiveNode
   context: RenderContext
 }) {
-  const props = getNodeProps<ParallelProps>(node)
+  getNodeProps<ParallelProps>(node)
   const style = toInlineStyle(node.style)
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
