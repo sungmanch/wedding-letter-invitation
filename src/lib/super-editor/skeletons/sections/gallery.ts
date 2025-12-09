@@ -559,6 +559,127 @@ export const gallerySkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Coverflow Dark Variant (3D 카드 캐러셀)
+    // ============================================
+    {
+      id: 'coverflow-dark',
+      name: '커버플로우 다크',
+      description: '다크 배경의 3D 카드 스타일 캐러셀',
+      tags: ['3d', 'coverflow', 'dark', 'elegant', 'cards'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        style: {
+          backgroundColor: '#1a1a1a',
+          padding: '48px 0 24px',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            style: {
+              gap: '16px',
+              alignItems: 'center',
+            },
+            children: [
+              {
+                id: 'gallery-header',
+                type: 'column',
+                style: {
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '16px',
+                },
+                children: [
+                  {
+                    id: 'gallery-title',
+                    type: 'text',
+                    style: {
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: '32px',
+                      fontWeight: '400',
+                      fontStyle: 'italic',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      lineHeight: '1.2',
+                    },
+                    props: {
+                      content: 'Self Snapshots',
+                      as: 'h2',
+                    },
+                  },
+                  {
+                    id: 'gallery-subtitle',
+                    type: 'text',
+                    style: {
+                      fontSize: '13px',
+                      fontWeight: '300',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      textAlign: 'center',
+                    },
+                    props: {
+                      content: '클릭하면 확대가 가능합니다',
+                      as: 'p',
+                    },
+                  },
+                ],
+              },
+              {
+                id: 'gallery-coverflow',
+                type: 'carousel',
+                style: {
+                  width: '100%',
+                  minHeight: '400px',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  aspectRatio: '3:4',
+                  objectFit: 'cover',
+                  autoplay: false,
+                  infinite: true,
+                  showDots: true,
+                  showArrows: true,
+                  effect: 'coverflow',
+                  onClick: 'lightbox',
+                },
+              },
+              {
+                id: 'gallery-hint',
+                type: 'text',
+                style: {
+                  fontSize: '13px',
+                  fontWeight: '300',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  textAlign: 'center',
+                  marginTop: '16px',
+                },
+                props: {
+                  content: '위아래로 스크롤하세요',
+                  as: 'p',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+      },
+    },
+
+    // ============================================
     // Film Strip Variant (무한 스크롤 + 양끝 페이드)
     // ============================================
     {
