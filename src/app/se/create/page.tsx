@@ -449,14 +449,15 @@ export default function SuperEditorCreatePage() {
                 </button>
               )}
 
-              {/* Progress Indicator */}
-              <div className="mt-6 w-full">
-                <ProgressIndicator
-                  basicInfo={basicInfo}
-                  collectedData={collectedData}
-                  stage={stage}
-                />
-              </div>
+              {/* Progress Indicator - Stage 2에서만 표시 */}
+              {stage === 'chat' && (
+                <div className="mt-6 w-full">
+                  <ProgressIndicator
+                    basicInfo={basicInfo}
+                    collectedData={collectedData}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
