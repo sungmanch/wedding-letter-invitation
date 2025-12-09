@@ -83,15 +83,17 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     // 실시간 필터 프리뷰를 위한 캔버스 렌더링
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    // Draw video with filter + stickers continuously
+    // 오버레이 캔버스 크기 (3:4 비율 유지, 스티커용)
+    const OVERLAY_WIDTH = 300;
+    const OVERLAY_HEIGHT = 400;
+
+    // Draw video with filter continuously
     useEffect(() => {
       if (boothState !== 'camera') return;
       if (!previewCanvasRef.current || !videoRef.current) return;
 
       const canvas = previewCanvasRef.current;
       const ctx = canvas.getContext('2d');
-      const overlayCanvas = overlayCanvasRef.current;
-      const overlayCtx = overlayCanvas?.getContext('2d');
       if (!ctx) return;
 
       let animationId: number;
@@ -103,14 +105,28 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
           return;
         }
 
-        // 캔버스 크기 설정
-        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-          canvas.width = video.videoWidth || 640;
-          canvas.height = video.videoHeight || 480;
-          if (overlayCanvas) {
-            overlayCanvas.width = canvas.width;
-            overlayCanvas.height = canvas.height;
-          }
+        // 캔버스 크기를 3:4 비율로 설정 (컨테이너와 동일)
+        const targetWidth = 300;
+        const targetHeight = 400;
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+        }
+
+        // 비디오를 3:4 비율 캔버스에 맞춰 그리기 (cover 방식)
+        const videoAspect = video.videoWidth / video.videoHeight;
+        const canvasAspect = canvas.width / canvas.height;
+
+        let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
+
+        if (videoAspect > canvasAspect) {
+          // 비디오가 더 넓음 - 좌우 자르기
+          sw = video.videoHeight * canvasAspect;
+          sx = (video.videoWidth - sw) / 2;
+        } else {
+          // 비디오가 더 높음 - 상하 자르기
+          sh = video.videoWidth / canvasAspect;
+          sy = (video.videoHeight - sh) / 2;
         }
 
         // 전면 카메라 미러링
@@ -119,18 +135,12 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
         }
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
         ctx.restore();
 
         // 필터 적용
         if (selectedFilter !== 'none') {
           applyFilter(ctx, canvas.width, canvas.height, selectedFilter);
-        }
-
-        // 오버레이 캔버스에 스티커 그리기
-        if (overlayCtx) {
-          overlayCtx.clearRect(0, 0, canvas.width, canvas.height);
-          drawAllStickers(overlayCtx, stickers, new Map());
         }
 
         animationId = requestAnimationFrame(draw);
@@ -141,7 +151,31 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       return () => {
         cancelAnimationFrame(animationId);
       };
-    }, [boothState, cameraState.facing, selectedFilter, stickers]);
+    }, [boothState, cameraState.facing, selectedFilter]);
+
+    // 스티커 오버레이 그리기 (별도 루프)
+    useEffect(() => {
+      if (boothState !== 'camera') return;
+      if (!overlayCanvasRef.current) return;
+
+      const overlayCanvas = overlayCanvasRef.current;
+      const overlayCtx = overlayCanvas.getContext('2d');
+      if (!overlayCtx) return;
+
+      let animationId: number;
+
+      const drawOverlay = () => {
+        overlayCtx.clearRect(0, 0, OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        drawAllStickers(overlayCtx, stickers, new Map());
+        animationId = requestAnimationFrame(drawOverlay);
+      };
+
+      drawOverlay();
+
+      return () => {
+        cancelAnimationFrame(animationId);
+      };
+    }, [boothState, stickers]);
 
     const handleCapture = useCallback(() => {
       const video = videoRef.current;
@@ -151,9 +185,25 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
-      // Set canvas size
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+      // 캡처 캔버스도 3:4 비율로 설정
+      canvas.width = OVERLAY_WIDTH;
+      canvas.height = OVERLAY_HEIGHT;
+
+      // 비디오를 3:4 비율 캔버스에 맞춰 그리기 (cover 방식)
+      const videoAspect = video.videoWidth / video.videoHeight;
+      const canvasAspect = canvas.width / canvas.height;
+
+      let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
+
+      if (videoAspect > canvasAspect) {
+        // 비디오가 더 넓음 - 좌우 자르기
+        sw = video.videoHeight * canvasAspect;
+        sx = (video.videoWidth - sw) / 2;
+      } else {
+        // 비디오가 더 높음 - 상하 자르기
+        sh = video.videoWidth / canvasAspect;
+        sy = (video.videoHeight - sh) / 2;
+      }
 
       // Flip for front camera
       ctx.save();
@@ -162,8 +212,8 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
         ctx.scale(-1, 1);
       }
 
-      // Draw video frame
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Draw video frame with cover crop
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
       ctx.restore();
 
       // Apply filter
@@ -181,7 +231,7 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
         drawFrameOverlay(ctx, canvas.width, canvas.height, overlay, hostImage);
       }
 
-      // Draw stickers
+      // Draw stickers (오버레이 캔버스와 같은 좌표계)
       drawAllStickers(ctx, stickers, new Map());
 
       // Draw title text
@@ -383,11 +433,11 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
                 />
               )}
 
-              {/* Overlay canvas for stickers */}
+              {/* Overlay canvas for stickers - 3:4 비율 유지 */}
               <canvas
                 ref={overlayCanvasRef}
-                width={640}
-                height={480}
+                width={300}
+                height={400}
                 style={styles.overlayCanvas}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
