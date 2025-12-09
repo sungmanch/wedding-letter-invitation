@@ -45,6 +45,8 @@ export type PrimitiveType =
   | 'repeat'
   // 오디오 (1개)
   | 'bgm-player'
+  // 인터랙티브 (1개)
+  | 'photobooth'
   // 확장 (1개)
   | 'custom'
 
@@ -358,6 +360,17 @@ export interface BgmPlayerProps {
 }
 
 // ============================================
+// Interactive Primitives Props
+// ============================================
+
+export interface PhotoBoothProps {
+  title?: string // 사진에 표시될 타이틀
+  frames?: unknown[] | string // 프레임 배열 또는 데이터 바인딩 ({{photobooth.frames}})
+  defaultFrameIndex?: number // 기본 선택 프레임 인덱스
+  compact?: boolean // 컴팩트 모드
+}
+
+// ============================================
 // Animation Config Types
 // ============================================
 
@@ -511,6 +524,7 @@ export type PrimitiveProps =
   | ConditionalProps
   | RepeatProps
   | BgmPlayerProps
+  | PhotoBoothProps
   | CustomProps
 
 // ============================================

@@ -49,6 +49,7 @@ export type EditorField =
   | RichTextField
   | GroupField
   | RepeaterField
+  | FramesField
 
 // ============================================
 // Field Base Interface
@@ -97,6 +98,7 @@ export type FieldType =
   | 'richtext'
   | 'group'
   | 'repeater'
+  | 'frames'
 
 // ============================================
 // Text Fields
@@ -331,6 +333,12 @@ export interface RepeaterField extends FieldBase {
   sortable?: boolean
   addLabel?: string
   removeLabel?: string
+}
+
+export interface FramesField extends FieldBase {
+  type: 'frames'
+  maxItems?: number
+  minItems?: number
 }
 
 // ============================================

@@ -538,6 +538,7 @@ export const SECTION_TYPE_TO_EDITOR_SECTIONS: Record<SectionType, string[]> = {
   accounts: ['accounts'],
   guestbook: [], // 방명록은 사용자 입력 받는 섹션이므로 에디터 필드 없음
   music: ['bgm'], // BGM 설정
+  photobooth: ['photobooth'], // 포토부스 프레임 설정
 }
 
 // ============================================

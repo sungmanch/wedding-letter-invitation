@@ -40,6 +40,10 @@ export * from './audio'
 import { bgmPlayerRenderer } from './audio'
 const audioRenderers = { 'bgm-player': bgmPlayerRenderer }
 
+// Interactive (1개)
+export * from './interactive'
+import { interactiveRenderers } from './interactive'
+
 // Custom (1개)
 export * from './custom'
 import { customRenderer } from './custom'
@@ -58,6 +62,7 @@ export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...animationRenderers,
   ...logicRenderers,
   ...audioRenderers,
+  ...interactiveRenderers,
   ...customRenderers,
 }
 
@@ -99,6 +104,11 @@ export const rendererCategories = {
     renderers: audioRenderers,
     types: ['bgm-player'],
   },
+  interactive: {
+    label: '인터랙티브',
+    renderers: interactiveRenderers,
+    types: ['photobooth'],
+  },
   custom: {
     label: '확장',
     renderers: customRenderers,
@@ -118,11 +128,12 @@ export const primitiveStats = {
   animation: Object.keys(animationRenderers).length,
   logic: Object.keys(logicRenderers).length,
   audio: Object.keys(audioRenderers).length,
+  interactive: Object.keys(interactiveRenderers).length,
   custom: Object.keys(customRenderers).length,
 }
 
-// 31개 확인 (30 + custom)
+// 32개 확인 (31 + photobooth)
 console.assert(
-  primitiveStats.total === 31,
-  `Expected 31 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 32,
+  `Expected 32 primitives, got ${primitiveStats.total}`
 )
