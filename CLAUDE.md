@@ -4,7 +4,8 @@ AI 기반 개인화 청첩장 서비스입니다.
 사용자가 본인의 웨딩 이미지를 업로드하면 해당 이미지를 바탕으로 꾸며진 청첩장 프리뷰를 보여주고 사용자에게 선택을 유도합니다.
 
 - **도메인**: maisondeletter.com
-- **브랜드 톤**: Black & Gold 럭셔리, Wong Kar-wai 화양연화 무드
+- **브랜드 톤**: Ivory/Sage 내추럴, Fresh & Elegant
+- **캐치프레이즈**: "원하는 분위기를 말하면, AI가 바로 시안을 만들어 드립니다"
 
 ## 중요 규칙
 1. 모든 작업은 마이크로 단위로 작업에 대한 commit을 합니다.
@@ -43,6 +44,16 @@ AI 기반 개인화 청첩장 서비스입니다.
 - **`__HIDDEN__` description**: 자동 계산 필드를 에디터에서 숨김
 
 ## 변경 이력
+
+### 2025-12-09: 랜딩 페이지 Split Hero 리디자인
+- **이유**: Black & Gold 테마가 20-30대 여성에게 올드하게 느껴짐, 전환율 개선 필요
+- **변경**:
+  - 컬러 팔레트: Black & Gold → Ivory/Sand + Sage Green
+  - 레이아웃: Split Hero (왼쪽 텍스트/CTA + 오른쪽 템플릿 캐러셀)
+  - 폰트: Playfair Display(영문) + Noto Serif KR(한글) + Pretendard(본문)
+  - 템플릿 3종: 매거진, 올드 머니, 미니멀 (자동 4초 슬라이드)
+  - CTA: Above-the-fold + 모바일 플로팅 (스크롤 300px 후 표시)
+- **파일**: `src/components/landing/NaturalHeroLanding.tsx`
 
 ### 2025-12-08: 다양한 폰트 지원을 위한 폰트 시스템 구축
 - **이유**: 9개 고정 폰트만 사용 가능했고, 새 폰트 추가 시 여러 파일 수동 수정 필요
