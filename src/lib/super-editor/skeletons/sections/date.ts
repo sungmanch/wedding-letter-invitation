@@ -743,5 +743,347 @@ export const dateSkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Typography Bold Variant
+    // ============================================
+    {
+      id: 'typography-bold',
+      name: '볼드 타이포',
+      description: '대형 볼드 타이포그래피 중심의 미니멀 레이아웃 (커플 사진 포함)',
+      tags: ['modern', 'bold', 'minimal', 'typography', 'photo'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            style: {
+              alignItems: 'flex-start',
+              position: 'relative',
+              minHeight: '700px',
+              padding: '40px 24px',
+            },
+            children: [
+              // 월/일 대형 표시
+              {
+                id: 'date-month-day',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.displayLg.fontFamily',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  fontSize: '80px',
+                  fontWeight: '900',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '0.9',
+                },
+                props: {
+                  content: '{{wedding.monthDay}}',
+                  as: 'p',
+                },
+              },
+              // PLEASE SAVE THE DATE
+              {
+                id: 'save-the-date-text',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  letterSpacing: '0.1em',
+                  marginTop: '8px',
+                },
+                props: {
+                  content: 'PLEASE SAVE THE DATE',
+                  as: 'p',
+                },
+              },
+              // /연도
+              {
+                id: 'date-year',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.displayLg.fontFamily',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  fontSize: '80px',
+                  fontWeight: '900',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '0.9',
+                  marginTop: '16px',
+                },
+                props: {
+                  content: '/{{wedding.year}}',
+                  as: 'p',
+                },
+              },
+              // A CELEBRATION OF OUR LOVE
+              {
+                id: 'celebration-text',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  letterSpacing: '0.1em',
+                  marginTop: '8px',
+                  alignSelf: 'flex-end',
+                  marginRight: '40px',
+                },
+                props: {
+                  content: 'A CELEBRATION OF OUR LOVE',
+                  as: 'p',
+                },
+              },
+              // 시간 대형 표시
+              {
+                id: 'time-large',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.displayLg.fontFamily',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  fontSize: '80px',
+                  fontWeight: '900',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '0.9',
+                  marginTop: '16px',
+                },
+                props: {
+                  content: '{{wedding.time24h}}',
+                  as: 'p',
+                },
+              },
+              // 하단 영역 (텍스트 + 사진)
+              {
+                id: 'bottom-section',
+                type: 'row',
+                style: {
+                  marginTop: 'auto',
+                  paddingTop: '40px',
+                  width: '100%',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                },
+                children: [
+                  // 이름 텍스트 블록
+                  {
+                    id: 'names-block',
+                    type: 'column',
+                    style: {
+                      alignItems: 'flex-start',
+                      gap: '2px',
+                    },
+                    children: [
+                      {
+                        id: 'names-line1',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          letterSpacing: '0.05em',
+                        },
+                        props: {
+                          content: '{{couple.groom.nameEn}}',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'names-line2',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          letterSpacing: '0.05em',
+                        },
+                        props: {
+                          content: 'AND',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'names-line3',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          letterSpacing: '0.05em',
+                        },
+                        props: {
+                          content: '{{couple.bride.nameEn}}',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'names-line4',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          letterSpacing: '0.05em',
+                        },
+                        props: {
+                          content: 'ARE GETTING',
+                          as: 'span',
+                        },
+                      },
+                      {
+                        id: 'names-line5',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          letterSpacing: '0.05em',
+                        },
+                        props: {
+                          content: 'MARRIED',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                  // 커플 사진
+                  {
+                    id: 'couple-photo',
+                    type: 'image',
+                    style: {
+                      width: '140px',
+                      height: '180px',
+                      objectFit: 'cover',
+                      filter: 'grayscale(100%)',
+                    },
+                    props: {
+                      src: '{{photos.couple}}',
+                      alt: '커플 사진',
+                    },
+                  },
+                ],
+              },
+              // 세로 텍스트 (장소) - 오른쪽 상단
+              {
+                id: 'vertical-venue',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.bodyMd.fontFamily',
+                  color: '$token.colors.text.secondary',
+                },
+                style: {
+                  position: 'absolute',
+                  top: '40px',
+                  right: '24px',
+                  writingMode: 'vertical-rl',
+                  fontSize: '11px',
+                  letterSpacing: '0.2em',
+                },
+                props: {
+                  content: '{{venue.name}} {{venue.hall}}',
+                  as: 'p',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2025-05-30',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+        {
+          id: 'groom-name-en',
+          path: 'couple.groom.nameEn',
+          type: 'text',
+          required: true,
+          description: '신랑 영문 이름',
+          defaultValue: 'GROOM',
+        },
+        {
+          id: 'bride-name-en',
+          path: 'couple.bride.nameEn',
+          type: 'text',
+          required: true,
+          description: '신부 영문 이름',
+          defaultValue: 'BRIDE',
+        },
+        {
+          id: 'couple-photo',
+          path: 'photos.couple',
+          type: 'image',
+          required: false,
+          description: '커플 사진',
+          defaultValue: '/images/placeholder-couple.jpg',
+        },
+        {
+          id: 'venue-name',
+          path: 'venue.name',
+          type: 'text',
+          required: false,
+          description: '예식장 이름',
+          defaultValue: '예식장',
+        },
+        {
+          id: 'venue-hall',
+          path: 'venue.hall',
+          type: 'text',
+          required: false,
+          description: '홀 이름',
+          defaultValue: '',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+      },
+    },
   ],
 }

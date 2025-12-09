@@ -341,10 +341,10 @@ function EditPageContent() {
     [state.layout, state.style, setTemplate]
   )
 
-  // Add section handler (dev mode only)
-  const _handleAddSection = useCallback(
+  // Add section handler
+  const handleAddSection = useCallback(
     (sectionType: SectionType) => {
-      if (process.env.NODE_ENV !== 'development' || !state.layout) return
+      if (!state.layout) return
 
       // Get default variant for the section
       const defaultVariant = getDefaultVariant(sectionType)
@@ -376,6 +376,9 @@ function EditPageContent() {
 
       // Update context state
       setTemplate(newLayout, state.style!)
+
+      // 추가된 섹션 펼치기
+      setExpandedSection(sectionType)
     },
     [state.layout, state.style, setTemplate, sectionOrder]
   )
@@ -519,6 +522,7 @@ function EditPageContent() {
               declarations={variablesSchema?.declarations}
               expandedSection={expandedSection}
               onExpandedSectionChange={setExpandedSection}
+              onAddSection={handleAddSection}
               className="flex-1"
             />
           )}
