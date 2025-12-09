@@ -1,16 +1,19 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { PrimitiveNode } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { mergeNodeStyles, getNodeProps } from '../types'
 
-// GSAP 플러그인 등록
+// GSAP 플러그인 등록 (클라이언트에서만)
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
+
+// SSR-safe useLayoutEffect
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 /**
  * Envelope Props
@@ -84,14 +87,26 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
   }, [envelopeColor, cardColor, flapColor, mounted])
 
   // GSAP ScrollTrigger 설정
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!containerRef.current || !cardRef.current || !mounted) return
 
-    // 스크롤 컨테이너 찾기
+    // 초기 위치 설정 (GSAP 애니메이션 시작 전)
+    gsap.set(cardRef.current, { yPercent: 50 })
+
+    // 스크롤 컨테이너 찾기 - overflow-y: auto/scroll 확인
     const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
       let parent = element.parentElement
       while (parent) {
+        const style = getComputedStyle(parent)
+        const overflowY = style.overflowY
+        // overflow-y가 auto 또는 scroll이면 스크롤 컨테이너
+        if (overflowY === 'auto' || overflowY === 'scroll') {
+          console.log('[Envelope] Found scroll container by overflow:', parent.className)
+          return parent
+        }
+        // 또는 scrollHeight가 clientHeight보다 크면
         if (parent.scrollHeight > parent.clientHeight + 10) {
+          console.log('[Envelope] Found scroll container by scrollHeight:', parent.className)
           return parent
         }
         parent = parent.parentElement
@@ -99,34 +114,49 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
       return null
     }
 
-    const scrollContainer = findScrollContainer(containerRef.current)
-    console.log('[Envelope] GSAP Init - scrollContainer:', scrollContainer?.className || 'window')
+    // 약간의 딜레이 후 ScrollTrigger 설정 (DOM 렌더링 완료 대기)
+    const initTimer = setTimeout(() => {
+      if (!containerRef.current || !cardRef.current) return
 
-    // GSAP 애니메이션: 카드가 봉투에서 올라옴
-    // startY: 50% (봉투 안에 숨어있음) -> endY: -30% (봉투 위로 올라옴)
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        scroller: scrollContainer || undefined,
-        start: 'top bottom', // 요소의 top이 뷰포트 bottom에 닿을 때 시작
-        end: 'center center', // 요소의 center가 뷰포트 center에 닿을 때 종료
-        scrub: 0.5, // 스크롤에 따라 부드럽게 연동
-        onUpdate: (self) => {
-          setScrollProgress(self.progress)
+      const scrollContainer = findScrollContainer(containerRef.current)
+      console.log('[Envelope] GSAP Init - scrollContainer:', scrollContainer?.className || 'window')
+      console.log('[Envelope] Container scrollHeight:', scrollContainer?.scrollHeight, 'clientHeight:', scrollContainer?.clientHeight)
+
+      // GSAP 애니메이션: 카드가 봉투에서 올라옴
+      // startY: 50% (봉투 안에 숨어있음) -> endY: -30% (봉투 위로 올라옴)
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          scroller: scrollContainer || undefined,
+          start: 'top 90%', // 요소의 top이 뷰포트 90% 지점에 닿을 때 시작
+          end: 'center center', // 요소의 center가 뷰포트 center에 닿을 때 종료
+          scrub: 0.3, // 스크롤에 따라 부드럽게 연동 (더 빠른 반응)
+          onUpdate: (self) => {
+            setScrollProgress(self.progress)
+          },
+          invalidateOnRefresh: true, // 리사이즈 시 재계산
+          // markers: true, // 디버그용 - 활성화하면 start/end 위치 표시
         },
-        // markers: true, // 디버그용
-      },
-    })
+      })
 
-    // 카드 애니메이션: translateY 50% -> -30%
-    tl.fromTo(
-      cardRef.current,
-      { yPercent: 50 },
-      { yPercent: -30, ease: 'none' }
-    )
+      // 카드 애니메이션: translateY 50% -> -30%
+      tl.fromTo(
+        cardRef.current,
+        { yPercent: 50 },
+        { yPercent: -30, ease: 'none' }
+      )
+
+      // cleanup을 위해 timeline 저장
+      ;(containerRef.current as HTMLElement & { _gsapTimeline?: gsap.core.Timeline })._gsapTimeline = tl
+    }, 200)
 
     return () => {
-      tl.kill()
+      clearTimeout(initTimer)
+      // timeline cleanup
+      const container = containerRef.current as HTMLElement & { _gsapTimeline?: gsap.core.Timeline } | null
+      if (container?._gsapTimeline) {
+        container._gsapTimeline.kill()
+      }
       ScrollTrigger.getAll().forEach((st) => {
         if (st.trigger === containerRef.current) {
           st.kill()
@@ -189,7 +219,7 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
           top: '25%',
           height: '70%',
           zIndex: 2,
-          // 초기 위치: translateY(50%) - GSAP이 제어
+          transform: 'translateY(50%)', // 초기 위치 (GSAP이 이후 제어)
         }}
       >
         <div

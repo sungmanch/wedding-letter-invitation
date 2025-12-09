@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import type { PrimitiveNode, CarouselProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
@@ -9,7 +10,7 @@ import { toInlineStyle, getNodeProps, getValueByPath } from '../types'
 
 // GSAP 플러그인 등록
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(useGSAP)
+  gsap.registerPlugin(useGSAP, ScrollTrigger)
 }
 
 export function Carousel({
@@ -424,6 +425,20 @@ export function Carousel({
     )
   }
 
+  // Scroll Horizontal 효과 - 수직 스크롤 중 pin되어 가로 스크롤 진행
+  if (effect === 'scroll-horizontal') {
+    return (
+      <ScrollHorizontalCarousel
+        node={node}
+        context={context}
+        images={images}
+        props={props}
+        style={style}
+        isSelected={isSelected}
+      />
+    )
+  }
+
   // Slide 효과 (기본) - GSAP 드래그 적용
   return (
     <div
@@ -570,6 +585,183 @@ export function Carousel({
   }
 }
 
+// ScrollHorizontalCarousel - 수직 스크롤 중 pin되어 가로 스크롤 진행
+function ScrollHorizontalCarousel({
+  node,
+  context,
+  images,
+  props,
+  style,
+  isSelected,
+}: {
+  node: PrimitiveNode
+  context: RenderContext
+  images: string[]
+  props: CarouselProps
+  style: React.CSSProperties
+  isSelected: boolean
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<ScrollTrigger | null>(null)
+
+  // 스크롤 부모 찾기 (PhoneFrame 내부 스크롤 컨테이너 지원)
+  const findScrollParent = (element: HTMLElement): HTMLElement | Window => {
+    let parent = element.parentElement
+    while (parent) {
+      const { overflow, overflowY } = window.getComputedStyle(parent)
+      if (overflow === 'auto' || overflow === 'scroll' || overflowY === 'auto' || overflowY === 'scroll') {
+        return parent
+      }
+      parent = parent.parentElement
+    }
+    return window
+  }
+
+  useGSAP(() => {
+    if (!containerRef.current || !trackRef.current || context.mode === 'edit' || images.length === 0) return
+
+    const container = containerRef.current
+    const track = trackRef.current
+    const scrollParent = findScrollParent(container)
+
+    // 트랙의 총 이동 거리 계산 (트랙 너비 - 컨테이너 너비)
+    const totalWidth = track.scrollWidth
+    const viewportWidth = container.offsetWidth
+    const scrollDistance = totalWidth - viewportWidth
+
+    if (scrollDistance <= 0) return
+
+    // 수직 스크롤 거리 설정 (가로 스크롤 거리만큼 수직으로 스크롤해야 함)
+    const scrollMultiplier = props.spacing ? 1.5 : 1 // 간격이 있으면 스크롤 거리 증가
+
+    triggerRef.current = ScrollTrigger.create({
+      trigger: container,
+      scroller: scrollParent === window ? undefined : scrollParent,
+      start: 'top top',
+      end: () => `+=${scrollDistance * scrollMultiplier}`,
+      pin: true,
+      anticipatePin: 1,
+      scrub: 1,
+      onUpdate: (self) => {
+        gsap.set(track, {
+          x: -scrollDistance * self.progress,
+        })
+      },
+    })
+
+    return () => {
+      triggerRef.current?.kill()
+    }
+  }, { scope: containerRef, dependencies: [context.mode, images.length, props.spacing] })
+
+  const handleImageClick = (index: number) => {
+    if (context.mode === 'edit') return
+    if (props.onClick === 'lightbox') {
+      const event = new CustomEvent('open-lightbox', {
+        detail: { images, currentIndex: index },
+      })
+      window.dispatchEvent(event)
+    }
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      data-node-id={node.id}
+      data-node-type="carousel"
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
+        ...style,
+        outline: isSelected ? '2px solid #3b82f6' : undefined,
+      }}
+      onClick={
+        context.mode === 'edit'
+          ? (e) => {
+              e.stopPropagation()
+              context.onSelectNode?.(node.id)
+            }
+          : undefined
+      }
+    >
+      <div
+        ref={trackRef}
+        style={{
+          display: 'flex',
+          gap: `${props.spacing || 16}px`,
+          height: '100%',
+          alignItems: 'center',
+          padding: '0 24px',
+          willChange: 'transform',
+        }}
+      >
+        {images.map((src, index) => (
+          <img
+            key={index}
+            src={src}
+            alt={`슬라이드 ${index + 1}`}
+            onClick={() => handleImageClick(index)}
+            style={{
+              flex: '0 0 auto',
+              height: '80%',
+              width: 'auto',
+              aspectRatio: props.aspectRatio?.replace(':', '/') || '3/4',
+              objectFit: props.objectFit || 'cover',
+              borderRadius: '12px',
+              cursor: props.onClick === 'lightbox' ? 'pointer' : 'default',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 스크롤 힌트 표시 */}
+      {context.mode !== 'edit' && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 24,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px',
+            opacity: 0.6,
+            pointerEvents: 'none',
+          }}
+        >
+          <span style={{ fontSize: '12px', color: 'var(--color-text-secondary, #666)' }}>
+            스크롤하여 더 보기
+          </span>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{ color: 'var(--color-text-secondary, #666)', animation: 'bounce 2s infinite' }}
+          >
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(5px); }
+          60% { transform: translateY(3px); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export const carouselRenderer: PrimitiveRenderer<CarouselProps> = {
   type: 'carousel',
   render: (node, context) => (
@@ -604,6 +796,7 @@ export const carouselRenderer: PrimitiveRenderer<CarouselProps> = {
         { value: 'coverflow', label: '커버플로우' },
         { value: 'cards', label: '카드 스택' },
         { value: 'cube', label: '큐브' },
+        { value: 'scroll-horizontal', label: '가로 스크롤 (Pin)' },
       ],
       defaultValue: 'slide',
     },

@@ -175,40 +175,33 @@ export function ContentTab({
           </div>
         ))}
 
-        {/* 플로팅 섹션: music, photobooth */}
-        {(hasMusic || hasPhotobooth) && (
-          <>
-            <div className="pt-4 border-t border-white/10 mt-4">
-              <p className="text-xs text-[#F5E6D3]/50 mb-2 px-1">추가 섹션</p>
-            </div>
-            {hasMusic && (
-              <div ref={setRef('music')}>
-                <SectionAccordion
-                  sectionType="music"
-                  expanded={expandedSection === 'music'}
-                  onExpand={() => handleExpand('music')}
-                  enabled={sectionEnabled.music}
-                  onToggle={() => toggleSection('music')}
-                  layout={layout}
-                  declarations={declarations}
-                  floating
-                />
-              </div>
-            )}
-            {hasPhotobooth && (
-              <div ref={setRef('photobooth')}>
-                <SectionAccordion
-                  sectionType="photobooth"
-                  expanded={expandedSection === 'photobooth'}
-                  onExpand={() => handleExpand('photobooth')}
-                  enabled={sectionEnabled.photobooth}
-                  onToggle={() => toggleSection('photobooth')}
-                  layout={layout}
-                  declarations={declarations}
-                />
-              </div>
-            )}
-          </>
+        {/* 추가 섹션: music, photobooth, invitation */}
+        {hasMusic && (
+          <div ref={setRef('music')}>
+            <SectionAccordion
+              sectionType="music"
+              expanded={expandedSection === 'music'}
+              onExpand={() => handleExpand('music')}
+              enabled={sectionEnabled.music}
+              onToggle={() => toggleSection('music')}
+              layout={layout}
+              declarations={declarations}
+              floating
+            />
+          </div>
+        )}
+        {hasPhotobooth && (
+          <div ref={setRef('photobooth')}>
+            <SectionAccordion
+              sectionType="photobooth"
+              expanded={expandedSection === 'photobooth'}
+              onExpand={() => handleExpand('photobooth')}
+              enabled={sectionEnabled.photobooth}
+              onToggle={() => toggleSection('photobooth')}
+              layout={layout}
+              declarations={declarations}
+            />
+          </div>
         )}
 
         {/* Layout에 섹션이 없는 경우 안내 */}

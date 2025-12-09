@@ -261,7 +261,7 @@ export interface CarouselProps extends ImageCollectionBaseProps {
   showArrows?: boolean
   showDots?: boolean
   slidesToShow?: number
-  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'cards'
+  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'cards' | 'scroll-horizontal'
   spacing?: number
 }
 
