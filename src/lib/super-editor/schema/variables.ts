@@ -215,6 +215,64 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     description: '__HIDDEN__',
   },
 
+  // Typography Bold variant용 파생 필드
+  'wedding.monthDay': {
+    type: 'text',
+    label: '월/일 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (05/30)
+  },
+  'wedding.year': {
+    type: 'text',
+    label: '연도',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (2025)
+  },
+  'wedding.monthNameEn': {
+    type: 'text',
+    label: '월 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (SEPTEMBER)
+  },
+  'wedding.time24h': {
+    type: 'text',
+    label: '시간 (24시간)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (14:00)
+  },
+  'wedding.time12h': {
+    type: 'text',
+    label: '시간 (12시간)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (2PM)
+  },
+
+  // Save The Date variant용 파생 필드
+  'wedding.dateFormatted': {
+    type: 'text',
+    label: '날짜 (포맷)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (2025. 06. 21)
+  },
+  'wedding.dayOfWeek': {
+    type: 'text',
+    label: '요일 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (SATURDAY)
+  },
+  'wedding.season': {
+    type: 'text',
+    label: '계절 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (SUMMER)
+  },
+  'wedding.timeOfDay': {
+    type: 'text',
+    label: '시간대 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (NIGHT)
+  },
+
   // Countdown (자동 계산값 - 에디터에서 숨김)
   'countdown.days': {
     type: 'number',

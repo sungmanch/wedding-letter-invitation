@@ -616,7 +616,7 @@ export const dateSkeleton: SectionSkeleton = {
                           textAlign: 'center',
                         },
                         props: {
-                          content: '{{wedding.dayOfWeek}} {{wedding.seasonTime}}',
+                          content: '{{wedding.dayOfWeek}} {{wedding.season}} {{wedding.timeOfDay}}',
                           as: 'p',
                         },
                       },
@@ -634,7 +634,7 @@ export const dateSkeleton: SectionSkeleton = {
                           textAlign: 'center',
                         },
                         props: {
-                          content: '{{wedding.timeDisplay12h}}',
+                          content: '{{wedding.time12h}}',
                           as: 'p',
                         },
                       },
