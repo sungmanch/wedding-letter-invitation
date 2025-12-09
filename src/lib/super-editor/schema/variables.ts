@@ -24,6 +24,7 @@ export type VariableType =
   | 'location'
   | 'account'
   | 'repeater'
+  | 'frames'
 
 // ============================================
 // Variable Declaration
@@ -104,6 +105,7 @@ export const VARIABLE_TYPE_TO_FIELD_TYPE: Record<VariableType, FieldType> = {
   location: 'location',
   account: 'account',
   repeater: 'repeater',
+  frames: 'frames',
 }
 
 // ============================================
@@ -603,6 +605,30 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     required: false,
     placeholder: '아티스트명',
   },
+
+  // PhotoBooth
+  'photobooth.description': {
+    type: 'textarea',
+    label: '포토부스 설명',
+    required: false,
+    rows: 2,
+    placeholder: '신랑 신부와 함께 특별한 추억을 남겨보세요',
+    defaultValue: '신랑 신부와 함께 특별한 추억을 남겨보세요',
+  },
+  'photobooth.title': {
+    type: 'text',
+    label: '프레임 타이틀',
+    required: false,
+    placeholder: 'Our Wedding Day',
+    defaultValue: 'Our Wedding Day',
+    helpText: '촬영된 사진에 표시될 타이틀',
+  },
+  'photobooth.frames': {
+    type: 'frames',
+    label: '프레임',
+    required: false,
+    helpText: '게스트가 선택할 수 있는 포토 프레임을 등록하세요',
+  },
 }
 
 // ============================================
@@ -626,6 +652,7 @@ export const SECTION_GROUP_META: Record<string, SectionGroupMeta> = {
   parents: { id: 'parents', title: '혼주 정보', icon: 'users', order: 8 },
   accounts: { id: 'accounts', title: '축의금 계좌', icon: 'credit-card', order: 9 },
   bgm: { id: 'bgm', title: '배경음악', icon: 'music', order: 10 },
+  photobooth: { id: 'photobooth', title: '포토부스', icon: 'camera', order: 11 },
   custom: { id: 'custom', title: '추가 설정', icon: 'settings', order: 100 },
 }
 
