@@ -314,8 +314,8 @@ const CropStep = forwardRef<
         ref={ref}
         src={imageUrl}
         width={300}
-        height={400}
-        shape="ellipseVertical"
+        height={300}
+        shape="square"
         showShapeBorder={true}
         minZoom={0.3}
         maxZoom={3}
@@ -610,8 +610,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   arrangePreview: {
     position: 'relative',
-    width: '100%',
+    width: '300px',
     height: '300px',
+    margin: '0 auto',
     borderRadius: '12px',
     overflow: 'hidden',
     touchAction: 'none',
@@ -669,7 +670,7 @@ const styles: Record<string, React.CSSProperties> = {
   completePreview: {
     position: 'relative',
     width: '200px',
-    height: '150px',
+    height: '200px',
     borderRadius: '12px',
     overflow: 'hidden',
     marginBottom: '16px',
