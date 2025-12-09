@@ -134,6 +134,7 @@ function getSortedSections(
   // 디버그: sectionEnabled 상태 확인
   console.log('[getSortedSections] sectionEnabled:', sectionEnabled)
   console.log('[getSortedSections] sectionOrder:', sectionOrder)
+  console.log('[getSortedSections] invitation enabled?', sectionEnabled.invitation)
 
   // visibleSections가 있으면 해당 섹션만 표시
   if (visibleSections) {

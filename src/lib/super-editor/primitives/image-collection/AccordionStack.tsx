@@ -15,10 +15,12 @@ if (typeof window !== 'undefined') {
 export interface AccordionStackProps {
   /** 이미지 배열 또는 데이터 바인딩 경로 */
   images: string[] | string
-  /** 축소된 상태의 이미지 높이 (px) */
+  /** 기본 상태의 이미지 높이 (px) - 아무것도 선택 안됐을 때 */
   collapsedHeight?: number
   /** 확장된 상태의 이미지 높이 (px) */
   expandedHeight?: number
+  /** 최소화된 상태의 이미지 높이 (px) - 다른 이미지가 확장됐을 때 */
+  minimizedHeight?: number
   /** 이미지 간 간격 (px) */
   gap?: number
   /** 애니메이션 지속시간 (ms) */
@@ -60,6 +62,7 @@ export function AccordionStack({
 
   const collapsedHeight = props.collapsedHeight || 120
   const expandedHeight = props.expandedHeight || 300
+  const minimizedHeight = props.minimizedHeight || 60
   const gap = props.gap ?? 4
   const duration = (props.duration || 400) / 1000
   const onClick = props.onClick || 'expand'
@@ -72,7 +75,18 @@ export function AccordionStack({
       if (!item) return
 
       const isExpanded = expandedIndex === index
-      const targetHeight = isExpanded ? expandedHeight : collapsedHeight
+      const isMinimized = expandedIndex !== null && expandedIndex !== index
+
+      // 확장된 것이 있으면: 확장된 것은 expandedHeight, 나머지는 minimizedHeight
+      // 확장된 것이 없으면: 모두 collapsedHeight
+      let targetHeight: number
+      if (isExpanded) {
+        targetHeight = expandedHeight
+      } else if (isMinimized) {
+        targetHeight = minimizedHeight
+      } else {
+        targetHeight = collapsedHeight
+      }
 
       gsap.to(item, {
         height: targetHeight,
@@ -80,17 +94,18 @@ export function AccordionStack({
         ease: 'power2.out',
       })
 
-      // 내부 이미지 스케일 애니메이션
+      // 내부 이미지 스케일 및 밝기 애니메이션
       const img = item.querySelector('img')
       if (img) {
         gsap.to(img, {
           scale: isExpanded ? 1.05 : 1,
+          filter: isMinimized ? 'brightness(0.7)' : 'brightness(1)',
           duration,
           ease: 'power2.out',
         })
       }
     })
-  }, { scope: containerRef, dependencies: [expandedIndex, collapsedHeight, expandedHeight, duration] })
+  }, { scope: containerRef, dependencies: [expandedIndex, collapsedHeight, expandedHeight, minimizedHeight, duration] })
 
   const handleImageClick = (index: number) => {
     if (context.mode === 'edit') return
@@ -191,7 +206,7 @@ export const accordionStackRenderer: PrimitiveRenderer<AccordionStackProps> = {
   editableProps: [
     {
       key: 'collapsedHeight',
-      label: '축소 높이 (px)',
+      label: '기본 높이 (px)',
       type: 'number',
       defaultValue: 120,
     },
@@ -200,6 +215,12 @@ export const accordionStackRenderer: PrimitiveRenderer<AccordionStackProps> = {
       label: '확장 높이 (px)',
       type: 'number',
       defaultValue: 300,
+    },
+    {
+      key: 'minimizedHeight',
+      label: '최소화 높이 (px)',
+      type: 'number',
+      defaultValue: 60,
     },
     {
       key: 'gap',
