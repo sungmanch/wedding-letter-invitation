@@ -8,17 +8,17 @@ import type { SectionSkeleton } from '../types'
 export const invitationSkeleton: SectionSkeleton = {
   sectionType: 'invitation',
   name: '참석 여부',
-  description: '편지봉투 스타일의 RSVP 참석 여부 확인 폼을 표시합니다.',
-  defaultVariant: 'envelope',
+  description: 'RSVP 참석 여부 확인 폼을 표시합니다.',
+  defaultVariant: 'card',
   variants: [
     // ============================================
-    // Envelope Variant (편지봉투 스타일)
+    // Card Variant (카드 스타일 - 기본)
     // ============================================
     {
-      id: 'envelope',
-      name: '편지봉투',
-      description: '스크롤 시 편지봉투에서 카드가 올라오는 인터랙티브 효과',
-      tags: ['elegant', 'interactive', 'romantic'],
+      id: 'card',
+      name: '카드',
+      description: '깔끔한 카드 형태의 RSVP 폼',
+      tags: ['elegant', 'clean', 'modern'],
       structure: {
         id: 'invitation-root',
         type: 'container',
@@ -26,155 +26,88 @@ export const invitationSkeleton: SectionSkeleton = {
           backgroundColor: '$token.colors.background',
           padding: '$token.spacing.section',
         },
-        style: {
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-        },
         children: [
-          // 타이틀 영역
           {
-            id: 'invitation-header',
+            id: 'invitation-content',
             type: 'column',
             tokenStyle: {
-              gap: '$token.spacing.md',
+              gap: '$token.spacing.lg',
             },
             style: {
-              alignItems: 'center',
-              textAlign: 'center',
-              marginBottom: '40px',
+              maxWidth: '340px',
+              margin: '0 auto',
             },
             children: [
+              // 헤더
               {
-                id: 'invitation-title',
-                type: 'text',
+                id: 'invitation-header',
+                type: 'column',
                 tokenStyle: {
-                  fontFamily: '$token.typography.displayLg.fontFamily',
-                  fontSize: '$token.typography.displayLg.fontSize',
-                  fontWeight: '$token.typography.displayLg.fontWeight',
-                  letterSpacing: '$token.typography.displayLg.letterSpacing',
-                  color: '$token.colors.text.primary',
+                  gap: '$token.spacing.sm',
                 },
                 style: {
+                  alignItems: 'center',
                   textAlign: 'center',
                 },
-                props: {
-                  content: "{{invitation.title}}",
-                  as: 'h2',
-                },
+                children: [
+                  {
+                    id: 'invitation-title',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.displayMd.fontFamily',
+                      fontSize: '$token.typography.displayMd.fontSize',
+                      fontWeight: '$token.typography.displayMd.fontWeight',
+                      letterSpacing: '$token.typography.displayMd.letterSpacing',
+                      color: '$token.colors.text.primary',
+                    },
+                    style: {
+                      textAlign: 'center',
+                    },
+                    props: {
+                      content: '{{invitation.title}}',
+                      as: 'h2',
+                    },
+                  },
+                  {
+                    id: 'invitation-description',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.bodyMd.fontFamily',
+                      fontSize: '$token.typography.bodyMd.fontSize',
+                      color: '$token.colors.text.secondary',
+                      lineHeight: '$token.typography.bodyMd.lineHeight',
+                    },
+                    style: {
+                      textAlign: 'center',
+                    },
+                    props: {
+                      content: '{{invitation.description}}',
+                      as: 'p',
+                    },
+                  },
+                ],
               },
-              {
-                id: 'invitation-description',
-                type: 'text',
-                tokenStyle: {
-                  fontFamily: '$token.typography.bodyMd.fontFamily',
-                  fontSize: '$token.typography.bodyMd.fontSize',
-                  color: '$token.colors.text.secondary',
-                  lineHeight: '$token.typography.bodyMd.lineHeight',
-                },
-                style: {
-                  textAlign: 'center',
-                  maxWidth: '280px',
-                },
-                props: {
-                  content: '{{invitation.description}}',
-                  as: 'p',
-                },
-              },
-            ],
-          },
-          // 편지봉투 컨테이너
-          {
-            id: 'envelope-container',
-            type: 'container',
-            style: {
-              position: 'relative',
-              width: '100%',
-              maxWidth: '320px',
-              aspectRatio: '1 / 0.7',
-            },
-            props: {
-              className: 'envelope-wrapper',
-            },
-            children: [
-              // 봉투 뒷면 (삼각형 덮개)
-              {
-                id: 'envelope-flap',
-                type: 'container',
-                tokenStyle: {
-                  backgroundColor: '$token.colors.surface',
-                },
-                style: {
-                  position: 'absolute',
-                  top: '0',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '0',
-                  height: '0',
-                  borderLeft: '160px solid transparent',
-                  borderRight: '160px solid transparent',
-                  borderTop: '100px solid',
-                  zIndex: 3,
-                },
-                props: {
-                  className: 'envelope-flap',
-                },
-              },
-              // 봉투 본체
-              {
-                id: 'envelope-body',
-                type: 'container',
-                tokenStyle: {
-                  backgroundColor: '$token.colors.surface',
-                },
-                style: {
-                  position: 'absolute',
-                  bottom: '0',
-                  left: '0',
-                  right: '0',
-                  height: '70%',
-                  borderRadius: '0 0 8px 8px',
-                  zIndex: 2,
-                },
-                props: {
-                  className: 'envelope-body',
-                },
-              },
-              // RSVP 카드 (스크롤 시 올라옴)
+              // RSVP 카드
               {
                 id: 'rsvp-card',
                 type: 'container',
                 tokenStyle: {
-                  backgroundColor: '$token.colors.background',
+                  backgroundColor: '$token.colors.surface',
                   borderRadius: '$token.borders.radiusMd',
+                  padding: '$token.spacing.lg',
                 },
                 style: {
-                  position: 'absolute',
-                  bottom: '10%',
-                  left: '50%',
-                  transform: 'translateX(-50%) translateY(60%)',
-                  width: '90%',
-                  padding: '24px 20px',
-                  boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
-                  zIndex: 1,
-                  transition: 'transform 0.6s ease-out',
-                },
-                props: {
-                  className: 'rsvp-card',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
                 },
                 children: [
-                  // RSVP 타이틀
+                  // RSVP 라벨
                   {
-                    id: 'rsvp-title',
+                    id: 'rsvp-label',
                     type: 'text',
                     tokenStyle: {
-                      fontFamily: '$token.typography.headingLg.fontFamily',
-                      fontSize: '$token.typography.headingLg.fontSize',
-                      fontWeight: '$token.typography.headingLg.fontWeight',
+                      fontFamily: '$token.typography.headingMd.fontFamily',
+                      fontSize: '$token.typography.headingMd.fontSize',
+                      fontWeight: '$token.typography.headingMd.fontWeight',
                       color: '$token.colors.text.primary',
                     },
                     style: {
@@ -220,7 +153,7 @@ export const invitationSkeleton: SectionSkeleton = {
                                 tokenStyle: {
                                   borderRadius: '$token.borders.radiusSm',
                                   borderColor: '$token.colors.border',
-                                  backgroundColor: '$token.colors.surface',
+                                  backgroundColor: '$token.colors.background',
                                 },
                                 style: {
                                   padding: '12px',
@@ -271,7 +204,7 @@ export const invitationSkeleton: SectionSkeleton = {
                                 tokenStyle: {
                                   borderRadius: '$token.borders.radiusSm',
                                   borderColor: '$token.colors.border',
-                                  backgroundColor: '$token.colors.surface',
+                                  backgroundColor: '$token.colors.background',
                                 },
                                 style: {
                                   padding: '12px',
@@ -280,7 +213,7 @@ export const invitationSkeleton: SectionSkeleton = {
                                 props: {
                                   type: 'tel',
                                   name: 'guestPhone',
-                                  placeholder: '01099990000',
+                                  placeholder: '01012345678',
                                   required: true,
                                   maxLength: 13,
                                 },
@@ -316,6 +249,7 @@ export const invitationSkeleton: SectionSkeleton = {
                         },
                         style: {
                           alignItems: 'center',
+                          paddingTop: '8px',
                         },
                         children: [
                           {
@@ -341,6 +275,9 @@ export const invitationSkeleton: SectionSkeleton = {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
+                                  backgroundColor: 'transparent',
+                                  border: '1px solid',
+                                  cursor: 'pointer',
                                 },
                                 props: {
                                   label: '−',
@@ -385,6 +322,9 @@ export const invitationSkeleton: SectionSkeleton = {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
+                                  backgroundColor: 'transparent',
+                                  border: '1px solid',
+                                  cursor: 'pointer',
                                 },
                                 props: {
                                   label: '+',
@@ -430,6 +370,8 @@ export const invitationSkeleton: SectionSkeleton = {
                           padding: '14px',
                           marginTop: '8px',
                           fontWeight: '500',
+                          border: 'none',
+                          cursor: 'pointer',
                         },
                         props: {
                           label: '회신하기',
@@ -470,7 +412,7 @@ export const invitationSkeleton: SectionSkeleton = {
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
-          { id: 'scroll-reveal', name: '스크롤 등장', preset: 'slide-up', trigger: 'inView', duration: 600 },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
         ],
       },
     },
@@ -481,8 +423,8 @@ export const invitationSkeleton: SectionSkeleton = {
     {
       id: 'simple',
       name: '심플',
-      description: '카드 없이 깔끔한 폼 형태',
-      tags: ['minimal', 'clean', 'modern'],
+      description: '간결한 입력 폼 형태',
+      tags: ['minimal', 'clean', 'simple'],
       structure: {
         id: 'invitation-root',
         type: 'container',
