@@ -887,7 +887,7 @@ export const dateSkeleton: SectionSkeleton = {
                       fontSize: '80px',
                       fontWeight: '900',
                       lineHeight: '0.9',
-                      animation: 'blink 1s ease-in-out infinite',
+                      animation: 'blink 2s ease-in-out infinite',
                     },
                     props: {
                       content: ':',
