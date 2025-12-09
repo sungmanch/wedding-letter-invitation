@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { ArrowLeft, Loader2, Sparkles, RefreshCw, X } from 'lucide-react'
 import { InvitationPreview } from '@/lib/super-editor/components'
 import { introResultToLayout } from '@/lib/super-editor/adapters'
@@ -37,12 +38,26 @@ type Stage = 'form' | 'chat'
 
 function EmptyPreview() {
   return (
-    <div className="flex flex-col items-center justify-center text-[#F5E6D3]/50 px-8 py-16 border border-[#C9A962]/30 rounded-xl bg-[#1A1A1A]/50">
-      <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mb-4">
-        <Sparkles className="w-10 h-10 text-[#F5E6D3]/30" />
+    <div className="w-full aspect-[9/16] rounded-2xl overflow-hidden shadow-lg relative">
+      {/* 배경 이미지 */}
+      <Image
+        src="/examples/images/example_wedding_image5.png"
+        alt="Wedding preview background"
+        fill
+        className="object-cover"
+        priority
+      />
+      {/* 어두운 오버레이 */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* 콘텐츠 */}
+      <div className="relative h-full flex flex-col items-center justify-center px-8">
+        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4">
+          <Sparkles className="w-10 h-10 text-white" />
+        </div>
+        <p className="text-center text-sm font-medium text-white/90">Letty와 대화하며</p>
+        <p className="text-center text-sm font-medium text-white/90">청첩장을 디자인해보세요</p>
       </div>
-      <p className="text-center text-sm font-medium">Letty와 대화하며</p>
-      <p className="text-center text-sm font-medium">청첩장을 디자인해보세요</p>
     </div>
   )
 }
@@ -59,35 +74,41 @@ function BasicPreview({ data }: { data: BasicInfoData }) {
     : '오후 2시'
 
   return (
-    <div className="w-full aspect-[9/16] bg-gradient-to-b from-[#FAF8F5] to-[#F5F0E8] rounded-2xl overflow-hidden shadow-lg relative">
-      {/* 배경 패턴 */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#C9A962_0%,transparent_50%)]" />
-      </div>
+    <div className="w-full aspect-[9/16] rounded-2xl overflow-hidden shadow-lg relative">
+      {/* 배경 이미지 */}
+      <Image
+        src="/examples/images/example_wedding_image5.png"
+        alt="Wedding preview background"
+        fill
+        className="object-cover"
+        priority
+      />
+      {/* 어두운 오버레이 */}
+      <div className="absolute inset-0 bg-black/40" />
 
       {/* 콘텐츠 */}
       <div className="relative h-full flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-xs tracking-[0.3em] text-[#8A8580] mb-4">WEDDING INVITATION</p>
+        <p className="text-xs tracking-[0.3em] text-white/70 mb-4">WEDDING INVITATION</p>
 
         <h2
-          className="text-2xl text-[#2C2C2C] mb-1"
+          className="text-2xl text-white mb-1"
           style={{ fontFamily: 'Noto Serif KR, serif' }}
         >
           {data.groomName || '신랑'}
         </h2>
-        <span className="text-lg text-[#C9A962] my-1">&</span>
+        <span className="text-lg text-[var(--sage-300)] my-1">&</span>
         <h2
-          className="text-2xl text-[#2C2C2C] mb-6"
+          className="text-2xl text-white mb-6"
           style={{ fontFamily: 'Noto Serif KR, serif' }}
         >
           {data.brideName || '신부'}
         </h2>
 
-        <div className="w-12 h-[1px] bg-[#D4D0C8] mb-6" />
+        <div className="w-12 h-[1px] bg-white/50 mb-6" />
 
-        <p className="text-sm text-[#666] mb-1">{displayDate}</p>
-        <p className="text-sm text-[#666] mb-4">{displayTime}</p>
-        <p className="text-sm text-[#8A8580]">{data.venueName || '예식장'}</p>
+        <p className="text-sm text-white/90 mb-1">{displayDate}</p>
+        <p className="text-sm text-white/90 mb-4">{displayTime}</p>
+        <p className="text-sm text-white/70">{data.venueName || '예식장'}</p>
       </div>
     </div>
   )
@@ -324,21 +345,21 @@ export default function SuperEditorCreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0806]">
+    <div className="min-h-screen bg-[var(--ivory-50)]">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-[#0A0806]/95 backdrop-blur-sm border-b border-white/10">
+      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-[var(--sand-200)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-3">
               <button
                 onClick={handleBack}
-                className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
+                className="p-2 -ml-2 rounded-full hover:bg-[var(--sage-50)] transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-[#F5E6D3]/70" />
+                <ArrowLeft className="w-5 h-5 text-[var(--text-muted)]" />
               </button>
               <div>
-                <h1 className="text-lg font-semibold text-[#F5E6D3]">새 청첩장 만들기</h1>
-                <p className="text-xs text-[#F5E6D3]/50">
+                <h1 className="text-lg font-semibold text-[var(--text-primary)]">새 청첩장 만들기</h1>
+                <p className="text-xs text-[var(--text-muted)]">
                   {stage === 'form' ? '1/2 기본 정보' : '2/2 스타일 선택'}
                 </p>
               </div>
@@ -347,7 +368,7 @@ export default function SuperEditorCreatePage() {
               <button
                 onClick={handleStartEditing}
                 disabled={isLoading}
-                className="px-4 py-2 bg-[#C9A962] text-[#0A0806] text-sm font-medium rounded-lg hover:bg-[#B8A052] disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-[var(--sage-500)] text-white text-sm font-medium rounded-lg hover:bg-[var(--sage-600)] disabled:opacity-50 transition-colors"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -367,7 +388,7 @@ export default function SuperEditorCreatePage() {
       <main className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)]">
           {/* Left Panel */}
-          <div className="flex-1 lg:max-w-xl flex flex-col bg-[#1A1A1A] border-r border-white/10">
+          <div className="flex-1 lg:max-w-xl flex flex-col bg-white border-r border-[var(--sand-200)]">
             {stage === 'form' ? (
               <BasicInfoForm data={basicInfo} onChange={setBasicInfo} onNext={handleFormNext} />
             ) : (
@@ -380,16 +401,16 @@ export default function SuperEditorCreatePage() {
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-8 bg-[#0A0806] overflow-y-auto">
+          <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-8 bg-[var(--ivory-100)] overflow-y-auto">
             <div className="flex flex-col items-center w-full max-w-sm">
-              <div className="text-sm text-[#F5E6D3]/60 mb-4">
+              <div className="text-sm text-[var(--text-muted)] mb-4">
                 {stage === 'form' ? '미리보기' : '인트로 미리보기'}
               </div>
 
               {stage === 'form' ? (
                 <BasicPreview data={basicInfo} />
               ) : introResult ? (
-                <div className="p-4 border border-[#C9A962]/30 rounded-xl bg-[#1A1A1A]/50">
+                <div className="p-4 border border-[var(--sand-200)] rounded-xl bg-white/50">
                   <InvitationPreview
                     layout={introResultToLayout(introResult)}
                     style={introResult.style}
@@ -409,7 +430,7 @@ export default function SuperEditorCreatePage() {
               {stage === 'chat' && introResult && (
                 <button
                   onClick={handleRegenerate}
-                  className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/10 rounded-lg transition-colors"
+                  className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)] rounded-lg transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />
                   다시 생성하기
@@ -425,7 +446,7 @@ export default function SuperEditorCreatePage() {
         <div className="fixed bottom-20 right-4 lg:hidden">
           <button
             onClick={() => setShowMobilePreview(true)}
-            className="w-14 h-14 bg-[#C9A962] text-[#0A0806] rounded-full shadow-lg flex items-center justify-center"
+            className="w-14 h-14 bg-[var(--sage-500)] text-white rounded-full shadow-lg flex items-center justify-center"
           >
             <Sparkles className="w-6 h-6" />
           </button>
@@ -434,22 +455,22 @@ export default function SuperEditorCreatePage() {
 
       {/* Mobile Preview Modal */}
       {showMobilePreview && introResult && (
-        <div className="fixed inset-0 z-50 lg:hidden bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 lg:hidden bg-[var(--ivory-50)]/95 backdrop-blur-sm">
           <div className="flex flex-col h-full">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-              <h3 className="text-[#F5E6D3] font-medium">인트로 미리보기</h3>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sand-200)]">
+              <h3 className="text-[var(--text-primary)] font-medium">인트로 미리보기</h3>
               <button
                 onClick={() => setShowMobilePreview(false)}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                className="p-2 rounded-full hover:bg-[var(--sage-50)] transition-colors"
               >
-                <X className="w-5 h-5 text-[#F5E6D3]/70" />
+                <X className="w-5 h-5 text-[var(--text-muted)]" />
               </button>
             </div>
 
             {/* Preview Content */}
-            <div className="flex-1 overflow-y-auto p-4 flex items-start justify-center">
-              <div className="p-4 border border-[#C9A962]/30 rounded-xl bg-[#1A1A1A]/50">
+            <div className="flex-1 overflow-y-auto p-4 flex items-start justify-center bg-[var(--ivory-100)]">
+              <div className="p-4 border border-[var(--sand-200)] rounded-xl bg-white/50">
                 <InvitationPreview
                   layout={introResultToLayout(introResult)}
                   style={introResult.style}
@@ -464,11 +485,11 @@ export default function SuperEditorCreatePage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-4 py-4 border-t border-white/10 space-y-3">
+            <div className="px-4 py-4 border-t border-[var(--sand-200)] space-y-3 bg-white">
               <button
                 onClick={handleStartEditing}
                 disabled={isLoading}
-                className="w-full px-4 py-3 bg-[#C9A962] text-[#0A0806] font-medium rounded-xl hover:bg-[#B8A052] disabled:opacity-50 transition-colors"
+                className="w-full px-4 py-3 bg-[var(--sage-500)] text-white font-medium rounded-xl hover:bg-[var(--sage-600)] disabled:opacity-50 transition-colors"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -484,7 +505,7 @@ export default function SuperEditorCreatePage() {
                   setShowMobilePreview(false)
                   handleRegenerate()
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/10 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)] rounded-lg transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
                 다시 생성하기

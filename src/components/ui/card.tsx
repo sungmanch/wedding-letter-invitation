@@ -7,6 +7,7 @@ const cardVariants = cva('rounded-xl border', {
     variant: {
       default: 'bg-white border-gray-200',
       dark: 'bg-white/5 backdrop-blur-sm border-white/10',
+      light: 'bg-white border-[var(--sand-200)] shadow-sm',
     },
   },
   defaultVariants: {

@@ -94,22 +94,22 @@ function SignupForm() {
   return (
     <>
       {/* Tagline */}
-      <p className="mb-8 text-center text-sm text-[#F5E6D3]/60">
+      <p className="mb-8 text-center text-sm text-[var(--text-muted)]">
         가입하고 청첩장을 계속 관리하세요
       </p>
 
       {/* Signup Form */}
-      <Card variant="dark" className="p-6">
+      <Card variant="light" className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#F5E6D3]">
+            <label className="mb-2 block text-sm font-medium text-[var(--text-body)]">
               이름
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#F5E6D3]/40" />
+              <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-muted)]" />
               <Input
                 type="text"
-                variant="dark"
+                variant="light"
                 placeholder="이름을 입력하세요"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -120,14 +120,14 @@ function SignupForm() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#F5E6D3]">
+            <label className="mb-2 block text-sm font-medium text-[var(--text-body)]">
               이메일
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#F5E6D3]/40" />
+              <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-muted)]" />
               <Input
                 type="email"
-                variant="dark"
+                variant="light"
                 placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -138,14 +138,14 @@ function SignupForm() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#F5E6D3]">
+            <label className="mb-2 block text-sm font-medium text-[var(--text-body)]">
               비밀번호
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#F5E6D3]/40" />
+              <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-muted)]" />
               <Input
                 type={showPassword ? 'text' : 'password'}
-                variant="dark"
+                variant="light"
                 placeholder="6자 이상 입력하세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -155,7 +155,7 @@ function SignupForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F5E6D3]/40 hover:text-[#F5E6D3] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 {showPassword ? (
                   <EyeOff className="h-5 w-5" />
@@ -167,14 +167,14 @@ function SignupForm() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#F5E6D3]">
+            <label className="mb-2 block text-sm font-medium text-[var(--text-body)]">
               비밀번호 확인
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#F5E6D3]/40" />
+              <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-muted)]" />
               <Input
                 type={showPassword ? 'text' : 'password'}
-                variant="dark"
+                variant="light"
                 placeholder="비밀번호를 다시 입력하세요"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -185,14 +185,14 @@ function SignupForm() {
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
           <Button
             type="submit"
-            variant="gold"
+            variant="sage"
             size="lg"
             fullWidth
             isLoading={isLoading}
@@ -204,9 +204,9 @@ function SignupForm() {
 
         {/* Divider */}
         <div className="my-6 flex items-center">
-          <div className="flex-1 border-t border-white/10" />
-          <span className="px-4 text-sm text-[#F5E6D3]/40">또는</span>
-          <div className="flex-1 border-t border-white/10" />
+          <div className="flex-1 border-t border-[var(--sand-200)]" />
+          <span className="px-4 text-sm text-[var(--text-muted)]">또는</span>
+          <div className="flex-1 border-t border-[var(--sand-200)]" />
         </div>
 
         {/* Social Signup */}
@@ -225,24 +225,24 @@ function SignupForm() {
       </Card>
 
       {/* Login link */}
-      <p className="mt-6 text-center text-sm text-[#F5E6D3]/60">
+      <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
         이미 계정이 있으신가요?{' '}
         <Link
           href={`/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}
-          className="font-medium text-[#C9A962] hover:text-[#B8A052] transition-colors"
+          className="font-medium text-[var(--sage-600)] hover:text-[var(--sage-700)] transition-colors"
         >
           로그인
         </Link>
       </p>
 
       {/* Terms */}
-      <p className="mt-4 text-center text-xs text-[#F5E6D3]/40">
+      <p className="mt-4 text-center text-xs text-[var(--text-light)]">
         가입하면{' '}
-        <Link href="/terms" className="underline hover:text-[#F5E6D3]/60 transition-colors">
+        <Link href="/terms" className="underline hover:text-[var(--text-muted)] transition-colors">
           이용약관
         </Link>
         {' '}및{' '}
-        <Link href="/privacy" className="underline hover:text-[#F5E6D3]/60 transition-colors">
+        <Link href="/privacy" className="underline hover:text-[var(--text-muted)] transition-colors">
           개인정보처리방침
         </Link>
         에 동의하는 것으로 간주됩니다.
@@ -255,7 +255,7 @@ export default function SignupPage() {
   return (
     <Suspense
       fallback={
-        <div className="text-center text-[#F5E6D3]/60">로딩 중...</div>
+        <div className="text-center text-[var(--text-muted)]">로딩 중...</div>
       }
     >
       <SignupForm />

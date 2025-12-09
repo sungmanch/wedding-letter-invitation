@@ -97,9 +97,9 @@ export function BasicInfoForm({ data, onChange, onNext }: BasicInfoFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-white/10">
-        <h2 className="text-lg font-semibold text-[#F5E6D3]">기본 정보</h2>
-        <p className="text-sm text-[#F5E6D3]/60 mt-1">
+      <div className="px-6 py-5 border-b border-[var(--sand-200)]">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">기본 정보</h2>
+        <p className="text-sm text-[var(--text-muted)] mt-1">
           청첩장에 들어갈 기본 정보를 입력해주세요
         </p>
       </div>
@@ -109,8 +109,8 @@ export function BasicInfoForm({ data, onChange, onNext }: BasicInfoFormProps) {
         {/* 신랑/신부 이름 */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#F5E6D3]/80 mb-2">
-              신랑 이름 <span className="text-[#C9A962]">*</span>
+            <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+              신랑 이름 <span className="text-[var(--sage-500)]">*</span>
             </label>
             <input
               type="text"
@@ -118,17 +118,17 @@ export function BasicInfoForm({ data, onChange, onNext }: BasicInfoFormProps) {
               onChange={handleChange('groomName')}
               onBlur={handleBlur('groomName')}
               placeholder="홍길동"
-              className={`w-full px-4 py-3 text-sm bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent transition-colors ${
-                showError('groomName') ? 'border-red-500/50' : 'border-white/10'
+              className={`w-full px-4 py-3 text-sm bg-white text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--sage-400)] focus:border-transparent transition-colors ${
+                showError('groomName') ? 'border-red-400' : 'border-[var(--sand-200)]'
               }`}
             />
             {showError('groomName') && (
-              <p className="text-xs text-red-400 mt-1">{errors.groomName}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.groomName}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#F5E6D3]/80 mb-2">
-              신부 이름 <span className="text-[#C9A962]">*</span>
+            <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+              신부 이름 <span className="text-[var(--sage-500)]">*</span>
             </label>
             <input
               type="text"
@@ -136,12 +136,12 @@ export function BasicInfoForm({ data, onChange, onNext }: BasicInfoFormProps) {
               onChange={handleChange('brideName')}
               onBlur={handleBlur('brideName')}
               placeholder="김영희"
-              className={`w-full px-4 py-3 text-sm bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent transition-colors ${
-                showError('brideName') ? 'border-red-500/50' : 'border-white/10'
+              className={`w-full px-4 py-3 text-sm bg-white text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--sage-400)] focus:border-transparent transition-colors ${
+                showError('brideName') ? 'border-red-400' : 'border-[var(--sand-200)]'
               }`}
             />
             {showError('brideName') && (
-              <p className="text-xs text-red-400 mt-1">{errors.brideName}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.brideName}</p>
             )}
           </div>
         </div>
@@ -149,45 +149,45 @@ export function BasicInfoForm({ data, onChange, onNext }: BasicInfoFormProps) {
         {/* 예식 날짜/시간 */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#F5E6D3]/80 mb-2">
-              예식 날짜 <span className="text-[#C9A962]">*</span>
+            <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+              예식 날짜 <span className="text-[var(--sage-500)]">*</span>
             </label>
             <input
               type="date"
               value={data.weddingDate}
               onChange={handleChange('weddingDate')}
               onBlur={handleBlur('weddingDate')}
-              className={`w-full px-4 py-3 text-sm bg-white/10 text-[#F5E6D3] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent [color-scheme:dark] transition-colors ${
-                showError('weddingDate') ? 'border-red-500/50' : 'border-white/10'
+              className={`w-full px-4 py-3 text-sm bg-white text-[var(--text-primary)] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--sage-400)] focus:border-transparent transition-colors ${
+                showError('weddingDate') ? 'border-red-400' : 'border-[var(--sand-200)]'
               }`}
             />
             {showError('weddingDate') && (
-              <p className="text-xs text-red-400 mt-1">{errors.weddingDate}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.weddingDate}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#F5E6D3]/80 mb-2">
-              예식 시간 <span className="text-[#C9A962]">*</span>
+            <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+              예식 시간 <span className="text-[var(--sage-500)]">*</span>
             </label>
             <input
               type="time"
               value={data.weddingTime}
               onChange={handleChange('weddingTime')}
               onBlur={handleBlur('weddingTime')}
-              className={`w-full px-4 py-3 text-sm bg-white/10 text-[#F5E6D3] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent [color-scheme:dark] transition-colors ${
-                showError('weddingTime') ? 'border-red-500/50' : 'border-white/10'
+              className={`w-full px-4 py-3 text-sm bg-white text-[var(--text-primary)] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--sage-400)] focus:border-transparent transition-colors ${
+                showError('weddingTime') ? 'border-red-400' : 'border-[var(--sand-200)]'
               }`}
             />
             {showError('weddingTime') && (
-              <p className="text-xs text-red-400 mt-1">{errors.weddingTime}</p>
+              <p className="text-xs text-red-500 mt-1">{errors.weddingTime}</p>
             )}
           </div>
         </div>
 
         {/* 예식장 이름 */}
         <div>
-          <label className="block text-sm font-medium text-[#F5E6D3]/80 mb-2">
-            예식장 이름 <span className="text-[#C9A962]">*</span>
+          <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+            예식장 이름 <span className="text-[var(--sage-500)]">*</span>
           </label>
           <input
             type="text"
@@ -195,25 +195,25 @@ export function BasicInfoForm({ data, onChange, onNext }: BasicInfoFormProps) {
             onChange={handleChange('venueName')}
             onBlur={handleBlur('venueName')}
             placeholder="더채플앳청담"
-            className={`w-full px-4 py-3 text-sm bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:border-transparent transition-colors ${
-              showError('venueName') ? 'border-red-500/50' : 'border-white/10'
+            className={`w-full px-4 py-3 text-sm bg-white text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--sage-400)] focus:border-transparent transition-colors ${
+              showError('venueName') ? 'border-red-400' : 'border-[var(--sand-200)]'
             }`}
           />
           {showError('venueName') && (
-            <p className="text-xs text-red-400 mt-1">{errors.venueName}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.venueName}</p>
           )}
-          <p className="text-xs text-[#F5E6D3]/40 mt-2">
+          <p className="text-xs text-[var(--text-muted)] mt-2">
             상세 주소는 나중에 편집 페이지에서 입력할 수 있어요
           </p>
         </div>
       </div>
 
       {/* Submit Button */}
-      <div className="px-6 py-4 border-t border-white/10">
+      <div className="px-6 py-4 border-t border-[var(--sand-200)]">
         <button
           type="submit"
           disabled={!isValid}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[#C9A962] text-[#0A0806] font-medium rounded-xl hover:bg-[#B8A052] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[var(--sage-500)] text-white font-medium rounded-xl hover:bg-[var(--sage-600)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           다음: 스타일 선택
           <ArrowRight className="w-4 h-4" />

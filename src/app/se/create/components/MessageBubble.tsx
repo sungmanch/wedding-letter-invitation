@@ -33,8 +33,8 @@ export function MessageBubble({ message, showAvatar = true }: MessageBubbleProps
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
           isUser
-            ? 'bg-[#C9A962] text-[#0A0806] rounded-br-sm'
-            : 'bg-white/10 text-[#F5E6D3] rounded-bl-sm'
+            ? 'bg-[var(--sage-500)] text-white rounded-br-sm'
+            : 'bg-[var(--sage-50)] text-[var(--text-primary)] rounded-bl-sm border border-[var(--sage-100)]'
         }`}
       >
         <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
@@ -56,7 +56,7 @@ export function TypingBubble({ showAvatar = true }: TypingBubbleProps) {
       {showAvatar && <LettyAvatar size="sm" />}
       {!showAvatar && <div className="w-8 shrink-0" />}
 
-      <div className="bg-white/10 rounded-2xl rounded-bl-sm px-4 py-3">
+      <div className="bg-[var(--sage-50)] rounded-2xl rounded-bl-sm px-4 py-3 border border-[var(--sage-100)]">
         <TypingIndicator />
       </div>
     </div>

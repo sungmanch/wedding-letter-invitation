@@ -514,44 +514,46 @@ export function NaturalHeroLanding() {
               <AIChatVideo />
             </div>
 
-            {/* SVG Flow Line - Desktop */}
+            {/* SVG Flow Line - Desktop (straight line) */}
             <div className="hidden sm:flex flex-col items-center justify-center self-center">
               <svg
                 width="80"
-                height="120"
-                viewBox="0 0 80 120"
+                height="20"
+                viewBox="0 0 80 20"
                 fill="none"
                 className="overflow-visible"
               >
                 {/* Gradient definition */}
                 <defs>
-                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="var(--sage-300)" />
                     <stop offset="100%" stopColor="var(--sage-500)" />
                   </linearGradient>
                 </defs>
-                {/* Curved path with draw animation */}
-                <path
-                  d="M 5 60 Q 40 30, 75 60"
+                {/* Straight line with draw animation */}
+                <line
+                  x1="5"
+                  y1="10"
+                  x2="75"
+                  y2="10"
                   stroke="url(#flowGradient)"
                   strokeWidth="2"
-                  fill="none"
                   strokeLinecap="round"
                   className="animate-[drawLine_2s_ease-in-out_infinite]"
                   style={{
-                    strokeDasharray: 100,
-                    strokeDashoffset: 100,
+                    strokeDasharray: 70,
+                    strokeDashoffset: 70,
                   }}
                 />
                 {/* Traveling dot */}
-                <circle r="4" fill="var(--sage-500)" className="animate-[travelPath_2s_ease-in-out_infinite]">
-                  <animateMotion dur="2s" repeatCount="indefinite" keyTimes="0;1" keySplines="0.42 0 0.58 1">
+                <circle r="4" fill="var(--sage-500)">
+                  <animateMotion dur="2s" repeatCount="indefinite">
                     <mpath href="#flowPath" />
                   </animateMotion>
                 </circle>
-                <path id="flowPath" d="M 5 60 Q 40 30, 75 60" fill="none" />
+                <path id="flowPath" d="M 5 10 L 75 10" fill="none" />
               </svg>
-              <span className="text-[10px] text-[var(--sage-500)] font-medium tracking-wider uppercase mt-1">생성</span>
+              <span className="text-[10px] text-[var(--sage-500)] font-medium tracking-wider uppercase mt-2">생성</span>
             </div>
 
             {/* SVG Flow Line - Mobile (vertical) */}
@@ -600,7 +602,7 @@ export function NaturalHeroLanding() {
           {/* Bottom: CTA */}
           <div className="text-center">
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/se/create">
+              <Link href="/login?redirect=/se/create">
                 <Button
                   className="bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white px-8 py-3.5 text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-300 h-auto w-full sm:w-auto"
                   style={{ fontFamily: 'Pretendard, sans-serif' }}

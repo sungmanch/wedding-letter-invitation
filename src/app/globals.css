@@ -263,11 +263,11 @@ body {
   --sage-600: #5a8a5a;
   --sage-700: #4a7a4a;
 
-  /* Text Colors - Fresh Natural */
-  --text-primary: #3d4f3d;
-  --text-body: #4a4a4a;
-  --text-muted: #7a7a7a;
-  --text-light: #9a9a8a;
+  /* Text Colors - Fresh Natural (darker for better readability) */
+  --text-primary: #2a3a2a;
+  --text-body: #3a3a3a;
+  --text-muted: #5a5a5a;
+  --text-light: #7a7a7a;
 }
 
 /* Fade up animation */
