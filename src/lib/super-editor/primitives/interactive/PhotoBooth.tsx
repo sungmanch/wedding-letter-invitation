@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import type { PrimitiveNode, PhotoBoothProps } from '../../schema/primitives'
 import type { RenderContext } from '../types'
 import { getNodeProps, resolveDataBinding, mergeNodeStyles } from '../types'
@@ -10,8 +9,8 @@ import { PhotoBooth as CameraPhotoBooth } from '../../../camera'
 /**
  * PhotoBooth Primitive Renderer
  *
- * 에디터 프리뷰에서는 시작 버튼을 표시하고,
- * 실제 게스트 뷰에서는 카메라와 상호작용 가능
+ * 에디터 모드: 플레이스홀더 표시
+ * 게스트 뷰: 인라인으로 카메라 렌더링 (팝업 없이)
  */
 export function PhotoBooth({
   node,
@@ -23,7 +22,6 @@ export function PhotoBooth({
   const props = getNodeProps<PhotoBoothProps>(node)
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
   const isEditMode = context.mode === 'edit'
-  const [isBoothOpen, setIsBoothOpen] = useState(false)
 
   // frames 데이터 바인딩 해결
   let frames: CustomFrame[] = []
@@ -42,29 +40,24 @@ export function PhotoBooth({
 
   const defaultFrameIndex = props.defaultFrameIndex ?? 0
   const selectedFrame = frames[defaultFrameIndex] ?? frames[0]
-  const compact = props.compact ?? false
 
   // 스타일 해결
   const style = mergeNodeStyles(node as PrimitiveNode & { tokenStyle?: Record<string, unknown> }, context)
 
-  // 에디트 모드 또는 부스가 열리지 않은 경우 - 시작 화면 표시
-  if (isEditMode || !isBoothOpen) {
+  // 에디트 모드 - 플레이스홀더 표시
+  if (isEditMode) {
     return (
       <div
         data-node-id={node.id}
         data-node-type={node.type}
         className={`relative ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
         style={style}
-        onClick={() => {
-          if (isEditMode) {
-            context.onSelectNode?.(node.id)
-          }
-        }}
+        onClick={() => context.onSelectNode?.(node.id)}
       >
         <div
           className="relative overflow-hidden"
           style={{
-            aspectRatio: compact ? '1' : '3/4',
+            aspectRatio: '3/4',
             backgroundColor: selectedFrame?.backgroundColor || 'var(--color-surface, #f5f5f5)',
             borderRadius: style.borderRadius,
           }}
@@ -97,8 +90,8 @@ export function PhotoBooth({
             />
           )}
 
-          {/* 시작 버튼 오버레이 */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
+          {/* 에디트 모드 플레이스홀더 */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <div className="text-5xl">📸</div>
             <div
               className="text-lg font-medium"
@@ -107,55 +100,24 @@ export function PhotoBooth({
               포토부스
             </div>
             <div
-              className="text-sm"
-              style={{ color: 'var(--color-text-secondary, #666)' }}
+              className="text-xs"
+              style={{ color: 'var(--color-text-muted, #999)' }}
             >
-              {frames.length > 0
-                ? '신랑 신부와 함께 사진을 찍어보세요!'
-                : '필터와 스티커로 사진을 꾸며보세요!'}
+              실제 청첩장에서 카메라가 표시됩니다
             </div>
-            {!isEditMode && (
-              <button
-                onClick={() => setIsBoothOpen(true)}
-                className="mt-2 px-6 py-3 rounded-full font-medium transition-transform active:scale-95"
-                style={{
-                  backgroundColor: 'var(--color-accent, #1a1a1a)',
-                  color: 'var(--color-text-on-brand, #fff)',
-                }}
-              >
-                사진 찍기
-              </button>
-            )}
-            {isEditMode && (
-              <div
-                className="text-xs mt-2"
-                style={{ color: 'var(--color-text-muted, #999)' }}
-              >
-                실제 청첩장에서 확인하세요
-              </div>
-            )}
           </div>
         </div>
       </div>
     )
   }
 
-  // 포토부스 열림 - 전체 화면 카메라
+  // 게스트 뷰 - 인라인 카메라 렌더링
   return (
     <div
       data-node-id={node.id}
       data-node-type={node.type}
-      className="fixed inset-0 z-50 bg-white"
+      style={style}
     >
-      {/* 닫기 버튼 */}
-      <button
-        onClick={() => setIsBoothOpen(false)}
-        className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center text-xl"
-      >
-        ✕
-      </button>
-
-      {/* 카메라 포토부스 */}
       <CameraPhotoBooth
         title={title}
         hostImageUrl={selectedFrame?.groomImage?.croppedUrl || undefined}
@@ -163,7 +125,6 @@ export function PhotoBooth({
         onCapture={(dataUrl) => {
           console.log('Photo captured:', dataUrl.substring(0, 50))
         }}
-        className="h-full"
       />
     </div>
   )

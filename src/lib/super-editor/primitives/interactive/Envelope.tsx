@@ -1,9 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { PrimitiveNode } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { mergeNodeStyles, getNodeProps } from '../types'
+
+// GSAP 플러그인 등록
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 /**
  * Envelope Props
@@ -28,15 +35,14 @@ export interface EnvelopeProps {
  * 3. envelope-front (z-3): 봉투 앞면 - 봉투와 함께 이동
  */
 export function Envelope({ node, context }: { node: PrimitiveNode; context: RenderContext }) {
-  console.log('hey')
+  console.log('[Envelope] Rendering')
   const props = getNodeProps<EnvelopeProps>(node)
   const style = mergeNodeStyles(
     node as PrimitiveNode & { tokenStyle?: Record<string, unknown> },
     context
   )
   const containerRef = useRef<HTMLDivElement>(null)
-  const rafRef = useRef<number>(0)
-  const lastProgressRef = useRef<number>(0)
+  const cardRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [resolvedColors, setResolvedColors] = useState({
     envelope: '#f5f5f5',
@@ -46,13 +52,11 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
   const [mounted, setMounted] = useState(false)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
-  const isEditMode = context.mode === 'edit'
 
   // 색상 설정
   const envelopeColor = props.envelopeColor || 'var(--color-surface, #f5f5f5)'
   const cardColor = props.cardColor || 'var(--color-background, #ffffff)'
   const flapColor = props.flapColor || envelopeColor
-  const parallaxIntensity = props.parallaxIntensity ?? 0.6
 
   // 마운트 플래그 설정 (hydration 이슈 방지)
   useEffect(() => {
@@ -63,7 +67,6 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
   useEffect(() => {
     if (!containerRef.current || !mounted) return
 
-    // 약간의 지연 후 색상 계산 (CSS 변수가 적용된 후)
     const timer = setTimeout(() => {
       if (!containerRef.current) return
       const computedStyle = getComputedStyle(containerRef.current)
@@ -80,15 +83,14 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
     return () => clearTimeout(timer)
   }, [envelopeColor, cardColor, flapColor, mounted])
 
-  // RAF 기반 스크롤 progress 계산 (스크롤 이벤트 대신 매 프레임 체크)
+  // GSAP ScrollTrigger 설정
   useEffect(() => {
-    if (!containerRef.current || !mounted) return
+    if (!containerRef.current || !cardRef.current || !mounted) return
 
     // 스크롤 컨테이너 찾기
     const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
       let parent = element.parentElement
       while (parent) {
-        // scrollHeight > clientHeight이면 스크롤 가능
         if (parent.scrollHeight > parent.clientHeight + 10) {
           return parent
         }
@@ -98,61 +100,40 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
     }
 
     const scrollContainer = findScrollContainer(containerRef.current)
+    console.log('[Envelope] GSAP Init - scrollContainer:', scrollContainer?.className || 'window')
 
-    console.log('[Envelope] Init - scrollContainer:', scrollContainer?.className || 'none')
+    // GSAP 애니메이션: 카드가 봉투에서 올라옴
+    // startY: 50% (봉투 안에 숨어있음) -> endY: -30% (봉투 위로 올라옴)
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        scroller: scrollContainer || undefined,
+        start: 'top bottom', // 요소의 top이 뷰포트 bottom에 닿을 때 시작
+        end: 'center center', // 요소의 center가 뷰포트 center에 닿을 때 종료
+        scrub: 0.5, // 스크롤에 따라 부드럽게 연동
+        onUpdate: (self) => {
+          setScrollProgress(self.progress)
+        },
+        // markers: true, // 디버그용
+      },
+    })
 
-    const updateProgress = () => {
-      if (!containerRef.current) return
-
-      const rect = containerRef.current.getBoundingClientRect()
-
-      // 스크롤 컨테이너 기준 또는 뷰포트 기준으로 계산
-      let viewportHeight: number
-      let viewportTop: number
-
-      if (scrollContainer) {
-        const containerRect = scrollContainer.getBoundingClientRect()
-        viewportHeight = containerRect.height
-        viewportTop = containerRect.top
-      } else {
-        viewportHeight = window.innerHeight
-        viewportTop = 0
-      }
-
-      const relativeTop = rect.top - viewportTop
-
-      // 요소가 화면 하단에서 시작해서 상단 30%에 도달할 때까지
-      const start = viewportHeight
-      const end = viewportHeight * 0.3
-
-      const progress = (start - relativeTop) / (start - end)
-      const clampedProgress = Math.max(0, Math.min(1, progress))
-
-      // 값이 변경되었을 때만 state 업데이트 (성능 최적화)
-      if (Math.abs(clampedProgress - lastProgressRef.current) > 0.001) {
-        lastProgressRef.current = clampedProgress
-        setScrollProgress(clampedProgress)
-      }
-
-      rafRef.current = requestAnimationFrame(updateProgress)
-    }
-
-    // RAF 시작
-    rafRef.current = requestAnimationFrame(updateProgress)
+    // 카드 애니메이션: translateY 50% -> -30%
+    tl.fromTo(
+      cardRef.current,
+      { yPercent: 50 },
+      { yPercent: -30, ease: 'none' }
+    )
 
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-      }
+      tl.kill()
+      ScrollTrigger.getAll().forEach((st) => {
+        if (st.trigger === containerRef.current) {
+          st.kill()
+        }
+      })
     }
   }, [mounted])
-
-  // 카드의 패럴랙스 transform 계산
-  // progress 0 → 카드가 봉투 안에 숨어있음 (translateY: 50%)
-  // progress 1 → 카드가 완전히 올라옴 (translateY: -30%)
-  const startY = 50 // 시작 위치 (봉투 안)
-  const endY = -30 // 끝 위치 (봉투 위로)
-  const cardTranslateY = startY + (endY - startY) * scrollProgress
 
   return (
     <div
@@ -198,8 +179,9 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
         </svg>
       </div>
 
-      {/* 2. 인비테이션 카드 - 패럴랙스 효과 */}
+      {/* 2. 인비테이션 카드 - GSAP ScrollTrigger로 애니메이션 */}
       <div
+        ref={cardRef}
         style={{
           position: 'absolute',
           left: '5%',
@@ -207,8 +189,7 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
           top: '25%',
           height: '70%',
           zIndex: 2,
-          transform: `translateY(${cardTranslateY}%)`,
-          transition: isEditMode ? 'none' : 'transform 0.1s ease-out',
+          // 초기 위치: translateY(50%) - GSAP이 제어
         }}
       >
         <div
