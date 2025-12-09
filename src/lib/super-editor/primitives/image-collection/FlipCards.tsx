@@ -48,7 +48,7 @@ export function FlipCards({
     images = props.images
   }
 
-  const columns = props.columns || 2
+  const columns = typeof props.columns === 'string' ? parseInt(props.columns, 10) : (props.columns || 2)
   const gap = props.gap ?? 8
   const flipDirection = props.flipDirection || 'horizontal'
   const backContent = props.backContent || 'overlay'
@@ -298,10 +298,10 @@ export const flipCardsRenderer: PrimitiveRenderer<FlipCardsProps> = {
       label: '컬럼 수',
       type: 'select',
       options: [
-        { value: 2, label: '2열' },
-        { value: 3, label: '3열' },
+        { value: '2', label: '2열' },
+        { value: '3', label: '3열' },
       ],
-      defaultValue: 2,
+      defaultValue: '2',
     },
     {
       key: 'flipDirection',
