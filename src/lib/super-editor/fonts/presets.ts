@@ -58,6 +58,9 @@ export interface FontPreset {
   license: string // 라이선스 (예: 'OFL', 'Apache 2.0', 'Commercial')
   description?: string // 폰트 설명
   recommended?: ('title' | 'body' | 'accent')[] // 추천 용도
+
+  // 이탤릭 지원
+  italic?: boolean // true면 이탤릭 스타일도 로드
 }
 
 // ============================================
@@ -411,6 +414,7 @@ export const FONT_PRESETS: FontPreset[] = [
     license: 'OFL',
     description: '전통적인 Garamond 스타일',
     recommended: ['title', 'body'],
+    italic: true,
   },
   {
     id: 'libre-baskerville',
