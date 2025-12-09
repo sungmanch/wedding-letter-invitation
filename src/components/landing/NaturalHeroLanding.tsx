@@ -56,11 +56,7 @@ function AIChatVideo() {
   return (
     <div className="relative">
       {/* Phone mockup frame */}
-<<<<<<< HEAD
-      <div className="relative w-[295px] sm:w-[347px] lg:w-[373px] mx-auto">
-=======
       <div className="relative w-[340px] sm:w-[400px] lg:w-[430px] mx-auto">
->>>>>>> 3637f8473fd5fbfd455fe326ab75cb36880a1895
         <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[3/4] rounded-[2.25rem] overflow-hidden bg-black">
             <video
@@ -290,11 +286,7 @@ function TemplateCarousel() {
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       {/* Phone mockup frame */}
-<<<<<<< HEAD
-      <div className="relative w-[220px] sm:w-[260px] lg:w-[280px] mx-auto">
-=======
       <div className="relative w-[255px] sm:w-[300px] lg:w-[322px] mx-auto">
->>>>>>> 3637f8473fd5fbfd455fe326ab75cb36880a1895
         <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
           <div className="w-full aspect-[9/16] rounded-[2.25rem] overflow-hidden relative">
             {renderTemplate(currentIndex)}
