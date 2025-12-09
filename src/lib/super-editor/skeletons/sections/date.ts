@@ -1750,7 +1750,7 @@ export const dateSkeleton: SectionSkeleton = {
                   gap: '0',
                 },
                 children: [
-                  // 월 (2자리)
+                  // 월 (2자리) - 프레스/엠보싱 효과
                   {
                     id: 'pressed-month',
                     type: 'text',
@@ -1759,9 +1759,16 @@ export const dateSkeleton: SectionSkeleton = {
                       fontWeight: '300',
                       lineHeight: '0.9',
                       fontFamily: 'Georgia, "Times New Roman", serif',
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      mixBlendMode: 'overlay',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      // 투명한 글자 + 배경 비침
+                      color: 'transparent',
+                      // 프레스된 느낌: 위쪽 하이라이트 + 아래쪽 그림자
+                      textShadow:
+                        '0 2px 3px rgba(255,255,255,0.5), 0 -1px 2px rgba(0,0,0,0.15), 1px 1px 0 rgba(255,255,255,0.3)',
+                      // 배경 이미지가 글자 모양으로 잘리게
+                      WebkitBackgroundClip: 'text',
+                      backgroundClip: 'text',
+                      // 배경 이미지 계승 (부모 사진)
+                      backgroundColor: 'rgba(255,255,255,0.25)',
                       letterSpacing: '-0.02em',
                     },
                     props: {
@@ -1769,7 +1776,7 @@ export const dateSkeleton: SectionSkeleton = {
                       as: 'span',
                     },
                   },
-                  // 일 (2자리)
+                  // 일 (2자리) - 프레스/엠보싱 효과
                   {
                     id: 'pressed-day',
                     type: 'text',
@@ -1778,9 +1785,12 @@ export const dateSkeleton: SectionSkeleton = {
                       fontWeight: '300',
                       lineHeight: '0.9',
                       fontFamily: 'Georgia, "Times New Roman", serif',
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      mixBlendMode: 'overlay',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      color: 'transparent',
+                      textShadow:
+                        '0 2px 3px rgba(255,255,255,0.5), 0 -1px 2px rgba(0,0,0,0.15), 1px 1px 0 rgba(255,255,255,0.3)',
+                      WebkitBackgroundClip: 'text',
+                      backgroundClip: 'text',
+                      backgroundColor: 'rgba(255,255,255,0.25)',
                       letterSpacing: '-0.02em',
                     },
                     props: {
@@ -1788,7 +1798,7 @@ export const dateSkeleton: SectionSkeleton = {
                       as: 'span',
                     },
                   },
-                  // 연도 (2자리)
+                  // 연도 (2자리) - 프레스/엠보싱 효과
                   {
                     id: 'pressed-year',
                     type: 'text',
@@ -1797,9 +1807,12 @@ export const dateSkeleton: SectionSkeleton = {
                       fontWeight: '300',
                       lineHeight: '0.9',
                       fontFamily: 'Georgia, "Times New Roman", serif',
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      mixBlendMode: 'overlay',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      color: 'transparent',
+                      textShadow:
+                        '0 2px 3px rgba(255,255,255,0.5), 0 -1px 2px rgba(0,0,0,0.15), 1px 1px 0 rgba(255,255,255,0.3)',
+                      WebkitBackgroundClip: 'text',
+                      backgroundClip: 'text',
+                      backgroundColor: 'rgba(255,255,255,0.25)',
                       letterSpacing: '-0.02em',
                     },
                     props: {
