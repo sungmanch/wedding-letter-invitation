@@ -38,15 +38,30 @@ export function Envelope({
   const style = mergeNodeStyles(node as PrimitiveNode & { tokenStyle?: Record<string, unknown> }, context)
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [resolvedFlapColor, setResolvedFlapColor] = useState('#f5f5f5')
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
   const isEditMode = context.mode === 'edit'
 
-  // 색상 설정
+  // 색상 설정 - CSS 변수는 나중에 resolved
   const envelopeColor = props.envelopeColor || 'var(--color-surface, #f5f5f5)'
   const cardColor = props.cardColor || 'var(--color-background, #ffffff)'
   const flapColor = props.flapColor || envelopeColor
   const parallaxIntensity = props.parallaxIntensity ?? 0.5
+
+  // CSS 변수를 실제 색상값으로 변환 (SVG fill에서 사용하기 위해)
+  useEffect(() => {
+    if (!containerRef.current) return
+    const computedStyle = getComputedStyle(containerRef.current)
+    // CSS 변수에서 실제 색상 추출
+    const surfaceColor = computedStyle.getPropertyValue('--color-surface').trim()
+    if (surfaceColor) {
+      setResolvedFlapColor(surfaceColor)
+    } else {
+      // fallback: 직접 지정된 색상이면 그대로 사용
+      setResolvedFlapColor(flapColor.startsWith('var(') ? '#f5f5f5' : flapColor)
+    }
+  }, [flapColor])
 
   // 스크롤 가능한 부모 요소 찾기
   const findScrollParent = useCallback((element: HTMLElement | null): HTMLElement | Window => {
@@ -113,11 +128,14 @@ export function Envelope({
   }, [isEditMode, findScrollParent])
 
   // 카드의 패럴랙스 transform 계산
-  // progress 0 → 카드가 봉투 안에 숨어있음 (translateY: 80%)
-  // progress 1 → 카드가 완전히 올라옴 (translateY: -60%)
+  // progress 0 → 카드가 봉투 안에 숨어있음 (translateY: 50%)
+  // progress 1 → 카드가 완전히 올라옴 (translateY: -50%)
+  // parallaxIntensity가 높을수록 더 많이 올라옴
+  const startY = 50 // 시작 위치 (봉투 안)
+  const endY = -50 * parallaxIntensity // 끝 위치 (봉투 위로)
   const cardTranslateY = isEditMode
-    ? -30 // 에디터에서는 중간 상태로 표시
-    : 80 - (scrollProgress * 140 * parallaxIntensity) - (scrollProgress * 140 * (1 - parallaxIntensity))
+    ? 0 // 에디터에서는 중간 상태로 표시
+    : startY + (endY - startY) * scrollProgress
 
   return (
     <div
@@ -161,7 +179,7 @@ export function Envelope({
         >
           <polygon
             points="0,0 100,0 50,50"
-            fill={flapColor}
+            fill={resolvedFlapColor}
           />
         </svg>
       </div>
@@ -238,6 +256,25 @@ export function Envelope({
           }}
         >
           스크롤 시 카드가 올라옵니다
+        </div>
+      )}
+
+      {/* 디버그: 스크롤 progress (개발 모드에서만) */}
+      {process.env.NODE_ENV === 'development' && !isEditMode && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 4,
+            right: 4,
+            zIndex: 20,
+            padding: '4px 8px',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            color: '#fff',
+            borderRadius: '4px',
+            fontSize: '10px',
+          }}
+        >
+          {(scrollProgress * 100).toFixed(0)}%
         </div>
       )}
     </div>
