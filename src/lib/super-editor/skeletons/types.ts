@@ -22,6 +22,7 @@ export type SectionType =
   | 'guestbook' // 축하 메시지
   | 'music' // 배경음악 (FAB 형태)
   | 'photobooth' // 포토부스
+  | 'invitation' // RSVP 참석 여부
 
 // ============================================
 // Skeleton Node
@@ -159,6 +160,7 @@ export function isSectionType(value: string): value is SectionType {
     'guestbook',
     'music',
     'photobooth',
+    'invitation',
   ].includes(value)
 }
 

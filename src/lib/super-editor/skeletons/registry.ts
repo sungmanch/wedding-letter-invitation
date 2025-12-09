@@ -16,6 +16,7 @@ import {
   guestbookSkeleton,
   musicSkeleton,
   photoboothSkeleton,
+  invitationSkeleton,
 } from './sections'
 
 // ============================================
@@ -34,6 +35,7 @@ const skeletonRegistry: Record<SectionType, SectionSkeleton> = {
   guestbook: guestbookSkeleton,
   music: musicSkeleton,
   photobooth: photoboothSkeleton,
+  invitation: invitationSkeleton,
 }
 
 // ============================================
@@ -117,6 +119,7 @@ export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   guestbook: true,
   music: true,
   photobooth: false, // 포토부스는 기본 비활성화
+  invitation: false, // RSVP는 기본 비활성화
 }
 
 // ============================================
@@ -129,5 +132,5 @@ export const skeletonStats = {
   sectionsWithMultipleVariants: Object.values(skeletonRegistry).filter((s) => s.variants.length > 1).length,
 }
 
-// 11개 섹션 확인 (intro, greeting, contact, venue, date, gallery, parents, accounts, guestbook, music, photobooth)
-console.assert(skeletonStats.totalSections === 11, `Expected 11 sections, got ${skeletonStats.totalSections}`)
+// 12개 섹션 확인 (intro, greeting, contact, venue, date, gallery, parents, accounts, guestbook, music, photobooth, invitation)
+console.assert(skeletonStats.totalSections === 12, `Expected 12 sections, got ${skeletonStats.totalSections}`)

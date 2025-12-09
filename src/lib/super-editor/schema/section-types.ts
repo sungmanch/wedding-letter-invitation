@@ -31,6 +31,7 @@ export type SectionType =
   | 'guestbook'
   | 'music'
   | 'photobooth'
+  | 'invitation'
 
 /**
  * 섹션 메타 정보
@@ -148,6 +149,15 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
     isFloating: false,
     defaultEnabled: false,
   },
+  invitation: {
+    type: 'invitation',
+    label: '참석 여부',
+    description: 'RSVP 참석 인원 확인 폼',
+    icon: 'mail',
+    isFixed: false,
+    isFloating: false,
+    defaultEnabled: false,
+  },
 }
 
 /**
@@ -193,6 +203,7 @@ export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   guestbook: true,
   music: false,
   photobooth: false,
+  invitation: false,
 }
 
 /**
@@ -269,5 +280,9 @@ export const SECTION_DATA_BINDINGS: Record<SectionType, string[]> = {
     'photobooth.title',
     'photobooth.description',
     'photobooth.frames',
+  ],
+  invitation: [
+    'invitation.title',
+    'invitation.description',
   ],
 }
