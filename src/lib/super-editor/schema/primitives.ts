@@ -27,13 +27,14 @@ export type PrimitiveType =
   | 'map-embed'
   | 'calendar'
   | 'countdown'
-  // 이미지 컬렉션 (6개)
+  // 이미지 컬렉션 (7개)
   | 'gallery'
   | 'carousel'
   | 'grid'
   | 'collage'
   | 'masonry'
   | 'vinyl-selector'
+  | 'film-strip'
   // 애니메이션 (5개)
   | 'animated'
   | 'sequence'
