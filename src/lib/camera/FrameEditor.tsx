@@ -315,8 +315,8 @@ const CropStep = forwardRef<
         src={imageUrl}
         width={300}
         height={300}
-        shape="square"
-        showShapeBorder={true}
+        shape="rectangle"
+        showShapeBorder={false}
         minZoom={0.3}
         maxZoom={3}
       />
