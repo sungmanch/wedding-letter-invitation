@@ -376,12 +376,15 @@ export function NaturalHeroLanding() {
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
             {/* Main Headline */}
             <h1
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-3"
               style={{ fontFamily: 'Noto Serif KR, serif' }}
             >
               <span className="text-[var(--sage-600)] font-medium">대화로</span>
               <span className="text-[var(--text-primary)] font-light"> 만드는 청첩장</span>
             </h1>
+            <p className="text-base sm:text-lg text-[var(--text-muted)]">
+              AI에게 이야기하면, 디자인부터 정보까지 알아서
+            </p>
           </div>
 
           {/* Middle: Video + Arrow + Template (Side by Side) */}
