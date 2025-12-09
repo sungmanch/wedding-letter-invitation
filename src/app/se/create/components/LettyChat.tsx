@@ -15,9 +15,10 @@ interface LettyChatProps {
   onGenerate: (data: CollectedData) => Promise<void>
   isGenerating?: boolean
   initialData?: InitialData
+  onCollectedDataChange?: (data: CollectedData) => void
 }
 
-export function LettyChat({ onGenerate, isGenerating = false, initialData }: LettyChatProps) {
+export function LettyChat({ onGenerate, isGenerating = false, initialData, onCollectedDataChange }: LettyChatProps) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -26,6 +27,7 @@ export function LettyChat({ onGenerate, isGenerating = false, initialData }: Let
     messages,
     currentStep,
     isTyping,
+    collectedData,
     startConversation,
     handleUserInput,
     isInputDisabled,
@@ -33,6 +35,13 @@ export function LettyChat({ onGenerate, isGenerating = false, initialData }: Let
     onGenerate,
     initialData,
   })
+
+  // collectedData 변경 시 부모에게 알림
+  useEffect(() => {
+    if (onCollectedDataChange) {
+      onCollectedDataChange(collectedData)
+    }
+  }, [collectedData, onCollectedDataChange])
 
   // 페이지 로드 시 대화 시작
   useEffect(() => {

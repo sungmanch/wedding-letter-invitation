@@ -25,6 +25,9 @@ import { BasicInfoForm, DEFAULT_BASIC_INFO, type BasicInfoData } from './compone
 import { LettyChat } from './components/LettyChat'
 import type { CollectedData } from './hooks/useLettyConversation'
 
+// 진행 인디케이터
+import { ProgressIndicator } from './components/ProgressIndicator'
+
 // PhoneFrame 크기 설정
 const PHONE_FRAME_WIDTH = 320
 const PHONE_FRAME_HEIGHT = 580
@@ -248,6 +251,14 @@ export default function SuperEditorCreatePage() {
   // 모바일 프리뷰 모달
   const [showMobilePreview, setShowMobilePreview] = useState(false)
 
+  // Stage 2: 채팅에서 수집된 데이터 (진행 인디케이터용)
+  const [collectedData, setCollectedData] = useState<Partial<CollectedData>>({})
+
+  // collectedData 업데이트 핸들러
+  const handleCollectedDataChange = useCallback((data: CollectedData) => {
+    setCollectedData(data)
+  }, [])
+
   // 프리뷰용 userData
   const previewUserData = useMemo(() => basicInfoToUserData(basicInfo), [basicInfo])
 
@@ -396,6 +407,7 @@ export default function SuperEditorCreatePage() {
                 onGenerate={handleGenerate}
                 isGenerating={isGenerating}
                 initialData={basicInfo}
+                onCollectedDataChange={handleCollectedDataChange}
               />
             )}
           </div>
@@ -436,6 +448,15 @@ export default function SuperEditorCreatePage() {
                   다시 생성하기
                 </button>
               )}
+
+              {/* Progress Indicator */}
+              <div className="mt-6 w-full">
+                <ProgressIndicator
+                  basicInfo={basicInfo}
+                  collectedData={collectedData}
+                  stage={stage}
+                />
+              </div>
             </div>
           </div>
         </div>
