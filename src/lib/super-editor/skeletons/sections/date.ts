@@ -325,5 +325,423 @@ export const dateSkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Save The Date Variant
+    // ============================================
+    {
+      id: 'save-the-date',
+      name: 'Save The Date',
+      description: '영문 스타일의 세이브더데이트 레이아웃 (코너 프레임 펼침 + 블러 해제 애니메이션)',
+      tags: ['modern', 'western', 'elegant', 'minimal', 'animated'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+              position: 'relative',
+              minHeight: '600px',
+              paddingTop: '40px',
+              paddingBottom: '40px',
+            },
+            children: [
+              // 코너 프레임 장식 (각 코너별 scroll-trigger)
+              {
+                id: 'corner-frame',
+                type: 'container',
+                style: {
+                  position: 'absolute',
+                  top: '0',
+                  left: '0',
+                  right: '0',
+                  bottom: '0',
+                  pointerEvents: 'none',
+                },
+                children: [
+                  // 좌상단 코너
+                  {
+                    id: 'corner-tl-trigger',
+                    type: 'scroll-trigger',
+                    style: {
+                      position: 'absolute',
+                      top: '0',
+                      left: '20px',
+                    },
+                    props: {
+                      animation: { preset: 'corner-expand-tl' },
+                      scrub: true,
+                    },
+                    children: [
+                      {
+                        id: 'corner-tl',
+                        type: 'text',
+                        tokenStyle: {
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '24px',
+                          fontWeight: '100',
+                        },
+                        props: {
+                          content: '┌',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                  // 우상단 코너
+                  {
+                    id: 'corner-tr-trigger',
+                    type: 'scroll-trigger',
+                    style: {
+                      position: 'absolute',
+                      top: '0',
+                      right: '20px',
+                    },
+                    props: {
+                      animation: { preset: 'corner-expand-tr' },
+                      scrub: true,
+                    },
+                    children: [
+                      {
+                        id: 'corner-tr',
+                        type: 'text',
+                        tokenStyle: {
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '24px',
+                          fontWeight: '100',
+                        },
+                        props: {
+                          content: '┐',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                  // 좌하단 코너
+                  {
+                    id: 'corner-bl-trigger',
+                    type: 'scroll-trigger',
+                    style: {
+                      position: 'absolute',
+                      bottom: '0',
+                      left: '20px',
+                    },
+                    props: {
+                      animation: { preset: 'corner-expand-bl' },
+                      scrub: true,
+                    },
+                    children: [
+                      {
+                        id: 'corner-bl',
+                        type: 'text',
+                        tokenStyle: {
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '24px',
+                          fontWeight: '100',
+                        },
+                        props: {
+                          content: '└',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                  // 우하단 코너
+                  {
+                    id: 'corner-br-trigger',
+                    type: 'scroll-trigger',
+                    style: {
+                      position: 'absolute',
+                      bottom: '0',
+                      right: '20px',
+                    },
+                    props: {
+                      animation: { preset: 'corner-expand-br' },
+                      scrub: true,
+                    },
+                    children: [
+                      {
+                        id: 'corner-br',
+                        type: 'text',
+                        tokenStyle: {
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '24px',
+                          fontWeight: '100',
+                        },
+                        props: {
+                          content: '┘',
+                          as: 'span',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              // 메인 콘텐츠 (블러 해제 애니메이션)
+              {
+                id: 'main-content-trigger',
+                type: 'scroll-trigger',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  animation: { preset: 'blur-reveal' },
+                  scrub: true,
+                },
+                children: [
+                  {
+                    id: 'main-content',
+                    type: 'column',
+                    tokenStyle: {
+                      gap: '$token.spacing.md',
+                    },
+                    style: {
+                      alignItems: 'center',
+                    },
+                    children: [
+                      // Save The Date 타이틀
+                      {
+                        id: 'save-the-date-title',
+                        type: 'row',
+                        style: {
+                          alignItems: 'baseline',
+                          justifyContent: 'center',
+                          gap: '8px',
+                        },
+                        children: [
+                          {
+                            id: 'save-text',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.sectionTitle.fontFamily',
+                              color: '$token.colors.text.primary',
+                            },
+                            style: {
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              letterSpacing: '0.15em',
+                              textTransform: 'uppercase',
+                            },
+                            props: {
+                              content: 'SAVE',
+                              as: 'span',
+                            },
+                          },
+                          {
+                            id: 'the-text',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.displayLg.fontFamily',
+                              color: '$token.colors.text.primary',
+                            },
+                            style: {
+                              fontSize: '20px',
+                              fontStyle: 'italic',
+                              fontWeight: '400',
+                            },
+                            props: {
+                              content: 'The',
+                              as: 'span',
+                            },
+                          },
+                          {
+                            id: 'date-text',
+                            type: 'text',
+                            tokenStyle: {
+                              fontFamily: '$token.typography.sectionTitle.fontFamily',
+                              color: '$token.colors.text.primary',
+                            },
+                            style: {
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              letterSpacing: '0.15em',
+                              textTransform: 'uppercase',
+                            },
+                            props: {
+                              content: 'DATE',
+                              as: 'span',
+                            },
+                          },
+                        ],
+                      },
+                      // 날짜 대형 표시
+                      {
+                        id: 'date-large',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.displayLg.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '48px',
+                          fontWeight: '300',
+                          letterSpacing: '0.05em',
+                          textAlign: 'center',
+                        },
+                        props: {
+                          content: '{{wedding.dateFormatted}}',
+                          as: 'p',
+                        },
+                      },
+                      // 요일 + 설명
+                      {
+                        id: 'date-description',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.secondary',
+                        },
+                        style: {
+                          fontSize: '12px',
+                          letterSpacing: '0.2em',
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                        },
+                        props: {
+                          content: '{{wedding.dayOfWeek}} {{wedding.seasonTime}}',
+                          as: 'p',
+                        },
+                      },
+                      // 시간 대형 표시
+                      {
+                        id: 'time-large',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.displayLg.fontFamily',
+                          color: '$token.colors.text.primary',
+                        },
+                        style: {
+                          fontSize: '56px',
+                          fontWeight: '300',
+                          textAlign: 'center',
+                        },
+                        props: {
+                          content: '{{wedding.timeDisplay12h}}',
+                          as: 'p',
+                        },
+                      },
+                      // Coming Soon 장식
+                      {
+                        id: 'coming-soon',
+                        type: 'text',
+                        tokenStyle: {
+                          fontFamily: '$token.typography.bodyMd.fontFamily',
+                          color: '$token.colors.text.secondary',
+                        },
+                        style: {
+                          fontSize: '11px',
+                          letterSpacing: '0.3em',
+                          textAlign: 'center',
+                        },
+                        props: {
+                          content: '★ COMING SOON ★',
+                          as: 'p',
+                        },
+                      },
+                      // 카운트다운 (영문 스타일)
+                      {
+                        id: 'date-countdown',
+                        type: 'countdown',
+                        props: {
+                          date: '{{wedding.date}}',
+                          time: '{{wedding.time}}',
+                          showCards: false,
+                          format: 'english',
+                          separator: ' ',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              // 미니 캘린더 (별도 scroll-trigger)
+              {
+                id: 'calendar-trigger',
+                type: 'scroll-trigger',
+                style: {
+                  width: '100%',
+                  maxWidth: '320px',
+                  marginTop: '16px',
+                },
+                props: {
+                  animation: { preset: 'scroll-fade-in' },
+                  scrub: true,
+                },
+                children: [
+                  {
+                    id: 'mini-calendar-wrapper',
+                    type: 'column',
+                    tokenStyle: {
+                      padding: '$token.spacing.md',
+                    },
+                    style: {
+                      alignItems: 'center',
+                      width: '100%',
+                    },
+                    children: [
+                      {
+                        id: 'mini-calendar',
+                        type: 'calendar',
+                        props: {
+                          date: '{{wedding.date}}',
+                          locale: 'en',
+                          highlightStyle: 'circle',
+                          showHolidayColor: false,
+                          showSaturdayColor: false,
+                          minimal: true,
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2025-06-21',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '18:00',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'blur-reveal', name: '블러 리빌 (기본)', preset: 'blur-in', trigger: 'inView', duration: 800 },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 600 },
+        ],
+      },
+    },
   ],
 }

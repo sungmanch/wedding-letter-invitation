@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { SectionAccordion } from './SectionAccordion'
 import { EditorToolbar } from './EditorPanel'
 import { extractSectionsFromLayout } from '../utils/variable-extractor'
-import { REORDERABLE_SECTIONS, type SectionType } from '../schema/section-types'
+import { REORDERABLE_SECTIONS, SECTION_META, type SectionType } from '../schema/section-types'
+import { getAllSectionTypes } from '../skeletons/registry'
 import type { LayoutSchema } from '../schema/layout'
 import type { VariableDeclaration } from '../schema/variables'
 
@@ -25,6 +26,8 @@ interface ContentTabProps {
   expandedSection: SectionType | null
   /** 펼쳐진 섹션 변경 콜백 */
   onExpandedSectionChange: (sectionType: SectionType | null) => void
+  /** 섹션 추가 콜백 */
+  onAddSection?: (sectionType: SectionType) => void
   className?: string
 }
 
@@ -37,10 +40,13 @@ export function ContentTab({
   declarations,
   expandedSection,
   onExpandedSectionChange,
+  onAddSection,
   className = '',
 }: ContentTabProps) {
   // 각 섹션의 ref를 저장
   const sectionRefs = useRef<Record<SectionType, HTMLDivElement | null>>({} as Record<SectionType, HTMLDivElement | null>)
+  // 드롭다운 열림 상태
+  const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false)
 
   // Layout에서 실제 존재하는 섹션 추출
   const availableSections = useMemo(() => {
@@ -48,9 +54,16 @@ export function ContentTab({
     return new Set(extractSectionsFromLayout(layout) as SectionType[])
   }, [layout])
 
-  // intro/music 존재 여부
+  // intro/music/photobooth 존재 여부
   const hasIntro = availableSections.has('intro')
   const hasMusic = availableSections.has('music')
+  const hasPhotobooth = availableSections.has('photobooth')
+
+  // 추가 가능한 섹션 목록 (layout에 없는 것들)
+  const missingSections = useMemo(() => {
+    const allSections = getAllSectionTypes()
+    return allSections.filter((s) => !availableSections.has(s))
+  }, [availableSections])
 
   // 표시할 순서 변경 가능한 섹션들 (layout에 있는 것만)
   const displayOrder = useMemo(() => {
@@ -107,6 +120,17 @@ export function ContentTab({
       sectionRefs.current[sectionType] = el
     },
     []
+  )
+
+  // 섹션 추가 핸들러
+  const handleAddSection = useCallback(
+    (sectionType: SectionType) => {
+      if (onAddSection) {
+        onAddSection(sectionType)
+        setIsAddDropdownOpen(false)
+      }
+    },
+    [onAddSection]
   )
 
   return (
