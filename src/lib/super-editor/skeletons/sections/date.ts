@@ -1378,6 +1378,238 @@ export const dateSkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Letterpress Border Variant
+    // ============================================
+    {
+      id: 'letterpress-border',
+      name: '레터프레스 (테두리)',
+      description: '이중 테두리와 각인된 프레임의 레터프레스 스타일',
+      tags: ['vintage', 'classic', 'letterpress', 'border', 'frame', 'elegant'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              // 레터프레스 테두리 타이틀
+              {
+                id: 'letterpress-border-title',
+                type: 'text',
+                style: {
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  letterSpacing: '0.3em',
+                  textTransform: 'uppercase',
+                  color: '#9A9590',
+                  textShadow: '0 1px 0 rgba(255,255,255,0.5)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                },
+                props: {
+                  content: '· SAVE THE DATE ·',
+                  as: 'p',
+                },
+              },
+              // 레터프레스 테두리 캘린더
+              {
+                id: 'letterpress-border-calendar-wrapper',
+                type: 'column',
+                style: {
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '380px',
+                },
+                children: [
+                  {
+                    id: 'letterpress-border-calendar',
+                    type: 'calendar',
+                    props: {
+                      date: '{{wedding.date}}',
+                      locale: 'en',
+                      variant: 'letterpress-border',
+                      highlightStyle: 'circle',
+                      showHolidayColor: false,
+                      showSaturdayColor: false,
+                    },
+                  },
+                ],
+              },
+              // 날짜/시간 텍스트
+              {
+                id: 'letterpress-border-date-text',
+                type: 'text',
+                style: {
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  letterSpacing: '0.2em',
+                  color: '#4A4A4A',
+                  textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  textAlign: 'center',
+                },
+                props: {
+                  content: '{{wedding.dateDisplay}} · {{wedding.timeDisplay}}',
+                  as: 'p',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2025-09-20',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 700 },
+        ],
+      },
+    },
+
+    // ============================================
+    // Letterpress Deep Variant
+    // ============================================
+    {
+      id: 'letterpress-deep',
+      name: '레터프레스 (깊은 음각)',
+      description: '더 강한 프레스 효과와 어두운 톤의 레터프레스 스타일',
+      tags: ['vintage', 'classic', 'letterpress', 'deep', 'bold', 'dramatic'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              // 깊은 음각 타이틀
+              {
+                id: 'letterpress-deep-title',
+                type: 'text',
+                style: {
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  color: '#2D2D2D',
+                  textShadow: '0 2px 0 rgba(255,255,255,0.25), 0 -1px 2px rgba(0,0,0,0.2)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                },
+                props: {
+                  content: 'SAVE THE DATE',
+                  as: 'p',
+                },
+              },
+              // 깊은 음각 캘린더
+              {
+                id: 'letterpress-deep-calendar-wrapper',
+                type: 'column',
+                style: {
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '360px',
+                },
+                children: [
+                  {
+                    id: 'letterpress-deep-calendar',
+                    type: 'calendar',
+                    props: {
+                      date: '{{wedding.date}}',
+                      locale: 'en',
+                      variant: 'letterpress-deep',
+                      highlightStyle: 'circle',
+                      showHolidayColor: false,
+                      showSaturdayColor: false,
+                    },
+                  },
+                ],
+              },
+              // 깊은 음각 날짜 텍스트
+              {
+                id: 'letterpress-deep-date-text',
+                type: 'text',
+                style: {
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  color: '#2D2D2D',
+                  textShadow: '0 2px 1px rgba(255,255,255,0.2), 0 -2px 2px rgba(0,0,0,0.25)',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  textAlign: 'center',
+                },
+                props: {
+                  content: '{{wedding.dateDisplay}} | {{wedding.timeDisplay}}',
+                  as: 'p',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2025-09-20',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 700 },
+        ],
+      },
+    },
+
+    // ============================================
     // Week Heart Variant
     // ============================================
     {
