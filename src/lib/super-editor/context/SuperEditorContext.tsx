@@ -208,6 +208,11 @@ function computeDerivedFields(
       result = setValueByPath(result, 'wedding.dateFormatted', format(date, 'yyyy. MM. dd')) // 2025. 06. 21
       result = setValueByPath(result, 'wedding.dayOfWeek', format(date, 'EEEE').toUpperCase()) // SATURDAY
 
+      // Photo Overlay variant용 파생 필드 (2자리 패딩)
+      result = setValueByPath(result, 'wedding.monthPadded', format(date, 'MM')) // 04, 06, 12
+      result = setValueByPath(result, 'wedding.dayPadded', format(date, 'dd')) // 04, 15, 31
+      result = setValueByPath(result, 'wedding.yearShort', format(date, 'yy')) // 24, 25, 26
+
       // 계절 + 시간대 계산
       const month = date.getMonth() + 1
       let season = ''

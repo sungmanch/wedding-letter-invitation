@@ -1693,5 +1693,216 @@ export const dateSkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Photo Overlay Variant (투명 프레스 효과)
+    // ============================================
+    {
+      id: 'photo-overlay',
+      name: '포토 오버레이',
+      description: '사진 위에 날짜가 투명하게 프레스된 스타일',
+      tags: ['modern', 'photo', 'overlay', 'elegant', 'minimal'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        style: {
+          position: 'relative',
+          width: '100%',
+          minHeight: '500px',
+          overflow: 'hidden',
+        },
+        children: [
+          // 배경 사진
+          {
+            id: 'background-photo',
+            type: 'image',
+            style: {
+              position: 'absolute',
+              top: '0',
+              left: '0',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            },
+            props: {
+              src: '{{photos.couple}}',
+              alt: '커플 사진',
+            },
+          },
+          // 오버레이 콘텐츠
+          {
+            id: 'overlay-content',
+            type: 'column',
+            style: {
+              position: 'relative',
+              zIndex: '1',
+              minHeight: '500px',
+              padding: '40px 24px',
+              justifyContent: 'space-between',
+            },
+            children: [
+              // 상단: 프레스된 날짜 (세로 배치)
+              {
+                id: 'pressed-date-column',
+                type: 'column',
+                style: {
+                  alignItems: 'flex-start',
+                  gap: '0',
+                },
+                children: [
+                  // 월 (2자리)
+                  {
+                    id: 'pressed-month',
+                    type: 'text',
+                    style: {
+                      fontSize: '100px',
+                      fontWeight: '300',
+                      lineHeight: '0.9',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      mixBlendMode: 'overlay',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      letterSpacing: '-0.02em',
+                    },
+                    props: {
+                      content: '{{wedding.monthPadded}}',
+                      as: 'span',
+                    },
+                  },
+                  // 일 (2자리)
+                  {
+                    id: 'pressed-day',
+                    type: 'text',
+                    style: {
+                      fontSize: '100px',
+                      fontWeight: '300',
+                      lineHeight: '0.9',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      mixBlendMode: 'overlay',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      letterSpacing: '-0.02em',
+                    },
+                    props: {
+                      content: '{{wedding.dayPadded}}',
+                      as: 'span',
+                    },
+                  },
+                  // 연도 (2자리)
+                  {
+                    id: 'pressed-year',
+                    type: 'text',
+                    style: {
+                      fontSize: '100px',
+                      fontWeight: '300',
+                      lineHeight: '0.9',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      mixBlendMode: 'overlay',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      letterSpacing: '-0.02em',
+                    },
+                    props: {
+                      content: '{{wedding.yearShort}}',
+                      as: 'span',
+                    },
+                  },
+                ],
+              },
+              // 하단: 감사 메시지 + 이름
+              {
+                id: 'bottom-info',
+                type: 'column',
+                style: {
+                  alignItems: 'flex-end',
+                  gap: '4px',
+                },
+                children: [
+                  {
+                    id: 'thank-you-text',
+                    type: 'text',
+                    style: {
+                      fontSize: '12px',
+                      fontWeight: '400',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      fontStyle: 'italic',
+                      color: '#333333',
+                      letterSpacing: '0.05em',
+                    },
+                    props: {
+                      content: 'Thank you for coming today.',
+                      as: 'p',
+                    },
+                  },
+                  {
+                    id: 'couple-names',
+                    type: 'text',
+                    style: {
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      color: '#333333',
+                      letterSpacing: '0.1em',
+                    },
+                    props: {
+                      content: '{{couple.groom.nameEn}} & {{couple.bride.nameEn}}',
+                      as: 'p',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2024-06-04',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+        {
+          id: 'couple-photo',
+          path: 'photos.couple',
+          type: 'image',
+          required: true,
+          description: '커플 사진',
+          defaultValue: '/images/placeholder-couple.jpg',
+        },
+        {
+          id: 'groom-name-en',
+          path: 'couple.groom.nameEn',
+          type: 'text',
+          required: true,
+          description: '신랑 영문 이름',
+          defaultValue: 'Minato',
+        },
+        {
+          id: 'bride-name-en',
+          path: 'couple.bride.nameEn',
+          type: 'text',
+          required: true,
+          description: '신부 영문 이름',
+          defaultValue: 'Yuki',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 800 },
+        ],
+      },
+    },
   ],
 }

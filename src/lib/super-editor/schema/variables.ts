@@ -285,6 +285,26 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     description: '__HIDDEN__', // 자동 계산 (NIGHT)
   },
 
+  // Photo Overlay variant용 파생 필드
+  'wedding.monthPadded': {
+    type: 'text',
+    label: '월 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (04, 06, 12)
+  },
+  'wedding.dayPadded': {
+    type: 'text',
+    label: '일 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (04, 15, 31)
+  },
+  'wedding.yearShort': {
+    type: 'text',
+    label: '연도 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (24, 25, 26)
+  },
+
   // Countdown (자동 계산값 - 에디터에서 숨김)
   'countdown.days': {
     type: 'number',
