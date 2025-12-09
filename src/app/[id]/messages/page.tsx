@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getInvitation } from '@/lib/actions/wedding'
 import { getMessages } from '@/lib/actions/message'
-import { MessageList } from '@/components/invitation'
 import { ArrowLeft, Share2 } from 'lucide-react'
 import { MessagesClient } from './MessagesClient'
 

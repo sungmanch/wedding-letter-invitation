@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { MessageList, MessageCard } from '@/components/invitation'
+import { MessageList } from '@/components/invitation'
 import { markMessageAsRead } from '@/lib/actions/message'
 import { X } from 'lucide-react'
 import type { InvitationMessage } from '@/lib/db/invitation-schema'

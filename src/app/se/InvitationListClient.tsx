@@ -48,7 +48,7 @@ export function InvitationListClient({ invitations }: InvitationListClientProps)
 }
 
 function InvitationCard({ invitation }: { invitation: InvitationItem }) {
-  const { id, isPaid, status, createdAt, layout, style, userData, templateName } = invitation
+  const { id, isPaid, createdAt, layout, style, userData, templateName } = invitation
 
   // 결제 완료 시 dashboard, 아니면 edit으로 이동
   const href = isPaid ? `/se/${id}/dashboard` : `/se/${id}/edit`

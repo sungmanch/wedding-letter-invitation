@@ -52,7 +52,7 @@ export function CreateFlow() {
         setError(result.error || '청첩장 생성에 실패했습니다')
         setStep('themes')
       }
-    } catch (err) {
+    } catch {
       setError('청첩장 생성 중 오류가 발생했습니다')
       setStep('themes')
     }

@@ -70,7 +70,11 @@ export function Animated({
   // Mount trigger
   useEffect(() => {
     if (trigger === 'mount') {
-      setIsVisible(true)
+      // requestAnimationFrame으로 다음 프레임에 실행 (React Compiler 호환)
+      const frameId = requestAnimationFrame(() => {
+        setIsVisible(true)
+      })
+      return () => cancelAnimationFrame(frameId)
     }
   }, [trigger])
 

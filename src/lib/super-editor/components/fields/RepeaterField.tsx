@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { RepeaterField as RepeaterFieldType, EditorField } from '../../schema/editor'
 import { useSuperEditor } from '../../context'
 import { FieldRenderer } from './FieldRenderer'
@@ -11,7 +11,12 @@ interface RepeaterFieldProps {
 
 export function RepeaterField({ field }: RepeaterFieldProps) {
   const { getFieldValue, updateField } = useSuperEditor()
-  const items = (getFieldValue(field.dataPath) as unknown[]) || []
+
+  // items를 useMemo로 감싸서 참조 안정성 확보 (|| [] 폴백이 매 렌더마다 새 배열 생성하는 것 방지)
+  const rawValue = getFieldValue(field.dataPath)
+  const items = useMemo<unknown[]>(() => {
+    return Array.isArray(rawValue) ? rawValue : []
+  }, [rawValue])
 
   const addItem = useCallback(() => {
     if (field.maxItems && items.length >= field.maxItems) return

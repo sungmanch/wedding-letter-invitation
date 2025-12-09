@@ -162,8 +162,13 @@ export function HeroWithLivePreview() {
   const containerRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
 
+  // 클라이언트 하이드레이션 완료 후 로드 상태 변경
   useEffect(() => {
-    setIsLoaded(true)
+    // requestAnimationFrame으로 다음 프레임에 상태 변경 (React Compiler 호환)
+    const frameId = requestAnimationFrame(() => {
+      setIsLoaded(true)
+    })
+    return () => cancelAnimationFrame(frameId)
   }, [])
 
   // 선택된 카드가 중앙으로 스크롤되도록
@@ -208,7 +213,7 @@ export function HeroWithLivePreview() {
 
         {/* Main Copy */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-          <span className="text-[#D4768A]">"이거 어디서 만들었어?"</span>
+          <span className="text-[#D4768A]">&quot;이거 어디서 만들었어?&quot;</span>
         </h1>
         <p className="text-gray-600 mb-6 max-w-xl mx-auto">
           LP가 돌고, 채팅이 흐르고, 당신의 사진이 빛나는

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
-import { SECTION_META, REORDERABLE_SECTIONS } from '../schema/section-types'
+import { SECTION_META } from '../schema/section-types'
 import { extractSectionsFromLayout } from '../utils/variable-extractor'
 import { getAllSectionTypes } from '../skeletons/registry'
 import type { SectionType } from '../schema/section-types'

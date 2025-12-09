@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { getInvitation } from '@/lib/actions/wedding'
 import { InvitationViewer } from '@/components/invitation'
@@ -7,7 +7,10 @@ import { db } from '@/lib/db'
 import { superEditorInvitations, superEditorTemplates } from '@/lib/db/super-editor-schema'
 import { eq, and } from 'drizzle-orm'
 import { ViewerClient } from '../se/[id]/ViewerClient'
-import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '@/lib/super-editor/schema/section-types'
+import {
+  DEFAULT_SECTION_ORDER,
+  DEFAULT_SECTION_ENABLED,
+} from '@/lib/super-editor/schema/section-types'
 import type { LayoutSchema } from '@/lib/super-editor/schema/layout'
 import type { StyleSchema } from '@/lib/super-editor/schema/style'
 import type { UserData, WeddingInvitationData } from '@/lib/super-editor/schema/user-data'
@@ -21,10 +24,7 @@ interface PageProps {
 // SE invitation 조회 헬퍼
 async function getSuperEditorInvitation(id: string) {
   const invitation = await db.query.superEditorInvitations.findFirst({
-    where: and(
-      eq(superEditorInvitations.id, id),
-      eq(superEditorInvitations.status, 'published')
-    ),
+    where: and(eq(superEditorInvitations.id, id), eq(superEditorInvitations.status, 'published')),
   })
 
   if (!invitation || !invitation.isPaid) {
@@ -50,9 +50,7 @@ function extractSeShareInfo(userData: UserData) {
   const title = `${groomName} ♥ ${brideName} 결혼합니다`
   const dateDisplay = data?.wedding?.dateDisplay || ''
   const venueName = data?.venue?.name || ''
-  const description = dateDisplay && venueName
-    ? `${dateDisplay} | ${venueName}`
-    : '모바일 청첩장'
+  const description = dateDisplay && venueName ? `${dateDisplay} | ${venueName}` : '모바일 청첩장'
   const imageUrl = data?.photos?.main || data?.photos?.cover
   return { title, description, imageUrl }
 }
@@ -152,8 +150,8 @@ export default async function GuestInvitationPage({ params, searchParams }: Page
     const { invitation, template } = seData
     const userData = invitation.userData as UserData
     const sectionOrder = (invitation.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER
-    const sectionEnabled = (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
-    const shareInfo = extractSeShareInfo(userData)
+    const sectionEnabled =
+      (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
 
     return (
       <ViewerClient
@@ -163,7 +161,6 @@ export default async function GuestInvitationPage({ params, searchParams }: Page
         userData={userData}
         sectionOrder={sectionOrder}
         sectionEnabled={sectionEnabled}
-        shareInfo={shareInfo}
       />
     )
   }
@@ -189,8 +186,8 @@ export default async function GuestInvitationPage({ params, searchParams }: Page
       const { invitation: seInv, template } = seInvData
       const userData = seInv.userData as UserData
       const sectionOrder = (seInv.sectionOrder as SectionType[]) ?? DEFAULT_SECTION_ORDER
-      const sectionEnabled = (seInv.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
-      const shareInfo = extractSeShareInfo(userData)
+      const sectionEnabled =
+        (seInv.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
 
       return (
         <ViewerClient
@@ -200,7 +197,6 @@ export default async function GuestInvitationPage({ params, searchParams }: Page
           userData={userData}
           sectionOrder={sectionOrder}
           sectionEnabled={sectionEnabled}
-          shareInfo={shareInfo}
         />
       )
     }

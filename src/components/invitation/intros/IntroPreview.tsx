@@ -29,7 +29,7 @@ export function IntroPreview({
   weddingDate,
   venueName,
   userImageUrl,
-  isCompact,
+  isCompact: _isCompact,
 }: IntroPreviewProps) {
   // Format date for display
   const formatDate = (dateStr: string) => {
@@ -140,7 +140,7 @@ interface PreviewProps {
 }
 
 // Cinematic (화양연화) Preview
-function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, venueName, userImageUrl }: PreviewProps) {
+function CinematicPreview({ colors: _colors, fonts, groomName, brideName, dateFormatted, venueName, userImageUrl }: PreviewProps) {
   const wkwColors = {
     red: '#8B2635',
     gold: '#C9A962',
@@ -319,7 +319,7 @@ function CinematicPreview({ colors, fonts, groomName, brideName, dateFormatted, 
 }
 
 // Exhibition Preview - Gallery style like HTML template
-function ExhibitionPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+function ExhibitionPreview({ colors: _colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   return (
     <div className="absolute inset-0 bg-gray-900">
       {/* Gallery Background */}
@@ -399,7 +399,7 @@ function ExhibitionPreview({ colors, fonts, groomName, brideName, dateFormatted,
 }
 
 // Magazine Preview - Vogue Cover Style
-function MagazinePreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+function MagazinePreview({ colors: _colors, fonts: _fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   const magColors = {
     white: '#FFFFFF',
     black: '#0A0A0A',
@@ -620,6 +620,8 @@ export function ChatPreview({ groomName, brideName, dateFormatted, isCompact }: 
 
     const resetTimer = setTimeout(() => setVisibleMessages(0), 1500)
     return () => clearTimeout(resetTimer)
+  // messages는 컴포넌트 내 상수 배열이므로 totalMessages만 의존성으로 충분
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleMessages, totalMessages])
 
   // 태그 색상
@@ -866,7 +868,7 @@ function GothicRomancePreview({ groomName, brideName, dateFormatted, userImageUr
 }
 
 // Old Money Preview - Quiet Luxury with letterpress texture
-function OldMoneyPreview({ colors, fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
+function OldMoneyPreview({ colors: _colors, fonts: _fonts, groomName, brideName, dateFormatted, userImageUrl }: PreviewProps) {
   const oldMoneyColors = {
     ivory: '#FAF8F5',
     charcoal: '#2C2C2C',

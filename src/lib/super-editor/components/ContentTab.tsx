@@ -1,12 +1,10 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useEffect } from 'react'
-import { useSuperEditor } from '../context'
+import { useCallback, useMemo, useRef } from 'react'
 import { SectionAccordion } from './SectionAccordion'
 import { EditorToolbar } from './EditorPanel'
 import { extractSectionsFromLayout } from '../utils/variable-extractor'
-import { SECTION_META, REORDERABLE_SECTIONS } from '../schema/section-types'
-import type { SectionType } from '../schema/section-types'
+import { REORDERABLE_SECTIONS, type SectionType } from '../schema/section-types'
 import type { LayoutSchema } from '../schema/layout'
 import type { VariableDeclaration } from '../schema/variables'
 

@@ -50,7 +50,7 @@ export function InvitationViewer({
   invitation,
   design,
   photos = [],
-  isPreview = false,
+  isPreview: _isPreview = false,
   className,
 }: InvitationViewerProps) {
   // 새로운 ScreenStructure 형식인지 확인

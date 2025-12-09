@@ -20,7 +20,7 @@ import { predefinedPresets } from '../presets/legacy'
 import { convertLegacyToIntroResult } from '../actions/legacy-converter'
 import { completeTemplateWithDefaults } from '../services/generation-service'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
-import type { Invitation, InvitationDesign, InvitationPhoto } from '@/lib/db/invitation-schema'
+import type { Invitation, InvitationPhoto } from '@/lib/db/invitation-schema'
 
 // ============================================
 // Types

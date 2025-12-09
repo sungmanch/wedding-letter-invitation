@@ -34,6 +34,18 @@ export function IntroRenderer({
   const [showIntro, setShowIntro] = React.useState(true)
   const [canSkip, setCanSkip] = React.useState(false)
 
+  // handleComplete를 useCallback으로 선언 (useEffect보다 먼저)
+  const handleComplete = React.useCallback(() => {
+    setShowIntro(false)
+    onComplete()
+  }, [onComplete])
+
+  const handleSkip = React.useCallback(() => {
+    if (canSkip) {
+      handleComplete()
+    }
+  }, [canSkip, handleComplete])
+
   // Enable skip after delay
   React.useEffect(() => {
     if (intro.skipEnabled && intro.skipDelay) {
@@ -52,18 +64,7 @@ export function IntroRenderer({
       handleComplete()
     }, intro.duration)
     return () => clearTimeout(timer)
-  }, [intro.duration])
-
-  const handleComplete = () => {
-    setShowIntro(false)
-    onComplete()
-  }
-
-  const handleSkip = () => {
-    if (canSkip) {
-      handleComplete()
-    }
-  }
+  }, [intro.duration, handleComplete])
 
   if (!showIntro) return null
 

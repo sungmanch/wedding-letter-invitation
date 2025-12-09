@@ -34,16 +34,11 @@ export function PaymentModal({ userName, onPaymentRequested }: PaymentModalProps
     amount: '9,900원',
   }
 
-  // 입금자명 생성 함수: userName + 3자리 랜덤 숫자 (100-999)
-  const generateDepositName = () => {
-    const randomNum = Math.floor(Math.random() * 900) + 100 // 100-999
-    return `${userName}${randomNum}`
-  }
-
-  // 모달이 열릴 때 입금자명 자동 생성
+  // 모달이 열릴 때 입금자명 자동 생성 (userName + 3자리 랜덤 숫자)
   useEffect(() => {
     if (isOpen && !depositName && !paymentPending) {
-      setDepositName(generateDepositName())
+      const randomNum = Math.floor(Math.random() * 900) + 100 // 100-999
+      setDepositName(`${userName}${randomNum}`)
     }
   }, [isOpen, depositName, paymentPending, userName])
 

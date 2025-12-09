@@ -21,7 +21,8 @@ import type { VariablesSchema } from '../schema/variables'
 import { db } from '@/lib/db'
 import { getTemplate, type TemplateId } from '../templates'
 import { superEditorTemplates, superEditorInvitations } from '@/lib/db/super-editor-schema'
-import { eq } from 'drizzle-orm'
+import { resolveTokens } from '../tokens/resolver'
+import { generateCssVariables } from '../tokens/css-generator'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { UserData, WeddingInvitationData } from '../schema/user-data'
@@ -298,9 +299,6 @@ export interface CompleteTemplateOutput {
  * 새 템플릿에서 IntroGenerationResult 생성
  */
 function createIntroResultFromTemplate(templateId: string): IntroGenerationResult | undefined {
-  const { resolveTokens } = require('../tokens/resolver')
-  const { generateCssVariables } = require('../tokens/css-generator')
-
   const template = getTemplate(templateId as TemplateId)
   if (!template) return undefined
 
@@ -425,7 +423,7 @@ export async function saveInvitationAction(
     let styleSchema: StyleSchema
     let templateName: string
     let templateDescription: string
-    let variables: VariablesSchema | undefined = variablesSchema
+    const variables: VariablesSchema | undefined = variablesSchema
 
     if (newTemplateId) {
       // 새 super-editor 템플릿 사용

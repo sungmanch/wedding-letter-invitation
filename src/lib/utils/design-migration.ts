@@ -7,8 +7,6 @@ import type {
   InvitationDesignData,
   SectionSetting,
   ExtendedSectionType,
-  DEFAULT_SECTION_SETTINGS,
-  DEFAULT_SECTION_ORDER,
 } from '@/lib/types/invitation-design'
 import type {
   ColorPalette,

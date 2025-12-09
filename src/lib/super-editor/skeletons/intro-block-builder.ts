@@ -6,11 +6,8 @@
 import type { SkeletonNode, DataSlot, AnimationOption } from './types'
 import type {
   IntroBlockComposition,
-  ImageLayoutBlock,
-  TextLayoutBlock,
   TextStyleBlock,
   ColorThemeBlock,
-  DecorationBlock,
 } from './intro-blocks'
 
 // ============================================
@@ -393,8 +390,8 @@ export interface IntroBuilderResult {
  * 블록 조합으로 인트로 SkeletonNode 생성
  */
 export function buildIntroFromBlocks(composition: IntroBlockComposition): IntroBuilderResult {
-  const { imageLayout, textLayout, textStyle, decoration, colorTheme } = composition
-  const colorStyles = COLOR_THEME_STYLES[colorTheme]
+  const { imageLayout, textLayout, textStyle: _textStyle, decoration: _decoration, colorTheme } = composition
+  const _colorStyles = COLOR_THEME_STYLES[colorTheme]
 
   // 기본 슬롯
   const slots: DataSlot[] = [
@@ -611,7 +608,6 @@ function buildFullscreenLayout(composition: IntroBlockComposition): SkeletonNode
 
 function buildSplitLayout(composition: IntroBlockComposition): SkeletonNode {
   const { textStyle, decoration, colorTheme } = composition
-  const colorStyles = COLOR_THEME_STYLES[colorTheme]
 
   const textChildren: SkeletonNode[] = []
 

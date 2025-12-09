@@ -6,6 +6,7 @@
  */
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { ChevronDown, ChevronUp, ImagePlus, X } from 'lucide-react'
 
 export interface PreviewFormData {
@@ -79,10 +80,12 @@ export function PreviewDataForm({ data, onChange }: PreviewDataFormProps) {
             <div className="flex items-center gap-3">
               {/* 이미지 미리보기 */}
               <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/10 shrink-0">
-                <img
+                <Image
                   src={currentImage}
                   alt="배경 미리보기"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
                 {data.mainImage && (
                   <button

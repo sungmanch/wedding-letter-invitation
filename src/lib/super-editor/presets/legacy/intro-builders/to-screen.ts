@@ -5,10 +5,9 @@
 
 import type { PrimitiveNode } from '../../../schema/primitives'
 import type { PredefinedTemplatePreset } from '../types'
-import type { IntroBuilderData, IntroBuilderResult } from './types'
-import type { StyleSchema, StyleMood } from '../../../schema/style'
+import type { IntroBuilderData } from './types'
+import type { StyleSchema } from '../../../schema/style'
 import type { SectionScreen, SkeletonNode } from '../../../skeletons/types'
-import type { SemanticDesignTokens } from '../../../tokens/schema'
 import type { IntroGenerationResult } from '../../../services/generation-service'
 
 import { buildIntroFromPreset } from './index'

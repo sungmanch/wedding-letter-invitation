@@ -11,7 +11,6 @@ import { FILLER_SYSTEM_PROMPT } from '../prompts/filler-prompt'
 import {
   getMoodVariantHints,
   COLOR_PRESETS,
-  type EnhancedPromptInput,
 } from '../prompts/prompt-hints'
 
 // ============================================

@@ -11,7 +11,7 @@ import type { IntroProps } from './types'
  */
 export function CinematicIntro({
   config,
-  colors,
+  colors: _colors,
   fonts,
   groomName,
   brideName,

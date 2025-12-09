@@ -4,7 +4,7 @@
  */
 
 import type { StyleSchema, ColorScale, FontFamily } from '../../../schema/style'
-import type { PredefinedTemplatePreset, LegacyColorPalette, LegacyFontConfig } from '../types'
+import type { PredefinedTemplatePreset, LegacyFontConfig } from '../types'
 import type { StyleOverrides } from './types'
 
 // ============================================
