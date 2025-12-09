@@ -13,6 +13,7 @@ import {
   parseISO,
   getDay,
 } from 'date-fns'
+import { ko } from 'date-fns/locale'
 import type { PrimitiveNode, CalendarProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { getNodeProps, resolveDataBinding, mergeNodeStyles } from '../types'
@@ -63,17 +64,26 @@ export function Calendar({
     highlightStyle = 'circle',
     showHolidayColor = true,
     showSaturdayColor = true,
+    weekOnly = false,
+    showMonth = true,
   } = props
 
   // 달력 날짜 계산
   const calendarDays = useMemo(() => {
+    if (weekOnly) {
+      // 결혼식이 있는 주만 표시
+      const weekStart = startOfWeek(weddingDate, { weekStartsOn })
+      const weekEnd = endOfWeek(weddingDate, { weekStartsOn })
+      return eachDayOfInterval({ start: weekStart, end: weekEnd })
+    }
+
     const monthStart = startOfMonth(weddingDate)
     const monthEnd = endOfMonth(weddingDate)
     const calendarStart = startOfWeek(monthStart, { weekStartsOn })
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn })
 
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd })
-  }, [weddingDate, weekStartsOn])
+  }, [weddingDate, weekStartsOn, weekOnly])
 
   // 요일 헤더
   const weekdays = useMemo(() => {
@@ -121,6 +131,14 @@ export function Calendar({
     return 'var(--color-text-primary)'
   }
 
+  // 월 이름 (weekOnly 모드에서 사용)
+  const monthName = useMemo(() => {
+    if (locale === 'ko') {
+      return format(weddingDate, 'M월', { locale: ko })
+    }
+    return format(weddingDate, 'MMMM').toUpperCase()
+  }, [weddingDate, locale])
+
   return (
     <div
       data-node-id={node.id}
@@ -130,15 +148,31 @@ export function Calendar({
         ...mergedStyle,
       }}
     >
+      {/* 월 이름 (weekOnly 모드에서 표시) */}
+      {showMonth && weekOnly && (
+        <div
+          style={{
+            textAlign: 'center',
+            fontSize: 'var(--typo-heading-md-font-size, 18px)',
+            fontFamily: 'var(--typo-heading-md-font-family)',
+            fontWeight: 400,
+            letterSpacing: '0.2em',
+            color: 'var(--color-text-secondary)',
+            marginBottom: '24px',
+          }}
+        >
+          {monthName}
+        </div>
+      )}
       {/* 요일 헤더 */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '8px',
-          marginBottom: '12px',
-          borderBottom: '1px solid var(--color-divider)',
-          paddingBottom: '12px',
+          gap: weekOnly ? '16px' : '8px',
+          marginBottom: weekOnly ? '16px' : '12px',
+          borderBottom: weekOnly ? 'none' : '1px solid var(--color-divider)',
+          paddingBottom: weekOnly ? '0' : '12px',
         }}
       >
         {weekdays.map((day, index) => {
@@ -152,9 +186,10 @@ export function Calendar({
               key={day + index}
               style={{
                 textAlign: 'center',
-                fontSize: 'var(--typo-body-md-font-size, 14px)',
+                fontSize: weekOnly ? 'var(--typo-body-sm-font-size, 12px)' : 'var(--typo-body-md-font-size, 14px)',
                 fontFamily: 'var(--typo-body-md-font-family)',
-                fontWeight: 500,
+                fontWeight: 400,
+                fontStyle: weekOnly ? 'italic' : 'normal',
                 color,
               }}
             >
@@ -169,12 +204,12 @@ export function Calendar({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '6px',
-          rowGap: '10px',
+          gap: weekOnly ? '16px' : '6px',
+          rowGap: weekOnly ? '0' : '10px',
         }}
       >
         {calendarDays.map((day) => {
-          const isCurrentMonth = isSameMonth(day, weddingDate)
+          const isCurrentMonth = weekOnly ? true : isSameMonth(day, weddingDate)
           const isWeddingDay = isSameDay(day, weddingDate)
           const dayColor = getDayColor(day, isCurrentMonth)
 
@@ -185,9 +220,9 @@ export function Calendar({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                aspectRatio: '1',
+                aspectRatio: weekOnly ? 'auto' : '1',
                 position: 'relative',
-                minHeight: '36px',
+                minHeight: weekOnly ? '48px' : '36px',
               }}
             >
               {isWeddingDay && highlightStyle === 'circle' && (
@@ -322,6 +357,18 @@ export const calendarRenderer: PrimitiveRenderer<CalendarProps> = {
     {
       key: 'showSaturdayColor',
       label: '토요일 색상',
+      type: 'boolean',
+      defaultValue: true,
+    },
+    {
+      key: 'weekOnly',
+      label: '주간만 표시',
+      type: 'boolean',
+      defaultValue: false,
+    },
+    {
+      key: 'showMonth',
+      label: '월 이름 표시',
       type: 'boolean',
       defaultValue: true,
     },

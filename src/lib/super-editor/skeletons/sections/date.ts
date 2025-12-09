@@ -1260,5 +1260,90 @@ export const dateSkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Week Heart Variant
+    // ============================================
+    {
+      id: 'week-heart',
+      name: '주간 하트',
+      description: '결혼식 주간만 표시하는 미니멀 캘린더 (하트 강조)',
+      tags: ['minimal', 'romantic', 'heart', 'week', 'elegant'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              // 주간 하트 캘린더
+              {
+                id: 'week-calendar-wrapper',
+                type: 'column',
+                tokenStyle: {
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '360px',
+                },
+                children: [
+                  {
+                    id: 'week-calendar',
+                    type: 'calendar',
+                    props: {
+                      date: '{{wedding.date}}',
+                      locale: 'en',
+                      highlightStyle: 'heart',
+                      weekOnly: true,
+                      showMonth: true,
+                      showHolidayColor: false,
+                      showSaturdayColor: false,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2026-09-18',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 600 },
+          { id: 'scale', name: '스케일 인', preset: 'scale-in', trigger: 'inView', duration: 500 },
+        ],
+      },
+    },
   ],
 }
