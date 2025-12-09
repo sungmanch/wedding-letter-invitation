@@ -50,10 +50,12 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     },
     ref
   ) {
-    const { videoRef, state: cameraState, startCamera, switchCamera, retake } = useCamera();
+    const { videoRef, state: cameraState, startCamera, stopCamera, switchCamera, retake } = useCamera();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
+    // 부스 상태: idle(초기) -> camera(촬영중) -> captured(촬영완료)
+    const [boothState, setBoothState] = useState<'idle' | 'camera' | 'captured'>('idle');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('none');
     const [activeStickers, setActiveStickers] = useState<Set<string>>(new Set());
     const [stickers, setStickers] = useState<PlacedSticker[]>([]);
@@ -72,9 +74,10 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       }
     }, [hostImageUrl]);
 
-    // Start camera on mount
-    useEffect(() => {
+    // 촬영하기 버튼 클릭 - 카메라 시작
+    const handleStartCamera = useCallback(() => {
       startCamera('user');
+      setBoothState('camera');
     }, [startCamera]);
 
     // Draw overlay (stickers + frame) continuously
@@ -154,6 +157,7 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       setCapturedImage(dataUrl);
+      setBoothState('captured');
       onCapture?.(dataUrl);
 
       return dataUrl;
@@ -170,6 +174,7 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
 
     const handleRetake = useCallback(() => {
       setCapturedImage(null);
+      setBoothState('camera');
       retake();
     }, [retake]);
 
@@ -287,140 +292,155 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       (s) => s.category === 'face-tracking'
     );
 
+    // 메인 액션 버튼 텍스트
+    const mainButtonText = boothState === 'idle' ? '촬영하기' : boothState === 'camera' ? '사진 찍기' : '다시 찍기';
+    const handleMainAction = boothState === 'idle' ? handleStartCamera : boothState === 'camera' ? handleCapture : handleRetake;
+
     return (
       <div className={className} style={styles.container}>
         {/* Header */}
         <h1 style={styles.title}>Photo Booth</h1>
 
-        {/* Top Toolbar */}
-        <div style={styles.toolbar}>
+        {/* Main Action Button */}
+        <div style={styles.mainButtonContainer}>
           <button
-            onClick={switchCamera}
-            style={styles.toolButton}
-            disabled={!!capturedImage}
+            onClick={handleMainAction}
+            style={styles.mainButton}
           >
-            <span style={styles.icon}>↺</span> 후면
-          </button>
-
-          <button
-            onClick={capturedImage ? handleRetake : handleCapture}
-            style={styles.captureButton}
-          >
-            <span style={styles.cameraIcon}>📷</span>
-          </button>
-
-          <button onClick={handleDownload} style={styles.toolButton}>
-            다운로드
+            {mainButtonText}
           </button>
         </div>
 
-        {/* Camera View */}
+        {/* Camera View - idle일 때는 플레이스홀더 표시 */}
         <div style={styles.cameraContainer}>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            style={{
-              ...styles.video,
-              display: capturedImage ? 'none' : 'block',
-              transform: cameraState.facing === 'user' ? 'scaleX(-1)' : 'none',
-            }}
-          />
-
-          {capturedImage && (
-            <img
-              src={capturedImage}
-              alt="Captured"
-              style={styles.capturedImage}
-            />
-          )}
-
-          {/* Overlay canvas for stickers */}
-          <canvas
-            ref={overlayCanvasRef}
-            width={640}
-            height={480}
-            style={styles.overlayCanvas}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-          />
-
-          {/* Hidden canvas for capture */}
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-          {/* Grid overlay */}
-          <div style={styles.gridOverlay}>
-            <div style={styles.gridLine} />
-            <div style={{ ...styles.gridLine, left: '66.67%' }} />
-            <div style={{ ...styles.gridLineH, top: '33.33%' }} />
-            <div style={{ ...styles.gridLineH, top: '66.67%' }} />
-          </div>
-
-          {/* Host image preview */}
-          {hostImage && !capturedImage && (
-            <div
-              style={{
-                ...styles.hostPreview,
-                [hostPosition]: 20,
-                bottom: 20,
-              }}
-            >
-              <img
-                src={hostImageUrl}
-                alt="Host"
-                style={styles.hostPreviewImage}
+          {boothState === 'idle' ? (
+            // 초기 상태 - 플레이스홀더
+            <div style={styles.placeholder}>
+              <div style={styles.placeholderIcon}>📸</div>
+              <p style={styles.placeholderText}>버튼을 눌러 촬영을 시작하세요</p>
+            </div>
+          ) : (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  ...styles.video,
+                  display: boothState === 'captured' ? 'none' : 'block',
+                  transform: cameraState.facing === 'user' ? 'scaleX(-1)' : 'none',
+                }}
               />
-            </div>
+
+              {boothState === 'captured' && capturedImage && (
+                <img
+                  src={capturedImage}
+                  alt="Captured"
+                  style={styles.capturedImage}
+                />
+              )}
+
+              {/* Overlay canvas for stickers */}
+              <canvas
+                ref={overlayCanvasRef}
+                width={640}
+                height={480}
+                style={styles.overlayCanvas}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+              />
+
+              {/* Hidden canvas for capture */}
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+              {/* Grid overlay - 카메라 모드일 때만 */}
+              {boothState === 'camera' && (
+                <div style={styles.gridOverlay}>
+                  <div style={styles.gridLine} />
+                  <div style={{ ...styles.gridLine, left: '66.67%' }} />
+                  <div style={{ ...styles.gridLineH, top: '33.33%' }} />
+                  <div style={{ ...styles.gridLineH, top: '66.67%' }} />
+                </div>
+              )}
+
+              {/* Host image preview */}
+              {hostImage && boothState === 'camera' && (
+                <div
+                  style={{
+                    ...styles.hostPreview,
+                    [hostPosition]: 20,
+                    bottom: 20,
+                  }}
+                >
+                  <img
+                    src={hostImageUrl}
+                    alt="Host"
+                    style={styles.hostPreviewImage}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        {/* Filter & Sticker Controls */}
-        <div style={styles.controlsContainer}>
-          {/* Filter Section */}
-          <div style={styles.controlSection}>
-            <p style={styles.sectionLabel}>필터</p>
-            <div style={styles.toggleGrid}>
-              {FILTER_LIST.filter(f => f.type !== 'none').map((filter) => (
-                <button
-                  key={filter.type}
-                  onClick={() => handleFilterToggle(filter.type)}
-                  style={{
-                    ...styles.toggleButton,
-                    ...(selectedFilter === filter.type
-                      ? styles.toggleButtonActive
-                      : {}),
-                  }}
-                >
-                  {filter.name}
-                </button>
-              ))}
-            </div>
+        {/* Secondary Actions - captured 상태에서만 */}
+        {boothState === 'captured' && (
+          <div style={styles.secondaryActions}>
+            <button onClick={handleDownload} style={styles.downloadButton}>
+              📥 다운로드
+            </button>
           </div>
+        )}
 
-          {/* Sticker Section */}
-          <div style={styles.controlSection}>
-            <p style={styles.sectionLabel}>스티커</p>
-            <div style={styles.toggleGrid}>
-              {generalStickers.map((sticker) => (
-                <button
-                  key={sticker.id}
-                  onClick={() => handleStickerToggle(sticker)}
-                  style={{
-                    ...styles.stickerToggleButton,
-                    ...(activeStickers.has(sticker.id)
-                      ? styles.toggleButtonActive
-                      : {}),
-                  }}
-                >
-                  {sticker.emoji}
-                </button>
-              ))}
+        {/* Filter & Sticker Controls - camera 모드일 때만 */}
+        {boothState === 'camera' && (
+          <div style={styles.controlsContainer}>
+            {/* Filter Section */}
+            <div style={styles.controlSection}>
+              <p style={styles.sectionLabel}>필터</p>
+              <div style={styles.toggleGrid}>
+                {FILTER_LIST.filter(f => f.type !== 'none').map((filter) => (
+                  <button
+                    key={filter.type}
+                    onClick={() => handleFilterToggle(filter.type)}
+                    style={{
+                      ...styles.toggleButton,
+                      ...(selectedFilter === filter.type
+                        ? styles.toggleButtonActive
+                        : {}),
+                    }}
+                  >
+                    {filter.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Sticker Section */}
+            <div style={styles.controlSection}>
+              <p style={styles.sectionLabel}>스티커</p>
+              <div style={styles.toggleGrid}>
+                {generalStickers.map((sticker) => (
+                  <button
+                    key={sticker.id}
+                    onClick={() => handleStickerToggle(sticker)}
+                    style={{
+                      ...styles.stickerToggleButton,
+                      ...(activeStickers.has(sticker.id)
+                        ? styles.toggleButtonActive
+                        : {}),
+                    }}
+                  >
+                    {sticker.emoji}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Error message */}
         {cameraState.error && (
@@ -442,46 +462,52 @@ const styles: Record<string, React.CSSProperties> = {
   },
   title: {
     fontFamily: '"Playfair Display", serif',
-    fontSize: '32px',
+    fontSize: '28px',
     fontStyle: 'italic',
     fontWeight: 400,
-    margin: '0 0 12px 0',
+    margin: '0 0 16px 0',
     color: 'var(--color-text-primary, #333)',
   },
-  toolbar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
+  mainButtonContainer: {
     marginBottom: '16px',
   },
-  toolButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '10px 20px',
+  mainButton: {
+    padding: '14px 32px',
+    border: 'none',
+    borderRadius: '28px',
+    backgroundColor: '#1a1a1a',
+    color: 'white',
+    fontSize: '16px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'transform 0.2s, opacity 0.2s',
+  },
+  secondaryActions: {
+    marginTop: '16px',
+  },
+  downloadButton: {
+    padding: '12px 24px',
     border: '1px solid #e0e0e0',
     borderRadius: '24px',
     backgroundColor: 'white',
-    cursor: 'pointer',
     fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'pointer',
   },
-  captureButton: {
+  placeholder: {
     display: 'flex',
+    flexDirection: 'column' as const,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '64px',
-    height: '40px',
-    border: 'none',
-    borderRadius: '24px',
-    backgroundColor: '#1a1a1a',
-    cursor: 'pointer',
+    height: '100%',
+    gap: '12px',
   },
-  icon: {
-    fontSize: '16px',
+  placeholderIcon: {
+    fontSize: '64px',
   },
-  cameraIcon: {
-    fontSize: '20px',
-    filter: 'grayscale(1) brightness(10)',
+  placeholderText: {
+    fontSize: '14px',
+    color: '#666',
   },
   cameraContainer: {
     position: 'relative',
