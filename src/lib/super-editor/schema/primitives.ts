@@ -122,6 +122,7 @@ export interface TextProps {
   content: string
   as?: 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'span' | 'div'
   html?: boolean // innerHTML 허용 여부
+  className?: string // CSS 클래스 (pseudo-element 효과용)
 }
 
 export interface ImageProps {
