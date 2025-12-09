@@ -80,21 +80,58 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       setBoothState('camera');
     }, [startCamera]);
 
-    // Draw overlay (stickers + frame) continuously
-    useEffect(() => {
-      if (!overlayCanvasRef.current || !videoRef.current) return;
+    // 실시간 필터 프리뷰를 위한 캔버스 렌더링
+    const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-      const canvas = overlayCanvasRef.current;
+    // Draw video with filter + stickers continuously
+    useEffect(() => {
+      if (boothState !== 'camera') return;
+      if (!previewCanvasRef.current || !videoRef.current) return;
+
+      const canvas = previewCanvasRef.current;
       const ctx = canvas.getContext('2d');
+      const overlayCanvas = overlayCanvasRef.current;
+      const overlayCtx = overlayCanvas?.getContext('2d');
       if (!ctx) return;
 
       let animationId: number;
 
       const draw = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const video = videoRef.current;
+        if (!video || video.readyState < 2) {
+          animationId = requestAnimationFrame(draw);
+          return;
+        }
 
-        // Draw stickers
-        drawAllStickers(ctx, stickers, new Map());
+        // 캔버스 크기 설정
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 480;
+          if (overlayCanvas) {
+            overlayCanvas.width = canvas.width;
+            overlayCanvas.height = canvas.height;
+          }
+        }
+
+        // 전면 카메라 미러링
+        ctx.save();
+        if (cameraState.facing === 'user') {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+        }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        // 필터 적용
+        if (selectedFilter !== 'none') {
+          applyFilter(ctx, canvas.width, canvas.height, selectedFilter);
+        }
+
+        // 오버레이 캔버스에 스티커 그리기
+        if (overlayCtx) {
+          overlayCtx.clearRect(0, 0, canvas.width, canvas.height);
+          drawAllStickers(overlayCtx, stickers, new Map());
+        }
 
         animationId = requestAnimationFrame(draw);
       };
@@ -104,7 +141,7 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       return () => {
         cancelAnimationFrame(animationId);
       };
-    }, [stickers]);
+    }, [boothState, cameraState.facing, selectedFilter, stickers]);
 
     const handleCapture = useCallback(() => {
       const video = videoRef.current;
@@ -321,17 +358,22 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
             </div>
           ) : (
             <>
+              {/* Hidden video element for camera stream */}
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
-                style={{
-                  ...styles.video,
-                  display: boothState === 'captured' ? 'none' : 'block',
-                  transform: cameraState.facing === 'user' ? 'scaleX(-1)' : 'none',
-                }}
+                style={{ display: 'none' }}
               />
+
+              {/* Preview canvas with filter applied */}
+              {boothState === 'camera' && (
+                <canvas
+                  ref={previewCanvasRef}
+                  style={styles.video}
+                />
+              )}
 
               {boothState === 'captured' && capturedImage && (
                 <img
@@ -487,7 +529,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   downloadButton: {
     padding: '12px 24px',
-    border: '1px solid #e0e0e0',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#e0e0e0',
     borderRadius: '24px',
     backgroundColor: 'white',
     fontSize: '14px',
@@ -596,12 +640,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   toggleButton: {
     padding: '8px 14px',
-    border: '1px solid #e0e0e0',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#e0e0e0',
     borderRadius: '20px',
     backgroundColor: 'white',
     cursor: 'pointer',
     fontSize: '12px',
     fontWeight: 500,
+    color: '#333',
     transition: 'all 0.2s',
   },
   toggleButtonActive: {
@@ -612,7 +659,9 @@ const styles: Record<string, React.CSSProperties> = {
   stickerToggleButton: {
     width: '44px',
     height: '44px',
-    border: '1px solid #e0e0e0',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#e0e0e0',
     borderRadius: '12px',
     backgroundColor: 'white',
     cursor: 'pointer',
