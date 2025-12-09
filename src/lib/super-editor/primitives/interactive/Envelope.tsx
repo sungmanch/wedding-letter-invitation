@@ -38,30 +38,35 @@ export function Envelope({
   const style = mergeNodeStyles(node as PrimitiveNode & { tokenStyle?: Record<string, unknown> }, context)
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
-  const [resolvedFlapColor, setResolvedFlapColor] = useState('#f5f5f5')
+  const [resolvedColors, setResolvedColors] = useState({
+    envelope: '#f5f5f5',
+    card: '#ffffff',
+    flap: '#f5f5f5',
+  })
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
   const isEditMode = context.mode === 'edit'
 
-  // 색상 설정 - CSS 변수는 나중에 resolved
+  // 색상 설정
   const envelopeColor = props.envelopeColor || 'var(--color-surface, #f5f5f5)'
   const cardColor = props.cardColor || 'var(--color-background, #ffffff)'
   const flapColor = props.flapColor || envelopeColor
-  const parallaxIntensity = props.parallaxIntensity ?? 0.5
+  const parallaxIntensity = props.parallaxIntensity ?? 0.6
 
-  // CSS 변수를 실제 색상값으로 변환 (SVG fill에서 사용하기 위해)
+  // CSS 변수를 실제 색상값으로 변환
   useEffect(() => {
     if (!containerRef.current) return
+
     const computedStyle = getComputedStyle(containerRef.current)
-    // CSS 변수에서 실제 색상 추출
-    const surfaceColor = computedStyle.getPropertyValue('--color-surface').trim()
-    if (surfaceColor) {
-      setResolvedFlapColor(surfaceColor)
-    } else {
-      // fallback: 직접 지정된 색상이면 그대로 사용
-      setResolvedFlapColor(flapColor.startsWith('var(') ? '#f5f5f5' : flapColor)
-    }
-  }, [flapColor])
+    const surfaceColor = computedStyle.getPropertyValue('--color-surface').trim() || '#f5f5f5'
+    const bgColor = computedStyle.getPropertyValue('--color-background').trim() || '#ffffff'
+
+    setResolvedColors({
+      envelope: surfaceColor,
+      card: bgColor,
+      flap: surfaceColor,
+    })
+  }, [envelopeColor, cardColor, flapColor])
 
   // 스크롤 가능한 부모 요소 찾기
   const findScrollParent = useCallback((element: HTMLElement | null): HTMLElement | Window => {
@@ -87,7 +92,7 @@ export function Envelope({
 
   // 스크롤 progress 계산
   useEffect(() => {
-    if (!containerRef.current || isEditMode) return
+    if (!containerRef.current) return
 
     const scrollParent = findScrollParent(containerRef.current)
     const isWindow = scrollParent === window
@@ -125,17 +130,14 @@ export function Envelope({
     handleScroll()
 
     return () => scrollParent.removeEventListener('scroll', handleScroll)
-  }, [isEditMode, findScrollParent])
+  }, [findScrollParent])
 
   // 카드의 패럴랙스 transform 계산
   // progress 0 → 카드가 봉투 안에 숨어있음 (translateY: 50%)
-  // progress 1 → 카드가 완전히 올라옴 (translateY: -50%)
-  // parallaxIntensity가 높을수록 더 많이 올라옴
+  // progress 1 → 카드가 완전히 올라옴 (translateY: -30%)
   const startY = 50 // 시작 위치 (봉투 안)
-  const endY = -50 * parallaxIntensity // 끝 위치 (봉투 위로)
-  const cardTranslateY = isEditMode
-    ? 0 // 에디터에서는 중간 상태로 표시
-    : startY + (endY - startY) * scrollProgress
+  const endY = -30 // 끝 위치 (봉투 위로)
+  const cardTranslateY = startY + (endY - startY) * scrollProgress
 
   return (
     <div
@@ -179,7 +181,7 @@ export function Envelope({
         >
           <polygon
             points="0,0 100,0 50,50"
-            fill={resolvedFlapColor}
+            fill={resolvedColors.flap}
           />
         </svg>
       </div>
@@ -201,7 +203,7 @@ export function Envelope({
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: cardColor,
+            backgroundColor: resolvedColors.card,
             borderRadius: '8px',
             boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
             overflow: 'hidden',
@@ -220,7 +222,7 @@ export function Envelope({
           left: 0,
           right: 0,
           height: '60%',
-          backgroundColor: envelopeColor,
+          backgroundColor: resolvedColors.envelope,
           borderRadius: '0 0 8px 8px',
           zIndex: 3,
         }}
@@ -238,29 +240,8 @@ export function Envelope({
         />
       </div>
 
-      {/* 에디터 모드 안내 */}
-      {isEditMode && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '10%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            padding: '8px 16px',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            color: '#fff',
-            borderRadius: '20px',
-            fontSize: '12px',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          스크롤 시 카드가 올라옵니다
-        </div>
-      )}
-
       {/* 디버그: 스크롤 progress (개발 모드에서만) */}
-      {process.env.NODE_ENV === 'development' && !isEditMode && (
+      {process.env.NODE_ENV === 'development' && (
         <div
           style={{
             position: 'absolute',
