@@ -380,13 +380,13 @@ export function NaturalHeroLanding() {
                 className="block text-[var(--text-primary)]"
                 style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 300 }}
               >
-                원하는 분위기의 청첩장을,
+                친구와 톡하듯 편하게 대화하세요
               </span>
               <span
                 className="block text-[var(--sage-600)] mt-1"
                 style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 500 }}
               >
-                AI와 함께 손쉽게 만들어보세요
+                청첩장의 모든 빈칸, AI가 알아서 채워드릴게요
               </span>
             </h1>
           </div>
@@ -421,7 +421,7 @@ export function NaturalHeroLanding() {
                   className="bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white px-8 py-3.5 text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-300 h-auto w-full sm:w-auto"
                   style={{ fontFamily: 'Pretendard, sans-serif' }}
                 >
-                  무료로 시작하기
+                  AI와 대화 시작하기
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -437,7 +437,7 @@ export function NaturalHeroLanding() {
                     clipRule="evenodd"
                   />
                 </svg>
-                회원가입 후 무료 미리보기
+                카드 등록 없이 무료 체험
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -447,7 +447,7 @@ export function NaturalHeroLanding() {
                     clipRule="evenodd"
                   />
                 </svg>
-                5분 완성
+                복잡한 양식 없이 대화로 완성
               </span>
             </div>
           </div>
