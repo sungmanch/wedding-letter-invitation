@@ -48,6 +48,11 @@ export function useKropper(options: KropperOptions = {}) {
     setState(instanceRef.current.getState());
   }, []);
 
+  const setShape = useCallback((shape: string) => {
+    if (!instanceRef.current) return;
+    instanceRef.current.setShape(shape);
+  }, []);
+
   useEffect(() => {
     return () => {
       if (instanceRef.current) {
@@ -66,5 +71,6 @@ export function useKropper(options: KropperOptions = {}) {
     crop,
     reset,
     setZoom,
+    setShape,
   };
 }

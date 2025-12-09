@@ -5,14 +5,19 @@ import type {
   KropperState,
   KropperInstance,
 } from './types';
+import { CROP_SHAPES, type CropShape } from './shapes';
 
-const DEFAULT_OPTIONS: Required<KropperOptions> = {
+const DEFAULT_OPTIONS: Required<Omit<KropperOptions, 'customShapePath'>> & {
+  customShapePath?: (width: number, height: number) => Path2D;
+} = {
   aspectRatio: 1,
   minZoom: 0.5,
   maxZoom: 3,
   initialZoom: 1,
   showGrid: true,
   gridLines: 3,
+  shape: 'rectangle',
+  customShapePath: undefined,
 };
 
 export function createKropper(
@@ -28,10 +33,29 @@ export function createKropper(
   let isDragging = false;
   let dragStart: Position = { x: 0, y: 0 };
   let lastPosition: Position = { x: 0, y: 0 };
+  let currentShape: string = opts.shape;
 
   // Touch handling
   let lastTouchDistance = 0;
   let lastTouchCenter: Position = { x: 0, y: 0 };
+
+  function getShapePath(): Path2D {
+    // Custom path takes priority
+    if (opts.customShapePath) {
+      return opts.customShapePath(canvas.width, canvas.height);
+    }
+
+    // Use preset shape
+    const shape: CropShape | undefined = CROP_SHAPES[currentShape];
+    if (shape) {
+      return shape.path(canvas.width, canvas.height);
+    }
+
+    // Fallback to rectangle
+    const path = new Path2D();
+    path.rect(0, 0, canvas.width, canvas.height);
+    return path;
+  }
 
   function getImageDimensions() {
     if (!imageEl) return { width: 0, height: 0 };
@@ -62,7 +86,14 @@ export function createKropper(
     const x = (canvas.width - width) / 2 + position.x;
     const y = (canvas.height - height) / 2 + position.y;
 
+    // Apply shape clipping
+    ctx.save();
+    const clipPath = getShapePath();
+    ctx.clip(clipPath);
+
     ctx.drawImage(imageEl, x, y, width, height);
+
+    ctx.restore();
   }
 
   function constrainPosition() {
@@ -252,9 +283,29 @@ export function createKropper(
     });
   }
 
-  async function crop(type = 'image/jpeg'): Promise<Blob | null> {
+  async function crop(type = 'image/png'): Promise<Blob | null> {
+    if (!ctx || !imageEl) return null;
+
+    // Create a temporary canvas for the cropped result
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+
+    if (!tempCtx) return null;
+
+    const { width, height } = getImageDimensions();
+    const x = (canvas.width - width) / 2 + position.x;
+    const y = (canvas.height - height) / 2 + position.y;
+
+    // Apply shape clipping to temp canvas
+    const clipPath = getShapePath();
+    tempCtx.clip(clipPath);
+
+    tempCtx.drawImage(imageEl, x, y, width, height);
+
     return new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), type, 0.9);
+      tempCanvas.toBlob((blob) => resolve(blob), type, 0.9);
     });
   }
 
@@ -267,6 +318,11 @@ export function createKropper(
   function setZoom(newZoom: number) {
     zoom = Math.max(opts.minZoom, Math.min(opts.maxZoom, newZoom));
     constrainPosition();
+    requestAnimationFrame(draw);
+  }
+
+  function setShape(shape: string) {
+    currentShape = shape;
     requestAnimationFrame(draw);
   }
 
@@ -291,6 +347,7 @@ export function createKropper(
     crop,
     reset,
     setZoom,
+    setShape,
     getState,
     destroy,
   };
