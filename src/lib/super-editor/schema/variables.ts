@@ -246,6 +246,18 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     required: false,
     description: '__HIDDEN__', // 자동 계산 (2PM)
   },
+  'wedding.hours': {
+    type: 'text',
+    label: '시 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (14)
+  },
+  'wedding.minutes': {
+    type: 'text',
+    label: '분 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (00)
+  },
 
   // Save The Date variant용 파생 필드
   'wedding.dateFormatted': {

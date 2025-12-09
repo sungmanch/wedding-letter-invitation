@@ -849,25 +849,70 @@ export const dateSkeleton: SectionSkeleton = {
                   as: 'p',
                 },
               },
-              // 시간 대형 표시
+              // 시간 대형 표시 (깜빡이는 콜론)
               {
                 id: 'time-large',
-                type: 'text',
-                tokenStyle: {
-                  fontFamily: '$token.typography.displayLg.fontFamily',
-                  color: '$token.colors.text.primary',
-                },
+                type: 'row',
                 style: {
-                  fontSize: '80px',
-                  fontWeight: '900',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '0.9',
+                  alignItems: 'center',
                   marginTop: '16px',
                 },
-                props: {
-                  content: '{{wedding.time24h}}',
-                  as: 'p',
-                },
+                children: [
+                  {
+                    id: 'time-hours',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.displayLg.fontFamily',
+                      color: '$token.colors.text.primary',
+                    },
+                    style: {
+                      fontSize: '80px',
+                      fontWeight: '900',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '0.9',
+                    },
+                    props: {
+                      content: '{{wedding.hours}}',
+                      as: 'span',
+                    },
+                  },
+                  {
+                    id: 'time-colon',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.displayLg.fontFamily',
+                      color: '$token.colors.text.primary',
+                    },
+                    style: {
+                      fontSize: '80px',
+                      fontWeight: '900',
+                      lineHeight: '0.9',
+                      animation: 'blink 1s ease-in-out infinite',
+                    },
+                    props: {
+                      content: ':',
+                      as: 'span',
+                    },
+                  },
+                  {
+                    id: 'time-minutes',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.displayLg.fontFamily',
+                      color: '$token.colors.text.primary',
+                    },
+                    style: {
+                      fontSize: '80px',
+                      fontWeight: '900',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '0.9',
+                    },
+                    props: {
+                      content: '{{wedding.minutes}}',
+                      as: 'span',
+                    },
+                  },
+                ],
               },
               // 하단 영역 (텍스트 + 사진)
               {

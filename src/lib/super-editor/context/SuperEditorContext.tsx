@@ -247,6 +247,10 @@ function computeDerivedFields(
       // 24시간 형식 시간 (14:00)
       result = setValueByPath(result, 'wedding.time24h', value)
 
+      // 시/분 분리 (Typography Bold용 깜빡이는 콜론)
+      result = setValueByPath(result, 'wedding.hours', hours.toString().padStart(2, '0'))
+      result = setValueByPath(result, 'wedding.minutes', minutes.toString().padStart(2, '0'))
+
       // 12시간 형식 시간 (2PM, 6PM)
       const time12h = minutes === 0
         ? `${displayHours}${periodEn}`
