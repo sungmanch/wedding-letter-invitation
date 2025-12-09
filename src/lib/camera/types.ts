@@ -63,3 +63,45 @@ export type PhotoBoothState = {
   stickers: PlacedSticker[];
   capturedImage: string | null;
 };
+
+// Frame Editor Types
+export type PersonType = 'groom' | 'bride';
+
+export type PersonImage = {
+  type: PersonType;
+  originalUrl: string;
+  croppedUrl: string | null;
+  position: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+  };
+};
+
+export type CustomFrame = {
+  id: string;
+  name: string;
+  groomImage: PersonImage | null;
+  brideImage: PersonImage | null;
+  backgroundColor: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type FrameEditorStep =
+  | 'groom-upload'
+  | 'groom-crop'
+  | 'bride-upload'
+  | 'bride-crop'
+  | 'arrange'
+  | 'name'
+  | 'complete';
+
+export type FrameEditorState = {
+  step: FrameEditorStep;
+  frame: CustomFrame;
+  isLoading: boolean;
+  error: string | null;
+};
