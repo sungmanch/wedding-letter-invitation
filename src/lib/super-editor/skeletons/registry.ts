@@ -120,7 +120,7 @@ export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   guestbook: true,
   music: true,
   photobooth: false, // 포토부스는 기본 비활성화
-  invitation: false, // RSVP는 기본 비활성화
+  invitation: true, // RSVP 활성화
 }
 
 // ============================================

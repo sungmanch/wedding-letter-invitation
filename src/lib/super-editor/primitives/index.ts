@@ -67,6 +67,8 @@ export const allRenderers: Record<string, PrimitiveRenderer> = {
 }
 
 // 렌더러 레지스트리 초기화
+console.log('[Primitives] Registering renderers:', Object.keys(allRenderers))
+console.log('[Primitives] Has envelope?', 'envelope' in allRenderers, allRenderers['envelope'])
 setRenderers(allRenderers)
 
 // ============================================
@@ -82,7 +84,7 @@ export const rendererCategories = {
   content: {
     label: '콘텐츠',
     renderers: contentRenderers,
-    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed', 'calendar'],
+    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed', 'calendar', 'countdown'],
   },
   imageCollection: {
     label: '이미지 컬렉션',
@@ -132,8 +134,8 @@ export const primitiveStats = {
   custom: Object.keys(customRenderers).length,
 }
 
-// 35개 확인 (34 + envelope)
+// 36개 확인 (layout 6 + content 11 + imageCollection 8 + animation 5 + logic 2 + audio 1 + interactive 2 + custom 1)
 console.assert(
-  primitiveStats.total === 35,
-  `Expected 35 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 36,
+  `Expected 36 primitives, got ${primitiveStats.total}`
 )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PrimitiveNode } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { mergeNodeStyles, getNodeProps } from '../types'
@@ -27,22 +27,23 @@ export interface EnvelopeProps {
  * 2. invitation-card (z-2): 인비테이션 카드 - 패럴랙스로 느리게 이동
  * 3. envelope-front (z-3): 봉투 앞면 - 봉투와 함께 이동
  */
-export function Envelope({
-  node,
-  context,
-}: {
-  node: PrimitiveNode
-  context: RenderContext
-}) {
+export function Envelope({ node, context }: { node: PrimitiveNode; context: RenderContext }) {
+  console.log('hey')
   const props = getNodeProps<EnvelopeProps>(node)
-  const style = mergeNodeStyles(node as PrimitiveNode & { tokenStyle?: Record<string, unknown> }, context)
+  const style = mergeNodeStyles(
+    node as PrimitiveNode & { tokenStyle?: Record<string, unknown> },
+    context
+  )
   const containerRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number>(0)
+  const lastProgressRef = useRef<number>(0)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [resolvedColors, setResolvedColors] = useState({
     envelope: '#f5f5f5',
     card: '#ffffff',
     flap: '#f5f5f5',
   })
+  const [mounted, setMounted] = useState(false)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
   const isEditMode = context.mode === 'edit'
@@ -53,84 +54,98 @@ export function Envelope({
   const flapColor = props.flapColor || envelopeColor
   const parallaxIntensity = props.parallaxIntensity ?? 0.6
 
-  // CSS 변수를 실제 색상값으로 변환
+  // 마운트 플래그 설정 (hydration 이슈 방지)
   useEffect(() => {
-    if (!containerRef.current) return
-
-    const computedStyle = getComputedStyle(containerRef.current)
-    const surfaceColor = computedStyle.getPropertyValue('--color-surface').trim() || '#f5f5f5'
-    const bgColor = computedStyle.getPropertyValue('--color-background').trim() || '#ffffff'
-
-    setResolvedColors({
-      envelope: surfaceColor,
-      card: bgColor,
-      flap: surfaceColor,
-    })
-  }, [envelopeColor, cardColor, flapColor])
-
-  // 스크롤 가능한 부모 요소 찾기
-  const findScrollParent = useCallback((element: HTMLElement | null): HTMLElement | Window => {
-    if (!element) return window
-
-    let parent = element.parentElement
-    while (parent) {
-      const { overflow, overflowY } = getComputedStyle(parent)
-      if (
-        overflow === 'auto' ||
-        overflow === 'scroll' ||
-        overflowY === 'auto' ||
-        overflowY === 'scroll'
-      ) {
-        if (parent.scrollHeight > parent.clientHeight) {
-          return parent
-        }
-      }
-      parent = parent.parentElement
-    }
-    return window
+    setMounted(true)
   }, [])
 
-  // 스크롤 progress 계산
+  // CSS 변수를 실제 색상값으로 변환
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current || !mounted) return
 
-    const scrollParent = findScrollParent(containerRef.current)
-    const isWindow = scrollParent === window
+    // 약간의 지연 후 색상 계산 (CSS 변수가 적용된 후)
+    const timer = setTimeout(() => {
+      if (!containerRef.current) return
+      const computedStyle = getComputedStyle(containerRef.current)
+      const surfaceColor = computedStyle.getPropertyValue('--color-surface').trim() || '#f5f5f5'
+      const bgColor = computedStyle.getPropertyValue('--color-background').trim() || '#ffffff'
 
-    const handleScroll = () => {
+      setResolvedColors({
+        envelope: surfaceColor,
+        card: bgColor,
+        flap: surfaceColor,
+      })
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [envelopeColor, cardColor, flapColor, mounted])
+
+  // RAF 기반 스크롤 progress 계산 (스크롤 이벤트 대신 매 프레임 체크)
+  useEffect(() => {
+    if (!containerRef.current || !mounted) return
+
+    // 스크롤 컨테이너 찾기
+    const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
+      let parent = element.parentElement
+      while (parent) {
+        // scrollHeight > clientHeight이면 스크롤 가능
+        if (parent.scrollHeight > parent.clientHeight + 10) {
+          return parent
+        }
+        parent = parent.parentElement
+      }
+      return null
+    }
+
+    const scrollContainer = findScrollContainer(containerRef.current)
+
+    console.log('[Envelope] Init - scrollContainer:', scrollContainer?.className || 'none')
+
+    const updateProgress = () => {
       if (!containerRef.current) return
 
       const rect = containerRef.current.getBoundingClientRect()
 
+      // 스크롤 컨테이너 기준 또는 뷰포트 기준으로 계산
       let viewportHeight: number
       let viewportTop: number
 
-      if (isWindow) {
-        viewportHeight = window.innerHeight
-        viewportTop = 0
-      } else {
-        const containerRect = (scrollParent as HTMLElement).getBoundingClientRect()
+      if (scrollContainer) {
+        const containerRect = scrollContainer.getBoundingClientRect()
         viewportHeight = containerRect.height
         viewportTop = containerRect.top
+      } else {
+        viewportHeight = window.innerHeight
+        viewportTop = 0
       }
 
       const relativeTop = rect.top - viewportTop
 
-      // 요소가 화면 하단에서 시작해서 중앙을 지날 때까지
+      // 요소가 화면 하단에서 시작해서 상단 30%에 도달할 때까지
       const start = viewportHeight
       const end = viewportHeight * 0.3
 
       const progress = (start - relativeTop) / (start - end)
       const clampedProgress = Math.max(0, Math.min(1, progress))
 
-      setScrollProgress(clampedProgress)
+      // 값이 변경되었을 때만 state 업데이트 (성능 최적화)
+      if (Math.abs(clampedProgress - lastProgressRef.current) > 0.001) {
+        lastProgressRef.current = clampedProgress
+        setScrollProgress(clampedProgress)
+      }
+
+      rafRef.current = requestAnimationFrame(updateProgress)
     }
 
-    scrollParent.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
+    // RAF 시작
+    rafRef.current = requestAnimationFrame(updateProgress)
 
-    return () => scrollParent.removeEventListener('scroll', handleScroll)
-  }, [findScrollParent])
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
+    }
+  }, [mounted])
 
   // 카드의 패럴랙스 transform 계산
   // progress 0 → 카드가 봉투 안에 숨어있음 (translateY: 50%)
@@ -179,10 +194,7 @@ export function Envelope({
             height: '100%',
           }}
         >
-          <polygon
-            points="0,0 100,0 50,50"
-            fill={resolvedColors.flap}
-          />
+          <polygon points="0,0 100,0 50,50" fill={resolvedColors.flap} />
         </svg>
       </div>
 
