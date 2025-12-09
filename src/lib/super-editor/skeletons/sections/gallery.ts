@@ -179,6 +179,106 @@ export const gallerySkeleton: SectionSkeleton = {
     },
 
     // ============================================
+    // Elegant Dark Variant (다크 배경 + 필기체 타이틀)
+    // ============================================
+    {
+      id: 'elegant-dark',
+      name: '엘레건트 다크',
+      description: '다크 배경에 필기체 타이틀과 둥근 그리드',
+      tags: ['dark', 'elegant', 'script', 'luxury'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        style: {
+          backgroundColor: '#1a1a1a',
+          padding: '48px 0',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            style: {
+              gap: '8px',
+              alignItems: 'center',
+            },
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                style: {
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '42px',
+                  fontWeight: '400',
+                  fontStyle: 'italic',
+                  color: '#ffffff',
+                  textAlign: 'center',
+                  marginBottom: '4px',
+                },
+                props: {
+                  content: 'Gallery',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-subtitle',
+                type: 'text',
+                style: {
+                  fontSize: '13px',
+                  fontWeight: '300',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  textAlign: 'center',
+                  marginBottom: '24px',
+                },
+                props: {
+                  content: '클릭하면 확대가 가능합니다',
+                  as: 'p',
+                },
+              },
+              {
+                id: 'gallery-grid-dark',
+                type: 'gallery',
+                style: {
+                  padding: '0 4px',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  layout: 'grid',
+                  columns: 3,
+                  gap: 4,
+                  aspectRatio: '3:4',
+                  objectFit: 'cover',
+                  borderRadius: 8,
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
+        ],
+        layouts: [
+          { id: '2col', name: '2열', props: { columns: 2 } },
+          { id: '3col', name: '3열', props: { columns: 3 } },
+          { id: '4col', name: '4열', props: { columns: 4 } },
+        ],
+      },
+    },
+
+    // ============================================
     // Masonry Variant
     // ============================================
     {
