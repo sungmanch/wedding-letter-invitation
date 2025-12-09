@@ -107,7 +107,7 @@ export const rendererCategories = {
   interactive: {
     label: '인터랙티브',
     renderers: interactiveRenderers,
-    types: ['photobooth'],
+    types: ['photobooth', 'envelope'],
   },
   custom: {
     label: '확장',
@@ -132,8 +132,8 @@ export const primitiveStats = {
   custom: Object.keys(customRenderers).length,
 }
 
-// 33개 확인 (32 + film-strip)
+// 34개 확인 (33 + envelope)
 console.assert(
-  primitiveStats.total === 33,
-  `Expected 33 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 34,
+  `Expected 34 primitives, got ${primitiveStats.total}`
 )
