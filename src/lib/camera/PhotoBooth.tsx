@@ -54,8 +54,8 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const [activeTab, setActiveTab] = useState<'filter' | 'sticker'>('filter');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('none');
+    const [activeStickers, setActiveStickers] = useState<Set<string>>(new Set());
     const [stickers, setStickers] = useState<PlacedSticker[]>([]);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [hostImage, setHostImage] = useState<HTMLImageElement | null>(null);
@@ -186,24 +186,38 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       link.click();
     }, [capturedImage, handleCapture]);
 
-    const handleAddSticker = useCallback((sticker: Sticker) => {
+    // 필터 토글 (같은 필터 누르면 끄기)
+    const handleFilterToggle = useCallback((filterType: FilterType) => {
+      setSelectedFilter((prev) => prev === filterType ? 'none' : filterType);
+    }, []);
+
+    // 스티커 토글 (같은 스티커 누르면 끄기, 왼쪽 위에 배치)
+    const handleStickerToggle = useCallback((sticker: Sticker) => {
       const canvas = overlayCanvasRef.current;
       if (!canvas) return;
 
-      const placed = createPlacedSticker(
-        sticker,
-        canvas.width / 2 - 40,
-        canvas.height / 2 - 40,
-        80
-      );
-      setStickers((prev) => [...prev, placed]);
+      setActiveStickers((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(sticker.id)) {
+          // 스티커 끄기
+          newSet.delete(sticker.id);
+          setStickers((prevStickers) =>
+            prevStickers.filter((s) => s.sticker.id !== sticker.id)
+          );
+        } else {
+          // 스티커 켜기 - 왼쪽 위에 배치 (사람을 가리지 않도록)
+          newSet.add(sticker.id);
+          const placed = createPlacedSticker(
+            sticker,
+            30,  // 왼쪽 여백
+            30,  // 위쪽 여백
+            60   // 크기
+          );
+          setStickers((prevStickers) => [...prevStickers, placed]);
+        }
+        return newSet;
+      });
     }, []);
-
-    const handleDeleteSticker = useCallback(() => {
-      if (!selectedSticker) return;
-      setStickers((prev) => prev.filter((s) => s.id !== selectedSticker.id));
-      setSelectedSticker(null);
-    }, [selectedSticker]);
 
     // Pointer handlers for sticker manipulation
     const handlePointerDown = useCallback(
@@ -363,40 +377,20 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
           )}
         </div>
 
-        {/* Tab Buttons */}
-        <div style={styles.tabContainer}>
-          <button
-            onClick={() => setActiveTab('filter')}
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === 'filter' ? styles.tabButtonActive : {}),
-            }}
-          >
-            Filter & Frame
-          </button>
-          <button
-            onClick={() => setActiveTab('sticker')}
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === 'sticker' ? styles.tabButtonActive : {}),
-            }}
-          >
-            Sticker
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div style={styles.tabContent}>
-          {activeTab === 'filter' && (
-            <div style={styles.filterGrid}>
-              {FILTER_LIST.map((filter) => (
+        {/* Filter & Sticker Controls */}
+        <div style={styles.controlsContainer}>
+          {/* Filter Section */}
+          <div style={styles.controlSection}>
+            <p style={styles.sectionLabel}>필터</p>
+            <div style={styles.toggleGrid}>
+              {FILTER_LIST.filter(f => f.type !== 'none').map((filter) => (
                 <button
                   key={filter.type}
-                  onClick={() => setSelectedFilter(filter.type)}
+                  onClick={() => handleFilterToggle(filter.type)}
                   style={{
-                    ...styles.filterButton,
+                    ...styles.toggleButton,
                     ...(selectedFilter === filter.type
-                      ? styles.filterButtonActive
+                      ? styles.toggleButtonActive
                       : {}),
                   }}
                 >
@@ -404,30 +398,28 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
                 </button>
               ))}
             </div>
-          )}
+          </div>
 
-          {activeTab === 'sticker' && (
-            <div>
-              <p style={styles.stickerLabel}>일반 스티커</p>
-              <div style={styles.stickerGrid}>
-                {generalStickers.map((sticker) => (
-                  <button
-                    key={sticker.id}
-                    onClick={() => handleAddSticker(sticker)}
-                    style={styles.stickerButton}
-                  >
-                    {sticker.emoji}
-                  </button>
-                ))}
-              </div>
-
-              {selectedSticker && (
-                <button onClick={handleDeleteSticker} style={styles.deleteButton}>
-                  선택한 스티커 삭제
+          {/* Sticker Section */}
+          <div style={styles.controlSection}>
+            <p style={styles.sectionLabel}>스티커</p>
+            <div style={styles.toggleGrid}>
+              {generalStickers.map((sticker) => (
+                <button
+                  key={sticker.id}
+                  onClick={() => handleStickerToggle(sticker)}
+                  style={{
+                    ...styles.stickerToggleButton,
+                    ...(activeStickers.has(sticker.id)
+                      ? styles.toggleButtonActive
+                      : {}),
+                  }}
+                >
+                  {sticker.emoji}
                 </button>
-              )}
+              ))}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Error message */}
@@ -553,29 +545,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: 'auto',
     display: 'block',
   },
-  tabContainer: {
-    display: 'flex',
-    width: '100%',
-    maxWidth: '400px',
-    marginTop: '16px',
-    gap: '8px',
-  },
-  tabButton: {
-    flex: 1,
-    padding: '12px 16px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '24px',
-    backgroundColor: 'white',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 500,
-  },
-  tabButtonActive: {
-    backgroundColor: '#1a1a1a',
-    color: 'white',
-    border: '1px solid #1a1a1a',
-  },
-  tabContent: {
+  controlsContainer: {
     width: '100%',
     maxWidth: '400px',
     marginTop: '16px',
@@ -584,54 +554,47 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '16px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
   },
-  filterGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '8px',
+  controlSection: {
+    marginBottom: '16px',
   },
-  filterButton: {
-    padding: '10px 8px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    cursor: 'pointer',
-    fontSize: '12px',
+  sectionLabel: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#333',
+    marginBottom: '10px',
   },
-  filterButtonActive: {
-    borderColor: '#1a1a1a',
-    backgroundColor: '#f5f5f5',
-  },
-  stickerLabel: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '12px',
-  },
-  stickerGrid: {
+  toggleGrid: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '8px',
   },
-  stickerButton: {
-    width: '48px',
-    height: '48px',
+  toggleButton: {
+    padding: '8px 14px',
+    border: '1px solid #e0e0e0',
+    borderRadius: '20px',
+    backgroundColor: 'white',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: 500,
+    transition: 'all 0.2s',
+  },
+  toggleButtonActive: {
+    borderColor: '#1a1a1a',
+    backgroundColor: '#1a1a1a',
+    color: 'white',
+  },
+  stickerToggleButton: {
+    width: '44px',
+    height: '44px',
     border: '1px solid #e0e0e0',
     borderRadius: '12px',
     backgroundColor: 'white',
     cursor: 'pointer',
-    fontSize: '24px',
+    fontSize: '22px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  deleteButton: {
-    marginTop: '16px',
-    padding: '10px 16px',
-    border: '1px solid #ff4444',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    color: '#ff4444',
-    cursor: 'pointer',
-    fontSize: '14px',
+    transition: 'all 0.2s',
   },
   error: {
     marginTop: '16px',

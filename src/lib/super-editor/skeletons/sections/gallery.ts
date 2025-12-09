@@ -847,5 +847,406 @@ export const gallerySkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Polaroid Variant (폴라로이드 스타일)
+    // ============================================
+    {
+      id: 'polaroid',
+      name: '폴라로이드',
+      description: '폴라로이드 사진 스타일의 갤러리',
+      tags: ['retro', 'vintage', 'playful', 'romantic'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            style: {
+              gap: '24px',
+              alignItems: 'center',
+            },
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-polaroid',
+                type: 'polaroid',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  layout: 'scattered',
+                  maxRotation: 8,
+                  frameColor: '#ffffff',
+                  shadowIntensity: 0.15,
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
+        ],
+        layouts: [
+          { id: 'scattered', name: '흩어진', props: { layout: 'scattered' } },
+          { id: 'grid', name: '정렬', props: { layout: 'grid' } },
+          { id: 'stack', name: '겹침', props: { layout: 'stack' } },
+        ],
+      },
+    },
+
+    // ============================================
+    // Magazine Variant (매거진 레이아웃)
+    // ============================================
+    {
+      id: 'magazine',
+      name: '매거진',
+      description: '잡지 스타일의 다양한 크기 레이아웃',
+      tags: ['editorial', 'modern', 'elegant', 'asymmetric'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-magazine',
+                type: 'magazine',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  gap: 4,
+                  pattern: 'featured-right',
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
+        ],
+        layouts: [
+          { id: 'featured-left', name: '왼쪽 강조', props: { pattern: 'featured-left' } },
+          { id: 'featured-right', name: '오른쪽 강조', props: { pattern: 'featured-right' } },
+          { id: 'alternating', name: '번갈아', props: { pattern: 'alternating' } },
+        ],
+      },
+    },
+
+    // ============================================
+    // Split Scroll Variant (좌우 반대 스크롤)
+    // ============================================
+    {
+      id: 'split-scroll',
+      name: '스플릿 스크롤',
+      description: '좌우 열이 반대 방향으로 스크롤',
+      tags: ['dynamic', 'modern', 'creative', 'parallax'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                  padding: '$token.spacing.lg',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-split',
+                type: 'split-scroll',
+                style: {
+                  width: '100%',
+                  height: '500px',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  gap: 8,
+                  speed: 30,
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+        ],
+        layouts: [
+          { id: 'slow', name: '느리게', props: { speed: 20 } },
+          { id: 'normal', name: '보통', props: { speed: 30 } },
+          { id: 'fast', name: '빠르게', props: { speed: 50 } },
+        ],
+      },
+    },
+
+    // ============================================
+    // Flip Cards Variant (뒤집기 카드)
+    // ============================================
+    {
+      id: 'flip-cards',
+      name: '플립 카드',
+      description: '호버/클릭 시 카드가 뒤집히는 갤러리',
+      tags: ['interactive', 'fun', 'playful', '3d'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.surface',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            style: {
+              gap: '24px',
+            },
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                tokenStyle: {
+                  fontFamily: '$token.typography.sectionTitle.fontFamily',
+                  fontSize: '$token.typography.sectionTitle.fontSize',
+                  fontWeight: '$token.typography.sectionTitle.fontWeight',
+                  letterSpacing: '$token.typography.sectionTitle.letterSpacing',
+                  color: '$token.colors.text.primary',
+                },
+                style: {
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                },
+                props: {
+                  content: '갤러리',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-flip',
+                type: 'flip-cards',
+                style: {
+                  width: '100%',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  columns: 2,
+                  gap: 12,
+                  aspectRatio: '3:4',
+                  flipTrigger: 'hover',
+                  backContent: 'blur',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 600 },
+        ],
+        layouts: [
+          { id: '2col', name: '2열', props: { columns: 2 } },
+          { id: '3col', name: '3열', props: { columns: 3 } },
+        ],
+      },
+    },
+
+    // ============================================
+    // Parallax Stack Variant (패럴랙스 스택)
+    // ============================================
+    {
+      id: 'parallax-stack',
+      name: '패럴랙스 스택',
+      description: '스크롤 시 레이어별 다른 속도로 움직이는 갤러리',
+      tags: ['parallax', 'immersive', 'cinematic', 'scroll'],
+      structure: {
+        id: 'gallery-root',
+        type: 'container',
+        style: {
+          backgroundColor: '#0a0a0a',
+          padding: '48px 0',
+        },
+        children: [
+          {
+            id: 'gallery-content',
+            type: 'column',
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              {
+                id: 'gallery-title',
+                type: 'text',
+                style: {
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '28px',
+                  fontWeight: '400',
+                  fontStyle: 'italic',
+                  color: '#ffffff',
+                  textAlign: 'center',
+                  marginBottom: '32px',
+                },
+                props: {
+                  content: 'Our Moments',
+                  as: 'h2',
+                },
+              },
+              {
+                id: 'gallery-parallax',
+                type: 'parallax-stack',
+                style: {
+                  width: '100%',
+                  height: '600px',
+                },
+                props: {
+                  images: '{{photos.gallery}}',
+                  baseSpeed: 0.5,
+                  spreadFactor: 0.3,
+                  onClick: 'lightbox',
+                },
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'gallery-images',
+          path: 'photos.gallery',
+          type: 'images',
+          required: true,
+          description: '갤러리 이미지 배열',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+        ],
+        layouts: [
+          { id: 'subtle', name: '은은하게', props: { baseSpeed: 0.3, spreadFactor: 0.2 } },
+          { id: 'normal', name: '보통', props: { baseSpeed: 0.5, spreadFactor: 0.3 } },
+          { id: 'dramatic', name: '극적', props: { baseSpeed: 0.8, spreadFactor: 0.5 } },
+        ],
+      },
+    },
   ],
 }
