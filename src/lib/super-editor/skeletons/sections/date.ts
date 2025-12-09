@@ -1750,7 +1750,7 @@ export const dateSkeleton: SectionSkeleton = {
                   gap: '0',
                 },
                 children: [
-                  // 월 (2자리) - Inset/Pressed 효과 (pseudo-element 사용)
+                  // 월 (2자리)
                   {
                     id: 'pressed-month',
                     type: 'text',
@@ -1760,14 +1760,15 @@ export const dateSkeleton: SectionSkeleton = {
                       lineHeight: '0.9',
                       fontFamily: 'Georgia, "Times New Roman", serif',
                       letterSpacing: '-0.02em',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     },
                     props: {
                       content: '{{wedding.monthPadded}}',
                       as: 'span',
-                      className: 'inset-text',
                     },
                   },
-                  // 일 (2자리) - Inset/Pressed 효과
+                  // 일 (2자리)
                   {
                     id: 'pressed-day',
                     type: 'text',
@@ -1777,14 +1778,15 @@ export const dateSkeleton: SectionSkeleton = {
                       lineHeight: '0.9',
                       fontFamily: 'Georgia, "Times New Roman", serif',
                       letterSpacing: '-0.02em',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     },
                     props: {
                       content: '{{wedding.dayPadded}}',
                       as: 'span',
-                      className: 'inset-text',
                     },
                   },
-                  // 연도 (2자리) - Inset/Pressed 효과
+                  // 연도 (2자리)
                   {
                     id: 'pressed-year',
                     type: 'text',
@@ -1794,11 +1796,12 @@ export const dateSkeleton: SectionSkeleton = {
                       lineHeight: '0.9',
                       fontFamily: 'Georgia, "Times New Roman", serif',
                       letterSpacing: '-0.02em',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     },
                     props: {
                       content: '{{wedding.yearShort}}',
                       as: 'span',
-                      className: 'inset-text',
                     },
                   },
                 ],
