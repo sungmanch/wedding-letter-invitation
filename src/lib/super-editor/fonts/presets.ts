@@ -697,6 +697,24 @@ export const FONT_PRESETS: FontPreset[] = [
   // 한글 손글씨 (projectnoonnu)
   // ============================================
   {
+    id: 'mapo-geumbitnaru',
+    family: 'MapoGeumbitnaru',
+    label: '마포금빛나루',
+    labelEn: 'Mapo Geumbitnaru',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoGoldenPierA.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '따뜻하고 감성적인 손글씨체',
+    recommended: ['title', 'accent'],
+  },
+  {
     id: 'school-safety-bookmark',
     family: 'SchoolSafetyBookmark',
     label: '학교안심 책갈피',
