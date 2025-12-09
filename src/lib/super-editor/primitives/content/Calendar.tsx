@@ -223,6 +223,38 @@ export function Calendar({
                   }}
                 />
               )}
+              {isWeddingDay && highlightStyle === 'heart' && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--color-brand, #3B82F6)"
+                  strokeWidth="1.5"
+                  style={{
+                    position: 'absolute',
+                    width: '42px',
+                    height: '42px',
+                  }}
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+              {isWeddingDay && highlightStyle === 'heart-filled' && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="var(--color-brand, #3B82F6)"
+                  style={{
+                    position: 'absolute',
+                    width: '42px',
+                    height: '42px',
+                  }}
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              )}
               <span
                 style={{
                   position: 'relative',
@@ -230,9 +262,11 @@ export function Calendar({
                   fontFamily: 'var(--typo-body-md-font-family)',
                   fontWeight: isWeddingDay ? 600 : 400,
                   color: isWeddingDay
-                    ? highlightStyle === 'ring'
+                    ? highlightStyle === 'ring' || highlightStyle === 'heart'
                       ? 'var(--color-brand, #3B82F6)'
-                      : '#FFFFFF'
+                      : highlightStyle === 'heart-filled'
+                        ? '#FFFFFF'
+                        : '#FFFFFF'
                     : dayColor,
                   zIndex: 1,
                 }}
@@ -274,6 +308,8 @@ export const calendarRenderer: PrimitiveRenderer<CalendarProps> = {
         { value: 'circle', label: '원형' },
         { value: 'filled', label: '채움' },
         { value: 'ring', label: '테두리' },
+        { value: 'heart', label: '하트 (테두리)' },
+        { value: 'heart-filled', label: '하트 (채움)' },
       ],
       defaultValue: 'circle',
     },

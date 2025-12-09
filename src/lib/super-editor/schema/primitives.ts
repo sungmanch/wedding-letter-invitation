@@ -211,7 +211,7 @@ export interface CalendarProps {
   /** 로케일 */
   locale?: 'ko' | 'en'
   /** 결혼 날짜 하이라이트 스타일 */
-  highlightStyle?: 'circle' | 'filled' | 'ring'
+  highlightStyle?: 'circle' | 'filled' | 'ring' | 'heart' | 'heart-filled'
   /** 일요일/공휴일 색상 표시 */
   showHolidayColor?: boolean
   /** 토요일 색상 표시 */

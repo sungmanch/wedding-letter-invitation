@@ -1085,5 +1085,135 @@ export const dateSkeleton: SectionSkeleton = {
         ],
       },
     },
+
+    // ============================================
+    // Calendar Heart Variant
+    // ============================================
+    {
+      id: 'calendar-heart',
+      name: '하트 캘린더',
+      description: '미니멀한 캘린더에 하트 모양으로 날짜를 강조하는 레이아웃',
+      tags: ['minimal', 'romantic', 'heart', 'calendar'],
+      structure: {
+        id: 'date-root',
+        type: 'container',
+        tokenStyle: {
+          backgroundColor: '$token.colors.background',
+          padding: '$token.spacing.section',
+        },
+        children: [
+          {
+            id: 'date-content',
+            type: 'column',
+            tokenStyle: {
+              gap: '$token.spacing.lg',
+            },
+            style: {
+              alignItems: 'center',
+            },
+            children: [
+              // SAVE OUR DATE 타이틀
+              {
+                id: 'save-our-date-title',
+                type: 'column',
+                style: {
+                  alignItems: 'center',
+                  gap: '4px',
+                },
+                children: [
+                  {
+                    id: 'save-our-date-text',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.sectionTitle.fontFamily',
+                      color: '$token.colors.text.primary',
+                    },
+                    style: {
+                      fontSize: '14px',
+                      fontWeight: '400',
+                      letterSpacing: '0.3em',
+                      textTransform: 'uppercase',
+                    },
+                    props: {
+                      content: 'SAVE OUR DATE',
+                      as: 'p',
+                    },
+                  },
+                  {
+                    id: 'month-year-text',
+                    type: 'text',
+                    tokenStyle: {
+                      fontFamily: '$token.typography.bodyMd.fontFamily',
+                      color: '$token.colors.text.primary',
+                    },
+                    style: {
+                      fontSize: '13px',
+                      fontWeight: '400',
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase',
+                    },
+                    props: {
+                      content: '{{wedding.monthNameEn}} {{wedding.year}}',
+                      as: 'p',
+                    },
+                  },
+                ],
+              },
+              // 하트 캘린더
+              {
+                id: 'heart-calendar-wrapper',
+                type: 'column',
+                tokenStyle: {
+                  padding: '$token.spacing.md',
+                },
+                style: {
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '340px',
+                },
+                children: [
+                  {
+                    id: 'heart-calendar',
+                    type: 'calendar',
+                    props: {
+                      date: '{{wedding.date}}',
+                      locale: 'en',
+                      highlightStyle: 'heart',
+                      showHolidayColor: false,
+                      showSaturdayColor: false,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      slots: [
+        {
+          id: 'wedding-date',
+          path: 'wedding.date',
+          type: 'date',
+          required: true,
+          description: '예식 날짜',
+          defaultValue: '2026-09-19',
+        },
+        {
+          id: 'wedding-time',
+          path: 'wedding.time',
+          type: 'time',
+          required: true,
+          description: '예식 시간',
+          defaultValue: '14:00',
+        },
+      ],
+      options: {
+        animations: [
+          { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
+          { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 600 },
+          { id: 'scale', name: '스케일 인', preset: 'scale-in', trigger: 'inView', duration: 500 },
+        ],
+      },
+    },
   ],
 }
