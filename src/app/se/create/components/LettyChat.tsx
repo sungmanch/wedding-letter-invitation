@@ -9,14 +9,15 @@ import { useEffect, useRef, useState } from 'react'
 import { Send, Loader2 } from 'lucide-react'
 import { MessageBubble, TypingBubble, type ChatMessage } from './MessageBubble'
 import { LettyAvatar } from './LettyAvatar'
-import { useLettyConversation, type CollectedData } from '../hooks/useLettyConversation'
+import { useLettyConversation, type CollectedData, type InitialData } from '../hooks/useLettyConversation'
 
 interface LettyChatProps {
   onGenerate: (data: CollectedData) => Promise<void>
   isGenerating?: boolean
+  initialData?: InitialData
 }
 
-export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) {
+export function LettyChat({ onGenerate, isGenerating = false, initialData }: LettyChatProps) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -30,6 +31,7 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
     isInputDisabled,
   } = useLettyConversation({
     onGenerate,
+    initialData,
   })
 
   // 페이지 로드 시 대화 시작

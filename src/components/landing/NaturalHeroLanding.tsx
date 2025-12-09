@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, MouseEvent, TouchEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui'
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
 
 // Template data for carousel
 const templates = [
@@ -74,6 +74,126 @@ function AIChatVideo() {
         </div>
       </div>
       <p className="text-center mt-3 text-sm text-[var(--text-muted)]">AI 채팅으로 디자인</p>
+    </div>
+  )
+}
+
+/**
+ * Before/After Comparison Slider
+ * User drags to reveal the transformation from chat to result
+ */
+function BeforeAfterSlider() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [sliderPosition, setSliderPosition] = useState(50)
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Auto-play video when visible
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {})
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
+
+  const handleMove = useCallback((clientX: number) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = clientX - rect.left
+    const percentage = Math.max(5, Math.min(95, (x / rect.width) * 100))
+    setSliderPosition(percentage)
+  }, [])
+
+  const handleMouseDown = () => setIsDragging(true)
+  const handleMouseUp = () => setIsDragging(false)
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return
+    handleMove(e.clientX)
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    handleMove(e.touches[0].clientX)
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        ref={containerRef}
+        className="relative w-[320px] sm:w-[380px] lg:w-[420px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl cursor-ew-resize select-none bg-[var(--sand-200)]"
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+      >
+        {/* Before: AI Chat Video (full width, clipped) */}
+        <div
+          className="absolute inset-0 z-10"
+          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+        >
+          <div className="w-full h-full bg-black">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster="/examples/chat-poster.jpg"
+            >
+              <source src="/examples/1208_AICHAT.webm" type="video/webm" />
+            </video>
+          </div>
+          {/* Before label */}
+          <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/60 rounded-md">
+            <span className="text-xs text-white font-medium">AI 대화</span>
+          </div>
+        </div>
+
+        {/* After: Result Template */}
+        <div className="absolute inset-0">
+          <MagazineTemplate />
+          {/* After label */}
+          <div className="absolute bottom-4 right-4 px-2 py-1 bg-white/80 rounded-md z-20">
+            <span className="text-xs text-[var(--text-primary)] font-medium">완성된 청첩장</span>
+          </div>
+        </div>
+
+        {/* Slider handle */}
+        <div
+          className="absolute top-0 bottom-0 z-20 flex items-center justify-center"
+          style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleMouseDown}
+        >
+          {/* Vertical line */}
+          <div className="absolute h-full w-0.5 bg-white shadow-lg" />
+          {/* Handle button */}
+          <div className="relative z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 transition-transform">
+            <GripVertical className="w-5 h-5 text-[var(--sage-500)]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Hint text */}
+      <p className="text-center mt-4 text-sm text-[var(--text-muted)]">
+        ← 드래그해서 변화 확인 →
+      </p>
     </div>
   )
 }
@@ -387,20 +507,88 @@ export function NaturalHeroLanding() {
             </p>
           </div>
 
-          {/* Middle: Video + Arrow + Template (Side by Side) */}
-          <div className="flex flex-col sm:flex-row items-start justify-center gap-6 sm:gap-8 lg:gap-12 mb-10 sm:mb-12">
+          {/* Middle: Video + SVG Line + Template (Side by Side) */}
+          <div className="flex flex-col sm:flex-row items-start justify-center gap-6 sm:gap-4 lg:gap-6 mb-10 sm:mb-12">
             {/* Left: AI Chat Video */}
             <div className="flex-shrink-0 flex flex-col items-center">
               <AIChatVideo />
             </div>
 
-            {/* Arrow - vertically centered with mockups */}
+            {/* SVG Flow Line - Desktop */}
             <div className="hidden sm:flex flex-col items-center justify-center self-center">
-              <ArrowRight className="w-6 h-6 lg:w-8 lg:h-8 text-[var(--sage-400)]" />
-              <span className="text-xs text-[var(--text-light)]">생성</span>
+              <svg
+                width="80"
+                height="120"
+                viewBox="0 0 80 120"
+                fill="none"
+                className="overflow-visible"
+              >
+                {/* Gradient definition */}
+                <defs>
+                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="var(--sage-300)" />
+                    <stop offset="100%" stopColor="var(--sage-500)" />
+                  </linearGradient>
+                </defs>
+                {/* Curved path with draw animation */}
+                <path
+                  d="M 5 60 Q 40 30, 75 60"
+                  stroke="url(#flowGradient)"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  className="animate-[drawLine_2s_ease-in-out_infinite]"
+                  style={{
+                    strokeDasharray: 100,
+                    strokeDashoffset: 100,
+                  }}
+                />
+                {/* Traveling dot */}
+                <circle r="4" fill="var(--sage-500)" className="animate-[travelPath_2s_ease-in-out_infinite]">
+                  <animateMotion dur="2s" repeatCount="indefinite" keyTimes="0;1" keySplines="0.42 0 0.58 1">
+                    <mpath href="#flowPath" />
+                  </animateMotion>
+                </circle>
+                <path id="flowPath" d="M 5 60 Q 40 30, 75 60" fill="none" />
+              </svg>
+              <span className="text-[10px] text-[var(--sage-500)] font-medium tracking-wider uppercase mt-1">생성</span>
             </div>
-            <div className="sm:hidden text-center">
-              <span className="text-2xl text-[var(--sage-400)]">↓</span>
+
+            {/* SVG Flow Line - Mobile (vertical) */}
+            <div className="sm:hidden flex flex-col items-center py-2">
+              <svg
+                width="40"
+                height="60"
+                viewBox="0 0 40 60"
+                fill="none"
+                className="overflow-visible"
+              >
+                <defs>
+                  <linearGradient id="flowGradientV" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="var(--sage-300)" />
+                    <stop offset="100%" stopColor="var(--sage-500)" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M 20 5 Q 30 30, 20 55"
+                  stroke="url(#flowGradientV)"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  className="animate-[drawLine_2s_ease-in-out_infinite]"
+                  style={{
+                    strokeDasharray: 60,
+                    strokeDashoffset: 60,
+                  }}
+                />
+                <circle r="3" fill="var(--sage-500)">
+                  <animateMotion dur="2s" repeatCount="indefinite">
+                    <mpath href="#flowPathV" />
+                  </animateMotion>
+                </circle>
+                <path id="flowPathV" d="M 20 5 Q 30 30, 20 55" fill="none" />
+              </svg>
+              <span className="text-[10px] text-[var(--sage-500)] font-medium tracking-wider uppercase mt-1">생성</span>
             </div>
 
             {/* Right: Template Carousel */}
