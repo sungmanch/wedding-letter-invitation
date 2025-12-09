@@ -1,9 +1,16 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 import type { PrimitiveNode, CarouselProps } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps, getValueByPath } from '../types'
+
+// GSAP 플러그인 등록
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(useGSAP)
+}
 
 export function Carousel({
   node,
@@ -15,13 +22,12 @@ export function Carousel({
   const props = getNodeProps<CarouselProps>(node)
   const style = toInlineStyle(node.style)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const autoplayRef = useRef<NodeJS.Timeout | null>(null)
-
-  // 스와이프 상태
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState(0)
-  const dragStartX = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const autoplayRef = useRef<gsap.core.Tween | null>(null)
+  const isDragging = useRef(false)
+  const startX = useRef(0)
+  const currentX = useRef(0)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
@@ -54,89 +60,171 @@ export function Carousel({
       effect = props.effect
     }
   }
+
   const slidesToShow = props.slidesToShow || 1
+  const totalSlides = images.length
+
+  // 슬라이드 이동
+  const goTo = useCallback((index: number, animate = true) => {
+    let targetIndex = index
+    if (props.infinite) {
+      targetIndex = ((index % totalSlides) + totalSlides) % totalSlides
+    } else {
+      targetIndex = Math.max(0, Math.min(index, totalSlides - 1))
+    }
+
+    setCurrentIndex(targetIndex)
+
+    if (trackRef.current && effect === 'slide') {
+      const slideWidth = containerRef.current?.offsetWidth || 0
+      gsap.to(trackRef.current, {
+        x: -targetIndex * slideWidth,
+        duration: animate ? 0.5 : 0,
+        ease: 'power2.out',
+      })
+    }
+  }, [props.infinite, totalSlides, effect])
+
+  // GSAP 드래그 핸들링
+  useGSAP(() => {
+    if (!containerRef.current || context.mode === 'edit' || images.length <= 1) return
+    if (effect !== 'slide') return // 슬라이드 효과에서만 드래그 적용
+
+    const container = containerRef.current
+    const track = trackRef.current
+    if (!track) return
+
+    const slideWidth = container.offsetWidth
+
+    const handlePointerDown = (e: PointerEvent) => {
+      isDragging.current = true
+      startX.current = e.clientX
+      currentX.current = gsap.getProperty(track, 'x') as number
+
+      gsap.killTweensOf(track)
+      container.setPointerCapture(e.pointerId)
+    }
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isDragging.current) return
+
+      const diff = e.clientX - startX.current
+      const newX = currentX.current + diff
+
+      // 경계 저항감 (rubber band effect)
+      const minX = -(totalSlides - 1) * slideWidth
+      const maxX = 0
+
+      let boundedX = newX
+      if (newX > maxX) {
+        boundedX = maxX + (newX - maxX) * 0.3
+      } else if (newX < minX) {
+        boundedX = minX + (newX - minX) * 0.3
+      }
+
+      gsap.set(track, { x: boundedX })
+    }
+
+    const handlePointerUp = (e: PointerEvent) => {
+      if (!isDragging.current) return
+      isDragging.current = false
+
+      container.releasePointerCapture(e.pointerId)
+
+      const diff = e.clientX - startX.current
+      const velocity = diff / 100 // 간단한 속도 계산
+
+      // 스냅할 인덱스 결정
+      let targetIndex = currentIndex
+      if (Math.abs(diff) > slideWidth * 0.2 || Math.abs(velocity) > 0.5) {
+        if (diff > 0) {
+          targetIndex = currentIndex - 1
+        } else {
+          targetIndex = currentIndex + 1
+        }
+      }
+
+      goTo(targetIndex)
+    }
+
+    container.addEventListener('pointerdown', handlePointerDown)
+    container.addEventListener('pointermove', handlePointerMove)
+    container.addEventListener('pointerup', handlePointerUp)
+    container.addEventListener('pointercancel', handlePointerUp)
+
+    return () => {
+      container.removeEventListener('pointerdown', handlePointerDown)
+      container.removeEventListener('pointermove', handlePointerMove)
+      container.removeEventListener('pointerup', handlePointerUp)
+      container.removeEventListener('pointercancel', handlePointerUp)
+    }
+  }, { scope: containerRef, dependencies: [currentIndex, totalSlides, effect, context.mode, images.length] })
+
+  // Coverflow/Cards 효과를 위한 GSAP 애니메이션
+  useGSAP(() => {
+    if (!containerRef.current || images.length === 0) return
+    if (effect !== 'coverflow' && effect !== 'cards') return
+
+    const items = containerRef.current.querySelectorAll('.carousel-item')
+
+    items.forEach((item, index) => {
+      const offset = index - currentIndex
+      const isActive = offset === 0
+
+      if (effect === 'coverflow') {
+        gsap.to(item, {
+          x: `${offset * 60}%`,
+          rotateY: offset * -35,
+          scale: isActive ? 1 : 0.75,
+          zIndex: totalSlides - Math.abs(offset),
+          opacity: Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.2,
+          duration: 0.5,
+          ease: 'power2.out',
+        })
+      } else if (effect === 'cards') {
+        gsap.to(item, {
+          x: `${offset * 30}%`,
+          y: isActive ? 0 : 20,
+          scale: isActive ? 1 : 0.9,
+          zIndex: totalSlides - Math.abs(offset),
+          opacity: Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.15,
+          duration: 0.4,
+          ease: 'power2.out',
+        })
+      }
+    })
+  }, { scope: containerRef, dependencies: [currentIndex, effect, images.length] })
 
   // 자동 재생
   useEffect(() => {
-    if (props.autoplay && context.mode !== 'edit' && images.length > 1 && !isDragging) {
-      autoplayRef.current = setInterval(() => {
-        setCurrentIndex((prev) =>
-          props.infinite
-            ? (prev + 1) % images.length
-            : Math.min(prev + 1, images.length - 1)
-        )
-      }, props.autoplayInterval || 3000)
-    }
+    if (!props.autoplay || context.mode === 'edit' || images.length <= 1) return
 
-    return () => {
-      if (autoplayRef.current) {
-        clearInterval(autoplayRef.current)
+    const interval = props.autoplayInterval || 3000
+
+    const tick = () => {
+      if (!isDragging.current) {
+        goTo(currentIndex + 1)
       }
     }
-  }, [props.autoplay, props.autoplayInterval, props.infinite, images.length, context.mode, isDragging])
 
-  // 네비게이션 함수 (goTo를 먼저 선언하여 handleDragEnd에서 참조 가능)
-  const goTo = useCallback((index: number) => {
-    if (props.infinite) {
-      setCurrentIndex((index + images.length) % images.length)
-    } else {
-      setCurrentIndex(Math.max(0, Math.min(index, images.length - 1)))
+    autoplayRef.current = gsap.delayedCall(interval / 1000, tick)
+
+    return () => {
+      autoplayRef.current?.kill()
     }
-  }, [props.infinite, images.length])
+  }, [props.autoplay, props.autoplayInterval, currentIndex, context.mode, images.length, goTo])
 
-  // 스와이프 핸들러
-  const handleDragStart = useCallback((clientX: number) => {
+  // 터치/드래그 for coverflow/cards
+  const handleItemClick = (index: number) => {
     if (context.mode === 'edit') return
-    setIsDragging(true)
-    dragStartX.current = clientX
-    setDragOffset(0)
-  }, [context.mode])
-
-  const handleDragMove = useCallback((clientX: number) => {
-    if (!isDragging) return
-    const diff = clientX - dragStartX.current
-    setDragOffset(diff)
-  }, [isDragging])
-
-  const handleDragEnd = useCallback(() => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    const threshold = 50 // 스와이프 임계값 (px)
-    if (dragOffset > threshold) {
-      // 왼쪽으로 스와이프 (이전)
-      goTo(currentIndex - 1)
-    } else if (dragOffset < -threshold) {
-      // 오른쪽으로 스와이프 (다음)
-      goTo(currentIndex + 1)
+    if (index !== currentIndex) {
+      goTo(index)
+    } else if (props.onClick === 'lightbox') {
+      const event = new CustomEvent('open-lightbox', {
+        detail: { images, currentIndex: index },
+      })
+      window.dispatchEvent(event)
     }
-    setDragOffset(0)
-  }, [isDragging, dragOffset, currentIndex, goTo])
-
-  // 터치 이벤트
-  const handleTouchStart = (e: React.TouchEvent) => {
-    handleDragStart(e.touches[0].clientX)
-  }
-  const handleTouchMove = (e: React.TouchEvent) => {
-    handleDragMove(e.touches[0].clientX)
-  }
-  const handleTouchEnd = () => {
-    handleDragEnd()
-  }
-
-  // 마우스 이벤트
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    handleDragStart(e.clientX)
-  }
-  const handleMouseMove = (e: React.MouseEvent) => {
-    handleDragMove(e.clientX)
-  }
-  const handleMouseUp = () => {
-    handleDragEnd()
-  }
-  const handleMouseLeave = () => {
-    if (isDragging) handleDragEnd()
   }
 
   const containerStyle: React.CSSProperties = {
@@ -145,20 +233,28 @@ export function Carousel({
     overflow: 'hidden',
     ...style,
     outline: isSelected ? '2px solid #3b82f6' : undefined,
-    cursor: isDragging ? 'grabbing' : 'grab',
+    cursor: effect === 'slide' ? 'grab' : 'default',
     userSelect: 'none',
     touchAction: 'pan-y pinch-zoom',
   }
 
-  // 공통 스와이프 이벤트 props
-  const swipeProps = {
-    onTouchStart: handleTouchStart,
-    onTouchMove: handleTouchMove,
-    onTouchEnd: handleTouchEnd,
-    onMouseDown: handleMouseDown,
-    onMouseMove: handleMouseMove,
-    onMouseUp: handleMouseUp,
-    onMouseLeave: handleMouseLeave,
+  if (images.length === 0) {
+    return (
+      <div
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{
+          padding: '40px',
+          textAlign: 'center',
+          color: '#999',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '8px',
+          ...style,
+        }}
+      >
+        이미지를 추가해주세요
+      </div>
+    )
   }
 
   // Fade 효과
@@ -169,23 +265,15 @@ export function Carousel({
         data-node-id={node.id}
         data-node-type="carousel"
         style={containerStyle}
-        {...swipeProps}
-        onClick={
-          context.mode === 'edit'
-            ? (e) => {
-                e.stopPropagation()
-                context.onSelectNode?.(node.id)
-              }
-            : undefined
-        }
+        onClick={context.mode === 'edit' ? (e) => { e.stopPropagation(); context.onSelectNode?.(node.id) } : undefined}
       >
         <div style={{ position: 'relative', width: '100%', aspectRatio: props.aspectRatio?.replace(':', '/') || '16/9' }}>
           {images.map((src, index) => (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               key={index}
               src={src}
               alt={`슬라이드 ${index + 1}`}
+              onClick={() => handleItemClick(index)}
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -194,11 +282,11 @@ export function Carousel({
                 objectFit: props.objectFit || 'cover',
                 opacity: index === currentIndex ? 1 : 0,
                 transition: 'opacity 0.5s ease',
+                cursor: 'pointer',
               }}
             />
           ))}
         </div>
-
         <CarouselControls />
       </div>
     )
@@ -212,84 +300,7 @@ export function Carousel({
         data-node-id={node.id}
         data-node-type="carousel"
         style={{ ...containerStyle, perspective: '1000px' }}
-        {...swipeProps}
-        onClick={
-          context.mode === 'edit'
-            ? (e) => {
-                e.stopPropagation()
-                context.onSelectNode?.(node.id)
-              }
-            : undefined
-        }
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '300px',
-            position: 'relative',
-          }}
-        >
-          {images.map((src, index) => {
-            const offset = index - currentIndex
-            const isActive = offset === 0
-            const translateX = offset * 60
-            const rotateY = offset * -35
-            const scale = isActive ? 1 : 0.75
-            const zIndex = images.length - Math.abs(offset)
-            const opacity = Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.2
-
-            return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={index}
-                src={src}
-                alt={`슬라이드 ${index + 1}`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  goTo(index)
-                }}
-                style={{
-                  position: 'absolute',
-                  width: '65%',
-                  aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
-                  objectFit: props.objectFit || 'cover',
-                  borderRadius: '12px',
-                  boxShadow: isActive ? '0 20px 40px rgba(0,0,0,0.3)' : '0 10px 20px rgba(0,0,0,0.2)',
-                  transform: `translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
-                  transition: 'all 0.5s ease',
-                  zIndex,
-                  opacity,
-                  cursor: 'pointer',
-                }}
-              />
-            )
-          })}
-        </div>
-
-        <CarouselControls />
-      </div>
-    )
-  }
-
-  // Cards 효과 (카드 스택)
-  if (effect === 'cards') {
-    return (
-      <div
-        ref={containerRef}
-        data-node-id={node.id}
-        data-node-type="carousel"
-        style={{ ...containerStyle, perspective: '1200px' }}
-        {...swipeProps}
-        onClick={
-          context.mode === 'edit'
-            ? (e) => {
-                e.stopPropagation()
-                context.onSelectNode?.(node.id)
-              }
-            : undefined
-        }
+        onClick={context.mode === 'edit' ? (e) => { e.stopPropagation(); context.onSelectNode?.(node.id) } : undefined}
       >
         <div
           style={{
@@ -300,71 +311,84 @@ export function Carousel({
             position: 'relative',
           }}
         >
-          {images.map((src, index) => {
-            const offset = index - currentIndex
-            const isActive = offset === 0
-            const translateY = isActive ? 0 : 20
-            const translateX = offset * 30
-            const scale = isActive ? 1 : 0.9
-            const zIndex = images.length - Math.abs(offset)
-            const opacity = Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.15
-
-            return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={index}
-                src={src}
-                alt={`슬라이드 ${index + 1}`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  goTo(index)
-                }}
-                style={{
-                  position: 'absolute',
-                  width: '75%',
-                  aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
-                  objectFit: props.objectFit || 'cover',
-                  borderRadius: '16px',
-                  boxShadow: isActive
-                    ? '0 25px 50px rgba(0,0,0,0.25)'
-                    : '0 10px 30px rgba(0,0,0,0.15)',
-                  transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale})`,
-                  transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                  zIndex,
-                  opacity,
-                  cursor: 'pointer',
-                }}
-              />
-            )
-          })}
+          {images.map((src, index) => (
+            <img
+              key={index}
+              className="carousel-item"
+              src={src}
+              alt={`슬라이드 ${index + 1}`}
+              onClick={() => handleItemClick(index)}
+              style={{
+                position: 'absolute',
+                width: '65%',
+                aspectRatio: props.aspectRatio?.replace(':', '/') || '3/4',
+                objectFit: props.objectFit || 'cover',
+                borderRadius: '12px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                cursor: 'pointer',
+                willChange: 'transform, opacity',
+              }}
+            />
+          ))}
         </div>
-
         <CarouselControls />
       </div>
     )
   }
 
-  // Cube 효과 (3D 큐브)
+  // Cards 효과
+  if (effect === 'cards') {
+    return (
+      <div
+        ref={containerRef}
+        data-node-id={node.id}
+        data-node-type="carousel"
+        style={{ ...containerStyle, perspective: '1200px' }}
+        onClick={context.mode === 'edit' ? (e) => { e.stopPropagation(); context.onSelectNode?.(node.id) } : undefined}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '350px',
+            position: 'relative',
+          }}
+        >
+          {images.map((src, index) => (
+            <img
+              key={index}
+              className="carousel-item"
+              src={src}
+              alt={`슬라이드 ${index + 1}`}
+              onClick={() => handleItemClick(index)}
+              style={{
+                position: 'absolute',
+                width: '75%',
+                aspectRatio: props.aspectRatio?.replace(':', '/') || '4/3',
+                objectFit: props.objectFit || 'cover',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+                cursor: 'pointer',
+                willChange: 'transform, opacity',
+              }}
+            />
+          ))}
+        </div>
+        <CarouselControls />
+      </div>
+    )
+  }
+
+  // Cube 효과
   if (effect === 'cube') {
     return (
       <div
         ref={containerRef}
         data-node-id={node.id}
         data-node-type="carousel"
-        style={{
-          ...containerStyle,
-          perspective: '1200px',
-          perspectiveOrigin: '50% 50%',
-        }}
-        {...swipeProps}
-        onClick={
-          context.mode === 'edit'
-            ? (e) => {
-                e.stopPropagation()
-                context.onSelectNode?.(node.id)
-              }
-            : undefined
-        }
+        style={{ ...containerStyle, perspective: '1200px', perspectiveOrigin: '50% 50%' }}
+        onClick={context.mode === 'edit' ? (e) => { e.stopPropagation(); context.onSelectNode?.(node.id) } : undefined}
       >
         <div
           style={{
@@ -379,7 +403,6 @@ export function Carousel({
           {images.slice(0, 4).map((src, index) => {
             const rotations = [0, 90, 180, 270]
             return (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={index}
                 src={src}
@@ -396,147 +419,147 @@ export function Carousel({
             )
           })}
         </div>
-
         <CarouselControls maxIndex={Math.min(images.length, 4)} />
       </div>
     )
   }
 
-  // Slide 효과 (기본)
+  // Slide 효과 (기본) - GSAP 드래그 적용
   return (
     <div
       ref={containerRef}
       data-node-id={node.id}
       data-node-type="carousel"
       style={containerStyle}
-      {...swipeProps}
-      onClick={
-        context.mode === 'edit'
-          ? (e) => {
-              e.stopPropagation()
-              context.onSelectNode?.(node.id)
-            }
-          : undefined
-      }
+      onClick={context.mode === 'edit' ? (e) => { e.stopPropagation(); context.onSelectNode?.(node.id) } : undefined}
     >
       <div
+        ref={trackRef}
         style={{
           display: 'flex',
           gap: `${props.spacing || 0}px`,
-          transform: `translateX(calc(-${currentIndex * (100 / slidesToShow)}% - ${currentIndex * (props.spacing || 0)}px + ${dragOffset}px))`,
-          transition: isDragging ? 'none' : 'transform 0.5s ease',
+          willChange: 'transform',
         }}
       >
         {images.map((src, index) => (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             key={index}
             src={src}
             alt={`슬라이드 ${index + 1}`}
+            onClick={() => {
+              if (props.onClick === 'lightbox' && !isDragging.current) {
+                const event = new CustomEvent('open-lightbox', {
+                  detail: { images, currentIndex: index },
+                })
+                window.dispatchEvent(event)
+              }
+            }}
             style={{
               flex: `0 0 calc(${100 / slidesToShow}% - ${((slidesToShow - 1) * (props.spacing || 0)) / slidesToShow}px)`,
               aspectRatio: props.aspectRatio?.replace(':', '/') || '16/9',
               objectFit: props.objectFit || 'cover',
               borderRadius: '8px',
+              pointerEvents: 'auto',
+              cursor: props.onClick === 'lightbox' ? 'pointer' : 'default',
             }}
           />
         ))}
       </div>
-
       <CarouselControls />
     </div>
   )
 
-  function CarouselControls({ maxIndex, darkMode }: { maxIndex?: number; darkMode?: boolean } = {}) {
-    const totalSlides = maxIndex || images.length
-    const arrowBg = darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.8)'
-    const arrowColor = darkMode ? '#fff' : '#000'
-    const dotActiveColor = darkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,1)'
-    const dotInactiveColor = darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'
+  function CarouselControls({ maxIndex }: { maxIndex?: number } = {}) {
+    const total = maxIndex || images.length
+    const isDark = effect === 'coverflow' || effect === 'cards'
+    const arrowBg = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)'
+    const arrowColor = isDark ? '#fff' : '#333'
+    const dotActiveColor = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)'
+    const dotInactiveColor = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'
 
     return (
       <>
-        {/* 화살표 */}
-        {props.showArrows !== false && totalSlides > 1 && (
+        {props.showArrows !== false && total > 1 && (
           <>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                goTo(currentIndex - 1)
-              }}
+              onClick={(e) => { e.stopPropagation(); goTo(currentIndex - 1) }}
               style={{
                 position: 'absolute',
-                left: 8,
+                left: 12,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                padding: '8px 12px',
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 backgroundColor: arrowBg,
                 color: arrowColor,
                 border: 'none',
                 borderRadius: '50%',
-                fontSize: '18px',
+                fontSize: '20px',
                 cursor: 'pointer',
                 zIndex: 10,
+                transition: 'background-color 0.2s, transform 0.2s',
               }}
+              onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 })}
+              onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
             >
               ‹
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                goTo(currentIndex + 1)
-              }}
+              onClick={(e) => { e.stopPropagation(); goTo(currentIndex + 1) }}
               style={{
                 position: 'absolute',
-                right: 8,
+                right: 12,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                padding: '8px 12px',
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 backgroundColor: arrowBg,
                 color: arrowColor,
                 border: 'none',
                 borderRadius: '50%',
-                fontSize: '18px',
+                fontSize: '20px',
                 cursor: 'pointer',
                 zIndex: 10,
+                transition: 'background-color 0.2s, transform 0.2s',
               }}
+              onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 })}
+              onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
             >
               ›
             </button>
           </>
         )}
 
-        {/* 도트 인디케이터 */}
-        {props.showDots !== false && totalSlides > 1 && (
+        {props.showDots !== false && total > 1 && (
           <div
             style={{
               position: 'absolute',
-              bottom: 12,
+              bottom: 16,
               left: '50%',
               transform: 'translateX(-50%)',
               display: 'flex',
-              gap: '6px',
+              gap: '8px',
               zIndex: 10,
             }}
           >
-            {Array.from({ length: totalSlides }).map((_, index) => (
+            {Array.from({ length: total }).map((_, index) => (
               <button
                 key={index}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  goTo(index)
-                }}
+                onClick={(e) => { e.stopPropagation(); goTo(index) }}
                 style={{
-                  width: '8px',
+                  width: index === currentIndex ? '24px' : '8px',
                   height: '8px',
-                  borderRadius: '50%',
+                  borderRadius: '4px',
                   border: 'none',
-                  backgroundColor:
-                    index === currentIndex
-                      ? dotActiveColor
-                      : dotInactiveColor,
+                  backgroundColor: index === currentIndex ? dotActiveColor : dotInactiveColor,
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s',
+                  transition: 'all 0.3s ease',
                 }}
               />
             ))}

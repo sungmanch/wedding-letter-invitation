@@ -1,9 +1,16 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 import type { PrimitiveNode } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps, getValueByPath } from '../types'
+
+// GSAP 플러그인 등록
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(useGSAP)
+}
 
 export interface AccordionStackProps {
   /** 이미지 배열 또는 데이터 바인딩 경로 */
@@ -31,6 +38,7 @@ export function AccordionStack({
   const style = toInlineStyle(node.style)
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
@@ -53,8 +61,36 @@ export function AccordionStack({
   const collapsedHeight = props.collapsedHeight || 120
   const expandedHeight = props.expandedHeight || 300
   const gap = props.gap ?? 4
-  const duration = props.duration || 400
+  const duration = (props.duration || 400) / 1000
   const onClick = props.onClick || 'expand'
+
+  // GSAP 확장/축소 애니메이션
+  useGSAP(() => {
+    if (!containerRef.current) return
+
+    itemRefs.current.forEach((item, index) => {
+      if (!item) return
+
+      const isExpanded = expandedIndex === index
+      const targetHeight = isExpanded ? expandedHeight : collapsedHeight
+
+      gsap.to(item, {
+        height: targetHeight,
+        duration,
+        ease: 'power2.out',
+      })
+
+      // 내부 이미지 스케일 애니메이션
+      const img = item.querySelector('img')
+      if (img) {
+        gsap.to(img, {
+          scale: isExpanded ? 1.05 : 1,
+          duration,
+          ease: 'power2.out',
+        })
+      }
+    })
+  }, { scope: containerRef, dependencies: [expandedIndex, collapsedHeight, expandedHeight, duration] })
 
   const handleImageClick = (index: number) => {
     if (context.mode === 'edit') return
@@ -64,7 +100,6 @@ export function AccordionStack({
     }
 
     if (onClick === 'lightbox' || onClick === 'both') {
-      // Lightbox 이벤트 발생
       const event = new CustomEvent('open-lightbox', {
         detail: { images, currentIndex: index },
       })
@@ -113,43 +148,37 @@ export function AccordionStack({
           : undefined
       }
     >
-      {images.map((src, index) => {
-        const isExpanded = expandedIndex === index
-        const currentHeight = isExpanded ? expandedHeight : collapsedHeight
-
-        return (
-          <div
-            key={index}
-            onClick={() => handleImageClick(index)}
+      {images.map((src, index) => (
+        <div
+          key={index}
+          ref={(el) => { itemRefs.current[index] = el }}
+          onClick={() => handleImageClick(index)}
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: `${collapsedHeight}px`,
+            overflow: 'hidden',
+            cursor: 'pointer',
+          }}
+        >
+          <img
+            src={src}
+            alt={`갤러리 이미지 ${index + 1}`}
             style={{
-              position: 'relative',
+              position: 'absolute',
+              top: '50%',
+              left: 0,
               width: '100%',
-              height: `${currentHeight}px`,
-              overflow: 'hidden',
-              cursor: 'pointer',
-              transition: `height ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+              height: 'auto',
+              minHeight: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              transform: 'translateY(-50%)',
+              willChange: 'transform',
             }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={src}
-              alt={`갤러리 이미지 ${index + 1}`}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: 0,
-                width: '100%',
-                height: 'auto',
-                minHeight: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                transform: 'translateY(-50%)',
-                transition: `transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-              }}
-            />
-          </div>
-        )
-      })}
+          />
+        </div>
+      ))}
     </div>
   )
 }

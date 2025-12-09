@@ -1,9 +1,16 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 import type { PrimitiveNode } from '../../schema/primitives'
 import type { RenderContext, PrimitiveRenderer } from '../types'
 import { toInlineStyle, getNodeProps, getValueByPath } from '../types'
+
+// GSAP 플러그인 등록
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(useGSAP)
+}
 
 export interface FilmStripProps {
   /** 이미지 배열 또는 데이터 바인딩 경로 */
@@ -38,8 +45,7 @@ export function FilmStrip({
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const [isPaused, setIsPaused] = useState(false)
-  const animationRef = useRef<number | null>(null)
-  const offsetRef = useRef(0)
+  const tweenRef = useRef<gsap.core.Tween | null>(null)
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
@@ -67,69 +73,59 @@ export function FilmStrip({
   const fadeWidth = props.fadeWidth ?? 60
   const pauseOnHover = props.pauseOnHover ?? true
 
-  // 무한 스크롤을 위해 이미지 복제 (최소 3배)
+  // 무한 스크롤을 위해 이미지 복제 (3배)
   const duplicatedImages = images.length > 0
     ? [...images, ...images, ...images]
     : []
 
-  // 애니메이션 루프
-  useEffect(() => {
-    if (context.mode === 'edit' || images.length === 0) return
+  // GSAP 무한 스크롤 애니메이션
+  useGSAP(() => {
+    if (context.mode === 'edit' || images.length === 0 || !trackRef.current) return
 
     const track = trackRef.current
-    if (!track) return
+    const singleSetWidth = track.scrollWidth / 3
 
-    let lastTime = performance.now()
-
-    const animate = (currentTime: number) => {
-      if (isPaused) {
-        lastTime = currentTime
-        animationRef.current = requestAnimationFrame(animate)
-        return
-      }
-
-      const deltaTime = (currentTime - lastTime) / 1000
-      lastTime = currentTime
-
-      const moveAmount = speed * deltaTime
-
-      if (direction === 'left') {
-        offsetRef.current -= moveAmount
-      } else {
-        offsetRef.current += moveAmount
-      }
-
-      // 한 세트 길이 계산
-      const singleSetWidth = track.scrollWidth / 3
-
-      // 무한 스크롤 리셋
-      if (direction === 'left' && offsetRef.current <= -singleSetWidth) {
-        offsetRef.current += singleSetWidth
-      } else if (direction === 'right' && offsetRef.current >= 0) {
-        offsetRef.current -= singleSetWidth
-      }
-
-      track.style.transform = `translateX(${offsetRef.current}px)`
-      animationRef.current = requestAnimationFrame(animate)
-    }
-
-    // 초기 오프셋 설정 (right 방향일 때)
+    // 초기 위치 설정
     if (direction === 'right') {
-      const track = trackRef.current
-      if (track) {
-        const singleSetWidth = track.scrollWidth / 3
-        offsetRef.current = -singleSetWidth
-      }
+      gsap.set(track, { x: -singleSetWidth })
+    } else {
+      gsap.set(track, { x: 0 })
     }
 
-    animationRef.current = requestAnimationFrame(animate)
+    // 애니메이션 duration 계산 (속도 기반)
+    const duration = singleSetWidth / speed
+
+    // 무한 스크롤 애니메이션
+    tweenRef.current = gsap.to(track, {
+      x: direction === 'left' ? -singleSetWidth : 0,
+      duration,
+      ease: 'none',
+      repeat: -1,
+      onRepeat: () => {
+        // 리셋 위치
+        if (direction === 'left') {
+          gsap.set(track, { x: 0 })
+        } else {
+          gsap.set(track, { x: -singleSetWidth })
+        }
+      },
+    })
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
+      tweenRef.current?.kill()
     }
-  }, [context.mode, images.length, speed, direction, isPaused])
+  }, { scope: containerRef, dependencies: [context.mode, images.length, speed, direction] })
+
+  // 일시정지/재생 처리
+  useEffect(() => {
+    if (!tweenRef.current) return
+
+    if (isPaused) {
+      tweenRef.current.pause()
+    } else {
+      tweenRef.current.resume()
+    }
+  }, [isPaused])
 
   const handleMouseEnter = () => {
     if (pauseOnHover) setIsPaused(true)
@@ -139,9 +135,8 @@ export function FilmStrip({
     if (pauseOnHover) setIsPaused(false)
   }
 
-  const handleImageClick = (src: string, index: number) => {
+  const handleImageClick = (index: number) => {
     if (props.onClick === 'lightbox' && context.mode !== 'edit') {
-      // Lightbox 이벤트 발생
       const event = new CustomEvent('open-lightbox', {
         detail: { images, currentIndex: index % images.length },
       })
@@ -229,12 +224,11 @@ export function FilmStrip({
         }}
       >
         {duplicatedImages.map((src, index) => (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             key={`${index}-${src}`}
             src={src}
             alt={`갤러리 이미지 ${(index % images.length) + 1}`}
-            onClick={() => handleImageClick(src, index)}
+            onClick={() => handleImageClick(index)}
             style={{
               height: `${imageHeight}px`,
               width: 'auto',

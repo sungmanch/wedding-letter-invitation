@@ -69,24 +69,90 @@ export function Calendar({
     variant = 'default',
   } = props
 
-  // 레터프레스 스타일 (클래식 음각 효과)
-  const isLetterpress = variant === 'letterpress'
-  const letterpressColors = {
-    background: '#F5F0E6', // 오래된 종이 색
-    text: '#3D3D3D', // 잉크 색
-    textMuted: '#8B8680', // 흐린 잉크
-    accent: '#2C2C2C', // 진한 잉크
-    highlight: '#E8E2D6', // 눌린 부분 배경
+  // 레터프레스 variant 체크
+  const isLetterpress = variant?.startsWith('letterpress')
+  const letterpressType = variant?.replace('letterpress-', '') || 'default'
+
+  // 레터프레스 스타일 설정 (variant별로 다른 색상/효과)
+  const letterpressStyles = {
+    // 기본 레터프레스: 밝은 종이 + 부드러운 음각
+    letterpress: {
+      background: '#F5F0E6',
+      text: '#3D3D3D',
+      textMuted: '#8B8680',
+      accent: '#2C2C2C',
+      highlight: '#E8E2D6',
+      borderColor: 'rgba(0,0,0,0.08)',
+      paperShadow: 'inset 0 2px 4px rgba(0,0,0,0.06), inset 0 -1px 0 rgba(255,255,255,0.5)',
+      textShadow: '0 1px 0 rgba(255,255,255,0.4), 0 -1px 1px rgba(0,0,0,0.1)',
+      textShadowStrong: '0 1px 0 rgba(255,255,255,0.3), 0 -1px 1px rgba(0,0,0,0.15)',
+    },
+    // 테두리 강조: 이중 테두리 + 각인된 프레임
+    'letterpress-border': {
+      background: '#FAF8F5',
+      text: '#4A4A4A',
+      textMuted: '#9A9590',
+      accent: '#2A2A2A',
+      highlight: '#EDE9E3',
+      borderColor: '#C4B8A8',
+      paperShadow:
+        'inset 0 0 0 4px #FAF8F5, inset 0 0 0 5px #C4B8A8, inset 0 0 0 8px #FAF8F5, inset 0 0 0 9px rgba(0,0,0,0.1), inset 0 4px 8px rgba(0,0,0,0.04)',
+      textShadow: '0 1px 0 rgba(255,255,255,0.5), 0 -1px 0 rgba(0,0,0,0.08)',
+      textShadowStrong: '0 2px 0 rgba(255,255,255,0.4), 0 -1px 1px rgba(0,0,0,0.12)',
+    },
+    // 깊은 음각: 더 강한 프레스 효과 + 어두운 톤
+    'letterpress-deep': {
+      background: '#E8E4DC',
+      text: '#2D2D2D',
+      textMuted: '#6B6560',
+      accent: '#1A1A1A',
+      highlight: '#D8D2C8',
+      borderColor: '#A09890',
+      paperShadow:
+        'inset 0 3px 6px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.08), inset 0 -2px 0 rgba(255,255,255,0.3)',
+      textShadow: '0 2px 0 rgba(255,255,255,0.25), 0 -1px 2px rgba(0,0,0,0.2)',
+      textShadowStrong: '0 2px 1px rgba(255,255,255,0.2), 0 -2px 2px rgba(0,0,0,0.25)',
+    },
   }
+
+  const lpStyle = isLetterpress
+    ? letterpressStyles[variant as keyof typeof letterpressStyles] || letterpressStyles.letterpress
+    : null
 
   // 레터프레스 텍스트 스타일 (음각 효과)
   const getLetterpressTextStyle = (isHighlight = false): React.CSSProperties => {
-    if (!isLetterpress) return {}
+    if (!isLetterpress || !lpStyle) return {}
     return {
-      textShadow: isHighlight
-        ? '0 1px 0 rgba(255,255,255,0.3), 0 -1px 1px rgba(0,0,0,0.15)'
-        : '0 1px 0 rgba(255,255,255,0.4), 0 -1px 1px rgba(0,0,0,0.1)',
-      letterSpacing: '0.05em',
+      textShadow: isHighlight ? lpStyle.textShadowStrong : lpStyle.textShadow,
+      letterSpacing: letterpressType === 'border' ? '0.08em' : '0.05em',
+    }
+  }
+
+  // 레터프레스 테두리 스타일
+  const getLetterpressBorderStyle = (): React.CSSProperties => {
+    if (!isLetterpress || !lpStyle) return {}
+
+    if (variant === 'letterpress-border') {
+      return {
+        border: `2px solid ${lpStyle.borderColor}`,
+        boxShadow: lpStyle.paperShadow,
+        padding: '32px',
+        position: 'relative' as const,
+      }
+    }
+
+    if (variant === 'letterpress-deep') {
+      return {
+        border: `1px solid ${lpStyle.borderColor}`,
+        boxShadow: lpStyle.paperShadow,
+        padding: '28px',
+      }
+    }
+
+    return {
+      border: `1px solid ${lpStyle.borderColor}`,
+      boxShadow: lpStyle.paperShadow,
+      padding: '24px',
     }
   }
 
@@ -137,8 +203,8 @@ export function Calendar({
   // 요일 색상 결정
   const getDayColor = (date: Date, isCurrentMonth: boolean): string | undefined => {
     // 레터프레스 스타일인 경우 단색 사용
-    if (isLetterpress) {
-      return isCurrentMonth ? letterpressColors.text : letterpressColors.textMuted
+    if (isLetterpress && lpStyle) {
+      return isCurrentMonth ? lpStyle.text : lpStyle.textMuted
     }
 
     if (!isCurrentMonth) return 'var(--color-text-muted)'
@@ -172,13 +238,12 @@ export function Calendar({
       data-node-type="calendar"
       style={{
         width: '100%',
-        ...(isLetterpress && {
-          backgroundColor: letterpressColors.background,
-          padding: '24px',
-          borderRadius: '4px',
-          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06), inset 0 -1px 0 rgba(255,255,255,0.5)',
-          border: '1px solid rgba(0,0,0,0.08)',
-        }),
+        ...(isLetterpress &&
+          lpStyle && {
+            backgroundColor: lpStyle.background,
+            borderRadius: variant === 'letterpress-border' ? '2px' : '4px',
+            ...getLetterpressBorderStyle(),
+          }),
         ...mergedStyle,
       }}
     >
@@ -187,11 +252,11 @@ export function Calendar({
         <div
           style={{
             textAlign: 'center',
-            fontSize: isLetterpress ? '14px' : 'var(--typo-heading-md-font-size, 18px)',
+            fontSize: isLetterpress ? (variant === 'letterpress-deep' ? '16px' : '14px') : 'var(--typo-heading-md-font-size, 18px)',
             fontFamily: isLetterpress ? 'Georgia, "Times New Roman", serif' : 'var(--typo-heading-md-font-family)',
-            fontWeight: isLetterpress ? 600 : 400,
-            letterSpacing: '0.2em',
-            color: isLetterpress ? letterpressColors.text : 'var(--color-text-secondary)',
+            fontWeight: isLetterpress ? (variant === 'letterpress-deep' ? 700 : 600) : 400,
+            letterSpacing: variant === 'letterpress-border' ? '0.25em' : '0.2em',
+            color: isLetterpress && lpStyle ? lpStyle.text : 'var(--color-text-secondary)',
             marginBottom: '24px',
             textTransform: isLetterpress ? 'uppercase' : undefined,
             ...getLetterpressTextStyle(),
@@ -209,15 +274,19 @@ export function Calendar({
           marginBottom: weekOnly ? '16px' : '12px',
           borderBottom: weekOnly
             ? 'none'
-            : isLetterpress
-              ? `1px solid ${letterpressColors.textMuted}40`
+            : isLetterpress && lpStyle
+              ? variant === 'letterpress-border'
+                ? `2px double ${lpStyle.textMuted}60`
+                : variant === 'letterpress-deep'
+                  ? `1px solid ${lpStyle.textMuted}80`
+                  : `1px solid ${lpStyle.textMuted}40`
               : '1px solid var(--color-divider)',
           paddingBottom: weekOnly ? '0' : '12px',
         }}
       >
         {weekdays.map((day, index) => {
           const dayIndex = (weekStartsOn + index) % 7
-          let color = isLetterpress ? letterpressColors.textMuted : 'var(--color-text-secondary)'
+          let color = isLetterpress && lpStyle ? lpStyle.textMuted : 'var(--color-text-secondary)'
           if (!isLetterpress) {
             if (showHolidayColor && dayIndex === 0) color = '#EF4444'
             if (showSaturdayColor && dayIndex === 6) color = '#3B82F6'
@@ -229,12 +298,14 @@ export function Calendar({
               style={{
                 textAlign: 'center',
                 fontSize: isLetterpress
-                  ? '11px'
+                  ? variant === 'letterpress-deep'
+                    ? '12px'
+                    : '11px'
                   : weekOnly
                     ? 'var(--typo-body-sm-font-size, 12px)'
                     : 'var(--typo-body-md-font-size, 14px)',
                 fontFamily: isLetterpress ? 'Georgia, "Times New Roman", serif' : 'var(--typo-body-md-font-family)',
-                fontWeight: isLetterpress ? 500 : 400,
+                fontWeight: isLetterpress ? (variant === 'letterpress-deep' ? 600 : 500) : 400,
                 fontStyle: weekOnly && !isLetterpress ? 'italic' : 'normal',
                 color,
                 textTransform: isLetterpress ? 'uppercase' : undefined,
@@ -276,17 +347,23 @@ export function Calendar({
                 minHeight: weekOnly ? '48px' : '36px',
               }}
             >
-              {/* 레터프레스 하이라이트 (음각 원형) */}
-              {showLetterpressHighlight && (
+              {/* 레터프레스 하이라이트 (variant별 다른 스타일) */}
+              {showLetterpressHighlight && lpStyle && (
                 <div
                   style={{
                     position: 'absolute',
-                    width: '34px',
-                    height: '34px',
-                    backgroundColor: letterpressColors.highlight,
-                    borderRadius: '50%',
+                    width: variant === 'letterpress-deep' ? '36px' : '34px',
+                    height: variant === 'letterpress-deep' ? '36px' : '34px',
+                    backgroundColor: lpStyle.highlight,
+                    borderRadius: variant === 'letterpress-border' ? '2px' : '50%',
                     boxShadow:
-                      'inset 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 2px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6)',
+                      variant === 'letterpress-deep'
+                        ? 'inset 0 3px 6px rgba(0,0,0,0.18), inset 0 1px 3px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.4)'
+                        : variant === 'letterpress-border'
+                          ? 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.5)'
+                          : 'inset 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 2px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6)',
+                    border:
+                      variant === 'letterpress-border' ? `1px solid ${lpStyle.borderColor}` : undefined,
                   }}
                 />
               )}
@@ -359,12 +436,24 @@ export function Calendar({
               <span
                 style={{
                   position: 'relative',
-                  fontSize: isLetterpress ? '13px' : 'var(--typo-body-md-font-size, 14px)',
+                  fontSize: isLetterpress
+                    ? variant === 'letterpress-deep'
+                      ? '14px'
+                      : '13px'
+                    : 'var(--typo-body-md-font-size, 14px)',
                   fontFamily: isLetterpress ? 'Georgia, "Times New Roman", serif' : 'var(--typo-body-md-font-family)',
-                  fontWeight: isWeddingDay ? (isLetterpress ? 700 : 600) : 400,
-                  color: isLetterpress
+                  fontWeight: isWeddingDay
+                    ? isLetterpress
+                      ? variant === 'letterpress-deep'
+                        ? 800
+                        : 700
+                      : 600
+                    : isLetterpress && variant === 'letterpress-deep'
+                      ? 500
+                      : 400,
+                  color: isLetterpress && lpStyle
                     ? isWeddingDay
-                      ? letterpressColors.accent
+                      ? lpStyle.accent
                       : dayColor
                     : isWeddingDay
                       ? highlightStyle === 'ring' || highlightStyle === 'heart'
@@ -402,7 +491,9 @@ export const calendarRenderer: PrimitiveRenderer<CalendarProps> = {
       type: 'select',
       options: [
         { value: 'default', label: '기본' },
-        { value: 'letterpress', label: '레터프레스' },
+        { value: 'letterpress', label: '레터프레스 (클래식)' },
+        { value: 'letterpress-border', label: '레터프레스 (테두리)' },
+        { value: 'letterpress-deep', label: '레터프레스 (깊은 음각)' },
       ],
       defaultValue: 'default',
     },
