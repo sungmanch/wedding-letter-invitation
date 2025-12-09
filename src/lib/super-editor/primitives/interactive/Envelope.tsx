@@ -46,6 +46,8 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
   )
   const containerRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
+  const envelopeRef = useRef<HTMLDivElement>(null) // 봉투 뒷면 (z-1)
+  const frontRef = useRef<HTMLDivElement>(null) // 봉투 앞면 (z-3)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [resolvedColors, setResolvedColors] = useState({
     envelope: '#f5f5f5',
@@ -73,8 +75,16 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
     const timer = setTimeout(() => {
       if (!containerRef.current) return
       const computedStyle = getComputedStyle(containerRef.current)
-      const surfaceColor = computedStyle.getPropertyValue('--color-surface').trim() || '#f5f5f5'
-      const bgColor = computedStyle.getPropertyValue('--color-background').trim() || '#ffffff'
+      const rawSurface = computedStyle.getPropertyValue('--color-surface').trim()
+      const rawBg = computedStyle.getPropertyValue('--color-background').trim()
+
+      // 유효한 색상인지 확인 (빈 문자열이나 초기값 제외)
+      const isValidColor = (color: string) => color && color !== 'initial' && color !== 'inherit'
+
+      const surfaceColor = isValidColor(rawSurface) ? rawSurface : '#f5f5f5'
+      const bgColor = isValidColor(rawBg) ? rawBg : '#ffffff'
+
+      console.log('[Envelope] Resolved colors - surface:', rawSurface, '->', surfaceColor, 'bg:', rawBg, '->', bgColor)
 
       setResolvedColors({
         envelope: surfaceColor,
@@ -88,25 +98,22 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
 
   // GSAP ScrollTrigger 설정
   useIsomorphicLayoutEffect(() => {
-    if (!containerRef.current || !cardRef.current || !mounted) return
+    if (!containerRef.current || !cardRef.current || !envelopeRef.current || !frontRef.current || !mounted) return
 
-    // 초기 위치 설정 (GSAP 애니메이션 시작 전)
-    gsap.set(cardRef.current, { yPercent: 50 })
-
-    // 스크롤 컨테이너 찾기 - overflow-y: auto/scroll 확인
+    // 스크롤 컨테이너 찾기
     const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
       let parent = element.parentElement
       while (parent) {
-        const style = getComputedStyle(parent)
-        const overflowY = style.overflowY
-        // overflow-y가 auto 또는 scroll이면 스크롤 컨테이너
-        if (overflowY === 'auto' || overflowY === 'scroll') {
-          console.log('[Envelope] Found scroll container by overflow:', parent.className)
+        // data-scroll-container 속성 확인 (PhoneFrame)
+        if (parent.dataset.scrollContainer === 'true') {
+          console.log('[Envelope] Found scroll container by data attribute:', parent.className)
           return parent
         }
-        // 또는 scrollHeight가 clientHeight보다 크면
-        if (parent.scrollHeight > parent.clientHeight + 10) {
-          console.log('[Envelope] Found scroll container by scrollHeight:', parent.className)
+        // overflow-y: auto/scroll 확인
+        const computedStyle = getComputedStyle(parent)
+        const overflowY = computedStyle.overflowY
+        if (overflowY === 'auto' || overflowY === 'scroll') {
+          console.log('[Envelope] Found scroll container by overflow:', parent.className)
           return parent
         }
         parent = parent.parentElement
@@ -114,56 +121,60 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
       return null
     }
 
-    // 약간의 딜레이 후 ScrollTrigger 설정 (DOM 렌더링 완료 대기)
-    const initTimer = setTimeout(() => {
-      if (!containerRef.current || !cardRef.current) return
+    const scrollContainer = findScrollContainer(containerRef.current)
+    console.log('[Envelope] GSAP Init - scrollContainer:', scrollContainer?.className || 'window')
 
-      const scrollContainer = findScrollContainer(containerRef.current)
-      console.log('[Envelope] GSAP Init - scrollContainer:', scrollContainer?.className || 'window')
-      console.log('[Envelope] Container scrollHeight:', scrollContainer?.scrollHeight, 'clientHeight:', scrollContainer?.clientHeight)
+    // 초기 위치 설정
+    gsap.set(cardRef.current, { y: 0 })
+    gsap.set(envelopeRef.current, { y: 0 })
+    gsap.set(frontRef.current, { y: 0 })
 
-      // GSAP 애니메이션: 카드가 봉투에서 올라옴
-      // startY: 50% (봉투 안에 숨어있음) -> endY: -30% (봉투 위로 올라옴)
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          scroller: scrollContainer || undefined,
-          start: 'top 90%', // 요소의 top이 뷰포트 90% 지점에 닿을 때 시작
-          end: 'center center', // 요소의 center가 뷰포트 center에 닿을 때 종료
-          scrub: 0.3, // 스크롤에 따라 부드럽게 연동 (더 빠른 반응)
-          onUpdate: (self) => {
-            setScrollProgress(self.progress)
-          },
-          invalidateOnRefresh: true, // 리사이즈 시 재계산
-          // markers: true, // 디버그용 - 활성화하면 start/end 위치 표시
-        },
-      })
+    // ScrollTrigger 설정
+    // 봉투 (뒷면+앞면): 느리게 아래로 이동
+    // 카드: 빠르게 위로 이동
+    // 상대적으로 카드가 봉투에서 빠져나오는 효과
+    const trigger = ScrollTrigger.create({
+      trigger: containerRef.current,
+      scroller: scrollContainer || undefined,
+      start: 'top 50%', // 화면 중앙에서 시작
+      end: 'top 30%', // 화면 상단 30% 지점에서 완료
+      scrub: 0.3,
+      onUpdate: (self) => {
+        if (!cardRef.current || !envelopeRef.current || !frontRef.current) return
 
-      // 카드 애니메이션: translateY 50% -> -30%
-      tl.fromTo(
-        cardRef.current,
-        { yPercent: 50 },
-        { yPercent: -30, ease: 'none' }
-      )
+        // 봉투 (뒷면+앞면): 느리게 아래로 이동 (0 → 150px)
+        const envelopeY = self.progress * 150
+        // 카드: 빠르게 위로 이동 (0 → -400px)
+        const cardY = self.progress * -400
 
-      // cleanup을 위해 timeline 저장
-      ;(containerRef.current as HTMLElement & { _gsapTimeline?: gsap.core.Timeline })._gsapTimeline = tl
-    }, 200)
+        gsap.set(envelopeRef.current, { y: envelopeY })
+        gsap.set(frontRef.current, { y: envelopeY })
+        gsap.set(cardRef.current, { y: cardY })
+        setScrollProgress(self.progress)
+      },
+      onRefresh: (self) => {
+        if (!cardRef.current || !envelopeRef.current || !frontRef.current) return
+        const envelopeY = self.progress * 150
+        const cardY = self.progress * -400
+        gsap.set(envelopeRef.current, { y: envelopeY })
+        gsap.set(frontRef.current, { y: envelopeY })
+        gsap.set(cardRef.current, { y: cardY })
+        setScrollProgress(self.progress)
+      },
+      invalidateOnRefresh: true,
+      // markers: true,
+    })
 
     return () => {
-      clearTimeout(initTimer)
-      // timeline cleanup
-      const container = containerRef.current as HTMLElement & { _gsapTimeline?: gsap.core.Timeline } | null
-      if (container?._gsapTimeline) {
-        container._gsapTimeline.kill()
-      }
-      ScrollTrigger.getAll().forEach((st) => {
-        if (st.trigger === containerRef.current) {
-          st.kill()
-        }
-      })
+      trigger.kill()
     }
   }, [mounted])
+
+  // 크기 상수
+  const ENVELOPE_WIDTH = 300
+  const ENVELOPE_HEIGHT = 180 // 봉투 본체 높이
+  const FLAP_HEIGHT = 50 // 삼각형 flap 높이
+  const CARD_MARGIN = 12
 
   return (
     <div
@@ -175,92 +186,99 @@ export function Envelope({ node, context }: { node: PrimitiveNode; context: Rend
         ...style,
         position: 'relative',
         width: '100%',
-        maxWidth: '320px',
-        margin: '0 auto',
-        aspectRatio: '1 / 1.2',
+        minHeight: '100dvh', // 모바일 화면 꽉 채우기
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--color-background)', // 배경색 명시
       }}
       onClick={() => context.onSelectNode?.(node.id)}
     >
-      {/* 1. 봉투 뒷면 - 열린 삼각형 flap */}
+      {/* 봉투+카드 래퍼 - 중앙 정렬, 고정 크기 */}
       <div
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '35%',
-          zIndex: 1,
-          overflow: 'hidden',
+          position: 'relative',
+          width: `${ENVELOPE_WIDTH}px`,
+          height: `${ENVELOPE_HEIGHT + FLAP_HEIGHT}px`,
+          flexShrink: 0,
+          flexGrow: 0,
         }}
       >
-        {/* SVG로 삼각형 flap 그리기 */}
-        <svg
-          viewBox="0 0 100 50"
-          preserveAspectRatio="none"
+        {/* 1. 편지 카드 - 위로 올라옴 (z-index 2) */}
+        <div
+          ref={cardRef}
           style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
+            left: `${CARD_MARGIN}px`,
+            right: `${CARD_MARGIN}px`,
+            top: `${FLAP_HEIGHT + 20}px`,
+            zIndex: 2,
           }}
         >
-          <polygon points="0,0 100,0 50,50" fill={resolvedColors.flap} />
-        </svg>
-      </div>
-
-      {/* 2. 인비테이션 카드 - GSAP ScrollTrigger로 애니메이션 */}
-      <div
-        ref={cardRef}
-        style={{
-          position: 'absolute',
-          left: '5%',
-          right: '5%',
-          top: '25%',
-          height: '70%',
-          zIndex: 2,
-          transform: 'translateY(50%)', // 초기 위치 (GSAP이 이후 제어)
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: resolvedColors.card,
-            borderRadius: '8px',
-            boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
-            overflow: 'hidden',
-          }}
-        >
-          {/* 카드 내용 - children 렌더링 */}
-          {node.children?.map((child) => context.renderNode(child))}
+          <div
+            style={{
+              backgroundColor: resolvedColors.card,
+              borderRadius: '4px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+              padding: '20px 16px',
+            }}
+          >
+            {node.children?.map((child) => context.renderNode(child))}
+          </div>
         </div>
-      </div>
 
-      {/* 3. 봉투 앞면 */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '60%',
-          backgroundColor: resolvedColors.envelope,
-          borderRadius: '0 0 8px 8px',
-          zIndex: 3,
-        }}
-      >
-        {/* 봉투 안쪽 그림자 효과 */}
+        {/* 2. 봉투 뒷면 - 오각형 (직사각형 + 아래로 뾰족한 삼각형) - z-1 */}
         <div
+          ref={envelopeRef}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            right: 0,
-            height: '20px',
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), transparent)',
+            width: `${ENVELOPE_WIDTH}px`,
+            height: `${ENVELOPE_HEIGHT + FLAP_HEIGHT}px`,
+            zIndex: 1,
+            pointerEvents: 'none',
           }}
-        />
+        >
+          <svg
+            width={ENVELOPE_WIDTH}
+            height={ENVELOPE_HEIGHT + FLAP_HEIGHT}
+            viewBox={`0 0 ${ENVELOPE_WIDTH} ${ENVELOPE_HEIGHT + FLAP_HEIGHT}`}
+          >
+            {/* 뒷면: 직사각형 + 아래 삼각형 flap */}
+            <polygon
+              points={`0,0 ${ENVELOPE_WIDTH},0 ${ENVELOPE_WIDTH},${ENVELOPE_HEIGHT} ${ENVELOPE_WIDTH / 2},${ENVELOPE_HEIGHT + FLAP_HEIGHT} 0,${ENVELOPE_HEIGHT}`}
+              fill={resolvedColors.flap}
+            />
+          </svg>
+        </div>
+
+        {/* 3. 봉투 앞면 - 오각형 (위쪽 V자 컷 + 직사각형) - z-3 */}
+        <div
+          ref={frontRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: `${ENVELOPE_WIDTH}px`,
+            height: `${ENVELOPE_HEIGHT + FLAP_HEIGHT}px`,
+            zIndex: 3,
+            pointerEvents: 'none',
+          }}
+        >
+          <svg
+            width={ENVELOPE_WIDTH}
+            height={ENVELOPE_HEIGHT + FLAP_HEIGHT}
+            viewBox={`0 0 ${ENVELOPE_WIDTH} ${ENVELOPE_HEIGHT + FLAP_HEIGHT}`}
+          >
+            {/* 앞면: V자 컷 (위) + 직사각형 (아래) */}
+            <polygon
+              points={`0,0 ${ENVELOPE_WIDTH / 2},${FLAP_HEIGHT} ${ENVELOPE_WIDTH},0 ${ENVELOPE_WIDTH},${ENVELOPE_HEIGHT} 0,${ENVELOPE_HEIGHT}`}
+              fill={resolvedColors.envelope}
+            />
+          </svg>
+        </div>
       </div>
 
       {/* 디버그: 스크롤 progress (개발 모드에서만) */}

@@ -91,7 +91,17 @@ function createScreenFromSkeleton(
   const clonedStructure = JSON.parse(JSON.stringify(variant.structure))
   const root = tokens ? resolveNode(clonedStructure, tokens) : clonedStructure
 
-  console.log(`[InvitationRenderer] Created screen from skeleton for ${sectionType}`, root.type)
+  console.log(`[InvitationRenderer] Created screen from skeleton for ${sectionType}:${variant.id}`, root.type)
+
+  // 디버그: envelope 노드가 있는지 확인
+  const findEnvelope = (node: typeof root): boolean => {
+    if (node.type === 'envelope') return true
+    return node.children?.some(findEnvelope) ?? false
+  }
+  if (sectionType === 'invitation') {
+    console.log(`[InvitationRenderer] invitation has envelope?`, findEnvelope(root))
+    console.log(`[InvitationRenderer] invitation root structure:`, JSON.stringify(root, null, 2).slice(0, 500))
+  }
 
   return {
     id: `${sectionType}-screen`,
@@ -123,12 +133,31 @@ function getSortedSections(
 
   // Screen을 찾거나 skeleton에서 생성하는 헬퍼
   const findOrCreateScreen = (type: SectionType): Screen | undefined => {
+    const requestedVariant = sectionVariants?.[type]
     const existing = screens.find((s) => s.sectionType === type)
-    if (existing) return existing
+    const existingVariant = (existing as Screen & { variantId?: string } | undefined)?.variantId
 
-    // layout에 없으면 skeleton에서 동적 생성
+    // variant가 지정되어 있으면 skeleton에서 생성 (일관성 보장)
+    if (requestedVariant) {
+      // 기존 screen이 있고 variant가 같으면 기존 것 사용
+      if (existing && existingVariant === requestedVariant) {
+        console.log(`[getSortedSections] Using existing screen for ${type}:${requestedVariant}`)
+        return existing
+      }
+      // variant가 다르거나 없으면 skeleton에서 새로 생성
+      console.log(`[getSortedSections] Generating from skeleton for ${type}:${requestedVariant} (existing: ${existingVariant || 'none'})`)
+      return createScreenFromSkeleton(type, requestedVariant, tokens)
+    }
+
+    // variant 지정 없으면 기존 screen 사용
+    if (existing) {
+      console.log(`[getSortedSections] Found existing screen for ${type}:`, existing.root?.type)
+      return existing
+    }
+
+    // layout에 없으면 skeleton에서 동적 생성 (기본 variant)
     console.log(`[getSortedSections] Creating screen for missing section: ${type}`)
-    return createScreenFromSkeleton(type, sectionVariants?.[type], tokens)
+    return createScreenFromSkeleton(type, undefined, tokens)
   }
 
   // 디버그: sectionEnabled 상태 확인
