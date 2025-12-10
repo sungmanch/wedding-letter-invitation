@@ -15,6 +15,7 @@ import { UrlField } from './UrlField'
 import { LocationField } from './LocationField'
 import { GroupField } from './GroupField'
 import { RepeaterField } from './RepeaterField'
+import { FramesField } from './FramesField'
 import { useSuperEditor } from '../../context'
 
 interface FieldRendererProps {
@@ -103,6 +104,9 @@ export function FieldRenderer({ field }: FieldRendererProps) {
 
     case 'repeater':
       return <RepeaterField field={field} />
+
+    case 'frames':
+      return <FramesField field={field as EditorField & { type: 'frames' }} />
 
     // TODO: 더 많은 필드 타입 추가
     case 'datetime':

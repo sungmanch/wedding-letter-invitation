@@ -58,6 +58,7 @@ export function buildGoogleFontsUrlFromPresets(presets: FontPreset[]): string {
   const requests: GoogleFontsRequest[] = googleFonts.map(p => ({
     family: p.family,
     weights: p.weights.map(w => w.value),
+    italic: p.italic,
   }))
 
   return buildGoogleFontsUrl(requests)
@@ -103,6 +104,7 @@ export function extractAndBuildFontUrls(fontFamilies: string[]): {
         googleFonts.push({
           family: preset.family,
           weights: preset.weights.map(w => w.value),
+          italic: preset.italic,
         })
       }
     } else if (preset.source === 'cdn' && preset.cdnUrl) {
@@ -186,6 +188,7 @@ export async function loadFontDynamically(fontFamily: string): Promise<boolean> 
       const url = buildGoogleFontsUrl([{
         family: preset.family,
         weights: preset.weights.map(w => w.value),
+        italic: preset.italic,
       }])
       await loadStylesheet(url)
     } else if (preset.source === 'cdn' && preset.cdnUrl) {

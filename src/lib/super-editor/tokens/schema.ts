@@ -48,6 +48,13 @@ export interface SemanticDesignTokens {
     bodyMd: TypoToken // 기본 본문 (14-15px)
     bodySm: TypoToken // 작은 본문 (13px)
     caption: TypoToken // 캡션 (12px)
+    // Drop Cap (첫 글자 강조)
+    dropCap?: {
+      enabled: boolean
+      scale: number // 크기 배율 (기본 2.5)
+      italic: boolean // 이탤릭 여부
+      fontFamily?: string // 전용 폰트 (미지정 시 heading 폰트)
+    }
   }
 
   // 간격 스케일

@@ -98,7 +98,8 @@ function PhoneFrame({
           <div
             ref={scrollRef}
             onScroll={onScroll}
-            className="absolute inset-0 bg-white rounded-[2rem] overflow-hidden overflow-y-auto scrollbar-hide"
+            data-scroll-container="true"
+            className="absolute inset-0 bg-white rounded-[2rem] overflow-x-hidden overflow-y-auto scrollbar-hide"
           >
             {children}
           </div>

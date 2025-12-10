@@ -26,6 +26,7 @@ export type IntroType =
   | 'old-money'         // Quiet Luxury
   | 'monogram'          // 모노그램 크레스트
   | 'jewel-velvet'      // 주얼 벨벳
+  | 'boarding-pass'     // 보딩패스/레터프레스
   | 'custom'            // AI 동적 생성
 
 /** 본문 인터랙션 방식 */

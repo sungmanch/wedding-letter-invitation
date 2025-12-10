@@ -19,7 +19,9 @@ import {
   type SectionType,
 } from '../schema/section-types'
 import { SectionRenderer } from './SectionRenderer'
-import { TokenStyleProvider } from '../context/TokenStyleContext'
+import { TokenStyleProvider, useTokenStyle } from '../context/TokenStyleContext'
+import { getSkeleton } from '../skeletons/registry'
+import { resolveNode } from '../builder/skeleton-resolver'
 
 // ============================================
 // Types
@@ -63,14 +65,63 @@ interface InvitationRendererProps {
 // ============================================
 
 /**
- * 섹션 정렬 및 필터링
+ * 누락된 섹션의 Screen을 skeleton에서 동적으로 생성
+ */
+function createScreenFromSkeleton(
+  sectionType: SectionType,
+  variantId?: string,
+  tokens?: ReturnType<typeof useTokenStyle>['tokens']
+): Screen | undefined {
+  const skeleton = getSkeleton(sectionType)
+  if (!skeleton) {
+    console.log(`[InvitationRenderer] No skeleton found for ${sectionType}`)
+    return undefined
+  }
+
+  const variant = variantId
+    ? skeleton.variants.find((v) => v.id === variantId)
+    : skeleton.variants.find((v) => v.id === skeleton.defaultVariant)
+
+  if (!variant) {
+    console.log(`[InvitationRenderer] No variant found for ${sectionType}:${variantId}`)
+    return undefined
+  }
+
+  // skeleton 노드를 PrimitiveNode로 변환 (deep clone 후 resolve)
+  const clonedStructure = JSON.parse(JSON.stringify(variant.structure))
+  const root = tokens ? resolveNode(clonedStructure, tokens) : clonedStructure
+
+  console.log(`[InvitationRenderer] Created screen from skeleton for ${sectionType}:${variant.id}`, root.type)
+
+  // 디버그: envelope 노드가 있는지 확인
+  const findEnvelope = (node: typeof root): boolean => {
+    if (node.type === 'envelope') return true
+    return node.children?.some(findEnvelope) ?? false
+  }
+  if (sectionType === 'invitation') {
+    console.log(`[InvitationRenderer] invitation has envelope?`, findEnvelope(root))
+    console.log(`[InvitationRenderer] invitation root structure:`, JSON.stringify(root, null, 2).slice(0, 500))
+  }
+
+  return {
+    id: `${sectionType}-screen`,
+    name: skeleton.name,
+    type: sectionType === 'intro' ? 'intro' : 'content',
+    sectionType,
+    root,
+  }
+}
+
+/**
+ * 섹션 정렬 및 필터링 (누락된 섹션은 skeleton에서 동적 생성)
  */
 function getSortedSections(
   screens: Screen[],
   sectionOrder: SectionType[],
   sectionEnabled: Record<SectionType, boolean>,
   visibleSections?: SectionType[],
-  sectionVariants?: Record<SectionType, string>
+  sectionVariants?: Record<SectionType, string>,
+  tokens?: ReturnType<typeof useTokenStyle>['tokens']
 ): {
   intro: Screen | undefined
   sections: Screen[]
@@ -80,9 +131,46 @@ function getSortedSections(
   // guestbook이 FAB variant인지 확인
   const isGuestbookFab = sectionVariants?.guestbook === 'fab'
 
+  // Screen을 찾거나 skeleton에서 생성하는 헬퍼
+  const findOrCreateScreen = (type: SectionType): Screen | undefined => {
+    const requestedVariant = sectionVariants?.[type]
+    const existing = screens.find((s) => s.sectionType === type)
+    const existingVariant = (existing as Screen & { variantId?: string } | undefined)?.variantId
+
+    // variant가 지정되어 있으면 skeleton에서 생성 (일관성 보장)
+    if (requestedVariant) {
+      // 기존 screen이 있고 variant가 같으면 기존 것 사용
+      if (existing && existingVariant === requestedVariant) {
+        console.log(`[getSortedSections] Using existing screen for ${type}:${requestedVariant}`)
+        return existing
+      }
+      // variant가 다르거나 없으면 skeleton에서 새로 생성
+      console.log(`[getSortedSections] Generating from skeleton for ${type}:${requestedVariant} (existing: ${existingVariant || 'none'})`)
+      return createScreenFromSkeleton(type, requestedVariant, tokens)
+    }
+
+    // variant 지정 없으면 기존 screen 사용
+    if (existing) {
+      console.log(`[getSortedSections] Found existing screen for ${type}:`, existing.root?.type)
+      return existing
+    }
+
+    // layout에 없으면 skeleton에서 동적 생성 (기본 variant)
+    console.log(`[getSortedSections] Creating screen for missing section: ${type}`)
+    return createScreenFromSkeleton(type, undefined, tokens)
+  }
+
+  // 디버그: sectionEnabled 상태 확인
+  console.log('[getSortedSections] sectionEnabled:', sectionEnabled)
+  console.log('[getSortedSections] sectionOrder:', sectionOrder)
+  console.log('[getSortedSections] invitation enabled?', sectionEnabled.invitation)
+
   // visibleSections가 있으면 해당 섹션만 표시
   if (visibleSections) {
-    const visible = screens.filter((s) => visibleSections.includes(s.sectionType))
+    const visible = visibleSections
+      .map(findOrCreateScreen)
+      .filter((s): s is Screen => s !== undefined)
+
     const intro = visible.find((s) => s.sectionType === 'intro')
     const sections = visible.filter(
       (s) =>
@@ -97,22 +185,22 @@ function getSortedSections(
 
   // 기본 동작: sectionEnabled 기반
   // 1. intro 항상 첫번째
-  const intro = screens.find((s) => s.sectionType === 'intro')
+  const intro = findOrCreateScreen('intro')
 
   // 2. 나머지 섹션 순서대로 + 활성화된 것만 (guestbook FAB은 제외)
   const sections = sectionOrder
     .filter((type) => sectionEnabled[type])
     .filter((type) => !(type === 'guestbook' && isGuestbookFab))
-    .map((type) => screens.find((s) => s.sectionType === type))
+    .map(findOrCreateScreen)
     .filter((s): s is Screen => s !== undefined)
 
   // 3. music은 FAB로 별도 렌더링
-  const music = screens.find((s) => s.sectionType === 'music')
+  const music = findOrCreateScreen('music')
 
   // 4. guestbook FAB variant는 별도 렌더링
   const guestbookFab =
     isGuestbookFab && sectionEnabled.guestbook
-      ? screens.find((s) => s.sectionType === 'guestbook')
+      ? findOrCreateScreen('guestbook')
       : undefined
 
   return { intro, sections, music, guestbookFab }
@@ -140,10 +228,13 @@ function InvitationContent({
   showVariantSwitcher = true,
   className,
 }: InvitationContentProps) {
-  // 섹션 정렬
+  // 토큰 컨텍스트에서 tokens 가져오기
+  const { tokens } = useTokenStyle()
+
+  // 섹션 정렬 (누락된 섹션은 skeleton에서 동적 생성)
   const { intro, sections } = React.useMemo(
-    () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants),
-    [layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants]
+    () => getSortedSections(layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants, tokens),
+    [layout.screens, sectionOrder, sectionEnabled, visibleSections, sectionVariants, tokens]
   )
 
   // intro 표시 여부 (visibleSections가 있으면 그 기준, 없으면 sectionEnabled 기준)

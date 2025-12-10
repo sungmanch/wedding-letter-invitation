@@ -149,6 +149,14 @@ export function declarationToField(
         fields: decl.fields?.map((f, i) => declarationToField(f, i + 1)) ?? [],
       }
 
+    case 'frames':
+      return {
+        ...base,
+        type: 'frames',
+        minItems: decl.minItems ?? 0,
+        maxItems: decl.maxItems ?? 10,
+      }
+
     default:
       return {
         ...base,

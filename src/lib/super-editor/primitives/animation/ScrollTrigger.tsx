@@ -262,31 +262,75 @@ export function ScrollTrigger({
 
   const isSelected = context.mode === 'edit' && context.selectedNodeId === node.id
 
+  // 가장 가까운 스크롤 가능한 부모 요소 찾기
+  const findScrollParent = useCallback((element: HTMLElement | null): HTMLElement | Window => {
+    if (!element) return window
+
+    let parent = element.parentElement
+    while (parent) {
+      const { overflow, overflowY } = getComputedStyle(parent)
+      if (
+        overflow === 'auto' ||
+        overflow === 'scroll' ||
+        overflowY === 'auto' ||
+        overflowY === 'scroll'
+      ) {
+        // 실제로 스크롤 가능한지 확인 (scrollHeight > clientHeight)
+        if (parent.scrollHeight > parent.clientHeight) {
+          return parent
+        }
+      }
+      parent = parent.parentElement
+    }
+    return window
+  }, [])
+
   // Scroll progress 계산
   useEffect(() => {
     if (!ref.current || context.mode === 'edit') return
+
+    const scrollParent = findScrollParent(ref.current)
+    const isWindow = scrollParent === window
 
     const handleScroll = () => {
       if (!ref.current) return
 
       const rect = ref.current.getBoundingClientRect()
-      const windowHeight = window.innerHeight
+
+      // 스크롤 컨테이너의 뷰포트 높이 계산
+      let viewportHeight: number
+      let viewportTop: number
+
+      if (isWindow) {
+        viewportHeight = window.innerHeight
+        viewportTop = 0
+      } else {
+        const containerRect = (scrollParent as HTMLElement).getBoundingClientRect()
+        viewportHeight = containerRect.height
+        viewportTop = containerRect.top
+      }
+
+      // 요소의 상대적 위치 계산 (컨테이너 기준)
+      const relativeTop = rect.top - viewportTop
 
       // 요소가 화면에 들어오는 비율 계산
-      const start = windowHeight // 화면 하단에서 시작
-      const end = -rect.height // 화면 상단을 벗어날 때 종료
+      // start: 화면 하단에서 시작 (progress = 0)
+      // end: 화면 70% 지점에서 완료 (progress = 1)
+      const start = viewportHeight // 요소 상단이 화면 하단에 있을 때
+      const end = viewportHeight * 0.3 // 요소 상단이 화면 70% 지점(상단에서 30%)에 있을 때
 
-      const currentProgress = (start - rect.top) / (start - end)
+      const currentProgress = (start - relativeTop) / (start - end)
       const clampedProgress = Math.max(0, Math.min(1, currentProgress))
 
       setProgress(clampedProgress)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    // 스크롤 이벤트 등록
+    scrollParent.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll() // 초기값 설정
 
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [context.mode])
+    return () => scrollParent.removeEventListener('scroll', handleScroll)
+  }, [context.mode, findScrollParent])
 
   // Get animation preset
   const preset = props.animation?.preset

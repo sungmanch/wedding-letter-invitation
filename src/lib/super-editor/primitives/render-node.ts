@@ -30,6 +30,11 @@ export function renderPrimitiveNode(
   node: PrimitiveNode,
   context: RenderContext
 ): React.ReactNode {
+  // 디버그: envelope 타입 렌더링 추적
+  if (node.type === 'envelope') {
+    console.log('[render-node] Rendering envelope node:', node.id)
+  }
+
   const renderer = getRenderer(node.type)
 
   if (!renderer) {

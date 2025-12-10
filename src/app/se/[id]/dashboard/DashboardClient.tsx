@@ -29,6 +29,8 @@ const INTRO_ONLY_ENABLED: Record<SectionType, boolean> = {
   accounts: false,
   guestbook: false,
   music: false,
+  photobooth: false,
+  invitation: false,
 }
 
 export function DashboardClient({ layout, style, userData }: DashboardClientProps) {

@@ -14,6 +14,7 @@ export { gothicRomancePreset } from './gothic-romance'
 export { oldMoneyPreset } from './old-money'
 export { monogramPreset } from './monogram'
 export { jewelVelvetPreset } from './jewel-velvet'
+export { boardingPassPreset } from './boarding-pass'
 
 // Import for registry
 import { cinematicPreset } from './cinematic'
@@ -23,6 +24,7 @@ import { gothicRomancePreset } from './gothic-romance'
 import { oldMoneyPreset } from './old-money'
 import { monogramPreset } from './monogram'
 import { jewelVelvetPreset } from './jewel-velvet'
+import { boardingPassPreset } from './boarding-pass'
 
 import type { PredefinedTemplatePreset, PredefinedTemplateCategory, LegacyIntroType } from './types'
 
@@ -38,6 +40,7 @@ export const predefinedPresets: Record<string, PredefinedTemplatePreset> = {
   'old-money': oldMoneyPreset,
   monogram: monogramPreset,
   'jewel-velvet': jewelVelvetPreset,
+  'boarding-pass': boardingPassPreset,
 }
 
 // ============================================
@@ -143,4 +146,5 @@ export const introTypeLabels: Record<LegacyIntroType, { en: string; ko: string }
   'old-money': { en: 'Old Money', ko: '올드 머니' },
   monogram: { en: 'Monogram Crest', ko: '모노그램 크레스트' },
   'jewel-velvet': { en: 'Jewel Velvet', ko: '주얼 벨벳' },
+  'boarding-pass': { en: 'Boarding Pass', ko: '보딩패스' },
 }

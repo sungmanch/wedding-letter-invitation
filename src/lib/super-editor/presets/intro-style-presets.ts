@@ -150,6 +150,23 @@ export const INTRO_STYLE_PRESETS: Record<LegacyIntroType, IntroStylePreset> = {
       body: { family: 'Noto Sans KR', weight: 300 },
     },
   },
+
+  'boarding-pass': {
+    introType: 'boarding-pass',
+    label: '보딩패스',
+    description: '레터프레스 엠보싱의 여행 테마',
+    colors: {
+      primary: '#C4A4A4',
+      background: '#FAF8F5',
+      titleText: '#8B7676',
+      bodyText: '#B8A8A8',
+      accent: '#D4B5B5',
+    },
+    fonts: {
+      title: { family: 'Cormorant Garamond', weight: 500 },
+      body: { family: 'Pretendard', weight: 300 },
+    },
+  },
 }
 
 // ============================================

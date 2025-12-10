@@ -27,13 +27,20 @@ export type PrimitiveType =
   | 'map-embed'
   | 'calendar'
   | 'countdown'
-  // 이미지 컬렉션 (6개)
+  // 이미지 컬렉션 (13개)
   | 'gallery'
   | 'carousel'
   | 'grid'
   | 'collage'
   | 'masonry'
   | 'vinyl-selector'
+  | 'film-strip'
+  | 'accordion-stack'
+  | 'polaroid'
+  | 'magazine'
+  | 'split-scroll'
+  | 'flip-cards'
+  | 'parallax-stack'
   // 애니메이션 (5개)
   | 'animated'
   | 'sequence'
@@ -45,6 +52,9 @@ export type PrimitiveType =
   | 'repeat'
   // 오디오 (1개)
   | 'bgm-player'
+  // 인터랙티브 (2개)
+  | 'photobooth'
+  | 'envelope'
   // 확장 (1개)
   | 'custom'
 
@@ -112,6 +122,7 @@ export interface TextProps {
   content: string
   as?: 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'span' | 'div'
   html?: boolean // innerHTML 허용 여부
+  className?: string // CSS 클래스 (pseudo-element 효과용)
 }
 
 export interface ImageProps {
@@ -209,11 +220,17 @@ export interface CalendarProps {
   /** 로케일 */
   locale?: 'ko' | 'en'
   /** 결혼 날짜 하이라이트 스타일 */
-  highlightStyle?: 'circle' | 'filled' | 'ring'
+  highlightStyle?: 'circle' | 'filled' | 'ring' | 'heart' | 'heart-filled'
   /** 일요일/공휴일 색상 표시 */
   showHolidayColor?: boolean
   /** 토요일 색상 표시 */
   showSaturdayColor?: boolean
+  /** 결혼식 주만 표시 (week-heart variant용) */
+  weekOnly?: boolean
+  /** 월 표시 여부 (weekOnly 사용 시) */
+  showMonth?: boolean
+  /** 캘린더 스타일 변형 */
+  variant?: 'default' | 'letterpress' | 'letterpress-border' | 'letterpress-deep'
 }
 
 // ============================================
@@ -244,7 +261,7 @@ export interface CarouselProps extends ImageCollectionBaseProps {
   showArrows?: boolean
   showDots?: boolean
   slidesToShow?: number
-  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'cards'
+  effect?: 'slide' | 'fade' | 'cube' | 'coverflow' | 'cards' | 'scroll-horizontal'
   spacing?: number
 }
 
@@ -355,6 +372,17 @@ export interface BgmPlayerProps {
   showControls?: boolean // 기본: true
   controlsPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
   controlsStyle?: 'minimal' | 'vinyl'
+}
+
+// ============================================
+// Interactive Primitives Props
+// ============================================
+
+export interface PhotoBoothProps {
+  title?: string // 사진에 표시될 타이틀
+  frames?: unknown[] | string // 프레임 배열 또는 데이터 바인딩 ({{photobooth.frames}})
+  defaultFrameIndex?: number // 기본 선택 프레임 인덱스
+  compact?: boolean // 컴팩트 모드
 }
 
 // ============================================
@@ -511,6 +539,7 @@ export type PrimitiveProps =
   | ConditionalProps
   | RepeatProps
   | BgmPlayerProps
+  | PhotoBoothProps
   | CustomProps
 
 // ============================================

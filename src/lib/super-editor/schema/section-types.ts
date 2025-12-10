@@ -30,6 +30,8 @@ export type SectionType =
   | 'accounts'
   | 'guestbook'
   | 'music'
+  | 'photobooth'
+  | 'invitation'
 
 /**
  * 섹션 메타 정보
@@ -138,6 +140,24 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
     isFloating: true,
     defaultEnabled: false,
   },
+  photobooth: {
+    type: 'photobooth',
+    label: '포토부스',
+    description: '게스트와 호스트가 함께 사진 촬영',
+    icon: 'camera',
+    isFixed: false,
+    isFloating: false,
+    defaultEnabled: false,
+  },
+  invitation: {
+    type: 'invitation',
+    label: '참석 여부',
+    description: 'RSVP 참석 인원 확인 폼',
+    icon: 'mail',
+    isFixed: false,
+    isFloating: false,
+    defaultEnabled: false,
+  },
 }
 
 /**
@@ -152,6 +172,7 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'venue',
   'accounts',
   'guestbook',
+  'invitation',
 ]
 
 /**
@@ -166,6 +187,7 @@ export const REORDERABLE_SECTIONS: SectionType[] = [
   'parents',
   'accounts',
   'guestbook',
+  'invitation',
 ]
 
 /**
@@ -182,6 +204,8 @@ export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   accounts: true,
   guestbook: true,
   music: false,
+  photobooth: false,
+  invitation: false,
 }
 
 /**
@@ -254,4 +278,13 @@ export const SECTION_DATA_BINDINGS: Record<SectionType, string[]> = {
     'guestbook.ctaText', // CTA 버튼 텍스트
   ],
   music: ['bgm.presetId', 'bgm.enabled', 'bgm.autoplay'],
+  photobooth: [
+    'photobooth.title',
+    'photobooth.description',
+    'photobooth.frames',
+  ],
+  invitation: [
+    'invitation.title',
+    'invitation.description',
+  ],
 }

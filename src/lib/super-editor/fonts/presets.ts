@@ -58,6 +58,9 @@ export interface FontPreset {
   license: string // 라이선스 (예: 'OFL', 'Apache 2.0', 'Commercial')
   description?: string // 폰트 설명
   recommended?: ('title' | 'body' | 'accent')[] // 추천 용도
+
+  // 이탤릭 지원
+  italic?: boolean // true면 이탤릭 스타일도 로드
 }
 
 // ============================================
@@ -206,6 +209,24 @@ export const FONT_PRESETS: FontPreset[] = [
     license: 'OFL',
     description: '우아한 바탕체',
     recommended: ['title', 'body'],
+  },
+  {
+    id: 'joseon-palace',
+    family: 'JoseonPalace',
+    label: '조선궁서',
+    labelEn: 'Joseon Palace',
+    category: 'serif-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunGs.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'serif',
+    license: 'OFL',
+    description: '고풍스러운 궁서체. 격조 있는 청첩장용',
+    recommended: ['title'],
   },
   {
     id: 'hahmlet',
@@ -411,6 +432,7 @@ export const FONT_PRESETS: FontPreset[] = [
     license: 'OFL',
     description: '전통적인 Garamond 스타일',
     recommended: ['title', 'body'],
+    italic: true,
   },
   {
     id: 'libre-baskerville',
@@ -542,6 +564,40 @@ export const FONT_PRESETS: FontPreset[] = [
     recommended: ['title'],
   },
   {
+    id: 'cinzel-decorative',
+    family: 'Cinzel Decorative',
+    label: 'Cinzel Decorative',
+    labelEn: 'Cinzel Decorative',
+    category: 'display-en',
+    source: 'google',
+    googleFontsId: 'Cinzel+Decorative',
+    weights: [
+      { value: 400, label: '보통' },
+      { value: 700, label: '굵게' },
+      { value: 900, label: '매우 굵게' },
+    ],
+    defaultWeight: 400,
+    fallback: 'serif',
+    license: 'OFL',
+    description: '장식적인 로마 대문자. 웨딩 타이틀에 적합',
+    recommended: ['title', 'accent'],
+  },
+  {
+    id: 'italiana',
+    family: 'Italiana',
+    label: 'Italiana',
+    labelEn: 'Italiana',
+    category: 'display-en',
+    source: 'google',
+    googleFontsId: 'Italiana',
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'serif',
+    license: 'OFL',
+    description: '우아한 이탈리안 스타일 디스플레이 폰트',
+    recommended: ['title'],
+  },
+  {
     id: 'great-vibes',
     family: 'Great Vibes',
     label: 'Great Vibes',
@@ -554,6 +610,36 @@ export const FONT_PRESETS: FontPreset[] = [
     fallback: 'cursive',
     license: 'OFL',
     description: '우아한 스크립트체. 청첩장 타이틀에 적합',
+    recommended: ['title', 'accent'],
+  },
+  {
+    id: 'pinyon-script',
+    family: 'Pinyon Script',
+    label: 'Pinyon Script',
+    labelEn: 'Pinyon Script',
+    category: 'display-en',
+    source: 'google',
+    googleFontsId: 'Pinyon+Script',
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '정교한 캘리그라피 스크립트. 격조 있는 청첩장용',
+    recommended: ['title', 'accent'],
+  },
+  {
+    id: 'italianno',
+    family: 'Italianno',
+    label: 'Italianno',
+    labelEn: 'Italianno',
+    category: 'display-en',
+    source: 'google',
+    googleFontsId: 'Italianno',
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '이탈리안 캘리그라피 스크립트. 로맨틱한 웨딩용',
     recommended: ['title', 'accent'],
   },
   {
@@ -628,6 +714,24 @@ export const FONT_PRESETS: FontPreset[] = [
   // ============================================
   // 한글 손글씨 (projectnoonnu)
   // ============================================
+  {
+    id: 'mapo-geumbitnaru',
+    family: 'MapoGeumbitnaru',
+    label: '마포금빛나루',
+    labelEn: 'Mapo Geumbitnaru',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoGoldenPierA.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '따뜻하고 감성적인 손글씨체',
+    recommended: ['title', 'accent'],
+  },
   {
     id: 'school-safety-bookmark',
     family: 'SchoolSafetyBookmark',

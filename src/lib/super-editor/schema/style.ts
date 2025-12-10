@@ -193,6 +193,24 @@ export interface TypographyConfig {
     normal: string
     wide: string
   }
+  /**
+   * Drop Cap 설정 (첫 글자 크게 표시)
+   * 이미지 참고: 청첩장 이름 첫 글자를 이탤릭+크게 표시
+   */
+  dropCap?: DropCapConfig
+}
+
+export interface DropCapConfig {
+  /** Drop Cap 활성화 여부 */
+  enabled: boolean
+  /** 첫 글자 크기 배율 (기본: 2.5) */
+  scale?: number
+  /** 이탤릭 적용 여부 (기본: true) */
+  italic?: boolean
+  /** 첫 글자 전용 폰트 (미지정 시 heading 폰트 사용) */
+  fontFamily?: string
+  /** 첫 글자 굵기 */
+  fontWeight?: number
 }
 
 export interface FontFamily {

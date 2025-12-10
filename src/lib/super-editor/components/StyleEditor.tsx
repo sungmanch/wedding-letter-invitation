@@ -229,6 +229,40 @@ export function StyleEditor({
             />
           </div>
 
+          {/* Drop Cap 토글 */}
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2">
+              <span className="text-lg italic font-serif">A</span>
+              <div>
+                <span className="text-xs font-medium text-[#F5E6D3]">첫 글자 강조</span>
+                <p className="text-[10px] text-[#F5E6D3]/50">이름 첫 글자를 크게 표시</p>
+              </div>
+            </div>
+            <button
+              onClick={() => updateTypography((typo) => {
+                if (!typo) return
+                if (!typo.dropCap) {
+                  typo.dropCap = { enabled: true, scale: 2.5, italic: true }
+                } else {
+                  typo.dropCap.enabled = !typo.dropCap.enabled
+                }
+              })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${
+                localStyle.theme.typography?.dropCap?.enabled
+                  ? 'bg-[#C9A962]'
+                  : 'bg-white/20'
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                  localStyle.theme.typography?.dropCap?.enabled
+                    ? 'translate-x-6'
+                    : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
           {/* 제목 상세 설정 */}
           <DisclosurePanel
             label="상세 설정"
@@ -236,6 +270,49 @@ export function StyleEditor({
             onToggle={() => setTitleAdvancedOpen(!titleAdvancedOpen)}
           >
             <div className="space-y-4 pt-2">
+              {/* Drop Cap 세부 설정 (활성화 시에만 표시) */}
+              {localStyle.theme.typography?.dropCap?.enabled && (
+                <div className="space-y-3 p-3 bg-[#C9A962]/5 rounded-lg border border-[#C9A962]/20">
+                  <label className="text-xs font-medium text-[#C9A962]">첫 글자 강조 설정</label>
+
+                  {/* 크기 배율 */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-[#F5E6D3]/50">
+                      <span>크기</span>
+                      <span>{localStyle.theme.typography?.dropCap?.scale ?? 2.5}x</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1.5"
+                      max="4"
+                      step="0.5"
+                      value={localStyle.theme.typography?.dropCap?.scale ?? 2.5}
+                      onChange={(e) => updateTypography((typo) => {
+                        if (typo?.dropCap) typo.dropCap.scale = parseFloat(e.target.value)
+                      })}
+                      className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#C9A962]"
+                    />
+                  </div>
+
+                  {/* 이탤릭 토글 */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#F5E6D3]/60">이탤릭</span>
+                    <button
+                      onClick={() => updateTypography((typo) => {
+                        if (typo?.dropCap) typo.dropCap.italic = !typo.dropCap.italic
+                      })}
+                      className={`px-3 py-1 text-xs rounded border transition-colors ${
+                        localStyle.theme.typography?.dropCap?.italic !== false
+                          ? 'border-[#C9A962] bg-[#C9A962]/10 text-[#C9A962] italic'
+                          : 'border-white/10 text-[#F5E6D3]/60'
+                      }`}
+                    >
+                      Aa
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* 제목 굵기 */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-[#F5E6D3]/60">굵기</label>

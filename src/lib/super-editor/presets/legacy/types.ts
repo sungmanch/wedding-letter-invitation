@@ -31,6 +31,7 @@ export type LegacyIntroType =
   | 'old-money'       // 올드 머니 (레터프레스, 왁스씰)
   | 'monogram'        // 모노그램 (쉴드 엠블럼, 포일)
   | 'jewel-velvet'    // 주얼 벨벳 (에메랄드/버건디, 벨벳 텍스처)
+  | 'boarding-pass'   // 보딩패스 (레터프레스 엠보싱, 티켓 스타일)
 
 // ============================================
 // Legacy Interaction Types

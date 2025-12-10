@@ -40,6 +40,10 @@ export * from './audio'
 import { bgmPlayerRenderer } from './audio'
 const audioRenderers = { 'bgm-player': bgmPlayerRenderer }
 
+// Interactive (1개)
+export * from './interactive'
+import { interactiveRenderers } from './interactive'
+
 // Custom (1개)
 export * from './custom'
 import { customRenderer } from './custom'
@@ -58,10 +62,13 @@ export const allRenderers: Record<string, PrimitiveRenderer> = {
   ...animationRenderers,
   ...logicRenderers,
   ...audioRenderers,
+  ...interactiveRenderers,
   ...customRenderers,
 }
 
 // 렌더러 레지스트리 초기화
+console.log('[Primitives] Registering renderers:', Object.keys(allRenderers))
+console.log('[Primitives] Has envelope?', 'envelope' in allRenderers, allRenderers['envelope'])
 setRenderers(allRenderers)
 
 // ============================================
@@ -77,12 +84,12 @@ export const rendererCategories = {
   content: {
     label: '콘텐츠',
     renderers: contentRenderers,
-    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed', 'calendar'],
+    types: ['text', 'image', 'video', 'avatar', 'button', 'spacer', 'divider', 'input', 'map-embed', 'calendar', 'countdown'],
   },
   imageCollection: {
     label: '이미지 컬렉션',
     renderers: imageCollectionRenderers,
-    types: ['gallery', 'carousel', 'grid', 'collage', 'masonry', 'vinyl-selector'],
+    types: ['gallery', 'carousel', 'grid', 'collage', 'masonry', 'vinyl-selector', 'film-strip', 'accordion-stack'],
   },
   animation: {
     label: '애니메이션',
@@ -98,6 +105,11 @@ export const rendererCategories = {
     label: '오디오',
     renderers: audioRenderers,
     types: ['bgm-player'],
+  },
+  interactive: {
+    label: '인터랙티브',
+    renderers: interactiveRenderers,
+    types: ['photobooth', 'envelope'],
   },
   custom: {
     label: '확장',
@@ -118,11 +130,12 @@ export const primitiveStats = {
   animation: Object.keys(animationRenderers).length,
   logic: Object.keys(logicRenderers).length,
   audio: Object.keys(audioRenderers).length,
+  interactive: Object.keys(interactiveRenderers).length,
   custom: Object.keys(customRenderers).length,
 }
 
-// 31개 확인 (30 + custom)
+// 36개 확인 (layout 6 + content 11 + imageCollection 8 + animation 5 + logic 2 + audio 1 + interactive 2 + custom 1)
 console.assert(
-  primitiveStats.total === 31,
-  `Expected 31 primitives, got ${primitiveStats.total}`
+  primitiveStats.total === 36,
+  `Expected 36 primitives, got ${primitiveStats.total}`
 )
