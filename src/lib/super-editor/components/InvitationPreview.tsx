@@ -271,6 +271,3 @@ export function InvitationPreview({
 
   return renderer
 }
-
-// Re-export PhoneFrame for standalone use
-export { PhoneFrame }
