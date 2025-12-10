@@ -12,7 +12,21 @@
 
 import React, { useEffect, useRef, useState, useMemo, useLayoutEffect } from 'react'
 import gsap from 'gsap'
-import { CalligraphyText as OpentypeCalligraphyText, CALLIGRAPHY_FONTS } from './calligraphy-text'
+import {
+  CalligraphyText as OpentypeCalligraphyText,
+  CALLIGRAPHY_FONTS,
+  CALLIGRAPHY_TEMPLATES,
+  getCalligraphyTemplate,
+  DEFAULT_CALLIGRAPHY_CONFIG,
+  type CalligraphyConfig,
+  type CalligraphyTexts,
+  type CalligraphyTemplate,
+  type CalligraphyItem,
+} from './calligraphy-text'
+
+// Re-export for convenience
+export type { CalligraphyConfig, CalligraphyTexts } from './calligraphy-text'
+export { DEFAULT_CALLIGRAPHY_CONFIG, CALLIGRAPHY_TEMPLATES } from './calligraphy-text'
 
 // ============================================
 // Types
@@ -470,88 +484,98 @@ export function CalligraphySequence({
 
 /**
  * 인트로용 캘리그라피 오버레이
- * opentype.js 기반 실제 텍스트 캘리그라피 애니메이션
+ * 다중 텍스트 + 템플릿 기반 캘리그라피 애니메이션
  */
 interface CalligraphyOverlayProps {
   className?: string
   color?: string
-  /** 커스텀 텍스트 (기본: "And") */
-  text?: string
-  /** 폰트 URL 또는 프리셋 키 */
-  fontUrl?: string
+  /** 캘리그라피 설정 (템플릿 + 텍스트) */
+  config?: CalligraphyConfig
+  /** 장식 flourish 표시 여부 */
+  showDecorations?: boolean
 }
 
 export function CalligraphyOverlay({
   className = '',
   color = 'currentColor',
-  text = 'And',
-  fontUrl = CALLIGRAPHY_FONTS.greatVibes,
+  config = DEFAULT_CALLIGRAPHY_CONFIG,
+  showDecorations = true,
 }: CalligraphyOverlayProps) {
+  // 템플릿 가져오기
+  const template = getCalligraphyTemplate(config.templateId) || CALLIGRAPHY_TEMPLATES[0]
+
+  // 애니메이션 키 (config 변경 시 리렌더)
+  const animationKey = useMemo(
+    () => `${config.templateId}-${JSON.stringify(config.texts)}`,
+    [config.templateId, config.texts]
+  )
+
+  // 마지막 아이템의 delay + duration 계산 (장식 애니메이션 타이밍용)
+  const lastItemEnd = useMemo(() => {
+    if (template.items.length === 0) return 0
+    const lastItem = template.items[template.items.length - 1]
+    return lastItem.delay + (lastItem.duration || 2)
+  }, [template.items])
+
   return (
-    <div className={`absolute inset-0 pointer-events-none ${className}`}>
-      {/* 상단 flourish (SVG 프리셋) */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 opacity-60">
-        <CalligraphySVG
-          type="flourish"
-          duration={2}
-          delay={0.3}
-          strokeColor={color}
-          strokeWidth={1.5}
-        />
-      </div>
+    <div key={animationKey} className={`absolute inset-0 pointer-events-none ${className}`}>
+      {/* 상단 flourish (선택적) */}
+      {showDecorations && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-40 opacity-50">
+          <CalligraphySVG
+            type="flourish"
+            duration={1.5}
+            delay={0}
+            strokeColor={color}
+            strokeWidth={1}
+          />
+        </div>
+      )}
 
-      {/* 중앙 캘리그라피 텍스트 (opentype.js) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <OpentypeCalligraphyText
-          text={text}
-          fontUrl={fontUrl}
-          fontSize={64}
-          strokeColor={color}
-          strokeWidth={1.5}
-          fillColor={color}
-          showFill={true}
-          duration={2.5}
-          delay={0.8}
-          stagger={0.15}
-          width={200}
-          className="opacity-80"
-        />
-      </div>
+      {/* 다중 캘리그라피 텍스트 렌더링 */}
+      {template.items.map((item, index) => {
+        const text = config.texts[item.slot]
+        if (!text) return null
 
-      {/* 좌상단 별 */}
-      <div className="absolute top-16 left-8 w-8 opacity-40">
-        <CalligraphySVG
-          type="starBurst"
-          duration={1.5}
-          delay={1.5}
-          stagger={0.1}
-          strokeColor={color}
-          strokeWidth={1}
-        />
-      </div>
+        return (
+          <div
+            key={`${item.slot}-${index}`}
+            className="absolute"
+            style={{
+              left: `${item.position.x}%`,
+              top: `${item.position.y}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <OpentypeCalligraphyText
+              text={text}
+              fontUrl={CALLIGRAPHY_FONTS[item.fontId]}
+              fontSize={item.fontSize}
+              strokeColor={color}
+              strokeWidth={item.fontSize > 40 ? 1.5 : 1}
+              fillColor={color}
+              showFill={true}
+              duration={item.duration || 2}
+              delay={item.delay}
+              stagger={0.1}
+              className="opacity-90"
+            />
+          </div>
+        )
+      })}
 
-      {/* 우상단 별 */}
-      <div className="absolute top-20 right-12 w-6 opacity-40">
-        <CalligraphySVG
-          type="starBurst"
-          duration={1.5}
-          delay={1.8}
-          stagger={0.1}
-          strokeColor={color}
-          strokeWidth={1}
-        />
-      </div>
-
-      {/* 하단 flourish */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-48 opacity-60">
-        <CalligraphySVG
-          type="flourish"
-          duration={2}
-          delay={2.2}
-          strokeColor={color}
-          strokeWidth={1.5}
-        />
-      </div>
+      {/* 하단 flourish (선택적) */}
+      {showDecorations && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-40 opacity-50">
+          <CalligraphySVG
+            type="flourish"
+            duration={1.5}
+            delay={lastItemEnd + 0.3}
+            strokeColor={color}
+            strokeWidth={1}
+          />
+        </div>
+      )}
     </div>
   )
 }

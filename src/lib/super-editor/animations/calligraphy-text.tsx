@@ -305,3 +305,120 @@ export function Calligraphy({
   const fontUrl = customFontUrl || CALLIGRAPHY_FONTS[font]
   return <CalligraphyText fontUrl={fontUrl} {...props} />
 }
+
+// ============================================
+// Multi-Item Calligraphy System (하이브리드)
+// ============================================
+
+/** 텍스트 슬롯 타입 */
+export type CalligraphySlot = 'groom' | 'and' | 'bride' | 'title'
+
+/** 개별 캘리그라피 아이템 */
+export interface CalligraphyItem {
+  slot: CalligraphySlot
+  fontId: CalligraphyFontPreset
+  fontSize: number
+  /** 위치 (% 기준, x: 가로 중심, y: 세로 위치) */
+  position: { x: number; y: number }
+  /** 애니메이션 지연 (초) */
+  delay: number
+  /** 애니메이션 시간 (초) */
+  duration?: number
+}
+
+/** 캘리그라피 템플릿 */
+export interface CalligraphyTemplate {
+  id: string
+  name: string
+  description: string
+  items: CalligraphyItem[]
+}
+
+/** 사용자 입력 텍스트 */
+export interface CalligraphyTexts {
+  groom: string
+  and: string
+  bride: string
+  title: string
+}
+
+/** 전체 캘리그라피 설정 (템플릿 + 텍스트) */
+export interface CalligraphyConfig {
+  templateId: string
+  texts: CalligraphyTexts
+}
+
+/** 기본 텍스트 */
+export const DEFAULT_CALLIGRAPHY_TEXTS: CalligraphyTexts = {
+  groom: '신랑',
+  and: 'And',
+  bride: '신부',
+  title: 'Wedding Invitation',
+}
+
+// ============================================
+// 캘리그라피 템플릿 프리셋
+// ============================================
+
+export const CALLIGRAPHY_TEMPLATES: CalligraphyTemplate[] = [
+  {
+    id: 'classic-vertical',
+    name: '클래식 세로',
+    description: '전통적인 세로 배치',
+    items: [
+      { slot: 'groom', fontId: 'nanumPen', fontSize: 48, position: { x: 50, y: 25 }, delay: 0, duration: 2 },
+      { slot: 'and', fontId: 'greatVibes', fontSize: 36, position: { x: 50, y: 45 }, delay: 0.8, duration: 1.5 },
+      { slot: 'bride', fontId: 'nanumPen', fontSize: 48, position: { x: 50, y: 65 }, delay: 1.6, duration: 2 },
+      { slot: 'title', fontId: 'parisienne', fontSize: 24, position: { x: 50, y: 88 }, delay: 2.4, duration: 2 },
+    ],
+  },
+  {
+    id: 'elegant-centered',
+    name: '우아한 중앙',
+    description: '중앙 집중형 레이아웃',
+    items: [
+      { slot: 'groom', fontId: 'allura', fontSize: 42, position: { x: 50, y: 30 }, delay: 0, duration: 2 },
+      { slot: 'and', fontId: 'dancingScript', fontSize: 28, position: { x: 50, y: 48 }, delay: 0.6, duration: 1.2 },
+      { slot: 'bride', fontId: 'allura', fontSize: 42, position: { x: 50, y: 66 }, delay: 1.2, duration: 2 },
+      { slot: 'title', fontId: 'greatVibes', fontSize: 20, position: { x: 50, y: 90 }, delay: 2, duration: 1.5 },
+    ],
+  },
+  {
+    id: 'side-by-side',
+    name: '나란히',
+    description: '신랑 신부 양옆 배치',
+    items: [
+      { slot: 'groom', fontId: 'nanumPen', fontSize: 36, position: { x: 25, y: 45 }, delay: 0, duration: 2 },
+      { slot: 'and', fontId: 'greatVibes', fontSize: 32, position: { x: 50, y: 45 }, delay: 0.5, duration: 1.5 },
+      { slot: 'bride', fontId: 'nanumPen', fontSize: 36, position: { x: 75, y: 45 }, delay: 1, duration: 2 },
+      { slot: 'title', fontId: 'parisienne', fontSize: 22, position: { x: 50, y: 75 }, delay: 1.8, duration: 2 },
+    ],
+  },
+  {
+    id: 'minimal',
+    name: '미니멀',
+    description: 'And만 강조',
+    items: [
+      { slot: 'and', fontId: 'greatVibes', fontSize: 64, position: { x: 50, y: 50 }, delay: 0, duration: 2.5 },
+    ],
+  },
+  {
+    id: 'romantic-korean',
+    name: '로맨틱 한글',
+    description: '한글 손글씨 강조',
+    items: [
+      { slot: 'groom', fontId: 'gaegu', fontSize: 52, position: { x: 50, y: 28 }, delay: 0, duration: 2.2 },
+      { slot: 'and', fontId: 'dancingScript', fontSize: 28, position: { x: 50, y: 50 }, delay: 0.8, duration: 1.2 },
+      { slot: 'bride', fontId: 'gaegu', fontSize: 52, position: { x: 50, y: 72 }, delay: 1.6, duration: 2.2 },
+    ],
+  },
+]
+
+export function getCalligraphyTemplate(id: string): CalligraphyTemplate | undefined {
+  return CALLIGRAPHY_TEMPLATES.find((t) => t.id === id)
+}
+
+export const DEFAULT_CALLIGRAPHY_CONFIG: CalligraphyConfig = {
+  templateId: 'classic-vertical',
+  texts: DEFAULT_CALLIGRAPHY_TEXTS,
+}
