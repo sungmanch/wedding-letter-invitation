@@ -551,6 +551,10 @@ function EditPageContent() {
               expandedSection={expandedSection}
               onExpandedSectionChange={setExpandedSection}
               onAddSection={handleAddSection}
+              introEffect={introEffect}
+              onIntroEffectChange={setIntroEffect}
+              calligraphyConfig={calligraphyConfig}
+              onCalligraphyConfigChange={setCalligraphyConfig}
               className="flex-1"
             />
           )}

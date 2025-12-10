@@ -1,41 +1,16 @@
 'use client';
 
-import {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
-import { useCamera } from './useCamera';
-import { FILTERS, FILTER_LIST, applyFilter } from './filters';
-import { drawFrameOverlay, drawTextOverlay, loadImage } from './frames';
-import {
-  DEFAULT_STICKERS,
-  createPlacedSticker,
-  drawAllStickers,
-  hitTestSticker,
-  moveSticker,
-} from './stickers';
-import type {
-  FilterType,
-  PlacedSticker,
-  Sticker,
-  FrameOverlay,
-  CustomFrame,
-} from './types';
+import { useState, forwardRef, useImperativeHandle } from 'react';
+import { PhotoBoothModal } from './PhotoBoothModal';
+import type { CustomFrame } from './types';
 
 export type PhotoBoothRef = {
-  capture: () => string | null;
-  download: () => void;
-  retake: () => void;
+  open: () => void;
+  close: () => void;
 };
 
 export type PhotoBoothProps = {
   title?: string;
-  hostImageUrl?: string;
-  hostPosition?: 'left' | 'right' | 'bottom';
   frames?: CustomFrame[];
   onCapture?: (dataUrl: string) => void;
   className?: string;
@@ -45,622 +20,81 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
   function PhotoBooth(
     {
       title = "Wedding Day",
-      hostImageUrl,
-      hostPosition = 'left',
       frames = [],
       onCapture,
       className,
     },
     ref
   ) {
-    const { videoRef, state: cameraState, startCamera, stopCamera, switchCamera, retake } = useCamera();
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [lastCapturedImage, setLastCapturedImage] = useState<string | null>(null);
 
-    // 부스 상태: idle(초기) -> camera(촬영중) -> captured(촬영완료)
-    const [boothState, setBoothState] = useState<'idle' | 'camera' | 'captured'>('idle');
-    const [selectedFilter, setSelectedFilter] = useState<FilterType>('none');
-    const [selectedFrameIndex, setSelectedFrameIndex] = useState<number>(0);
-    const [activeStickers, setActiveStickers] = useState<Set<string>>(new Set());
-    const [stickers, setStickers] = useState<PlacedSticker[]>([]);
-    const [capturedImage, setCapturedImage] = useState<string | null>(null);
-    const [hostImage, setHostImage] = useState<HTMLImageElement | null>(null);
-    const [groomImage, setGroomImage] = useState<HTMLImageElement | null>(null);
-    const [brideImage, setBrideImage] = useState<HTMLImageElement | null>(null);
+    useImperativeHandle(ref, () => ({
+      open: () => setIsModalOpen(true),
+      close: () => setIsModalOpen(false),
+    }), []);
 
-    // 현재 선택된 프레임
-    const selectedFrame = frames.length > 0 ? frames[selectedFrameIndex] : null;
-
-    // Sticker interaction state
-    const [selectedSticker, setSelectedSticker] = useState<PlacedSticker | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const dragStartRef = useRef({ x: 0, y: 0 });
-
-    // Load frame images (신랑/신부 이미지 미리 로드)
-    useEffect(() => {
-      if (selectedFrame?.groomImage?.croppedUrl) {
-        loadImage(selectedFrame.groomImage.croppedUrl).then(setGroomImage).catch(console.error);
-      } else {
-        setGroomImage(null);
-      }
-      if (selectedFrame?.brideImage?.croppedUrl) {
-        loadImage(selectedFrame.brideImage.croppedUrl).then(setBrideImage).catch(console.error);
-      } else {
-        setBrideImage(null);
-      }
-    }, [selectedFrame]);
-
-    // Load legacy host image (frames가 없을 때만)
-    useEffect(() => {
-      if (!selectedFrame && hostImageUrl) {
-        loadImage(hostImageUrl).then(setHostImage).catch(console.error);
-      } else {
-        setHostImage(null);
-      }
-    }, [hostImageUrl, selectedFrame]);
-
-    // 촬영하기 버튼 클릭 - 카메라 시작
-    const handleStartCamera = useCallback(() => {
-      startCamera('user');
-      setBoothState('camera');
-    }, [startCamera]);
-
-    // 실시간 필터 프리뷰를 위한 캔버스 렌더링
-    const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-
-    // 오버레이 캔버스 크기 (3:4 비율 유지, 스티커용)
-    const OVERLAY_WIDTH = 300;
-    const OVERLAY_HEIGHT = 400;
-
-    // Draw video with filter continuously
-    useEffect(() => {
-      if (boothState !== 'camera') return;
-      if (!previewCanvasRef.current || !videoRef.current) return;
-
-      const canvas = previewCanvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      let animationId: number;
-
-      const draw = () => {
-        const video = videoRef.current;
-        if (!video || video.readyState < 2) {
-          animationId = requestAnimationFrame(draw);
-          return;
-        }
-
-        // 캔버스 크기를 3:4 비율로 설정 (컨테이너와 동일)
-        const targetWidth = 300;
-        const targetHeight = 400;
-        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
-          canvas.width = targetWidth;
-          canvas.height = targetHeight;
-        }
-
-        // 비디오를 3:4 비율 캔버스에 맞춰 그리기 (cover 방식)
-        const videoAspect = video.videoWidth / video.videoHeight;
-        const canvasAspect = canvas.width / canvas.height;
-
-        let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
-
-        if (videoAspect > canvasAspect) {
-          // 비디오가 더 넓음 - 좌우 자르기
-          sw = video.videoHeight * canvasAspect;
-          sx = (video.videoWidth - sw) / 2;
-        } else {
-          // 비디오가 더 높음 - 상하 자르기
-          sh = video.videoWidth / canvasAspect;
-          sy = (video.videoHeight - sh) / 2;
-        }
-
-        // 전면 카메라 미러링
-        ctx.save();
-        if (cameraState.facing === 'user') {
-          ctx.translate(canvas.width, 0);
-          ctx.scale(-1, 1);
-        }
-        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-        ctx.restore();
-
-        // 필터 적용
-        if (selectedFilter !== 'none') {
-          applyFilter(ctx, canvas.width, canvas.height, selectedFilter);
-        }
-
-        animationId = requestAnimationFrame(draw);
-      };
-
-      draw();
-
-      return () => {
-        cancelAnimationFrame(animationId);
-      };
-    }, [boothState, cameraState.facing, selectedFilter]);
-
-    // 스티커 오버레이 그리기 (별도 루프)
-    useEffect(() => {
-      if (boothState !== 'camera') return;
-      if (!overlayCanvasRef.current) return;
-
-      const overlayCanvas = overlayCanvasRef.current;
-      const overlayCtx = overlayCanvas.getContext('2d');
-      if (!overlayCtx) return;
-
-      let animationId: number;
-
-      const drawOverlay = () => {
-        overlayCtx.clearRect(0, 0, OVERLAY_WIDTH, OVERLAY_HEIGHT);
-        drawAllStickers(overlayCtx, stickers, new Map());
-        animationId = requestAnimationFrame(drawOverlay);
-      };
-
-      drawOverlay();
-
-      return () => {
-        cancelAnimationFrame(animationId);
-      };
-    }, [boothState, stickers]);
-
-    const handleCapture = useCallback(() => {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      if (!video || !canvas || !cameraState.isStreaming) return null;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return null;
-
-      // 캡처 캔버스도 3:4 비율로 설정
-      canvas.width = OVERLAY_WIDTH;
-      canvas.height = OVERLAY_HEIGHT;
-
-      // 비디오를 3:4 비율 캔버스에 맞춰 그리기 (cover 방식)
-      const videoAspect = video.videoWidth / video.videoHeight;
-      const canvasAspect = canvas.width / canvas.height;
-
-      let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
-
-      if (videoAspect > canvasAspect) {
-        // 비디오가 더 넓음 - 좌우 자르기
-        sw = video.videoHeight * canvasAspect;
-        sx = (video.videoWidth - sw) / 2;
-      } else {
-        // 비디오가 더 높음 - 상하 자르기
-        sh = video.videoWidth / canvasAspect;
-        sy = (video.videoHeight - sh) / 2;
-      }
-
-      // Flip for front camera
-      ctx.save();
-      if (cameraState.facing === 'user') {
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-      }
-
-      // Draw video frame with cover crop
-      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-      ctx.restore();
-
-      // Apply filter
-      applyFilter(ctx, canvas.width, canvas.height, selectedFilter);
-
-      // Draw frame overlay images (프레임 에디터에서 설정한 위치)
-      if (selectedFrame) {
-        // 신랑 이미지
-        if (groomImage && selectedFrame.groomImage) {
-          const pos = selectedFrame.groomImage.position;
-          ctx.save();
-          ctx.translate(pos.x + pos.width / 2, pos.y + pos.height / 2);
-          ctx.rotate((pos.rotation * Math.PI) / 180);
-          ctx.drawImage(groomImage, -pos.width / 2, -pos.height / 2, pos.width, pos.height);
-          ctx.restore();
-        }
-        // 신부 이미지
-        if (brideImage && selectedFrame.brideImage) {
-          const pos = selectedFrame.brideImage.position;
-          ctx.save();
-          ctx.translate(pos.x + pos.width / 2, pos.y + pos.height / 2);
-          ctx.rotate((pos.rotation * Math.PI) / 180);
-          ctx.drawImage(brideImage, -pos.width / 2, -pos.height / 2, pos.width, pos.height);
-          ctx.restore();
-        }
-      } else if (hostImage) {
-        // Legacy: frames가 없을 때 기존 방식
-        const overlay: FrameOverlay = {
-          id: 'host',
-          frame: { id: 'host', name: 'Host', imageUrl: '' },
-          hostImageUrl,
-          position: hostPosition,
-          opacity: 1,
-        };
-        drawFrameOverlay(ctx, canvas.width, canvas.height, overlay, hostImage);
-      }
-
-      // Draw stickers (오버레이 캔버스와 같은 좌표계)
-      drawAllStickers(ctx, stickers, new Map());
-
-      // Draw title text
-      if (title) {
-        drawTextOverlay(ctx, canvas.width, canvas.height, title, {
-          position: 'bottom',
-          offsetY: 50,
-        });
-      }
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      setCapturedImage(dataUrl);
-      setBoothState('captured');
+    const handleCapture = (dataUrl: string) => {
+      setLastCapturedImage(dataUrl);
       onCapture?.(dataUrl);
+    };
 
-      return dataUrl;
-    }, [
-      cameraState,
-      selectedFilter,
-      selectedFrame,
-      groomImage,
-      brideImage,
-      hostImage,
-      hostImageUrl,
-      hostPosition,
-      stickers,
-      title,
-      onCapture,
-    ]);
-
-    const handleRetake = useCallback(() => {
-      setCapturedImage(null);
-      setBoothState('camera');
-      retake();
-    }, [retake]);
-
-    const handleDownload = useCallback(() => {
-      if (!capturedImage) {
-        handleCapture();
-      }
-      const image = capturedImage || canvasRef.current?.toDataURL('image/jpeg', 0.9);
-      if (!image) return;
-
-      const link = document.createElement('a');
-      link.download = `photobooth-${Date.now()}.jpg`;
-      link.href = image;
-      link.click();
-    }, [capturedImage, handleCapture]);
-
-    // 필터 토글 (같은 필터 누르면 끄기)
-    const handleFilterToggle = useCallback((filterType: FilterType) => {
-      setSelectedFilter((prev) => prev === filterType ? 'none' : filterType);
-    }, []);
-
-    // 스티커 토글 (같은 스티커 누르면 끄기, 왼쪽 위에 배치)
-    const handleStickerToggle = useCallback((sticker: Sticker) => {
-      const canvas = overlayCanvasRef.current;
-      if (!canvas) return;
-
-      setActiveStickers((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(sticker.id)) {
-          // 스티커 끄기
-          newSet.delete(sticker.id);
-          setStickers((prevStickers) =>
-            prevStickers.filter((s) => s.sticker.id !== sticker.id)
-          );
-        } else {
-          // 스티커 켜기 - 왼쪽 위에 배치 (사람을 가리지 않도록)
-          newSet.add(sticker.id);
-          const placed = createPlacedSticker(
-            sticker,
-            30,  // 왼쪽 여백
-            30,  // 위쪽 여백
-            60   // 크기
-          );
-          setStickers((prevStickers) => [...prevStickers, placed]);
-        }
-        return newSet;
-      });
-    }, []);
-
-    // Pointer handlers for sticker manipulation
-    const handlePointerDown = useCallback(
-      (e: React.PointerEvent<HTMLCanvasElement>) => {
-        const canvas = overlayCanvasRef.current;
-        if (!canvas) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-        const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-
-        const hit = hitTestSticker(x, y, stickers);
-        setSelectedSticker(hit);
-
-        if (hit) {
-          setIsDragging(true);
-          dragStartRef.current = { x, y };
-          (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
-        }
-      },
-      [stickers]
-    );
-
-    const handlePointerMove = useCallback(
-      (e: React.PointerEvent<HTMLCanvasElement>) => {
-        if (!isDragging || !selectedSticker) return;
-
-        const canvas = overlayCanvasRef.current;
-        if (!canvas) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-        const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-
-        const dx = x - dragStartRef.current.x;
-        const dy = y - dragStartRef.current.y;
-
-        setStickers((prev) =>
-          prev.map((s) =>
-            s.id === selectedSticker.id ? moveSticker(s, dx, dy) : s
-          )
-        );
-
-        dragStartRef.current = { x, y };
-      },
-      [isDragging, selectedSticker]
-    );
-
-    const handlePointerUp = useCallback(() => {
-      setIsDragging(false);
-    }, []);
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        capture: handleCapture,
-        download: handleDownload,
-        retake: handleRetake,
-      }),
-      [handleCapture, handleDownload, handleRetake]
-    );
-
-    const generalStickers = DEFAULT_STICKERS.filter(
-      (s) => s.category === 'general'
-    );
-    const faceStickers = DEFAULT_STICKERS.filter(
-      (s) => s.category === 'face-tracking'
-    );
-
-    // 메인 액션 버튼 텍스트
-    const mainButtonText = boothState === 'idle' ? '촬영하기' : boothState === 'camera' ? '사진 찍기' : '다시 찍기';
-    const handleMainAction = boothState === 'idle' ? handleStartCamera : boothState === 'camera' ? handleCapture : handleRetake;
+    // 현재 선택된 프레임 (첫 번째)
+    const previewFrame = frames.length > 0 ? frames[0] : null;
 
     return (
-      <div className={className} style={styles.container}>
-        {/* Header */}
-        <h1 style={styles.title}>Photo Booth</h1>
+      <>
+        <div className={className} style={styles.container}>
+          {/* 타이틀 */}
+          <h2 style={styles.title}>Photo Booth</h2>
+          <p style={styles.subtitle}>특별한 순간을 함께 기록하세요</p>
 
-        {/* Main Action Button */}
-        <div style={styles.mainButtonContainer}>
+          {/* 프리뷰 영역 */}
+          <div style={styles.previewContainer}>
+            {lastCapturedImage ? (
+              // 마지막 촬영 이미지
+              <img
+                src={lastCapturedImage}
+                alt="Last captured"
+                style={styles.previewImage}
+              />
+            ) : (
+              // 플레이스홀더
+              <div style={styles.placeholder}>
+                <div style={styles.placeholderIcon}>📸</div>
+                {previewFrame && (
+                  <div style={styles.framePreview}>
+                    {previewFrame.groomImage?.croppedUrl && (
+                      <img
+                        src={previewFrame.groomImage.croppedUrl}
+                        alt=""
+                        style={styles.framePreviewImage}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 촬영 버튼 */}
           <button
-            onClick={handleMainAction}
-            style={styles.mainButton}
+            onClick={() => setIsModalOpen(true)}
+            style={styles.captureButton}
           >
-            {mainButtonText}
+            {lastCapturedImage ? '다시 촬영하기' : '촬영하기'}
           </button>
         </div>
 
-        {/* Camera View - idle일 때는 플레이스홀더 표시 */}
-        <div style={styles.cameraContainer}>
-          {boothState === 'idle' ? (
-            // 초기 상태 - 플레이스홀더
-            <div style={styles.placeholder}>
-              <div style={styles.placeholderIcon}>📸</div>
-              <p style={styles.placeholderText}>버튼을 눌러 촬영을 시작하세요</p>
-            </div>
-          ) : (
-            <>
-              {/* Hidden video element for camera stream */}
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{ display: 'none' }}
-              />
-
-              {/* Preview canvas with filter applied */}
-              {boothState === 'camera' && (
-                <canvas
-                  ref={previewCanvasRef}
-                  style={styles.video}
-                />
-              )}
-
-              {boothState === 'captured' && capturedImage && (
-                <img
-                  src={capturedImage}
-                  alt="Captured"
-                  style={styles.capturedImage}
-                />
-              )}
-
-              {/* Overlay canvas for stickers - 3:4 비율 유지 */}
-              <canvas
-                ref={overlayCanvasRef}
-                width={300}
-                height={400}
-                style={styles.overlayCanvas}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-              />
-
-              {/* Hidden canvas for capture */}
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-              {/* Grid overlay - 카메라 모드일 때만 */}
-              {boothState === 'camera' && (
-                <div style={styles.gridOverlay}>
-                  <div style={styles.gridLine} />
-                  <div style={{ ...styles.gridLine, left: '66.67%' }} />
-                  <div style={{ ...styles.gridLineH, top: '33.33%' }} />
-                  <div style={{ ...styles.gridLineH, top: '66.67%' }} />
-                </div>
-              )}
-
-              {/* Frame overlay images - 프레임 에디터에서 설정한 위치에 렌더링 */}
-              {selectedFrame && boothState === 'camera' && (
-                <>
-                  {selectedFrame.groomImage?.croppedUrl && (
-                    <img
-                      src={selectedFrame.groomImage.croppedUrl}
-                      alt=""
-                      style={{
-                        position: 'absolute',
-                        left: `${(selectedFrame.groomImage.position.x / 300) * 100}%`,
-                        top: `${(selectedFrame.groomImage.position.y / 400) * 100}%`,
-                        width: `${(selectedFrame.groomImage.position.width / 300) * 100}%`,
-                        height: 'auto',
-                        transform: `rotate(${selectedFrame.groomImage.position.rotation}deg)`,
-                        pointerEvents: 'none',
-                        objectFit: 'contain',
-                      }}
-                    />
-                  )}
-                  {selectedFrame.brideImage?.croppedUrl && (
-                    <img
-                      src={selectedFrame.brideImage.croppedUrl}
-                      alt=""
-                      style={{
-                        position: 'absolute',
-                        left: `${(selectedFrame.brideImage.position.x / 300) * 100}%`,
-                        top: `${(selectedFrame.brideImage.position.y / 400) * 100}%`,
-                        width: `${(selectedFrame.brideImage.position.width / 300) * 100}%`,
-                        height: 'auto',
-                        transform: `rotate(${selectedFrame.brideImage.position.rotation}deg)`,
-                        pointerEvents: 'none',
-                        objectFit: 'contain',
-                      }}
-                    />
-                  )}
-                </>
-              )}
-              {/* Legacy host image preview - frames가 없을 때만 */}
-              {!selectedFrame && hostImage && boothState === 'camera' && (
-                <div
-                  style={{
-                    ...styles.hostPreview,
-                    [hostPosition]: 20,
-                    bottom: 20,
-                  }}
-                >
-                  <img
-                    src={hostImageUrl}
-                    alt="Host"
-                    style={styles.hostPreviewImage}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Secondary Actions - captured 상태에서만 */}
-        {boothState === 'captured' && (
-          <div style={styles.secondaryActions}>
-            <button onClick={handleDownload} style={styles.downloadButton}>
-              📥 다운로드
-            </button>
-          </div>
-        )}
-
-        {/* Filter & Sticker Controls - camera 모드일 때만 */}
-        {boothState === 'camera' && (
-          <div style={styles.controlsContainer}>
-            {/* Frame Section - 프레임이 있을 때만 표시 */}
-            {frames.length > 0 && (
-              <div style={styles.controlSection}>
-                <p style={styles.sectionLabel}>프레임</p>
-                <div style={styles.frameGrid}>
-                  {frames.map((frame, index) => (
-                    <button
-                      key={frame.id}
-                      onClick={() => setSelectedFrameIndex(index)}
-                      style={{
-                        ...styles.frameButton,
-                        backgroundColor: frame.backgroundColor,
-                        ...(selectedFrameIndex === index
-                          ? styles.frameButtonActive
-                          : {}),
-                      }}
-                    >
-                      {frame.groomImage?.croppedUrl && (
-                        <img
-                          src={frame.groomImage.croppedUrl}
-                          alt=""
-                          style={styles.frameThumbImage}
-                        />
-                      )}
-                      {frame.brideImage?.croppedUrl && (
-                        <img
-                          src={frame.brideImage.croppedUrl}
-                          alt=""
-                          style={styles.frameThumbImage}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Filter Section */}
-            <div style={styles.controlSection}>
-              <p style={styles.sectionLabel}>필터</p>
-              <div style={styles.toggleGrid}>
-                {FILTER_LIST.filter(f => f.type !== 'none').map((filter) => (
-                  <button
-                    key={filter.type}
-                    onClick={() => handleFilterToggle(filter.type)}
-                    style={{
-                      ...styles.toggleButton,
-                      ...(selectedFilter === filter.type
-                        ? styles.toggleButtonActive
-                        : {}),
-                    }}
-                  >
-                    {filter.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sticker Section */}
-            <div style={styles.controlSection}>
-              <p style={styles.sectionLabel}>스티커</p>
-              <div style={styles.toggleGrid}>
-                {generalStickers.map((sticker) => (
-                  <button
-                    key={sticker.id}
-                    onClick={() => handleStickerToggle(sticker)}
-                    style={{
-                      ...styles.stickerToggleButton,
-                      ...(activeStickers.has(sticker.id)
-                        ? styles.toggleButtonActive
-                        : {}),
-                    }}
-                  >
-                    {sticker.emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error message */}
-        {cameraState.error && (
-          <div style={styles.error}>{cameraState.error}</div>
-        )}
-      </div>
+        {/* 풀스크린 모달 */}
+        <PhotoBoothModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          frames={frames}
+          title={title}
+          onCapture={handleCapture}
+        />
+      </>
     );
   }
 );
@@ -670,215 +104,70 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    padding: '16px',
+    padding: '24px 16px',
     fontFamily: 'system-ui, sans-serif',
   },
   title: {
     fontFamily: '"Playfair Display", serif',
-    fontSize: '28px',
-    fontStyle: 'italic',
+    fontSize: '24px',
     fontWeight: 400,
-    margin: '0 0 16px 0',
+    margin: '0 0 8px 0',
     color: 'var(--color-text-primary, #333)',
+    textAlign: 'center',
   },
-  mainButtonContainer: {
-    marginBottom: '16px',
+  subtitle: {
+    fontSize: '14px',
+    color: 'var(--color-text-secondary, #666)',
+    margin: '0 0 20px 0',
+    textAlign: 'center',
   },
-  mainButton: {
+  previewContainer: {
+    width: '100%',
+    maxWidth: '280px',
+    aspectRatio: '9/16',
+    backgroundColor: 'var(--color-surface, #f5f5f5)',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    marginBottom: '20px',
+  },
+  placeholder: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '16px',
+    position: 'relative',
+  },
+  placeholderIcon: {
+    fontSize: '48px',
+  },
+  framePreview: {
+    position: 'absolute',
+    bottom: '20px',
+    left: '20px',
+    opacity: 0.5,
+  },
+  framePreviewImage: {
+    width: '60px',
+    height: 'auto',
+    borderRadius: '4px',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  captureButton: {
     padding: '14px 32px',
     border: 'none',
     borderRadius: '28px',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'var(--color-accent, #1a1a1a)',
     color: 'white',
     fontSize: '16px',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'transform 0.2s, opacity 0.2s',
-  },
-  secondaryActions: {
-    marginTop: '16px',
-  },
-  downloadButton: {
-    padding: '12px 24px',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#e0e0e0',
-    borderRadius: '24px',
-    backgroundColor: 'white',
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-  },
-  placeholder: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    gap: '12px',
-  },
-  placeholderIcon: {
-    fontSize: '64px',
-  },
-  placeholderText: {
-    fontSize: '14px',
-    color: '#666',
-  },
-  cameraContainer: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: '400px',
-    aspectRatio: '3/4',
-    backgroundColor: '#000',
-    borderRadius: '16px',
-    overflow: 'hidden',
-  },
-  video: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  capturedImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  overlayCanvas: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    touchAction: 'none',
-  },
-  gridOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none',
-  },
-  gridLine: {
-    position: 'absolute',
-    left: '33.33%',
-    top: 0,
-    width: '1px',
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  gridLineH: {
-    position: 'absolute',
-    left: 0,
-    width: '100%',
-    height: '1px',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  hostPreview: {
-    position: 'absolute',
-    width: '30%',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-  },
-  hostPreviewImage: {
-    width: '100%',
-    height: 'auto',
-    display: 'block',
-  },
-  controlsContainer: {
-    width: '100%',
-    maxWidth: '400px',
-    marginTop: '16px',
-    padding: '16px',
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-  },
-  controlSection: {
-    marginBottom: '16px',
-  },
-  sectionLabel: {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#333',
-    marginBottom: '10px',
-  },
-  toggleGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-  },
-  toggleButton: {
-    padding: '8px 14px',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#e0e0e0',
-    borderRadius: '20px',
-    backgroundColor: 'white',
-    cursor: 'pointer',
-    fontSize: '12px',
-    fontWeight: 500,
-    color: '#333',
-    transition: 'all 0.2s',
-  },
-  toggleButtonActive: {
-    borderColor: '#1a1a1a',
-    backgroundColor: '#1a1a1a',
-    color: 'white',
-  },
-  stickerToggleButton: {
-    width: '44px',
-    height: '44px',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#e0e0e0',
-    borderRadius: '12px',
-    backgroundColor: 'white',
-    cursor: 'pointer',
-    fontSize: '22px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s',
-  },
-  frameGrid: {
-    display: 'flex',
-    gap: '8px',
-    overflowX: 'auto',
-    paddingBottom: '4px',
-  },
-  frameButton: {
-    position: 'relative',
-    width: '60px',
-    height: '80px',
-    borderWidth: '2px',
-    borderStyle: 'solid',
-    borderColor: '#e0e0e0',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    overflow: 'hidden',
-    flexShrink: 0,
-    padding: 0,
-  },
-  frameButtonActive: {
-    borderColor: '#3b82f6',
-    boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.3)',
-  },
-  frameThumbImage: {
-    position: 'absolute',
-    width: '40%',
-    height: 'auto',
-    objectFit: 'contain',
-    bottom: '4px',
-  },
-  error: {
-    marginTop: '16px',
-    padding: '12px 16px',
-    backgroundColor: '#ffebee',
-    color: '#c62828',
-    borderRadius: '8px',
-    fontSize: '14px',
   },
 };

@@ -21,16 +21,21 @@ function createInitialFrame(): CustomFrame {
   };
 }
 
+// 프레임 에디터 기준 좌표계 (9:16 비율)
+export const FRAME_CANVAS_WIDTH = 540;
+export const FRAME_CANVAS_HEIGHT = 960;
+
 function createPersonImage(type: PersonType, originalUrl: string): PersonImage {
   return {
     type,
     originalUrl,
     croppedUrl: null,
     position: {
-      x: type === 'groom' ? 50 : 200,
-      y: 100,
-      width: 150,
-      height: 200,
+      // 9:16 캔버스(540x960) 기준 초기 위치
+      x: type === 'groom' ? 50 : 300,
+      y: 600,
+      width: 180,
+      height: 240,
       rotation: 0,
     },
   };

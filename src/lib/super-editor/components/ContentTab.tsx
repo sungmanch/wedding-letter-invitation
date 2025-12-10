@@ -8,6 +8,8 @@ import { REORDERABLE_SECTIONS, SECTION_META, type SectionType } from '../schema/
 import { getAllSectionTypes } from '../skeletons/registry'
 import type { LayoutSchema } from '../schema/layout'
 import type { VariableDeclaration } from '../schema/variables'
+import type { IntroEffectType } from '../animations/intro-effects'
+import type { CalligraphyConfig } from '../animations/calligraphy-text'
 
 interface ContentTabProps {
   /** 섹션 순서 */
@@ -28,6 +30,14 @@ interface ContentTabProps {
   onExpandedSectionChange: (sectionType: SectionType | null) => void
   /** 섹션 추가 콜백 */
   onAddSection?: (sectionType: SectionType) => void
+  /** 인트로 효과 */
+  introEffect?: IntroEffectType
+  /** 인트로 효과 변경 콜백 */
+  onIntroEffectChange?: (effect: IntroEffectType) => void
+  /** 캘리그라피 설정 */
+  calligraphyConfig?: CalligraphyConfig
+  /** 캘리그라피 설정 변경 콜백 */
+  onCalligraphyConfigChange?: (config: CalligraphyConfig) => void
   className?: string
 }
 
@@ -41,6 +51,10 @@ export function ContentTab({
   expandedSection,
   onExpandedSectionChange,
   onAddSection,
+  introEffect,
+  onIntroEffectChange,
+  calligraphyConfig,
+  onCalligraphyConfigChange,
   className = '',
 }: ContentTabProps) {
   // 각 섹션의 ref를 저장
@@ -152,6 +166,10 @@ export function ContentTab({
               layout={layout}
               declarations={declarations}
               fixed
+              introEffect={introEffect}
+              onIntroEffectChange={onIntroEffectChange}
+              calligraphyConfig={calligraphyConfig}
+              onCalligraphyConfigChange={onCalligraphyConfigChange}
             />
           </div>
         )}

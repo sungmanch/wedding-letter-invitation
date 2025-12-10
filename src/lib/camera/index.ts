@@ -1,11 +1,14 @@
 export { PhotoBooth } from './PhotoBooth';
 export type { PhotoBoothRef, PhotoBoothProps } from './PhotoBooth';
 
+export { PhotoBoothModal } from './PhotoBoothModal';
+export type { PhotoBoothModalProps } from './PhotoBoothModal';
+
 export { FrameEditor } from './FrameEditor';
 export type { FrameEditorRef, FrameEditorProps } from './FrameEditor';
 
 export { useCamera } from './useCamera';
-export { useFrameEditor } from './useFrameEditor';
+export { useFrameEditor, FRAME_CANVAS_WIDTH, FRAME_CANVAS_HEIGHT } from './useFrameEditor';
 
 export { FILTERS, FILTER_LIST, applyFilter } from './filters';
 export { DEFAULT_FRAMES, drawFrameOverlay, drawTextOverlay, loadImage } from './frames';

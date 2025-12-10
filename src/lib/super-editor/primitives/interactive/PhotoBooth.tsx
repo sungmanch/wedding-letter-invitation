@@ -129,8 +129,6 @@ export function PhotoBooth({
       <CameraPhotoBooth
         title={title}
         frames={frames}
-        hostImageUrl={selectedFrame?.groomImage?.croppedUrl || undefined}
-        hostPosition="left"
         onCapture={(dataUrl) => {
           console.log('Photo captured:', dataUrl.substring(0, 50))
         }}

@@ -537,27 +537,34 @@ export function CalligraphyOverlay({
         const text = config.texts[item.slot]
         if (!text) return null
 
+        // 오버라이드 적용
+        const override = config.overrides?.[item.slot]
+        const fontId = override?.fontId ?? item.fontId
+        const fontSize = override?.fontSize ?? item.fontSize
+        const position = override?.position ?? item.position
+
         return (
           <div
             key={`${item.slot}-${index}`}
-            className="absolute"
+            className="absolute whitespace-nowrap"
             style={{
-              left: `${item.position.x}%`,
-              top: `${item.position.y}%`,
+              left: `${position.x}%`,
+              top: `${position.y}%`,
               transform: 'translate(-50%, -50%)',
             }}
           >
             <OpentypeCalligraphyText
               text={text}
-              fontUrl={CALLIGRAPHY_FONTS[item.fontId]}
-              fontSize={item.fontSize}
+              fontUrl={CALLIGRAPHY_FONTS[fontId]}
+              fontSize={fontSize}
               strokeColor={color}
-              strokeWidth={item.fontSize > 40 ? 1.5 : 1}
+              strokeWidth={fontSize > 40 ? 1.5 : 1}
               fillColor={color}
               showFill={true}
               duration={item.duration || 2}
               delay={item.delay}
               stagger={0.1}
+              width="auto"
               className="opacity-90"
             />
           </div>

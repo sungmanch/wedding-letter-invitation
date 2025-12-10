@@ -2,11 +2,14 @@
 
 import { useMemo } from 'react'
 import { FieldRenderer } from './fields/FieldRenderer'
+import { CalligraphyEditor } from './CalligraphyEditor'
 import { getFieldsForSectionType } from '../utils/editor-generator'
 import { SECTION_META } from '../schema/section-types'
 import type { SectionType } from '../schema/section-types'
 import type { LayoutSchema } from '../schema/layout'
 import type { VariableDeclaration } from '../schema/variables'
+import type { IntroEffectType } from '../animations/intro-effects'
+import type { CalligraphyConfig } from '../animations/calligraphy-text'
 
 interface SectionAccordionProps {
   sectionType: SectionType
@@ -30,6 +33,14 @@ interface SectionAccordionProps {
   canMoveDown?: boolean
   /** 스크롤 대상 ref */
   accordionRef?: React.RefObject<HTMLDivElement>
+  /** 인트로 효과 (intro 섹션용) */
+  introEffect?: IntroEffectType
+  /** 인트로 효과 변경 콜백 */
+  onIntroEffectChange?: (effect: IntroEffectType) => void
+  /** 캘리그라피 설정 (intro 섹션용) */
+  calligraphyConfig?: CalligraphyConfig
+  /** 캘리그라피 설정 변경 콜백 */
+  onCalligraphyConfigChange?: (config: CalligraphyConfig) => void
 }
 
 export function SectionAccordion({
@@ -47,6 +58,10 @@ export function SectionAccordion({
   canMoveUp = true,
   canMoveDown = true,
   accordionRef,
+  introEffect,
+  onIntroEffectChange,
+  calligraphyConfig,
+  onCalligraphyConfigChange,
 }: SectionAccordionProps) {
   const meta = SECTION_META[sectionType]
 
@@ -194,15 +209,30 @@ export function SectionAccordion({
       {/* 본문 (펼쳐진 경우) */}
       {expanded && enabled && (
         <div className="border-t border-white/10 p-4 space-y-4">
+          {/* intro 섹션일 때 캘리그라피 에디터 표시 */}
+          {sectionType === 'intro' &&
+            introEffect !== undefined &&
+            onIntroEffectChange &&
+            calligraphyConfig &&
+            onCalligraphyConfigChange && (
+              <CalligraphyEditor
+                introEffect={introEffect}
+                onIntroEffectChange={onIntroEffectChange}
+                calligraphyConfig={calligraphyConfig}
+                onCalligraphyConfigChange={onCalligraphyConfigChange}
+              />
+            )}
+
+          {/* 기존 필드 렌더러 */}
           {sectionFields.length > 0 ? (
             sectionFields
               .sort((a, b) => a.order - b.order)
               .map((field) => <FieldRenderer key={field.id} field={field} />)
-          ) : (
+          ) : sectionType !== 'intro' ? (
             <div className="text-center py-4 text-[#F5E6D3]/50 text-sm">
               편집 가능한 필드가 없습니다
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

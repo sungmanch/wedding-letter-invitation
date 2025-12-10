@@ -8,9 +8,12 @@ import {
   forwardRef,
   useImperativeHandle,
 } from 'react';
-import { useFrameEditor } from './useFrameEditor';
+import { useFrameEditor, FRAME_CANVAS_WIDTH, FRAME_CANVAS_HEIGHT } from './useFrameEditor';
 import { ImageCropper, ImageCropperRef } from '../kropper';
 import type { CustomFrame, PersonImage } from './types';
+
+// 화면에 표시할 프리뷰 스케일 (540x960 -> 270x480)
+const PREVIEW_SCALE = 0.5;
 
 export type FrameEditorRef = {
   getFrame: () => CustomFrame;
@@ -124,8 +127,9 @@ export const FrameEditor = forwardRef<FrameEditorRef, FrameEditorProps>(
       (e: React.PointerEvent) => {
         if (!dragTarget) return;
 
-        const dx = e.clientX - dragStartRef.current.x;
-        const dy = e.clientY - dragStartRef.current.y;
+        // 화면상의 이동량을 실제 좌표계(540x960)로 변환
+        const dx = (e.clientX - dragStartRef.current.x) / PREVIEW_SCALE;
+        const dy = (e.clientY - dragStartRef.current.y) / PREVIEW_SCALE;
 
         if (dragTarget === 'groom' && state.frame.groomImage) {
           updateGroomPosition({
@@ -352,12 +356,18 @@ function ArrangeStep({
     '#1a1a1a',
   ];
 
+  // 9:16 비율 프리뷰 (스케일 적용)
+  const previewWidth = FRAME_CANVAS_WIDTH * PREVIEW_SCALE;
+  const previewHeight = FRAME_CANVAS_HEIGHT * PREVIEW_SCALE;
+
   return (
     <div style={styles.arrangeContainer}>
-      {/* Preview Canvas */}
+      {/* Preview Canvas - 9:16 비율 */}
       <div
         style={{
           ...styles.arrangePreview,
+          width: previewWidth,
+          height: previewHeight,
           backgroundColor: frame.backgroundColor,
         }}
         onPointerMove={onPointerMove}
@@ -371,10 +381,10 @@ function ArrangeStep({
             draggable={false}
             style={{
               ...styles.arrangeImage,
-              left: frame.groomImage.position.x,
-              top: frame.groomImage.position.y,
-              width: frame.groomImage.position.width,
-              height: frame.groomImage.position.height,
+              left: frame.groomImage.position.x * PREVIEW_SCALE,
+              top: frame.groomImage.position.y * PREVIEW_SCALE,
+              width: frame.groomImage.position.width * PREVIEW_SCALE,
+              height: frame.groomImage.position.height * PREVIEW_SCALE,
               transform: `rotate(${frame.groomImage.position.rotation}deg)`,
             }}
             onPointerDown={(e) => onPointerDown(e, 'groom')}
@@ -387,10 +397,10 @@ function ArrangeStep({
             draggable={false}
             style={{
               ...styles.arrangeImage,
-              left: frame.brideImage.position.x,
-              top: frame.brideImage.position.y,
-              width: frame.brideImage.position.width,
-              height: frame.brideImage.position.height,
+              left: frame.brideImage.position.x * PREVIEW_SCALE,
+              top: frame.brideImage.position.y * PREVIEW_SCALE,
+              width: frame.brideImage.position.width * PREVIEW_SCALE,
+              height: frame.brideImage.position.height * PREVIEW_SCALE,
               transform: `rotate(${frame.brideImage.position.rotation}deg)`,
             }}
             onPointerDown={(e) => onPointerDown(e, 'bride')}
@@ -443,11 +453,18 @@ function NameStep({
 }
 
 function CompleteStep({ frame }: { frame: CustomFrame }) {
+  // 완료 화면은 더 작은 스케일로 표시
+  const completeScale = 0.25;
+  const previewWidth = FRAME_CANVAS_WIDTH * completeScale;
+  const previewHeight = FRAME_CANVAS_HEIGHT * completeScale;
+
   return (
     <div style={styles.completeContainer}>
       <div
         style={{
           ...styles.completePreview,
+          width: previewWidth,
+          height: previewHeight,
           backgroundColor: frame.backgroundColor,
         }}
       >
@@ -457,10 +474,10 @@ function CompleteStep({ frame }: { frame: CustomFrame }) {
             alt="신랑"
             style={{
               ...styles.completeImage,
-              left: frame.groomImage.position.x * 0.5,
-              top: frame.groomImage.position.y * 0.5,
-              width: frame.groomImage.position.width * 0.5,
-              height: frame.groomImage.position.height * 0.5,
+              left: frame.groomImage.position.x * completeScale,
+              top: frame.groomImage.position.y * completeScale,
+              width: frame.groomImage.position.width * completeScale,
+              height: frame.groomImage.position.height * completeScale,
             }}
           />
         )}
@@ -470,10 +487,10 @@ function CompleteStep({ frame }: { frame: CustomFrame }) {
             alt="신부"
             style={{
               ...styles.completeImage,
-              left: frame.brideImage.position.x * 0.5,
-              top: frame.brideImage.position.y * 0.5,
-              width: frame.brideImage.position.width * 0.5,
-              height: frame.brideImage.position.height * 0.5,
+              left: frame.brideImage.position.x * completeScale,
+              top: frame.brideImage.position.y * completeScale,
+              width: frame.brideImage.position.width * completeScale,
+              height: frame.brideImage.position.height * completeScale,
             }}
           />
         )}
@@ -612,15 +629,15 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
+    alignItems: 'center',
   },
   arrangePreview: {
     position: 'relative',
-    width: '300px',
-    height: '300px',
-    margin: '0 auto',
+    // width, height는 컴포넌트에서 동적으로 설정
     borderRadius: '12px',
     overflow: 'hidden',
     touchAction: 'none',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
   },
   arrangeImage: {
     position: 'absolute',
@@ -674,11 +691,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   completePreview: {
     position: 'relative',
-    width: '200px',
-    height: '200px',
+    // width, height는 컴포넌트에서 동적으로 설정
     borderRadius: '12px',
     overflow: 'hidden',
     marginBottom: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
   },
   completeImage: {
     position: 'absolute',
