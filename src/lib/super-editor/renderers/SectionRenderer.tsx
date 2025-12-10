@@ -19,6 +19,13 @@ import {
   CalligraphyOverlay,
   type IntroEffectType,
 } from '../animations/intro-effects'
+import { CALLIGRAPHY_FONTS, type CalligraphyFontPreset } from '../animations/calligraphy-text'
+
+/** 캘리그라피 설정 */
+export interface CalligraphyConfig {
+  text: string
+  fontId: CalligraphyFontPreset
+}
 
 interface SectionRendererProps {
   screen: Screen
@@ -38,6 +45,8 @@ interface SectionRendererProps {
   showVariantSwitcher?: boolean
   // 인트로 애니메이션 효과 (intro 섹션에만 적용)
   introEffect?: IntroEffectType
+  // 캘리그라피 설정
+  calligraphyConfig?: CalligraphyConfig
 }
 
 export function SectionRenderer({
@@ -53,6 +62,7 @@ export function SectionRenderer({
   onVariantChange,
   showVariantSwitcher: showVariantSwitcherProp = true,
   introEffect,
+  calligraphyConfig,
 }: SectionRendererProps) {
   // 토큰 스타일 컨텍스트에서 resolveTokenRef 가져오기
   const { resolveTokenRef, tokens } = useTokenStyle()
@@ -152,7 +162,12 @@ export function SectionRenderer({
         <FallingPetals count={12} color="#FFB7C5" className="z-10" />
       )}
       {showIntroEffect && introEffect === 'calligraphy' && (
-        <CalligraphyOverlay color="currentColor" className="z-10" />
+        <CalligraphyOverlay
+          color="currentColor"
+          className="z-10"
+          text={calligraphyConfig?.text || 'And'}
+          fontUrl={calligraphyConfig?.fontId ? CALLIGRAPHY_FONTS[calligraphyConfig.fontId] : undefined}
+        />
       )}
     </section>
   )

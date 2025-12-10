@@ -19,8 +19,11 @@ import { InvitationRenderer } from '../renderers'
 import { GuestbookFab } from '../renderers/GuestbookFab'
 import { MusicPlayer } from '../renderers/MusicPlayer'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
-import { VariantControlPanel } from './VariantControlPanel'
+import { VariantControlPanel, type CalligraphyConfig } from './VariantControlPanel'
 import type { IntroEffectType } from '../animations/intro-effects'
+
+// Re-export CalligraphyConfig for convenience
+export type { CalligraphyConfig } from './VariantControlPanel'
 
 // ============================================
 // Types
@@ -53,6 +56,10 @@ interface InvitationPreviewProps {
   // 인트로 애니메이션 효과
   introEffect?: IntroEffectType
   onIntroEffectChange?: (effect: IntroEffectType) => void
+
+  // 캘리그라피 설정
+  calligraphyConfig?: CalligraphyConfig
+  onCalligraphyConfigChange?: (config: CalligraphyConfig) => void
 
   // PhoneFrame 옵션
   withFrame?: boolean
@@ -137,6 +144,8 @@ export function InvitationPreview({
   onVariantChange,
   introEffect,
   onIntroEffectChange,
+  calligraphyConfig,
+  onCalligraphyConfigChange,
   withFrame = false,
   frameWidth,
   frameHeight,
@@ -208,6 +217,7 @@ export function InvitationPreview({
       onVariantChange={onVariantChange}
       showVariantSwitcher={false}
       introEffect={introEffect}
+      calligraphyConfig={calligraphyConfig}
       className={className}
     />
   )
@@ -271,6 +281,8 @@ export function InvitationPreview({
               sectionEnabled={sectionEnabled}
               introEffect={introEffect}
               onIntroEffectChange={onIntroEffectChange}
+              calligraphyConfig={calligraphyConfig}
+              onCalligraphyConfigChange={onCalligraphyConfigChange}
               className="h-full overflow-y-auto"
             />
           </div>

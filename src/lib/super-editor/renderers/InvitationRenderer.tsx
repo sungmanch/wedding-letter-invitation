@@ -23,6 +23,10 @@ import { TokenStyleProvider, useTokenStyle } from '../context/TokenStyleContext'
 import { getSkeleton } from '../skeletons/registry'
 import { resolveNode } from '../builder/skeleton-resolver'
 import type { IntroEffectType } from '../animations/intro-effects'
+import type { CalligraphyConfig } from './SectionRenderer'
+
+// Re-export for convenience
+export type { CalligraphyConfig } from './SectionRenderer'
 
 // ============================================
 // Types
@@ -60,6 +64,9 @@ interface InvitationRendererProps {
 
   // 인트로 애니메이션 효과
   introEffect?: IntroEffectType
+
+  // 캘리그라피 설정
+  calligraphyConfig?: CalligraphyConfig
 
   className?: string
 }
@@ -231,6 +238,7 @@ function InvitationContent({
   onVariantChange,
   showVariantSwitcher = true,
   introEffect,
+  calligraphyConfig,
   className,
 }: InvitationContentProps) {
   // 토큰 컨텍스트에서 tokens 가져오기
@@ -275,6 +283,7 @@ function InvitationContent({
           onVariantChange={onVariantChange}
           showVariantSwitcher={showVariantSwitcher}
           introEffect={introEffect}
+          calligraphyConfig={calligraphyConfig}
         />
       )}
 

@@ -265,6 +265,27 @@ export const CALLIGRAPHY_FONTS = {
 
 export type CalligraphyFontPreset = keyof typeof CALLIGRAPHY_FONTS
 
+/** 폰트 프리셋 메타 정보 */
+export interface CalligraphyFontMeta {
+  id: CalligraphyFontPreset
+  name: string
+  category: 'english' | 'korean'
+  sample: string
+}
+
+export const CALLIGRAPHY_FONT_PRESETS: CalligraphyFontMeta[] = [
+  { id: 'greatVibes', name: 'Great Vibes', category: 'english', sample: 'And' },
+  { id: 'dancingScript', name: 'Dancing Script', category: 'english', sample: 'Love' },
+  { id: 'parisienne', name: 'Parisienne', category: 'english', sample: 'Wedding' },
+  { id: 'allura', name: 'Allura', category: 'english', sample: 'Forever' },
+  { id: 'nanumPen', name: '나눔손글씨 펜', category: 'korean', sample: '사랑' },
+  { id: 'gaegu', name: '개구체', category: 'korean', sample: '결혼' },
+]
+
+export function getCalligraphyFontMeta(id: CalligraphyFontPreset): CalligraphyFontMeta | undefined {
+  return CALLIGRAPHY_FONT_PRESETS.find((f) => f.id === id)
+}
+
 // ============================================
 // Wrapper with Preset
 // ============================================

@@ -13,8 +13,11 @@ import {
   DEFAULT_SECTION_ORDER,
   DEFAULT_SECTION_ENABLED,
 } from '../schema/section-types'
-import { IntroEffectSelector } from './IntroEffectSelector'
+import { IntroEffectSelector, type CalligraphyConfig } from './IntroEffectSelector'
 import type { IntroEffectType } from '../animations/intro-effects'
+
+// Re-export CalligraphyConfig for external use
+export type { CalligraphyConfig } from './IntroEffectSelector'
 
 interface VariantControlPanelProps {
   activeSection: SectionType | null
@@ -26,6 +29,9 @@ interface VariantControlPanelProps {
   // 인트로 애니메이션 효과
   introEffect?: IntroEffectType
   onIntroEffectChange?: (effect: IntroEffectType) => void
+  // 캘리그라피 설정
+  calligraphyConfig?: CalligraphyConfig
+  onCalligraphyConfigChange?: (config: CalligraphyConfig) => void
   className?: string
 }
 
@@ -38,6 +44,8 @@ export function VariantControlPanel({
   sectionEnabled = DEFAULT_SECTION_ENABLED,
   introEffect = 'none',
   onIntroEffectChange,
+  calligraphyConfig,
+  onCalligraphyConfigChange,
   className = '',
 }: VariantControlPanelProps) {
   // layout.screens에 있는 섹션 타입들 (중복 제거, music만 제외)
@@ -111,6 +119,8 @@ export function VariantControlPanel({
             <IntroEffectSelector
               currentEffect={introEffect}
               onEffectChange={onIntroEffectChange}
+              calligraphyConfig={calligraphyConfig}
+              onCalligraphyConfigChange={onCalligraphyConfigChange}
             />
           </>
         )}
