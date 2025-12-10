@@ -100,6 +100,7 @@ function PhoneFrame({
             onScroll={onScroll}
             data-scroll-container="true"
             className="absolute inset-0 bg-white rounded-[2rem] overflow-x-hidden overflow-y-auto scrollbar-hide"
+            style={{ '--preview-screen-height': `${height}px` } as React.CSSProperties}
           >
             {children}
           </div>
