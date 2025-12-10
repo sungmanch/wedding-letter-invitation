@@ -33,11 +33,11 @@ export function VariantControlPanel({
   sectionEnabled = DEFAULT_SECTION_ENABLED,
   className = '',
 }: VariantControlPanelProps) {
-  // layout.screens에 있는 섹션 타입들 (중복 제거)
+  // layout.screens에 있는 섹션 타입들 (중복 제거, music만 제외)
   const availableSections = useMemo(() => {
     const seen = new Set<SectionType>()
     layout.screens.forEach((s) => {
-      if (s.sectionType !== 'intro' && s.sectionType !== 'music') {
+      if (s.sectionType !== 'music') {
         seen.add(s.sectionType as SectionType)
       }
     })
@@ -45,10 +45,23 @@ export function VariantControlPanel({
   }, [layout.screens])
 
   // sectionOrder 순서대로 정렬하고, 활성화된 섹션만 필터링
+  // intro는 sectionOrder에 없지만 항상 맨 위에 표시
   const sections = useMemo(() => {
-    return sectionOrder.filter(
-      (type) => sectionEnabled[type] && availableSections.has(type)
-    )
+    const orderedSections: SectionType[] = []
+
+    // intro가 availableSections에 있으면 맨 앞에 추가
+    if (availableSections.has('intro')) {
+      orderedSections.push('intro')
+    }
+
+    // 나머지 섹션은 sectionOrder 순서대로
+    sectionOrder.forEach((type) => {
+      if (sectionEnabled[type] && availableSections.has(type)) {
+        orderedSections.push(type)
+      }
+    })
+
+    return orderedSections
   }, [sectionOrder, sectionEnabled, availableSections])
 
   // variant가 2개 이상인 섹션만 필터링

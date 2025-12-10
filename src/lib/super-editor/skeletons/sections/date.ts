@@ -232,7 +232,6 @@ export const dateSkeleton: SectionSkeleton = {
                 type: 'column',
                 tokenStyle: {
                   padding: '$token.spacing.lg',
-                  backgroundColor: '$token.colors.surface',
                   borderRadius: '$token.borders.radiusMd',
                 },
                 style: {
@@ -275,7 +274,8 @@ export const dateSkeleton: SectionSkeleton = {
                   textAlign: 'center',
                 },
                 props: {
-                  content: '{{couple.groom.name}} ♥ {{couple.bride.name}} 결혼식이 {{countdown.days}}일 남았습니다',
+                  content:
+                    '{{couple.groom.name}} ♥ {{couple.bride.name}} 결혼식이 {{countdown.days}}일 남았습니다',
                   as: 'p',
                 },
               },
@@ -332,7 +332,8 @@ export const dateSkeleton: SectionSkeleton = {
     {
       id: 'save-the-date',
       name: 'Save The Date',
-      description: '영문 스타일의 세이브더데이트 레이아웃 (코너 프레임 펼침 + 블러 해제 애니메이션)',
+      description:
+        '영문 스타일의 세이브더데이트 레이아웃 (코너 프레임 펼침 + 블러 해제 애니메이션)',
       tags: ['modern', 'western', 'elegant', 'minimal', 'animated'],
       structure: {
         id: 'date-root',
@@ -738,7 +739,13 @@ export const dateSkeleton: SectionSkeleton = {
       options: {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
-          { id: 'blur-reveal', name: '블러 리빌 (기본)', preset: 'blur-in', trigger: 'inView', duration: 800 },
+          {
+            id: 'blur-reveal',
+            name: '블러 리빌 (기본)',
+            preset: 'blur-in',
+            trigger: 'inView',
+            duration: 800,
+          },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 600 },
         ],
       },
