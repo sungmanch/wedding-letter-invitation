@@ -57,6 +57,13 @@
       "when": 1765087518886,
       "tag": "0007_wealthy_old_lace",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1765387607656,
+      "tag": "0008_skinny_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

@@ -65,6 +65,8 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     const [stickers, setStickers] = useState<PlacedSticker[]>([]);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [hostImage, setHostImage] = useState<HTMLImageElement | null>(null);
+    const [groomImage, setGroomImage] = useState<HTMLImageElement | null>(null);
+    const [brideImage, setBrideImage] = useState<HTMLImageElement | null>(null);
 
     // 현재 선택된 프레임
     const selectedFrame = frames.length > 0 ? frames[selectedFrameIndex] : null;
@@ -74,11 +76,24 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     const [isDragging, setIsDragging] = useState(false);
     const dragStartRef = useRef({ x: 0, y: 0 });
 
-    // Load host image (frames가 있으면 선택된 프레임의 이미지 사용)
+    // Load frame images (신랑/신부 이미지 미리 로드)
     useEffect(() => {
-      const imageUrl = selectedFrame?.groomImage?.croppedUrl || hostImageUrl;
-      if (imageUrl) {
-        loadImage(imageUrl).then(setHostImage).catch(console.error);
+      if (selectedFrame?.groomImage?.croppedUrl) {
+        loadImage(selectedFrame.groomImage.croppedUrl).then(setGroomImage).catch(console.error);
+      } else {
+        setGroomImage(null);
+      }
+      if (selectedFrame?.brideImage?.croppedUrl) {
+        loadImage(selectedFrame.brideImage.croppedUrl).then(setBrideImage).catch(console.error);
+      } else {
+        setBrideImage(null);
+      }
+    }, [selectedFrame]);
+
+    // Load legacy host image (frames가 없을 때만)
+    useEffect(() => {
+      if (!selectedFrame && hostImageUrl) {
+        loadImage(hostImageUrl).then(setHostImage).catch(console.error);
       } else {
         setHostImage(null);
       }
@@ -229,8 +244,28 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       // Apply filter
       applyFilter(ctx, canvas.width, canvas.height, selectedFilter);
 
-      // Draw host image overlay
-      if (hostImage) {
+      // Draw frame overlay images (프레임 에디터에서 설정한 위치)
+      if (selectedFrame) {
+        // 신랑 이미지
+        if (groomImage && selectedFrame.groomImage) {
+          const pos = selectedFrame.groomImage.position;
+          ctx.save();
+          ctx.translate(pos.x + pos.width / 2, pos.y + pos.height / 2);
+          ctx.rotate((pos.rotation * Math.PI) / 180);
+          ctx.drawImage(groomImage, -pos.width / 2, -pos.height / 2, pos.width, pos.height);
+          ctx.restore();
+        }
+        // 신부 이미지
+        if (brideImage && selectedFrame.brideImage) {
+          const pos = selectedFrame.brideImage.position;
+          ctx.save();
+          ctx.translate(pos.x + pos.width / 2, pos.y + pos.height / 2);
+          ctx.rotate((pos.rotation * Math.PI) / 180);
+          ctx.drawImage(brideImage, -pos.width / 2, -pos.height / 2, pos.width, pos.height);
+          ctx.restore();
+        }
+      } else if (hostImage) {
+        // Legacy: frames가 없을 때 기존 방식
         const overlay: FrameOverlay = {
           id: 'host',
           frame: { id: 'host', name: 'Host', imageUrl: '' },
@@ -261,6 +296,9 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     }, [
       cameraState,
       selectedFilter,
+      selectedFrame,
+      groomImage,
+      brideImage,
       hostImage,
       hostImageUrl,
       hostPosition,
@@ -468,8 +506,45 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
                 </div>
               )}
 
-              {/* Host image preview */}
-              {hostImage && boothState === 'camera' && (
+              {/* Frame overlay images - 프레임 에디터에서 설정한 위치에 렌더링 */}
+              {selectedFrame && boothState === 'camera' && (
+                <>
+                  {selectedFrame.groomImage?.croppedUrl && (
+                    <img
+                      src={selectedFrame.groomImage.croppedUrl}
+                      alt=""
+                      style={{
+                        position: 'absolute',
+                        left: `${(selectedFrame.groomImage.position.x / 300) * 100}%`,
+                        top: `${(selectedFrame.groomImage.position.y / 400) * 100}%`,
+                        width: `${(selectedFrame.groomImage.position.width / 300) * 100}%`,
+                        height: 'auto',
+                        transform: `rotate(${selectedFrame.groomImage.position.rotation}deg)`,
+                        pointerEvents: 'none',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  )}
+                  {selectedFrame.brideImage?.croppedUrl && (
+                    <img
+                      src={selectedFrame.brideImage.croppedUrl}
+                      alt=""
+                      style={{
+                        position: 'absolute',
+                        left: `${(selectedFrame.brideImage.position.x / 300) * 100}%`,
+                        top: `${(selectedFrame.brideImage.position.y / 400) * 100}%`,
+                        width: `${(selectedFrame.brideImage.position.width / 300) * 100}%`,
+                        height: 'auto',
+                        transform: `rotate(${selectedFrame.brideImage.position.rotation}deg)`,
+                        pointerEvents: 'none',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  )}
+                </>
+              )}
+              {/* Legacy host image preview - frames가 없을 때만 */}
+              {!selectedFrame && hostImage && boothState === 'camera' && (
                 <div
                   style={{
                     ...styles.hostPreview,

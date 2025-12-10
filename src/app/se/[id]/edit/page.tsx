@@ -10,6 +10,7 @@ import {
   updateTemplateLayout,
   uploadOgImage,
   updateOgMetadata,
+  updateIntroEffect,
 } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import {
@@ -116,6 +117,14 @@ function EditPageContent() {
         setSectionEnabled(
           (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
         )
+
+        // 인트로 애니메이션 효과 로드
+        if (invitation.introEffect) {
+          setIntroEffect(invitation.introEffect as IntroEffectType)
+        }
+        if (invitation.calligraphyConfig) {
+          setCalligraphyConfig(invitation.calligraphyConfig as CalligraphyConfig)
+        }
 
         // OG 기본값 설정
         const userData = invitation.userData as UserData
@@ -224,6 +233,13 @@ function EditPageContent() {
         await updateTemplateStyle(invitationId, state.style)
       }
 
+      // 인트로 애니메이션 효과 저장
+      await updateIntroEffect(
+        invitationId,
+        introEffect,
+        introEffect === 'calligraphy' ? calligraphyConfig : undefined
+      )
+
       // OG 이미지 저장 (pendingImageData가 있는 경우)
       if (ogValues.pendingImageData) {
         const imageResult = await uploadOgImage(invitationId, ogValues.pendingImageData)
@@ -260,6 +276,8 @@ function EditPageContent() {
     state.style,
     sectionOrder,
     sectionEnabled,
+    introEffect,
+    calligraphyConfig,
     ogValues,
   ])
 

@@ -342,10 +342,19 @@ export interface CalligraphyTexts {
   title: string
 }
 
-/** 전체 캘리그라피 설정 (템플릿 + 텍스트) */
+/** 아이템별 오버라이드 (폰트, 위치 등) */
+export interface CalligraphyItemOverride {
+  fontId?: CalligraphyFontPreset
+  fontSize?: number
+  position?: { x: number; y: number }
+}
+
+/** 전체 캘리그라피 설정 (템플릿 + 텍스트 + 오버라이드) */
 export interface CalligraphyConfig {
   templateId: string
   texts: CalligraphyTexts
+  /** 슬롯별 오버라이드 (템플릿 기본값을 덮어씀) */
+  overrides?: Partial<Record<CalligraphySlot, CalligraphyItemOverride>>
 }
 
 /** 기본 텍스트 */
