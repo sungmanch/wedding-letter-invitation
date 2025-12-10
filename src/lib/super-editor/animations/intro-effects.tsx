@@ -7,10 +7,12 @@
  * 1. SpinningStars - 빙글빙글 도는 별/오브젝트
  * 2. FallingPetals - 흩날리는 꽃잎 (SVG)
  * 3. CalligraphySVG - GSAP DrawSVG 스타일 필기체 애니메이션
+ * 4. CalligraphyTextOverlay - opentype.js 기반 실제 텍스트 캘리그라피
  */
 
 import React, { useEffect, useRef, useState, useMemo, useLayoutEffect } from 'react'
 import gsap from 'gsap'
+import { CalligraphyText as OpentypeCalligraphyText, CALLIGRAPHY_FONTS } from './calligraphy-text'
 
 // ============================================
 // Types
@@ -468,27 +470,51 @@ export function CalligraphySequence({
 
 /**
  * 인트로용 캘리그라피 오버레이
- * 화면에 장식 요소들이 순차적으로 그려짐
+ * opentype.js 기반 실제 텍스트 캘리그라피 애니메이션
  */
 interface CalligraphyOverlayProps {
   className?: string
   color?: string
+  /** 커스텀 텍스트 (기본: "And") */
+  text?: string
+  /** 폰트 URL 또는 프리셋 키 */
+  fontUrl?: string
 }
 
 export function CalligraphyOverlay({
   className = '',
   color = 'currentColor',
+  text = 'And',
+  fontUrl = CALLIGRAPHY_FONTS.greatVibes,
 }: CalligraphyOverlayProps) {
   return (
     <div className={`absolute inset-0 pointer-events-none ${className}`}>
-      {/* 상단 flourish */}
+      {/* 상단 flourish (SVG 프리셋) */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 opacity-60">
         <CalligraphySVG
           type="flourish"
           duration={2}
-          delay={0.5}
+          delay={0.3}
           strokeColor={color}
           strokeWidth={1.5}
+        />
+      </div>
+
+      {/* 중앙 캘리그라피 텍스트 (opentype.js) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <OpentypeCalligraphyText
+          text={text}
+          fontUrl={fontUrl}
+          fontSize={64}
+          strokeColor={color}
+          strokeWidth={1.5}
+          fillColor={color}
+          showFill={true}
+          duration={2.5}
+          delay={0.8}
+          stagger={0.15}
+          width={200}
+          className="opacity-80"
         />
       </div>
 
@@ -497,7 +523,7 @@ export function CalligraphyOverlay({
         <CalligraphySVG
           type="starBurst"
           duration={1.5}
-          delay={1}
+          delay={1.5}
           stagger={0.1}
           strokeColor={color}
           strokeWidth={1}
@@ -509,7 +535,7 @@ export function CalligraphyOverlay({
         <CalligraphySVG
           type="starBurst"
           duration={1.5}
-          delay={1.3}
+          delay={1.8}
           stagger={0.1}
           strokeColor={color}
           strokeWidth={1}
@@ -521,7 +547,7 @@ export function CalligraphyOverlay({
         <CalligraphySVG
           type="flourish"
           duration={2}
-          delay={1.8}
+          delay={2.2}
           strokeColor={color}
           strokeWidth={1.5}
         />
@@ -530,8 +556,8 @@ export function CalligraphyOverlay({
   )
 }
 
-// 기존 CalligraphyText도 유지 (하위 호환성)
-interface CalligraphyTextProps {
+// 기존 CSS clip-path 기반 텍스트 리빌 효과 (하위 호환성)
+interface ClipRevealTextProps {
   text: string
   duration?: number
   delay?: number
@@ -540,14 +566,14 @@ interface CalligraphyTextProps {
   as?: 'span' | 'p' | 'h1' | 'h2' | 'h3'
 }
 
-export function CalligraphyText({
+export function ClipRevealText({
   text,
   duration = 2000,
   delay = 0,
   className = '',
   style,
   as: Component = 'span',
-}: CalligraphyTextProps) {
+}: ClipRevealTextProps) {
   return (
     <>
       <style>
