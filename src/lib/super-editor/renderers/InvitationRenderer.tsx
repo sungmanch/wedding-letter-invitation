@@ -22,6 +22,7 @@ import { SectionRenderer } from './SectionRenderer'
 import { TokenStyleProvider, useTokenStyle } from '../context/TokenStyleContext'
 import { getSkeleton } from '../skeletons/registry'
 import { resolveNode } from '../builder/skeleton-resolver'
+import type { IntroEffectType } from '../animations/intro-effects'
 
 // ============================================
 // Types
@@ -56,6 +57,9 @@ interface InvitationRendererProps {
 
   // 섹션 내부 VariantSwitcher 표시 여부 (false면 외부 패널 사용)
   showVariantSwitcher?: boolean
+
+  // 인트로 애니메이션 효과
+  introEffect?: IntroEffectType
 
   className?: string
 }
@@ -226,6 +230,7 @@ function InvitationContent({
   sectionVariants,
   onVariantChange,
   showVariantSwitcher = true,
+  introEffect,
   className,
 }: InvitationContentProps) {
   // 토큰 컨텍스트에서 tokens 가져오기
@@ -269,6 +274,7 @@ function InvitationContent({
           currentVariantId={sectionVariants?.intro}
           onVariantChange={onVariantChange}
           showVariantSwitcher={showVariantSwitcher}
+          introEffect={introEffect}
         />
       )}
 

@@ -87,6 +87,11 @@ export const ImageCropper = forwardRef<ImageCropperRef, ImageCropperProps>(
 
       instanceRef.current = createKropper(canvasRef.current, options);
 
+      // 마운트 시 src가 있으면 바로 이미지 로드
+      if (src) {
+        instanceRef.current.setImage(src);
+      }
+
       return () => {
         instanceRef.current?.destroy();
         instanceRef.current = null;
