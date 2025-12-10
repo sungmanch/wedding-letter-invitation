@@ -82,26 +82,22 @@ export const ImageCropper = forwardRef<ImageCropperRef, ImageCropperProps>(
       ]
     );
 
+    // kropper 인스턴스 생성 및 이미지 로드
     useEffect(() => {
-      if (!canvasRef.current) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-      instanceRef.current = createKropper(canvasRef.current, options);
+      const instance = createKropper(canvas, options);
+      instanceRef.current = instance;
 
-      // 마운트 시 src가 있으면 바로 이미지 로드
       if (src) {
-        instanceRef.current.setImage(src);
+        instance.setImage(src).catch(console.error);
       }
 
       return () => {
-        instanceRef.current?.destroy();
+        instance.destroy();
         instanceRef.current = null;
       };
-    }, []);
-
-    useEffect(() => {
-      if (src && instanceRef.current) {
-        instanceRef.current.setImage(src);
-      }
     }, [src]);
 
     useEffect(() => {

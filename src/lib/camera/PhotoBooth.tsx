@@ -23,6 +23,7 @@ import type {
   PlacedSticker,
   Sticker,
   FrameOverlay,
+  CustomFrame,
 } from './types';
 
 export type PhotoBoothRef = {
@@ -35,6 +36,7 @@ export type PhotoBoothProps = {
   title?: string;
   hostImageUrl?: string;
   hostPosition?: 'left' | 'right' | 'bottom';
+  frames?: CustomFrame[];
   onCapture?: (dataUrl: string) => void;
   className?: string;
 };
@@ -45,6 +47,7 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
       title = "Wedding Day",
       hostImageUrl,
       hostPosition = 'left',
+      frames = [],
       onCapture,
       className,
     },
@@ -57,22 +60,29 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
     // 부스 상태: idle(초기) -> camera(촬영중) -> captured(촬영완료)
     const [boothState, setBoothState] = useState<'idle' | 'camera' | 'captured'>('idle');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('none');
+    const [selectedFrameIndex, setSelectedFrameIndex] = useState<number>(0);
     const [activeStickers, setActiveStickers] = useState<Set<string>>(new Set());
     const [stickers, setStickers] = useState<PlacedSticker[]>([]);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [hostImage, setHostImage] = useState<HTMLImageElement | null>(null);
+
+    // 현재 선택된 프레임
+    const selectedFrame = frames.length > 0 ? frames[selectedFrameIndex] : null;
 
     // Sticker interaction state
     const [selectedSticker, setSelectedSticker] = useState<PlacedSticker | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const dragStartRef = useRef({ x: 0, y: 0 });
 
-    // Load host image
+    // Load host image (frames가 있으면 선택된 프레임의 이미지 사용)
     useEffect(() => {
-      if (hostImageUrl) {
-        loadImage(hostImageUrl).then(setHostImage).catch(console.error);
+      const imageUrl = selectedFrame?.groomImage?.croppedUrl || hostImageUrl;
+      if (imageUrl) {
+        loadImage(imageUrl).then(setHostImage).catch(console.error);
+      } else {
+        setHostImage(null);
       }
-    }, [hostImageUrl]);
+    }, [hostImageUrl, selectedFrame]);
 
     // 촬영하기 버튼 클릭 - 카메라 시작
     const handleStartCamera = useCallback(() => {
@@ -490,6 +500,43 @@ export const PhotoBooth = forwardRef<PhotoBoothRef, PhotoBoothProps>(
         {/* Filter & Sticker Controls - camera 모드일 때만 */}
         {boothState === 'camera' && (
           <div style={styles.controlsContainer}>
+            {/* Frame Section - 프레임이 있을 때만 표시 */}
+            {frames.length > 0 && (
+              <div style={styles.controlSection}>
+                <p style={styles.sectionLabel}>프레임</p>
+                <div style={styles.frameGrid}>
+                  {frames.map((frame, index) => (
+                    <button
+                      key={frame.id}
+                      onClick={() => setSelectedFrameIndex(index)}
+                      style={{
+                        ...styles.frameButton,
+                        backgroundColor: frame.backgroundColor,
+                        ...(selectedFrameIndex === index
+                          ? styles.frameButtonActive
+                          : {}),
+                      }}
+                    >
+                      {frame.groomImage?.croppedUrl && (
+                        <img
+                          src={frame.groomImage.croppedUrl}
+                          alt=""
+                          style={styles.frameThumbImage}
+                        />
+                      )}
+                      {frame.brideImage?.croppedUrl && (
+                        <img
+                          src={frame.brideImage.croppedUrl}
+                          alt=""
+                          style={styles.frameThumbImage}
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Filter Section */}
             <div style={styles.controlSection}>
               <p style={styles.sectionLabel}>필터</p>
@@ -720,6 +767,36 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s',
+  },
+  frameGrid: {
+    display: 'flex',
+    gap: '8px',
+    overflowX: 'auto',
+    paddingBottom: '4px',
+  },
+  frameButton: {
+    position: 'relative',
+    width: '60px',
+    height: '80px',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: '#e0e0e0',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    overflow: 'hidden',
+    flexShrink: 0,
+    padding: 0,
+  },
+  frameButtonActive: {
+    borderColor: '#3b82f6',
+    boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.3)',
+  },
+  frameThumbImage: {
+    position: 'absolute',
+    width: '40%',
+    height: 'auto',
+    objectFit: 'contain',
+    bottom: '4px',
   },
   error: {
     marginTop: '16px',

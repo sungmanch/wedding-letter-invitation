@@ -47,7 +47,6 @@ export const FrameEditor = forwardRef<FrameEditorRef, FrameEditorProps>(
 
     const cropperRef = useRef<ImageCropperRef>(null);
     const [dragTarget, setDragTarget] = useState<'groom' | 'bride' | null>(null);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const stepInfo = getStepInfo();
     const currentStep = getCurrentStepIndex();
@@ -108,10 +107,14 @@ export const FrameEditor = forwardRef<FrameEditorRef, FrameEditorProps>(
     }, [state.frame, onSave]);
 
     // Drag handlers for arrange step
+    const dragStartRef = useRef({ x: 0, y: 0 });
+
     const handlePointerDown = useCallback(
       (e: React.PointerEvent, target: 'groom' | 'bride') => {
+        e.preventDefault();
+        e.stopPropagation();
         setDragTarget(target);
-        setDragStart({ x: e.clientX, y: e.clientY });
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
       },
       []
@@ -121,8 +124,8 @@ export const FrameEditor = forwardRef<FrameEditorRef, FrameEditorProps>(
       (e: React.PointerEvent) => {
         if (!dragTarget) return;
 
-        const dx = e.clientX - dragStart.x;
-        const dy = e.clientY - dragStart.y;
+        const dx = e.clientX - dragStartRef.current.x;
+        const dy = e.clientY - dragStartRef.current.y;
 
         if (dragTarget === 'groom' && state.frame.groomImage) {
           updateGroomPosition({
@@ -136,9 +139,9 @@ export const FrameEditor = forwardRef<FrameEditorRef, FrameEditorProps>(
           });
         }
 
-        setDragStart({ x: e.clientX, y: e.clientY });
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
       },
-      [dragTarget, dragStart, state.frame, updateGroomPosition, updateBridePosition]
+      [dragTarget, state.frame, updateGroomPosition, updateBridePosition]
     );
 
     const handlePointerUp = useCallback(() => {
@@ -365,6 +368,7 @@ function ArrangeStep({
           <img
             src={frame.groomImage.croppedUrl}
             alt="신랑"
+            draggable={false}
             style={{
               ...styles.arrangeImage,
               left: frame.groomImage.position.x,
@@ -380,6 +384,7 @@ function ArrangeStep({
           <img
             src={frame.brideImage.croppedUrl}
             alt="신부"
+            draggable={false}
             style={{
               ...styles.arrangeImage,
               left: frame.brideImage.position.x,

@@ -24,7 +24,11 @@ export function createKropper(
   canvas: HTMLCanvasElement,
   options: KropperOptions = {}
 ): KropperInstance {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  // undefined 값을 제거하고 기본값과 병합
+  const filteredOptions = Object.fromEntries(
+    Object.entries(options).filter(([, v]) => v !== undefined)
+  );
+  const opts = { ...DEFAULT_OPTIONS, ...filteredOptions };
   const ctx = canvas.getContext('2d');
 
   let imageEl: HTMLImageElement | null = null;
@@ -263,7 +267,10 @@ export function createKropper(
     return new Promise((resolve, reject) => {
       if (typeof src === 'string') {
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        // data URL이나 blob URL은 crossOrigin 설정하면 안 됨
+        if (!src.startsWith('data:') && !src.startsWith('blob:')) {
+          img.crossOrigin = 'anonymous';
+        }
         img.onload = () => {
           imageEl = img;
           position = { x: 0, y: 0 };
@@ -271,7 +278,10 @@ export function createKropper(
           requestAnimationFrame(draw);
           resolve();
         };
-        img.onerror = reject;
+        img.onerror = (e) => {
+          console.error('Kropper: Failed to load image', e);
+          reject(e);
+        };
         img.src = src;
       } else {
         imageEl = src;
