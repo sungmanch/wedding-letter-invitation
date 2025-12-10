@@ -37,6 +37,7 @@ import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 import type { LegacyIntroType } from '@/lib/super-editor/presets/legacy/types'
+import type { IntroEffectType } from '@/lib/super-editor/animations/intro-effects'
 
 type EditorTab = 'content' | 'design' | 'share'
 
@@ -64,6 +65,8 @@ function EditPageContent() {
   const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>(
     {} as Record<SectionType, string>
   )
+  // 인트로 애니메이션 효과 상태
+  const [introEffect, setIntroEffect] = useState<IntroEffectType>('none')
   // OG 기본값
   const [ogDefaults, setOgDefaults] = useState({
     title: '',
@@ -577,6 +580,8 @@ function EditPageContent() {
                   highlightedSection={expandedSection}
                   sectionVariants={sectionVariants}
                   onVariantChange={handleVariantChange}
+                  introEffect={introEffect}
+                  onIntroEffectChange={setIntroEffect}
                   withFrame
                   frameWidth={375}
                   frameHeight={667}

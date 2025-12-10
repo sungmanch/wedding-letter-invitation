@@ -13,6 +13,8 @@ import {
   DEFAULT_SECTION_ORDER,
   DEFAULT_SECTION_ENABLED,
 } from '../schema/section-types'
+import { IntroEffectSelector } from './IntroEffectSelector'
+import type { IntroEffectType } from '../animations/intro-effects'
 
 interface VariantControlPanelProps {
   activeSection: SectionType | null
@@ -21,6 +23,9 @@ interface VariantControlPanelProps {
   layout: LayoutSchema
   sectionOrder?: SectionType[]
   sectionEnabled?: Record<SectionType, boolean>
+  // 인트로 애니메이션 효과
+  introEffect?: IntroEffectType
+  onIntroEffectChange?: (effect: IntroEffectType) => void
   className?: string
 }
 
@@ -31,6 +36,8 @@ export function VariantControlPanel({
   layout,
   sectionOrder = DEFAULT_SECTION_ORDER,
   sectionEnabled = DEFAULT_SECTION_ENABLED,
+  introEffect = 'none',
+  onIntroEffectChange,
   className = '',
 }: VariantControlPanelProps) {
   // layout.screens에 있는 섹션 타입들 (중복 제거, music만 제외)
@@ -72,7 +79,10 @@ export function VariantControlPanel({
     })
   }, [sections])
 
-  if (sectionsWithVariants.length === 0) {
+  // intro가 있는지 확인
+  const hasIntro = availableSections.has('intro')
+
+  if (sectionsWithVariants.length === 0 && !hasIntro) {
     return null
   }
 
@@ -93,6 +103,17 @@ export function VariantControlPanel({
             isActive={activeSection === sectionType}
           />
         ))}
+
+        {/* 인트로 애니메이션 효과 선택기 */}
+        {hasIntro && onIntroEffectChange && (
+          <>
+            <div className="border-t border-white/10 my-2" />
+            <IntroEffectSelector
+              currentEffect={introEffect}
+              onEffectChange={onIntroEffectChange}
+            />
+          </>
+        )}
       </div>
     </div>
   )

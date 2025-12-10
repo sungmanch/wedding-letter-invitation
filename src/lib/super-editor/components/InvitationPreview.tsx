@@ -20,6 +20,8 @@ import { GuestbookFab } from '../renderers/GuestbookFab'
 import { MusicPlayer } from '../renderers/MusicPlayer'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
 import { VariantControlPanel } from './VariantControlPanel'
+import type { IntroEffectType } from '../animations/intro-effects'
+import { SpinningStars, FallingPetals } from '../animations/intro-effects'
 
 // ============================================
 // Types
@@ -48,6 +50,10 @@ interface InvitationPreviewProps {
   // Variant switcher (dev mode only)
   sectionVariants?: Record<SectionType, string>
   onVariantChange?: (sectionType: SectionType, variantId: string) => void
+
+  // 인트로 애니메이션 효과
+  introEffect?: IntroEffectType
+  onIntroEffectChange?: (effect: IntroEffectType) => void
 
   // PhoneFrame 옵션
   withFrame?: boolean
@@ -130,6 +136,8 @@ export function InvitationPreview({
   highlightedSection,
   sectionVariants,
   onVariantChange,
+  introEffect,
+  onIntroEffectChange,
   withFrame = false,
   frameWidth,
   frameHeight,
@@ -222,6 +230,13 @@ export function InvitationPreview({
     // PhoneFrame용 오버레이 (FAB 등)
     const frameOverlay = (
       <>
+        {/* 인트로 애니메이션 효과 - 전체 화면에 오버레이 */}
+        {introEffect === 'spinning-stars' && (
+          <SpinningStars count={8} color="currentColor" className="z-10" />
+        )}
+        {introEffect === 'falling-petals' && (
+          <FallingPetals count={12} color="#FFB7C5" className="z-10" />
+        )}
         {/* Music FAB - 우상단 */}
         {showMusicFab && musicScreen && (
           <MusicPlayer screen={musicScreen} userData={userData} mode={mode} />
@@ -261,6 +276,8 @@ export function InvitationPreview({
               layout={layout}
               sectionOrder={sectionOrder}
               sectionEnabled={sectionEnabled}
+              introEffect={introEffect}
+              onIntroEffectChange={onIntroEffectChange}
               className="h-full overflow-y-auto"
             />
           </div>
