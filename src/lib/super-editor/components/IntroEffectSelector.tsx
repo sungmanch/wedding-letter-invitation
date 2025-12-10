@@ -2,24 +2,29 @@
 
 /**
  * IntroEffectSelector - 인트로 애니메이션 효과 선택 UI
- * 캘리그라피 효과 선택 시 텍스트/폰트 설정 가능
+ * 캘리그라피 효과 선택 시 템플릿 + 텍스트 설정 가능
  */
 
 import React from 'react'
 import {
   INTRO_EFFECT_PRESETS,
   type IntroEffectType,
+  CALLIGRAPHY_TEMPLATES,
+  DEFAULT_CALLIGRAPHY_CONFIG,
+  type CalligraphyConfig,
+  type CalligraphyTexts,
 } from '../animations/intro-effects'
-import {
-  CALLIGRAPHY_FONT_PRESETS,
-  CALLIGRAPHY_FONTS,
-  type CalligraphyFontPreset,
-} from '../animations/calligraphy-text'
 
-/** 캘리그라피 설정 */
-export interface CalligraphyConfig {
-  text: string
-  fontId: CalligraphyFontPreset
+// Re-export CalligraphyConfig
+export type { CalligraphyConfig, CalligraphyTexts }
+export { DEFAULT_CALLIGRAPHY_CONFIG }
+
+/** 슬롯별 라벨 */
+const SLOT_LABELS: Record<keyof CalligraphyTexts, string> = {
+  groom: '신랑 이름',
+  and: '연결어',
+  bride: '신부 이름',
+  title: '타이틀',
 }
 
 interface IntroEffectSelectorProps {
@@ -44,10 +49,13 @@ export function IntroEffectSelector({
   // 캘리그라피 효과인지 확인
   const isCalligraphy = currentEffect === 'calligraphy'
 
-  // 현재 캘리그라피 폰트 정보
-  const currentFontMeta = calligraphyConfig
-    ? CALLIGRAPHY_FONT_PRESETS.find((f) => f.id === calligraphyConfig.fontId)
-    : CALLIGRAPHY_FONT_PRESETS[0]
+  // 현재 템플릿
+  const currentTemplate = calligraphyConfig
+    ? CALLIGRAPHY_TEMPLATES.find((t) => t.id === calligraphyConfig.templateId)
+    : CALLIGRAPHY_TEMPLATES[0]
+
+  // 템플릿에서 사용하는 슬롯들
+  const usedSlots = currentTemplate?.items.map((item) => item.slot) || []
 
   const handlePrev = () => {
     const prevIndex =
@@ -60,16 +68,30 @@ export function IntroEffectSelector({
     onEffectChange(INTRO_EFFECT_PRESETS[nextIndex].id)
   }
 
-  const handleTextChange = (text: string) => {
+  const handleTemplateChange = (templateId: string) => {
     if (onCalligraphyConfigChange && calligraphyConfig) {
-      onCalligraphyConfigChange({ ...calligraphyConfig, text })
+      onCalligraphyConfigChange({ ...calligraphyConfig, templateId })
     }
   }
 
-  const handleFontChange = (fontId: CalligraphyFontPreset) => {
+  const handleTextChange = (slot: keyof CalligraphyTexts, value: string) => {
     if (onCalligraphyConfigChange && calligraphyConfig) {
-      onCalligraphyConfigChange({ ...calligraphyConfig, fontId })
+      onCalligraphyConfigChange({
+        ...calligraphyConfig,
+        texts: { ...calligraphyConfig.texts, [slot]: value },
+      })
     }
+  }
+
+  // 템플릿 순환
+  const templateIndex = CALLIGRAPHY_TEMPLATES.findIndex((t) => t.id === calligraphyConfig?.templateId)
+  const handlePrevTemplate = () => {
+    const prevIdx = (templateIndex - 1 + CALLIGRAPHY_TEMPLATES.length) % CALLIGRAPHY_TEMPLATES.length
+    handleTemplateChange(CALLIGRAPHY_TEMPLATES[prevIdx].id)
+  }
+  const handleNextTemplate = () => {
+    const nextIdx = (templateIndex + 1) % CALLIGRAPHY_TEMPLATES.length
+    handleTemplateChange(CALLIGRAPHY_TEMPLATES[nextIdx].id)
   }
 
   return (
@@ -122,63 +144,64 @@ export function IntroEffectSelector({
 
       {/* Calligraphy Settings */}
       {isCalligraphy && calligraphyConfig && onCalligraphyConfigChange && (
-        <div className="mt-3 space-y-2 border-t border-white/10 pt-2">
-          {/* 텍스트 입력 */}
+        <div className="mt-3 space-y-3 border-t border-white/10 pt-2">
+          {/* 템플릿 선택 */}
           <div>
-            <label className="text-[10px] text-white/50 block mb-1">텍스트</label>
-            <input
-              type="text"
-              value={calligraphyConfig.text}
-              onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="And"
-              maxLength={20}
-              className="w-full px-2 py-1 text-xs bg-white/10 border border-white/20
-                         rounded text-white placeholder-white/30
-                         focus:outline-none focus:border-white/40"
-            />
+            <div className="text-[10px] text-white/50 mb-1">레이아웃</div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handlePrevTemplate}
+                className="w-5 h-5 flex items-center justify-center text-white/60
+                           hover:text-white hover:bg-white/10 rounded transition-colors"
+              >
+                <ChevronLeftIcon />
+              </button>
+              <span className="flex-1 text-center text-[11px] text-white truncate">
+                {currentTemplate?.name}
+              </span>
+              <button
+                onClick={handleNextTemplate}
+                className="w-5 h-5 flex items-center justify-center text-white/60
+                           hover:text-white hover:bg-white/10 rounded transition-colors"
+              >
+                <ChevronRightIcon />
+              </button>
+            </div>
+            <div className="text-[9px] text-white/30 text-center mt-0.5">
+              {currentTemplate?.description}
+            </div>
           </div>
 
-          {/* 폰트 선택 */}
-          <div>
-            <label className="text-[10px] text-white/50 block mb-1">폰트</label>
-            <select
-              value={calligraphyConfig.fontId}
-              onChange={(e) => handleFontChange(e.target.value as CalligraphyFontPreset)}
-              className="w-full px-2 py-1 text-xs bg-white/10 border border-white/20
-                         rounded text-white appearance-none cursor-pointer
-                         focus:outline-none focus:border-white/40"
-              style={{ backgroundImage: 'none' }}
-            >
-              <optgroup label="영문 캘리그라피">
-                {CALLIGRAPHY_FONT_PRESETS.filter((f) => f.category === 'english').map((font) => (
-                  <option key={font.id} value={font.id} className="bg-gray-800">
-                    {font.name}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="한글 손글씨">
-                {CALLIGRAPHY_FONT_PRESETS.filter((f) => f.category === 'korean').map((font) => (
-                  <option key={font.id} value={font.id} className="bg-gray-800">
-                    {font.name}
-                  </option>
-                ))}
-              </optgroup>
-            </select>
+          {/* 텍스트 입력 (템플릿에서 사용하는 슬롯만) */}
+          <div className="space-y-2">
+            <div className="text-[10px] text-white/50">텍스트</div>
+            {(['groom', 'and', 'bride', 'title'] as const).map((slot) => {
+              // 현재 템플릿에서 사용하는 슬롯만 표시
+              if (!usedSlots.includes(slot)) return null
+
+              return (
+                <div key={slot} className="flex items-center gap-2">
+                  <label className="text-[9px] text-white/40 w-14 shrink-0">
+                    {SLOT_LABELS[slot]}
+                  </label>
+                  <input
+                    type="text"
+                    value={calligraphyConfig.texts[slot]}
+                    onChange={(e) => handleTextChange(slot, e.target.value)}
+                    placeholder={SLOT_LABELS[slot]}
+                    maxLength={30}
+                    className="flex-1 px-2 py-1 text-[11px] bg-white/10 border border-white/20
+                               rounded text-white placeholder-white/30
+                               focus:outline-none focus:border-white/40"
+                  />
+                </div>
+              )
+            })}
           </div>
 
-          {/* 폰트 미리보기 */}
-          <div className="text-center py-2">
-            <span
-              className="text-lg text-white/80"
-              style={{
-                fontFamily:
-                  currentFontMeta?.category === 'korean'
-                    ? `'${currentFontMeta.name}', sans-serif`
-                    : `'${currentFontMeta?.name}', cursive`,
-              }}
-            >
-              {calligraphyConfig.text || currentFontMeta?.sample || 'And'}
-            </span>
+          {/* 템플릿 미리보기 힌트 */}
+          <div className="text-[9px] text-white/30 text-center pt-1 border-t border-white/5">
+            프리뷰에서 애니메이션을 확인하세요
           </div>
         </div>
       )}

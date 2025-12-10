@@ -38,7 +38,10 @@ import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 import type { LegacyIntroType } from '@/lib/super-editor/presets/legacy/types'
 import type { IntroEffectType } from '@/lib/super-editor/animations/intro-effects'
-import type { CalligraphyConfig } from '@/lib/super-editor/components/InvitationPreview'
+import {
+  type CalligraphyConfig,
+  DEFAULT_CALLIGRAPHY_CONFIG,
+} from '@/lib/super-editor/components/IntroEffectSelector'
 
 type EditorTab = 'content' | 'design' | 'share'
 
@@ -69,10 +72,8 @@ function EditPageContent() {
   // 인트로 애니메이션 효과 상태
   const [introEffect, setIntroEffect] = useState<IntroEffectType>('none')
   // 캘리그라피 설정 상태
-  const [calligraphyConfig, setCalligraphyConfig] = useState<CalligraphyConfig>({
-    text: 'And',
-    fontId: 'greatVibes',
-  })
+  const [calligraphyConfig, setCalligraphyConfig] =
+    useState<CalligraphyConfig>(DEFAULT_CALLIGRAPHY_CONFIG)
   // OG 기본값
   const [ogDefaults, setOgDefaults] = useState({
     title: '',

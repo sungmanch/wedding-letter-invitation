@@ -2,7 +2,7 @@
 
 import type { PrimitiveNode, PhotoBoothProps } from '../../schema/primitives'
 import type { RenderContext } from '../types'
-import { getNodeProps, resolveDataBinding, mergeNodeStyles } from '../types'
+import { getNodeProps, resolveDataBinding, getValueByPath, mergeNodeStyles } from '../types'
 import type { CustomFrame } from '../../../camera'
 import { PhotoBooth as CameraPhotoBooth } from '../../../camera'
 
@@ -24,13 +24,21 @@ export function PhotoBooth({
   const isEditMode = context.mode === 'edit'
 
   // frames 데이터 바인딩 해결
+  // {{path}} 형태의 문자열이면 getValueByPath로 직접 배열 데이터를 가져옴
   let frames: CustomFrame[] = []
   if (props.frames) {
-    const resolved = typeof props.frames === 'string'
-      ? resolveDataBinding(props.frames, context.data)
-      : props.frames
-    if (Array.isArray(resolved)) {
-      frames = resolved as CustomFrame[]
+    if (typeof props.frames === 'string') {
+      // {{photobooth.frames}} 형태에서 경로 추출
+      const match = props.frames.match(/^\{\{(.+)\}\}$/)
+      if (match) {
+        const path = match[1].trim()
+        const resolved = getValueByPath(context.data, path)
+        if (Array.isArray(resolved)) {
+          frames = resolved as CustomFrame[]
+        }
+      }
+    } else if (Array.isArray(props.frames)) {
+      frames = props.frames as CustomFrame[]
     }
   }
 

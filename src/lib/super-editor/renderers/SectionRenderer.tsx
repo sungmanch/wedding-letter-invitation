@@ -18,14 +18,11 @@ import {
   FallingPetals,
   CalligraphyOverlay,
   type IntroEffectType,
+  type CalligraphyConfig,
 } from '../animations/intro-effects'
-import { CALLIGRAPHY_FONTS, type CalligraphyFontPreset } from '../animations/calligraphy-text'
 
-/** 캘리그라피 설정 */
-export interface CalligraphyConfig {
-  text: string
-  fontId: CalligraphyFontPreset
-}
+// Re-export CalligraphyConfig
+export type { CalligraphyConfig } from '../animations/intro-effects'
 
 interface SectionRendererProps {
   screen: Screen
@@ -165,8 +162,7 @@ export function SectionRenderer({
         <CalligraphyOverlay
           color="currentColor"
           className="z-10"
-          text={calligraphyConfig?.text || 'And'}
-          fontUrl={calligraphyConfig?.fontId ? CALLIGRAPHY_FONTS[calligraphyConfig.fontId] : undefined}
+          config={calligraphyConfig}
         />
       )}
     </section>
