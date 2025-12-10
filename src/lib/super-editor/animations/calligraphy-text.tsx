@@ -317,9 +317,10 @@ export type CalligraphySlot = 'groom' | 'and' | 'bride' | 'title'
 export interface CalligraphyItem {
   slot: CalligraphySlot
   fontId: CalligraphyFontPreset
-  fontSize: number
   /** 위치 (% 기준, x: 가로 중심, y: 세로 위치) */
   position: { x: number; y: number }
+  /** 너비 비율 (% 기준, 부모 컨테이너 대비) */
+  widthPercent: number
   /** 애니메이션 지연 (초) */
   delay: number
   /** 애니메이션 시간 (초) */
@@ -342,11 +343,13 @@ export interface CalligraphyTexts {
   title: string
 }
 
-/** 아이템별 오버라이드 (폰트, 위치 등) */
+/** 아이템별 오버라이드 (폰트, 위치, 너비) */
 export interface CalligraphyItemOverride {
   fontId?: CalligraphyFontPreset
-  fontSize?: number
+  /** 위치 (% 기준) */
   position?: { x: number; y: number }
+  /** 너비 비율 (% 기준, 기본 20%) */
+  widthPercent?: number
 }
 
 /** 전체 캘리그라피 설정 (템플릿 + 텍스트 + 오버라이드) */
@@ -375,10 +378,10 @@ export const CALLIGRAPHY_TEMPLATES: CalligraphyTemplate[] = [
     name: '클래식 세로',
     description: '전통적인 세로 배치',
     items: [
-      { slot: 'groom', fontId: 'nanumPen', fontSize: 48, position: { x: 50, y: 25 }, delay: 0, duration: 2 },
-      { slot: 'and', fontId: 'greatVibes', fontSize: 36, position: { x: 50, y: 45 }, delay: 0.8, duration: 1.5 },
-      { slot: 'bride', fontId: 'nanumPen', fontSize: 48, position: { x: 50, y: 65 }, delay: 1.6, duration: 2 },
-      { slot: 'title', fontId: 'parisienne', fontSize: 24, position: { x: 50, y: 88 }, delay: 2.4, duration: 2 },
+      { slot: 'groom', fontId: 'nanumPen', widthPercent: 25, position: { x: 50, y: 25 }, delay: 0, duration: 2 },
+      { slot: 'and', fontId: 'greatVibes', widthPercent: 15, position: { x: 50, y: 45 }, delay: 0.8, duration: 1.5 },
+      { slot: 'bride', fontId: 'nanumPen', widthPercent: 25, position: { x: 50, y: 65 }, delay: 1.6, duration: 2 },
+      { slot: 'title', fontId: 'parisienne', widthPercent: 60, position: { x: 50, y: 88 }, delay: 2.4, duration: 2 },
     ],
   },
   {
@@ -386,10 +389,10 @@ export const CALLIGRAPHY_TEMPLATES: CalligraphyTemplate[] = [
     name: '우아한 중앙',
     description: '중앙 집중형 레이아웃',
     items: [
-      { slot: 'groom', fontId: 'allura', fontSize: 42, position: { x: 50, y: 30 }, delay: 0, duration: 2 },
-      { slot: 'and', fontId: 'dancingScript', fontSize: 28, position: { x: 50, y: 48 }, delay: 0.6, duration: 1.2 },
-      { slot: 'bride', fontId: 'allura', fontSize: 42, position: { x: 50, y: 66 }, delay: 1.2, duration: 2 },
-      { slot: 'title', fontId: 'greatVibes', fontSize: 20, position: { x: 50, y: 90 }, delay: 2, duration: 1.5 },
+      { slot: 'groom', fontId: 'allura', widthPercent: 22, position: { x: 50, y: 30 }, delay: 0, duration: 2 },
+      { slot: 'and', fontId: 'dancingScript', widthPercent: 12, position: { x: 50, y: 48 }, delay: 0.6, duration: 1.2 },
+      { slot: 'bride', fontId: 'allura', widthPercent: 22, position: { x: 50, y: 66 }, delay: 1.2, duration: 2 },
+      { slot: 'title', fontId: 'greatVibes', widthPercent: 55, position: { x: 50, y: 90 }, delay: 2, duration: 1.5 },
     ],
   },
   {
@@ -397,10 +400,10 @@ export const CALLIGRAPHY_TEMPLATES: CalligraphyTemplate[] = [
     name: '나란히',
     description: '신랑 신부 양옆 배치',
     items: [
-      { slot: 'groom', fontId: 'nanumPen', fontSize: 36, position: { x: 25, y: 45 }, delay: 0, duration: 2 },
-      { slot: 'and', fontId: 'greatVibes', fontSize: 32, position: { x: 50, y: 45 }, delay: 0.5, duration: 1.5 },
-      { slot: 'bride', fontId: 'nanumPen', fontSize: 36, position: { x: 75, y: 45 }, delay: 1, duration: 2 },
-      { slot: 'title', fontId: 'parisienne', fontSize: 22, position: { x: 50, y: 75 }, delay: 1.8, duration: 2 },
+      { slot: 'groom', fontId: 'nanumPen', widthPercent: 18, position: { x: 25, y: 45 }, delay: 0, duration: 2 },
+      { slot: 'and', fontId: 'greatVibes', widthPercent: 12, position: { x: 50, y: 45 }, delay: 0.5, duration: 1.5 },
+      { slot: 'bride', fontId: 'nanumPen', widthPercent: 18, position: { x: 75, y: 45 }, delay: 1, duration: 2 },
+      { slot: 'title', fontId: 'parisienne', widthPercent: 50, position: { x: 50, y: 75 }, delay: 1.8, duration: 2 },
     ],
   },
   {
@@ -408,7 +411,7 @@ export const CALLIGRAPHY_TEMPLATES: CalligraphyTemplate[] = [
     name: '미니멀',
     description: 'And만 강조',
     items: [
-      { slot: 'and', fontId: 'greatVibes', fontSize: 64, position: { x: 50, y: 50 }, delay: 0, duration: 2.5 },
+      { slot: 'and', fontId: 'greatVibes', widthPercent: 30, position: { x: 50, y: 50 }, delay: 0, duration: 2.5 },
     ],
   },
   {
@@ -416,9 +419,9 @@ export const CALLIGRAPHY_TEMPLATES: CalligraphyTemplate[] = [
     name: '로맨틱 한글',
     description: '한글 손글씨 강조',
     items: [
-      { slot: 'groom', fontId: 'gaegu', fontSize: 52, position: { x: 50, y: 28 }, delay: 0, duration: 2.2 },
-      { slot: 'and', fontId: 'dancingScript', fontSize: 28, position: { x: 50, y: 50 }, delay: 0.8, duration: 1.2 },
-      { slot: 'bride', fontId: 'gaegu', fontSize: 52, position: { x: 50, y: 72 }, delay: 1.6, duration: 2.2 },
+      { slot: 'groom', fontId: 'gaegu', widthPercent: 28, position: { x: 50, y: 28 }, delay: 0, duration: 2.2 },
+      { slot: 'and', fontId: 'dancingScript', widthPercent: 12, position: { x: 50, y: 50 }, delay: 0.8, duration: 1.2 },
+      { slot: 'bride', fontId: 'gaegu', widthPercent: 28, position: { x: 50, y: 72 }, delay: 1.6, duration: 2.2 },
     ],
   },
 ]

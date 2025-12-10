@@ -118,16 +118,16 @@ export function CalligraphyEditor({
     [calligraphyConfig, currentTemplate, onCalligraphyConfigChange]
   )
 
-  // 폰트 크기 변경
-  const handleFontSizeChange = useCallback(
-    (slot: CalligraphySlot, fontSize: number) => {
+  // 너비 비율 변경
+  const handleWidthPercentChange = useCallback(
+    (slot: CalligraphySlot, widthPercent: number) => {
       onCalligraphyConfigChange({
         ...calligraphyConfig,
         overrides: {
           ...calligraphyConfig.overrides,
           [slot]: {
             ...calligraphyConfig.overrides?.[slot],
-            fontSize,
+            widthPercent,
           },
         },
       })
@@ -143,8 +143,8 @@ export function CalligraphyEditor({
 
       return {
         fontId: override?.fontId ?? templateItem?.fontId ?? 'greatVibes',
-        fontSize: override?.fontSize ?? templateItem?.fontSize ?? 36,
         position: override?.position ?? templateItem?.position ?? { x: 50, y: 50 },
+        widthPercent: override?.widthPercent ?? templateItem?.widthPercent ?? 20,
       }
     },
     [calligraphyConfig.overrides, currentTemplate]
@@ -238,17 +238,17 @@ export function CalligraphyEditor({
                   </select>
                 </div>
 
-                {/* 폰트 크기 */}
+                {/* 너비 비율 */}
                 <div>
                   <label className="block text-[10px] text-[#F5E6D3]/40 mb-1">
-                    크기: {slotValue.fontSize}px
+                    너비: {slotValue.widthPercent}%
                   </label>
                   <input
                     type="range"
-                    min={16}
+                    min={5}
                     max={80}
-                    value={slotValue.fontSize}
-                    onChange={(e) => handleFontSizeChange(slot, parseInt(e.target.value))}
+                    value={slotValue.widthPercent}
+                    onChange={(e) => handleWidthPercentChange(slot, parseInt(e.target.value))}
                     className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer
                                [&::-webkit-slider-thumb]:appearance-none
                                [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
