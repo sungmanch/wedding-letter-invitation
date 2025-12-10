@@ -21,7 +21,7 @@ import { MusicPlayer } from '../renderers/MusicPlayer'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
 import { VariantControlPanel } from './VariantControlPanel'
 import type { IntroEffectType } from '../animations/intro-effects'
-import { SpinningStars, FallingPetals } from '../animations/intro-effects'
+import { SpinningStars, FallingPetals, CalligraphyOverlay } from '../animations/intro-effects'
 
 // ============================================
 // Types
@@ -236,6 +236,9 @@ export function InvitationPreview({
         )}
         {introEffect === 'falling-petals' && (
           <FallingPetals count={12} color="#FFB7C5" className="z-10" />
+        )}
+        {introEffect === 'calligraphy' && (
+          <CalligraphyOverlay color="currentColor" className="z-10" />
         )}
         {/* Music FAB - 우상단 */}
         {showMusicFab && musicScreen && (

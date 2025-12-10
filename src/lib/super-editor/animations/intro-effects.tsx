@@ -6,10 +6,11 @@
  *
  * 1. SpinningStars - 빙글빙글 도는 별/오브젝트
  * 2. FallingPetals - 흩날리는 꽃잎 (SVG)
- * 3. CalligraphyText - 필기체 글 쓰기 애니메이션
+ * 3. CalligraphySVG - GSAP DrawSVG 스타일 필기체 애니메이션
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react'
+import React, { useEffect, useRef, useState, useMemo, useLayoutEffect } from 'react'
+import gsap from 'gsap'
 
 // ============================================
 // Types
@@ -242,9 +243,294 @@ export function FallingPetals({
 }
 
 // ============================================
-// 3. Calligraphy Text Animation
+// 3. Calligraphy SVG Animation (GSAP DrawSVG Style)
 // ============================================
 
+/**
+ * 캘리그라피 스타일 SVG 패스 프리셋
+ * "And", "♥", 장식 flourish 등
+ */
+export const CALLIGRAPHY_PATHS = {
+  // "And" 캘리그라피
+  and: {
+    viewBox: '0 0 100 50',
+    paths: [
+      // A
+      'M10 45 Q15 10 25 10 Q35 10 30 25 L25 45',
+      // n
+      'M35 30 L35 45 M35 35 Q45 25 50 35 L50 45',
+      // d
+      'M55 30 Q55 45 65 45 Q75 45 75 30 L75 10',
+    ],
+  },
+  // 하트
+  heart: {
+    viewBox: '0 0 50 50',
+    paths: [
+      'M25 45 C10 30 0 20 10 10 C20 0 25 10 25 15 C25 10 30 0 40 10 C50 20 40 30 25 45',
+    ],
+  },
+  // 장식 flourish (좌우 대칭)
+  flourish: {
+    viewBox: '0 0 200 30',
+    paths: [
+      // 왼쪽 flourish
+      'M5 15 Q20 5 40 15 Q60 25 80 15 Q90 10 100 15',
+      // 오른쪽 flourish (미러)
+      'M195 15 Q180 5 160 15 Q140 25 120 15 Q110 10 100 15',
+    ],
+  },
+  // 별 장식
+  starBurst: {
+    viewBox: '0 0 100 100',
+    paths: [
+      'M50 10 L50 90', // 수직선
+      'M10 50 L90 50', // 수평선
+      'M20 20 L80 80', // 대각선 1
+      'M80 20 L20 80', // 대각선 2
+    ],
+  },
+  // 웨딩 벨
+  bells: {
+    viewBox: '0 0 100 80',
+    paths: [
+      // 왼쪽 벨
+      'M25 15 Q10 15 10 35 Q10 55 25 55 Q40 55 40 35 Q40 15 25 15',
+      'M25 55 L25 65',
+      'M20 65 Q25 70 30 65',
+      // 오른쪽 벨
+      'M75 15 Q60 15 60 35 Q60 55 75 55 Q90 55 90 35 Q90 15 75 15',
+      'M75 55 L75 65',
+      'M70 65 Q75 70 80 65',
+      // 리본
+      'M40 20 Q50 10 60 20',
+    ],
+  },
+}
+
+export type CalligraphyPathType = keyof typeof CALLIGRAPHY_PATHS
+
+interface CalligraphySVGProps {
+  type?: CalligraphyPathType
+  customPaths?: string[]
+  customViewBox?: string
+  duration?: number
+  delay?: number
+  stagger?: number
+  strokeColor?: string
+  strokeWidth?: number
+  fillColor?: string
+  showFill?: boolean
+  width?: number | string
+  height?: number | string
+  className?: string
+  onComplete?: () => void
+}
+
+/**
+ * GSAP을 사용한 SVG 패스 드로잉 애니메이션
+ * DrawSVGPlugin과 동일한 효과를 stroke-dasharray/dashoffset으로 구현
+ */
+export function CalligraphySVG({
+  type = 'and',
+  customPaths,
+  customViewBox,
+  duration = 2,
+  delay = 0,
+  stagger = 0.3,
+  strokeColor = 'currentColor',
+  strokeWidth = 2,
+  fillColor = 'none',
+  showFill = false,
+  width = '100%',
+  height = 'auto',
+  className = '',
+  onComplete,
+}: CalligraphySVGProps) {
+  const svgRef = useRef<SVGSVGElement>(null)
+  const pathRefs = useRef<SVGPathElement[]>([])
+
+  // 패스 데이터 결정
+  const pathData = customPaths
+    ? { viewBox: customViewBox || '0 0 100 100', paths: customPaths }
+    : CALLIGRAPHY_PATHS[type]
+
+  useLayoutEffect(() => {
+    if (!svgRef.current || pathRefs.current.length === 0) return
+
+    const paths = pathRefs.current.filter(Boolean)
+    const ctx = gsap.context(() => {
+      // 각 패스의 길이를 계산하고 초기 상태 설정
+      paths.forEach((path) => {
+        const length = path.getTotalLength()
+        gsap.set(path, {
+          strokeDasharray: length,
+          strokeDashoffset: length,
+          opacity: 1,
+        })
+      })
+
+      // 드로잉 애니메이션
+      const tl = gsap.timeline({
+        delay,
+        onComplete,
+      })
+
+      tl.to(paths, {
+        strokeDashoffset: 0,
+        duration,
+        stagger,
+        ease: 'power2.inOut',
+      })
+
+      // 선택적으로 fill 애니메이션
+      if (showFill && fillColor !== 'none') {
+        tl.to(
+          paths,
+          {
+            fill: fillColor,
+            duration: duration * 0.5,
+            ease: 'power1.in',
+          },
+          `-=${duration * 0.3}`
+        )
+      }
+    }, svgRef)
+
+    return () => ctx.revert()
+  }, [type, duration, delay, stagger, showFill, fillColor, onComplete])
+
+  return (
+    <svg
+      ref={svgRef}
+      viewBox={pathData.viewBox}
+      width={width}
+      height={height}
+      className={className}
+      style={{ overflow: 'visible' }}
+    >
+      {pathData.paths.map((d, i) => (
+        <path
+          key={i}
+          ref={(el) => {
+            if (el) pathRefs.current[i] = el
+          }}
+          d={d}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ opacity: 0 }}
+        />
+      ))}
+    </svg>
+  )
+}
+
+/**
+ * 여러 캘리그라피 요소를 순차적으로 애니메이션
+ */
+interface CalligraphySequenceProps {
+  items: Array<{
+    type: CalligraphyPathType
+    delay?: number
+  }>
+  duration?: number
+  stagger?: number
+  strokeColor?: string
+  className?: string
+}
+
+export function CalligraphySequence({
+  items,
+  duration = 1.5,
+  stagger = 0.5,
+  strokeColor = 'currentColor',
+  className = '',
+}: CalligraphySequenceProps) {
+  return (
+    <div className={`flex items-center justify-center gap-4 ${className}`}>
+      {items.map((item, index) => (
+        <CalligraphySVG
+          key={index}
+          type={item.type}
+          duration={duration}
+          delay={item.delay ?? index * stagger}
+          strokeColor={strokeColor}
+          width={60}
+          height={40}
+        />
+      ))}
+    </div>
+  )
+}
+
+/**
+ * 인트로용 캘리그라피 오버레이
+ * 화면에 장식 요소들이 순차적으로 그려짐
+ */
+interface CalligraphyOverlayProps {
+  className?: string
+  color?: string
+}
+
+export function CalligraphyOverlay({
+  className = '',
+  color = 'currentColor',
+}: CalligraphyOverlayProps) {
+  return (
+    <div className={`absolute inset-0 pointer-events-none ${className}`}>
+      {/* 상단 flourish */}
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 opacity-60">
+        <CalligraphySVG
+          type="flourish"
+          duration={2}
+          delay={0.5}
+          strokeColor={color}
+          strokeWidth={1.5}
+        />
+      </div>
+
+      {/* 좌상단 별 */}
+      <div className="absolute top-16 left-8 w-8 opacity-40">
+        <CalligraphySVG
+          type="starBurst"
+          duration={1.5}
+          delay={1}
+          stagger={0.1}
+          strokeColor={color}
+          strokeWidth={1}
+        />
+      </div>
+
+      {/* 우상단 별 */}
+      <div className="absolute top-20 right-12 w-6 opacity-40">
+        <CalligraphySVG
+          type="starBurst"
+          duration={1.5}
+          delay={1.3}
+          stagger={0.1}
+          strokeColor={color}
+          strokeWidth={1}
+        />
+      </div>
+
+      {/* 하단 flourish */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-48 opacity-60">
+        <CalligraphySVG
+          type="flourish"
+          duration={2}
+          delay={1.8}
+          strokeColor={color}
+          strokeWidth={1.5}
+        />
+      </div>
+    </div>
+  )
+}
+
+// 기존 CalligraphyText도 유지 (하위 호환성)
 interface CalligraphyTextProps {
   text: string
   duration?: number
@@ -262,25 +548,6 @@ export function CalligraphyText({
   style,
   as: Component = 'span',
 }: CalligraphyTextProps) {
-  const pathRef = useRef<SVGPathElement>(null)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [pathLength, setPathLength] = useState(0)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAnimating(true)
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-
-  useEffect(() => {
-    if (pathRef.current) {
-      setPathLength(pathRef.current.getTotalLength())
-    }
-  }, [text])
-
-  // 텍스트를 SVG 패스로 변환하는 것은 복잡하므로,
-  // clip-path를 사용한 reveal 애니메이션으로 대체
   return (
     <>
       <style>
