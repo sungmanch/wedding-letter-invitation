@@ -45,6 +45,8 @@ const AVAILABLE_VARIABLES = {
   'groom.nameEn': { type: 'text', label: '신랑 영문명' },
   'groom.fatherName': { type: 'text', label: '신랑 아버지' },
   'groom.motherName': { type: 'text', label: '신랑 어머니' },
+  'groom.fatherPhone': { type: 'phone', label: '신랑 아버지 연락처' },
+  'groom.motherPhone': { type: 'phone', label: '신랑 어머니 연락처' },
   'groom.phone': { type: 'phone', label: '신랑 연락처' },
   'groom.account': { type: 'account', label: '신랑 계좌' },
 
@@ -53,6 +55,8 @@ const AVAILABLE_VARIABLES = {
   'bride.nameEn': { type: 'text', label: '신부 영문명' },
   'bride.fatherName': { type: 'text', label: '신부 아버지' },
   'bride.motherName': { type: 'text', label: '신부 어머니' },
+  'bride.fatherPhone': { type: 'phone', label: '신부 아버지 연락처' },
+  'bride.motherPhone': { type: 'phone', label: '신부 어머니 연락처' },
   'bride.phone': { type: 'phone', label: '신부 연락처' },
   'bride.account': { type: 'account', label: '신부 계좌' },
 
@@ -64,7 +68,8 @@ const AVAILABLE_VARIABLES = {
 
   // 예식장 정보
   'venue.name': { type: 'text', label: '예식장명' },
-  'venue.hall': { type: 'text', label: '층/홀' },
+  'venue.hall': { type: 'text', label: '홀' },
+  'venue.floor': { type: 'text', label: '층' },
   'venue.address': { type: 'text', label: '주소' },
   'venue.addressDetail': { type: 'text', label: '상세 주소' },
   'venue.coordinates': { type: 'coordinates', label: '지도 좌표' },
@@ -155,17 +160,35 @@ interface Block {
 }
 
 type BlockType =
-  | 'intro'      // 인트로 (메인 사진, 이름, 날짜)
-  | 'greeting'   // 인사말
-  | 'gallery'    // 포토 갤러리
-  | 'venue'      // 예식장 정보 + 지도
-  | 'calendar'   // 달력/D-day
-  | 'parents'    // 혼주 소개
-  | 'accounts'   // 축의금 계좌
-  | 'contact'    // 연락처
-  | 'guestbook'  // 방명록
-  | 'music'      // BGM 컨트롤
-  | 'custom'     // 사용자 정의 블록
+  // ─── 핵심 섹션 ───
+  | 'hero'              // 메인 히어로 (메인 사진, 이름, 날짜)
+  | 'greeting'          // 인사말
+  | 'calendar'          // 달력/D-day
+  | 'gallery'           // 포토 갤러리
+  | 'location'          // 예식장 정보 + 지도
+  | 'parents'           // 혼주 소개
+  | 'contact'           // 연락처
+  | 'account'           // 축의금 계좌
+  | 'message'           // 축하 메시지/방명록
+  | 'rsvp'              // 참석 여부
+  // ─── 확장 섹션 ───
+  | 'loading'           // 로딩 화면
+  | 'quote'             // 글귀
+  | 'profile'           // 프로필형 소개
+  | 'parents-contact'   // 혼주 연락처
+  | 'timeline'          // 타임라인/스토리
+  | 'video'             // 영상
+  | 'interview'         // 웨딩 인터뷰
+  | 'transport'         // 교통수단
+  | 'notice'            // 안내사항
+  | 'announcement'      // 안내문
+  | 'flower-gift'       // 화환 보내기
+  | 'together-time'     // 함께한 시간
+  | 'dday'              // D-DAY 카운트다운
+  | 'guest-snap'        // 게스트스냅
+  | 'ending'            // 엔딩 크레딧
+  | 'music'             // BGM 컨트롤
+  | 'custom'            // 사용자 정의 블록
 ```
 
 ### 4.2 AI 맥락 이해 방식
@@ -198,7 +221,7 @@ interface Element {
   y: number       // vh (블록 내 상대 위치)
   width: number   // vw
   height: number  // vh
-  rotation: number // degrees
+  rotation?: number // degrees (기본값: 0)
 
   // z-index
   zIndex: number
@@ -674,6 +697,64 @@ interface ElementStyle {
 }
 ```
 
+### 7.10 해석된 스타일 (ResolvedStyle)
+
+`StyleSystem`을 `resolveStyleSystem()`으로 해석한 결과. 컴포넌트에서 직접 사용.
+
+> **참고**: 렌더러에서 사용하는 `GlobalStyle`은 `ResolvedStyle`의 별칭입니다.
+
+```typescript
+/**
+ * StyleSystem → ResolvedStyle 변환 파이프라인:
+ * 1. 프리셋 로드 (Level 1)
+ * 2. 빠른 설정 적용 (Level 2)
+ * 3. 고급 설정 오버라이드 (Level 3)
+ * 4. 타이포그래피/이펙트 해석
+ * 5. 대비 검증 및 자동 보정
+ */
+interface ResolvedStyle {
+  // 시맨틱 토큰 (색상) - CSS 변수로 변환됨
+  tokens: SemanticTokens
+
+  // 팔레트 색상
+  palette: PaletteColor[]
+
+  // 해석된 타이포그래피
+  typography: {
+    fontStacks: Record<string, {
+      family: string[]
+      fallback: string
+    }>
+    scale: Record<string, {
+      size: number
+      sizeUnit: 'px' | 'rem' | 'vw'
+      weight: number
+      lineHeight: number
+      letterSpacing: number
+    }>
+  }
+
+  // 해석된 이펙트
+  effects: {
+    radius: Record<string, number>  // 'sm' | 'md' | 'lg' | 'full'
+    shadows: Record<string, string> // 'sm' | 'md' | 'lg'
+    blurs: Record<string, number>
+    textures?: Record<string, TextureConfig>
+  }
+
+  // 블록별 오버라이드 (해석 완료)
+  blockOverrides?: {
+    [blockId: string]: {
+      mode: 'inherit' | 'invert' | 'custom'
+      tokens?: Partial<SemanticTokens>
+    }
+  }
+}
+
+// GlobalStyle은 ResolvedStyle의 별칭 (하위 호환)
+type GlobalStyle = ResolvedStyle
+```
+
 ---
 
 ## 8. 애니메이션 시스템 (요약)
@@ -778,10 +859,14 @@ interface WeddingData {
     nameEn?: string
     fatherName?: string
     motherName?: string
+    fatherPhone?: string       // 부모 연락처 추가
+    motherPhone?: string       // 부모 연락처 추가
     phone?: string
-    accountBank?: string
-    accountNumber?: string
-    accountHolder?: string
+    account?: {                // 계좌 정보 (compound 구조로 통일)
+      bank: string
+      number: string
+      holder: string
+    }
   }
 
   // 신부 정보
@@ -790,23 +875,28 @@ interface WeddingData {
     nameEn?: string
     fatherName?: string
     motherName?: string
+    fatherPhone?: string       // 부모 연락처 추가
+    motherPhone?: string       // 부모 연락처 추가
     phone?: string
-    accountBank?: string
-    accountNumber?: string
-    accountHolder?: string
+    account?: {                // 계좌 정보 (compound 구조로 통일)
+      bank: string
+      number: string
+      holder: string
+    }
   }
 
   // 예식 정보
   wedding: {
     date: string          // ISO 8601: '2025-03-15'
     time: string          // 'HH:mm': '14:00'
-    dateDisplay?: string  // 표시용: '2025년 3월 15일 토요일 오후 2시'
+    dateDisplay?: string  // 표시용: '2025년 3월 15일 토요일 오후 2시' (computed)
   }
 
   // 예식장 정보
   venue: {
     name: string
     hall?: string
+    floor?: string        // 층 정보 추가
     address: string
     addressDetail?: string
     coordinates?: {

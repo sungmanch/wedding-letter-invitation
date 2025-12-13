@@ -748,7 +748,7 @@ function BlockRenderer({
 }: {
   block: Block
   data: WeddingData
-  style: GlobalStyle
+  style: ResolvedStyle  // = GlobalStyle (@see 01_data_schema.md §7.10)
   isSelected: boolean
   onClick: () => void
 }) {

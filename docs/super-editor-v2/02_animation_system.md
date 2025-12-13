@@ -527,6 +527,112 @@ type EasingFunction =
 
 복잡한 상태 전환 로직 정의.
 
+### 6.0 복잡도 제한
+
+AI가 생성하는 상태 머신의 복잡도를 제한하여 디버깅 용이성과 성능을 보장.
+
+```typescript
+const STATE_MACHINE_CONSTRAINTS = {
+  maxStates: 5,           // 최대 상태 개수
+  maxTransitions: 10,     // 최대 전이 개수
+  maxDepth: 3,            // 최대 전이 경로 깊이
+  allowCycles: false,     // 순환 참조 허용 여부 (기본: 불허)
+  maxActionsPerState: 3,  // 상태당 최대 액션 수 (onEnter + onExit + interactions)
+} as const
+
+function validateStateMachineComplexity(
+  sm: AnimationStateMachine
+): ValidationResult {
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  const stateCount = Object.keys(sm.states).length
+  const transitionCount = sm.transitions.length
+
+  // 1. 상태 개수 제한
+  if (stateCount > STATE_MACHINE_CONSTRAINTS.maxStates) {
+    errors.push(`상태 개수 초과: ${stateCount}/${STATE_MACHINE_CONSTRAINTS.maxStates}`)
+  }
+
+  // 2. 전이 개수 제한
+  if (transitionCount > STATE_MACHINE_CONSTRAINTS.maxTransitions) {
+    errors.push(`전이 개수 초과: ${transitionCount}/${STATE_MACHINE_CONSTRAINTS.maxTransitions}`)
+  }
+
+  // 3. 순환 참조 검사
+  if (!STATE_MACHINE_CONSTRAINTS.allowCycles) {
+    const cycles = detectCycles(sm)
+    if (cycles.length > 0) {
+      errors.push(`순환 참조 감지: ${cycles.map(c => c.join(' → ')).join(', ')}`)
+    }
+  }
+
+  // 4. 전이 경로 깊이 검사
+  const maxDepth = calculateMaxDepth(sm)
+  if (maxDepth > STATE_MACHINE_CONSTRAINTS.maxDepth) {
+    warnings.push(`전이 경로 깊이 ${maxDepth} - 복잡한 흐름일 수 있음`)
+  }
+
+  // 5. 상태당 액션 수 검사
+  for (const [stateName, state] of Object.entries(sm.states)) {
+    const actionCount =
+      (state.onEnter ? 1 : 0) +
+      (state.onExit ? 1 : 0) +
+      (state.interactions?.length || 0)
+    if (actionCount > STATE_MACHINE_CONSTRAINTS.maxActionsPerState) {
+      warnings.push(`상태 '${stateName}'의 액션 수 ${actionCount} - 단순화 권장`)
+    }
+  }
+
+  // 6. 도달 불가능한 상태 검사
+  const reachableStates = findReachableStates(sm)
+  const unreachable = Object.keys(sm.states).filter(s => !reachableStates.has(s) && s !== sm.initial)
+  if (unreachable.length > 0) {
+    warnings.push(`도달 불가능한 상태: ${unreachable.join(', ')}`)
+  }
+
+  return { valid: errors.length === 0, errors, warnings }
+}
+
+// 순환 참조 탐지 (DFS)
+// 수정: inStack Set 추가로 O(1) 경로 체크 (기존 path.includes는 O(n))
+function detectCycles(sm: AnimationStateMachine): string[][] {
+  const cycles: string[][] = []
+  const visited = new Set<string>()
+  const inStack = new Set<string>()  // 현재 DFS 경로에 있는지 체크 (O(1))
+  const path: string[] = []
+
+  function dfs(state: string) {
+    // 현재 경로에 이미 있으면 순환 발견
+    if (inStack.has(state)) {
+      const cycleStart = path.indexOf(state)
+      cycles.push([...path.slice(cycleStart), state])
+      return
+    }
+
+    // 이미 방문한 노드는 스킵 (순환 아님)
+    if (visited.has(state)) return
+
+    visited.add(state)
+    inStack.add(state)
+    path.push(state)
+
+    const outgoing = sm.transitions.filter(t => t.from === state || t.from === '*')
+    for (const t of outgoing) {
+      dfs(t.to)
+    }
+
+    path.pop()
+    inStack.delete(state)  // 경로에서 제거
+  }
+
+  dfs(sm.initial)
+  return cycles
+}
+```
+
+### 6.1 StateMachine 구조
+
 ```typescript
 interface AnimationStateMachine {
   id: string
@@ -975,15 +1081,33 @@ function summarizeAnimation(animation: any): string {
 ## 사용자 요청
 "{{userPrompt}}"
 
-## 출력 형식
+## 출력 형식 (JSON Patch - RFC 6902)
 ```json
 {
-  "analysis": { "intent": "...", "affectedProperties": [...], "approach": "..." },
-  "changes": { "path": "...", "before": {...}, "after": {...} },
-  "result": { /* 수정된 애니메이션 객체 */ },
+  "analysis": {
+    "intent": "사용자 의도 요약",
+    "affectedProperties": ["x", "y", "animation.entrance"],
+    "approach": "접근 방식 설명"
+  },
+  "patches": [
+    { "op": "replace", "path": "/blocks/0/elements/1/x", "value": 10 },
+    { "op": "replace", "path": "/blocks/0/elements/1/y", "value": 20 },
+    { "op": "add", "path": "/blocks/0/elements/-", "value": { "id": "new-elem", "type": "text" } },
+    { "op": "remove", "path": "/blocks/0/elements/2" }
+  ],
   "explanation": "사용자에게 보여줄 변경 설명"
 }
 ```
+
+### JSON Patch 연산자
+| op | 설명 | 예시 |
+|----|------|------|
+| `replace` | 기존 값 교체 | `{"op": "replace", "path": "/x", "value": 50}` |
+| `add` | 새 값 추가 (배열: `-`는 끝에 추가) | `{"op": "add", "path": "/elements/-", "value": {...}}` |
+| `remove` | 값 삭제 | `{"op": "remove", "path": "/elements/2"}` |
+| `move` | 값 이동 | `{"op": "move", "from": "/a", "path": "/b"}` |
+| `copy` | 값 복사 | `{"op": "copy", "from": "/a", "path": "/b"}` |
+| `test` | 값 검증 (적용 전 확인) | `{"op": "test", "path": "/x", "value": 10}` |
 ```
 
 ### 11.4 AI 출력 검증
@@ -995,41 +1119,98 @@ interface ValidationResult {
   warnings: string[]
 }
 
-function validateAnimationChange(
+interface AIOutput {
+  analysis: {
+    intent: string
+    affectedProperties: string[]
+    approach: string
+  }
+  patches: JsonPatch[]
+  explanation: string
+}
+
+interface JsonPatch {
+  op: 'add' | 'remove' | 'replace' | 'move' | 'copy' | 'test'
+  path: string
+  value?: unknown
+  from?: string  // move, copy 용
+}
+
+function validateAIOutput(
   context: AIAnimationContext,
   aiOutput: AIOutput
 ): ValidationResult {
   const errors: string[] = []
   const warnings: string[] = []
 
-  // 1. 스키마 유효성
-  if (!isValidAnimationSchema(aiOutput.result)) {
-    errors.push("애니메이션 스키마가 유효하지 않음")
+  // 1. JSON Patch 형식 검증
+  if (!Array.isArray(aiOutput.patches)) {
+    errors.push("patches는 배열이어야 함")
+    return { valid: false, errors, warnings }
   }
 
-  // 2. 참조 무결성
-  const referencedIds = extractTargetIds(aiOutput.result)
-  referencedIds.forEach(id => {
-    if (!id.startsWith('$') && !elementExists(context.target.document, id)) {
-      errors.push(`존재하지 않는 요소 참조: ${id}`)
+  for (const patch of aiOutput.patches) {
+    // 1-1. 필수 필드 검증
+    if (!['add', 'remove', 'replace', 'move', 'copy', 'test'].includes(patch.op)) {
+      errors.push(`유효하지 않은 op: ${patch.op}`)
     }
-  })
+    if (typeof patch.path !== 'string' || !patch.path.startsWith('/')) {
+      errors.push(`유효하지 않은 path: ${patch.path}`)
+    }
 
-  // 3. 제약 조건 위반
-  context.modifiable.constraints?.forEach(constraint => {
-    if (!satisfiesConstraint(aiOutput.result, constraint)) {
-      errors.push(`제약 조건 위반: ${constraint}`)
+    // 1-2. op별 필수 필드
+    if (['add', 'replace', 'test'].includes(patch.op) && patch.value === undefined) {
+      errors.push(`${patch.op} 연산에 value 필요: ${patch.path}`)
     }
-  })
+    if (['move', 'copy'].includes(patch.op) && !patch.from) {
+      errors.push(`${patch.op} 연산에 from 필요: ${patch.path}`)
+    }
+
+    // 1-3. path 존재 여부 (remove, replace, move, copy, test)
+    if (['remove', 'replace', 'move', 'copy', 'test'].includes(patch.op)) {
+      if (!pathExists(context.target.document, patch.path)) {
+        errors.push(`존재하지 않는 경로: ${patch.path}`)
+      }
+    }
+  }
+
+  // 2. 참조 무결성 (새로 추가되는 요소의 target ID)
+  const newElements = aiOutput.patches
+    .filter(p => p.op === 'add' && p.value)
+    .map(p => p.value)
+
+  for (const elem of newElements) {
+    const referencedIds = extractTargetIds(elem)
+    referencedIds.forEach(id => {
+      if (!id.startsWith('$') && !elementExists(context.target.document, id)) {
+        errors.push(`존재하지 않는 요소 참조: ${id}`)
+      }
+    })
+  }
+
+  // 3. 수정 가능한 속성 범위 체크
+  const modifiablePaths = context.modifiable.properties.map(p => `/${p.replace(/\./g, '/')}`)
+  for (const patch of aiOutput.patches) {
+    const isAllowed = modifiablePaths.some(mp => patch.path.startsWith(mp))
+    if (!isAllowed && context.modifiable.constraints?.includes('strict')) {
+      errors.push(`수정 불가능한 경로: ${patch.path}`)
+    }
+  }
 
   // 4. 성능 경고
-  if (hasExpensiveAnimation(aiOutput.result)) {
-    warnings.push("복잡한 애니메이션 - 저사양 기기에서 느릴 수 있음")
+  const animationPatches = aiOutput.patches.filter(p => p.path.includes('animation'))
+  if (animationPatches.length > 10) {
+    warnings.push("많은 애니메이션 변경 - 성능 영향 가능")
   }
 
-  // 5. 순환 참조
-  if (hasCircularReference(aiOutput.result)) {
-    errors.push("순환 참조 감지됨")
+  // 5. 상태 머신 복잡도 검증
+  const stateMachinePatches = aiOutput.patches.filter(p => p.path.includes('stateMachine'))
+  for (const patch of stateMachinePatches) {
+    if (patch.op === 'add' || patch.op === 'replace') {
+      const smValidation = validateStateMachineComplexity(patch.value)
+      errors.push(...smValidation.errors)
+      warnings.push(...smValidation.warnings)
+    }
   }
 
   return { valid: errors.length === 0, errors, warnings }

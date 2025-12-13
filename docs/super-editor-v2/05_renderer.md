@@ -53,8 +53,9 @@ interface DocumentContextValue {
   document: EditorDocument
   data: WeddingData
 
-  // 전역 스타일
-  style: GlobalStyle
+  // 전역 스타일 (해석된 결과)
+  // @see 01_data_schema.md §7.10 ResolvedStyle
+  style: ResolvedStyle  // = GlobalStyle
 
   // 전역 애니메이션 설정
   animation: GlobalAnimation
@@ -356,23 +357,42 @@ function DocumentRenderer({
   )
 }
 
-function getDocumentStyles(style: GlobalStyle): CSSProperties {
+/**
+ * ResolvedStyle → CSS 변수 변환
+ *
+ * @see 01_data_schema.md §7.10 ResolvedStyle 타입 정의
+ */
+function getDocumentStyles(resolved: ResolvedStyle): CSSProperties {
   return {
-    '--color-primary': style.colors.primary,
-    '--color-secondary': style.colors.secondary,
-    '--color-background': style.colors.background,
-    '--color-surface': style.colors.surface,
-    '--color-accent': style.colors.accent,
-    '--color-text-primary': style.colors.text.primary,
-    '--color-text-secondary': style.colors.text.secondary,
-    '--color-text-muted': style.colors.text.muted,
-    '--font-heading': style.fonts.heading.family,
-    '--font-body': style.fonts.body.family,
-    '--spacing-section': `${style.spacing.section}vh`,
-    '--spacing-element': `${style.spacing.element}vw`,
-    '--border-radius': `${style.effects.borderRadius}px`,
-    backgroundColor: style.colors.background,
-    color: style.colors.text.primary,
+    // 시맨틱 토큰 (색상)
+    '--color-bg-page': resolved.tokens['bg-page'],
+    '--color-bg-section': resolved.tokens['bg-section'],
+    '--color-bg-section-alt': resolved.tokens['bg-section-alt'],
+    '--color-fg-default': resolved.tokens['fg-default'],
+    '--color-fg-muted': resolved.tokens['fg-muted'],
+    '--color-fg-emphasis': resolved.tokens['fg-emphasis'],
+    '--color-accent': resolved.tokens['accent-default'],
+    '--color-accent-hover': resolved.tokens['accent-hover'],
+    '--color-accent-active': resolved.tokens['accent-active'],
+    '--color-border-default': resolved.tokens['border-default'],
+    '--color-border-muted': resolved.tokens['border-muted'],
+
+    // 타이포그래피
+    '--font-heading': resolved.typography.fontStacks.heading?.family.join(', '),
+    '--font-body': resolved.typography.fontStacks.body?.family.join(', '),
+
+    // 이펙트
+    '--radius-sm': `${resolved.effects.radius.sm}px`,
+    '--radius-md': `${resolved.effects.radius.md}px`,
+    '--radius-lg': `${resolved.effects.radius.lg}px`,
+    '--radius-full': `${resolved.effects.radius.full}px`,
+    '--shadow-sm': resolved.effects.shadows.sm,
+    '--shadow-md': resolved.effects.shadows.md,
+    '--shadow-lg': resolved.effects.shadows.lg,
+
+    // 기본 스타일 적용
+    backgroundColor: resolved.tokens['bg-page'],
+    color: resolved.tokens['fg-default'],
   } as CSSProperties
 }
 ```
@@ -2144,6 +2164,16 @@ interface ExtractedPalette {
   }
 }
 
+/**
+ * 사진에서 색상 팔레트 추출 (최적화 버전)
+ *
+ * ⚠️ 성능 고려사항:
+ * - K-means 클러스터링은 CPU 집약적 작업
+ * - 메인 스레드 블로킹 방지를 위해 Web Worker 사용 권장
+ * - 아래 코드는 Worker 분리 전 참조 구현
+ *
+ * @see style/extraction/kmeans.worker.ts (실제 구현 시 Worker 분리)
+ */
 async function extractPaletteOptimized(
   imageUrl: string,
   config: PhotoPaletteConfig
@@ -2154,7 +2184,9 @@ async function extractPaletteOptimized(
   const { width, height } = config.extraction.optimization
   const resizedPixels = await loadAndResizeImage(imageUrl, width, height)
 
-  // 2. K-means 클러스터링
+  // 2. K-means 클러스터링 (Worker에서 실행 권장)
+  // TODO: Web Worker로 분리하여 UI 블로킹 방지
+  // const clusters = await kmeansWorker.postMessage({ pixels, options })
   const { colorCount, optimization } = config.extraction
   const clusters = kMeansClustering(resizedPixels, {
     k: colorCount,
@@ -2474,4 +2506,5 @@ src/lib/super-editor-v2/
 - [x] `03_variables.md` - 변수 시스템
 - [x] `04_editor_ui.md` - 에디터 UI + AI 컨텍스트 압축
 - [x] `05_renderer.md` - 렌더링 시스템 + 스타일 런타임 (현재 문서)
-- [ ] `06_ai_prompts.md` - AI 프롬프트 템플릿 + 컨텍스트 주입
+- [x] `06_web_worker.md` - Web Worker 시스템 (K-means 색상 추출 등)
+- [ ] `07_ai_prompts.md` - AI 프롬프트 템플릿 + 컨텍스트 주입
