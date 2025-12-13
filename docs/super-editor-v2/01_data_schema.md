@@ -196,13 +196,13 @@ type BlockType =
 AI는 Block의 `type`과 각 Element의 `binding`을 통해 맥락을 파악:
 
 ```
-Block(type: 'intro')의 elements:
+Block(type: 'hero')의 elements:
 ├── Element(binding: 'photos.main') → "메인 사진"
 ├── Element(binding: 'groom.name') → "신랑 이름"
 ├── Element(binding: 'bride.name') → "신부 이름"
 └── Element(binding: 'wedding.dateDisplay') → "예식 날짜"
 
-→ AI 이해: "이 블록은 메인 사진 위에 신랑신부 이름과 날짜를 보여주는 인트로"
+→ AI 이해: "이 블록은 메인 사진 위에 신랑신부 이름과 날짜를 보여주는 히어로"
 ```
 
 ---
@@ -966,7 +966,7 @@ interface PhotoData {
 → AI가 mood='cinematic' 매칭
 → 블록 구성 + 각 블록 내 elements 배치:
 
-Block(type: 'intro')
+Block(type: 'hero')
 ├── Element(type: 'image', binding: 'photos.main', style: fullscreen)
 ├── Element(type: 'text', binding: 'groom.name', x: 30, y: 45)
 ├── Element(type: 'text', value: '♥', x: 50, y: 45)
@@ -980,10 +980,10 @@ Block(type: 'gallery')
 ### 10.2 블록 단위 수정
 
 ```
-사용자: (intro 블록 선택 후)
+사용자: (hero 블록 선택 후)
         "이름을 세로로 배치하고, 폰트를 더 크게"
 
-→ AI가 intro 블록의 elements만 수정:
+→ AI가 hero 블록의 elements만 수정:
   - groom.name: x:50, y:35 → x:50, y:30, fontSize: 8vw
   - bride.name: x:50, y:50 (세로 배치)
   - 다른 블록은 변경 없음
@@ -992,7 +992,7 @@ Block(type: 'gallery')
 ### 10.3 요소 추가
 
 ```
-사용자: (intro 블록 선택 후)
+사용자: (hero 블록 선택 후)
         "하트 아이콘 추가해줘"
 
 → AI가 새 Element 추가:
@@ -1084,8 +1084,8 @@ Block(type: 'gallery')
   },
   "blocks": [
     {
-      "id": "block-intro",
-      "type": "intro",
+      "id": "block-hero",
+      "type": "hero",
       "enabled": true,
       "height": 100,
       "elements": [

@@ -220,7 +220,7 @@ function SectionAccordion({
 
 ```typescript
 const SECTION_METADATA: Record<BlockType, SectionMeta> = {
-  intro: { label: '인트로', icon: 'image', order: 1 },
+  hero: { label: '인트로', icon: 'image', order: 1 },
   greeting: { label: '인사말', icon: 'message', order: 2 },
   parents: { label: '혼주 소개', icon: 'users', order: 3 },
   gallery: { label: '갤러리', icon: 'images', order: 4 },
@@ -1205,7 +1205,7 @@ function AIPromptInput({ selectedBlockId, onSubmit, isLoading }: AIPromptInputPr
 
 ```typescript
 const PROMPT_SUGGESTIONS: Record<BlockType | 'global', string[]> = {
-  intro: [
+  hero: [
     '이름을 더 크게 해줘',
     '배경을 더 어둡게',
     '날짜를 아래쪽으로 옮겨줘',
@@ -1483,8 +1483,8 @@ function buildAIContext(
 {
   "context": {
     "selectedBlock": {
-      "id": "block-intro",
-      "type": "intro",
+      "id": "block-hero",
+      "type": "hero",
       "enabled": true,
       "height": 100,
       "elements": [
@@ -2564,10 +2564,10 @@ function ShareTab({ documentId }: { documentId: string }) {
     setIsCapturing(true)
     try {
       // html2canvas로 인트로 캡처
-      const introElement = document.querySelector('[data-block-type="intro"]')
-      if (!introElement) return
+      const heroElement = document.querySelector('[data-block-type="hero"]')
+      if (!heroElement) return
 
-      const canvas = await html2canvas(introElement, {
+      const canvas = await html2canvas(heroElement, {
         width: 1200,
         height: 630,
         scale: 2,

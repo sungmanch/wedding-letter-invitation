@@ -815,7 +815,7 @@ interface FloatingElement {
   "content": "<svg>...</svg>",
   "zIndex": 1000,
   "scrollRange": {
-    "start": "block-intro bottom",
+    "start": "block-hero bottom",
     "end": "100%"
   },
   "stateMachine": {
@@ -969,7 +969,7 @@ const ENTRANCE_PRESETS = [
     name: '시네마틱 페이드',
     meta: {
       mood: ['cinematic', 'romantic'],
-      suitableFor: ['intro'],
+      suitableFor: ['hero'],
       keywords: { ko: ['영화', '드라마틱'], en: ['movie', 'dramatic'] },
       description: '느린 페이드 + 줌 + 블러 해제',
       intensity: 'medium'
@@ -1331,14 +1331,14 @@ function validateAIOutput(
     "width": "8vw",
     "height": "8vw",
     "zIndex": 1000,
-    "scrollRange": { "start": "block-intro bottom", "end": "100%" },
+    "scrollRange": { "start": "block-hero bottom", "end": "100%" },
     "stateMachine": {
       "id": "paper-plane-journey",
       "initial": "flying",
       "states": {
         "flying": {
           "interactions": [{
-            "trigger": { "type": "scroll", "start": "block-intro bottom", "end": "block-guestbook top", "scrub": true },
+            "trigger": { "type": "scroll", "start": "block-hero bottom", "end": "block-guestbook top", "scrub": true },
             "action": { "type": "path", "target": "paper-plane", "path": "M 10,5 Q 30,15 50,10 T 70,20 T 90,15", "align": true }
           }]
         },
