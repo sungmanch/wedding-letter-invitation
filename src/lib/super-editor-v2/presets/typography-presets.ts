@@ -12,9 +12,9 @@ import type { TypographyPresetId, TypeScale } from '../schema/types'
 // ============================================
 
 export interface FontStack {
-  family: string[]
-  fallback: string
-  googleFonts?: string[] // Google Fonts 로드용 이름
+  readonly family: readonly string[]
+  readonly fallback: string
+  readonly googleFonts?: readonly string[] // Google Fonts 로드용 이름
 }
 
 export interface TypographyPreset {
