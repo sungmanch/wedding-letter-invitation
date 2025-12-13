@@ -4,6 +4,7 @@ import * as schema from './schema'
 import * as invitationSchema from './invitation-schema'
 import * as templateSchema from './template-schema'
 import * as superEditorSchema from './super-editor-schema'
+import * as superEditorV2Schema from '../super-editor-v2/schema/db-schema'
 
 // Create postgres connection
 const connectionString = process.env.DATABASE_URL!
@@ -17,7 +18,13 @@ const queryClient = postgres(connectionString, {
 })
 
 // Combine all schemas
-const allSchemas = { ...schema, ...invitationSchema, ...templateSchema, ...superEditorSchema }
+const allSchemas = {
+  ...schema,
+  ...invitationSchema,
+  ...templateSchema,
+  ...superEditorSchema,
+  ...superEditorV2Schema,
+}
 
 // Create drizzle database instance with schema
 export const db = drizzle(queryClient, { schema: allSchemas })
