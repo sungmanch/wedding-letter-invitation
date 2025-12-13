@@ -606,29 +606,52 @@ const GRADIENT_PRESETS: Record<string, GradientValue> = {
 
 ### 7.7 타이포그래피 & 이펙트
 
+> **상세 문서**: [07_typography_system.md](./07_typography_system.md)
+
 ```typescript
+/**
+ * 타이포그래피 설정
+ * - 제목: 영문 폰트 (Playfair, Cinzel 등)
+ * - 본문: 한글 폰트 (Noto Serif KR, Pretendard 등)
+ * - 12개 프리셋 제공 (클래식/모던/로맨틱/내추럴)
+ */
 interface TypographyConfig {
+  // 프리셋 선택 (Level 1)
   preset?: TypographyPresetId
+
+  // 커스텀 설정 (Level 2-3)
   custom?: {
-    fontStacks: Record<string, FontStack>
-    scale: Record<string, TypeStyle>
+    fontStacks?: {
+      heading?: string  // fontId (FONT_PRESETS)
+      body?: string
+      accent?: string
+    }
+    weights?: {
+      heading?: number
+      body?: number
+      accent?: number
+    }
+    scale?: Partial<TypeScale>
   }
 }
 
-interface FontStack {
-  family: string[]
-  category: 'serif' | 'sans' | 'display' | 'script' | 'mono'
-  weights: number[]
-}
-
-interface TypeStyle {
-  fontStack: string
-  weight: number
-  size: number
-  sizeUnit: 'vw' | 'rem'
-  lineHeight: number
-  letterSpacing: number
-}
+type TypographyPresetId =
+  // 클래식/우아
+  | 'classic-elegant'      // Playfair + Noto Serif
+  | 'classic-traditional'  // Cinzel + Nanum Myeongjo
+  | 'classic-romantic'     // Cormorant + Gowun Batang
+  // 모던/미니멀
+  | 'modern-minimal'       // Montserrat + Pretendard
+  | 'modern-clean'         // Inter + Noto Sans
+  | 'modern-geometric'     // Poppins + Pretendard
+  // 로맨틱/감성
+  | 'romantic-script'      // Great Vibes + Gowun Batang
+  | 'romantic-italian'     // Italianno + Noto Serif
+  | 'romantic-soft'        // Pinyon Script + Hahmlet
+  // 내추럴/손글씨
+  | 'natural-handwritten'  // High Summit + 마포금빛나루
+  | 'natural-brush'        // Alex Brush + 나눔붓글씨
+  | 'natural-warm'         // Dancing Script + 고운돋움
 
 interface EffectsConfig {
   preset?: EffectsPresetId
