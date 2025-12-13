@@ -1512,11 +1512,94 @@ function buildAIContext(
 }
 ```
 
+### 7.6 AI 스타일 컨텍스트 압축
+
+스타일 시스템은 전체를 AI에 전달하면 토큰 낭비가 심함. 압축 전략을 사용.
+
+```typescript
+interface CompressedStyleContext {
+  // 현재 활성 레벨만 포함
+  activeLevel: 'preset' | 'quick' | 'advanced'
+
+  // 레벨별 요약
+  summary: {
+    preset?: string           // 'classic-gold'
+    quickOverrides?: string[] // ['dominantColor', 'mood:warm']
+    advancedOverrides?: string[] // ['palette[2]', 'tokens.accent-default']
+  }
+
+  // 현재 해석된 값 (읽기 전용)
+  resolved: {
+    dominantColor: string
+    accentColor: string
+    textColor: string
+    mood: string
+    contrastLevel: string
+  }
+
+  // 사진 팔레트 (있는 경우)
+  extractedPalette?: {
+    colors: string[]          // hex 배열만
+    mapping: string           // 'dominant:0, accent:2, text:auto'
+  }
+}
+
+function compressStyleContext(style: StyleSystem): CompressedStyleContext {
+  const resolved = resolveStyleSystem(style)
+
+  // 활성 레벨 판단
+  let activeLevel: 'preset' | 'quick' | 'advanced' = 'preset'
+  if (style.advanced) activeLevel = 'advanced'
+  else if (style.quick) activeLevel = 'quick'
+
+  // 요약 생성
+  const summary: CompressedStyleContext['summary'] = {}
+
+  if (style.preset) {
+    summary.preset = style.preset
+  }
+
+  if (style.quick) {
+    const overrides: string[] = []
+    if (style.quick.dominantColor) overrides.push('dominantColor')
+    if (style.quick.accentColor) overrides.push('accentColor')
+    if (style.quick.mood) overrides.push(`mood:${style.quick.mood}`)
+    if (style.quick.photoExtraction?.enabled) overrides.push('photoExtraction')
+    summary.quickOverrides = overrides
+  }
+
+  return {
+    activeLevel,
+    summary,
+    resolved: {
+      dominantColor: resolved.tokens['bg-page'],
+      accentColor: resolved.tokens['accent-default'],
+      textColor: resolved.tokens['fg-default'],
+      mood: detectMood(resolved),
+      contrastLevel: detectContrastLevel(resolved),
+    },
+    extractedPalette: style.quick?.photoExtraction?.enabled
+      ? {
+          colors: resolved.extractedPalette?.colors.map(c => c.hex) || [],
+          mapping: `dominant:${resolved.extractedPalette?.mappedRoles.dominant}, accent:${resolved.extractedPalette?.mappedRoles.emphasis}`,
+        }
+      : undefined,
+  }
+}
+```
+
+#### 컨텍스트 크기 비교
+
+| 전략 | 토큰 수 | 정보량 | 적합한 상황 |
+|------|---------|--------|-------------|
+| 전체 JSON | ~2,000 | 100% | 초기 생성 |
+| 압축 요약 | ~300 | 70% | 일반 수정 |
+| 델타 기반 | ~100 | 30% | 연속 수정 |
+| 의도 기반 | ~200 | 80% | AI 생성 |
+
 ---
 
 ## 8. 디자인 탭 (3-Level 스타일 시스템)
-
-> **스타일 시스템 상세**: [07_style_system.md](./07_style_system.md)
 
 ### 8.1 구조 개요
 
@@ -3610,7 +3693,7 @@ src/lib/super-editor-v2/
 │       ├── BlockRenderer.tsx       # 블록 렌더러
 │       └── ElementRenderer.tsx     # 요소 렌더러
 │
-├── style/                          # 스타일 시스템 코어 (07_style_system.md)
+├── style/                          # 스타일 시스템 코어
 │   ├── types.ts                    # StyleSystem, SemanticTokens 등
 │   ├── resolver.ts                 # resolveStyleSystem()
 │   ├── presets/
@@ -3673,11 +3756,11 @@ src/lib/super-editor-v2/
 
 ---
 
-## 13. 다음 단계
+## 14. 다음 단계
 
-- [x] `01_data_schema.md` - 블록/요소 구조
+- [x] `01_data_schema.md` - 블록/요소 구조 + 스타일 시스템 타입
 - [x] `02_animation_system.md` - 애니메이션 시스템
 - [x] `03_variables.md` - 변수 시스템
-- [x] `04_editor_ui.md` - 에디터 UI 컴포넌트 설계 (현재 문서)
-- [ ] `05_renderer.md` - 렌더링 시스템 + 변수 해석 런타임
+- [x] `04_editor_ui.md` - 에디터 UI + AI 컨텍스트 압축 (현재 문서)
+- [x] `05_renderer.md` - 렌더링 시스템 + 스타일 런타임
 - [ ] `06_ai_prompts.md` - AI 프롬프트 템플릿 + 변수 생성 가이드

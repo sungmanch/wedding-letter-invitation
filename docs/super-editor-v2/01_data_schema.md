@@ -339,8 +339,6 @@ interface CalendarProps {
 
 ## 7. 스타일 시스템
 
-> **상세 문서**: [07_style_system.md](./07_style_system.md)
-
 ### 7.1 3-Level 하이브리드 구조
 
 예술적 다양성을 지원하는 유연한 색상/타이포그래피 시스템.
@@ -520,7 +518,70 @@ interface SemanticTokens {
 }
 ```
 
-### 7.6 타이포그래피 & 이펙트
+### 7.6 그라데이션 프리셋
+
+```typescript
+const GRADIENT_PRESETS: Record<string, GradientValue> = {
+  // 로맨틱
+  'sunset-blush': {
+    type: 'linear',
+    angle: 135,
+    stops: [
+      { color: '#FFB6C1', position: 0 },
+      { color: '#FFC0CB', position: 50 },
+      { color: '#FFE4E1', position: 100 },
+    ]
+  },
+
+  // 골드
+  'golden-hour': {
+    type: 'linear',
+    angle: 45,
+    stops: [
+      { color: '#C9A962', position: 0 },
+      { color: '#E5D4A8', position: 50 },
+      { color: '#F5EED5', position: 100 },
+    ]
+  },
+
+  // 시네마틱
+  'cinematic-vignette': {
+    type: 'radial',
+    shape: 'ellipse',
+    position: 'center',
+    stops: [
+      { color: '#000000', position: 0, opacity: 0 },
+      { color: '#000000', position: 70, opacity: 0.3 },
+      { color: '#000000', position: 100, opacity: 0.7 },
+    ]
+  },
+
+  // 메탈릭 골드
+  'metallic-gold': {
+    type: 'linear',
+    angle: 135,
+    stops: [
+      { color: '#BF953F', position: 0 },
+      { color: '#FCF6BA', position: 25 },
+      { color: '#B38728', position: 50 },
+      { color: '#FBF5B7', position: 75 },
+      { color: '#AA771C', position: 100 },
+    ]
+  },
+
+  // 듀오톤 (동적 생성용 템플릿)
+  'duotone-template': {
+    type: 'linear',
+    angle: 135,
+    stops: [
+      { color: '$color1', position: 0 },
+      { color: '$color2', position: 100 },
+    ]
+  },
+}
+```
+
+### 7.7 타이포그래피 & 이펙트
 
 ```typescript
 interface TypographyConfig {
@@ -563,7 +624,7 @@ interface TextureConfig {
 }
 ```
 
-### 7.7 블록별 테마 오버라이드
+### 7.8 블록별 테마 오버라이드
 
 ```typescript
 interface BlockThemeConfig {
@@ -579,7 +640,7 @@ interface BlockThemeConfig {
 }
 ```
 
-### 7.8 요소 스타일
+### 7.9 요소 스타일
 
 ```typescript
 interface ElementStyle {
@@ -1065,11 +1126,11 @@ Block(type: 'gallery')
 
 ### 12.1 문서 작성
 
-- [x] `01_data_schema.md` - 데이터 스키마 설계 (현재 문서)
-- [x] `02_animation_system.md` - 완전 유연한 애니메이션 시스템 (트리거, 상태 머신, AI 통합)
-- [x] `03_variables.md` - 변수 시스템 상세 정의 (타입, 유효성 검사, 포맷팅)
-- [ ] `04_editor_ui.md` - 에디터 UI 컴포넌트 설계 (블록 선택, 프롬프트 입력)
-- [ ] `05_renderer.md` - 렌더링 시스템 + 애니메이션 런타임
+- [x] `01_data_schema.md` - 데이터 스키마 + 스타일 시스템 타입 (현재 문서)
+- [x] `02_animation_system.md` - 애니메이션 시스템 (트리거, 상태 머신, AI 통합)
+- [x] `03_variables.md` - 변수 시스템 (타입, 유효성 검사, 포맷팅)
+- [x] `04_editor_ui.md` - 에디터 UI + AI 컨텍스트 압축
+- [x] `05_renderer.md` - 렌더링 시스템 + 스타일 런타임 + K-means 추출
 - [ ] `06_ai_prompts.md` - AI 프롬프트 템플릿 + 맥락 주입 + 테스트 케이스
 
 ### 12.2 AI 프롬프트 시스템 개선 TODO
@@ -1079,7 +1140,7 @@ Block(type: 'gallery')
 | JSON Patch 출력 형식 | ✅ 완료 | `02_animation_system.md` §11.3 | RFC 6902 표준 적용 |
 | AI 확장 변수 검증 | ✅ 완료 | `03_variables.md` §6.3 | definition + value 함께 제출, 타입 검증 |
 | 상태 머신 복잡도 제한 | ✅ 완료 | `02_animation_system.md` §6.0 | 상태 5개, 전이 10개, 깊이 3, 순환 불허 |
-| **프롬프트 컨텍스트 압축** | ⏳ 대기 | `04_editor_ui.md` (예정) | 선택된 블록만 full JSON, 나머지 요약 |
+| **프롬프트 컨텍스트 압축** | ✅ 완료 | `04_editor_ui.md` §7.6 | 선택된 블록만 full JSON, 나머지 요약 |
 
 ### 12.3 프롬프트 컨텍스트 압축 상세 (다음 세션)
 
