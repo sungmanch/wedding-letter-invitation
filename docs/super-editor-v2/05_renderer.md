@@ -695,17 +695,23 @@ interface TextElementProps {
 }
 
 function TextElement({ value, style, globalStyle }: TextElementProps) {
+  // typography.fontStacks: 폰트 패밀리 정의
+  // typography.scale: 크기/두께/행간/자간 정의
+  // tokens: 시맨틱 색상 토큰
+  const bodyFont = globalStyle.typography.fontStacks.body
+  const bodyScale = globalStyle.typography.scale.body
+
   const textStyle: CSSProperties = useMemo(() => ({
-    fontFamily: style?.fontFamily || globalStyle.fonts.body.family,
-    fontSize: `${style?.fontSize || globalStyle.fonts.body.size}vw`,
-    fontWeight: style?.fontWeight || globalStyle.fonts.body.weight,
-    color: style?.color || globalStyle.colors.text.primary,
+    fontFamily: style?.fontFamily || bodyFont.family.join(', '),
+    fontSize: `${style?.fontSize || bodyScale.size}${bodyScale.sizeUnit}`,
+    fontWeight: style?.fontWeight || bodyScale.weight,
+    color: style?.color || globalStyle.tokens['fg-default'],
     textAlign: style?.textAlign || 'center',
-    lineHeight: style?.lineHeight || globalStyle.fonts.body.lineHeight,
-    letterSpacing: `${style?.letterSpacing || globalStyle.fonts.body.letterSpacing}em`,
+    lineHeight: style?.lineHeight || bodyScale.lineHeight,
+    letterSpacing: `${style?.letterSpacing || bodyScale.letterSpacing}em`,
     whiteSpace: 'pre-wrap',  // 줄바꿈 유지
     wordBreak: 'keep-all',   // 한글 단어 단위 줄바꿈
-  }), [style, globalStyle])
+  }), [style, globalStyle, bodyFont, bodyScale])
 
   return (
     <div className="text-element" style={textStyle}>

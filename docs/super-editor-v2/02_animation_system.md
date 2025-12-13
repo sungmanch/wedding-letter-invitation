@@ -594,36 +594,51 @@ function validateStateMachineComplexity(
   return { valid: errors.length === 0, errors, warnings }
 }
 
-// 순환 참조 탐지 (DFS)
-// 수정: inStack Set 추가로 O(1) 경로 체크 (기존 path.includes는 O(n))
+/**
+ * 순환 참조 탐지 (DFS with Back-edge Detection)
+ *
+ * 알고리즘:
+ * - inStack: 현재 DFS 경로에 있는 노드 (O(1) 체크)
+ * - visited: 탐색 완료된 노드 (중복 탐색 방지)
+ * - path: 순환 경로 추출용 배열
+ *
+ * 순환 탐지 조건:
+ * - 현재 노드가 inStack에 있으면 → 백 엣지 발견 → 순환 존재
+ */
 function detectCycles(sm: AnimationStateMachine): string[][] {
   const cycles: string[][] = []
   const visited = new Set<string>()
-  const inStack = new Set<string>()  // 현재 DFS 경로에 있는지 체크 (O(1))
-  const path: string[] = []
+  const inStack = new Set<string>()  // 현재 DFS 스택에 있는 노드
+  const path: string[] = []          // 순환 경로 추출용
 
   function dfs(state: string) {
-    // 현재 경로에 이미 있으면 순환 발견
+    // Case 1: 현재 DFS 스택에 있는 노드 재방문 → 순환 발견 (백 엣지)
+    // 이 시점에서 state는 아직 path에 push 전이지만,
+    // 이전 재귀 호출에서 이미 path에 추가되어 있음
     if (inStack.has(state)) {
       const cycleStart = path.indexOf(state)
+      // 예: path=['A','B','C'], state='A' → cycle=['A','B','C','A']
       cycles.push([...path.slice(cycleStart), state])
       return
     }
 
-    // 이미 방문한 노드는 스킵 (순환 아님)
+    // Case 2: 이미 완전히 탐색된 노드 → 스킵 (다른 경로에서 방문 완료)
     if (visited.has(state)) return
 
+    // 현재 노드 탐색 시작
     visited.add(state)
     inStack.add(state)
     path.push(state)
 
+    // 인접 노드 탐색
     const outgoing = sm.transitions.filter(t => t.from === state || t.from === '*')
     for (const t of outgoing) {
       dfs(t.to)
     }
 
+    // 현재 노드 탐색 완료 → 스택에서 제거 (백트래킹)
     path.pop()
-    inStack.delete(state)  // 경로에서 제거
+    inStack.delete(state)
   }
 
   dfs(sm.initial)

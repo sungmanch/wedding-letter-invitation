@@ -655,6 +655,9 @@ class WorkerManager {
       }
 
       // ImageData는 Transferable
+      // ⚠️ CAVEAT: 버퍼 전송 후 원본 imageData.data는 neutered 됨
+      //    → 호출자가 동일 ImageData를 재사용하면 예외 발생
+      //    → 재사용이 필요하면 전송 전에 복사본 생성 필요
       this.kmeansWorker!.postMessage(request, [imageData.data.buffer])
     })
   }
@@ -1020,6 +1023,33 @@ const result = await kmeansApi.extractPalette(imageData, options, mapping)
 - ImageData 전송 시 `Transferable` 사용으로 복사 비용 제거
 - Worker 당 ~5MB 메모리 사용
 - 싱글톤 패턴으로 Worker 재사용
+
+### 6.3 Transferable 사용 시 주의사항
+
+> ⚠️ **CAVEAT**: Transferable 객체는 전송 후 원본이 **neutered** 됩니다.
+
+```typescript
+// ❌ 잘못된 사용 - 전송 후 원본 접근 시 예외 발생
+const imageData = ctx.getImageData(0, 0, 100, 100)
+await workerManager.extractPalette(imageData, options, mapping)
+console.log(imageData.data[0])  // TypeError: Cannot read neutered ArrayBuffer
+
+// ✅ 올바른 사용 - 재사용이 필요하면 복사본 생성
+const imageData = ctx.getImageData(0, 0, 100, 100)
+const copy = new ImageData(
+  new Uint8ClampedArray(imageData.data),
+  imageData.width,
+  imageData.height
+)
+await workerManager.extractPalette(copy, options, mapping)
+console.log(imageData.data[0])  // OK - 원본 유지
+```
+
+| 시나리오 | 권장 방식 |
+|---------|----------|
+| 일회성 추출 | Transferable 직접 전송 (성능 최적) |
+| 원본 재사용 필요 | 복사본 생성 후 전송 |
+| 다중 Worker 전송 | 각 Worker별 복사본 필요 |
 
 ---
 
