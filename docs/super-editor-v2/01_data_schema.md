@@ -105,8 +105,8 @@ interface EditorDocument {
     updatedAt: string
   }
 
-  // 전역 스타일 토큰
-  style: GlobalStyle
+  // 전역 스타일 시스템 (3-Level 하이브리드)
+  style: StyleSystem
 
   // 전역 애니메이션 설정
   animation: GlobalAnimation
@@ -315,101 +315,271 @@ interface CalendarProps {
 
 **사용자 요청**: "신랑 이름을 왼쪽에, 신부 이름을 오른쪽에 배치해줘"
 
-**AI 동작**:
+**AI 출력 (JSON Patch 형식)**:
 ```json
-// Before
 {
-  "id": "elem-1",
-  "type": "text",
-  "binding": "groom.name",
-  "x": 50, "y": 40,
-  "style": { "text": { "textAlign": "center" } }
-}
-
-// After
-{
-  "id": "elem-1",
-  "type": "text",
-  "binding": "groom.name",  // 바인딩 유지
-  "x": 10, "y": 40,         // 위치만 변경
-  "style": { "text": { "textAlign": "left" } }
+  "analysis": {
+    "intent": "신랑/신부 이름 좌우 배치",
+    "affectedProperties": ["elements[0].x", "elements[0].style", "elements[2].x", "elements[2].style"],
+    "approach": "groom.name 왼쪽, bride.name 오른쪽으로 위치 및 정렬 변경"
+  },
+  "patches": [
+    { "op": "replace", "path": "/blocks/0/elements/0/x", "value": 10 },
+    { "op": "replace", "path": "/blocks/0/elements/0/style/text/textAlign", "value": "left" },
+    { "op": "replace", "path": "/blocks/0/elements/2/x", "value": 90 },
+    { "op": "replace", "path": "/blocks/0/elements/2/style/text/textAlign", "value": "right" }
+  ],
+  "explanation": "신랑 이름을 왼쪽 정렬, 신부 이름을 오른쪽 정렬로 배치했습니다."
 }
 ```
+
+**핵심**: 바인딩(`groom.name`, `bride.name`)은 유지하고 위치/스타일만 변경
 
 ---
 
 ## 7. 스타일 시스템
 
-### 7.1 전역 스타일 (GlobalStyle)
+> **상세 문서**: [07_style_system.md](./07_style_system.md)
+
+### 7.1 3-Level 하이브리드 구조
+
+예술적 다양성을 지원하는 유연한 색상/타이포그래피 시스템.
+
+| 레벨 | 대상 | 설정 방식 | 복잡도 |
+|------|------|----------|--------|
+| **Level 1** | 초보자 | preset 선택 | ~10 토큰 |
+| **Level 2** | 중급자 | quick 조정 | ~50 토큰 |
+| **Level 3** | AI/전문가 | advanced 제어 | ~200 토큰 |
 
 ```typescript
-interface GlobalStyle {
-  // 색상 토큰
-  colors: {
-    primary: string      // 주 강조색
-    secondary: string    // 보조색
-    background: string   // 배경색 (60%)
-    surface: string      // 카드/섹션 배경 (30%)
-    accent: string       // 포인트색 (10%)
-    text: {
-      primary: string    // 제목
-      secondary: string  // 본문
-      muted: string      // 보조 텍스트
+interface StyleSystem {
+  version: 2
+
+  // ═══════════════════════════════════════════════════════════
+  // Level 1: 프리셋 (초보자용)
+  // - preset 하나만 선택하면 완성
+  // ═══════════════════════════════════════════════════════════
+  preset?: ThemePresetId
+
+  // ═══════════════════════════════════════════════════════════
+  // Level 2: 빠른 설정 (중급자용)
+  // - 프리셋 기반으로 주요 값만 조정
+  // ═══════════════════════════════════════════════════════════
+  quick?: QuickStyleConfig
+
+  // ═══════════════════════════════════════════════════════════
+  // Level 3: 고급 설정 (AI/전문가용)
+  // - 팔레트와 토큰 직접 제어
+  // ═══════════════════════════════════════════════════════════
+  advanced?: AdvancedStyleConfig
+
+  // ═══════════════════════════════════════════════════════════
+  // 공통: 타이포그래피 & 이펙트
+  // ═══════════════════════════════════════════════════════════
+  typography: TypographyConfig
+  effects: EffectsConfig
+}
+
+// 해석 우선순위: advanced > quick > preset > DEFAULT
+```
+
+### 7.2 Level 1: 테마 프리셋
+
+```typescript
+type ThemePresetId =
+  // 기본
+  | 'minimal-light'       // 밝은 미니멀
+  | 'minimal-dark'        // 어두운 미니멀
+  // 클래식
+  | 'classic-ivory'       // 아이보리 클래식
+  | 'classic-gold'        // 골드 클래식
+  // 모던
+  | 'modern-mono'         // 모노크롬 모던
+  | 'modern-contrast'     // 고대비 모던
+  // 로맨틱
+  | 'romantic-blush'      // 블러쉬 핑크
+  | 'romantic-garden'     // 가든 그린
+  // 시네마틱
+  | 'cinematic-dark'      // 다크 시네마틱
+  | 'cinematic-warm'      // 따뜻한 시네마틱
+  // 특수
+  | 'photo-adaptive'      // 사진 기반 자동
+  | 'duotone'             // 듀오톤
+  | 'gradient-hero'       // 그라데이션 중심
+```
+
+### 7.3 Level 2: 빠른 설정
+
+```typescript
+interface QuickStyleConfig {
+  // 색상 조정
+  dominantColor?: string      // 메인 색상 → 나머지 자동 파생
+  accentColor?: string        // 포인트 색상
+  secondaryColor?: string     // 두 번째 주 색상 (듀오톤용)
+
+  // 전체 무드 조정
+  mood?: 'warm' | 'cool' | 'neutral'
+  contrast?: 'low' | 'medium' | 'high'
+  saturation?: 'muted' | 'normal' | 'vivid'
+
+  // 사진 기반 추출
+  photoExtraction?: {
+    enabled: boolean
+    source: 'photos.main' | string
+    mapping: {
+      dominant: 'most-common' | 'most-saturated' | 'darkest' | 'lightest'
+      accent: 'complementary' | 'second-common' | 'most-saturated'
+    }
+    adjustments?: {
+      saturation?: number     // -100 ~ +100
+      brightness?: number     // -100 ~ +100
+      warmth?: number         // -100 ~ +100
     }
   }
 
-  // 폰트 토큰
-  fonts: {
-    heading: FontConfig   // 제목용
-    body: FontConfig      // 본문용
-    accent?: FontConfig   // 강조용 (선택)
+  // 블록별 간단 설정
+  blockModes?: {
+    [blockId: string]: 'light' | 'dark' | 'accent'
   }
+}
+```
 
-  // 간격 토큰
-  spacing: {
-    section: number      // 섹션 간 간격 (vh)
-    element: number      // 요소 간 간격 (vw)
-  }
+### 7.4 Level 3: 고급 설정
 
-  // 테두리/그림자
-  effects: {
-    borderRadius: number
-    shadow: 'none' | 'subtle' | 'medium' | 'strong'
+```typescript
+interface AdvancedStyleConfig {
+  // 원시 팔레트
+  palette: PaletteColor[]
+
+  // 시맨틱 토큰
+  tokens: SemanticTokens
+
+  // 블록별 토큰 오버라이드
+  blockOverrides?: {
+    [blockId: string]: {
+      mode: 'inherit' | 'invert' | 'custom'
+      tokens?: Partial<SemanticTokens>
+    }
   }
 }
 
-interface FontConfig {
-  family: string
+interface PaletteColor {
+  id: string                  // 'gold', 'ivory', 'forest'
+  value: ColorValue           // 단색 또는 그라데이션
+  variants?: {                // 자동 생성 가능
+    light: string
+    dark: string
+    muted: string
+  }
+}
+
+type ColorValue = string | GradientValue
+
+interface GradientValue {
+  type: 'linear' | 'radial' | 'conic'
+  angle?: number              // linear 전용 (0-360)
+  shape?: 'circle' | 'ellipse'  // radial 전용
+  position?: string           // radial 전용
+  stops: { color: string; position: number; opacity?: number }[]
+}
+```
+
+### 7.5 시맨틱 토큰
+
+```typescript
+interface SemanticTokens {
+  // ─── 배경 ───
+  'bg-page': string           // 페이지 전체 배경
+  'bg-section': string        // 기본 섹션 배경
+  'bg-section-alt': string    // 대체 섹션 배경 (교차용)
+  'bg-card': string           // 카드/컨테이너 배경
+  'bg-overlay': string        // 이미지 오버레이
+
+  // ─── 전경 ───
+  'fg-default': string        // 기본 텍스트
+  'fg-muted': string          // 보조 텍스트
+  'fg-emphasis': string       // 강조 텍스트
+  'fg-inverse': string        // 반전 배경 위 텍스트
+  'fg-on-accent': string      // 액센트 배경 위 텍스트
+
+  // ─── 강조/액션 ───
+  'accent-default': string    // 기본 액센트
+  'accent-hover': string      // 호버 상태
+  'accent-active': string     // 활성 상태
+  'accent-secondary': string  // 보조 액센트 (듀오톤)
+
+  // ─── 보더 ───
+  'border-default': string
+  'border-emphasis': string
+  'border-muted': string
+
+  // ─── 그라데이션 (선택) ───
+  'gradient-hero'?: GradientValue
+  'gradient-accent'?: GradientValue
+  'gradient-overlay'?: GradientValue
+}
+```
+
+### 7.6 타이포그래피 & 이펙트
+
+```typescript
+interface TypographyConfig {
+  preset?: TypographyPresetId
+  custom?: {
+    fontStacks: Record<string, FontStack>
+    scale: Record<string, TypeStyle>
+  }
+}
+
+interface FontStack {
+  family: string[]
+  category: 'serif' | 'sans' | 'display' | 'script' | 'mono'
+  weights: number[]
+}
+
+interface TypeStyle {
+  fontStack: string
   weight: number
-  size: number        // 기본 크기 (vw)
+  size: number
+  sizeUnit: 'vw' | 'rem'
   lineHeight: number
   letterSpacing: number
 }
-```
 
-### 7.2 블록 스타일 오버라이드
-
-```typescript
-interface BlockStyleOverride {
-  // 전역 토큰 오버라이드
-  colors?: Partial<GlobalStyle['colors']>
-  fonts?: Partial<GlobalStyle['fonts']>
-
-  // 블록 전용 스타일
-  background?: {
-    type: 'color' | 'gradient' | 'image'
-    value: string
-    overlay?: string  // 이미지 위 오버레이
+interface EffectsConfig {
+  preset?: EffectsPresetId
+  custom?: {
+    radius: Record<string, number>
+    shadows: Record<string, string>
+    blurs: Record<string, number>
+    textures?: Record<string, TextureConfig>
   }
+}
 
-  padding?: {
-    top: number
-    bottom: number
-  }
+interface TextureConfig {
+  type: 'noise' | 'grain' | 'paper'
+  opacity: number
+  blend: BlendMode
 }
 ```
 
-### 7.3 요소 스타일
+### 7.7 블록별 테마 오버라이드
+
+```typescript
+interface BlockThemeConfig {
+  mode: 'inherit' | 'invert' | 'custom'
+
+  // invert 모드: 자동 반전
+  inversion?: {
+    type: 'full' | 'bg-only' | 'text-only'
+  }
+
+  // custom 모드: 직접 지정
+  tokens?: Partial<SemanticTokens>
+}
+```
+
+### 7.8 요소 스타일
 
 ```typescript
 interface ElementStyle {
@@ -425,7 +595,7 @@ interface ElementStyle {
   }
 
   // 배경
-  background?: string
+  background?: string | GradientValue
 
   // 테두리
   border?: {
@@ -698,36 +868,63 @@ Block(type: 'gallery')
     "updatedAt": "2025-01-15T12:30:00Z"
   },
   "style": {
-    "colors": {
-      "primary": "#8B7355",
-      "secondary": "#D4C5B5",
-      "background": "#FDFBF7",
-      "surface": "#F5F0E8",
-      "accent": "#C9A962",
-      "text": {
-        "primary": "#2C2C2C",
-        "secondary": "#5C5C5C",
-        "muted": "#9C9C9C"
+    "version": 2,
+
+    "preset": "classic-ivory",
+
+    "quick": {
+      "dominantColor": "#FDFBF7",
+      "accentColor": "#C9A962",
+      "mood": "warm",
+      "contrast": "medium"
+    },
+
+    "typography": {
+      "preset": "elegant-serif",
+      "custom": {
+        "fontStacks": {
+          "heading": {
+            "family": ["Playfair Display", "Noto Serif KR", "serif"],
+            "category": "serif",
+            "weights": [400, 600, 700]
+          },
+          "body": {
+            "family": ["Pretendard", "sans-serif"],
+            "category": "sans",
+            "weights": [400, 500]
+          }
+        },
+        "scale": {
+          "heading-lg": {
+            "fontStack": "heading",
+            "weight": 600,
+            "size": 6,
+            "sizeUnit": "vw",
+            "lineHeight": 1.3,
+            "letterSpacing": 0.02
+          },
+          "body-md": {
+            "fontStack": "body",
+            "weight": 400,
+            "size": 4,
+            "sizeUnit": "vw",
+            "lineHeight": 1.6,
+            "letterSpacing": 0
+          }
+        }
       }
     },
-    "fonts": {
-      "heading": {
-        "family": "Playfair Display",
-        "weight": 600,
-        "size": 6,
-        "lineHeight": 1.3,
-        "letterSpacing": 0.02
-      },
-      "body": {
-        "family": "Pretendard",
-        "weight": 400,
-        "size": 4,
-        "lineHeight": 1.6,
-        "letterSpacing": 0
+
+    "effects": {
+      "preset": "subtle",
+      "custom": {
+        "radius": { "sm": 4, "md": 8, "lg": 16 },
+        "shadows": {
+          "sm": "0 1px 2px rgba(0,0,0,0.05)",
+          "md": "0 4px 6px rgba(0,0,0,0.1)"
+        }
       }
-    },
-    "spacing": { "section": 8, "element": 4 },
-    "effects": { "borderRadius": 8, "shadow": "subtle" }
+    }
   },
   "animation": {
     "mood": "cinematic",
@@ -866,8 +1063,47 @@ Block(type: 'gallery')
 
 ## 12. 다음 단계
 
+### 12.1 문서 작성
+
+- [x] `01_data_schema.md` - 데이터 스키마 설계 (현재 문서)
 - [x] `02_animation_system.md` - 완전 유연한 애니메이션 시스템 (트리거, 상태 머신, AI 통합)
-- [ ] `03_variables.md` - 변수 시스템 상세 정의 (타입, 유효성 검사, 포맷팅)
+- [x] `03_variables.md` - 변수 시스템 상세 정의 (타입, 유효성 검사, 포맷팅)
 - [ ] `04_editor_ui.md` - 에디터 UI 컴포넌트 설계 (블록 선택, 프롬프트 입력)
 - [ ] `05_renderer.md` - 렌더링 시스템 + 애니메이션 런타임
 - [ ] `06_ai_prompts.md` - AI 프롬프트 템플릿 + 맥락 주입 + 테스트 케이스
+
+### 12.2 AI 프롬프트 시스템 개선 TODO
+
+| 항목 | 상태 | 문서 | 설명 |
+|------|------|------|------|
+| JSON Patch 출력 형식 | ✅ 완료 | `02_animation_system.md` §11.3 | RFC 6902 표준 적용 |
+| AI 확장 변수 검증 | ✅ 완료 | `03_variables.md` §6.3 | definition + value 함께 제출, 타입 검증 |
+| 상태 머신 복잡도 제한 | ✅ 완료 | `02_animation_system.md` §6.0 | 상태 5개, 전이 10개, 깊이 3, 순환 불허 |
+| **프롬프트 컨텍스트 압축** | ⏳ 대기 | `04_editor_ui.md` (예정) | 선택된 블록만 full JSON, 나머지 요약 |
+
+### 12.3 프롬프트 컨텍스트 압축 상세 (다음 세션)
+
+`04_editor_ui.md`에서 다룰 내용:
+
+```
+## 프롬프트 컨텍스트 압축 전략
+
+### 문제
+- 블록이 많아지면 전체 문서 JSON이 커져서 토큰 한도 초과
+- 불필요한 정보가 AI 응답 품질 저하
+
+### 해결 방안
+1. **선택된 블록**: full JSON 포함
+2. **다른 블록**: 요약만 포함
+   ```json
+   { "id": "block-greeting", "type": "greeting", "elementCount": 3 }
+   ```
+3. **전역 스타일/애니메이션**: 참조만 (`$ref: 'document.style'`)
+4. **data (WeddingData)**: 선택된 블록이 참조하는 변수만 포함
+
+### 컨텍스트 크기 목표
+- 선택된 블록 컨텍스트: ~2,000 토큰
+- 전체 문서 요약: ~500 토큰
+- AI 응답 여유: ~1,500 토큰
+- 총합: ~4,000 토큰 (GPT-4 8K 컨텍스트의 50%)
+```
