@@ -21,6 +21,8 @@ export type SectionType =
   | 'accounts' // 계좌 정보
   | 'guestbook' // 축하 메시지
   | 'music' // 배경음악 (FAB 형태)
+  | 'photobooth' // 포토부스
+  | 'invitation' // RSVP 참석 여부
 
 // ============================================
 // Skeleton Node
@@ -46,7 +48,7 @@ export interface SkeletonNode {
 export interface DataSlot {
   id: string
   path: string // 데이터 바인딩 경로 (예: "couple.groom.name")
-  type: 'text' | 'image' | 'images' | 'date' | 'time' | 'location' | 'phone' | 'account' | 'select'
+  type: 'text' | 'image' | 'images' | 'date' | 'time' | 'location' | 'phone' | 'account' | 'select' | 'frames'
   required: boolean
   description: string
   defaultValue?: unknown
@@ -157,6 +159,8 @@ export function isSectionType(value: string): value is SectionType {
     'accounts',
     'guestbook',
     'music',
+    'photobooth',
+    'invitation',
   ].includes(value)
 }
 

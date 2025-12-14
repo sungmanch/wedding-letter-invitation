@@ -11,6 +11,8 @@ import type { StyleSchema } from '../schema/style'
 import type { VariablesSchema } from '../schema/variables'
 import type { UserData } from '../schema/user-data'
 import { DEFAULT_SECTION_ORDER, DEFAULT_SECTION_ENABLED } from '../schema/section-types'
+import type { IntroEffectType } from '../animations/intro-effects'
+import type { CalligraphyConfig } from '../animations/calligraphy-text'
 
 // ============================================
 // Template Actions
@@ -234,6 +236,37 @@ export async function updateInvitationSections(
     .set({
       sectionOrder,
       sectionEnabled,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(superEditorInvitations.id, invitationId),
+      eq(superEditorInvitations.userId, user.id)
+    ))
+    .returning()
+
+  return updated
+}
+
+/**
+ * 인트로 애니메이션 효과 저장
+ */
+export async function updateIntroEffect(
+  invitationId: string,
+  introEffect: IntroEffectType,
+  calligraphyConfig?: CalligraphyConfig
+) {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const [updated] = await db
+    .update(superEditorInvitations)
+    .set({
+      introEffect,
+      calligraphyConfig,
       updatedAt: new Date(),
     })
     .where(and(

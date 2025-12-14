@@ -1,0 +1,98 @@
+'use client'
+
+/**
+ * Text Element - 텍스트 요소
+ *
+ * 변수 바인딩된 텍스트 또는 직접 입력 텍스트 렌더링
+ */
+
+import { useMemo, type CSSProperties } from 'react'
+import type { TextStyle } from '../../schema/types'
+
+// ============================================
+// Types
+// ============================================
+
+export interface TextElementProps {
+  value?: string | null
+  style?: TextStyle
+  editable?: boolean
+  className?: string
+}
+
+// ============================================
+// Component
+// ============================================
+
+export function TextElement({
+  value,
+  style,
+  editable = false,
+  className = '',
+}: TextElementProps) {
+  // 텍스트 스타일 계산
+  const textStyle = useMemo<CSSProperties>(() => {
+    const css: CSSProperties = {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: style?.textAlign === 'left'
+        ? 'flex-start'
+        : style?.textAlign === 'right'
+          ? 'flex-end'
+          : 'center',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'keep-all',
+    }
+
+    if (style) {
+      if (style.fontFamily) css.fontFamily = style.fontFamily
+      if (style.fontSize) css.fontSize = style.fontSize
+      if (style.fontWeight) css.fontWeight = style.fontWeight
+      if (style.color) css.color = style.color
+      if (style.textAlign) css.textAlign = style.textAlign
+      if (style.lineHeight) css.lineHeight = style.lineHeight
+      if (style.letterSpacing) css.letterSpacing = style.letterSpacing
+    }
+
+    return css
+  }, [style])
+
+  // 줄바꿈 처리
+  const formattedValue = useMemo(() => {
+    if (!value) return ''
+    // \n을 실제 줄바꿈으로 변환
+    return value
+  }, [value])
+
+  if (!value) {
+    return (
+      <div
+        className={`se2-text-element se2-text-element--empty ${className}`}
+        style={textStyle}
+      >
+        {editable && (
+          <span style={{ color: 'var(--fg-muted)', fontStyle: 'italic' }}>
+            텍스트를 입력하세요
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={`se2-text-element ${className}`}
+      style={textStyle}
+    >
+      {formattedValue}
+    </div>
+  )
+}
+
+// ============================================
+// Exports
+// ============================================
+
+export { TextElement as default }

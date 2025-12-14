@@ -19,7 +19,11 @@ import { InvitationRenderer } from '../renderers'
 import { GuestbookFab } from '../renderers/GuestbookFab'
 import { MusicPlayer } from '../renderers/MusicPlayer'
 import { collectAllIntroStyles } from '../presets/legacy/intro-builders'
-import { VariantControlPanel } from './VariantControlPanel'
+import { VariantControlPanel, type CalligraphyConfig } from './VariantControlPanel'
+import type { IntroEffectType } from '../animations/intro-effects'
+
+// Re-export CalligraphyConfig for convenience
+export type { CalligraphyConfig } from './VariantControlPanel'
 
 // ============================================
 // Types
@@ -48,6 +52,14 @@ interface InvitationPreviewProps {
   // Variant switcher (dev mode only)
   sectionVariants?: Record<SectionType, string>
   onVariantChange?: (sectionType: SectionType, variantId: string) => void
+
+  // 인트로 애니메이션 효과
+  introEffect?: IntroEffectType
+  onIntroEffectChange?: (effect: IntroEffectType) => void
+
+  // 캘리그라피 설정
+  calligraphyConfig?: CalligraphyConfig
+  onCalligraphyConfigChange?: (config: CalligraphyConfig) => void
 
   // PhoneFrame 옵션
   withFrame?: boolean
@@ -98,7 +110,9 @@ function PhoneFrame({
           <div
             ref={scrollRef}
             onScroll={onScroll}
-            className="absolute inset-0 bg-white rounded-[2rem] overflow-hidden overflow-y-auto scrollbar-hide"
+            data-scroll-container="true"
+            className="absolute inset-0 bg-white rounded-[2rem] overflow-x-hidden overflow-y-auto scrollbar-hide"
+            style={{ '--preview-screen-height': `${height}px` } as React.CSSProperties}
           >
             {children}
           </div>
@@ -128,6 +142,10 @@ export function InvitationPreview({
   highlightedSection,
   sectionVariants,
   onVariantChange,
+  introEffect,
+  onIntroEffectChange,
+  calligraphyConfig,
+  onCalligraphyConfigChange,
   withFrame = false,
   frameWidth,
   frameHeight,
@@ -198,6 +216,8 @@ export function InvitationPreview({
       sectionVariants={sectionVariants}
       onVariantChange={onVariantChange}
       showVariantSwitcher={false}
+      introEffect={introEffect}
+      calligraphyConfig={calligraphyConfig}
       className={className}
     />
   )
@@ -259,6 +279,10 @@ export function InvitationPreview({
               layout={layout}
               sectionOrder={sectionOrder}
               sectionEnabled={sectionEnabled}
+              introEffect={introEffect}
+              onIntroEffectChange={onIntroEffectChange}
+              calligraphyConfig={calligraphyConfig}
+              onCalligraphyConfigChange={onCalligraphyConfigChange}
               className="h-full overflow-y-auto"
             />
           </div>
@@ -269,6 +293,3 @@ export function InvitationPreview({
 
   return renderer
 }
-
-// Re-export PhoneFrame for standalone use
-export { PhoneFrame }

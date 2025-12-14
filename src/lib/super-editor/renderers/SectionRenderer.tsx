@@ -13,6 +13,16 @@ import { createNodeRenderer, renderPrimitiveNode } from '../primitives'
 import type { RenderContext } from '../primitives/types'
 import { VariantSwitcher } from '../components/VariantSwitcher'
 import { useTokenStyle } from '../context/TokenStyleContext'
+import {
+  SpinningStars,
+  FallingPetals,
+  CalligraphyOverlay,
+  type IntroEffectType,
+  type CalligraphyConfig,
+} from '../animations/intro-effects'
+
+// Re-export CalligraphyConfig
+export type { CalligraphyConfig } from '../animations/intro-effects'
 
 interface SectionRendererProps {
   screen: Screen
@@ -30,6 +40,10 @@ interface SectionRendererProps {
   onVariantChange?: (sectionType: SectionType, variantId: string) => void
   // 섹션 내부 VariantSwitcher 표시 여부 (false면 외부 패널 사용)
   showVariantSwitcher?: boolean
+  // 인트로 애니메이션 효과 (intro 섹션에만 적용)
+  introEffect?: IntroEffectType
+  // 캘리그라피 설정
+  calligraphyConfig?: CalligraphyConfig
 }
 
 export function SectionRenderer({
@@ -44,6 +58,8 @@ export function SectionRenderer({
   currentVariantId,
   onVariantChange,
   showVariantSwitcher: showVariantSwitcherProp = true,
+  introEffect,
+  calligraphyConfig,
 }: SectionRendererProps) {
   // 토큰 스타일 컨텍스트에서 resolveTokenRef 가져오기
   const { resolveTokenRef, tokens } = useTokenStyle()
@@ -109,6 +125,10 @@ export function SectionRenderer({
     }
   }
 
+  // 인트로 섹션에만 효과 적용
+  const isIntro = screen.sectionType === 'intro'
+  const showIntroEffect = isIntro && introEffect && introEffect !== 'none'
+
   return (
     <section
       id={`section-${screen.sectionType}`}
@@ -130,6 +150,21 @@ export function SectionRenderer({
         />
       )}
       {rendered}
+
+      {/* 인트로 애니메이션 효과 오버레이 */}
+      {showIntroEffect && introEffect === 'spinning-stars' && (
+        <SpinningStars count={8} color="currentColor" className="z-10" />
+      )}
+      {showIntroEffect && introEffect === 'falling-petals' && (
+        <FallingPetals count={12} color="#FFB7C5" className="z-10" />
+      )}
+      {showIntroEffect && introEffect === 'calligraphy' && (
+        <CalligraphyOverlay
+          color="currentColor"
+          className="z-10"
+          config={calligraphyConfig}
+        />
+      )}
     </section>
   )
 }

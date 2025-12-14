@@ -45,12 +45,17 @@ export function Text({
       }
     : eventHandlers.onClick
 
+  // className 지원
+  const className = props.className as string | undefined
+
   // HTML 허용 여부에 따라 렌더링 방식 결정
   if (props.html) {
     return (
       <Tag
         data-node-id={node.id}
         data-node-type="text"
+        data-text={content}
+        className={className}
         style={combinedStyle}
         dangerouslySetInnerHTML={{ __html: content }}
         onClick={handleClick}
@@ -64,6 +69,8 @@ export function Text({
     <Tag
       data-node-id={node.id}
       data-node-type="text"
+      data-text={content}
+      className={className}
       style={combinedStyle}
       onClick={handleClick}
       onMouseEnter={eventHandlers.onMouseEnter}
