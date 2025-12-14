@@ -4,6 +4,15 @@
  * 요소 직접 편집을 위한 컴포넌트들
  */
 
+// Edit Mode Toggle
+export {
+  EditModeToggle,
+  CompactModeToggle,
+  type EditMode,
+  type EditModeToggleProps,
+  type CompactModeToggleProps,
+} from './edit-mode-toggle'
+
 // Draggable
 export {
   DraggableElement,
@@ -23,6 +32,14 @@ export {
   type UseResizableOptions,
 } from './resize-handles'
 
+// Rotate
+export {
+  RotateHandle,
+  useRotatable,
+  type RotateHandleProps,
+  type UseRotatableOptions,
+} from './rotate-handle'
+
 // Context Menu
 export {
   ContextMenu,
@@ -41,3 +58,10 @@ export {
   type MultiSelectionOverlayProps,
   type SelectionBoxProps,
 } from './selection-overlay'
+
+// Editable Canvas
+export {
+  EditableCanvas,
+  type EditableCanvasProps,
+  type ContextMenuState,
+} from './editable-canvas'
