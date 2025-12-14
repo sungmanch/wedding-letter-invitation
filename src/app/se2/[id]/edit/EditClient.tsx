@@ -430,6 +430,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                         document={editorDoc}
                         mode="edit"
                         onBlockClick={handleBlockSelect}
+                        skipProvider
                       />
                     </div>
                   </DocumentProvider>
