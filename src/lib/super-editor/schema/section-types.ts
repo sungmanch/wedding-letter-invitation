@@ -32,6 +32,8 @@ export type SectionType =
   | 'music'
   | 'photobooth'
   | 'invitation'
+  | 'rsvp'
+  | 'notice'
 
 /**
  * 섹션 메타 정보
@@ -158,6 +160,24 @@ export const SECTION_META: Record<SectionType, SectionMeta> = {
     isFloating: false,
     defaultEnabled: false,
   },
+  rsvp: {
+    type: 'rsvp',
+    label: '참석 여부 (RSVP)',
+    description: '하객의 참석 여부를 수집합니다',
+    icon: 'check-circle',
+    isFixed: false,
+    isFloating: false,
+    defaultEnabled: false,
+  },
+  notice: {
+    type: 'notice',
+    label: '공지사항',
+    description: '셔틀버스, 주차, 식사 등 안내사항',
+    icon: 'info',
+    isFixed: false,
+    isFloating: false,
+    defaultEnabled: false,
+  },
 }
 
 /**
@@ -173,6 +193,8 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'accounts',
   'guestbook',
   'invitation',
+  'rsvp',
+  'notice',
 ]
 
 /**
@@ -188,6 +210,8 @@ export const REORDERABLE_SECTIONS: SectionType[] = [
   'accounts',
   'guestbook',
   'invitation',
+  'rsvp',
+  'notice',
 ]
 
 /**
@@ -206,6 +230,8 @@ export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   music: false,
   photobooth: false,
   invitation: false,
+  rsvp: false,
+  notice: false,
 }
 
 /**
@@ -286,5 +312,14 @@ export const SECTION_DATA_BINDINGS: Record<SectionType, string[]> = {
   invitation: [
     'invitation.title',
     'invitation.description',
+  ],
+  rsvp: [
+    'rsvp.title',
+    'rsvp.description',
+    'rsvp.showGuestCount',
+    'rsvp.showMessage',
+  ],
+  notice: [
+    'notice.items', // [{ icon, title, content }]
   ],
 }

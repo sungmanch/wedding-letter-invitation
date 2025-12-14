@@ -161,8 +161,9 @@ export const noticeSkeleton: SectionSkeleton = {
         {
           id: 'notice-items-slot',
           path: 'notice.items',
-          nodeId: 'notice-list',
-          property: 'repeat',
+          type: 'text',
+          required: false,
+          description: '공지사항 목록 (아이콘, 제목, 내용)',
           defaultValue: [],
         },
       ],
@@ -170,7 +171,7 @@ export const noticeSkeleton: SectionSkeleton = {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
-          { id: 'stagger', name: '순차 등장', preset: 'stagger-up', trigger: 'inView', duration: 400 },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 400 },
         ],
       },
     },
@@ -339,8 +340,9 @@ export const noticeSkeleton: SectionSkeleton = {
         {
           id: 'notice-accordion-items-slot',
           path: 'notice.items',
-          nodeId: 'notice-accordion-list',
-          property: 'repeat',
+          type: 'text',
+          required: false,
+          description: '공지사항 목록 (아이콘, 제목, 내용)',
           defaultValue: [],
         },
       ],
@@ -490,8 +492,9 @@ export const noticeSkeleton: SectionSkeleton = {
         {
           id: 'notice-card-items-slot',
           path: 'notice.items',
-          nodeId: 'notice-card-grid',
-          property: 'repeat',
+          type: 'text',
+          required: false,
+          description: '공지사항 목록 (아이콘, 제목, 내용)',
           defaultValue: [],
         },
       ],
@@ -499,7 +502,7 @@ export const noticeSkeleton: SectionSkeleton = {
         animations: [
           { id: 'none', name: '없음', preset: 'none', trigger: 'mount' },
           { id: 'fade', name: '페이드 인', preset: 'fade-in', trigger: 'inView', duration: 500 },
-          { id: 'stagger', name: '순차 등장', preset: 'stagger-scale', trigger: 'inView', duration: 300 },
+          { id: 'stagger', name: '순차 등장', preset: 'stagger', trigger: 'inView', duration: 300 },
         ],
       },
     },

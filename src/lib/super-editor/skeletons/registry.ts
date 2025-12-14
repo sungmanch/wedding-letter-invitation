@@ -17,6 +17,8 @@ import {
   musicSkeleton,
   photoboothSkeleton,
   invitationSkeleton,
+  rsvpSkeleton,
+  noticeSkeleton,
 } from './sections'
 
 // ============================================
@@ -36,6 +38,8 @@ const skeletonRegistry: Record<SectionType, SectionSkeleton> = {
   music: musicSkeleton,
   photobooth: photoboothSkeleton,
   invitation: invitationSkeleton,
+  rsvp: rsvpSkeleton,
+  notice: noticeSkeleton,
 }
 
 // ============================================
@@ -103,6 +107,8 @@ export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'accounts',
   'guestbook',
   'invitation',
+  'rsvp',
+  'notice',
 ]
 
 /**
@@ -121,6 +127,8 @@ export const DEFAULT_SECTION_ENABLED: Record<SectionType, boolean> = {
   music: true,
   photobooth: false, // 포토부스는 기본 비활성화
   invitation: true, // RSVP 활성화
+  rsvp: false,
+  notice: false,
 }
 
 // ============================================
@@ -133,5 +141,5 @@ export const skeletonStats = {
   sectionsWithMultipleVariants: Object.values(skeletonRegistry).filter((s) => s.variants.length > 1).length,
 }
 
-// 12개 섹션 확인 (intro, greeting, contact, venue, date, gallery, parents, accounts, guestbook, music, photobooth, invitation)
-console.assert(skeletonStats.totalSections === 12, `Expected 12 sections, got ${skeletonStats.totalSections}`)
+// 14개 섹션 확인 (intro, greeting, contact, venue, date, gallery, parents, accounts, guestbook, music, photobooth, invitation, rsvp, notice)
+console.assert(skeletonStats.totalSections === 14, `Expected 14 sections, got ${skeletonStats.totalSections}`)
