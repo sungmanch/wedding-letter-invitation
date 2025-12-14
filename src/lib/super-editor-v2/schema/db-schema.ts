@@ -288,7 +288,7 @@ export const aiEditLogsV2 = pgTable('ai_edit_logs_v2', {
 
   // 요청 데이터
   prompt: text('prompt').notNull(),
-  targetBlockId: uuid('target_block_id'),
+  targetBlockId: text('target_block_id'),
   context: jsonb('context').$type<{
     selectedElementId?: string
     viewportInfo?: {

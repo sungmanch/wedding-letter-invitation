@@ -1,0 +1,1 @@
+ALTER TABLE "ai_edit_logs_v2" ALTER COLUMN "target_block_id" SET DATA TYPE text;

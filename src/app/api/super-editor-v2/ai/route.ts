@@ -144,7 +144,7 @@ function buildSystemPrompt(
 ## 수정 대상 블록
 - ID: ${targetBlock.id}
 - 타입: ${targetBlock.type} (${BLOCK_TYPE_LABELS[targetBlock.type]})
-- 요소 수: ${targetBlock.elements.length}
+- 요소 수: ${(targetBlock.elements ?? []).length}
 - 현재 상태: ${JSON.stringify(targetBlock, null, 2)}
 `
     }
@@ -155,6 +155,33 @@ function buildSystemPrompt(
 
 ## 블록 타입
 ${blockLabels}
+
+## 블록 스키마 (수정 가능한 속성만 나열)
+\`\`\`typescript
+interface Block {
+  id: string              // 읽기 전용, 수정 불가
+  type: BlockType         // 읽기 전용, 수정 불가
+  enabled: boolean        // 블록 활성화 여부
+  height: number          // 블록 높이 (vh 단위, 10~200)
+  elements: Element[]     // 요소 배열
+  style?: {               // 블록 레벨 스타일 오버라이드
+    background?: { color?: string, image?: string }
+    padding?: { top?: number, bottom?: number }
+  }
+}
+
+interface Element {
+  id: string              // 읽기 전용
+  type: 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'map' | 'calendar'
+  binding?: string        // 데이터 바인딩 경로 (수정 불가)
+  style?: {
+    position?: { x: number, y: number }  // 위치 (%)
+    size?: { width: number, height: number }  // 크기 (%)
+    text?: { fontSize: number, fontWeight: number, color: string, textAlign: string }
+    opacity?: number
+  }
+}
+\`\`\`
 
 ## 현재 문서 상태
 
@@ -191,14 +218,17 @@ ${targetBlockInfo}
 
 ## 경로 규칙
 - /blocks/{index}/... : 블록 수정
+- /blocks/{index}/elements/{index}/... : 요소 수정
 - /style/... : 전역 스타일 수정
 - /data/... : 웨딩 데이터 수정
 
 ## 주의사항
+- 스키마에 정의된 속성만 수정하세요. 존재하지 않는 속성(예: layout, variant)을 만들지 마세요.
 - 변수 바인딩(binding)은 수정하지 마세요
-- 블록의 id는 변경하지 마세요
+- 블록의 id, type은 변경하지 마세요
 - 유효한 JSON Patch만 생성하세요
 - 한 번에 너무 많은 변경을 하지 마세요
+- 이미지 크기 조정은 elements의 style.size를 수정하세요
 `
 }
 

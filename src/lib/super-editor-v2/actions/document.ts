@@ -13,6 +13,7 @@ import {
   DEFAULT_STYLE_SYSTEM,
   DEFAULT_ANIMATION,
   DEFAULT_WEDDING_DATA,
+  createDefaultBlocks,
 } from '../schema'
 import type {
   Block,
@@ -45,7 +46,7 @@ export async function createDocument(data?: {
   const [document] = await db.insert(editorDocumentsV2).values({
     userId: user.id,
     title: data?.title ?? '새 청첩장',
-    blocks: data?.blocks ?? [],
+    blocks: data?.blocks ?? createDefaultBlocks(),
     style: data?.style ?? DEFAULT_STYLE_SYSTEM,
     animation: data?.animation ?? DEFAULT_ANIMATION,
     data: data?.weddingData ?? DEFAULT_WEDDING_DATA,

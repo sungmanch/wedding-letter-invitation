@@ -178,3 +178,209 @@ export const BLOCK_TYPE_LABELS: Record<Block['type'], string> = {
   music: 'BGM',
   custom: '커스텀',
 }
+
+/**
+ * 기본 블록 템플릿 생성
+ * 각 블록 타입별 기본 elements와 binding 포함
+ */
+export function createDefaultBlocks(): Block[] {
+  return [
+    // 메인 (Hero)
+    {
+      id: 'hero-1',
+      type: 'hero',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.hero,
+      elements: [
+        {
+          id: 'hero-main-image',
+          type: 'image',
+          x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+          binding: 'photos.main',
+          props: { type: 'image', objectFit: 'cover' },
+        },
+        {
+          id: 'hero-groom-name',
+          type: 'text',
+          x: 20, y: 40, width: 25, height: 10, zIndex: 1,
+          binding: 'groom.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'hero-bride-name',
+          type: 'text',
+          x: 55, y: 40, width: 25, height: 10, zIndex: 1,
+          binding: 'bride.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'hero-wedding-date',
+          type: 'text',
+          x: 25, y: 55, width: 50, height: 8, zIndex: 1,
+          binding: 'wedding.date',
+          props: { type: 'text' },
+        },
+      ],
+    },
+    // 인사말
+    {
+      id: 'greeting-1',
+      type: 'greeting',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.greeting,
+      elements: [
+        {
+          id: 'greeting-title',
+          type: 'text',
+          x: 10, y: 10, width: 80, height: 15, zIndex: 1,
+          binding: 'greeting.title',
+          props: { type: 'text' },
+        },
+        {
+          id: 'greeting-content',
+          type: 'text',
+          x: 10, y: 30, width: 80, height: 50, zIndex: 1,
+          binding: 'greeting.content',
+          props: { type: 'text' },
+        },
+      ],
+    },
+    // 달력
+    {
+      id: 'calendar-1',
+      type: 'calendar',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.calendar,
+      elements: [
+        {
+          id: 'calendar-date',
+          type: 'calendar',
+          x: 10, y: 10, width: 80, height: 60, zIndex: 1,
+          binding: 'wedding.date',
+          props: { type: 'calendar' },
+        },
+        {
+          id: 'calendar-time',
+          type: 'text',
+          x: 25, y: 75, width: 50, height: 10, zIndex: 1,
+          binding: 'wedding.time',
+          props: { type: 'text' },
+        },
+      ],
+    },
+    // 갤러리
+    {
+      id: 'gallery-1',
+      type: 'gallery',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.gallery,
+      elements: [
+        {
+          id: 'gallery-photos',
+          type: 'image',
+          x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+          binding: 'photos.gallery',
+          props: { type: 'image', objectFit: 'cover' },
+        },
+      ],
+    },
+    // 예식장
+    {
+      id: 'location-1',
+      type: 'location',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.location,
+      elements: [
+        {
+          id: 'location-name',
+          type: 'text',
+          x: 10, y: 10, width: 80, height: 10, zIndex: 1,
+          binding: 'venue.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'location-address',
+          type: 'text',
+          x: 10, y: 22, width: 80, height: 8, zIndex: 1,
+          binding: 'venue.address',
+          props: { type: 'text' },
+        },
+        {
+          id: 'location-map',
+          type: 'map',
+          x: 5, y: 35, width: 90, height: 55, zIndex: 1,
+          binding: 'venue.address',
+          props: { type: 'map' },
+        },
+      ],
+    },
+    // 혼주
+    {
+      id: 'parents-1',
+      type: 'parents',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.parents,
+      elements: [
+        {
+          id: 'parents-groom-father',
+          type: 'text',
+          x: 10, y: 20, width: 35, height: 8, zIndex: 1,
+          binding: 'groom.fatherName',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-groom-mother',
+          type: 'text',
+          x: 10, y: 32, width: 35, height: 8, zIndex: 1,
+          binding: 'groom.motherName',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-bride-father',
+          type: 'text',
+          x: 55, y: 20, width: 35, height: 8, zIndex: 1,
+          binding: 'bride.fatherName',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-bride-mother',
+          type: 'text',
+          x: 55, y: 32, width: 35, height: 8, zIndex: 1,
+          binding: 'bride.motherName',
+          props: { type: 'text' },
+        },
+      ],
+    },
+    // 축의금
+    {
+      id: 'account-1',
+      type: 'account',
+      enabled: true,
+      height: DEFAULT_BLOCK_HEIGHTS.account,
+      elements: [
+        {
+          id: 'account-groom',
+          type: 'text',
+          x: 10, y: 20, width: 80, height: 30, zIndex: 1,
+          binding: 'groom.account',
+          props: { type: 'text' },
+        },
+        {
+          id: 'account-bride',
+          type: 'text',
+          x: 10, y: 55, width: 80, height: 30, zIndex: 1,
+          binding: 'bride.account',
+          props: { type: 'text' },
+        },
+      ],
+    },
+    // 방명록
+    {
+      id: 'message-1',
+      type: 'message',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.message,
+      elements: [],
+    },
+  ]
+}

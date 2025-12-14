@@ -15,7 +15,7 @@ import type { ElementStyle } from '../../schema/types'
 // ============================================
 
 export interface ImageElementProps {
-  src?: string | null
+  src?: string | string[] | null
   objectFit?: 'cover' | 'contain' | 'fill'
   overlay?: string
   style?: ElementStyle
@@ -28,7 +28,7 @@ export interface ImageElementProps {
 // ============================================
 
 export function ImageElement({
-  src,
+  src: srcProp,
   objectFit = 'cover',
   overlay,
   style,
@@ -37,6 +37,17 @@ export function ImageElement({
 }: ImageElementProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
+
+  // src 정규화: 배열인 경우 첫 번째 항목 사용, 유효한 URL인지 확인
+  const src = useMemo(() => {
+    const rawSrc = Array.isArray(srcProp) ? srcProp[0] : srcProp
+    if (!rawSrc || typeof rawSrc !== 'string') return null
+    // 상대 경로 또는 유효한 URL 형식인지 확인
+    if (rawSrc.startsWith('/') || rawSrc.startsWith('http://') || rawSrc.startsWith('https://') || rawSrc.startsWith('data:')) {
+      return rawSrc
+    }
+    return null
+  }, [srcProp])
 
   // 컨테이너 스타일
   const containerStyle = useMemo<CSSProperties>(() => ({

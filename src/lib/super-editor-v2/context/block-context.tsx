@@ -160,7 +160,7 @@ export function BlockProvider({
 
   // 요소 조회 함수
   const getElement = useMemo(() => {
-    const elementMap = new Map(block.elements.map(el => [el.id, el]))
+    const elementMap = new Map((block.elements ?? []).map(el => [el.id, el]))
     return (elementId: string) => elementMap.get(elementId)
   }, [block.elements])
 

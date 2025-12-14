@@ -177,14 +177,26 @@ function applyPatch(
   const lastKey = pathParts.pop()!
   let target: Record<string, unknown> = obj
 
-  // 부모까지 순회
-  for (const part of pathParts) {
+  // 부모까지 순회 (add/replace일 때는 중간 경로 자동 생성)
+  for (let i = 0; i < pathParts.length; i++) {
+    const part = pathParts[i]
     const key = part.replace(/~1/g, '/').replace(/~0/g, '~')
     const index = parseInt(key, 10)
 
     if (Array.isArray(target) && !isNaN(index)) {
       target = target[index] as Record<string, unknown>
     } else {
+      // 중간 경로가 없으면 add/replace일 때 자동 생성
+      if (target[key] === undefined) {
+        if (patch.op === 'add' || patch.op === 'replace') {
+          // 다음 경로가 숫자면 배열, 아니면 객체 생성
+          const nextPart = pathParts[i + 1] ?? lastKey
+          const nextIsIndex = !isNaN(parseInt(nextPart, 10))
+          target[key] = nextIsIndex ? [] : {}
+        } else {
+          throw new Error(`Path not found: ${patch.path}`)
+        }
+      }
       target = target[key] as Record<string, unknown>
     }
 

@@ -120,7 +120,7 @@ function BlockContainer({
 
       {/* 요소 렌더링 */}
       <div className="se2-block__elements">
-        {block.elements.map(element => (
+        {(block.elements ?? []).map(element => (
           <ElementRenderer
             key={element.id}
             element={element}
@@ -304,8 +304,12 @@ function resolveBlockStyleOverride(
   if (override.background) {
     if (typeof override.background === 'string') {
       style.backgroundColor = override.background
-    } else {
+    } else if (override.background.type && override.background.stops) {
+      // GradientValue 형식인 경우만 처리
       style.background = gradientToCSS(override.background)
+    } else if (override.background.color) {
+      // { color: string } 형식인 경우
+      style.backgroundColor = override.background.color
     }
   }
 

@@ -7,7 +7,7 @@
  * 블록(섹션) 아코디언 + 변수 필드 편집
  */
 
-import { useState, useCallback, useMemo, type ReactNode } from 'react'
+import { useState, useCallback, useMemo, useRef, type ReactNode, type ChangeEvent } from 'react'
 import type {
   EditorDocument,
   Block,
@@ -36,6 +36,8 @@ export interface ContentTabProps {
   onDataChange?: (data: WeddingData) => void
   /** 블록 추가 콜백 */
   onAddBlock?: (blockType: BlockType) => void
+  /** 이미지 업로드 핸들러 */
+  onUploadImage?: (file: File) => Promise<string>
   /** 추가 className */
   className?: string
 }
@@ -180,7 +182,7 @@ function BlockAccordion({
 }: BlockAccordionProps) {
   // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출
   const editableFields = useMemo(() => {
-    return block.elements
+    return (block.elements ?? [])
       .filter(el => el.binding)
       .map(el => ({
         elementId: el.id,
