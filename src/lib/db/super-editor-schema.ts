@@ -206,6 +206,43 @@ export const guestbookMessages = pgTable('guestbook_messages', {
 ]).enableRLS()
 
 // ============================================
+// RSVP Responses
+// 게스트의 참석 여부 응답
+// ============================================
+
+export const rsvpResponses = pgTable('rsvp_responses', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // FK: superEditorInvitations
+  invitationId: uuid('invitation_id')
+    .references(() => superEditorInvitations.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // 익명 사용자 구분 (브라우저 쿠키 기반)
+  cookieId: varchar('cookie_id', { length: 100 }),
+
+  // 하객 정보
+  guestName: varchar('guest_name', { length: 50 }).notNull(),
+  guestPhone: varchar('guest_phone', { length: 20 }),
+
+  // 참석 여부
+  attending: varchar('attending', { length: 10 }).notNull(), // 'yes' | 'no' | 'maybe'
+
+  // 추가 정보
+  guestCount: integer('guest_count').default(1), // 동행인 수 (본인 포함)
+  mealOption: varchar('meal_option', { length: 20 }), // 식사 옵션 (선택)
+  side: varchar('side', { length: 10 }), // 'groom' | 'bride'
+  message: text('message'), // 축하 메시지 (선택)
+
+  // 생성 시간
+  submittedAt: timestamp('submitted_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_rsvp_invitation').on(table.invitationId),
+  index('idx_rsvp_attending').on(table.attending),
+  index('idx_rsvp_side').on(table.side),
+]).enableRLS()
+
+// ============================================
 // Type exports
 // ============================================
 
@@ -220,3 +257,6 @@ export type NewSuperEditorPreset = typeof superEditorPresets.$inferInsert
 
 export type GuestbookMessage = typeof guestbookMessages.$inferSelect
 export type NewGuestbookMessage = typeof guestbookMessages.$inferInsert
+
+export type RsvpResponse = typeof rsvpResponses.$inferSelect
+export type NewRsvpResponse = typeof rsvpResponses.$inferInsert
