@@ -10,7 +10,7 @@ import { useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
 import type { EditorDocument, Block, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
-import { updateBlocks, updateStyle, updateWeddingData, updateOgMetadata } from '@/lib/super-editor-v2/actions/document'
+import { updateBlocks, updateStyle, updateWeddingData, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
 import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DocumentProvider } from '@/lib/super-editor-v2/context/document-context'
@@ -120,6 +120,28 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     setExpandedBlockId(blockId)
     setActiveTab('content')
   }, [])
+
+  // 이미지 업로드
+  const handleUploadImage = useCallback(async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = async (event) => {
+        const base64Data = event.target?.result as string
+        const result = await uploadImage(dbDocument.id, {
+          data: base64Data,
+          filename: file.name,
+          mimeType: file.type,
+        })
+        if (result.success && result.url) {
+          resolve(result.url)
+        } else {
+          reject(new Error(result.error || '업로드 실패'))
+        }
+      }
+      reader.onerror = () => reject(new Error('파일 읽기 실패'))
+      reader.readAsDataURL(file)
+    })
+  }, [dbDocument.id])
 
   // OG 업데이트
   const handleOgChange = useCallback(async (newOg: OgMetadata) => {
@@ -236,6 +258,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 onExpandedBlockChange={setExpandedBlockId}
                 onBlocksChange={handleBlocksChange}
                 onDataChange={handleDataChange}
+                onUploadImage={handleUploadImage}
               />
             )}
             {activeTab === 'design' && (

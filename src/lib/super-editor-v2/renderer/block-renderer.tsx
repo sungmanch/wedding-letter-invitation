@@ -304,10 +304,10 @@ function resolveBlockStyleOverride(
   if (override.background) {
     if (typeof override.background === 'string') {
       style.backgroundColor = override.background
-    } else if (override.background.type && override.background.stops) {
-      // GradientValue 형식인 경우만 처리
+    } else if ('type' in override.background && 'stops' in override.background) {
+      // GradientValue 형식인 경우
       style.background = gradientToCSS(override.background)
-    } else if (override.background.color) {
+    } else if ('color' in override.background) {
       // { color: string } 형식인 경우
       style.backgroundColor = override.background.color
     }

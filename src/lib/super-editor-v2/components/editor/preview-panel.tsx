@@ -4,12 +4,15 @@
  * Super Editor v2 - Preview Panel
  *
  * 모바일 프리뷰 + 폰 프레임 래퍼
- * DocumentRenderer를 감싸서 편집 모드 프리뷰 제공
+ * - form 모드: DocumentRenderer (읽기 전용)
+ * - direct 모드: EditableCanvas (드래그/리사이즈/회전)
  */
 
-import { useMemo, type CSSProperties } from 'react'
-import type { EditorDocument } from '../../schema/types'
+import { useState, useMemo, useCallback, type CSSProperties, type ReactNode } from 'react'
+import type { EditorDocument, Block, Element } from '../../schema/types'
 import { DocumentRenderer } from '../../renderer/document-renderer'
+import { EditableCanvas, type ContextMenuState } from './direct/editable-canvas'
+import { EditModeToggle, CompactModeToggle, type EditMode } from './direct/edit-mode-toggle'
 
 // ============================================
 // Types
@@ -18,10 +21,28 @@ import { DocumentRenderer } from '../../renderer/document-renderer'
 export interface PreviewPanelProps {
   /** 문서 데이터 */
   document: EditorDocument
+  /** 편집 모드 */
+  editMode?: EditMode
+  /** 편집 모드 변경 콜백 */
+  onEditModeChange?: (mode: EditMode) => void
+  /** 선택된 블록 ID */
+  selectedBlockId?: string | null
+  /** 선택된 요소 ID */
+  selectedElementId?: string | null
   /** 블록 클릭 콜백 */
   onBlockClick?: (blockId: string) => void
   /** 요소 클릭 콜백 */
   onElementClick?: (blockId: string, elementId: string) => void
+  /** 요소 선택 콜백 */
+  onElementSelect?: (elementId: string | null, blockId?: string) => void
+  /** 요소 업데이트 콜백 */
+  onElementUpdate?: (blockId: string, elementId: string, updates: Partial<Element>) => void
+  /** 요소 삭제 콜백 */
+  onElementDelete?: (blockId: string, elementId: string) => void
+  /** 요소 복제 콜백 */
+  onElementDuplicate?: (blockId: string, elementId: string) => void
+  /** 컨텍스트 메뉴 콜백 */
+  onContextMenu?: (context: ContextMenuState) => void
   /** 하이라이트할 블록 ID */
   highlightedBlockId?: string | null
   /** 폰 프레임 사용 여부 */
@@ -30,6 +51,10 @@ export interface PreviewPanelProps {
   frameWidth?: number
   /** 프레임 높이 (px) */
   frameHeight?: number
+  /** 모드 토글 표시 */
+  showModeToggle?: boolean
+  /** 요소 렌더러 (direct 모드용) */
+  renderElement?: (element: Element, block: Block) => ReactNode
   /** 추가 className */
   className?: string
 }
@@ -40,14 +65,37 @@ export interface PreviewPanelProps {
 
 export function PreviewPanel({
   document,
+  editMode: externalEditMode,
+  onEditModeChange,
+  selectedBlockId,
+  selectedElementId,
   onBlockClick,
   onElementClick,
+  onElementSelect,
+  onElementUpdate,
+  onElementDelete,
+  onElementDuplicate,
+  onContextMenu,
   highlightedBlockId,
   withFrame = true,
   frameWidth = 375,
   frameHeight = 667,
+  showModeToggle = true,
+  renderElement,
   className = '',
 }: PreviewPanelProps) {
+  // 내부 모드 상태 (외부 제어가 없을 때 사용)
+  const [internalEditMode, setInternalEditMode] = useState<EditMode>('form')
+  const editMode = externalEditMode ?? internalEditMode
+
+  const handleModeChange = useCallback((mode: EditMode) => {
+    if (onEditModeChange) {
+      onEditModeChange(mode)
+    } else {
+      setInternalEditMode(mode)
+    }
+  }, [onEditModeChange])
+
   // 하이라이트 스타일
   const highlightStyle = useMemo((): CSSProperties | undefined => {
     if (!highlightedBlockId) return undefined
@@ -56,7 +104,8 @@ export function PreviewPanel({
     } as CSSProperties
   }, [highlightedBlockId])
 
-  const previewContent = (
+  // Form 모드: 읽기 전용 프리뷰
+  const formModeContent = (
     <div
       className={`se2-preview ${highlightedBlockId ? 'se2-preview--highlighting' : ''}`}
       style={highlightStyle}
@@ -86,22 +135,64 @@ export function PreviewPanel({
     </div>
   )
 
+  // Direct 모드: 편집 가능한 캔버스
+  const directModeContent = (
+    <EditableCanvas
+      document={document}
+      selectedBlockId={selectedBlockId ?? null}
+      selectedElementId={selectedElementId ?? null}
+      onElementSelect={onElementSelect ?? (() => {})}
+      onElementUpdate={onElementUpdate ?? (() => {})}
+      onElementDelete={onElementDelete}
+      onElementDuplicate={onElementDuplicate}
+      onContextMenu={onContextMenu}
+      canvasWidth={withFrame ? frameWidth - 24 : frameWidth} // 프레임 패딩 고려
+      canvasHeight={withFrame ? frameHeight - 24 : frameHeight}
+      renderElement={renderElement}
+      showIdBadge
+    />
+  )
+
+  const previewContent = editMode === 'form' ? formModeContent : directModeContent
+
   if (!withFrame) {
     return (
-      <div className={`w-full h-full overflow-auto ${className}`}>
-        {previewContent}
+      <div className={`relative w-full h-full ${className}`}>
+        {/* 모드 토글 */}
+        {showModeToggle && (
+          <div className="absolute top-2 right-2 z-20">
+            <CompactModeToggle
+              mode={editMode}
+              onChange={handleModeChange}
+            />
+          </div>
+        )}
+        <div className="w-full h-full overflow-auto">
+          {previewContent}
+        </div>
       </div>
     )
   }
 
   return (
-    <PhoneFrame
-      width={frameWidth}
-      height={frameHeight}
-      className={className}
-    >
-      {previewContent}
-    </PhoneFrame>
+    <div className={`relative ${className}`}>
+      {/* 모드 토글 (프레임 위) */}
+      {showModeToggle && (
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-20">
+          <EditModeToggle
+            mode={editMode}
+            onChange={handleModeChange}
+            size="sm"
+          />
+        </div>
+      )}
+      <PhoneFrame
+        width={frameWidth}
+        height={frameHeight}
+      >
+        {previewContent}
+      </PhoneFrame>
+    </div>
   )
 }
 
@@ -271,3 +362,5 @@ function PlusIcon({ className }: { className?: string }) {
 // ============================================
 
 export { PhoneFrame }
+export { EditModeToggle, CompactModeToggle, type EditMode }
+export type { ContextMenuState }
