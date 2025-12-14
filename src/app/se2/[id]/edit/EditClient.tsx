@@ -68,7 +68,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [showAIPrompt, setShowAIPrompt] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEVICE_PRESETS[1]) // iPhone 14 기본
   const [showDeviceMenu, setShowDeviceMenu] = useState(false)
+  const [previewScale, setPreviewScale] = useState(1)
   const deviceMenuRef = useRef<HTMLDivElement>(null)
+  const previewContainerRef = useRef<HTMLDivElement>(null)
 
   // 디바이스 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -80,6 +82,28 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // 프리뷰 스케일 자동 조정
+  useEffect(() => {
+    function calculateScale() {
+      if (!previewContainerRef.current) return
+
+      const container = previewContainerRef.current
+      const padding = 48 // p-6 = 24px * 2
+      const availableWidth = container.clientWidth - padding
+      const availableHeight = container.clientHeight - padding
+
+      const scaleX = availableWidth / selectedDevice.width
+      const scaleY = availableHeight / selectedDevice.height
+      const scale = Math.min(scaleX, scaleY, 1) // 최대 1배 (확대 안함)
+
+      setPreviewScale(scale)
+    }
+
+    calculateScale()
+    window.addEventListener('resize', calculateScale)
+    return () => window.removeEventListener('resize', calculateScale)
+  }, [selectedDevice])
 
   // 스타일 해석
   const resolvedStyle = useMemo(
@@ -324,6 +348,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 <span className="text-[#F5E6D3]/40 text-xs">
                   {selectedDevice.width}×{selectedDevice.height}
                 </span>
+                {previewScale < 1 && (
+                  <span className="text-[#C9A962] text-xs">
+                    {Math.round(previewScale * 100)}%
+                  </span>
+                )}
                 <ChevronDownIcon className="w-4 h-4 text-[#F5E6D3]/40" />
               </button>
 
@@ -360,12 +389,17 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           </div>
 
           {/* 프리뷰 영역 */}
-          <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
+          <div
+            ref={previewContainerRef}
+            className="flex-1 flex items-center justify-center p-6 overflow-hidden"
+          >
             <div
               className="relative transition-all duration-300 ease-out"
               style={{
                 width: `${selectedDevice.width}px`,
                 height: `${selectedDevice.height}px`,
+                transform: `scale(${previewScale})`,
+                transformOrigin: 'center center',
               }}
             >
               {/* 폰 프레임 */}
