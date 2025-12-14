@@ -9,7 +9,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
-import type { EditorDocument, Block, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
+import type { EditorDocument, Block, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
 import { updateBlocks, updateStyle, updateWeddingData, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
 import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle } from '@/lib/super-editor-v2/renderer/style-resolver'
@@ -20,6 +20,8 @@ import { DesignTab } from '@/lib/super-editor-v2/components/editor/tabs/design-t
 import { ShareTab, type OgMetadata } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
 import { FloatingPromptInput } from '@/lib/super-editor-v2/components/editor/ai/prompt-input'
 import { useAIEdit } from '@/lib/super-editor-v2/hooks/useAIEdit'
+import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/editor/direct/edit-mode-toggle'
+import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 
 // ============================================
 // Types
@@ -69,6 +71,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEVICE_PRESETS[1]) // iPhone 14 기본
   const [showDeviceMenu, setShowDeviceMenu] = useState(false)
   const [previewScale, setPreviewScale] = useState(1)
+  const [editMode, setEditMode] = useState<EditMode>('form')
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
 
@@ -171,6 +175,54 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     setExpandedBlockId(blockId)
     setActiveTab('content')
   }, [])
+
+  // 요소 선택 (직접 편집 모드)
+  const handleElementSelect = useCallback((elementId: string | null, blockId?: string) => {
+    setSelectedElementId(elementId)
+    if (blockId) {
+      setExpandedBlockId(blockId)
+    }
+  }, [])
+
+  // 요소 업데이트 (직접 편집 모드)
+  const handleElementUpdate = useCallback(async (
+    blockId: string,
+    elementId: string,
+    updates: Partial<Element>
+  ) => {
+    setEditorDoc(prev => ({
+      ...prev,
+      blocks: prev.blocks.map(block => {
+        if (block.id !== blockId) return block
+        return {
+          ...block,
+          elements: block.elements?.map(el =>
+            el.id === elementId ? { ...el, ...updates } : el
+          ),
+        }
+      }),
+    }))
+
+    // 서버 저장
+    const newBlocks = editorDoc.blocks.map(block => {
+      if (block.id !== blockId) return block
+      return {
+        ...block,
+        elements: block.elements?.map(el =>
+          el.id === elementId ? { ...el, ...updates } : el
+        ),
+      }
+    })
+
+    setIsSaving(true)
+    try {
+      await updateBlocks(dbDocument.id, newBlocks)
+    } catch (error) {
+      console.error('Failed to save element update:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [dbDocument.id, editorDoc.blocks])
 
   // 이미지 업로드
   const handleUploadImage = useCallback(async (file: File): Promise<string> => {
@@ -332,8 +384,16 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
 
         {/* 프리뷰 패널 */}
         <div className="flex-1 flex flex-col bg-[#0f0f0f]">
-          {/* 디바이스 선택 바 */}
-          <div className="flex-shrink-0 h-12 border-b border-white/10 flex items-center justify-center px-4">
+          {/* 디바이스 선택 바 + 모드 토글 */}
+          <div className="flex-shrink-0 h-12 border-b border-white/10 flex items-center justify-between px-4">
+            {/* 편집 모드 토글 */}
+            <EditModeToggle
+              mode={editMode}
+              onChange={setEditMode}
+              size="sm"
+            />
+
+            {/* 디바이스 선택 */}
             <div className="relative" ref={deviceMenuRef}>
               <button
                 onClick={() => setShowDeviceMenu(!showDeviceMenu)}
@@ -416,24 +476,40 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
                   }}
                 >
-                  {/* 렌더러 */}
-                  <DocumentProvider
-                    document={editorDoc}
-                    style={resolvedStyle}
-                    viewportOverride={{
-                      width: selectedDevice.width - 24, // 프레임 패딩 제외
-                      height: selectedDevice.height - 24,
-                    }}
-                  >
-                    <div className="w-full h-full overflow-y-auto">
-                      <DocumentRenderer
-                        document={editorDoc}
-                        mode="edit"
-                        onBlockClick={handleBlockSelect}
-                        skipProvider
-                      />
-                    </div>
-                  </DocumentProvider>
+                  {/* 폼 모드: 읽기 전용 프리뷰 */}
+                  {editMode === 'form' && (
+                    <DocumentProvider
+                      document={editorDoc}
+                      style={resolvedStyle}
+                      viewportOverride={{
+                        width: selectedDevice.width - 24, // 프레임 패딩 제외
+                        height: selectedDevice.height - 24,
+                      }}
+                    >
+                      <div className="w-full h-full overflow-y-auto">
+                        <DocumentRenderer
+                          document={editorDoc}
+                          mode="edit"
+                          onBlockClick={handleBlockSelect}
+                          skipProvider
+                        />
+                      </div>
+                    </DocumentProvider>
+                  )}
+
+                  {/* 직접 편집 모드: 드래그/리사이즈/회전 가능 */}
+                  {editMode === 'direct' && (
+                    <EditableCanvas
+                      document={editorDoc}
+                      selectedBlockId={expandedBlockId}
+                      selectedElementId={selectedElementId}
+                      onElementSelect={handleElementSelect}
+                      onElementUpdate={handleElementUpdate}
+                      canvasWidth={selectedDevice.width - 24}
+                      canvasHeight={selectedDevice.height - 24}
+                      showIdBadge
+                    />
+                  )}
                 </div>
               </div>
 
