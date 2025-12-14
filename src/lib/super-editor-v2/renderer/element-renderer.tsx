@@ -147,8 +147,18 @@ interface ElementTypeRendererProps {
 
 function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
   const props = element.props
+  // element.type을 우선 사용, props.type은 fallback
+  const elementType = element.type || props?.type
 
-  switch (props.type) {
+  if (!elementType) {
+    return (
+      <div className="se2-element--unknown">
+        Unknown element (no type)
+      </div>
+    )
+  }
+
+  switch (elementType) {
     case 'text':
       return (
         <TextElement
@@ -233,7 +243,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     default:
       return (
         <div className="se2-element--unknown">
-          Unknown element type: {(props as ElementProps).type}
+          Unknown element type: {elementType}
         </div>
       )
   }
