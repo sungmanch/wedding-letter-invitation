@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, sql } from 'drizzle-orm'
 import { editorDocumentsV2, editorSnapshotsV2 } from '../schema/db-schema'
 import type {
   Block,
@@ -114,7 +114,7 @@ export async function applyAIEdit(
         animation: updatedDocument.animation,
         data: updatedDocument.data,
         updatedAt: new Date(),
-        documentVersion: db.raw('document_version + 1'),
+        documentVersion: sql`document_version + 1`,
       })
       .where(eq(editorDocumentsV2.id, documentId))
 
@@ -306,7 +306,7 @@ export async function undoLastAIEdit(
       animation: snapshotData.animation,
       data: snapshotData.data,
       updatedAt: new Date(),
-      documentVersion: db.raw('document_version + 1'),
+      documentVersion: sql`document_version + 1`,
     })
     .where(eq(editorDocumentsV2.id, documentId))
 

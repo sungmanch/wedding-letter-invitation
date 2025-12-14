@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, sql } from 'drizzle-orm'
 import {
   editorDocumentsV2,
   editorSnapshotsV2,
@@ -160,7 +160,7 @@ export async function updateBlocks(
     .set({
       blocks,
       updatedAt: new Date(),
-      documentVersion: db.raw('document_version + 1'),
+      documentVersion: sql`document_version + 1`,
     })
     .where(and(
       eq(editorDocumentsV2.id, documentId),
@@ -190,7 +190,7 @@ export async function updateStyle(
     .set({
       style,
       updatedAt: new Date(),
-      documentVersion: db.raw('document_version + 1'),
+      documentVersion: sql`document_version + 1`,
     })
     .where(and(
       eq(editorDocumentsV2.id, documentId),
@@ -220,7 +220,7 @@ export async function updateAnimation(
     .set({
       animation,
       updatedAt: new Date(),
-      documentVersion: db.raw('document_version + 1'),
+      documentVersion: sql`document_version + 1`,
     })
     .where(and(
       eq(editorDocumentsV2.id, documentId),
@@ -250,7 +250,7 @@ export async function updateWeddingData(
     .set({
       data,
       updatedAt: new Date(),
-      documentVersion: db.raw('document_version + 1'),
+      documentVersion: sql`document_version + 1`,
     })
     .where(and(
       eq(editorDocumentsV2.id, documentId),
@@ -442,7 +442,7 @@ export async function restoreSnapshot(
       animation: snapshotData.animation,
       data: snapshotData.data,
       updatedAt: new Date(),
-      documentVersion: db.raw('document_version + 1'),
+      documentVersion: sql`document_version + 1`,
     })
     .where(eq(editorDocumentsV2.id, documentId))
     .returning()
