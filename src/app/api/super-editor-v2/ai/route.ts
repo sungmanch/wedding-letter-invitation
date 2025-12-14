@@ -292,12 +292,22 @@ async function callGeminiAPI(
     })
 
     const response = await result.response
+
+    // 디버깅: 응답 상태 확인
+    console.log('[Gemini Debug] candidates:', JSON.stringify(response.candidates, null, 2))
+    console.log('[Gemini Debug] finish reason:', response.candidates?.[0]?.finishReason)
+    console.log('[Gemini Debug] safety ratings:', JSON.stringify(response.candidates?.[0]?.safetyRatings, null, 2))
+
     const content = response.text()
+    console.log('[Gemini Debug] content length:', content?.length ?? 0)
+    console.log('[Gemini Debug] content preview:', content?.slice(0, 500))
 
     if (!content) {
+      const finishReason = response.candidates?.[0]?.finishReason
+      const safetyRatings = response.candidates?.[0]?.safetyRatings
       return {
         success: false,
-        error: 'Empty response from AI',
+        error: `Empty response from AI. Finish reason: ${finishReason}, Safety: ${JSON.stringify(safetyRatings)}`,
       }
     }
 
