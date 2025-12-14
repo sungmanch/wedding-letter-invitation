@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { eq, and, desc } from 'drizzle-orm'
@@ -9,6 +10,13 @@ import {
   type JSONPatch,
 } from '@/lib/super-editor-v2/actions'
 import { BLOCK_TYPE_LABELS, aiEditLogsV2, editorSnapshotsV2 } from '@/lib/super-editor-v2/schema'
+
+// ============================================
+// Google AI Client
+// ============================================
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
+const MODEL = 'gemini-3-pro-preview'
 
 // ============================================
 // AI Edit API Route
@@ -51,8 +59,8 @@ export async function POST(request: NextRequest) {
     const systemPrompt = buildSystemPrompt(context, body.targetBlockId)
     const userPrompt = buildUserPrompt(body.prompt, body.context)
 
-    // AI 호출 (Anthropic Claude)
-    const aiResponse = await callClaudeAPI(systemPrompt, userPrompt)
+    // AI 호출 (Google Gemini)
+    const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
 
     if (!aiResponse.success) {
       return NextResponse.json(
@@ -216,61 +224,45 @@ ${contextInfo}
 }
 
 // ============================================
-// Claude API Call
+// Gemini API Call
 // ============================================
 
-interface ClaudeResponse {
+interface GeminiResponse {
   success: boolean
   patches?: JSONPatch[]
   explanation?: string
   error?: string
 }
 
-async function callClaudeAPI(
+async function callGeminiAPI(
   systemPrompt: string,
   userPrompt: string
-): Promise<ClaudeResponse> {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-
-  if (!apiKey) {
+): Promise<GeminiResponse> {
+  if (!process.env.GOOGLE_AI_API_KEY) {
     return {
       success: false,
-      error: 'ANTHROPIC_API_KEY not configured',
+      error: 'GOOGLE_AI_API_KEY not configured',
     }
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+    const model = genAI.getGenerativeModel({ model: MODEL })
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 4096,
+        temperature: 0.7,
       },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: userPrompt,
-          },
-        ],
-      }),
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error('Claude API Error:', errorData)
-      return {
-        success: false,
-        error: `API Error: ${response.status}`,
-      }
-    }
-
-    const data = await response.json()
-    const content = data.content?.[0]?.text
+    const response = await result.response
+    const content = response.text()
 
     if (!content) {
       return {
@@ -280,7 +272,7 @@ async function callClaudeAPI(
     }
 
     // JSON 파싱
-    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/)
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/)
     if (!jsonMatch) {
       // JSON 블록이 없으면 전체 내용을 파싱 시도
       try {
@@ -306,7 +298,7 @@ async function callClaudeAPI(
       explanation: parsed.explanation,
     }
   } catch (error) {
-    console.error('Claude API call failed:', error)
+    console.error('Gemini API call failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
