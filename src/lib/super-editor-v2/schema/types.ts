@@ -487,7 +487,7 @@ export interface BorderStyle {
 
 export interface BlockStyleOverride {
   theme?: BlockThemeConfig
-  background?: string | GradientValue
+  background?: string | GradientValue | { color: string }
   padding?: number | { top?: number; right?: number; bottom?: number; left?: number }
 }
 
