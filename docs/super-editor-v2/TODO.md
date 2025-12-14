@@ -40,20 +40,22 @@
 - [ ] `renderer/token-resolver.ts` - SemanticTokens 해석 (style-resolver에 통합됨)
 
 #### 3.4 Block/Element Renderer
-- [ ] `renderer/document-renderer.tsx` - 최상위 렌더러
-- [ ] `renderer/block-renderer.tsx` - 21개 BlockType 렌더링
-- [ ] `renderer/element-renderer.tsx` - 8개 ElementType 렌더링
-- [ ] `renderer/floating-renderer.tsx` - Floating 요소 렌더링
+- [x] `renderer/document-renderer.tsx` - 최상위 렌더러 ✅
+- [x] `renderer/block-renderer.tsx` - 21개 BlockType 렌더링 ✅
+- [x] `renderer/element-renderer.tsx` - 8개 ElementType 렌더링 ✅
+- [x] `renderer/floating-renderer.tsx` - Floating 요소 렌더링 ✅
+- [x] `renderer/index.ts` - Renderer exports ✅
 
 #### 3.5 Element Type Components
-- [ ] `components/elements/text-element.tsx`
-- [ ] `components/elements/image-element.tsx`
-- [ ] `components/elements/shape-element.tsx`
-- [ ] `components/elements/button-element.tsx`
-- [ ] `components/elements/icon-element.tsx`
-- [ ] `components/elements/divider-element.tsx`
-- [ ] `components/elements/map-element.tsx`
-- [ ] `components/elements/calendar-element.tsx`
+- [x] `components/elements/text-element.tsx` ✅
+- [x] `components/elements/image-element.tsx` ✅
+- [x] `components/elements/shape-element.tsx` ✅
+- [x] `components/elements/button-element.tsx` ✅
+- [x] `components/elements/icon-element.tsx` ✅
+- [x] `components/elements/divider-element.tsx` ✅
+- [x] `components/elements/map-element.tsx` ✅
+- [x] `components/elements/calendar-element.tsx` ✅
+- [x] `components/elements/index.ts` - Element exports ✅
 
 ---
 
@@ -147,11 +149,11 @@ src/lib/super-editor-v2/
 │   └── computed-fields.ts
 ├── renderer/
 │   ├── style-resolver.ts     ✅
-│   ├── css-generator.ts
-│   ├── document-renderer.tsx
-│   ├── block-renderer.tsx
-│   ├── element-renderer.tsx
-│   └── floating-renderer.tsx
+│   ├── document-renderer.tsx ✅
+│   ├── block-renderer.tsx    ✅
+│   ├── element-renderer.tsx  ✅
+│   ├── floating-renderer.tsx ✅
+│   └── index.ts              ✅
 ├── animation/
 │   ├── animation-runtime.ts
 │   ├── trigger-handler.ts
@@ -160,9 +162,15 @@ src/lib/super-editor-v2/
 │   └── scroll-manager.ts
 ├── components/
 │   ├── elements/
-│   │   ├── text-element.tsx
-│   │   ├── image-element.tsx
-│   │   └── ...
+│   │   ├── text-element.tsx     ✅
+│   │   ├── image-element.tsx    ✅
+│   │   ├── shape-element.tsx    ✅
+│   │   ├── button-element.tsx   ✅
+│   │   ├── icon-element.tsx     ✅
+│   │   ├── divider-element.tsx  ✅
+│   │   ├── map-element.tsx      ✅
+│   │   ├── calendar-element.tsx ✅
+│   │   └── index.ts             ✅
 │   └── editor/
 │       ├── editor-layout.tsx
 │       ├── tabs/
@@ -199,9 +207,9 @@ src/lib/super-editor-v2/
 
 ## 다음 세션 시작점
 
-Phase 3.1 ~ 3.3 완료됨. 다음 작업:
+Phase 3 완료됨 (렌더러 시스템). 다음 작업:
 
-1. `renderer/document-renderer.tsx` - 최상위 렌더러
-2. `renderer/block-renderer.tsx` - 블록 렌더링
-3. `renderer/element-renderer.tsx` - 요소 렌더링
-4. `components/elements/` - 8개 요소 타입 컴포넌트
+1. `animation/animation-runtime.ts` - GSAP 기반 애니메이션 실행
+2. `animation/trigger-handler.ts` - 트리거 감지 및 처리
+3. `animation/scroll-manager.ts` - ScrollTrigger 관리
+4. 또는 Phase 5 에디터 UI 먼저 진행 가능
