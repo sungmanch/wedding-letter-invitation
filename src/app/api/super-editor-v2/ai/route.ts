@@ -145,14 +145,23 @@ function buildSystemPrompt(
 
   let targetBlockInfo = ''
   if (targetBlockId) {
-    const targetBlock = context.blocks.find(b => b.id === targetBlockId)
-    if (targetBlock) {
+    const targetBlockIndex = context.blocks.findIndex(b => b.id === targetBlockId)
+    const targetBlock = context.blocks[targetBlockIndex]
+    if (targetBlock && targetBlockIndex !== -1) {
+      // 요소 요약 (토큰 절약)
+      const elementsSummary = (targetBlock.elements ?? []).map((el, idx) => {
+        return `  [${idx}] ${el.type} (id: ${el.id}, binding: ${el.binding || 'none'}, x: ${el.x}, y: ${el.y}, w: ${el.width}, h: ${el.height})`
+      }).join('\n')
+
       targetBlockInfo = `
 ## 수정 대상 블록
+- **블록 인덱스**: ${targetBlockIndex} (경로: /blocks/${targetBlockIndex}/...)
 - ID: ${targetBlock.id}
 - 타입: ${targetBlock.type} (${BLOCK_TYPE_LABELS[targetBlock.type]})
-- 요소 수: ${(targetBlock.elements ?? []).length}
-- 현재 상태: ${JSON.stringify(targetBlock, null, 2)}
+- 높이: ${targetBlock.height}vh
+- enabled: ${targetBlock.enabled}
+- 요소 목록:
+${elementsSummary}
 `
     }
   }

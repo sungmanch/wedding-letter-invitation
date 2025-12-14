@@ -80,15 +80,8 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
     return () => window.removeEventListener('resize', calculateViewport)
   }, [])
 
-  // 데스크탑/태블릿에서 컨테이너 스타일 (마운트 후에만 적용)
-  const containerStyle = isMounted && isDesktopMode && viewport
-    ? {
-        maxWidth: `${viewport.width}px`,
-        height: `${viewport.height}px`,
-        margin: '0 auto',
-        boxShadow: '0 0 40px rgba(0,0,0,0.3)',
-      }
-    : undefined
+  // 데스크탑 모드에서 사용할 뷰포트 (마운트 후)
+  const effectiveViewport = isMounted && isDesktopMode ? viewport : undefined
 
   return (
     <div className={isMounted && isDesktopMode ? 'min-h-screen bg-gray-900 flex items-center justify-center py-8' : ''}>
@@ -115,15 +108,23 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
 
       {/* 컨텐츠 */}
       <div
-        className={isMounted && isDesktopMode ? 'relative overflow-hidden rounded-3xl' : ''}
-        style={containerStyle}
+        className={isMounted && isDesktopMode ? 'relative rounded-3xl bg-white' : ''}
+        style={effectiveViewport ? {
+          width: `${effectiveViewport.width}px`,
+          height: `${effectiveViewport.height}px`,
+          boxShadow: '0 0 40px rgba(0,0,0,0.3)',
+          overflow: 'hidden',
+        } : undefined}
       >
         <DocumentProvider
           document={editorDoc}
           style={resolvedStyle}
-          viewportOverride={viewport}
+          viewportOverride={effectiveViewport}
         >
-          <div className={isMounted && isDesktopMode ? 'h-full overflow-y-auto' : ''}>
+          <div
+            className="overflow-y-auto"
+            style={effectiveViewport ? { height: `${effectiveViewport.height}px` } : undefined}
+          >
             <DocumentRenderer document={editorDoc} mode="preview" skipProvider />
           </div>
         </DocumentProvider>

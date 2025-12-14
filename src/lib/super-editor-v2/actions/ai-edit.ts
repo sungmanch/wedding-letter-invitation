@@ -104,7 +104,12 @@ export async function applyAIEdit(
 
   // JSON Patch 적용
   try {
+    console.log('[AI Edit] Applying patches:', JSON.stringify(patches, null, 2))
+    console.log('[AI Edit] Document blocks count:', (document.blocks as Block[]).length)
+
     const updatedDocument = applyPatches(document, patches)
+
+    console.log('[AI Edit] Updated blocks count:', updatedDocument.blocks.length)
 
     await db
       .update(editorDocumentsV2)
@@ -118,6 +123,7 @@ export async function applyAIEdit(
       })
       .where(eq(editorDocumentsV2.id, documentId))
 
+    console.log('[AI Edit] DB update completed for document:', documentId)
     return { success: true }
   } catch (error) {
     console.error('Failed to apply AI edit patches:', error)
@@ -154,6 +160,7 @@ function applyPatches(
   }
 
   for (const patch of patches) {
+    console.log('[AI Edit] Applying single patch:', patch.op, patch.path)
     applyPatch(result, patch)
   }
 
