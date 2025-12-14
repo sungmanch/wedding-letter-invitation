@@ -3,6 +3,7 @@
 import { db } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
 import { eq, and, desc, sql } from 'drizzle-orm'
+import { createHash } from 'crypto'
 import {
   editorDocumentsV2,
   editorSnapshotsV2,
@@ -449,4 +450,98 @@ export async function restoreSnapshot(
     .returning()
 
   return updated ?? null
+}
+
+// ============================================
+// Image Upload
+// ============================================
+
+const BUCKET_NAME = 'wedding-images'
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+
+/**
+ * 이미지 업로드 (base64)
+ */
+export async function uploadImage(
+  documentId: string,
+  imageData: { data: string; filename: string; mimeType: string }
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: '로그인이 필요합니다' }
+    }
+
+    // 문서 소유권 확인
+    const document = await db.query.editorDocumentsV2.findFirst({
+      where: and(
+        eq(editorDocumentsV2.id, documentId),
+        eq(editorDocumentsV2.userId, user.id)
+      ),
+    })
+
+    if (!document) {
+      return { success: false, error: '문서를 찾을 수 없습니다' }
+    }
+
+    // MIME 타입 검증
+    if (!ALLOWED_IMAGE_TYPES.includes(imageData.mimeType)) {
+      return { success: false, error: '지원하지 않는 이미지 형식입니다' }
+    }
+
+    // base64 → Buffer
+    const base64Data = imageData.data.replace(/^data:image\/\w+;base64,/, '')
+    const buffer = Buffer.from(base64Data, 'base64')
+
+    // 파일 크기 검증
+    if (buffer.length > MAX_IMAGE_SIZE) {
+      return { success: false, error: '파일 크기가 10MB를 초과합니다' }
+    }
+
+    // 파일 확장자 결정
+    const ext = imageData.mimeType.split('/')[1] === 'jpeg' ? 'jpg' : imageData.mimeType.split('/')[1]
+
+    // MD5 해시로 파일명 생성 (중복 이미지 방지)
+    const md5Hash = createHash('md5').update(buffer).digest('hex')
+    const filename = `se2/${documentId}/${md5Hash}.${ext}`
+
+    // 이미 존재하는지 확인
+    const { data: existingFile } = await supabase.storage
+      .from(BUCKET_NAME)
+      .list(`se2/${documentId}`, { search: `${md5Hash}.${ext}` })
+
+    if (existingFile && existingFile.length > 0) {
+      const { data: urlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filename)
+      return { success: true, url: urlData.publicUrl }
+    }
+
+    // Supabase Storage에 업로드
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filename, buffer, {
+        contentType: imageData.mimeType,
+        cacheControl: '31536000', // 1년 캐시
+        upsert: false,
+      })
+
+    if (uploadError) {
+      console.error('Image upload error:', uploadError)
+      return { success: false, error: '업로드에 실패했습니다' }
+    }
+
+    // Public URL 가져오기
+    const { data: urlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filename)
+
+    return { success: true, url: urlData.publicUrl }
+  } catch (error) {
+    console.error('Failed to upload image:', error)
+    return { success: false, error: '이미지 업로드에 실패했습니다' }
+  }
 }
