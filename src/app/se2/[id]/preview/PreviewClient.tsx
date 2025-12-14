@@ -30,8 +30,8 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
   )
 
   return (
-    <div className="min-h-screen relative">
-      {/* 프리뷰 배너 */}
+    <>
+      {/* 프리뷰 배너 - fixed로 콘텐츠와 완전 분리 */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-[#C9A962] text-[#1a1a1a] py-2 px-4">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -52,16 +52,14 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
         </div>
       </div>
 
-      {/* 컨텐츠 (배너 높이만큼 패딩) */}
-      <div className="pt-10">
-        <DocumentProvider
-          document={editorDoc}
-          style={resolvedStyle}
-        >
-          <DocumentRenderer document={editorDoc} mode="preview" />
-        </DocumentProvider>
-      </div>
-    </div>
+      {/* 컨텐츠 - 전체 화면 사용 (배너와 무관) */}
+      <DocumentProvider
+        document={editorDoc}
+        style={resolvedStyle}
+      >
+        <DocumentRenderer document={editorDoc} mode="preview" skipProvider />
+      </DocumentProvider>
+    </>
   )
 }
 
