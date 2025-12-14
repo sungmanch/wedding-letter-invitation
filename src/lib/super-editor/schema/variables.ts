@@ -448,8 +448,8 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     type: 'images',
     label: '갤러리 사진',
     required: false,
-    maxItems: 20,
-    helpText: '최대 20장까지 업로드 가능합니다',
+    maxItems: 40,
+    helpText: '최대 40장까지 업로드 가능합니다',
   },
 
   // Gallery Settings
@@ -515,6 +515,18 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       { value: 'deceased', label: '故' },
     ],
   },
+  'parents.groom.father.baptismalName': {
+    type: 'text',
+    label: '신랑 아버지 세례명',
+    required: false,
+    placeholder: '베드로',
+    helpText: '천주교 결혼식인 경우 입력하세요',
+  },
+  'parents.groom.father.phone': {
+    type: 'phone',
+    label: '신랑 아버지 연락처',
+    required: false,
+  },
   'parents.groom.mother.name': {
     type: 'text',
     label: '신랑 어머니',
@@ -529,6 +541,18 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       { value: '', label: '표기 없음' },
       { value: 'deceased', label: '故' },
     ],
+  },
+  'parents.groom.mother.baptismalName': {
+    type: 'text',
+    label: '신랑 어머니 세례명',
+    required: false,
+    placeholder: '마리아',
+    helpText: '천주교 결혼식인 경우 입력하세요',
+  },
+  'parents.groom.mother.phone': {
+    type: 'phone',
+    label: '신랑 어머니 연락처',
+    required: false,
   },
 
   // Parents - Bride
@@ -547,6 +571,18 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       { value: 'deceased', label: '故' },
     ],
   },
+  'parents.bride.father.baptismalName': {
+    type: 'text',
+    label: '신부 아버지 세례명',
+    required: false,
+    placeholder: '요셉',
+    helpText: '천주교 결혼식인 경우 입력하세요',
+  },
+  'parents.bride.father.phone': {
+    type: 'phone',
+    label: '신부 아버지 연락처',
+    required: false,
+  },
   'parents.bride.mother.name': {
     type: 'text',
     label: '신부 어머니',
@@ -561,6 +597,31 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
       { value: '', label: '표기 없음' },
       { value: 'deceased', label: '故' },
     ],
+  },
+  'parents.bride.mother.baptismalName': {
+    type: 'text',
+    label: '신부 어머니 세례명',
+    required: false,
+    placeholder: '안나',
+    helpText: '천주교 결혼식인 경우 입력하세요',
+  },
+  'parents.bride.mother.phone': {
+    type: 'phone',
+    label: '신부 어머니 연락처',
+    required: false,
+  },
+
+  // Contact - Show Parents Toggle
+  'contact.showParents': {
+    type: 'select',
+    label: '혼주 연락처 표시',
+    required: false,
+    defaultValue: 'false',
+    options: [
+      { value: 'false', label: '표시 안 함' },
+      { value: 'true', label: '표시' },
+    ],
+    helpText: '연락처 섹션에 혼주 연락처를 함께 표시합니다',
   },
 
   // Accounts
@@ -659,12 +720,125 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     ],
   },
 
+  // Accounts - KakaoPay
+  'accounts.kakaopay.groom': {
+    type: 'text',
+    label: '신랑측 카카오페이 계좌',
+    required: false,
+    placeholder: '3333-01-1234567',
+    helpText: '카카오페이 송금용 계좌번호',
+  },
+  'accounts.kakaopay.bride': {
+    type: 'text',
+    label: '신부측 카카오페이 계좌',
+    required: false,
+    placeholder: '3333-01-7654321',
+    helpText: '카카오페이 송금용 계좌번호',
+  },
+
   // Guestbook (DB에서 가져오는 데이터 - 에디터에서 숨김)
   'guestbook.messages': {
     type: 'text',
     label: '방명록 메시지',
     required: false,
     description: '__HIDDEN__', // DB에서 조회, 에디터 입력 불필요
+  },
+
+  // RSVP (참석여부)
+  'rsvp.title': {
+    type: 'text',
+    label: 'RSVP 제목',
+    required: false,
+    defaultValue: '참석 여부를 알려주세요',
+    placeholder: '참석 여부를 알려주세요',
+  },
+  'rsvp.description': {
+    type: 'textarea',
+    label: 'RSVP 안내 문구',
+    required: false,
+    rows: 3,
+    placeholder: '참석 여부를 미리 알려주시면 준비에 큰 도움이 됩니다.',
+  },
+  'rsvp.showGuestCount': {
+    type: 'select',
+    label: '동행인 수 입력',
+    required: false,
+    defaultValue: 'true',
+    options: [
+      { value: 'true', label: '받기' },
+      { value: 'false', label: '받지 않기' },
+    ],
+  },
+  'rsvp.showMeal': {
+    type: 'select',
+    label: '식사 여부 입력',
+    required: false,
+    defaultValue: 'false',
+    options: [
+      { value: 'true', label: '받기' },
+      { value: 'false', label: '받지 않기' },
+    ],
+  },
+  'rsvp.showMessage': {
+    type: 'select',
+    label: '메시지 입력란',
+    required: false,
+    defaultValue: 'true',
+    options: [
+      { value: 'true', label: '표시' },
+      { value: 'false', label: '숨기기' },
+    ],
+  },
+  'rsvp.deadline': {
+    type: 'date',
+    label: 'RSVP 마감일',
+    required: false,
+    helpText: '마감일 이후에는 참석 여부를 받지 않습니다',
+  },
+
+  // Notice (공지사항)
+  'notice.items': {
+    type: 'repeater',
+    label: '공지사항',
+    required: false,
+    minItems: 0,
+    maxItems: 10,
+    itemLabel: '공지',
+    helpText: '셔틀버스, 주차, 식사 등 안내사항을 추가하세요',
+    fields: [
+      {
+        id: 'icon',
+        path: 'icon',
+        type: 'select',
+        label: '아이콘',
+        required: false,
+        options: [
+          { value: 'info', label: '정보 (i)' },
+          { value: 'bus', label: '버스' },
+          { value: 'car', label: '자동차/주차' },
+          { value: 'utensils', label: '식사' },
+          { value: 'gift', label: '선물/화환' },
+          { value: 'clock', label: '시간' },
+        ],
+      },
+      {
+        id: 'title',
+        path: 'title',
+        type: 'text',
+        label: '제목',
+        required: true,
+        placeholder: '셔틀버스 안내',
+      },
+      {
+        id: 'content',
+        path: 'content',
+        type: 'textarea',
+        label: '내용',
+        required: true,
+        rows: 3,
+        placeholder: '강남역 3번 출구에서 10분 간격으로 운행합니다.',
+      },
+    ],
   },
 
   // BGM
@@ -740,7 +914,11 @@ export const SECTION_GROUP_META: Record<string, SectionGroupMeta> = {
   photos: { id: 'photos', title: '사진', icon: 'image', order: 5 },
   greeting: { id: 'greeting', title: '인사말', icon: 'message-square', order: 7 },
   parents: { id: 'parents', title: '혼주 정보', icon: 'users', order: 8 },
+  contact: { id: 'contact', title: '연락처', icon: 'phone', order: 8.5 },
   accounts: { id: 'accounts', title: '축의금 계좌', icon: 'credit-card', order: 9 },
+  rsvp: { id: 'rsvp', title: '참석 여부', icon: 'check-circle', order: 9.5 },
+  notice: { id: 'notice', title: '공지사항', icon: 'bell', order: 9.7 },
+  guestbook: { id: 'guestbook', title: '방명록', icon: 'book-open', order: 9.8 },
   bgm: { id: 'bgm', title: '배경음악', icon: 'music', order: 10 },
   photobooth: { id: 'photobooth', title: '포토부스', icon: 'camera', order: 11 },
   custom: { id: 'custom', title: '추가 설정', icon: 'settings', order: 100 },

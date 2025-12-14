@@ -22,6 +22,10 @@ const buttonVariants = cva(
           'bg-[#C9A962] text-[#0A0806] hover:bg-[#B8A052] focus-visible:ring-[#C9A962]',
         'ghost-dark':
           'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5 focus-visible:ring-[#C9A962]',
+        sage:
+          'bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] focus-visible:ring-[var(--sage-400)]',
+        'ghost-light':
+          'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)] focus-visible:ring-[var(--sage-400)]',
       },
       size: {
         default: 'h-14 px-6 py-3',
