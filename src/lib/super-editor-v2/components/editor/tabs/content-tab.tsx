@@ -854,7 +854,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
 // ============================================
 
 /**
- * 중첩된 객체에 값 설정
+ * 중첩된 객체에 값 설정 (immutable)
  */
 function setNestedValue<T extends object>(
   obj: T,
@@ -862,17 +862,29 @@ function setNestedValue<T extends object>(
   value: unknown
 ): T {
   const keys = path.split('.')
-  const result = { ...obj }
 
-  let current: Record<string, unknown> = result as Record<string, unknown>
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
-    current[key] = { ...(current[key] as object) }
-    current = current[key] as Record<string, unknown>
+  // 재귀적으로 깊은 복사하면서 값 설정
+  function setAt(current: Record<string, unknown>, keyIndex: number): Record<string, unknown> {
+    const key = keys[keyIndex]
+
+    if (keyIndex === keys.length - 1) {
+      // 마지막 키: 값 설정
+      return { ...current, [key]: value }
+    }
+
+    // 중간 키: 재귀적으로 처리
+    const nextValue = current[key]
+    const nextObj = (typeof nextValue === 'object' && nextValue !== null)
+      ? nextValue as Record<string, unknown>
+      : {}
+
+    return {
+      ...current,
+      [key]: setAt(nextObj, keyIndex + 1),
+    }
   }
 
-  current[keys[keys.length - 1]] = value
-  return result
+  return setAt(obj as Record<string, unknown>, 0) as T
 }
 
 // ============================================
