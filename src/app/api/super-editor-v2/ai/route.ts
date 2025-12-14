@@ -196,6 +196,23 @@ interface Element {
     text?: { fontSize: number, fontWeight: number, color: string, textAlign: string }
     opacity?: number
   }
+  animation?: {
+    entrance?: {
+      preset?: string  // fade-in, slide-left, slide-right, slide-up, slide-down, zoom-in
+      custom?: TweenAction
+      delay?: number   // ms
+      duration?: number // ms
+    }
+  }
+}
+
+// 애니메이션 액션
+interface TweenAction {
+  type: 'tween'
+  from?: { x?: number, y?: number, opacity?: number, scale?: number }
+  to: { x?: number, y?: number, opacity?: number, scale?: number }
+  duration: number  // ms
+  easing?: 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'spring'
 }
 \`\`\`
 
@@ -205,7 +222,7 @@ interface Element {
 ${context.blockSummary}
 
 ### 스타일 설정
-${JSON.stringify(context.style, null, 2)}
+- 프리셋: ${context.style?.preset || 'custom'}
 
 ### 웨딩 데이터
 - 신랑: ${context.data.groom.name || '(미입력)'}
@@ -245,6 +262,8 @@ ${targetBlockInfo}
 - 유효한 JSON Patch만 생성하세요
 - 한 번에 너무 많은 변경을 하지 마세요
 - 이미지 크기 조정은 elements의 style.size를 수정하세요
+- 애니메이션 요청 시 animation.entrance를 사용하세요 (preset 또는 custom TweenAction)
+- 양쪽에서 들어오는 효과: slide-left (왼쪽→), slide-right (→오른쪽), custom으로 from.x 조정
 `
 }
 
@@ -302,8 +321,8 @@ async function callGeminiAPI(
         },
       ],
       generationConfig: {
-        maxOutputTokens: 4096,
-        temperature: 0.7,
+        maxOutputTokens: 8192,
+        temperature: 0.3,  // 더 결정적인 출력
       },
     })
 

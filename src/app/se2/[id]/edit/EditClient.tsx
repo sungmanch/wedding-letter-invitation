@@ -22,6 +22,7 @@ import { FloatingPromptInput } from '@/lib/super-editor-v2/components/editor/ai/
 import { useAIEdit } from '@/lib/super-editor-v2/hooks/useAIEdit'
 import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/editor/direct/edit-mode-toggle'
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
+import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
 
 // ============================================
 // Types
@@ -497,18 +498,30 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     </DocumentProvider>
                   )}
 
-                  {/* 직접 편집 모드: 드래그/리사이즈/회전 가능 */}
+                  {/* 직접 편집 모드: 드래그/리사이즈/회전 가능 + 실제 스타일 적용 */}
                   {editMode === 'direct' && (
-                    <EditableCanvas
+                    <DocumentProvider
                       document={editorDoc}
-                      selectedBlockId={expandedBlockId}
-                      selectedElementId={selectedElementId}
-                      onElementSelect={handleElementSelect}
-                      onElementUpdate={handleElementUpdate}
-                      canvasWidth={selectedDevice.width - 24}
-                      canvasHeight={selectedDevice.height - 24}
-                      showIdBadge
-                    />
+                      style={resolvedStyle}
+                      viewportOverride={{
+                        width: selectedDevice.width - 24,
+                        height: selectedDevice.height - 24,
+                      }}
+                    >
+                      <EditableCanvas
+                        document={editorDoc}
+                        selectedBlockId={expandedBlockId}
+                        selectedElementId={selectedElementId}
+                        onElementSelect={handleElementSelect}
+                        onElementUpdate={handleElementUpdate}
+                        canvasWidth={selectedDevice.width - 24}
+                        canvasHeight={selectedDevice.height - 24}
+                        showIdBadge
+                        renderElement={(element, block) => (
+                          <StyledElementRenderer element={element} block={block} />
+                        )}
+                      />
+                    </DocumentProvider>
                   )}
                 </div>
               </div>

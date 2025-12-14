@@ -1,0 +1,171 @@
+'use client'
+
+/**
+ * Styled Element Renderer
+ *
+ * EditableCanvas에서 실제 스타일을 적용하여 요소를 렌더링
+ * DefaultElementRenderer 대신 사용하여 폼 모드와 동일한 렌더링 결과 제공
+ */
+
+import { useMemo } from 'react'
+import type { Element, Block, TextProps, ImageProps, ShapeProps, DividerProps } from '../../../schema/types'
+import { useDocument } from '../../../context/document-context'
+import { resolveBinding } from '../../../utils/binding-resolver'
+import { interpolate } from '../../../utils/interpolate'
+
+// Element Components
+import { TextElement } from '../../elements/text-element'
+import { ImageElement } from '../../elements/image-element'
+import { ShapeElement } from '../../elements/shape-element'
+import { DividerElement } from '../../elements/divider-element'
+
+// ============================================
+// Types
+// ============================================
+
+export interface StyledElementRendererProps {
+  element: Element
+  block: Block
+}
+
+// ============================================
+// Component
+// ============================================
+
+export function StyledElementRenderer({ element, block }: StyledElementRendererProps) {
+  const { data } = useDocument()
+
+  // 요소 값 해석 (바인딩 또는 직접 값)
+  const resolvedValue = useMemo(() => {
+    if (element.binding) {
+      return resolveBinding(data, element.binding)
+    }
+    return element.value
+  }, [element.binding, element.value, data])
+
+  // 포맷 문자열 처리 (TextProps의 format)
+  const formattedValue = useMemo(() => {
+    if (element.props?.type === 'text' && (element.props as TextProps).format) {
+      return interpolate((element.props as TextProps).format!, data)
+    }
+    return resolvedValue
+  }, [element.props, resolvedValue, data])
+
+  const props = element.props
+  const elementType = element.type || props?.type
+
+  if (!elementType) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
+        Unknown
+      </div>
+    )
+  }
+
+  switch (elementType) {
+    case 'text':
+      return (
+        <TextElement
+          value={formattedValue as string}
+          style={element.style?.text}
+          editable
+        />
+      )
+
+    case 'image':
+      return (
+        <ImageElement
+          src={formattedValue as string}
+          objectFit={(props as ImageProps)?.objectFit}
+          overlay={(props as ImageProps)?.overlay}
+          style={element.style}
+          editable
+        />
+      )
+
+    case 'shape':
+      return (
+        <ShapeElement
+          shape={(props as ShapeProps)?.shape}
+          fill={(props as ShapeProps)?.fill}
+          stroke={(props as ShapeProps)?.stroke}
+          strokeWidth={(props as ShapeProps)?.strokeWidth}
+          svgPath={(props as ShapeProps)?.svgPath}
+          style={element.style}
+        />
+      )
+
+    case 'divider': {
+      const dividerProps = props as DividerProps
+      return (
+        <DividerElement
+          dividerStyle={dividerProps?.dividerStyle || 'solid'}
+          ornamentId={dividerProps?.ornamentId}
+          style={element.style}
+        />
+      )
+    }
+
+    case 'button':
+      return (
+        <div
+          className="w-full h-full flex items-center justify-center rounded"
+          style={{
+            backgroundColor: element.style?.background as string || '#C9A962',
+            color: element.style?.text?.color || '#fff',
+            fontSize: element.style?.text?.fontSize || 14,
+            fontFamily: element.style?.text?.fontFamily,
+          }}
+        >
+          {formattedValue as string || '버튼'}
+        </div>
+      )
+
+    case 'icon':
+      return (
+        <div
+          className="w-full h-full flex items-center justify-center"
+          style={{ color: element.style?.text?.color || '#000' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10" />
+          </svg>
+        </div>
+      )
+
+    case 'map':
+      return (
+        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+        </div>
+      )
+
+    case 'calendar':
+      return (
+        <div className="w-full h-full bg-white border border-gray-200 rounded flex items-center justify-center text-gray-500 text-sm">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
+      )
+
+    default:
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 border border-dashed border-gray-300 text-gray-500 text-xs">
+          {elementType}
+        </div>
+      )
+  }
+}
+
+// ============================================
+// Exports
+// ============================================
+
+export { StyledElementRenderer as default }

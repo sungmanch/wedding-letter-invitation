@@ -4,8 +4,8 @@
  * Super Editor v2 - Editable Canvas
  *
  * 직접 편집 모드의 캔버스
- * - 블록별 요소 렌더링
- * - DraggableElement로 드래그/리사이즈/회전 지원
+ * - 블록 기반 레이아웃 (세로 스크롤)
+ * - 각 블록 내에서 요소 드래그/리사이즈/회전
  * - 요소 선택 및 컨텍스트 메뉴
  * - ID 배지 표시
  */
@@ -58,7 +58,7 @@ export interface EditableCanvasProps {
   onContextMenu?: (context: ContextMenuState) => void
   /** 캔버스 너비 */
   canvasWidth?: number
-  /** 캔버스 높이 */
+  /** 캔버스 높이 (뷰포트 높이, 블록 높이 계산용) */
   canvasHeight?: number
   /** 그리드 스냅 (px) */
   gridSnap?: number
@@ -113,33 +113,35 @@ export function EditableCanvas({
     onElementSelect(null)
   }, [onElementSelect])
 
-  // 요소 위치 변경
+  // 요소 위치 변경 (블록 높이 기준)
   const handlePositionChange = useCallback((
     blockId: string,
     elementId: string,
-    newPosition: Position
+    newPosition: Position,
+    blockHeightPx: number
   ) => {
-    // px를 퍼센트로 변환
+    // px를 퍼센트로 변환 (블록 높이 기준)
     const x = pxToPercent(newPosition.x, canvasWidth)
-    const y = pxToPercent(newPosition.y, canvasHeight)
+    const y = pxToPercent(newPosition.y, blockHeightPx)
 
     onElementUpdate(blockId, elementId, { x, y })
-  }, [canvasWidth, canvasHeight, onElementUpdate])
+  }, [canvasWidth, onElementUpdate])
 
-  // 요소 크기 변경
+  // 요소 크기 변경 (블록 높이 기준)
   const handleSizeChange = useCallback((
     blockId: string,
     elementId: string,
     newSize: Size,
-    newPosition: Position
+    newPosition: Position,
+    blockHeightPx: number
   ) => {
     const x = pxToPercent(newPosition.x, canvasWidth)
-    const y = pxToPercent(newPosition.y, canvasHeight)
+    const y = pxToPercent(newPosition.y, blockHeightPx)
     const width = pxToPercent(newSize.width, canvasWidth)
-    const height = pxToPercent(newSize.height, canvasHeight)
+    const height = pxToPercent(newSize.height, blockHeightPx)
 
     onElementUpdate(blockId, elementId, { x, y, width, height })
-  }, [canvasWidth, canvasHeight, onElementUpdate])
+  }, [canvasWidth, onElementUpdate])
 
   // 요소 회전 변경
   const handleRotationChange = useCallback((
@@ -178,7 +180,6 @@ export function EditableCanvas({
     const success = await copyIdToClipboard(displayId)
 
     if (success) {
-      // toast 사용 시 여기서 호출
       console.log(`#${displayId} 복사됨`)
     }
 
@@ -196,8 +197,6 @@ export function EditableCanvas({
   // 요소 붙여넣기
   const handlePaste = useCallback(() => {
     if (!clipboard || !selectedBlockId) return
-
-    // 복제 콜백 사용 또는 직접 처리
     console.log('Paste element:', clipboard)
     close()
   }, [clipboard, selectedBlockId, close])
@@ -205,7 +204,6 @@ export function EditableCanvas({
   // 요소 삭제
   const handleDelete = useCallback(() => {
     if (!menuContext || !onElementDelete) return
-
     onElementDelete(menuContext.block.id, menuContext.element.id)
     close()
   }, [menuContext, onElementDelete, close])
@@ -213,7 +211,6 @@ export function EditableCanvas({
   // 요소 복제
   const handleDuplicate = useCallback(() => {
     if (!menuContext || !onElementDuplicate) return
-
     onElementDuplicate(menuContext.block.id, menuContext.element.id)
     close()
   }, [menuContext, onElementDuplicate, close])
@@ -221,7 +218,6 @@ export function EditableCanvas({
   // 순서 변경
   const handleBringToFront = useCallback(() => {
     if (!menuContext) return
-    // zIndex를 최대값으로 설정
     const maxZ = Math.max(
       ...menuContext.block.elements?.map(el => el.zIndex || 0) || [0]
     )
@@ -231,7 +227,6 @@ export function EditableCanvas({
 
   const handleSendToBack = useCallback(() => {
     if (!menuContext) return
-    // zIndex를 최소값으로 설정
     const minZ = Math.min(
       ...menuContext.block.elements?.map(el => el.zIndex || 0) || [0]
     )
@@ -246,7 +241,6 @@ export function EditableCanvas({
     const displayId = getDisplayId(menuContext.element, menuContext.block)
 
     return [
-      // ID 복사 (상단에 추가)
       {
         id: 'copy-id',
         label: `ID 복사 (#${displayId})`,
@@ -255,7 +249,6 @@ export function EditableCanvas({
         onClick: handleCopyId,
       },
       { id: 'divider-id', label: '', divider: true },
-      // 기본 메뉴
       ...createElementMenuItems({
         onCopy: handleCopy,
         onPaste: handlePaste,
@@ -281,24 +274,32 @@ export function EditableCanvas({
   return (
     <div
       ref={canvasRef}
-      className={`relative bg-white overflow-hidden ${className}`}
+      className={`relative bg-white overflow-y-auto overflow-x-hidden ${className}`}
       style={{
         width: canvasWidth,
-        height: canvasHeight,
+        height: '100%', // 컨테이너 높이에 맞춤
       }}
       onClick={handleCanvasClick}
     >
-      {/* 블록별 요소 렌더링 */}
+      {/* 블록 기반 레이아웃: 세로로 쌓임 */}
       {document.blocks.map(block => {
         if (!block.enabled) return null
+
+        // 블록 높이 계산 (vh 기준 -> px)
+        const blockHeightPx = (block.height / 100) * canvasHeight
 
         return (
           <div
             key={block.id}
             className={`
               block-layer relative
-              ${block.id === selectedBlockId ? 'ring-1 ring-[#C9A962]/30' : ''}
+              ${block.id === selectedBlockId ? 'ring-2 ring-[#C9A962]/50 ring-inset' : ''}
             `}
+            style={{
+              width: '100%',
+              minHeight: blockHeightPx,
+              position: 'relative',
+            }}
             data-block-id={block.id}
           >
             {block.elements?.map(element => {
@@ -306,18 +307,18 @@ export function EditableCanvas({
               const isHovered = element.id === hoveredElementId
               const displayId = getDisplayId(element, block)
 
-              // 퍼센트를 px로 변환
+              // 퍼센트를 px로 변환 (블록 높이 기준)
               const posX = (element.x || 0) / 100 * canvasWidth
-              const posY = (element.y || 0) / 100 * canvasHeight
+              const posY = (element.y || 0) / 100 * blockHeightPx
               const width = (element.width || 10) / 100 * canvasWidth
-              const height = (element.height || 10) / 100 * canvasHeight
+              const height = (element.height || 10) / 100 * blockHeightPx
 
               return (
                 <DraggableElement
                   key={element.id}
                   elementId={element.id}
                   position={{ x: posX, y: posY }}
-                  onPositionChange={(_id, pos) => handlePositionChange(block.id, element.id, pos)}
+                  onPositionChange={(_id, pos) => handlePositionChange(block.id, element.id, pos, blockHeightPx)}
                   onSelect={() => onElementSelect(element.id, block.id)}
                   isSelected={isSelected}
                   gridSnap={gridSnap}
@@ -366,7 +367,7 @@ export function EditableCanvas({
                             handleSizeChange(block.id, element.id, size, {
                               x: posX + pos.x,
                               y: posY + pos.y,
-                            })
+                            }, blockHeightPx)
                           }
                           keepAspectRatio={element.type === 'image'}
                         />
@@ -383,6 +384,11 @@ export function EditableCanvas({
                 </DraggableElement>
               )
             })}
+
+            {/* 블록 구분선 (편집 모드 시각적 피드백) */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-px bg-[#C9A962]/20 pointer-events-none"
+            />
           </div>
         )
       })}
@@ -415,7 +421,6 @@ function DefaultElementRenderer({ element }: DefaultElementRendererProps) {
     justifyContent: 'center',
   }
 
-  // 텍스트 스타일 추출
   const textStyle = element.style?.text
 
   switch (element.type) {
