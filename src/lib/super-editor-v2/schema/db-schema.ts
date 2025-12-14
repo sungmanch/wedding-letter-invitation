@@ -269,3 +269,59 @@ export type NewGuestbookMessageV2 = typeof guestbookMessagesV2.$inferInsert
 
 export type RsvpResponseV2 = typeof rsvpResponsesV2.$inferSelect
 export type NewRsvpResponseV2 = typeof rsvpResponsesV2.$inferInsert
+
+// ============================================
+// AI Edit Logs
+// AI 프롬프트-결과 추적 (제품 개선 분석용)
+// ============================================
+
+export const aiEditLogsV2 = pgTable('ai_edit_logs_v2', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // FK: editorDocumentsV2
+  documentId: uuid('document_id')
+    .references(() => editorDocumentsV2.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // 사용자
+  userId: uuid('user_id').notNull(),
+
+  // 요청 데이터
+  prompt: text('prompt').notNull(),
+  targetBlockId: uuid('target_block_id'),
+  context: jsonb('context').$type<{
+    selectedElementId?: string
+    viewportInfo?: {
+      width: number
+      height: number
+    }
+  }>(),
+
+  // 응답 데이터
+  patches: jsonb('patches').$type<{
+    op: 'add' | 'remove' | 'replace' | 'move' | 'copy'
+    path: string
+    value?: unknown
+    from?: string
+  }[]>(),
+  explanation: text('explanation'),
+
+  // 결과
+  success: boolean('success').notNull(),
+  errorMessage: text('error_message'),
+
+  // 연결된 스냅샷 (전/후 상태 참조용)
+  snapshotId: uuid('snapshot_id')
+    .references(() => editorSnapshotsV2.id, { onDelete: 'set null' }),
+
+  // 메타
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_ai_edit_logs_v2_doc').on(table.documentId),
+  index('idx_ai_edit_logs_v2_user').on(table.userId),
+  index('idx_ai_edit_logs_v2_created').on(table.createdAt),
+  index('idx_ai_edit_logs_v2_success').on(table.success),
+]).enableRLS()
+
+export type AiEditLogV2 = typeof aiEditLogsV2.$inferSelect
+export type NewAiEditLogV2 = typeof aiEditLogsV2.$inferInsert

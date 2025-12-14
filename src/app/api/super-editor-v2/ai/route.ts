@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { db } from '@/lib/db'
+import { eq, and, desc } from 'drizzle-orm'
 import {
   getDocumentContextForAI,
   applyAIEdit,
   type AIEditRequest,
   type JSONPatch,
 } from '@/lib/super-editor-v2/actions'
-import { BLOCK_TYPE_LABELS } from '@/lib/super-editor-v2/schema'
+import { BLOCK_TYPE_LABELS, aiEditLogsV2, editorSnapshotsV2 } from '@/lib/super-editor-v2/schema'
 
 // ============================================
 // AI Edit API Route
@@ -66,6 +68,30 @@ export async function POST(request: NextRequest) {
       body.prompt,
       aiResponse.explanation!
     )
+
+    // 스냅샷 ID 조회 (방금 생성된 ai-edit 스냅샷)
+    const latestSnapshot = await db.query.editorSnapshotsV2.findFirst({
+      where: and(
+        eq(editorSnapshotsV2.documentId, body.documentId),
+        eq(editorSnapshotsV2.type, 'ai-edit')
+      ),
+      orderBy: [desc(editorSnapshotsV2.snapshotNumber)],
+      columns: { id: true },
+    })
+
+    // AI 사용 내역 로깅
+    await db.insert(aiEditLogsV2).values({
+      documentId: body.documentId,
+      userId: user.id,
+      prompt: body.prompt,
+      targetBlockId: body.targetBlockId ?? null,
+      context: body.context ?? null,
+      patches: aiResponse.patches ?? null,
+      explanation: aiResponse.explanation ?? null,
+      success: result.success,
+      errorMessage: result.error ?? null,
+      snapshotId: latestSnapshot?.id ?? null,
+    })
 
     if (!result.success) {
       return NextResponse.json(

@@ -64,6 +64,20 @@
       "when": 1765387607656,
       "tag": "0008_skinny_lady_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1765643749707,
+      "tag": "0009_striped_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1765690182716,
+      "tag": "0010_dry_the_santerians",
+      "breakpoints": true
     }
   ]
 }
