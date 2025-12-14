@@ -24,6 +24,7 @@ export type VariableType =
   | 'location'
   | 'account'
   | 'repeater'
+  | 'frames'
 
 // ============================================
 // Variable Declaration
@@ -104,6 +105,7 @@ export const VARIABLE_TYPE_TO_FIELD_TYPE: Record<VariableType, FieldType> = {
   location: 'location',
   account: 'account',
   repeater: 'repeater',
+  frames: 'frames',
 }
 
 // ============================================
@@ -211,6 +213,96 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     label: '예식 요일',
     required: false,
     description: '__HIDDEN__',
+  },
+
+  // Typography Bold variant용 파생 필드
+  'wedding.monthDay': {
+    type: 'text',
+    label: '월/일 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (05/30)
+  },
+  'wedding.year': {
+    type: 'text',
+    label: '연도',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (2025)
+  },
+  'wedding.monthNameEn': {
+    type: 'text',
+    label: '월 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (SEPTEMBER)
+  },
+  'wedding.time24h': {
+    type: 'text',
+    label: '시간 (24시간)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (14:00)
+  },
+  'wedding.time12h': {
+    type: 'text',
+    label: '시간 (12시간)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (2PM)
+  },
+  'wedding.hours': {
+    type: 'text',
+    label: '시 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (14)
+  },
+  'wedding.minutes': {
+    type: 'text',
+    label: '분 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (00)
+  },
+
+  // Save The Date variant용 파생 필드
+  'wedding.dateFormatted': {
+    type: 'text',
+    label: '날짜 (포맷)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (2025. 06. 21)
+  },
+  'wedding.dayOfWeek': {
+    type: 'text',
+    label: '요일 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (SATURDAY)
+  },
+  'wedding.season': {
+    type: 'text',
+    label: '계절 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (SUMMER)
+  },
+  'wedding.timeOfDay': {
+    type: 'text',
+    label: '시간대 (영문)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (NIGHT)
+  },
+
+  // Photo Overlay variant용 파생 필드
+  'wedding.monthPadded': {
+    type: 'text',
+    label: '월 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (04, 06, 12)
+  },
+  'wedding.dayPadded': {
+    type: 'text',
+    label: '일 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (04, 15, 31)
+  },
+  'wedding.yearShort': {
+    type: 'text',
+    label: '연도 (2자리)',
+    required: false,
+    description: '__HIDDEN__', // 자동 계산 (24, 25, 26)
   },
 
   // Countdown (자동 계산값 - 에디터에서 숨김)
@@ -777,6 +869,30 @@ export const STANDARD_VARIABLE_PATHS: Record<string, Partial<VariableDeclaration
     required: false,
     placeholder: '아티스트명',
   },
+
+  // PhotoBooth
+  'photobooth.description': {
+    type: 'textarea',
+    label: '포토부스 설명',
+    required: false,
+    rows: 2,
+    placeholder: '신랑 신부와 함께 특별한 추억을 남겨보세요',
+    defaultValue: '신랑 신부와 함께 특별한 추억을 남겨보세요',
+  },
+  'photobooth.title': {
+    type: 'text',
+    label: '프레임 타이틀',
+    required: false,
+    placeholder: 'Our Wedding Day',
+    defaultValue: 'Our Wedding Day',
+    helpText: '촬영된 사진에 표시될 타이틀',
+  },
+  'photobooth.frames': {
+    type: 'frames',
+    label: '프레임',
+    required: false,
+    helpText: '게스트가 선택할 수 있는 포토 프레임을 등록하세요',
+  },
 }
 
 // ============================================
@@ -804,6 +920,7 @@ export const SECTION_GROUP_META: Record<string, SectionGroupMeta> = {
   notice: { id: 'notice', title: '공지사항', icon: 'bell', order: 9.7 },
   guestbook: { id: 'guestbook', title: '방명록', icon: 'book-open', order: 9.8 },
   bgm: { id: 'bgm', title: '배경음악', icon: 'music', order: 10 },
+  photobooth: { id: 'photobooth', title: '포토부스', icon: 'camera', order: 11 },
   custom: { id: 'custom', title: '추가 설정', icon: 'settings', order: 100 },
 }
 

@@ -6,6 +6,7 @@ import { CinematicIntro } from './CinematicIntro'
 import { ExhibitionIntro } from './ExhibitionIntro'
 import { MagazineIntro } from './MagazineIntro'
 import { ChatIntro } from './ChatIntro'
+import { BoardingPassIntro } from './BoardingPassIntro'
 import type { IntroProps } from './types'
 
 interface IntroRendererProps {
@@ -91,6 +92,8 @@ export function IntroRenderer({
         return <MagazineIntro {...commonProps} />
       case 'chat':
         return <ChatIntro {...commonProps} />
+      case 'boarding-pass':
+        return <BoardingPassIntro {...commonProps} />
       case 'gothic-romance':
       case 'old-money':
       case 'monogram':

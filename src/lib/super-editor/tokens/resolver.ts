@@ -142,7 +142,7 @@ function resolveTypography(typography: TypographyConfig | undefined): SemanticDe
     return DEFAULT_TOKENS.typography
   }
 
-  return {
+  const result: SemanticDesignTokens['typography'] = {
     displayLg: createTypoToken(typography, 'heading', '4xl', 'bold', 'tight'),
     displayMd: createTypoToken(typography, 'heading', '3xl', 'semibold', 'tight'),
     sectionTitle: {
@@ -157,6 +157,24 @@ function resolveTypography(typography: TypographyConfig | undefined): SemanticDe
     bodySm: createTypoToken(typography, 'body', 'xs', 'regular', 'normal'),
     caption: createTypoToken(typography, 'body', 'xs', 'regular', 'normal'),
   }
+
+  // Drop Cap 설정 추가
+  if (typography.dropCap?.enabled) {
+    const headingFont = typography.fonts.heading
+    const dropCapFontFamily = typography.dropCap.fontFamily
+      ?? (headingFont.fallback
+        ? `'${headingFont.family}', ${headingFont.fallback}`
+        : `'${headingFont.family}'`)
+
+    result.dropCap = {
+      enabled: true,
+      scale: typography.dropCap.scale ?? 2.5,
+      italic: typography.dropCap.italic ?? true,
+      fontFamily: dropCapFontFamily,
+    }
+  }
+
+  return result
 }
 
 /**

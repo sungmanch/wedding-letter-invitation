@@ -14,6 +14,8 @@ import type { LayoutSchema } from '../super-editor/schema/layout'
 import type { StyleSchema } from '../super-editor/schema/style'
 import type { VariablesSchema } from '../super-editor/schema/variables'
 import type { UserData } from '../super-editor/schema/user-data'
+import type { IntroEffectType } from '../super-editor/animations/intro-effects'
+import type { CalligraphyConfig } from '../super-editor/animations/calligraphy-text'
 
 // ============================================
 // Super Editor Templates
@@ -117,6 +119,10 @@ export const superEditorInvitations = pgTable('super_editor_invitations', {
   // 섹션 관리
   sectionOrder: jsonb('section_order').$type<string[]>(), // 섹션 순서 (intro 제외)
   sectionEnabled: jsonb('section_enabled').$type<Record<string, boolean>>(), // 섹션 활성화 상태
+
+  // 인트로 애니메이션 효과
+  introEffect: varchar('intro_effect', { length: 50 }).$type<IntroEffectType>().default('none'),
+  calligraphyConfig: jsonb('calligraphy_config').$type<CalligraphyConfig>(), // 캘리그라피 효과 설정
 
   // 결제
   isPaid: boolean('is_paid').default(false).notNull(),

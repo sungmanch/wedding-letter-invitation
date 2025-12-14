@@ -14,6 +14,7 @@ export { buildGothicRomanceIntro } from './gothic-romance'
 export { buildOldMoneyIntro } from './old-money'
 export { buildMonogramIntro } from './monogram'
 export { buildJewelVelvetIntro } from './jewel-velvet'
+export { buildBoardingPassIntro } from './boarding-pass'
 
 import type { IntroBuilder, IntroBuilderContext, IntroBuilderResult, IntroBuilderData } from './types'
 import type { LegacyIntroType } from '../types'
@@ -26,6 +27,7 @@ import { buildGothicRomanceIntro } from './gothic-romance'
 import { buildOldMoneyIntro } from './old-money'
 import { buildMonogramIntro } from './monogram'
 import { buildJewelVelvetIntro } from './jewel-velvet'
+import { buildBoardingPassIntro } from './boarding-pass'
 
 // ============================================
 // Builder Registry
@@ -39,6 +41,7 @@ export const introBuilders: Record<LegacyIntroType, IntroBuilder> = {
   'old-money': buildOldMoneyIntro,
   monogram: buildMonogramIntro,
   'jewel-velvet': buildJewelVelvetIntro,
+  'boarding-pass': buildBoardingPassIntro,
 }
 
 // ============================================

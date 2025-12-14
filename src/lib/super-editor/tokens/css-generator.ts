@@ -100,7 +100,35 @@ export function generateCssVariables(tokens: SemanticDesignTokens): string {
   lines.push(`  --easing-default: ${tokens.animation.easing};`)
   lines.push(`  --stagger-delay: ${tokens.animation.staggerDelay}ms;`)
 
+  // Drop Cap (첫 글자 강조)
+  if (tokens.typography.dropCap?.enabled) {
+    lines.push('')
+    lines.push('  /* Drop Cap */')
+    lines.push(`  --drop-cap-scale: ${tokens.typography.dropCap.scale};`)
+    lines.push(`  --drop-cap-italic: ${tokens.typography.dropCap.italic ? 'italic' : 'normal'};`)
+    if (tokens.typography.dropCap.fontFamily) {
+      lines.push(`  --drop-cap-font-family: ${tokens.typography.dropCap.fontFamily};`)
+    }
+  }
+
   lines.push('}')
+
+  // Drop Cap CSS 클래스 추가
+  if (tokens.typography.dropCap?.enabled) {
+    lines.push('')
+    lines.push('/* Drop Cap - 첫 글자 강조 */')
+    lines.push('.drop-cap::first-letter {')
+    lines.push(`  font-size: ${tokens.typography.dropCap.scale}em;`)
+    lines.push(`  font-style: ${tokens.typography.dropCap.italic ? 'italic' : 'normal'};`)
+    if (tokens.typography.dropCap.fontFamily) {
+      lines.push(`  font-family: ${tokens.typography.dropCap.fontFamily};`)
+    }
+    lines.push('  float: left;')
+    lines.push('  line-height: 0.8;')
+    lines.push('  margin-right: 0.05em;')
+    lines.push('  margin-top: 0.1em;')
+    lines.push('}')
+  }
 
   return lines.join('\n')
 }

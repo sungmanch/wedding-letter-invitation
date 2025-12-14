@@ -26,8 +26,15 @@ export type ScrollMotionPreset =
   | 'parallax-slow'
   | 'parallax-fast'
   | 'parallax-zoom'
+  // Corner Expand (4개 - Save The Date용)
+  | 'corner-expand-tl'
+  | 'corner-expand-tr'
+  | 'corner-expand-bl'
+  | 'corner-expand-br'
+  // Blur Reveal (콘텐츠 블러 해제)
+  | 'blur-reveal'
 
-export type ScrollMotionCategory = 'reveal' | 'clip' | 'parallax'
+export type ScrollMotionCategory = 'reveal' | 'clip' | 'parallax' | 'corner'
 
 // ============================================
 // Scroll Keyframe Type
@@ -214,6 +221,65 @@ export const scrollPresets: Record<ScrollMotionPreset, ScrollPresetConfig> = {
     keyframes: [
       { offset: 0, transform: 'scale(1.3)' },
       { offset: 1, transform: 'scale(1)' },
+    ],
+    defaultScrub: true,
+  },
+
+  // ========== Corner Expand (4개 - Save The Date용) ==========
+  'corner-expand-tl': {
+    name: 'corner-expand-tl',
+    label: '코너 펼침 (좌상)',
+    description: '좌상단 코너가 중앙에서 모서리로 펼쳐짐',
+    category: 'corner',
+    keyframes: [
+      { offset: 0, transform: 'translate(80px, 80px)', opacity: 0 },
+      { offset: 1, transform: 'translate(0px, 0px)', opacity: 1 },
+    ],
+    defaultScrub: true,
+  },
+  'corner-expand-tr': {
+    name: 'corner-expand-tr',
+    label: '코너 펼침 (우상)',
+    description: '우상단 코너가 중앙에서 모서리로 펼쳐짐',
+    category: 'corner',
+    keyframes: [
+      { offset: 0, transform: 'translate(-80px, 80px)', opacity: 0 },
+      { offset: 1, transform: 'translate(0px, 0px)', opacity: 1 },
+    ],
+    defaultScrub: true,
+  },
+  'corner-expand-bl': {
+    name: 'corner-expand-bl',
+    label: '코너 펼침 (좌하)',
+    description: '좌하단 코너가 중앙에서 모서리로 펼쳐짐',
+    category: 'corner',
+    keyframes: [
+      { offset: 0, transform: 'translate(80px, -80px)', opacity: 0 },
+      { offset: 1, transform: 'translate(0px, 0px)', opacity: 1 },
+    ],
+    defaultScrub: true,
+  },
+  'corner-expand-br': {
+    name: 'corner-expand-br',
+    label: '코너 펼침 (우하)',
+    description: '우하단 코너가 중앙에서 모서리로 펼쳐짐',
+    category: 'corner',
+    keyframes: [
+      { offset: 0, transform: 'translate(-80px, -80px)', opacity: 0 },
+      { offset: 1, transform: 'translate(0px, 0px)', opacity: 1 },
+    ],
+    defaultScrub: true,
+  },
+
+  // ========== Blur Reveal (콘텐츠 블러 해제) ==========
+  'blur-reveal': {
+    name: 'blur-reveal',
+    label: '블러 리빌',
+    description: '흐릿한 상태에서 선명해지며 나타남 (Save The Date용)',
+    category: 'reveal',
+    keyframes: [
+      { offset: 0, filter: 'blur(12px)', opacity: 0.3 },
+      { offset: 1, filter: 'blur(0px)', opacity: 1 },
     ],
     defaultScrub: true,
   },
