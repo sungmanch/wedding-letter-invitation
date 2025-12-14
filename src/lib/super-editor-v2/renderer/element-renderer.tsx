@@ -70,7 +70,7 @@ export function ElementRenderer({
 
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
-    if (element.props.type === 'text' && (element.props as TextProps).format) {
+    if (element.props?.type === 'text' && (element.props as TextProps).format) {
       return interpolate((element.props as TextProps).format!, data)
     }
     return resolvedValue
