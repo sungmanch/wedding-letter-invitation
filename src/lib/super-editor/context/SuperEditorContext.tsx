@@ -199,6 +199,29 @@ function computeDerivedFields(
       result = setValueByPath(result, 'wedding.day', format(date, 'd'))
       result = setValueByPath(result, 'wedding.weekday', format(date, 'EEEE', { locale: ko }))
 
+      // Typography Bold variant용 파생 필드
+      result = setValueByPath(result, 'wedding.monthDay', format(date, 'MM/dd')) // 05/30
+      result = setValueByPath(result, 'wedding.year', format(date, 'yyyy')) // 2025
+      result = setValueByPath(result, 'wedding.monthNameEn', format(date, 'MMMM').toUpperCase()) // SEPTEMBER
+
+      // Save The Date variant용 파생 필드
+      result = setValueByPath(result, 'wedding.dateFormatted', format(date, 'yyyy. MM. dd')) // 2025. 06. 21
+      result = setValueByPath(result, 'wedding.dayOfWeek', format(date, 'EEEE').toUpperCase()) // SATURDAY
+
+      // Photo Overlay variant용 파생 필드 (2자리 패딩)
+      result = setValueByPath(result, 'wedding.monthPadded', format(date, 'MM')) // 04, 06, 12
+      result = setValueByPath(result, 'wedding.dayPadded', format(date, 'dd')) // 04, 15, 31
+      result = setValueByPath(result, 'wedding.yearShort', format(date, 'yy')) // 24, 25, 26
+
+      // 계절 + 시간대 계산
+      const month = date.getMonth() + 1
+      let season = ''
+      if (month >= 3 && month <= 5) season = 'SPRING'
+      else if (month >= 6 && month <= 8) season = 'SUMMER'
+      else if (month >= 9 && month <= 11) season = 'AUTUMN'
+      else season = 'WINTER'
+      result = setValueByPath(result, 'wedding.season', season)
+
       // D-Day 계산
       const dday = differenceInDays(date, today)
       result = setValueByPath(result, 'wedding.dday', dday)
@@ -225,6 +248,30 @@ function computeDerivedFields(
       const periodEn = hours >= 12 ? 'PM' : 'AM'
       const timeEn = `${periodEn} ${displayHours}:${minutes.toString().padStart(2, '0')}`
       result = setValueByPath(result, 'wedding.timeEn', timeEn)
+
+      // 24시간 형식 시간 (14:00)
+      result = setValueByPath(result, 'wedding.time24h', value)
+
+      // 시/분 분리 (Typography Bold용 깜빡이는 콜론)
+      result = setValueByPath(result, 'wedding.hours', hours.toString().padStart(2, '0'))
+      result = setValueByPath(result, 'wedding.minutes', minutes.toString().padStart(2, '0'))
+
+      // 12시간 형식 시간 (2PM, 6PM)
+      const time12h = minutes === 0
+        ? `${displayHours}${periodEn}`
+        : `${displayHours}:${minutes.toString().padStart(2, '0')}${periodEn}`
+      result = setValueByPath(result, 'wedding.time12h', time12h)
+
+      // Save The Date variant용 - 시간대 (NIGHT, AFTERNOON 등)
+      let timeOfDay = ''
+      if (hours >= 6 && hours < 12) timeOfDay = 'MORNING'
+      else if (hours >= 12 && hours < 17) timeOfDay = 'AFTERNOON'
+      else if (hours >= 17 && hours < 21) timeOfDay = 'EVENING'
+      else timeOfDay = 'NIGHT'
+      result = setValueByPath(result, 'wedding.timeOfDay', timeOfDay)
+
+      // seasonTime은 season + timeOfDay 조합 (예: SUMMER NIGHT)
+      // season은 date에서 계산되므로 여기서는 timeOfDay만 저장
     } catch (e) {
       console.error('Failed to compute time derived fields:', e)
     }

@@ -452,6 +452,7 @@ export function NaturalHeroLanding() {
             </div>
           </div>
         </div>
+
       </section>
     </>
   )

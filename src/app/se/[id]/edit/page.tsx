@@ -10,6 +10,7 @@ import {
   updateTemplateLayout,
   uploadOgImage,
   updateOgMetadata,
+  updateIntroEffect,
 } from '@/lib/super-editor/actions'
 import { SuperEditorProvider, useSuperEditor } from '@/lib/super-editor/context'
 import {
@@ -37,6 +38,11 @@ import type { SectionType } from '@/lib/super-editor/schema/section-types'
 import type { SectionScreen } from '@/lib/super-editor/skeletons/types'
 import type { VariablesSchema } from '@/lib/super-editor/schema/variables'
 import type { LegacyIntroType } from '@/lib/super-editor/presets/legacy/types'
+import type { IntroEffectType } from '@/lib/super-editor/animations/intro-effects'
+import {
+  type CalligraphyConfig,
+  DEFAULT_CALLIGRAPHY_CONFIG,
+} from '@/lib/super-editor/components/IntroEffectSelector'
 
 type EditorTab = 'content' | 'design' | 'share'
 
@@ -64,6 +70,11 @@ function EditPageContent() {
   const [sectionVariants, setSectionVariants] = useState<Record<SectionType, string>>(
     {} as Record<SectionType, string>
   )
+  // 인트로 애니메이션 효과 상태
+  const [introEffect, setIntroEffect] = useState<IntroEffectType>('none')
+  // 캘리그라피 설정 상태
+  const [calligraphyConfig, setCalligraphyConfig] =
+    useState<CalligraphyConfig>(DEFAULT_CALLIGRAPHY_CONFIG)
   // OG 기본값
   const [ogDefaults, setOgDefaults] = useState({
     title: '',
@@ -106,6 +117,14 @@ function EditPageContent() {
         setSectionEnabled(
           (invitation.sectionEnabled as Record<SectionType, boolean>) ?? DEFAULT_SECTION_ENABLED
         )
+
+        // 인트로 애니메이션 효과 로드
+        if (invitation.introEffect) {
+          setIntroEffect(invitation.introEffect as IntroEffectType)
+        }
+        if (invitation.calligraphyConfig) {
+          setCalligraphyConfig(invitation.calligraphyConfig as CalligraphyConfig)
+        }
 
         // OG 기본값 설정
         const userData = invitation.userData as UserData
@@ -214,6 +233,13 @@ function EditPageContent() {
         await updateTemplateStyle(invitationId, state.style)
       }
 
+      // 인트로 애니메이션 효과 저장
+      await updateIntroEffect(
+        invitationId,
+        introEffect,
+        introEffect === 'calligraphy' ? calligraphyConfig : undefined
+      )
+
       // OG 이미지 저장 (pendingImageData가 있는 경우)
       if (ogValues.pendingImageData) {
         const imageResult = await uploadOgImage(invitationId, ogValues.pendingImageData)
@@ -250,6 +276,8 @@ function EditPageContent() {
     state.style,
     sectionOrder,
     sectionEnabled,
+    introEffect,
+    calligraphyConfig,
     ogValues,
   ])
 
@@ -341,10 +369,10 @@ function EditPageContent() {
     [state.layout, state.style, setTemplate]
   )
 
-  // Add section handler (dev mode only)
-  const _handleAddSection = useCallback(
+  // Add section handler
+  const handleAddSection = useCallback(
     (sectionType: SectionType) => {
-      if (process.env.NODE_ENV !== 'development' || !state.layout) return
+      if (!state.layout) return
 
       // Get default variant for the section
       const defaultVariant = getDefaultVariant(sectionType)
@@ -376,6 +404,9 @@ function EditPageContent() {
 
       // Update context state
       setTemplate(newLayout, state.style!)
+
+      // 추가된 섹션 펼치기
+      setExpandedSection(sectionType)
     },
     [state.layout, state.style, setTemplate, sectionOrder]
   )
@@ -519,6 +550,11 @@ function EditPageContent() {
               declarations={variablesSchema?.declarations}
               expandedSection={expandedSection}
               onExpandedSectionChange={setExpandedSection}
+              onAddSection={handleAddSection}
+              introEffect={introEffect}
+              onIntroEffectChange={setIntroEffect}
+              calligraphyConfig={calligraphyConfig}
+              onCalligraphyConfigChange={setCalligraphyConfig}
               className="flex-1"
             />
           )}
@@ -573,6 +609,10 @@ function EditPageContent() {
                   highlightedSection={expandedSection}
                   sectionVariants={sectionVariants}
                   onVariantChange={handleVariantChange}
+                  introEffect={introEffect}
+                  onIntroEffectChange={setIntroEffect}
+                  calligraphyConfig={calligraphyConfig}
+                  onCalligraphyConfigChange={setCalligraphyConfig}
                   withFrame
                   frameWidth={375}
                   frameHeight={667}
