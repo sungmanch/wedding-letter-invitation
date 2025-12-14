@@ -6,7 +6,7 @@
  * 2패널 편집 화면 (에디터 + 프리뷰)
  */
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
 import type { EditorDocument, Block, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
@@ -31,6 +31,19 @@ interface EditClientProps {
 
 type TabType = 'content' | 'design' | 'share'
 
+// 디바이스 프리셋
+const DEVICE_PRESETS = [
+  { id: 'iphone-se', name: 'iPhone SE', width: 375, height: 667, notch: false },
+  { id: 'iphone-14', name: 'iPhone 14', width: 390, height: 844, notch: true },
+  { id: 'iphone-14-pro', name: 'iPhone 14 Pro', width: 393, height: 852, notch: true },
+  { id: 'iphone-15-pro-max', name: 'iPhone 15 Pro Max', width: 430, height: 932, notch: true },
+  { id: 'galaxy-s24', name: 'Galaxy S24', width: 360, height: 780, notch: false },
+  { id: 'galaxy-s24-ultra', name: 'Galaxy S24 Ultra', width: 384, height: 824, notch: false },
+  { id: 'pixel-8', name: 'Pixel 8', width: 412, height: 915, notch: false },
+] as const
+
+type DevicePreset = typeof DEVICE_PRESETS[number]
+
 // ============================================
 // Component
 // ============================================
@@ -53,6 +66,20 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [showAIPrompt, setShowAIPrompt] = useState(false)
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEVICE_PRESETS[1]) // iPhone 14 기본
+  const [showDeviceMenu, setShowDeviceMenu] = useState(false)
+  const deviceMenuRef = useRef<HTMLDivElement>(null)
+
+  // 디바이스 메뉴 외부 클릭 닫기
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (deviceMenuRef.current && !deviceMenuRef.current.contains(event.target as Node)) {
+        setShowDeviceMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // 스타일 해석
   const resolvedStyle = useMemo(
@@ -280,29 +307,107 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         </div>
 
         {/* 프리뷰 패널 */}
-        <div className="flex-1 flex items-center justify-center bg-[#0f0f0f] p-8">
-          <div className="relative">
-            {/* 폰 프레임 */}
-            <div className="w-[375px] h-[812px] bg-black rounded-[3rem] p-3 shadow-2xl">
-              <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden">
-                {/* 렌더러 */}
-                <DocumentProvider
-                  document={editorDoc}
-                  style={resolvedStyle}
-                >
-                  <div className="w-full h-full overflow-y-auto">
-                    <DocumentRenderer
-                      document={editorDoc}
-                      mode="edit"
-                      onBlockClick={handleBlockSelect}
-                    />
-                  </div>
-                </DocumentProvider>
-              </div>
-            </div>
+        <div className="flex-1 flex flex-col bg-[#0f0f0f]">
+          {/* 디바이스 선택 바 */}
+          <div className="flex-shrink-0 h-12 border-b border-white/10 flex items-center justify-center px-4">
+            <div className="relative" ref={deviceMenuRef}>
+              <button
+                onClick={() => setShowDeviceMenu(!showDeviceMenu)}
+                className="
+                  flex items-center gap-2 px-3 py-1.5 rounded-lg
+                  bg-white/5 hover:bg-white/10 transition-colors
+                  text-sm text-[#F5E6D3]
+                "
+              >
+                <DevicePhoneIcon className="w-4 h-4" />
+                <span>{selectedDevice.name}</span>
+                <span className="text-[#F5E6D3]/40 text-xs">
+                  {selectedDevice.width}×{selectedDevice.height}
+                </span>
+                <ChevronDownIcon className="w-4 h-4 text-[#F5E6D3]/40" />
+              </button>
 
-            {/* 노치 */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full" />
+              {/* 드롭다운 메뉴 */}
+              {showDeviceMenu && (
+                <div className="
+                  absolute top-full left-1/2 -translate-x-1/2 mt-2
+                  bg-[#2a2a2a] border border-white/10 rounded-lg shadow-xl
+                  py-1 min-w-[200px] z-50
+                ">
+                  {DEVICE_PRESETS.map((device) => (
+                    <button
+                      key={device.id}
+                      onClick={() => {
+                        setSelectedDevice(device)
+                        setShowDeviceMenu(false)
+                      }}
+                      className={`
+                        w-full px-3 py-2 text-left text-sm
+                        flex items-center justify-between
+                        hover:bg-white/5 transition-colors
+                        ${selectedDevice.id === device.id ? 'text-[#C9A962]' : 'text-[#F5E6D3]'}
+                      `}
+                    >
+                      <span>{device.name}</span>
+                      <span className="text-[#F5E6D3]/40 text-xs">
+                        {device.width}×{device.height}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 프리뷰 영역 */}
+          <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
+            <div
+              className="relative transition-all duration-300 ease-out"
+              style={{
+                width: `${selectedDevice.width}px`,
+                height: `${selectedDevice.height}px`,
+              }}
+            >
+              {/* 폰 프레임 */}
+              <div
+                className="absolute inset-0 bg-black shadow-2xl"
+                style={{
+                  borderRadius: selectedDevice.notch ? '3rem' : '2rem',
+                  padding: '12px',
+                }}
+              >
+                <div
+                  className="w-full h-full bg-white overflow-hidden"
+                  style={{
+                    borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
+                  }}
+                >
+                  {/* 렌더러 */}
+                  <DocumentProvider
+                    document={editorDoc}
+                    style={resolvedStyle}
+                  >
+                    <div className="w-full h-full overflow-y-auto">
+                      <DocumentRenderer
+                        document={editorDoc}
+                        mode="edit"
+                        onBlockClick={handleBlockSelect}
+                      />
+                    </div>
+                  </DocumentProvider>
+                </div>
+              </div>
+
+              {/* 노치 (iPhone 스타일) */}
+              {selectedDevice.notch && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full z-10" />
+              )}
+
+              {/* 펀치홀 (Galaxy/Pixel 스타일) */}
+              {!selectedDevice.notch && selectedDevice.id.includes('galaxy') && (
+                <div className="absolute top-5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black rounded-full z-10" />
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -324,6 +429,22 @@ function SparklesIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    </svg>
+  )
+}
+
+function DevicePhoneIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+    </svg>
+  )
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
     </svg>
   )
 }

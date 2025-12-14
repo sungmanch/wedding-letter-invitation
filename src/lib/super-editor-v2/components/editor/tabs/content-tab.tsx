@@ -347,7 +347,7 @@ function GalleryFieldLocal({
   value,
   onChange,
   onUploadImage,
-  maxImages = 10,
+  maxImages = 60,
 }: GalleryFieldLocalProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isLoading, setIsLoading] = useState(false)
