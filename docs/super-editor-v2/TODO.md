@@ -66,14 +66,15 @@
 - [x] `components/editor/fields/address-field.tsx` ✅
 
 #### 5.4 직접 편집
-- [ ] `components/editor/direct/draggable-element.tsx` - 드래그 가능 요소
-- [ ] `components/editor/direct/resize-handles.tsx` - 리사이즈 핸들
-- [ ] `components/editor/direct/context-menu.tsx` - 컨텍스트 메뉴
+- [x] `components/editor/direct/draggable-element.tsx` - 드래그 가능 요소 ✅
+- [x] `components/editor/direct/resize-handles.tsx` - 리사이즈 핸들 ✅
+- [x] `components/editor/direct/context-menu.tsx` - 컨텍스트 메뉴 ✅
+- [x] `components/editor/direct/selection-overlay.tsx` - 선택 오버레이 ✅
 
 #### 5.5 AI 프롬프트
-- [ ] `components/editor/ai/prompt-input.tsx` - AI 프롬프트 입력
-- [ ] `components/editor/ai/block-selector.tsx` - 블록 선택기
-- [ ] `hooks/useAIEdit.ts` - AI 편집 훅
+- [x] `components/editor/ai/prompt-input.tsx` - AI 프롬프트 입력 ✅
+- [x] `components/editor/ai/block-selector.tsx` - 블록 선택기 ✅
+- [x] `hooks/useAIEdit.ts` - AI 편집 훅 ✅
 
 ---
 
@@ -166,7 +167,15 @@ src/lib/super-editor-v2/
 │       │   ├── address-field.tsx  ✅
 │       │   └── index.ts           ✅
 │       ├── direct/
+│       │   ├── draggable-element.tsx  ✅
+│       │   ├── resize-handles.tsx     ✅
+│       │   ├── context-menu.tsx       ✅
+│       │   ├── selection-overlay.tsx  ✅
+│       │   └── index.ts               ✅
 │       └── ai/
+│           ├── prompt-input.tsx       ✅
+│           ├── block-selector.tsx     ✅
+│           └── index.ts               ✅
 ├── builder/
 │   ├── html-builder.ts
 │   ├── css-builder.ts
@@ -175,7 +184,8 @@ src/lib/super-editor-v2/
 │   ├── v1-to-v2-converter.ts
 │   └── data-migrator.ts
 ├── hooks/
-│   └── useAIEdit.ts
+│   ├── useAIEdit.ts          ✅
+│   └── index.ts              ✅
 └── index.ts                  ✅
 ```
 
@@ -197,11 +207,12 @@ src/lib/super-editor-v2/
 
 ## 다음 세션 시작점
 
-Phase 5.1, 5.2, 5.3 완료됨. 다음 작업:
+**Phase 5 에디터 UI 완료!** 다음 작업:
 
-1. Phase 5.4 직접 편집 진행
-   - `components/editor/direct/draggable-element.tsx` - 드래그 가능 요소
-   - `components/editor/direct/resize-handles.tsx` - 리사이즈 핸들
-   - `components/editor/direct/context-menu.tsx` - 컨텍스트 메뉴
-2. 또는 Phase 5.5 AI 프롬프트 진행
-3. 또는 Phase 6 빌드 시스템 먼저 진행 가능
+1. Phase 6 빌드 시스템 진행
+   - `builder/html-builder.ts` - EditorDocument → 정적 HTML 변환
+   - `builder/css-builder.ts` - 스타일 시스템 → CSS 빌드
+   - `builder/js-builder.ts` - 런타임 JS (애니메이션, 상호작용) 빌드
+   - `builder/asset-optimizer.ts` - 이미지 최적화
+   - `actions/publish.ts` - S3/CDN 배포 액션
+2. 또는 Phase 7 v1→v2 마이그레이션 진행 가능
