@@ -32,12 +32,12 @@
 #### 3.2 변수 바인딩
 - [x] `utils/binding-resolver.ts` - resolveBinding, getValueByPath ✅
 - [x] `utils/interpolate.ts` - 포맷 문자열 보간 (`{groom.name} ♥ {bride.name}`) ✅
-- [ ] `utils/computed-fields.ts` - Computed 필드 정의 (binding-resolver에 통합됨)
+- [x] ~~`utils/computed-fields.ts`~~ - Computed 필드 정의 → `binding-resolver.ts`에 통합 ✅
 
 #### 3.3 Style Resolver
 - [x] `renderer/style-resolver.ts` - StyleSystem → ResolvedStyle 변환 (styleToCSSVariables 포함) ✅
-- [ ] `renderer/css-generator.ts` - ResolvedStyle → CSS Variables (style-resolver에 통합됨)
-- [ ] `renderer/token-resolver.ts` - SemanticTokens 해석 (style-resolver에 통합됨)
+- [x] ~~`renderer/css-generator.ts`~~ - ResolvedStyle → CSS Variables → `style-resolver.ts`에 통합 ✅
+- [x] ~~`renderer/token-resolver.ts`~~ - SemanticTokens 해석 → `style-resolver.ts`에 통합 ✅
 
 #### 3.4 Block/Element Renderer
 - [x] `renderer/document-renderer.tsx` - 최상위 렌더러 ✅
@@ -61,11 +61,12 @@
 
 ### Phase 4: 애니메이션 런타임
 
-- [ ] `animation/animation-runtime.ts` - GSAP 기반 애니메이션 실행
-- [ ] `animation/trigger-handler.ts` - 트리거 감지 및 처리
-- [ ] `animation/action-executor.ts` - 애니메이션 액션 실행
-- [ ] `animation/state-machine.ts` - 상태 머신 구현
-- [ ] `animation/scroll-manager.ts` - ScrollTrigger 관리
+- [x] `animation/animation-runtime.ts` - GSAP + Lenis 기반 애니메이션 실행 ✅
+- [x] `animation/trigger-handler.ts` - 트리거 감지 및 처리 (scroll, gesture, event, time, state) ✅
+- [x] `animation/action-executor.ts` - 블록/요소 애니메이션 컨트롤러 훅 ✅
+- [x] `animation/state-machine.ts` - 상태 머신 구현 (검증, 프리빌트 머신 포함) ✅
+- [x] `animation/scroll-manager.ts` - ScrollTrigger, 수평 스크롤, 패럴랙스 관리 ✅
+- [x] `animation/index.ts` - Animation module exports ✅
 
 ---
 
@@ -155,11 +156,12 @@ src/lib/super-editor-v2/
 │   ├── floating-renderer.tsx ✅
 │   └── index.ts              ✅
 ├── animation/
-│   ├── animation-runtime.ts
-│   ├── trigger-handler.ts
-│   ├── action-executor.ts
-│   ├── state-machine.ts
-│   └── scroll-manager.ts
+│   ├── animation-runtime.ts  ✅
+│   ├── trigger-handler.ts    ✅
+│   ├── action-executor.ts    ✅
+│   ├── state-machine.ts      ✅
+│   ├── scroll-manager.ts     ✅
+│   └── index.ts              ✅
 ├── components/
 │   ├── elements/
 │   │   ├── text-element.tsx     ✅
@@ -207,9 +209,10 @@ src/lib/super-editor-v2/
 
 ## 다음 세션 시작점
 
-Phase 3 완료됨 (렌더러 시스템). 다음 작업:
+Phase 4 완료됨 (애니메이션 런타임). 다음 작업:
 
-1. `animation/animation-runtime.ts` - GSAP 기반 애니메이션 실행
-2. `animation/trigger-handler.ts` - 트리거 감지 및 처리
-3. `animation/scroll-manager.ts` - ScrollTrigger 관리
-4. 또는 Phase 5 에디터 UI 먼저 진행 가능
+1. Phase 5 에디터 UI 진행
+   - `components/editor/editor-layout.tsx` - 2패널 레이아웃
+   - `components/editor/tabs/content-tab.tsx` - 콘텐츠 탭
+   - `components/editor/tabs/design-tab.tsx` - 디자인 탭
+2. 또는 Phase 6 빌드 시스템 먼저 진행 가능
