@@ -456,7 +456,7 @@ export async function restoreSnapshot(
 // Image Upload
 // ============================================
 
-const BUCKET_NAME = 'wedding-images'
+const BUCKET_NAME = 'wedding-photos'
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 
