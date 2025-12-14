@@ -39,10 +39,17 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
     [editorDoc.style]
   )
 
+  // 클라이언트 마운트 상태
+  const [isMounted, setIsMounted] = useState(false)
+
   // 뷰포트 크기 계산 (모바일은 실제 크기, 그 외는 제한)
+  // SSR 기본값: 모바일로 가정 (undefined)
   const [viewport, setViewport] = useState<{ width: number; height: number } | undefined>(undefined)
+  const [isDesktopMode, setIsDesktopMode] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
+
     function calculateViewport() {
       const screenWidth = window.innerWidth
       const screenHeight = window.innerHeight
@@ -50,11 +57,11 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
       // 모바일: 실제 화면 크기 사용
       if (screenWidth <= MOBILE_BREAKPOINT) {
         setViewport(undefined) // undefined면 DocumentProvider가 실제 window 크기 사용
+        setIsDesktopMode(false)
         return
       }
 
       // 태블릿/데스크탑: iPhone 13 비율로 제한
-      // 높이 기준으로 너비 계산 또는 너비 기준으로 높이 계산
       let width = MAX_WIDTH
       let height = MAX_HEIGHT
 
@@ -65,6 +72,7 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
       }
 
       setViewport({ width, height })
+      setIsDesktopMode(true)
     }
 
     calculateViewport()
@@ -72,9 +80,8 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
     return () => window.removeEventListener('resize', calculateViewport)
   }, [])
 
-  // 데스크탑/태블릿에서 컨테이너 스타일
-  const isDesktop = viewport !== undefined
-  const containerStyle = isDesktop
+  // 데스크탑/태블릿에서 컨테이너 스타일 (마운트 후에만 적용)
+  const containerStyle = isMounted && isDesktopMode && viewport
     ? {
         maxWidth: `${viewport.width}px`,
         height: `${viewport.height}px`,
@@ -84,7 +91,7 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
     : undefined
 
   return (
-    <div className={isDesktop ? 'min-h-screen bg-gray-900 flex items-center justify-center py-8' : ''}>
+    <div className={isMounted && isDesktopMode ? 'min-h-screen bg-gray-900 flex items-center justify-center py-8' : ''}>
       {/* 프리뷰 배너 - fixed로 콘텐츠와 완전 분리 */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-[#C9A962] text-[#1a1a1a] py-2 px-4">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -108,7 +115,7 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
 
       {/* 컨텐츠 */}
       <div
-        className={isDesktop ? 'relative overflow-hidden rounded-3xl' : ''}
+        className={isMounted && isDesktopMode ? 'relative overflow-hidden rounded-3xl' : ''}
         style={containerStyle}
       >
         <DocumentProvider
@@ -116,7 +123,7 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
           style={resolvedStyle}
           viewportOverride={viewport}
         >
-          <div className={isDesktop ? 'h-full overflow-y-auto' : ''}>
+          <div className={isMounted && isDesktopMode ? 'h-full overflow-y-auto' : ''}>
             <DocumentRenderer document={editorDoc} mode="preview" skipProvider />
           </div>
         </DocumentProvider>

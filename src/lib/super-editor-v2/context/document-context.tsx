@@ -126,27 +126,23 @@ export function DocumentProvider({
   // 공유 상태
   const [sharedState, setSharedStateMap] = useState<Record<string, unknown>>({})
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
-  // 뷰포트 정보 (viewportOverride가 있으면 가상 뷰포트 사용)
-  const [viewport, setViewport] = useState<ViewportInfo>(() => {
-    if (viewportOverride) {
-      return {
-        width: viewportOverride.width,
-        height: viewportOverride.height,
-        isDesktop: false,
-        isMobile: true,
-      }
-    }
-    return {
-      width: typeof window !== 'undefined' ? window.innerWidth : 390,
-      height: typeof window !== 'undefined' ? window.innerHeight : 844,
-      isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1024 : false,
-      isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : true,
-    }
-  })
+  // SSR 기본값 (iPhone 13 기준)
+  const SSR_DEFAULT: ViewportInfo = {
+    width: viewportOverride?.width ?? 390,
+    height: viewportOverride?.height ?? 844,
+    isDesktop: false,
+    isMobile: true,
+  }
 
-  // viewportOverride 변경 시 뷰포트 업데이트
+  // 뷰포트 정보 - 초기값은 항상 SSR 기본값
+  const [viewport, setViewport] = useState<ViewportInfo>(SSR_DEFAULT)
+
+  // 클라이언트 마운트 후 실제 뷰포트로 업데이트
   useEffect(() => {
+    setIsMounted(true)
+
     if (viewportOverride) {
       setViewport({
         width: viewportOverride.width,
@@ -154,12 +150,19 @@ export function DocumentProvider({
         isDesktop: false,
         isMobile: true,
       })
+    } else {
+      setViewport({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        isDesktop: window.innerWidth >= 1024,
+        isMobile: window.innerWidth < 768,
+      })
     }
-  }, [viewportOverride])
+  }, [viewportOverride?.width, viewportOverride?.height])
 
   // 뷰포트 리사이즈 핸들링 (viewportOverride가 없을 때만)
   useEffect(() => {
-    if (typeof window === 'undefined' || viewportOverride) return
+    if (!isMounted || viewportOverride) return
 
     const handleResize = () => {
       setViewport({
@@ -172,7 +175,7 @@ export function DocumentProvider({
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [viewportOverride])
+  }, [isMounted, viewportOverride])
 
   // 공유 상태 업데이트
   const setSharedState = useCallback((key: string, value: unknown) => {

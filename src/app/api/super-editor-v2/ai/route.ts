@@ -59,6 +59,13 @@ export async function POST(request: NextRequest) {
     const systemPrompt = buildSystemPrompt(context, body.targetBlockId)
     const userPrompt = buildUserPrompt(body.prompt, body.context)
 
+    // 디버깅: 프롬프트 크기 확인
+    const totalPromptLength = systemPrompt.length + userPrompt.length
+    console.log('[Gemini Debug] System prompt length:', systemPrompt.length)
+    console.log('[Gemini Debug] User prompt length:', userPrompt.length)
+    console.log('[Gemini Debug] Total prompt length:', totalPromptLength)
+    console.log('[Gemini Debug] Estimated tokens:', Math.ceil(totalPromptLength / 4))
+
     // AI 호출 (Google Gemini)
     const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
 
