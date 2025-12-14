@@ -34,3 +34,6 @@ export * from './utils/interpolate'
 
 // Element Components
 export * from './components/elements'
+
+// Editor UI Components
+export * from './components/editor'
