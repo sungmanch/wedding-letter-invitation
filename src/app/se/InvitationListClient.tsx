@@ -37,6 +37,8 @@ const INTRO_ONLY_ENABLED: Record<SectionType, boolean> = {
   music: false,
   photobooth: false,
   invitation: false,
+  rsvp: false,
+  notice: false,
 }
 
 export function InvitationListClient({ invitations }: InvitationListClientProps) {

@@ -9,14 +9,16 @@ import { useEffect, useRef, useState } from 'react'
 import { Send, Loader2 } from 'lucide-react'
 import { MessageBubble, TypingBubble, type ChatMessage } from './MessageBubble'
 import { LettyAvatar } from './LettyAvatar'
-import { useLettyConversation, type CollectedData } from '../hooks/useLettyConversation'
+import { useLettyConversation, type CollectedData, type InitialData } from '../hooks/useLettyConversation'
 
 interface LettyChatProps {
   onGenerate: (data: CollectedData) => Promise<void>
   isGenerating?: boolean
+  initialData?: InitialData
+  onCollectedDataChange?: (data: CollectedData) => void
 }
 
-export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) {
+export function LettyChat({ onGenerate, isGenerating = false, initialData, onCollectedDataChange }: LettyChatProps) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -25,12 +27,21 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
     messages,
     currentStep,
     isTyping,
+    collectedData,
     startConversation,
     handleUserInput,
     isInputDisabled,
   } = useLettyConversation({
     onGenerate,
+    initialData,
   })
+
+  // collectedData 변경 시 부모에게 알림
+  useEffect(() => {
+    if (onCollectedDataChange) {
+      onCollectedDataChange(collectedData)
+    }
+  }, [collectedData, onCollectedDataChange])
 
   // 페이지 로드 시 대화 시작
   useEffect(() => {
@@ -74,14 +85,14 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
   }
 
   return (
-    <div className="flex flex-col h-full m-4 border border-[#C9A962]/30 rounded-xl overflow-hidden bg-[#1A1A1A]">
+    <div className="flex flex-col h-full m-4 border border-[var(--sand-200)] rounded-xl overflow-hidden bg-[var(--ivory-50)]">
       {/* Chat Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-[#C9A962]/20">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--sand-200)] bg-white">
         <LettyAvatar size="lg" />
         <div>
-          <h3 className="text-sm font-semibold text-[#F5E6D3]">디자인 어시스턴트</h3>
-          <p className="text-xs text-[#F5E6D3]/60">
-            <span className="font-semibold text-[#C9A962]">Letty</span> 와 함께 디자인해봐요
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">디자인 어시스턴트</h3>
+          <p className="text-xs text-[var(--text-muted)]">
+            <span className="font-semibold text-[var(--sage-600)]">Letty</span> 와 함께 디자인해봐요
           </p>
         </div>
       </div>
@@ -107,9 +118,9 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
         {currentStep === 'generating' && isGenerating && (
           <div className="flex gap-2 flex-row">
             <div className="w-8 shrink-0" />
-            <div className="bg-white/10 rounded-2xl rounded-bl-sm px-4 py-3">
-              <div className="flex items-center gap-2 text-[#F5E6D3]">
-                <Loader2 className="w-4 h-4 animate-spin text-[#C9A962]" />
+            <div className="bg-[var(--sage-50)] rounded-2xl rounded-bl-sm px-4 py-3">
+              <div className="flex items-center gap-2 text-[var(--text-primary)]">
+                <Loader2 className="w-4 h-4 animate-spin text-[var(--sage-500)]" />
                 <span className="text-sm">청첩장을 디자인하고 있어요...</span>
               </div>
             </div>
@@ -120,7 +131,7 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-[#C9A962]/20">
+      <div className="p-4 border-t border-[var(--sand-200)] bg-white">
         <div className="flex items-end gap-2">
           <div className="flex-1 relative">
             <textarea
@@ -137,14 +148,14 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
               }
               rows={1}
               disabled={isInputDisabled || isGenerating}
-              className="w-full px-4 py-3 bg-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[#C9A962] focus:bg-white/15 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 bg-[var(--ivory-100)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[var(--sage-400)] focus:bg-white transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed border border-[var(--sand-200)]"
               style={{ maxHeight: '100px' }}
             />
           </div>
           <button
             onClick={handleSubmit}
             disabled={!input.trim() || isInputDisabled || isGenerating}
-            className="p-3 bg-[#C9A962] text-[#0A0806] rounded-full hover:bg-[#B8A052] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+            className="p-3 bg-[var(--sage-500)] text-white rounded-full hover:bg-[var(--sage-600)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             {isGenerating ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -153,7 +164,7 @@ export function LettyChat({ onGenerate, isGenerating = false }: LettyChatProps) 
             )}
           </button>
         </div>
-        <p className="text-xs text-[#F5E6D3]/40 mt-2 text-center">
+        <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
           {currentStep === 'complete'
             ? '오른쪽 미리보기를 확인하세요'
             : 'Enter로 전송, Shift+Enter로 줄바꿈'}

@@ -11,6 +11,8 @@ const inputVariants = cva(
           'bg-white border-gray-200 text-charcoal placeholder:text-gray-400 focus:ring-blush-pink hover:border-blush-pink-200',
         dark:
           'bg-white/5 border-white/10 text-[#F5E6D3] placeholder:text-[#F5E6D3]/40 focus:ring-[#C9A962]/50 focus:border-[#C9A962]/30 hover:border-white/20',
+        light:
+          'bg-white border-[var(--sand-200)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-[var(--sage-400)] hover:border-[var(--sage-300)]',
       },
     },
     defaultVariants: {
@@ -31,6 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const generatedId = React.useId()
     const inputId = id || generatedId
     const isDark = variant === 'dark'
+    const isLight = variant === 'light'
 
     return (
       <div className="w-full">
@@ -39,7 +42,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             htmlFor={inputId}
             className={cn(
               'mb-2 block text-sm font-medium',
-              isDark ? 'text-[#F5E6D3]' : 'text-charcoal'
+              isDark ? 'text-[#F5E6D3]' : isLight ? 'text-[var(--text-body)]' : 'text-charcoal'
             )}
           >
             {label}
@@ -50,7 +53,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           className={cn(
             inputVariants({ variant }),
-            error && (isDark ? 'border-red-400 focus:ring-red-400' : 'border-red-500 focus:ring-red-500'),
+            error && (isDark || isLight ? 'border-red-400 focus:ring-red-400' : 'border-red-500 focus:ring-red-500'),
             className
           )}
           ref={ref}

@@ -51,7 +51,7 @@ export default async function WeddingLandingPage() {
                 <span className="hidden sm:inline">로그인</span>
               </Link>
             )}
-            <Link href="/se/create">
+            <Link href="/login?redirect=/se/create">
               <Button className="bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white rounded-full px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base font-medium h-auto">
                 시작하기
               </Button>
@@ -66,9 +66,6 @@ export default async function WeddingLandingPage() {
       {/* Footer */}
       <footer className="border-t border-[var(--sand-100)] px-6 py-10 bg-[var(--ivory-50)]">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
-          {/* Logo */}
-          <Image src="/logo.png" alt="Maison de Letter" width={120} height={28} className="opacity-60 h-6 w-auto" />
-
           {/* Legal Links */}
           <div className="flex items-center gap-4 text-xs">
             <Link href="/terms" className="text-[var(--text-muted)] hover:text-[var(--text-body)] transition-colors">

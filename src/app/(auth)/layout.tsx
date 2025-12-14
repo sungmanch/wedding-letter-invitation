@@ -8,13 +8,13 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[#0A0806]">
-      {/* Dark Theme Header */}
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#0A0806]/80 backdrop-blur">
+    <div className="min-h-screen bg-[var(--ivory-50)]">
+      {/* Light Theme Header */}
+      <header className="sticky top-0 z-10 border-b border-[var(--sand-200)] bg-white/95 backdrop-blur">
         <div className="flex h-14 items-center px-4">
           <Link
             href="/"
-            className="flex items-center text-[#F5E6D3]/60 hover:text-[#F5E6D3] transition-colors"
+            className="flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
@@ -24,7 +24,7 @@ export default function AuthLayout({
               alt="Maison de Letter"
               width={120}
               height={28}
-              className="h-7 w-auto brightness-0 invert opacity-90"
+              className="h-7 w-auto"
             />
           </div>
           <div className="w-5" />

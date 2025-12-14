@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, MouseEvent, TouchEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui'
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
 
 // Template data for carousel
 const templates = [
@@ -74,6 +74,126 @@ function AIChatVideo() {
         </div>
       </div>
       <p className="text-center mt-3 text-sm text-[var(--text-muted)]">AI 채팅으로 디자인</p>
+    </div>
+  )
+}
+
+/**
+ * Before/After Comparison Slider
+ * User drags to reveal the transformation from chat to result
+ */
+function BeforeAfterSlider() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [sliderPosition, setSliderPosition] = useState(50)
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Auto-play video when visible
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {})
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
+
+  const handleMove = useCallback((clientX: number) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = clientX - rect.left
+    const percentage = Math.max(5, Math.min(95, (x / rect.width) * 100))
+    setSliderPosition(percentage)
+  }, [])
+
+  const handleMouseDown = () => setIsDragging(true)
+  const handleMouseUp = () => setIsDragging(false)
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return
+    handleMove(e.clientX)
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    handleMove(e.touches[0].clientX)
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        ref={containerRef}
+        className="relative w-[320px] sm:w-[380px] lg:w-[420px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl cursor-ew-resize select-none bg-[var(--sand-200)]"
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+      >
+        {/* Before: AI Chat Video (full width, clipped) */}
+        <div
+          className="absolute inset-0 z-10"
+          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+        >
+          <div className="w-full h-full bg-black">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster="/examples/chat-poster.jpg"
+            >
+              <source src="/examples/1208_AICHAT.webm" type="video/webm" />
+            </video>
+          </div>
+          {/* Before label */}
+          <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/60 rounded-md">
+            <span className="text-xs text-white font-medium">AI 대화</span>
+          </div>
+        </div>
+
+        {/* After: Result Template */}
+        <div className="absolute inset-0">
+          <MagazineTemplate />
+          {/* After label */}
+          <div className="absolute bottom-4 right-4 px-2 py-1 bg-white/80 rounded-md z-20">
+            <span className="text-xs text-[var(--text-primary)] font-medium">완성된 청첩장</span>
+          </div>
+        </div>
+
+        {/* Slider handle */}
+        <div
+          className="absolute top-0 bottom-0 z-20 flex items-center justify-center"
+          style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleMouseDown}
+        >
+          {/* Vertical line */}
+          <div className="absolute h-full w-0.5 bg-white shadow-lg" />
+          {/* Handle button */}
+          <div className="relative z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 transition-transform">
+            <GripVertical className="w-5 h-5 text-[var(--sage-500)]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Hint text */}
+      <p className="text-center mt-4 text-sm text-[var(--text-muted)]">
+        ← 드래그해서 변화 확인 →
+      </p>
     </div>
   )
 }
@@ -375,36 +495,102 @@ export function NaturalHeroLanding() {
           {/* Top: Hero Text (Centered) */}
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
             {/* Main Headline */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4">
-              <span
-                className="block text-[var(--text-primary)]"
-                style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 300 }}
-              >
-                원하는 분위기의 청첩장을,
-              </span>
-              <span
-                className="block text-[var(--sage-600)] mt-1"
-                style={{ fontFamily: 'Noto Serif KR, serif', fontWeight: 500 }}
-              >
-                AI와 함께 손쉽게 만들어보세요
-              </span>
+            <h1
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-3"
+              style={{ fontFamily: 'Noto Serif KR, serif' }}
+            >
+              <span className="text-[var(--sage-600)] font-medium">대화로</span>
+              <span className="text-[var(--text-primary)] font-light"> 만드는 청첩장</span>
             </h1>
+            <p className="text-base sm:text-lg text-[var(--text-muted)]">
+              AI에게 이야기하면, 디자인부터 정보까지 알아서
+            </p>
           </div>
 
-          {/* Middle: Video + Arrow + Template (Side by Side) */}
-          <div className="flex flex-col sm:flex-row items-start justify-center gap-6 sm:gap-8 lg:gap-12 mb-10 sm:mb-12">
+          {/* Middle: Video + SVG Line + Template (Side by Side) */}
+          <div className="flex flex-col sm:flex-row items-start justify-center gap-6 sm:gap-4 lg:gap-6 mb-10 sm:mb-12">
             {/* Left: AI Chat Video */}
             <div className="flex-shrink-0 flex flex-col items-center">
               <AIChatVideo />
             </div>
 
-            {/* Arrow - vertically centered with mockups */}
+            {/* SVG Flow Line - Desktop (straight line) */}
             <div className="hidden sm:flex flex-col items-center justify-center self-center">
-              <ArrowRight className="w-6 h-6 lg:w-8 lg:h-8 text-[var(--sage-400)]" />
-              <span className="text-xs text-[var(--text-light)]">생성</span>
+              <svg
+                width="80"
+                height="20"
+                viewBox="0 0 80 20"
+                fill="none"
+                className="overflow-visible"
+              >
+                {/* Gradient definition */}
+                <defs>
+                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="var(--sage-300)" />
+                    <stop offset="100%" stopColor="var(--sage-500)" />
+                  </linearGradient>
+                </defs>
+                {/* Straight line with draw animation */}
+                <line
+                  x1="5"
+                  y1="10"
+                  x2="75"
+                  y2="10"
+                  stroke="url(#flowGradient)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  className="animate-[drawLine_2s_ease-in-out_infinite]"
+                  style={{
+                    strokeDasharray: 70,
+                    strokeDashoffset: 70,
+                  }}
+                />
+                {/* Traveling dot */}
+                <circle r="4" fill="var(--sage-500)">
+                  <animateMotion dur="2s" repeatCount="indefinite">
+                    <mpath href="#flowPath" />
+                  </animateMotion>
+                </circle>
+                <path id="flowPath" d="M 5 10 L 75 10" fill="none" />
+              </svg>
+              <span className="text-[10px] text-[var(--sage-500)] font-medium tracking-wider uppercase mt-2">생성</span>
             </div>
-            <div className="sm:hidden text-center">
-              <span className="text-2xl text-[var(--sage-400)]">↓</span>
+
+            {/* SVG Flow Line - Mobile (vertical) */}
+            <div className="sm:hidden flex flex-col items-center py-2">
+              <svg
+                width="40"
+                height="60"
+                viewBox="0 0 40 60"
+                fill="none"
+                className="overflow-visible"
+              >
+                <defs>
+                  <linearGradient id="flowGradientV" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="var(--sage-300)" />
+                    <stop offset="100%" stopColor="var(--sage-500)" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M 20 5 Q 30 30, 20 55"
+                  stroke="url(#flowGradientV)"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  className="animate-[drawLine_2s_ease-in-out_infinite]"
+                  style={{
+                    strokeDasharray: 60,
+                    strokeDashoffset: 60,
+                  }}
+                />
+                <circle r="3" fill="var(--sage-500)">
+                  <animateMotion dur="2s" repeatCount="indefinite">
+                    <mpath href="#flowPathV" />
+                  </animateMotion>
+                </circle>
+                <path id="flowPathV" d="M 20 5 Q 30 30, 20 55" fill="none" />
+              </svg>
+              <span className="text-[10px] text-[var(--sage-500)] font-medium tracking-wider uppercase mt-1">생성</span>
             </div>
 
             {/* Right: Template Carousel */}
@@ -416,12 +602,12 @@ export function NaturalHeroLanding() {
           {/* Bottom: CTA */}
           <div className="text-center">
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/se/create">
+              <Link href="/login?redirect=/se/create">
                 <Button
                   className="bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white px-8 py-3.5 text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-300 h-auto w-full sm:w-auto"
                   style={{ fontFamily: 'Pretendard, sans-serif' }}
                 >
-                  무료로 시작하기
+                  AI와 대화 시작하기
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -437,7 +623,7 @@ export function NaturalHeroLanding() {
                     clipRule="evenodd"
                   />
                 </svg>
-                회원가입 후 무료 미리보기
+                카드 등록 없이 무료 체험
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -447,7 +633,7 @@ export function NaturalHeroLanding() {
                     clipRule="evenodd"
                   />
                 </svg>
-                5분 완성
+                복잡한 양식 없이 대화로 완성
               </span>
             </div>
           </div>
