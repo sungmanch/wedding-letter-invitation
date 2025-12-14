@@ -53,6 +53,7 @@ export function ContentTab({
   onBlocksChange,
   onDataChange,
   onAddBlock,
+  onUploadImage,
   className = '',
 }: ContentTabProps) {
   // 블록 토글
@@ -133,6 +134,7 @@ export function ContentTab({
               canMoveDown={!isFixed && index < document.blocks.length - 1}
               fixed={isFixed}
               onFieldChange={handleFieldChange}
+              onUploadImage={onUploadImage}
             />
           )
         })}
@@ -165,6 +167,7 @@ interface BlockAccordionProps {
   canMoveDown: boolean
   fixed: boolean
   onFieldChange: (path: VariablePath, value: unknown) => void
+  onUploadImage?: (file: File) => Promise<string>
 }
 
 function BlockAccordion({
@@ -179,6 +182,7 @@ function BlockAccordion({
   canMoveDown,
   fixed,
   onFieldChange,
+  onUploadImage,
 }: BlockAccordionProps) {
   // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출
   const editableFields = useMemo(() => {
@@ -218,6 +222,7 @@ function BlockAccordion({
                 binding={field.binding}
                 value={field.value}
                 onChange={(value) => onFieldChange(field.binding, value)}
+                onUploadImage={onUploadImage}
               />
             ))
           ) : (
@@ -239,9 +244,10 @@ interface VariableFieldProps {
   binding: VariablePath
   value: unknown
   onChange: (value: unknown) => void
+  onUploadImage?: (file: File) => Promise<string>
 }
 
-function VariableField({ binding, value, onChange }: VariableFieldProps) {
+function VariableField({ binding, value, onChange, onUploadImage }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
   const label = fieldConfig?.label ?? binding
   const type = fieldConfig?.type ?? 'text'
@@ -305,6 +311,7 @@ function VariableField({ binding, value, onChange }: VariableFieldProps) {
         <ImageField
           value={String(value ?? '')}
           onChange={onChange}
+          onUploadImage={onUploadImage}
         />
       )}
     </div>
@@ -317,12 +324,74 @@ function VariableField({ binding, value, onChange }: VariableFieldProps) {
 
 interface ImageFieldProps {
   value: string
-  onChange: (value: string) => void
+  onChange: (value: unknown) => void
+  onUploadImage?: (file: File) => Promise<string>
 }
 
-function ImageField({ value, onChange }: ImageFieldProps) {
+function ImageField({ value, onChange, onUploadImage }: ImageFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleClick = useCallback(() => {
+    if (!isLoading) {
+      inputRef.current?.click()
+    }
+  }, [isLoading])
+
+  const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 파일 타입 검증
+    if (!file.type.startsWith('image/')) {
+      setError('이미지 파일만 업로드할 수 있습니다')
+      return
+    }
+
+    // 파일 크기 검증 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('파일 크기는 10MB 이하여야 합니다')
+      return
+    }
+
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      if (onUploadImage) {
+        const url = await onUploadImage(file)
+        onChange(url)
+      } else {
+        // fallback: base64 로컬 프리뷰
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          onChange(event.target?.result as string)
+        }
+        reader.readAsDataURL(file)
+      }
+    } catch (err) {
+      setError('이미지 업로드에 실패했습니다')
+      console.error('Image upload failed:', err)
+    } finally {
+      setIsLoading(false)
+    }
+
+    // Reset input
+    e.target.value = ''
+  }, [onUploadImage, onChange])
+
   return (
     <div className="space-y-2">
+      {/* 히든 input */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {value && (
         <div className="relative aspect-video bg-[#2A2A2A] rounded-lg overflow-hidden">
           <img
@@ -331,6 +400,7 @@ function ImageField({ value, onChange }: ImageFieldProps) {
             className="w-full h-full object-cover"
           />
           <button
+            type="button"
             onClick={() => onChange('')}
             className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
           >
@@ -340,10 +410,24 @@ function ImageField({ value, onChange }: ImageFieldProps) {
       )}
 
       <button
-        className="w-full px-3 py-2 bg-[#2A2A2A] border border-dashed border-white/20 rounded-lg text-[#F5E6D3]/60 text-sm hover:bg-[#333333] hover:border-white/30 transition-colors"
+        type="button"
+        onClick={handleClick}
+        disabled={isLoading}
+        className="w-full px-3 py-2 bg-[#2A2A2A] border border-dashed border-white/20 rounded-lg text-[#F5E6D3]/60 text-sm hover:bg-[#333333] hover:border-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        {value ? '이미지 변경' : '이미지 업로드'}
+        {isLoading ? (
+          <>
+            <div className="w-4 h-4 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin" />
+            업로드 중...
+          </>
+        ) : (
+          value ? '이미지 변경' : '이미지 업로드'
+        )}
       </button>
+
+      {error && (
+        <p className="text-xs text-red-400">{error}</p>
+      )}
     </div>
   )
 }
