@@ -188,12 +188,22 @@ function BlockAccordion({
   const editableFields = useMemo(() => {
     return (block.elements ?? [])
       .filter(el => el.binding)
-      .map(el => ({
-        elementId: el.id,
-        binding: el.binding!,
-        type: el.type,
-        value: resolveBinding(data, el.binding!),
-      }))
+      .map(el => {
+        const binding = el.binding!
+        // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+        let value: unknown
+        if (binding === 'photos.gallery') {
+          value = data.photos?.gallery ?? []
+        } else {
+          value = resolveBinding(data, binding)
+        }
+        return {
+          elementId: el.id,
+          binding,
+          type: el.type,
+          value,
+        }
+      })
   }, [block.elements, data])
 
   return (

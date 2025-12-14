@@ -420,6 +420,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                   <DocumentProvider
                     document={editorDoc}
                     style={resolvedStyle}
+                    viewportOverride={{
+                      width: selectedDevice.width - 24, // 프레임 패딩 제외
+                      height: selectedDevice.height - 24,
+                    }}
                   >
                     <div className="w-full h-full overflow-y-auto">
                       <DocumentRenderer

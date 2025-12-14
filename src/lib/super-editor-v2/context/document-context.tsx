@@ -106,6 +106,8 @@ interface DocumentProviderProps {
   children: ReactNode
   document: EditorDocument
   style: ResolvedStyle
+  // 가상 뷰포트 크기 (프리뷰용)
+  viewportOverride?: { width: number; height: number }
   // 편집 모드 콜백
   onUpdateBlocks?: (blocks: Block[]) => void
   onUpdateData?: (data: WeddingData) => void
@@ -116,6 +118,7 @@ export function DocumentProvider({
   children,
   document,
   style,
+  viewportOverride,
   onUpdateBlocks,
   onUpdateData,
   onUpdateStyle,
@@ -124,17 +127,39 @@ export function DocumentProvider({
   const [sharedState, setSharedStateMap] = useState<Record<string, unknown>>({})
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
 
-  // 뷰포트 정보
-  const [viewport, setViewport] = useState<ViewportInfo>({
-    width: typeof window !== 'undefined' ? window.innerWidth : 390,
-    height: typeof window !== 'undefined' ? window.innerHeight : 844,
-    isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1024 : false,
-    isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : true,
+  // 뷰포트 정보 (viewportOverride가 있으면 가상 뷰포트 사용)
+  const [viewport, setViewport] = useState<ViewportInfo>(() => {
+    if (viewportOverride) {
+      return {
+        width: viewportOverride.width,
+        height: viewportOverride.height,
+        isDesktop: false,
+        isMobile: true,
+      }
+    }
+    return {
+      width: typeof window !== 'undefined' ? window.innerWidth : 390,
+      height: typeof window !== 'undefined' ? window.innerHeight : 844,
+      isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1024 : false,
+      isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : true,
+    }
   })
 
-  // 뷰포트 리사이즈 핸들링
+  // viewportOverride 변경 시 뷰포트 업데이트
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (viewportOverride) {
+      setViewport({
+        width: viewportOverride.width,
+        height: viewportOverride.height,
+        isDesktop: false,
+        isMobile: true,
+      })
+    }
+  }, [viewportOverride])
+
+  // 뷰포트 리사이즈 핸들링 (viewportOverride가 없을 때만)
+  useEffect(() => {
+    if (typeof window === 'undefined' || viewportOverride) return
 
     const handleResize = () => {
       setViewport({
@@ -147,7 +172,7 @@ export function DocumentProvider({
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [viewportOverride])
 
   // 공유 상태 업데이트
   const setSharedState = useCallback((key: string, value: unknown) => {
