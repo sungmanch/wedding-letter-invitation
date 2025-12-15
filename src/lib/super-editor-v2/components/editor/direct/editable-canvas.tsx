@@ -15,6 +15,7 @@ import {
   useState,
   useMemo,
   useRef,
+  useEffect,
   type ReactNode,
 } from 'react'
 import type { EditorDocument, Block, Element, TextProps } from '../../../schema/types'
@@ -55,6 +56,8 @@ export interface EditableCanvasProps {
   onElementDelete?: (blockId: string, elementId: string) => void
   /** 요소 복제 콜백 */
   onElementDuplicate?: (blockId: string, elementId: string) => void
+  /** 블록 높이 변경 콜백 */
+  onBlockHeightChange?: (blockId: string, height: number) => void
   /** 컨텍스트 메뉴 콜백 (외부 처리용) */
   onContextMenu?: (context: ContextMenuState) => void
   /** 캔버스 너비 */
@@ -85,6 +88,7 @@ export function EditableCanvas({
   onElementUpdate,
   onElementDelete,
   onElementDuplicate,
+  onBlockHeightChange,
   onContextMenu: externalContextMenu,
   canvasWidth = 375,
   canvasHeight = 667,
@@ -397,10 +401,22 @@ export function EditableCanvas({
               )
             })}
 
+            {/* 블록 높이 조절 핸들 */}
+            {onBlockHeightChange && (
+              <BlockResizeHandle
+                blockId={block.id}
+                blockHeight={block.height}
+                canvasHeight={canvasHeight}
+                onHeightChange={onBlockHeightChange}
+              />
+            )}
+
             {/* 블록 구분선 (편집 모드 시각적 피드백) */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-px bg-[#C9A962]/20 pointer-events-none"
-            />
+            {!onBlockHeightChange && (
+              <div
+                className="absolute bottom-0 left-0 right-0 h-px bg-[#C9A962]/20 pointer-events-none"
+              />
+            )}
           </div>
         )
       })}
@@ -512,6 +528,88 @@ function DefaultElementRenderer({ element }: DefaultElementRendererProps) {
         </div>
       )
   }
+}
+
+// ============================================
+// Block Resize Handle
+// ============================================
+
+interface BlockResizeHandleProps {
+  blockId: string
+  blockHeight: number // vh 단위
+  canvasHeight: number // px
+  onHeightChange: (blockId: string, height: number) => void
+}
+
+function BlockResizeHandle({
+  blockId,
+  blockHeight,
+  canvasHeight,
+  onHeightChange,
+}: BlockResizeHandleProps) {
+  const [isDragging, setIsDragging] = useState(false)
+  const startYRef = useRef(0)
+  const startHeightRef = useRef(0)
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    startYRef.current = e.clientY
+    startHeightRef.current = blockHeight
+  }, [blockHeight])
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = e.clientY - startYRef.current
+      // px를 vh로 변환
+      const deltaVh = (deltaY / canvasHeight) * 100
+      const newHeight = Math.max(10, startHeightRef.current + deltaVh) // 최소 10vh
+      onHeightChange(blockId, Math.round(newHeight))
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, blockId, canvasHeight, onHeightChange])
+
+  return (
+    <div
+      className={`
+        absolute bottom-0 left-0 right-0 h-4
+        flex items-center justify-center
+        cursor-ns-resize group z-50
+        ${isDragging ? 'bg-[#C9A962]/20' : 'hover:bg-[#C9A962]/10'}
+      `}
+      onMouseDown={handleMouseDown}
+    >
+      {/* 핸들 라인 */}
+      <div
+        className={`
+          w-12 h-1 rounded-full transition-colors
+          ${isDragging ? 'bg-[#C9A962]' : 'bg-[#C9A962]/40 group-hover:bg-[#C9A962]/60'}
+        `}
+      />
+      {/* 높이 표시 (드래그 중) */}
+      {isDragging && (
+        <div
+          className="absolute right-2 bottom-full mb-1 px-2 py-0.5 rounded bg-[#2a2a2a] text-[#C9A962] text-xs font-mono"
+        >
+          {blockHeight}vh
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ============================================

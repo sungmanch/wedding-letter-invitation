@@ -213,6 +213,19 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     }))
   }, [updateDocument])
 
+  // 블록 높이 변경 (직접 편집 모드)
+  const handleBlockHeightChange = useCallback((
+    blockId: string,
+    height: number
+  ) => {
+    updateDocument(prev => ({
+      ...prev,
+      blocks: prev.blocks.map(block =>
+        block.id === blockId ? { ...block, height } : block
+      ),
+    }))
+  }, [updateDocument])
+
   // 이미지 업로드 (즉시 서버 업로드)
   const handleUploadImage = useCallback(async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -532,6 +545,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                         selectedElementId={selectedElementId}
                         onElementSelect={handleElementSelect}
                         onElementUpdate={handleElementUpdate}
+                        onBlockHeightChange={handleBlockHeightChange}
                         canvasWidth={selectedDevice.width - 24}
                         canvasHeight={selectedDevice.height - 24}
                         showIdBadge
