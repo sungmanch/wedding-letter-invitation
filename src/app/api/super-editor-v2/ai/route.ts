@@ -189,7 +189,7 @@ interface Block {
 interface Element {
   id: string              // 읽기 전용
   type: 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'map' | 'calendar'
-  binding?: string        // 데이터 바인딩 경로 (수정 불가)
+  binding?: string        // 데이터 바인딩 경로 (기존 바인딩 수정 불가, 새 요소 추가 시 커스텀 바인딩 사용)
   style?: {
     position?: { x: number, y: number }  // 위치 (%)
     size?: { width: number, height: number }  // 크기 (%)
@@ -255,9 +255,32 @@ ${targetBlockInfo}
 - /style/... : 전역 스타일 수정
 - /data/... : 웨딩 데이터 수정
 
+## 커스텀 변수 (새 텍스트 추가 시)
+새 텍스트 요소를 추가할 때는 반드시 커스텀 바인딩과 데이터를 함께 설정하세요:
+1. 요소 추가: binding에 "custom.키이름" 형식 사용 (예: "custom.title", "custom.subtitle")
+2. 데이터 추가: /data/custom/키이름 경로에 초기 텍스트 값 설정
+
+예시 - "Wedding Invitation" 텍스트 추가:
+\`\`\`json
+{
+  "patches": [
+    { "op": "add", "path": "/blocks/0/elements/-", "value": {
+      "id": "el-custom-title",
+      "type": "text",
+      "binding": "custom.weddingTitle",
+      "x": 50, "y": 10, "width": 80, "height": 10, "zIndex": 10,
+      "props": { "type": "text" }
+    }},
+    { "op": "add", "path": "/data/custom", "value": {} },
+    { "op": "add", "path": "/data/custom/weddingTitle", "value": "Wedding Invitation" }
+  ]
+}
+\`\`\`
+⚠️ /data/custom이 없으면 먼저 빈 객체로 생성한 뒤 값을 추가하세요.
+
 ## 주의사항
 - 스키마에 정의된 속성만 수정하세요. 존재하지 않는 속성(예: layout, variant)을 만들지 마세요.
-- 변수 바인딩(binding)은 수정하지 마세요
+- 기존 요소의 바인딩(binding)은 수정하지 마세요 (새 요소 추가 시에만 커스텀 바인딩 사용)
 - 블록의 id, type은 변경하지 마세요
 - 유효한 JSON Patch만 생성하세요
 - 한 번에 너무 많은 변경을 하지 마세요

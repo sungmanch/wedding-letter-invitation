@@ -17,7 +17,7 @@ import type {
   VariablePath,
 } from '../../../schema/types'
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
-import { resolveBinding } from '../../../utils/binding-resolver'
+import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 
 // ============================================
 // Types
@@ -184,26 +184,45 @@ function BlockAccordion({
   onFieldChange,
   onUploadImage,
 }: BlockAccordionProps) {
-  // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출
+  // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출 (바인딩 기준 dedupe)
   const editableFields = useMemo(() => {
-    return (block.elements ?? [])
-      .filter(el => el.binding)
-      .map(el => {
-        const binding = el.binding!
-        // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
-        let value: unknown
-        if (binding === 'photos.gallery') {
-          value = data.photos?.gallery ?? []
-        } else {
-          value = resolveBinding(data, binding)
-        }
-        return {
-          elementId: el.id,
-          binding,
-          type: el.type,
-          value,
-        }
+    const seenBindings = new Set<string>()
+    const fields: Array<{
+      elementId: string
+      binding: VariablePath
+      type: string
+      value: unknown
+    }> = []
+
+    for (const el of block.elements ?? []) {
+      if (!el.binding) continue
+
+      // 같은 바인딩은 한 번만 표시
+      if (seenBindings.has(el.binding)) continue
+      seenBindings.add(el.binding)
+
+      const binding = el.binding
+      // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+      let value: unknown
+      if (binding === 'photos.gallery') {
+        value = data.photos?.gallery ?? []
+      } else if (isCustomVariablePath(binding)) {
+        // 커스텀 변수는 data.custom에서 가져옴
+        const key = getCustomVariableKey(binding)
+        value = key ? data.custom?.[key] ?? '' : ''
+      } else {
+        value = resolveBinding(data, binding)
+      }
+
+      fields.push({
+        elementId: el.id,
+        binding,
+        type: el.type,
+        value,
       })
+    }
+
+    return fields
   }, [block.elements, data])
 
   return (
@@ -259,7 +278,23 @@ interface VariableFieldProps {
 
 function VariableField({ binding, value, onChange, onUploadImage }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
-  const label = fieldConfig?.label ?? binding
+
+  // 커스텀 변수의 경우 키를 레이블로 사용
+  let label: string
+  if (isCustomVariablePath(binding)) {
+    const key = getCustomVariableKey(binding) || binding
+    // camelCase/snake_case를 읽기 좋게 변환 (예: weddingTitle → Wedding Title)
+    label = key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/_/g, ' ')
+      .replace(/^\s/, '')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  } else {
+    label = fieldConfig?.label ?? binding
+  }
+
   const type = fieldConfig?.type ?? 'text'
   const placeholder = fieldConfig?.placeholder
 

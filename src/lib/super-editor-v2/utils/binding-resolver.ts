@@ -226,6 +226,11 @@ export function formatTime(timeStr: string): string {
  * 유효한 VariablePath인지 확인
  */
 export function isValidVariablePath(path: string): path is VariablePath {
+  // 커스텀 경로는 항상 유효
+  if (path.startsWith('custom.')) {
+    return true
+  }
+
   const validPaths: string[] = [
     // 신랑
     'groom.name', 'groom.nameEn', 'groom.fatherName', 'groom.motherName',
@@ -248,6 +253,21 @@ export function isValidVariablePath(path: string): path is VariablePath {
   ]
 
   return validPaths.includes(path)
+}
+
+/**
+ * 커스텀 변수 경로인지 확인
+ */
+export function isCustomVariablePath(path: string): boolean {
+  return path.startsWith('custom.')
+}
+
+/**
+ * 커스텀 변수 키 추출 (custom.title → title)
+ */
+export function getCustomVariableKey(path: string): string | null {
+  if (!isCustomVariablePath(path)) return null
+  return path.slice('custom.'.length)
 }
 
 /**
