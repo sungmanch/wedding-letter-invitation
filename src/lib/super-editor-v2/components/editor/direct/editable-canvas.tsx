@@ -313,6 +313,7 @@ export function EditableCanvas({
               width: '100%',
               minHeight: blockHeightPx,
               position: 'relative',
+              overflow: 'hidden', // 블록 밖으로 넘치는 요소 잘라냄
               backgroundColor: blockTokens.bgSection,
               color: blockTokens.fgDefault,
             }}

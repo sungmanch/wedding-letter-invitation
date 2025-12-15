@@ -90,6 +90,7 @@ function BlockContainer({
     const style: CSSProperties = {
       position: 'relative',
       minHeight: `${heightInPx}px`,
+      overflow: 'hidden', // 블록 밖으로 넘치는 요소 잘라냄
       backgroundColor: tokens.bgSection,
       color: tokens.fgDefault,
     }

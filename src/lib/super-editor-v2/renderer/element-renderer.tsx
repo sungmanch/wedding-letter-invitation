@@ -58,7 +58,7 @@ export function ElementRenderer({
   onClick,
 }: ElementRendererProps) {
   const { data, activeBlockId, viewport } = useDocument()
-  const { blockId, isActive: isBlockActive } = useBlock()
+  const { blockId, isActive: isBlockActive, height: blockHeight } = useBlock()
 
   // 요소 값 해석 (바인딩 또는 직접 값)
   const resolvedValue = useMemo(() => {
@@ -76,13 +76,18 @@ export function ElementRenderer({
     return resolvedValue
   }, [element.props, resolvedValue, data])
 
-  // 요소 스타일 계산 (viewport 기반)
+  // 요소 스타일 계산 (블록 기준)
   const elementStyle = useMemo<CSSProperties>(() => {
-    // vw/vh 대신 viewport 크기 기반으로 계산
+    // 블록 높이를 px로 계산
+    const blockHeightPx = (blockHeight / 100) * viewport.height
+
+    // x, width는 viewport.width 기준 (가로는 블록과 동일)
     const leftPx = (element.x / 100) * viewport.width
-    const topPx = (element.y / 100) * viewport.height
     const widthPx = (element.width / 100) * viewport.width
-    const heightPx = (element.height / 100) * viewport.height
+
+    // y, height는 블록 높이 기준 (블록 내 상대 위치)
+    const topPx = (element.y / 100) * blockHeightPx
+    const heightPx = (element.height / 100) * blockHeightPx
 
     const style: CSSProperties = {
       position: 'absolute',
@@ -110,7 +115,7 @@ export function ElementRenderer({
     }
 
     return style
-  }, [element, editable, viewport])
+  }, [element, editable, viewport, blockHeight])
 
   // 클릭 핸들러
   const handleClick = useCallback((e: React.MouseEvent) => {
