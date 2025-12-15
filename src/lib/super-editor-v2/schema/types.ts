@@ -468,6 +468,16 @@ export interface ElementStyle {
   border?: BorderStyle
   shadow?: string
   opacity?: number
+  // 일부 요소에서 width/height를 style.size로 지정
+  size?: {
+    width?: number
+    height?: number
+  }
+  // 위치 정보 (일부 레거시 데이터)
+  position?: {
+    x?: number
+    y?: number
+  }
 }
 
 export interface TextStyle {

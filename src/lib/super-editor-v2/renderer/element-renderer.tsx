@@ -61,12 +61,14 @@ export function ElementRenderer({
   const { blockId, isActive: isBlockActive, height: blockHeight } = useBlock()
 
   // 요소 값 해석 (바인딩 또는 직접 값)
+  // content 필드도 확인 (일부 요소는 value 대신 content 사용)
   const resolvedValue = useMemo(() => {
     if (element.binding) {
       return resolveBinding(data, element.binding)
     }
-    return element.value
-  }, [element.binding, element.value, data])
+    // value가 없으면 content 필드 확인
+    return element.value ?? (element as { content?: string }).content
+  }, [element.binding, element.value, data, element])
 
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
@@ -81,13 +83,17 @@ export function ElementRenderer({
     // 블록 높이를 px로 계산
     const blockHeightPx = (blockHeight / 100) * viewport.height
 
+    // width/height: 루트 필드 우선, 없으면 style.size에서 가져옴
+    const elemWidth = element.width ?? element.style?.size?.width ?? 0
+    const elemHeight = element.height ?? element.style?.size?.height ?? 0
+
     // x, width는 viewport.width 기준 (가로는 블록과 동일)
     const leftPx = (element.x / 100) * viewport.width
-    const widthPx = (element.width / 100) * viewport.width
+    const widthPx = (elemWidth / 100) * viewport.width
 
     // y, height는 블록 높이 기준 (블록 내 상대 위치)
     const topPx = (element.y / 100) * blockHeightPx
-    const heightPx = (element.height / 100) * blockHeightPx
+    const heightPx = (elemHeight / 100) * blockHeightPx
 
     const style: CSSProperties = {
       position: 'absolute',

@@ -190,11 +190,25 @@ interface Element {
   id: string              // 읽기 전용
   type: 'text' | 'image' | 'button' | 'divider' | 'spacer' | 'map' | 'calendar'
   binding?: string        // 데이터 바인딩 경로 (기존 바인딩 수정 불가, 새 요소 추가 시 커스텀 바인딩 사용)
+
+  // ⚠️⚠️⚠️ 중요: 위치/크기는 반드시 최상위 속성으로! ⚠️⚠️⚠️
+  // style.size나 style.position에 넣으면 안됩니다!
+  x: number               // 위치 X (%, 0-100) - 필수!
+  y: number               // 위치 Y (%, 0-100) - 필수!
+  width: number           // 너비 (%, 0-100) - 필수!
+  height: number          // 높이 (%, 0-100) - 필수!
+
+  zIndex?: number         // 레이어 순서
+  rotation?: number       // 회전 각도 (deg)
+  props?: {               // 요소 타입별 속성
+    type: string          // 요소 타입 (필수)
+    objectFit?: 'cover' | 'contain'  // 이미지용
+  }
   style?: {
-    position?: { x: number, y: number }  // 위치 (%)
-    size?: { width: number, height: number }  // 크기 (%)
     text?: { fontSize: number, fontWeight: number, color: string, textAlign: string }
     opacity?: number
+    background?: string
+    // ❌ size, position 속성 사용 금지! 최상위 x,y,width,height 사용
   }
   animation?: {
     entrance?: {
@@ -284,7 +298,7 @@ ${targetBlockInfo}
 - 블록의 id, type은 변경하지 마세요
 - 유효한 JSON Patch만 생성하세요
 - 한 번에 너무 많은 변경을 하지 마세요
-- 이미지 크기 조정은 elements의 style.size를 수정하세요
+- ⚠️ 요소 크기/위치 조정은 반드시 최상위 x, y, width, height를 수정하세요 (style.size 사용 금지!)
 - 애니메이션 요청 시 animation.entrance를 사용하세요 (preset 또는 custom TweenAction)
 - 양쪽에서 들어오는 효과: slide-left (왼쪽→), slide-right (→오른쪽), custom으로 from.x 조정
 `

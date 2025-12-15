@@ -11,7 +11,8 @@ import type { WeddingData, VariablePath } from '../schema/types'
 // Types
 // ============================================
 
-export type BindingValue = string | number | boolean | null | undefined
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BindingValue = string | number | boolean | null | undefined | any[]
 
 export interface ResolveOptions {
   // 값이 없을 때 기본값
@@ -76,6 +77,15 @@ export function getValueByPath(
     } else {
       current = current[part]
     }
+  }
+
+  // 배열인 경우 그대로 반환 (갤러리 등에서 사용)
+  if (Array.isArray(current)) {
+    // 갤러리 배열: [{id, url, order}, ...] → url 배열로 변환
+    if (current.length > 0 && typeof current[0] === 'object' && 'url' in current[0]) {
+      return current.map((item: { url: string }) => item.url)
+    }
+    return current
   }
 
   // 객체인 경우 적절한 문자열 변환
