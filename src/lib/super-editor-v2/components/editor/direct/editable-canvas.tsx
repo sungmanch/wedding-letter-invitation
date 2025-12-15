@@ -67,6 +67,8 @@ export interface EditableCanvasProps {
   showIdBadge?: boolean
   /** 요소 렌더러 */
   renderElement?: (element: Element, block: Block) => ReactNode
+  /** 스크롤 비활성화 (외부 스크롤 컨테이너 사용 시) */
+  disableScroll?: boolean
   /** 추가 className */
   className?: string
 }
@@ -89,6 +91,7 @@ export function EditableCanvas({
   gridSnap,
   showIdBadge = true,
   renderElement,
+  disableScroll = false,
   className = '',
 }: EditableCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -276,10 +279,10 @@ export function EditableCanvas({
   return (
     <div
       ref={canvasRef}
-      className={`relative overflow-y-auto overflow-x-hidden ${className}`}
+      className={`relative ${disableScroll ? '' : 'overflow-y-auto overflow-x-hidden'} ${className}`}
       style={{
         width: canvasWidth,
-        height: '100%', // 컨테이너 높이에 맞춤
+        height: disableScroll ? 'auto' : '100%',
         backgroundColor: style.tokens.bgPage,
         color: style.tokens.fgDefault,
       }}

@@ -98,6 +98,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const scrollPositionRef = useRef<number>(0)
 
   // 디바이스 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -126,6 +128,26 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     window.addEventListener('resize', calculateScale)
     return () => window.removeEventListener('resize', calculateScale)
   }, [selectedDevice])
+
+  // 모드 전환 시 스크롤 위치 저장 및 복원
+  const handleEditModeChange = useCallback((newMode: EditMode) => {
+    // 현재 스크롤 위치 저장
+    if (scrollContainerRef.current) {
+      scrollPositionRef.current = scrollContainerRef.current.scrollTop
+    }
+    setEditMode(newMode)
+  }, [])
+
+  // 모드 전환 후 스크롤 위치 복원
+  useEffect(() => {
+    // 약간의 지연 후 스크롤 위치 복원 (DOM 업데이트 후)
+    const timer = setTimeout(() => {
+      if (scrollContainerRef.current && scrollPositionRef.current > 0) {
+        scrollContainerRef.current.scrollTop = scrollPositionRef.current
+      }
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [editMode])
 
   // 스타일 해석 및 CSS 변수 생성
   const resolvedStyle = useMemo(() => resolveStyle(editorDoc.style), [editorDoc.style])
@@ -412,7 +434,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <div className="flex-1 flex flex-col bg-[#0f0f0f]">
           {/* 디바이스 선택 바 + 모드 토글 */}
           <div className="flex-shrink-0 h-12 border-b border-white/10 flex items-center justify-between px-4">
-            <EditModeToggle mode={editMode} onChange={setEditMode} size="sm" />
+            <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
 
             <div className="relative" ref={deviceMenuRef}>
               <button
@@ -476,7 +498,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 }}
               >
                 <div
-                  className="w-full h-full overflow-hidden"
+                  ref={scrollContainerRef}
+                  className="w-full h-full overflow-y-auto overflow-x-hidden"
                   style={{
                     borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
                     ...cssVariables,
@@ -485,35 +508,24 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     color: 'var(--fg-default)',
                   }}
                 >
-                  {editMode === 'form' && (
-                    <DocumentProvider
-                      document={editorDoc}
-                      style={resolvedStyle}
-                      viewportOverride={{
-                        width: selectedDevice.width - 24,
-                        height: selectedDevice.height - 24,
-                      }}
-                    >
-                      <div className="w-full h-full overflow-y-auto">
-                        <DocumentRenderer
-                          document={editorDoc}
-                          mode="edit"
-                          onBlockClick={handleBlockSelect}
-                          skipProvider
-                        />
-                      </div>
-                    </DocumentProvider>
-                  )}
+                  <DocumentProvider
+                    document={editorDoc}
+                    style={resolvedStyle}
+                    viewportOverride={{
+                      width: selectedDevice.width - 24,
+                      height: selectedDevice.height - 24,
+                    }}
+                  >
+                    {editMode === 'form' && (
+                      <DocumentRenderer
+                        document={editorDoc}
+                        mode="edit"
+                        onBlockClick={handleBlockSelect}
+                        skipProvider
+                      />
+                    )}
 
-                  {editMode === 'direct' && (
-                    <DocumentProvider
-                      document={editorDoc}
-                      style={resolvedStyle}
-                      viewportOverride={{
-                        width: selectedDevice.width - 24,
-                        height: selectedDevice.height - 24,
-                      }}
-                    >
+                    {editMode === 'direct' && (
                       <EditableCanvas
                         document={editorDoc}
                         selectedBlockId={expandedBlockId}
@@ -523,12 +535,13 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                         canvasWidth={selectedDevice.width - 24}
                         canvasHeight={selectedDevice.height - 24}
                         showIdBadge
+                        disableScroll
                         renderElement={(element, block) => (
                           <StyledElementRenderer element={element} block={block} />
                         )}
                       />
-                    </DocumentProvider>
-                  )}
+                    )}
+                  </DocumentProvider>
                 </div>
               </div>
 
