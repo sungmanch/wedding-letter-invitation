@@ -14,7 +14,7 @@ import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
 import type { EditorDocument, Block, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
 import { updateDocument as saveToServer, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
 import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
-import { resolveStyle } from '@/lib/super-editor-v2/renderer/style-resolver'
+import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DocumentProvider } from '@/lib/super-editor-v2/context/document-context'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
 import { ContentTab } from '@/lib/super-editor-v2/components/editor/tabs/content-tab'
@@ -127,8 +127,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     return () => window.removeEventListener('resize', calculateScale)
   }, [selectedDevice])
 
-  // 스타일 해석
+  // 스타일 해석 및 CSS 변수 생성
   const resolvedStyle = useMemo(() => resolveStyle(editorDoc.style), [editorDoc.style])
+  const cssVariables = useMemo(() => styleToCSSVariables(resolvedStyle), [resolvedStyle])
 
   // AI 편집 훅
   const aiEdit = useAIEdit({
@@ -475,8 +476,14 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 }}
               >
                 <div
-                  className="w-full h-full bg-white overflow-hidden"
-                  style={{ borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem' }}
+                  className="w-full h-full overflow-hidden"
+                  style={{
+                    borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
+                    ...cssVariables,
+                    backgroundColor: 'var(--bg-page)',
+                    fontFamily: 'var(--font-body)',
+                    color: 'var(--fg-default)',
+                  }}
                 >
                   {editMode === 'form' && (
                     <DocumentProvider

@@ -18,6 +18,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { EditorDocument, Block, Element, TextProps } from '../../../schema/types'
+import { useDocumentStyle } from '../../../context/document-context'
 import { DraggableElement, type Position } from './draggable-element'
 import { ResizeHandles, type Size } from './resize-handles'
 import { RotateHandle } from './rotate-handle'
@@ -91,6 +92,7 @@ export function EditableCanvas({
   className = '',
 }: EditableCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
+  const style = useDocumentStyle()
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null)
   const [clipboard, setClipboard] = useState<Element | null>(null)
 
@@ -274,10 +276,12 @@ export function EditableCanvas({
   return (
     <div
       ref={canvasRef}
-      className={`relative bg-white overflow-y-auto overflow-x-hidden ${className}`}
+      className={`relative overflow-y-auto overflow-x-hidden ${className}`}
       style={{
         width: canvasWidth,
         height: '100%', // 컨테이너 높이에 맞춤
+        backgroundColor: style.tokens.bgPage,
+        color: style.tokens.fgDefault,
       }}
       onClick={handleCanvasClick}
     >
@@ -287,6 +291,9 @@ export function EditableCanvas({
 
         // 블록 높이 계산 (vh 기준 -> px)
         const blockHeightPx = (block.height / 100) * canvasHeight
+
+        // 블록별 스타일 오버라이드 가져오기
+        const blockTokens = style.blockOverrides.get(block.id) ?? style.tokens
 
         return (
           <div
@@ -299,6 +306,8 @@ export function EditableCanvas({
               width: '100%',
               minHeight: blockHeightPx,
               position: 'relative',
+              backgroundColor: blockTokens.bgSection,
+              color: blockTokens.fgDefault,
             }}
             data-block-id={block.id}
           >
