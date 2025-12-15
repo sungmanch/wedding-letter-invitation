@@ -45,6 +45,15 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-15: Super Editor v2 블록 높이 기준 요소 위치 계산 수정
+- **이유**: 블록 높이 조절 시 요소가 블록 밖으로 넘쳐서 다음 블록과 겹침
+- **원인**: element-renderer에서 요소 y/height를 viewport.height 기준으로 계산함 (블록 높이 기준이 아님)
+- **변경**:
+  - `element-renderer.tsx`: y, height를 블록 높이 기준으로 계산
+  - `block-renderer.tsx`: overflow: hidden 추가
+  - `editable-canvas.tsx`: overflow: hidden 추가
+- **파일**: `renderer/element-renderer.tsx`, `renderer/block-renderer.tsx`, `components/editor/direct/editable-canvas.tsx`
+
 ### 2025-12-15: Super Editor v2 커스텀 변수 시스템
 - **이유**: AI가 새 텍스트 요소 추가 시 편집기에서 수정 불가 ("텍스트를 입력하세요" 표시)
 - **변경**:
