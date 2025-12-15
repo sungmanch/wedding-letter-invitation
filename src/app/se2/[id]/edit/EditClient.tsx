@@ -4,13 +4,15 @@
  * Super Editor v2 - Edit Client
  *
  * 2패널 편집 화면 (에디터 + 프리뷰)
+ * - 변경 사항은 IndexedDB에 로컬 저장 (debounced)
+ * - 명시적 저장 버튼으로 서버 동기화
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
 import type { EditorDocument, Block, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
-import { updateBlocks, updateStyle, updateWeddingData, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
+import { updateDocument as saveToServer, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
 import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DocumentProvider } from '@/lib/super-editor-v2/context/document-context'
@@ -20,6 +22,7 @@ import { DesignTab } from '@/lib/super-editor-v2/components/editor/tabs/design-t
 import { ShareTab, type OgMetadata } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
 import { FloatingPromptInput } from '@/lib/super-editor-v2/components/editor/ai/prompt-input'
 import { useAIEdit } from '@/lib/super-editor-v2/hooks/useAIEdit'
+import { useLocalStorage } from '@/lib/super-editor-v2/hooks/useLocalStorage'
 import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/editor/direct/edit-mode-toggle'
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
@@ -52,12 +55,31 @@ type DevicePreset = typeof DEVICE_PRESETS[number]
 // ============================================
 
 export function EditClient({ document: dbDocument }: EditClientProps) {
-  // DB 데이터를 EditorDocument로 변환
-  const [editorDoc, setEditorDoc] = useState<EditorDocument>(() =>
-    toEditorDocument(dbDocument)
-  )
+  // 초기 문서 변환 (메모이제이션)
+  const initialDocument = useMemo(() => toEditorDocument(dbDocument), [dbDocument])
 
-  // OG 상태
+  // 로컬 저장소 훅 - IndexedDB 기반
+  const {
+    document: editorDoc,
+    updateDocument,
+    save,
+    isDirty,
+    isSaving,
+    lastSaved,
+    discardChanges,
+  } = useLocalStorage({
+    documentId: dbDocument.id,
+    initialDocument,
+    onSave: async (doc) => {
+      await saveToServer(dbDocument.id, {
+        blocks: doc.blocks,
+        style: doc.style,
+        data: doc.data,
+      })
+    },
+  })
+
+  // OG 상태 (별도 관리 - 즉시 저장)
   const [og, setOg] = useState<OgMetadata>(() => ({
     title: dbDocument.ogTitle || '',
     description: dbDocument.ogDescription || '',
@@ -67,13 +89,13 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // UI 상태
   const [activeTab, setActiveTab] = useState<TabType>('content')
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
   const [showAIPrompt, setShowAIPrompt] = useState(false)
-  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEVICE_PRESETS[1]) // iPhone 14 기본
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEVICE_PRESETS[1])
   const [showDeviceMenu, setShowDeviceMenu] = useState(false)
   const [previewScale, setPreviewScale] = useState(1)
   const [editMode, setEditMode] = useState<EditMode>('form')
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false)
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
 
@@ -92,29 +114,21 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   useEffect(() => {
     function calculateScale() {
       if (!previewContainerRef.current) return
-
       const container = previewContainerRef.current
-      const padding = 48 // p-6 = 24px * 2
+      const padding = 48
       const availableWidth = container.clientWidth - padding
       const availableHeight = container.clientHeight - padding
-
       const scaleX = availableWidth / selectedDevice.width
       const scaleY = availableHeight / selectedDevice.height
-      const scale = Math.min(scaleX, scaleY, 1) // 최대 1배 (확대 안함)
-
-      setPreviewScale(scale)
+      setPreviewScale(Math.min(scaleX, scaleY, 1))
     }
-
     calculateScale()
     window.addEventListener('resize', calculateScale)
     return () => window.removeEventListener('resize', calculateScale)
   }, [selectedDevice])
 
   // 스타일 해석
-  const resolvedStyle = useMemo(
-    () => resolveStyle(editorDoc.style),
-    [editorDoc.style]
-  )
+  const resolvedStyle = useMemo(() => resolveStyle(editorDoc.style), [editorDoc.style])
 
   // AI 편집 훅
   const aiEdit = useAIEdit({
@@ -129,47 +143,20 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     return editorDoc.blocks.find(b => b.id === expandedBlockId)
   }, [editorDoc.blocks, expandedBlockId])
 
-  // 블록 업데이트
-  const handleBlocksChange = useCallback(async (newBlocks: Block[]) => {
-    setEditorDoc(prev => ({ ...prev, blocks: newBlocks }))
+  // 블록 업데이트 (로컬 저장만)
+  const handleBlocksChange = useCallback((newBlocks: Block[]) => {
+    updateDocument(prev => ({ ...prev, blocks: newBlocks }))
+  }, [updateDocument])
 
-    setIsSaving(true)
-    try {
-      await updateBlocks(dbDocument.id, newBlocks)
-    } catch (error) {
-      console.error('Failed to save blocks:', error)
-    } finally {
-      setIsSaving(false)
-    }
-  }, [dbDocument.id])
+  // 스타일 업데이트 (로컬 저장만)
+  const handleStyleChange = useCallback((newStyle: StyleSystem) => {
+    updateDocument(prev => ({ ...prev, style: newStyle }))
+  }, [updateDocument])
 
-  // 스타일 업데이트
-  const handleStyleChange = useCallback(async (newStyle: StyleSystem) => {
-    setEditorDoc(prev => ({ ...prev, style: newStyle }))
-
-    setIsSaving(true)
-    try {
-      await updateStyle(dbDocument.id, newStyle)
-    } catch (error) {
-      console.error('Failed to save style:', error)
-    } finally {
-      setIsSaving(false)
-    }
-  }, [dbDocument.id])
-
-  // 데이터 업데이트
-  const handleDataChange = useCallback(async (newData: WeddingData) => {
-    setEditorDoc(prev => ({ ...prev, data: newData }))
-
-    setIsSaving(true)
-    try {
-      await updateWeddingData(dbDocument.id, newData)
-    } catch (error) {
-      console.error('Failed to save data:', error)
-    } finally {
-      setIsSaving(false)
-    }
-  }, [dbDocument.id])
+  // 데이터 업데이트 (로컬 저장만)
+  const handleDataChange = useCallback((newData: WeddingData) => {
+    updateDocument(prev => ({ ...prev, data: newData }))
+  }, [updateDocument])
 
   // 블록 선택 (프리뷰에서)
   const handleBlockSelect = useCallback((blockId: string) => {
@@ -180,18 +167,16 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 요소 선택 (직접 편집 모드)
   const handleElementSelect = useCallback((elementId: string | null, blockId?: string) => {
     setSelectedElementId(elementId)
-    if (blockId) {
-      setExpandedBlockId(blockId)
-    }
+    if (blockId) setExpandedBlockId(blockId)
   }, [])
 
-  // 요소 업데이트 (직접 편집 모드)
-  const handleElementUpdate = useCallback(async (
+  // 요소 업데이트 (직접 편집 모드, 로컬 저장만)
+  const handleElementUpdate = useCallback((
     blockId: string,
     elementId: string,
     updates: Partial<Element>
   ) => {
-    setEditorDoc(prev => ({
+    updateDocument(prev => ({
       ...prev,
       blocks: prev.blocks.map(block => {
         if (block.id !== blockId) return block
@@ -203,29 +188,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         }
       }),
     }))
+  }, [updateDocument])
 
-    // 서버 저장
-    const newBlocks = editorDoc.blocks.map(block => {
-      if (block.id !== blockId) return block
-      return {
-        ...block,
-        elements: block.elements?.map(el =>
-          el.id === elementId ? { ...el, ...updates } : el
-        ),
-      }
-    })
-
-    setIsSaving(true)
-    try {
-      await updateBlocks(dbDocument.id, newBlocks)
-    } catch (error) {
-      console.error('Failed to save element update:', error)
-    } finally {
-      setIsSaving(false)
-    }
-  }, [dbDocument.id, editorDoc.blocks])
-
-  // 이미지 업로드
+  // 이미지 업로드 (즉시 서버 업로드)
   const handleUploadImage = useCallback(async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -247,11 +212,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     })
   }, [dbDocument.id])
 
-  // OG 업데이트
+  // OG 업데이트 (즉시 서버 저장)
   const handleOgChange = useCallback(async (newOg: OgMetadata) => {
     setOg(newOg)
-
-    setIsSaving(true)
     try {
       await updateOgMetadata(dbDocument.id, {
         ogTitle: newOg.title,
@@ -260,12 +223,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       })
     } catch (error) {
       console.error('Failed to save OG:', error)
-    } finally {
-      setIsSaving(false)
     }
   }, [dbDocument.id])
 
-  // OG 기본값 (문서 데이터에서)
+  // OG 기본값
   const defaultOg = useMemo(() => {
     const groomName = editorDoc.data.groom?.name || '신랑'
     const brideName = editorDoc.data.bride?.name || '신부'
@@ -281,6 +242,36 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     setShowAIPrompt(false)
   }, [aiEdit, expandedBlockId])
 
+  // 저장 핸들러
+  const handleSave = useCallback(async () => {
+    try {
+      await save()
+    } catch (error) {
+      console.error('Failed to save:', error)
+      alert('저장에 실패했습니다. 다시 시도해주세요.')
+    }
+  }, [save])
+
+  // 변경사항 취소
+  const handleDiscard = useCallback(() => {
+    discardChanges()
+    setShowDiscardDialog(false)
+  }, [discardChanges])
+
+  // 키보드 단축키 (Cmd/Ctrl + S)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        if (isDirty && !isSaving) {
+          handleSave()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isDirty, isSaving, handleSave])
+
   return (
     <div className="h-screen flex flex-col bg-[#1a1a1a] text-[#F5E6D3]">
       {/* 헤더 */}
@@ -293,21 +284,58 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             ← 목록
           </Link>
           <h1 className="font-medium">{editorDoc.meta.title}</h1>
-          {isSaving && (
-            <span className="text-xs text-[#F5E6D3]/40">저장 중...</span>
-          )}
+
+          {/* 저장 상태 표시 */}
+          <div className="flex items-center gap-2 text-xs">
+            {isSaving && (
+              <span className="text-[#C9A962] flex items-center gap-1">
+                <LoadingSpinner className="w-3 h-3" />
+                저장 중...
+              </span>
+            )}
+            {!isSaving && isDirty && (
+              <span className="text-[#F5E6D3]/40">저장되지 않은 변경사항</span>
+            )}
+            {!isSaving && !isDirty && lastSaved && (
+              <span className="text-green-400/60">
+                저장됨 {formatTime(lastSaved)}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* 변경사항 취소 버튼 */}
+          {isDirty && (
+            <button
+              onClick={() => setShowDiscardDialog(true)}
+              className="px-3 py-1.5 rounded-lg text-sm text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5 transition-colors"
+            >
+              취소
+            </button>
+          )}
+
+          {/* 저장 버튼 */}
+          <button
+            onClick={handleSave}
+            disabled={!isDirty || isSaving}
+            className={`
+              px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+              flex items-center gap-2
+              ${isDirty && !isSaving
+                ? 'bg-[#C9A962] text-[#0A0806] hover:bg-[#D4B876]'
+                : 'bg-white/10 text-[#F5E6D3]/40 cursor-not-allowed'
+              }
+            `}
+          >
+            <SaveIcon className="w-4 h-4" />
+            저장
+          </button>
+
           {/* AI 버튼 */}
           <button
             onClick={() => setShowAIPrompt(true)}
-            className="
-              px-3 py-1.5 rounded-lg text-sm
-              bg-[#C9A962]/20 text-[#C9A962]
-              hover:bg-[#C9A962]/30 transition-colors
-              flex items-center gap-2
-            "
+            className="px-3 py-1.5 rounded-lg text-sm bg-[#C9A962]/20 text-[#C9A962] hover:bg-[#C9A962]/30 transition-colors flex items-center gap-2"
           >
             <SparklesIcon className="w-4 h-4" />
             AI 편집
@@ -317,11 +345,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           <Link
             href={`/se2/${dbDocument.id}/preview`}
             target="_blank"
-            className="
-              px-3 py-1.5 rounded-lg text-sm
-              bg-white/10 text-[#F5E6D3]
-              hover:bg-white/20 transition-colors
-            "
+            className="px-3 py-1.5 rounded-lg text-sm bg-white/10 text-[#F5E6D3] hover:bg-white/20 transition-colors"
           >
             미리보기
           </Link>
@@ -387,22 +411,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <div className="flex-1 flex flex-col bg-[#0f0f0f]">
           {/* 디바이스 선택 바 + 모드 토글 */}
           <div className="flex-shrink-0 h-12 border-b border-white/10 flex items-center justify-between px-4">
-            {/* 편집 모드 토글 */}
-            <EditModeToggle
-              mode={editMode}
-              onChange={setEditMode}
-              size="sm"
-            />
+            <EditModeToggle mode={editMode} onChange={setEditMode} size="sm" />
 
-            {/* 디바이스 선택 */}
             <div className="relative" ref={deviceMenuRef}>
               <button
                 onClick={() => setShowDeviceMenu(!showDeviceMenu)}
-                className="
-                  flex items-center gap-2 px-3 py-1.5 rounded-lg
-                  bg-white/5 hover:bg-white/10 transition-colors
-                  text-sm text-[#F5E6D3]
-                "
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm text-[#F5E6D3]"
               >
                 <DevicePhoneIcon className="w-4 h-4" />
                 <span>{selectedDevice.name}</span>
@@ -417,13 +431,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 <ChevronDownIcon className="w-4 h-4 text-[#F5E6D3]/40" />
               </button>
 
-              {/* 드롭다운 메뉴 */}
               {showDeviceMenu && (
-                <div className="
-                  absolute top-full left-1/2 -translate-x-1/2 mt-2
-                  bg-[#2a2a2a] border border-white/10 rounded-lg shadow-xl
-                  py-1 min-w-[200px] z-50
-                ">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#2a2a2a] border border-white/10 rounded-lg shadow-xl py-1 min-w-[200px] z-50">
                   {DEVICE_PRESETS.map((device) => (
                     <button
                       key={device.id}
@@ -431,12 +440,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                         setSelectedDevice(device)
                         setShowDeviceMenu(false)
                       }}
-                      className={`
-                        w-full px-3 py-2 text-left text-sm
-                        flex items-center justify-between
-                        hover:bg-white/5 transition-colors
-                        ${selectedDevice.id === device.id ? 'text-[#C9A962]' : 'text-[#F5E6D3]'}
-                      `}
+                      className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-white/5 transition-colors ${selectedDevice.id === device.id ? 'text-[#C9A962]' : 'text-[#F5E6D3]'}`}
                     >
                       <span>{device.name}</span>
                       <span className="text-[#F5E6D3]/40 text-xs">
@@ -463,7 +467,6 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 transformOrigin: 'center center',
               }}
             >
-              {/* 폰 프레임 */}
               <div
                 className="absolute inset-0 bg-black shadow-2xl"
                 style={{
@@ -473,17 +476,14 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               >
                 <div
                   className="w-full h-full bg-white overflow-hidden"
-                  style={{
-                    borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
-                  }}
+                  style={{ borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem' }}
                 >
-                  {/* 폼 모드: 읽기 전용 프리뷰 */}
                   {editMode === 'form' && (
                     <DocumentProvider
                       document={editorDoc}
                       style={resolvedStyle}
                       viewportOverride={{
-                        width: selectedDevice.width - 24, // 프레임 패딩 제외
+                        width: selectedDevice.width - 24,
                         height: selectedDevice.height - 24,
                       }}
                     >
@@ -498,7 +498,6 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     </DocumentProvider>
                   )}
 
-                  {/* 직접 편집 모드: 드래그/리사이즈/회전 가능 + 실제 스타일 적용 */}
                   {editMode === 'direct' && (
                     <DocumentProvider
                       document={editorDoc}
@@ -526,12 +525,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 </div>
               </div>
 
-              {/* 노치 (iPhone 스타일) */}
               {selectedDevice.notch && (
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full z-10" />
               )}
-
-              {/* 펀치홀 (Galaxy/Pixel 스타일) */}
               {!selectedDevice.notch && selectedDevice.id.includes('galaxy') && (
                 <div className="absolute top-5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black rounded-full z-10" />
               )}
@@ -548,11 +544,75 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         isLoading={aiEdit.isLoading}
         selectedBlockName={selectedBlock ? `${selectedBlock.type} 블록` : undefined}
       />
+
+      {/* 변경사항 취소 확인 다이얼로그 */}
+      {showDiscardDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#2a2a2a] border border-white/10 rounded-xl p-6 max-w-sm mx-4">
+            <h3 className="text-lg font-medium mb-2">변경사항을 취소하시겠습니까?</h3>
+            <p className="text-[#F5E6D3]/60 text-sm mb-6">
+              저장하지 않은 모든 변경사항이 삭제됩니다.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDiscardDialog(false)}
+                className="px-4 py-2 rounded-lg text-sm bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                계속 편집
+              </button>
+              <button
+                onClick={handleDiscard}
+                className="px-4 py-2 rounded-lg text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+              >
+                변경사항 취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
+// ============================================
+// Utility Functions
+// ============================================
+
+function formatTime(date: Date): string {
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+
+  if (minutes < 1) return '방금'
+  if (minutes < 60) return `${minutes}분 전`
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}시간 전`
+
+  return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+}
+
+// ============================================
 // Icons
+// ============================================
+
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg className={`animate-spin ${className}`} fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+    </svg>
+  )
+}
+
+function SaveIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+    </svg>
+  )
+}
+
 function SparklesIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">

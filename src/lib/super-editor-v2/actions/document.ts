@@ -134,6 +134,58 @@ export async function deleteDocument(documentId: string): Promise<boolean> {
 }
 
 // ============================================
+// Full Document Update
+// ============================================
+
+/**
+ * 문서 전체 업데이트 (blocks, style, data 한번에)
+ * 저장 버튼 클릭 시 사용
+ */
+export async function updateDocument(
+  documentId: string,
+  updates: {
+    blocks?: Block[]
+    style?: StyleSystem
+    data?: WeddingData
+    animation?: GlobalAnimation
+  },
+  createSnapshotOnSave = false
+): Promise<EditorDocumentV2 | null> {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  // 스냅샷 생성 (선택적)
+  if (createSnapshotOnSave) {
+    await createSnapshotInternal(documentId, user.id, 'manual', 'Manual save')
+  }
+
+  const setData: Record<string, unknown> = {
+    updatedAt: new Date(),
+    documentVersion: sql`document_version + 1`,
+  }
+
+  if (updates.blocks) setData.blocks = updates.blocks
+  if (updates.style) setData.style = updates.style
+  if (updates.data) setData.data = updates.data
+  if (updates.animation) setData.animation = updates.animation
+
+  const [updated] = await db
+    .update(editorDocumentsV2)
+    .set(setData)
+    .where(and(
+      eq(editorDocumentsV2.id, documentId),
+      eq(editorDocumentsV2.userId, user.id)
+    ))
+    .returning()
+
+  return updated ?? null
+}
+
+// ============================================
 // Partial Updates
 // ============================================
 
