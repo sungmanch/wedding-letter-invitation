@@ -197,6 +197,9 @@ function BlockAccordion({
     for (const el of block.elements ?? []) {
       if (!el.binding) continue
 
+      // 자동 계산 필드는 숨김
+      if (HIDDEN_VARIABLE_PATHS.has(el.binding)) continue
+
       // 같은 바인딩은 한 번만 표시
       if (seenBindings.has(el.binding)) continue
       seenBindings.add(el.binding)
@@ -816,6 +819,22 @@ interface FieldConfig {
   placeholder?: string
 }
 
+// 자동 계산되는 필드 (편집기에서 숨김)
+const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
+  // 날짜/시간 파생 필드
+  'wedding.dateDisplay',
+  'wedding.timeDisplay',
+  'wedding.dday',
+  'wedding.month',
+  'wedding.day',
+  'wedding.weekday',
+  // 카운트다운 (실시간 계산)
+  'countdown.days',
+  'countdown.hours',
+  'countdown.minutes',
+  'countdown.seconds',
+])
+
 const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 신랑 정보
   'groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
@@ -866,31 +885,18 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
 // Block type icons (editor-panel.tsx와 동일)
 const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   hero: '🖼️',
-  greeting: '💌',
+  'greeting-parents': '💌',
+  profile: '👤',
   calendar: '📅',
   gallery: '🎨',
+  rsvp: '✅',
   location: '📍',
-  parents: '👨‍👩‍👧',
-  contact: '📞',
+  notice: '📢',
   account: '💳',
   message: '💬',
-  rsvp: '✅',
-  loading: '⏳',
-  quote: '✨',
-  profile: '👤',
-  'parents-contact': '📱',
-  timeline: '📆',
-  video: '🎬',
-  interview: '🎤',
-  transport: '🚗',
-  notice: '📢',
-  announcement: '📝',
-  'flower-gift': '💐',
-  'together-time': '⏰',
-  dday: '🎯',
-  'guest-snap': '📸',
   ending: '🎬',
   music: '🎵',
+  loading: '⏳',
   custom: '🔧',
 }
 
