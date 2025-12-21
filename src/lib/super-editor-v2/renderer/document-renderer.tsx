@@ -31,6 +31,8 @@ export interface DocumentRendererProps {
   onElementClick?: (blockId: string, elementId: string) => void
   // 추가 className
   className?: string
+  // 외부 DocumentProvider 사용 시 true (내부 Provider 스킵)
+  skipProvider?: boolean
 }
 
 // ============================================
@@ -44,6 +46,7 @@ export function DocumentRenderer({
   onBlockClick,
   onElementClick,
   className = '',
+  skipProvider = false,
 }: DocumentRendererProps) {
   // 스타일 해석
   const resolvedStyle = useMemo<ResolvedStyle>(
@@ -66,59 +69,69 @@ export function DocumentRenderer({
   // 플로팅 요소들
   const floatingElements = document.animation.floatingElements ?? []
 
+  // 내부 콘텐츠
+  const content = (
+    <AnimationProvider config={document.animation}>
+      <div
+        className={`se2-document ${className}`}
+        style={{
+          ...cssVariables,
+          backgroundColor: 'var(--bg-page)',
+          color: 'var(--fg-default)',
+          fontFamily: 'var(--font-body)',
+          minHeight: '100%',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        data-mode={mode}
+        data-editable={editable}
+      >
+        {/* 블록 렌더링 */}
+        <div className="se2-blocks">
+          {enabledBlocks.map((block, index) => (
+            <BlockRenderer
+              key={block.id}
+              block={block}
+              blockIndex={index}
+              editable={editable}
+              onBlockClick={onBlockClick}
+              onElementClick={onElementClick}
+            />
+          ))}
+        </div>
+
+        {/* 플로팅 요소 렌더링 */}
+        {floatingElements.length > 0 && (
+          <FloatingRenderer elements={floatingElements} />
+        )}
+
+        {/* 편집 모드 오버레이 */}
+        {editable && mode === 'edit' && (
+          <div
+            className="se2-edit-overlay"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              pointerEvents: 'none',
+              zIndex: 9999,
+            }}
+          />
+        )}
+      </div>
+    </AnimationProvider>
+  )
+
+  // skipProvider가 true면 Provider 없이 렌더링
+  if (skipProvider) {
+    return content
+  }
+
   return (
     <DocumentProvider document={document} style={resolvedStyle}>
-      <AnimationProvider config={document.animation}>
-        <div
-          className={`se2-document ${className}`}
-          style={{
-            ...cssVariables,
-            backgroundColor: 'var(--bg-page)',
-            color: 'var(--fg-default)',
-            fontFamily: 'var(--font-body)',
-            minHeight: '100vh',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-          data-mode={mode}
-          data-editable={editable}
-        >
-          {/* 블록 렌더링 */}
-          <div className="se2-blocks">
-            {enabledBlocks.map((block, index) => (
-              <BlockRenderer
-                key={block.id}
-                block={block}
-                blockIndex={index}
-                editable={editable}
-                onBlockClick={onBlockClick}
-                onElementClick={onElementClick}
-              />
-            ))}
-          </div>
-
-          {/* 플로팅 요소 렌더링 */}
-          {floatingElements.length > 0 && (
-            <FloatingRenderer elements={floatingElements} />
-          )}
-
-          {/* 편집 모드 오버레이 */}
-          {editable && mode === 'edit' && (
-            <div
-              className="se2-edit-overlay"
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                pointerEvents: 'none',
-                zIndex: 9999,
-              }}
-            />
-          )}
-        </div>
-      </AnimationProvider>
+      {content}
     </DocumentProvider>
   )
 }

@@ -4,8 +4,8 @@
  * Super Editor v2 - Editable Canvas
  *
  * 직접 편집 모드의 캔버스
- * - 블록별 요소 렌더링
- * - DraggableElement로 드래그/리사이즈/회전 지원
+ * - 블록 기반 레이아웃 (세로 스크롤)
+ * - 각 블록 내에서 요소 드래그/리사이즈/회전
  * - 요소 선택 및 컨텍스트 메뉴
  * - ID 배지 표시
  */
@@ -15,9 +15,11 @@ import {
   useState,
   useMemo,
   useRef,
+  useEffect,
   type ReactNode,
 } from 'react'
 import type { EditorDocument, Block, Element, TextProps } from '../../../schema/types'
+import { useDocumentStyle } from '../../../context/document-context'
 import { DraggableElement, type Position } from './draggable-element'
 import { ResizeHandles, type Size } from './resize-handles'
 import { RotateHandle } from './rotate-handle'
@@ -54,11 +56,13 @@ export interface EditableCanvasProps {
   onElementDelete?: (blockId: string, elementId: string) => void
   /** 요소 복제 콜백 */
   onElementDuplicate?: (blockId: string, elementId: string) => void
+  /** 블록 높이 변경 콜백 */
+  onBlockHeightChange?: (blockId: string, height: number) => void
   /** 컨텍스트 메뉴 콜백 (외부 처리용) */
   onContextMenu?: (context: ContextMenuState) => void
   /** 캔버스 너비 */
   canvasWidth?: number
-  /** 캔버스 높이 */
+  /** 캔버스 높이 (뷰포트 높이, 블록 높이 계산용) */
   canvasHeight?: number
   /** 그리드 스냅 (px) */
   gridSnap?: number
@@ -66,6 +70,8 @@ export interface EditableCanvasProps {
   showIdBadge?: boolean
   /** 요소 렌더러 */
   renderElement?: (element: Element, block: Block) => ReactNode
+  /** 스크롤 비활성화 (외부 스크롤 컨테이너 사용 시) */
+  disableScroll?: boolean
   /** 추가 className */
   className?: string
 }
@@ -82,15 +88,18 @@ export function EditableCanvas({
   onElementUpdate,
   onElementDelete,
   onElementDuplicate,
+  onBlockHeightChange,
   onContextMenu: externalContextMenu,
   canvasWidth = 375,
   canvasHeight = 667,
   gridSnap,
   showIdBadge = true,
   renderElement,
+  disableScroll = false,
   className = '',
 }: EditableCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
+  const style = useDocumentStyle()
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null)
   const [clipboard, setClipboard] = useState<Element | null>(null)
 
@@ -113,33 +122,35 @@ export function EditableCanvas({
     onElementSelect(null)
   }, [onElementSelect])
 
-  // 요소 위치 변경
+  // 요소 위치 변경 (블록 높이 기준)
   const handlePositionChange = useCallback((
     blockId: string,
     elementId: string,
-    newPosition: Position
+    newPosition: Position,
+    blockHeightPx: number
   ) => {
-    // px를 퍼센트로 변환
+    // px를 퍼센트로 변환 (블록 높이 기준)
     const x = pxToPercent(newPosition.x, canvasWidth)
-    const y = pxToPercent(newPosition.y, canvasHeight)
+    const y = pxToPercent(newPosition.y, blockHeightPx)
 
     onElementUpdate(blockId, elementId, { x, y })
-  }, [canvasWidth, canvasHeight, onElementUpdate])
+  }, [canvasWidth, onElementUpdate])
 
-  // 요소 크기 변경
+  // 요소 크기 변경 (블록 높이 기준)
   const handleSizeChange = useCallback((
     blockId: string,
     elementId: string,
     newSize: Size,
-    newPosition: Position
+    newPosition: Position,
+    blockHeightPx: number
   ) => {
     const x = pxToPercent(newPosition.x, canvasWidth)
-    const y = pxToPercent(newPosition.y, canvasHeight)
+    const y = pxToPercent(newPosition.y, blockHeightPx)
     const width = pxToPercent(newSize.width, canvasWidth)
-    const height = pxToPercent(newSize.height, canvasHeight)
+    const height = pxToPercent(newSize.height, blockHeightPx)
 
     onElementUpdate(blockId, elementId, { x, y, width, height })
-  }, [canvasWidth, canvasHeight, onElementUpdate])
+  }, [canvasWidth, onElementUpdate])
 
   // 요소 회전 변경
   const handleRotationChange = useCallback((
@@ -178,7 +189,6 @@ export function EditableCanvas({
     const success = await copyIdToClipboard(displayId)
 
     if (success) {
-      // toast 사용 시 여기서 호출
       console.log(`#${displayId} 복사됨`)
     }
 
@@ -196,8 +206,6 @@ export function EditableCanvas({
   // 요소 붙여넣기
   const handlePaste = useCallback(() => {
     if (!clipboard || !selectedBlockId) return
-
-    // 복제 콜백 사용 또는 직접 처리
     console.log('Paste element:', clipboard)
     close()
   }, [clipboard, selectedBlockId, close])
@@ -205,7 +213,6 @@ export function EditableCanvas({
   // 요소 삭제
   const handleDelete = useCallback(() => {
     if (!menuContext || !onElementDelete) return
-
     onElementDelete(menuContext.block.id, menuContext.element.id)
     close()
   }, [menuContext, onElementDelete, close])
@@ -213,7 +220,6 @@ export function EditableCanvas({
   // 요소 복제
   const handleDuplicate = useCallback(() => {
     if (!menuContext || !onElementDuplicate) return
-
     onElementDuplicate(menuContext.block.id, menuContext.element.id)
     close()
   }, [menuContext, onElementDuplicate, close])
@@ -221,7 +227,6 @@ export function EditableCanvas({
   // 순서 변경
   const handleBringToFront = useCallback(() => {
     if (!menuContext) return
-    // zIndex를 최대값으로 설정
     const maxZ = Math.max(
       ...menuContext.block.elements?.map(el => el.zIndex || 0) || [0]
     )
@@ -231,7 +236,6 @@ export function EditableCanvas({
 
   const handleSendToBack = useCallback(() => {
     if (!menuContext) return
-    // zIndex를 최소값으로 설정
     const minZ = Math.min(
       ...menuContext.block.elements?.map(el => el.zIndex || 0) || [0]
     )
@@ -246,7 +250,6 @@ export function EditableCanvas({
     const displayId = getDisplayId(menuContext.element, menuContext.block)
 
     return [
-      // ID 복사 (상단에 추가)
       {
         id: 'copy-id',
         label: `ID 복사 (#${displayId})`,
@@ -255,7 +258,6 @@ export function EditableCanvas({
         onClick: handleCopyId,
       },
       { id: 'divider-id', label: '', divider: true },
-      // 기본 메뉴
       ...createElementMenuItems({
         onCopy: handleCopy,
         onPaste: handlePaste,
@@ -281,24 +283,40 @@ export function EditableCanvas({
   return (
     <div
       ref={canvasRef}
-      className={`relative bg-white overflow-hidden ${className}`}
+      className={`relative ${disableScroll ? '' : 'overflow-y-auto overflow-x-hidden'} ${className}`}
       style={{
         width: canvasWidth,
-        height: canvasHeight,
+        height: disableScroll ? 'auto' : '100%',
+        backgroundColor: style.tokens.bgPage,
+        color: style.tokens.fgDefault,
       }}
       onClick={handleCanvasClick}
     >
-      {/* 블록별 요소 렌더링 */}
+      {/* 블록 기반 레이아웃: 세로로 쌓임 */}
       {document.blocks.map(block => {
         if (!block.enabled) return null
+
+        // 블록 높이 계산 (vh 기준 -> px)
+        const blockHeightPx = (block.height / 100) * canvasHeight
+
+        // 블록별 스타일 오버라이드 가져오기
+        const blockTokens = style.blockOverrides.get(block.id) ?? style.tokens
 
         return (
           <div
             key={block.id}
             className={`
               block-layer relative
-              ${block.id === selectedBlockId ? 'ring-1 ring-[#C9A962]/30' : ''}
+              ${block.id === selectedBlockId ? 'ring-2 ring-[#C9A962]/50 ring-inset' : ''}
             `}
+            style={{
+              width: '100%',
+              minHeight: blockHeightPx,
+              position: 'relative',
+              overflow: 'hidden', // 블록 밖으로 넘치는 요소 잘라냄
+              backgroundColor: blockTokens.bgSection,
+              color: blockTokens.fgDefault,
+            }}
             data-block-id={block.id}
           >
             {block.elements?.map(element => {
@@ -306,18 +324,18 @@ export function EditableCanvas({
               const isHovered = element.id === hoveredElementId
               const displayId = getDisplayId(element, block)
 
-              // 퍼센트를 px로 변환
+              // 퍼센트를 px로 변환 (블록 높이 기준)
               const posX = (element.x || 0) / 100 * canvasWidth
-              const posY = (element.y || 0) / 100 * canvasHeight
+              const posY = (element.y || 0) / 100 * blockHeightPx
               const width = (element.width || 10) / 100 * canvasWidth
-              const height = (element.height || 10) / 100 * canvasHeight
+              const height = (element.height || 10) / 100 * blockHeightPx
 
               return (
                 <DraggableElement
                   key={element.id}
                   elementId={element.id}
                   position={{ x: posX, y: posY }}
-                  onPositionChange={(_id, pos) => handlePositionChange(block.id, element.id, pos)}
+                  onPositionChange={(_id, pos) => handlePositionChange(block.id, element.id, pos, blockHeightPx)}
                   onSelect={() => onElementSelect(element.id, block.id)}
                   isSelected={isSelected}
                   gridSnap={gridSnap}
@@ -366,7 +384,7 @@ export function EditableCanvas({
                             handleSizeChange(block.id, element.id, size, {
                               x: posX + pos.x,
                               y: posY + pos.y,
-                            })
+                            }, blockHeightPx)
                           }
                           keepAspectRatio={element.type === 'image'}
                         />
@@ -383,6 +401,23 @@ export function EditableCanvas({
                 </DraggableElement>
               )
             })}
+
+            {/* 블록 높이 조절 핸들 */}
+            {onBlockHeightChange && (
+              <BlockResizeHandle
+                blockId={block.id}
+                blockHeight={block.height}
+                canvasHeight={canvasHeight}
+                onHeightChange={onBlockHeightChange}
+              />
+            )}
+
+            {/* 블록 구분선 (편집 모드 시각적 피드백) */}
+            {!onBlockHeightChange && (
+              <div
+                className="absolute bottom-0 left-0 right-0 h-px bg-[#C9A962]/20 pointer-events-none"
+              />
+            )}
           </div>
         )
       })}
@@ -415,7 +450,6 @@ function DefaultElementRenderer({ element }: DefaultElementRendererProps) {
     justifyContent: 'center',
   }
 
-  // 텍스트 스타일 추출
   const textStyle = element.style?.text
 
   switch (element.type) {
@@ -495,6 +529,88 @@ function DefaultElementRenderer({ element }: DefaultElementRendererProps) {
         </div>
       )
   }
+}
+
+// ============================================
+// Block Resize Handle
+// ============================================
+
+interface BlockResizeHandleProps {
+  blockId: string
+  blockHeight: number // vh 단위
+  canvasHeight: number // px
+  onHeightChange: (blockId: string, height: number) => void
+}
+
+function BlockResizeHandle({
+  blockId,
+  blockHeight,
+  canvasHeight,
+  onHeightChange,
+}: BlockResizeHandleProps) {
+  const [isDragging, setIsDragging] = useState(false)
+  const startYRef = useRef(0)
+  const startHeightRef = useRef(0)
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    startYRef.current = e.clientY
+    startHeightRef.current = blockHeight
+  }, [blockHeight])
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = e.clientY - startYRef.current
+      // px를 vh로 변환
+      const deltaVh = (deltaY / canvasHeight) * 100
+      const newHeight = Math.max(10, startHeightRef.current + deltaVh) // 최소 10vh
+      onHeightChange(blockId, Math.round(newHeight))
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, blockId, canvasHeight, onHeightChange])
+
+  return (
+    <div
+      className={`
+        absolute bottom-0 left-0 right-0 h-4
+        flex items-center justify-center
+        cursor-ns-resize group z-50
+        ${isDragging ? 'bg-[#C9A962]/20' : 'hover:bg-[#C9A962]/10'}
+      `}
+      onMouseDown={handleMouseDown}
+    >
+      {/* 핸들 라인 */}
+      <div
+        className={`
+          w-12 h-1 rounded-full transition-colors
+          ${isDragging ? 'bg-[#C9A962]' : 'bg-[#C9A962]/40 group-hover:bg-[#C9A962]/60'}
+        `}
+      />
+      {/* 높이 표시 (드래그 중) */}
+      {isDragging && (
+        <div
+          className="absolute right-2 bottom-full mb-1 px-2 py-0.5 rounded bg-[#2a2a2a] text-[#C9A962] text-xs font-mono"
+        >
+          {blockHeight}vh
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ============================================

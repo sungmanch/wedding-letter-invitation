@@ -79,14 +79,18 @@ function BlockContainer({
   onElementClick,
 }: BlockContainerProps) {
   const tokens = useBlockTokens()
-  const { activeBlockId } = useDocument()
+  const { activeBlockId, viewport } = useDocument()
   const isActive = activeBlockId === block.id
 
-  // 블록 스타일 계산
+  // 블록 스타일 계산 (viewport.height 기반으로 높이 계산)
   const blockStyle = useMemo<CSSProperties>(() => {
+    // vh 대신 viewport.height를 기준으로 계산
+    const heightInPx = (block.height / 100) * viewport.height
+
     const style: CSSProperties = {
       position: 'relative',
-      minHeight: `${block.height}vh`,
+      minHeight: `${heightInPx}px`,
+      overflow: 'hidden', // 블록 밖으로 넘치는 요소 잘라냄
       backgroundColor: tokens.bgSection,
       color: tokens.fgDefault,
     }
@@ -104,7 +108,7 @@ function BlockContainer({
     }
 
     return style
-  }, [block.height, block.style, tokens, editable, isActive])
+  }, [block.height, block.style, tokens, editable, isActive, viewport.height])
 
   return (
     <section
