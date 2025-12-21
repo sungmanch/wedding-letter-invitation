@@ -878,10 +878,12 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
 
   // 혼주 정보 (신규)
+  'parents.groom.birthOrder': { label: '신랑 서열', type: 'text', placeholder: '장남' },
   'parents.groom.father.name': { label: '신랑 아버지 성함', type: 'text' },
   'parents.groom.father.phone': { label: '신랑 아버지 연락처', type: 'phone' },
   'parents.groom.mother.name': { label: '신랑 어머니 성함', type: 'text' },
   'parents.groom.mother.phone': { label: '신랑 어머니 연락처', type: 'phone' },
+  'parents.bride.birthOrder': { label: '신부 서열', type: 'text', placeholder: '차녀' },
   'parents.bride.father.name': { label: '신부 아버지 성함', type: 'text' },
   'parents.bride.father.phone': { label: '신부 아버지 연락처', type: 'phone' },
   'parents.bride.mother.name': { label: '신부 어머니 성함', type: 'text' },

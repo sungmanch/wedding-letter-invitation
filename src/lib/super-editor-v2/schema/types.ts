@@ -49,6 +49,9 @@ export interface Block {
   // 의미적 타입 (AI 맥락 이해용)
   type: BlockType
 
+  // 프리셋 ID (e.g., 'calendar-countdown', 'profile-dual-card')
+  presetId?: string
+
   // 블록 활성화 여부
   enabled: boolean
 
@@ -68,32 +71,19 @@ export interface Block {
 export type BlockType =
   // ─── 핵심 섹션 ───
   | 'hero'              // 메인 히어로 (메인 사진, 이름, 날짜)
-  | 'greeting'          // 인사말
-  | 'calendar'          // 달력/D-day
-  | 'gallery'           // 포토 갤러리
-  | 'location'          // 예식장 정보 + 지도
-  | 'parents'           // 혼주 소개
-  | 'contact'           // 연락처
-  | 'account'           // 축의금 계좌
-  | 'message'           // 축하 메시지/방명록
+  | 'greeting-parents'  // 인사말 + 혼주 소개 (통합)
+  | 'profile'           // 신랑신부 소개/인터뷰
+  | 'calendar'          // 예식일시 (달력/D-day)
+  | 'gallery'           // 갤러리 (사진/영상)
   | 'rsvp'              // 참석 여부
-  // ─── 확장 섹션 ───
-  | 'loading'           // 로딩 화면
-  | 'quote'             // 글귀
-  | 'profile'           // 프로필형 소개
-  | 'parents-contact'   // 혼주 연락처
-  | 'timeline'          // 타임라인/스토리
-  | 'video'             // 영상
-  | 'interview'         // 웨딩 인터뷰
-  | 'transport'         // 교통수단
-  | 'notice'            // 안내사항
-  | 'announcement'      // 안내문
-  | 'flower-gift'       // 화환 보내기
-  | 'together-time'     // 함께한 시간
-  | 'dday'              // D-DAY 카운트다운
-  | 'guest-snap'        // 게스트스냅
-  | 'ending'            // 엔딩 크레딧
+  | 'location'          // 오시는길 (예식장 정보 + 지도 + 교통)
+  | 'notice'            // 공지사항/안내
+  | 'account'           // 축의금 계좌
+  | 'message'           // 방명록/축하 메시지
+  | 'ending'            // 축하화환/공유/엔딩
+  // ─── 기타 기능 ───
   | 'music'             // BGM 컨트롤
+  | 'loading'           // 로딩 화면
   | 'custom'            // 사용자 정의 블록
 
 // ============================================
@@ -213,6 +203,7 @@ export type VariablePath =
 
   // ─── 혼주 ───
   | 'parents.deceasedIcon'
+  | 'parents.groom.birthOrder' | 'parents.bride.birthOrder'
   | 'parents.groom.father.name' | 'parents.groom.father.status' | 'parents.groom.father.phone'
   | 'parents.groom.mother.name' | 'parents.groom.mother.status' | 'parents.groom.mother.phone'
   | 'parents.bride.father.name' | 'parents.bride.father.status' | 'parents.bride.father.phone'
@@ -832,8 +823,8 @@ export interface WeddingData {
 
   parents?: {
     deceasedIcon?: '故' | '고' | '✿'
-    groom: { father?: ParentInfo; mother?: ParentInfo }
-    bride: { father?: ParentInfo; mother?: ParentInfo }
+    groom: { father?: ParentInfo; mother?: ParentInfo; birthOrder?: string }
+    bride: { father?: ParentInfo; mother?: ParentInfo; birthOrder?: string }
   }
 
   // ═══════════════════════════════════════════════
