@@ -1,0 +1,105 @@
+name: block-preset-from-image
+description: "이미지를 분석하여 super-editor-v2 block preset을 생성합니다. 대화형 워크플로우로 구조를 완성합니다."
+author: "BMad"
+
+# Config
+config_source: "{project-root}/.bmad/bmm/config.yaml"
+output_folder: "{config_source}:output_folder"
+communication_language: "{config_source}:communication_language"
+document_output_language: "{config_source}:document_output_language"
+date: system-generated
+
+# ============================================================
+# Image Analysis Settings
+# ============================================================
+
+# 이미지 분석 시 추출할 정보
+analysis_targets:
+  layout:
+    - element_positions: "각 UI 요소의 위치 (상단/중앙/하단, 좌/중/우)"
+    - element_hierarchy: "요소들의 시각적 계층구조"
+    - spacing_pattern: "여백 및 간격 패턴"
+    - grid_structure: "그리드 또는 레이아웃 구조"
+
+  typography:
+    - font_styles: "폰트 스타일 (세리프/산세리프, 두께, 크기)"
+    - text_hierarchy: "제목/본문/캡션 등 텍스트 계층"
+    - text_alignment: "텍스트 정렬 방식"
+
+  visual_style:
+    - color_scheme: "주요 색상 및 배색"
+    - contrast_level: "명암 대비 수준"
+    - mood: "전체적인 분위기 (minimal, elegant, romantic 등)"
+
+  content_mapping:
+    - bindable_elements: "데이터 바인딩 가능한 요소"
+    - static_elements: "정적 디자인 요소"
+    - interactive_elements: "버튼, 링크 등 인터랙티브 요소"
+
+# 사용 가능한 BlockType
+available_block_types:
+  - hero
+  - greeting
+  - calendar
+  - gallery
+  - location
+  - parents
+  - contact
+  - account
+  - message
+  - rsvp
+  - loading
+  - quote
+  - profile
+  - parents-contact
+  - timeline
+  - video
+  - interview
+  - transport
+  - notice
+  - announcement
+  - flower-gift
+  - together-time
+  - dday
+  - guest-snap
+  - ending
+  - music
+  - custom
+
+# 사용 가능한 ElementType
+available_element_types:
+  - text
+  - image
+  - shape
+  - button
+  - icon
+  - divider
+  - map
+  - calendar
+
+# ============================================================
+# Source and target references
+# ============================================================
+v2_types: "{project-root}/src/lib/super-editor-v2/schema/types.ts"
+v2_presets: "{project-root}/src/lib/super-editor-v2/presets"
+block_presets_file: "{v2_presets}/block-presets.ts"
+
+# Input file patterns for context loading
+input_file_patterns:
+  v2_schema:
+    description: "v2 schema types for block structure"
+    whole: "{v2_types}"
+    load_strategy: "FULL_LOAD"
+  existing_presets:
+    description: "Existing block presets for reference"
+    sharded: "{v2_presets}/*.ts"
+    load_strategy: "FULL_LOAD"
+
+# Workflow components
+installed_path: "{project-root}/.bmad/bmm/workflows/block-preset-from-image"
+instructions: "{installed_path}/instructions.md"
+
+# Output will be appended to or create new file
+output_mode: "conversational"  # 대화형 - 파일 생성은 최종 단계에서
+
+standalone: true
