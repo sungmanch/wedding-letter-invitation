@@ -8,7 +8,17 @@ import type { BlockType } from '../../schema/types'
 import type { BlockPreset } from './types'
 
 // Types
-export type { BlockPreset, PresetElement } from './types'
+export type {
+  BlockPreset,
+  PresetElement,
+  ModalPreset,
+  ModalSection,
+  ToggleSectionConfig,
+  TabSectionConfig,
+  TextInputSectionConfig,
+  RadioSectionConfig,
+  CheckboxSectionConfig,
+} from './types'
 
 // Calendar Presets (date skeleton → calendar block)
 export {
@@ -37,12 +47,28 @@ export {
   type GreetingParentsPresetId,
 } from './greeting-parents-presets'
 
+// RSVP Presets (attendance confirmation with modal)
+export {
+  RSVP_PRESETS,
+  getRsvpPreset,
+  getRsvpPresetIds,
+  getRsvpPresetsByComplexity,
+  type RsvpPresetId,
+} from './rsvp-presets'
+
+// Notice Presets (공지사항/안내)
+export {
+  NOTICE_PRESETS,
+  getNoticePreset,
+  getNoticePresetIds,
+  getNoticePresetsByComplexity,
+  type NoticePresetId,
+} from './notice-presets'
+
 // Future block presets will be added here:
 // export { HERO_PRESETS, ... } from './hero-presets'
 // export { GALLERY_PRESETS, ... } from './gallery-presets'
-// export { RSVP_PRESETS, ... } from './rsvp-presets'
 // export { LOCATION_PRESETS, ... } from './location-presets'
-// export { NOTICE_PRESETS, ... } from './notice-presets'
 // export { ACCOUNT_PRESETS, ... } from './account-presets'
 // export { MESSAGE_PRESETS, ... } from './message-presets'
 // export { ENDING_PRESETS, ... } from './ending-presets'
@@ -55,12 +81,14 @@ export {
 import { CALENDAR_PRESETS, type CalendarPresetId } from './calendar-presets'
 import { PROFILE_PRESETS, type ProfilePresetId } from './profile-presets'
 import { GREETING_PARENTS_PRESETS, type GreetingParentsPresetId } from './greeting-parents-presets'
+import { RSVP_PRESETS, type RsvpPresetId } from './rsvp-presets'
+import { NOTICE_PRESETS, type NoticePresetId } from './notice-presets'
 
 // ============================================
 // Combined Types
 // ============================================
 
-export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId
+export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId
 // Future: | HeroPresetId | GalleryPresetId | ...
 
 // ============================================
@@ -71,6 +99,8 @@ export const BLOCK_PRESETS: Record<string, BlockPreset> = {
   ...CALENDAR_PRESETS,
   ...PROFILE_PRESETS,
   ...GREETING_PARENTS_PRESETS,
+  ...RSVP_PRESETS,
+  ...NOTICE_PRESETS,
   // Future: ...HERO_PRESETS,
   // Future: ...GALLERY_PRESETS,
 }
