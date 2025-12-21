@@ -76,6 +76,25 @@ export function CalendarElement({
     fontFamily: style?.text?.fontFamily ?? 'var(--font-body)',
   }), [style])
 
+  // 달력 그리드 생성 (Hook 순서 보장을 위해 조건부 return 전에 배치)
+  const calendarGrid = useMemo(() => {
+    if (!dateInfo) return []
+
+    const grid: (number | null)[] = []
+
+    // 첫 주 빈 칸
+    for (let i = 0; i < dateInfo.firstDayOfMonth; i++) {
+      grid.push(null)
+    }
+
+    // 날짜 채우기
+    for (let d = 1; d <= dateInfo.lastDateOfMonth; d++) {
+      grid.push(d)
+    }
+
+    return grid
+  }, [dateInfo])
+
   // 날짜 정보가 없는 경우
   if (!dateInfo) {
     return (
@@ -112,23 +131,6 @@ export function CalendarElement({
   }
 
   const DAYS = ['일', '월', '화', '수', '목', '금', '토']
-
-  // 달력 그리드 생성
-  const calendarGrid = useMemo(() => {
-    const grid: (number | null)[] = []
-
-    // 첫 주 빈 칸
-    for (let i = 0; i < dateInfo.firstDayOfMonth; i++) {
-      grid.push(null)
-    }
-
-    // 날짜 채우기
-    for (let d = 1; d <= dateInfo.lastDateOfMonth; d++) {
-      grid.push(d)
-    }
-
-    return grid
-  }, [dateInfo])
 
   return (
     <div

@@ -241,6 +241,8 @@ export type VariablePath =
   | 'music.url'
   | 'music.title'
   | 'music.artist'
+  // 커스텀 변수 (AI 생성 텍스트 등)
+  | `custom.${string}`
 
 // ============================================
 // 5. 스타일 시스템 (3-Level)
@@ -466,6 +468,16 @@ export interface ElementStyle {
   border?: BorderStyle
   shadow?: string
   opacity?: number
+  // 일부 요소에서 width/height를 style.size로 지정
+  size?: {
+    width?: number
+    height?: number
+  }
+  // 위치 정보 (일부 레거시 데이터)
+  position?: {
+    x?: number
+    y?: number
+  }
 }
 
 export interface TextStyle {
@@ -818,6 +830,9 @@ export interface WeddingData {
     enabled: boolean
     requirePassword: boolean
   }
+
+  // 커스텀 변수 (AI가 생성한 텍스트 등)
+  custom?: Record<string, string>
 }
 
 export interface PersonInfo {

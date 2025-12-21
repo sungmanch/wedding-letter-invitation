@@ -45,6 +45,24 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-15: Super Editor v2 블록 높이 기준 요소 위치 계산 수정
+- **이유**: 블록 높이 조절 시 요소가 블록 밖으로 넘쳐서 다음 블록과 겹침
+- **원인**: element-renderer에서 요소 y/height를 viewport.height 기준으로 계산함 (블록 높이 기준이 아님)
+- **변경**:
+  - `element-renderer.tsx`: y, height를 블록 높이 기준으로 계산
+  - `block-renderer.tsx`: overflow: hidden 추가
+  - `editable-canvas.tsx`: overflow: hidden 추가
+- **파일**: `renderer/element-renderer.tsx`, `renderer/block-renderer.tsx`, `components/editor/direct/editable-canvas.tsx`
+
+### 2025-12-15: Super Editor v2 커스텀 변수 시스템
+- **이유**: AI가 새 텍스트 요소 추가 시 편집기에서 수정 불가 ("텍스트를 입력하세요" 표시)
+- **변경**:
+  - `VariablePath` 타입에 `custom.${string}` 패턴 허용
+  - `WeddingData.custom` 필드 추가 (Record<string, string>)
+  - AI 프롬프트에 커스텀 변수 생성 가이드 추가
+  - ContentTab에서 바인딩 기준 dedupe (중복 필드 제거)
+- **파일**: `types.ts`, `binding-resolver.ts`, `content-tab.tsx`, `ai/route.ts`
+
 ### 2025-12-09: 랜딩 페이지 Split Hero 리디자인
 - **이유**: Black & Gold 테마가 20-30대 여성에게 올드하게 느껴짐, 전환율 개선 필요
 - **변경**:

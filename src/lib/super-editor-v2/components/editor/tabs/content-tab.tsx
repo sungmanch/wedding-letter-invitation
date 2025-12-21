@@ -17,7 +17,7 @@ import type {
   VariablePath,
 } from '../../../schema/types'
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
-import { resolveBinding } from '../../../utils/binding-resolver'
+import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 
 // ============================================
 // Types
@@ -184,16 +184,45 @@ function BlockAccordion({
   onFieldChange,
   onUploadImage,
 }: BlockAccordionProps) {
-  // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출
+  // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출 (바인딩 기준 dedupe)
   const editableFields = useMemo(() => {
-    return (block.elements ?? [])
-      .filter(el => el.binding)
-      .map(el => ({
+    const seenBindings = new Set<string>()
+    const fields: Array<{
+      elementId: string
+      binding: VariablePath
+      type: string
+      value: unknown
+    }> = []
+
+    for (const el of block.elements ?? []) {
+      if (!el.binding) continue
+
+      // 같은 바인딩은 한 번만 표시
+      if (seenBindings.has(el.binding)) continue
+      seenBindings.add(el.binding)
+
+      const binding = el.binding
+      // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+      let value: unknown
+      if (binding === 'photos.gallery') {
+        value = data.photos?.gallery ?? []
+      } else if (isCustomVariablePath(binding)) {
+        // 커스텀 변수는 data.custom에서 가져옴
+        const key = getCustomVariableKey(binding)
+        value = key ? data.custom?.[key] ?? '' : ''
+      } else {
+        value = resolveBinding(data, binding)
+      }
+
+      fields.push({
         elementId: el.id,
-        binding: el.binding!,
+        binding,
         type: el.type,
-        value: resolveBinding(data, el.binding!),
-      }))
+        value,
+      })
+    }
+
+    return fields
   }, [block.elements, data])
 
   return (
@@ -249,7 +278,23 @@ interface VariableFieldProps {
 
 function VariableField({ binding, value, onChange, onUploadImage }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
-  const label = fieldConfig?.label ?? binding
+
+  // 커스텀 변수의 경우 키를 레이블로 사용
+  let label: string
+  if (isCustomVariablePath(binding)) {
+    const key = getCustomVariableKey(binding) || binding
+    // camelCase/snake_case를 읽기 좋게 변환 (예: weddingTitle → Wedding Title)
+    label = key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/_/g, ' ')
+      .replace(/^\s/, '')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  } else {
+    label = fieldConfig?.label ?? binding
+  }
+
   const type = fieldConfig?.type ?? 'text'
   const placeholder = fieldConfig?.placeholder
 
@@ -313,6 +358,291 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           onChange={onChange}
           onUploadImage={onUploadImage}
         />
+      )}
+
+      {type === 'gallery' && (
+        <GalleryFieldLocal
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+          onUploadImage={onUploadImage}
+        />
+      )}
+    </div>
+  )
+}
+
+// ============================================
+// Gallery Field (Local implementation)
+// ============================================
+
+interface GalleryImage {
+  id: string
+  url: string
+  order: number
+}
+
+interface GalleryFieldLocalProps {
+  value: GalleryImage[]
+  onChange: (value: unknown) => void
+  onUploadImage?: (file: File) => Promise<string>
+  maxImages?: number
+}
+
+function GalleryFieldLocal({
+  value,
+  onChange,
+  onUploadImage,
+  maxImages = 60,
+}: GalleryFieldLocalProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
+  const canAddMore = value.length < maxImages
+
+  const handleClick = useCallback(() => {
+    if (!isLoading && canAddMore) {
+      inputRef.current?.click()
+    }
+  }, [isLoading, canAddMore])
+
+  const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      const newImages: GalleryImage[] = []
+      const remainingSlots = maxImages - value.length
+
+      for (const file of files.slice(0, remainingSlots)) {
+        // 파일 타입 검증
+        if (!file.type.startsWith('image/')) {
+          continue
+        }
+        // 파일 크기 검증 (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          continue
+        }
+
+        let url: string
+        if (onUploadImage) {
+          url = await onUploadImage(file)
+        } else {
+          // fallback: base64 로컬 프리뷰
+          url = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = (event) => {
+              resolve(event.target?.result as string)
+            }
+            reader.readAsDataURL(file)
+          })
+        }
+
+        newImages.push({
+          id: `gallery-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          url,
+          order: value.length + newImages.length,
+        })
+      }
+
+      if (newImages.length > 0) {
+        onChange([...value, ...newImages])
+      }
+    } catch (err) {
+      setError('이미지 업로드에 실패했습니다')
+      console.error('Gallery upload failed:', err)
+    } finally {
+      setIsLoading(false)
+    }
+
+    e.target.value = ''
+  }, [onUploadImage, onChange, value, maxImages])
+
+  // 드래그 앤 드롭 (파일)
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    if (!isLoading && canAddMore) {
+      setIsDragging(true)
+    }
+  }, [isLoading, canAddMore])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+
+    if (isLoading || !canAddMore) return
+
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
+    if (files.length === 0) return
+
+    setIsLoading(true)
+    try {
+      const newImages: GalleryImage[] = []
+      const remainingSlots = maxImages - value.length
+
+      for (const file of files.slice(0, remainingSlots)) {
+        if (file.size > 10 * 1024 * 1024) continue
+
+        let url: string
+        if (onUploadImage) {
+          url = await onUploadImage(file)
+        } else {
+          url = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = (event) => {
+              resolve(event.target?.result as string)
+            }
+            reader.readAsDataURL(file)
+          })
+        }
+
+        newImages.push({
+          id: `gallery-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          url,
+          order: value.length + newImages.length,
+        })
+      }
+
+      if (newImages.length > 0) {
+        onChange([...value, ...newImages])
+      }
+    } catch (err) {
+      setError('이미지 업로드에 실패했습니다')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isLoading, canAddMore, onUploadImage, onChange, value, maxImages])
+
+  // 이미지 삭제
+  const handleDelete = useCallback((imageId: string) => {
+    if (isLoading) return
+    const updated = value.filter(img => img.id !== imageId)
+    const reordered = updated.map((img, idx) => ({ ...img, order: idx }))
+    onChange(reordered)
+  }, [isLoading, value, onChange])
+
+  // 순서 변경 - 드래그 시작
+  const handleImageDragStart = useCallback((index: number) => {
+    setDraggedIndex(index)
+  }, [])
+
+  // 순서 변경 - 드래그 오버
+  const handleImageDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const newValue = [...value]
+    const [dragged] = newValue.splice(draggedIndex, 1)
+    newValue.splice(index, 0, dragged)
+
+    const reordered = newValue.map((img, idx) => ({ ...img, order: idx }))
+    onChange(reordered)
+    setDraggedIndex(index)
+  }, [draggedIndex, value, onChange])
+
+  // 순서 변경 - 드래그 끝
+  const handleImageDragEnd = useCallback(() => {
+    setDraggedIndex(null)
+  }, [])
+
+  return (
+    <div className="space-y-2">
+      {/* 갤러리 그리드 */}
+      <div className="grid grid-cols-3 gap-2">
+        {/* 기존 이미지들 */}
+        {value.map((image, index) => (
+          <div
+            key={image.id}
+            draggable
+            onDragStart={() => handleImageDragStart(index)}
+            onDragOver={(e) => handleImageDragOver(e, index)}
+            onDragEnd={handleImageDragEnd}
+            className={`
+              relative aspect-square rounded-lg overflow-hidden cursor-move bg-[#2A2A2A]
+              ${draggedIndex === index ? 'opacity-50' : ''}
+            `}
+          >
+            <img
+              src={image.url}
+              alt={`Gallery ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
+            {/* 순서 표시 */}
+            <div className="absolute top-1 left-1 px-1.5 py-0.5 text-xs bg-black/50 text-white rounded">
+              {index + 1}
+            </div>
+            {/* 삭제 버튼 */}
+            <button
+              type="button"
+              onClick={() => handleDelete(image.id)}
+              className="
+                absolute top-1 right-1 p-1 rounded-full
+                bg-black/50 text-white hover:bg-red-500/80
+                transition-colors
+              "
+              title="삭제"
+            >
+              <XIcon className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+
+        {/* 추가 버튼 */}
+        {canAddMore && (
+          <div
+            onClick={handleClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`
+              aspect-square rounded-lg border-2 border-dashed
+              flex flex-col items-center justify-center cursor-pointer
+              transition-colors bg-[#2A2A2A]
+              ${isDragging
+                ? 'border-[#C9A962] bg-[#C9A962]/10'
+                : 'border-white/20 hover:border-[#C9A962]/50'
+              }
+            `}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            {isLoading ? (
+              <div className="w-6 h-6 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <PlusIcon className="w-6 h-6 text-[#F5E6D3]/40" />
+                <span className="text-xs text-[#F5E6D3]/40 mt-1">추가</span>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 카운터 */}
+      <p className="text-xs text-[#F5E6D3]/50">
+        {value.length}/{maxImages}장
+      </p>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <p className="text-xs text-red-400">{error}</p>
       )}
     </div>
   )
@@ -482,7 +812,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery'
   placeholder?: string
 }
 
@@ -521,6 +851,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
 
   // 사진
   'photos.main': { label: '메인 사진', type: 'image' },
+  'photos.gallery': { label: '갤러리 사진', type: 'gallery' },
 
   // 인사말
   'greeting.title': { label: '인사말 제목', type: 'text' },
@@ -568,7 +899,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
 // ============================================
 
 /**
- * 중첩된 객체에 값 설정
+ * 중첩된 객체에 값 설정 (immutable)
  */
 function setNestedValue<T extends object>(
   obj: T,
@@ -576,17 +907,29 @@ function setNestedValue<T extends object>(
   value: unknown
 ): T {
   const keys = path.split('.')
-  const result = { ...obj }
 
-  let current: Record<string, unknown> = result as Record<string, unknown>
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
-    current[key] = { ...(current[key] as object) }
-    current = current[key] as Record<string, unknown>
+  // 재귀적으로 깊은 복사하면서 값 설정
+  function setAt(current: Record<string, unknown>, keyIndex: number): Record<string, unknown> {
+    const key = keys[keyIndex]
+
+    if (keyIndex === keys.length - 1) {
+      // 마지막 키: 값 설정
+      return { ...current, [key]: value }
+    }
+
+    // 중간 키: 재귀적으로 처리
+    const nextValue = current[key]
+    const nextObj = (typeof nextValue === 'object' && nextValue !== null)
+      ? nextValue as Record<string, unknown>
+      : {}
+
+    return {
+      ...current,
+      [key]: setAt(nextObj, keyIndex + 1),
+    }
   }
 
-  current[keys[keys.length - 1]] = value
-  return result
+  return setAt(obj as Record<string, unknown>, 0) as T
 }
 
 // ============================================

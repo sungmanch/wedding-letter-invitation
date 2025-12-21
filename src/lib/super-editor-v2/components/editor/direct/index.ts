@@ -65,3 +65,9 @@ export {
   type EditableCanvasProps,
   type ContextMenuState,
 } from './editable-canvas'
+
+// Styled Element Renderer
+export {
+  StyledElementRenderer,
+  type StyledElementRendererProps,
+} from './styled-element-renderer'

@@ -57,33 +57,50 @@ export function ElementRenderer({
   editable = false,
   onClick,
 }: ElementRendererProps) {
-  const { data, activeBlockId } = useDocument()
-  const { blockId, isActive: isBlockActive } = useBlock()
+  const { data, activeBlockId, viewport } = useDocument()
+  const { blockId, isActive: isBlockActive, height: blockHeight } = useBlock()
 
   // 요소 값 해석 (바인딩 또는 직접 값)
+  // content 필드도 확인 (일부 요소는 value 대신 content 사용)
   const resolvedValue = useMemo(() => {
     if (element.binding) {
       return resolveBinding(data, element.binding)
     }
-    return element.value
-  }, [element.binding, element.value, data])
+    // value가 없으면 content 필드 확인
+    return element.value ?? (element as { content?: string }).content
+  }, [element.binding, element.value, data, element])
 
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
-    if (element.props.type === 'text' && (element.props as TextProps).format) {
+    if (element.props?.type === 'text' && (element.props as TextProps).format) {
       return interpolate((element.props as TextProps).format!, data)
     }
     return resolvedValue
   }, [element.props, resolvedValue, data])
 
-  // 요소 스타일 계산
+  // 요소 스타일 계산 (블록 기준)
   const elementStyle = useMemo<CSSProperties>(() => {
+    // 블록 높이를 px로 계산
+    const blockHeightPx = (blockHeight / 100) * viewport.height
+
+    // width/height: 루트 필드 우선, 없으면 style.size에서 가져옴
+    const elemWidth = element.width ?? element.style?.size?.width ?? 0
+    const elemHeight = element.height ?? element.style?.size?.height ?? 0
+
+    // x, width는 viewport.width 기준 (가로는 블록과 동일)
+    const leftPx = (element.x / 100) * viewport.width
+    const widthPx = (elemWidth / 100) * viewport.width
+
+    // y, height는 블록 높이 기준 (블록 내 상대 위치)
+    const topPx = (element.y / 100) * blockHeightPx
+    const heightPx = (elemHeight / 100) * blockHeightPx
+
     const style: CSSProperties = {
       position: 'absolute',
-      left: `${element.x}vw`,
-      top: `${element.y}vh`,
-      width: `${element.width}vw`,
-      height: `${element.height}vh`,
+      left: `${leftPx}px`,
+      top: `${topPx}px`,
+      width: `${widthPx}px`,
+      height: `${heightPx}px`,
       zIndex: element.zIndex,
     }
 
@@ -104,7 +121,7 @@ export function ElementRenderer({
     }
 
     return style
-  }, [element, editable])
+  }, [element, editable, viewport, blockHeight])
 
   // 클릭 핸들러
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -141,8 +158,18 @@ interface ElementTypeRendererProps {
 
 function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
   const props = element.props
+  // element.type을 우선 사용, props.type은 fallback
+  const elementType = element.type || props?.type
 
-  switch (props.type) {
+  if (!elementType) {
+    return (
+      <div className="se2-element--unknown">
+        Unknown element (no type)
+      </div>
+    )
+  }
+
+  switch (elementType) {
     case 'text':
       return (
         <TextElement
@@ -227,7 +254,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     default:
       return (
         <div className="se2-element--unknown">
-          Unknown element type: {(props as ElementProps).type}
+          Unknown element type: {elementType}
         </div>
       )
   }
