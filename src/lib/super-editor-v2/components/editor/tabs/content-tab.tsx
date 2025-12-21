@@ -197,14 +197,20 @@ function BlockAccordion({
     for (const el of block.elements ?? []) {
       if (!el.binding) continue
 
-      // 자동 계산 필드는 숨김
-      if (HIDDEN_VARIABLE_PATHS.has(el.binding)) continue
+      // 자동 계산 필드는 대응 입력 필드로 변환
+      let binding: VariablePath = el.binding
+      if (HIDDEN_VARIABLE_PATHS.has(el.binding)) {
+        const inputBinding = DERIVED_TO_INPUT_MAP[el.binding]
+        if (inputBinding) {
+          binding = inputBinding
+        } else {
+          continue // 매핑 없으면 숨김
+        }
+      }
 
       // 같은 바인딩은 한 번만 표시
-      if (seenBindings.has(el.binding)) continue
-      seenBindings.add(el.binding)
-
-      const binding = el.binding
+      if (seenBindings.has(binding)) continue
+      seenBindings.add(binding)
       // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
       if (binding === 'photos.gallery') {
@@ -834,6 +840,20 @@ const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
   'countdown.minutes',
   'countdown.seconds',
 ])
+
+// 자동 계산 필드 → 입력 필드 매핑 (표시용 바인딩 대신 입력용 바인딩 표시)
+const DERIVED_TO_INPUT_MAP: Record<string, VariablePath> = {
+  'wedding.dateDisplay': 'wedding.date',
+  'wedding.timeDisplay': 'wedding.time',
+  'wedding.dday': 'wedding.date',
+  'wedding.month': 'wedding.date',
+  'wedding.day': 'wedding.date',
+  'wedding.weekday': 'wedding.date',
+  'countdown.days': 'wedding.date',
+  'countdown.hours': 'wedding.date',
+  'countdown.minutes': 'wedding.date',
+  'countdown.seconds': 'wedding.date',
+}
 
 const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 신랑 정보
