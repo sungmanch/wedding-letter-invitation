@@ -73,14 +73,13 @@ export const DEFAULT_ANIMATION: GlobalAnimation = {
 }
 
 /**
- * 기본 WeddingData
+ * 기본 WeddingData (section-data.md v2.2 기준)
  */
 export const DEFAULT_WEDDING_DATA: WeddingData = {
-  groom: {
-    name: '',
-  },
-  bride: {
-    name: '',
+  // ═══ 공유 필드 ═══
+  couple: {
+    groom: { name: '' },
+    bride: { name: '' },
   },
   wedding: {
     date: '',
@@ -88,11 +87,14 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
   },
   venue: {
     name: '',
-    address: '',
   },
   photos: {
     gallery: [],
   },
+
+  // ═══ Legacy 호환 ═══
+  groom: { name: '' },
+  bride: { name: '' },
 }
 
 /**

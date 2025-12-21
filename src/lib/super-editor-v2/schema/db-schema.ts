@@ -242,6 +242,11 @@ export const rsvpResponsesV2 = pgTable('rsvp_responses_v2', {
   guestCount: integer('guest_count').default(1),
   mealOption: varchar('meal_option', { length: 50 }),
 
+  // 신규 컬럼 (section-data.md v2.2)
+  side: varchar('side', { length: 10 }),  // 'groom' | 'bride'
+  busRequired: boolean('bus_required'),   // 버스 탑승 여부
+  privacyAgreed: boolean('privacy_agreed').default(false).notNull(),  // 개인정보 동의 (필수)
+
   // 메모
   note: text('note'),
 
