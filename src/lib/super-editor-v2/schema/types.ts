@@ -155,7 +155,7 @@ export interface ShapeProps {
 export interface ButtonProps {
   type: 'button'
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal'
 }
 
 export interface IconProps {

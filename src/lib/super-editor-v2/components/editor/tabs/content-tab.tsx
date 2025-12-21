@@ -237,12 +237,24 @@ function BlockAccordion({
       }
 
       // 2. format 속성에서 변수 추출 (예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}')
-      const props = el.props as { format?: string }
+      const props = el.props as { format?: string; action?: string }
       if (props.format) {
         const formatVars = extractFormatVariables(props.format)
         for (const varPath of formatVars) {
           addBinding(el.id, varPath as VariablePath, el.type)
         }
+      }
+
+      // 3. contact-modal 버튼이 있으면 전화번호 필드들 자동 추가
+      if (el.type === 'button' && props.action === 'contact-modal') {
+        // 신랑측 전화번호
+        addBinding(el.id, 'couple.groom.phone', 'phone')
+        addBinding(el.id, 'parents.groom.father.phone', 'phone')
+        addBinding(el.id, 'parents.groom.mother.phone', 'phone')
+        // 신부측 전화번호
+        addBinding(el.id, 'couple.bride.phone', 'phone')
+        addBinding(el.id, 'parents.bride.father.phone', 'phone')
+        addBinding(el.id, 'parents.bride.mother.phone', 'phone')
       }
     }
 

@@ -53,12 +53,20 @@
 **2. 요소 분석**
 
 각 UI 요소에 대해:
+
+> **좌표 시스템 (중요!)**
+> - `x`: 왼쪽 상단 기준 vw% (0 = 왼쪽 끝)
+> - `y`: 왼쪽 상단 기준 vh% (0 = 위쪽 끝, 블록 내 상대)
+> - **중앙 정렬 공식**: `x = (100 - width) / 2`
+>   - 예: width 80% → x = 10% (10~90 범위)
+>   - 예: width 60% → x = 20% (20~80 범위)
+
 ```
 | # | 요소 타입 | 위치 (x%, y%) | 크기 (w%, h%) | 바인딩 경로 | 기본값/스타일 |
 |---|----------|---------------|---------------|-------------|---------------|
-| 1 | text     | (50, 10)      | (80, 8)       | couple.groom.name | 폰트: 세리프, 크기: 2xl |
+| 1 | text     | (10, 10)      | (80, 8)       | couple.groom.name | 폰트: 세리프, 크기: 2xl |
 | 2 | image    | (0, 20)       | (100, 60)     | photos.main | cover, overlay: 0.2 |
-| 3 | text     | (50, 85)      | (60, 5)       | wedding.dateDisplay | 폰트: 산세리프 |
+| 3 | text     | (20, 85)      | (60, 5)       | wedding.dateDisplay | 폰트: 산세리프 |
 ...
 ```
 
@@ -173,13 +181,19 @@
 element:
   type: text | image | shape | button | icon | divider | map | calendar
   position:
-    x: 0-100  # vw 기준 중심점 X
-    y: 0-100  # vh 기준 중심점 Y (블록 내 상대)
+    x: 0-100  # vw 기준 왼쪽 상단 X (중앙정렬: x = (100 - width) / 2)
+    y: 0-100  # vh 기준 왼쪽 상단 Y (블록 내 상대)
   size:
-    width: 0-100   # vw 기준
+    width: 0-100   # vw 기준 (x + width <= 100 이어야 함)
     height: 0-100  # vh 기준
   rotation: 0      # degrees
   zIndex: 1        # 레이어 순서
+
+  # ⚠️ 좌표 계산 주의!
+  # - x, y는 왼쪽 상단 기준 (중심점 아님!)
+  # - 중앙 정렬: x = (100 - width) / 2
+  #   예: width=80 → x=10 (범위: 10~90%)
+  #   예: width=60 → x=20 (범위: 20~80%)
 
   # 데이터 바인딩
   binding: couple.groom.name  # VariablePath

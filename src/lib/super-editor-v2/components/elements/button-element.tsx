@@ -3,11 +3,13 @@
 /**
  * Button Element - 버튼 요소
  *
- * 링크, 전화, 지도, 복사, 공유 액션 버튼
+ * 링크, 전화, 지도, 복사, 공유, 연락하기 모달 액션 버튼
  */
 
-import { useCallback, useMemo, type CSSProperties } from 'react'
+import { useCallback, useMemo, useState, type CSSProperties } from 'react'
 import type { ElementStyle } from '../../schema/types'
+import { useDocument } from '../../context/document-context'
+import { ContactModal } from '../ui/contact-modal'
 
 // ============================================
 // Types
@@ -15,7 +17,7 @@ import type { ElementStyle } from '../../schema/types'
 
 export interface ButtonElementProps {
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal'
   value?: unknown
   style?: ElementStyle
   editable?: boolean
@@ -34,6 +36,9 @@ export function ButtonElement({
   editable = false,
   className = '',
 }: ButtonElementProps) {
+  const { data } = useDocument()
+  const [contactModalOpen, setContactModalOpen] = useState(false)
+
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
@@ -134,6 +139,10 @@ export function ButtonElement({
           })
         }
         break
+
+      case 'contact-modal':
+        setContactModalOpen(true)
+        break
     }
   }, [action, value, editable])
 
@@ -183,22 +192,40 @@ export function ButtonElement({
           </svg>
         )
 
+      case 'contact-modal':
+        return (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+        )
+
       default:
         return null
     }
   }, [action])
 
   return (
-    <button
-      type="button"
-      className={`se2-button-element se2-button-element--${action} ${className}`}
-      style={buttonStyle}
-      onClick={handleClick}
-      disabled={editable}
-    >
-      {ActionIcon}
-      <span>{label}</span>
-    </button>
+    <>
+      <button
+        type="button"
+        className={`se2-button-element se2-button-element--${action} ${className}`}
+        style={buttonStyle}
+        onClick={handleClick}
+        disabled={editable}
+      >
+        {ActionIcon}
+        <span>{label}</span>
+      </button>
+
+      {/* 연락하기 모달 */}
+      {action === 'contact-modal' && (
+        <ContactModal
+          open={contactModalOpen}
+          onOpenChange={setContactModalOpen}
+          data={data}
+        />
+      )}
+    </>
   )
 }
 

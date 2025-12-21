@@ -415,12 +415,200 @@ function transformNode(node: SkeletonNode, parentBounds: Rect): BlockPresetEleme
   // 3. Extract binding from props
   const binding = extractBinding(node.props)
 
-  // 4. Convert token styles
+  // 4. Convert token styles (including color mapping)
   const tokenStyle = transformTokenStyles(node.tokenStyle)
 
   return { type, position, size, binding, tokenStyle }
 }
 ```
+
+### Design Token Color Mapping (Critical)
+
+**v1 → v2 색상 토큰 변환 규칙**
+
+v1 skeleton의 `$token.colors.xxx` 형식을 v2의 CSS 변수 `var(--xxx)`로 변환합니다.
+
+| v1 Skeleton Token | v2 CSS Variable | 용도 |
+|-------------------|-----------------|------|
+| `$token.colors.background` | `var(--bg-page)` | 페이지 전체 배경 |
+| `$token.colors.background` (섹션 내) | `var(--bg-section)` | 섹션 배경 |
+| `$token.colors.surface` | `var(--bg-card)` | 카드/컨테이너 배경 |
+| `$token.colors.text.primary` | `var(--fg-default)` | 기본 텍스트 |
+| `$token.colors.text.secondary` | `var(--fg-muted)` | 보조 텍스트 |
+| `$token.colors.text.muted` | `var(--fg-muted)` | 뮤트 텍스트 |
+| `$token.colors.text.emphasis` | `var(--fg-emphasis)` | 강조 텍스트 |
+| `$token.colors.text.inverse` | `var(--fg-inverse)` | 반전 텍스트 (어두운 배경 위) |
+| `$token.colors.text.onBrand` | `var(--fg-on-accent)` | 액센트 배경 위 텍스트 |
+| `$token.colors.brand` | `var(--accent-default)` | 브랜드/강조색 |
+| `$token.colors.accent` | `var(--accent-secondary)` | 보조 강조색 |
+| `$token.colors.border` | `var(--border-default)` | 기본 테두리 |
+| `$token.colors.divider` | `var(--border-muted)` | 구분선 |
+
+**Static Color → Design Token 변환 규칙**
+
+하드코딩된 색상값은 의미적으로 가장 적합한 design token으로 변환합니다:
+
+| Static Color Pattern | Design Token | 판단 기준 |
+|---------------------|--------------|-----------|
+| `#000`, `#111`, `#1A1A1A` (어두운 색) | `var(--fg-default)` | 기본 텍스트로 사용될 때 |
+| `#000`, `#111`, `#1A1A1A` (어두운 색) | `var(--bg-section)` | 배경으로 사용될 때 |
+| `#FFF`, `#FAFAFA`, `#F5F5F5` (밝은 색) | `var(--bg-page)` | 배경으로 사용될 때 |
+| `#FFF`, `#FAFAFA` (밝은 색) | `var(--fg-inverse)` | 어두운 배경 위 텍스트 |
+| `#666`, `#888`, `#999` (회색) | `var(--fg-muted)` | 보조 텍스트 |
+| `#C9A962`, `#D4AF37` (골드) | `var(--accent-default)` | 강조/브랜드색 |
+| `#E8D4B8`, `#F5E6D3` (크림) | `var(--bg-card)` | 카드 배경 |
+| `rgba(0,0,0,0.5)` (반투명 어두운) | `var(--bg-overlay)` | 오버레이 |
+| `#E5E5E5`, `#DDD` (연한 회색) | `var(--border-default)` | 테두리 |
+
+**변환 코드 예시**
+
+```typescript
+function transformColor(value: string, context: 'text' | 'background' | 'border'): string {
+  // 1. v1 Token → v2 CSS Variable
+  if (value.startsWith('$token.colors.')) {
+    return TOKEN_COLOR_MAP[value] ?? value
+  }
+
+  // 2. Static Color → Design Token
+  const hex = value.toLowerCase()
+
+  // 텍스트 컨텍스트
+  if (context === 'text') {
+    if (isVeryDark(hex)) return 'var(--fg-default)'
+    if (isVeryLight(hex)) return 'var(--fg-inverse)'
+    if (isGray(hex)) return 'var(--fg-muted)'
+    if (isGold(hex)) return 'var(--accent-default)'
+  }
+
+  // 배경 컨텍스트
+  if (context === 'background') {
+    if (isVeryLight(hex)) return 'var(--bg-page)'
+    if (isVeryDark(hex)) return 'var(--bg-section)'
+    if (isCream(hex)) return 'var(--bg-card)'
+    if (isTransparentDark(hex)) return 'var(--bg-overlay)'
+  }
+
+  // 테두리 컨텍스트
+  if (context === 'border') {
+    if (isLightGray(hex)) return 'var(--border-default)'
+    if (isGold(hex)) return 'var(--accent-default)'
+  }
+
+  return value // fallback: 원본 유지
+}
+
+const TOKEN_COLOR_MAP: Record<string, string> = {
+  '$token.colors.background': 'var(--bg-page)',
+  '$token.colors.surface': 'var(--bg-card)',
+  '$token.colors.text.primary': 'var(--fg-default)',
+  '$token.colors.text.secondary': 'var(--fg-muted)',
+  '$token.colors.text.emphasis': 'var(--fg-emphasis)',
+  '$token.colors.text.inverse': 'var(--fg-inverse)',
+  '$token.colors.text.onBrand': 'var(--fg-on-accent)',
+  '$token.colors.brand': 'var(--accent-default)',
+  '$token.colors.accent': 'var(--accent-secondary)',
+  '$token.colors.border': 'var(--border-default)',
+  '$token.colors.divider': 'var(--border-muted)',
+}
+```
+
+**주의사항**
+
+1. **컨텍스트 기반 판단**: 동일한 색상도 사용 위치에 따라 다른 토큰으로 매핑
+2. **투명도 보존**: `rgba()` 값의 투명도는 `var(--bg-overlay)` 등으로 통합
+3. **Gradient 처리**: 그라데이션은 `var(--gradient-xxx)` 토큰 또는 원본 유지
+4. **Theme 호환**: 모든 색상은 light/dark 테마에서 자동 적응되어야 함
+
+### Design Token Typography Mapping (Critical)
+
+**v1 → v2 타이포그래피 토큰 변환 규칙**
+
+v1 skeleton의 `$token.typography.xxx` 형식을 v2의 CSS 변수 `var(--typo-xxx)`로 변환합니다.
+
+| v1 Skeleton Token | v2 CSS Variable | 용도 |
+|-------------------|-----------------|------|
+| `$token.typography.displayLg.fontFamily` | `var(--typo-display-lg-font-family)` | 메인 타이틀 폰트 |
+| `$token.typography.displayLg.fontSize` | `var(--typo-display-lg-font-size)` | 메인 타이틀 크기 |
+| `$token.typography.displayLg.fontWeight` | `var(--typo-display-lg-font-weight)` | 메인 타이틀 굵기 |
+| `$token.typography.displayMd.fontFamily` | `var(--typo-display-md-font-family)` | 대제목 폰트 |
+| `$token.typography.displayMd.fontSize` | `var(--typo-display-md-font-size)` | 대제목 크기 |
+| `$token.typography.displayMd.fontWeight` | `var(--typo-display-md-font-weight)` | 대제목 굵기 |
+| `$token.typography.sectionTitle.fontFamily` | `var(--typo-section-title-font-family)` | 섹션 영문 타이틀 |
+| `$token.typography.sectionTitle.fontSize` | `var(--typo-section-title-font-size)` | 섹션 타이틀 크기 |
+| `$token.typography.sectionTitle.fontWeight` | `var(--typo-section-title-font-weight)` | 섹션 타이틀 굵기 |
+| `$token.typography.headingLg.fontFamily` | `var(--typo-heading-lg-font-family)` | H1 폰트 |
+| `$token.typography.headingMd.fontFamily` | `var(--typo-heading-md-font-family)` | H2 폰트 |
+| `$token.typography.headingSm.fontFamily` | `var(--typo-heading-sm-font-family)` | H3 폰트 |
+| `$token.typography.bodyLg.fontFamily` | `var(--typo-body-lg-font-family)` | 본문 대 |
+| `$token.typography.bodyMd.fontFamily` | `var(--typo-body-md-font-family)` | 본문 중 |
+| `$token.typography.bodySm.fontFamily` | `var(--typo-body-sm-font-family)` | 본문 소 |
+| `$token.typography.caption.fontFamily` | `var(--typo-caption-font-family)` | 캡션 |
+
+**Typography 속성 매핑**
+
+각 토큰에 대해 5가지 속성이 있습니다:
+
+| 속성 | v1 suffix | v2 suffix | 예시 |
+|-----|-----------|-----------|------|
+| 폰트 | `.fontFamily` | `-font-family` | `var(--typo-display-lg-font-family)` |
+| 크기 | `.fontSize` | `-font-size` | `var(--typo-display-lg-font-size)` |
+| 굵기 | `.fontWeight` | `-font-weight` | `var(--typo-display-lg-font-weight)` |
+| 줄높이 | `.lineHeight` | `-line-height` | `var(--typo-body-md-line-height)` |
+| 자간 | `.letterSpacing` | `-letter-spacing` | `var(--typo-display-lg-letter-spacing)` |
+
+**Static Font → Design Token 또는 유지 규칙**
+
+하드코딩된 폰트는 상황에 따라 처리합니다:
+
+| Font Family | 처리 방식 | 이유 |
+|-------------|----------|------|
+| `Noto Serif KR`, `Noto Sans KR` | **유지** | 한글 본문 기본 폰트 |
+| `Playfair Display` | **유지** | 영문 디스플레이 폰트 |
+| `Cormorant Garamond` | **유지** | 영문 세리프 폰트 |
+| `Montserrat` | **유지** | 영문 산세리프 폰트 |
+| 시스템 폰트 스택 | `var(--typo-body-md-font-family)` | 토큰으로 변환 |
+
+> **권장**: 프리셋에서는 구체적인 폰트명을 직접 사용하고, 테마 시스템이 전역 오버라이드 가능하도록 설계
+
+**변환 코드 예시**
+
+```typescript
+function transformTypographyToken(token: string): string {
+  // $token.typography.displayLg.fontFamily → var(--typo-display-lg-font-family)
+  const match = token.match(/^\$token\.typography\.(\w+)\.(\w+)$/)
+  if (!match) return token
+
+  const [, scale, property] = match
+
+  // camelCase → kebab-case
+  const scaleKebab = scale.replace(/([A-Z])/g, '-$1').toLowerCase()
+  const propKebab = property.replace(/([A-Z])/g, '-$1').toLowerCase()
+
+  return `var(--typo-${scaleKebab}-${propKebab})`
+}
+
+// 예시
+transformTypographyToken('$token.typography.displayLg.fontFamily')
+// → 'var(--typo-display-lg-font-family)'
+
+transformTypographyToken('$token.typography.bodyMd.fontSize')
+// → 'var(--typo-body-md-font-size)'
+```
+
+**Typography Scale 참조**
+
+| Scale | 용도 | 기본 크기 |
+|-------|------|----------|
+| `displayLg` | 메인 타이틀 (인트로 신랑♥신부) | 4xl (36px) |
+| `displayMd` | 대제목 | 3xl (30px) |
+| `sectionTitle` | 섹션 영문 타이틀 (GALLERY, LOCATION) | sm (14px) |
+| `headingLg` | H1 | 2xl (24px) |
+| `headingMd` | H2 | lg (18px) |
+| `headingSm` | H3 | base (16px) |
+| `bodyLg` | 본문 대 | base (16px) |
+| `bodyMd` | 본문 중 | sm (14px) |
+| `bodySm` | 본문 소 | xs (12px) |
+| `caption` | 캡션 | xs (12px) |
 
 ### 섹션 → 블록 타입 매핑
 
