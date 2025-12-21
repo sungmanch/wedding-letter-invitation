@@ -194,41 +194,56 @@ function BlockAccordion({
       value: unknown
     }> = []
 
-    for (const el of block.elements ?? []) {
-      if (!el.binding) continue
-
+    // 바인딩 추가 헬퍼 함수
+    const addBinding = (elementId: string, binding: VariablePath, type: string) => {
       // 자동 계산 필드는 대응 입력 필드로 변환
-      let binding: VariablePath = el.binding
-      if (HIDDEN_VARIABLE_PATHS.has(el.binding)) {
-        const inputBinding = DERIVED_TO_INPUT_MAP[el.binding]
+      let finalBinding: VariablePath = binding
+      if (HIDDEN_VARIABLE_PATHS.has(binding)) {
+        const inputBinding = DERIVED_TO_INPUT_MAP[binding]
         if (inputBinding) {
-          binding = inputBinding
+          finalBinding = inputBinding
         } else {
-          continue // 매핑 없으면 숨김
+          return // 매핑 없으면 숨김
         }
       }
 
       // 같은 바인딩은 한 번만 표시
-      if (seenBindings.has(binding)) continue
-      seenBindings.add(binding)
-      // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+      if (seenBindings.has(finalBinding)) return
+      seenBindings.add(finalBinding)
+
+      // 값 가져오기
       let value: unknown
-      if (binding === 'photos.gallery') {
+      if (finalBinding === 'photos.gallery') {
         value = data.photos?.gallery ?? []
-      } else if (isCustomVariablePath(binding)) {
-        // 커스텀 변수는 data.custom에서 가져옴
-        const key = getCustomVariableKey(binding)
+      } else if (isCustomVariablePath(finalBinding)) {
+        const key = getCustomVariableKey(finalBinding)
         value = key ? data.custom?.[key] ?? '' : ''
       } else {
-        value = resolveBinding(data, binding)
+        value = resolveBinding(data, finalBinding)
       }
 
       fields.push({
-        elementId: el.id,
-        binding,
-        type: el.type,
+        elementId,
+        binding: finalBinding,
+        type,
         value,
       })
+    }
+
+    for (const el of block.elements ?? []) {
+      // 1. 직접 바인딩된 요소
+      if (el.binding) {
+        addBinding(el.id, el.binding, el.type)
+      }
+
+      // 2. format 속성에서 변수 추출 (예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}')
+      const props = el.props as { format?: string }
+      if (props.format) {
+        const formatVars = extractFormatVariables(props.format)
+        for (const varPath of formatVars) {
+          addBinding(el.id, varPath as VariablePath, el.type)
+        }
+      }
     }
 
     return fields
@@ -856,7 +871,23 @@ const DERIVED_TO_INPUT_MAP: Record<string, VariablePath> = {
 }
 
 const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
-  // 신랑 정보
+  // 커플 정보 (신규)
+  'couple.groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
+  'couple.groom.phone': { label: '신랑 연락처', type: 'phone' },
+  'couple.bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
+  'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
+
+  // 혼주 정보 (신규)
+  'parents.groom.father.name': { label: '신랑 아버지 성함', type: 'text' },
+  'parents.groom.father.phone': { label: '신랑 아버지 연락처', type: 'phone' },
+  'parents.groom.mother.name': { label: '신랑 어머니 성함', type: 'text' },
+  'parents.groom.mother.phone': { label: '신랑 어머니 연락처', type: 'phone' },
+  'parents.bride.father.name': { label: '신부 아버지 성함', type: 'text' },
+  'parents.bride.father.phone': { label: '신부 아버지 연락처', type: 'phone' },
+  'parents.bride.mother.name': { label: '신부 어머니 성함', type: 'text' },
+  'parents.bride.mother.phone': { label: '신부 어머니 연락처', type: 'phone' },
+
+  // 신랑 정보 (레거시)
   'groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
   'groom.nameEn': { label: '신랑 영문 이름', type: 'text', placeholder: 'Gildong' },
   'groom.phone': { label: '신랑 연락처', type: 'phone' },
@@ -865,7 +896,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'groom.fatherPhone': { label: '신랑 아버지 연락처', type: 'phone' },
   'groom.motherPhone': { label: '신랑 어머니 연락처', type: 'phone' },
 
-  // 신부 정보
+  // 신부 정보 (레거시)
   'bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
   'bride.nameEn': { label: '신부 영문 이름', type: 'text', placeholder: 'Younghee' },
   'bride.phone': { label: '신부 연락처', type: 'phone' },
@@ -923,6 +954,23 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
 // ============================================
 // Utility Functions
 // ============================================
+
+/**
+ * format 문자열에서 변수 경로 추출
+ * 예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}'
+ *     → ['parents.groom.father.name', 'parents.groom.mother.name', 'couple.groom.name']
+ */
+function extractFormatVariables(format: string): string[] {
+  const regex = /\{([^}]+)\}/g
+  const matches: string[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(format)) !== null) {
+    matches.push(match[1])
+  }
+
+  return matches
+}
 
 /**
  * 중첩된 객체에 값 설정 (immutable)
