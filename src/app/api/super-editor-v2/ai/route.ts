@@ -239,10 +239,10 @@ ${context.blockSummary}
 - 프리셋: ${context.style?.preset || 'custom'}
 
 ### 웨딩 데이터
-- 신랑: ${context.data.groom.name || '(미입력)'}
-- 신부: ${context.data.bride.name || '(미입력)'}
-- 날짜: ${context.data.wedding.date || '(미입력)'}
-- 장소: ${context.data.venue.name || '(미입력)'}
+- 신랑: ${context.data.couple?.groom?.name || '(미입력)'}
+- 신부: ${context.data.couple?.bride?.name || '(미입력)'}
+- 날짜: ${context.data.wedding?.date || '(미입력)'}
+- 장소: ${context.data.venue?.name || '(미입력)'}
 ${targetBlockInfo}
 
 ## 출력 형식
