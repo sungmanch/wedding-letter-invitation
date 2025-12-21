@@ -62,18 +62,23 @@
 ...
 ```
 
-**3. 시각 스타일 분석**
+**3. 시각 스타일 분석 (Design Token 기반)**
 ```
-색상 스킴:
-- 배경: [예: #FFFFFF, gradient, 이미지]
-- 주요 텍스트: [예: #1A1A1A]
-- 강조/포인트: [예: #D4A574]
+색상 스킴 → 시맨틱 토큰 매핑:
+- 배경: bg-section | bg-section-alt | bg-card
+- 주요 텍스트: fg-default | fg-emphasis
+- 보조 텍스트: fg-muted
+- 강조/포인트: accent-default | accent-secondary
+- 오버레이: bg-overlay
 
 무드/분위기: [minimal | elegant | romantic | modern | cinematic | playful]
 
-추천 테마 프리셋: [예: classic-ivory, minimal-light]
-추천 타이포그래피: [예: classic-elegant, modern-minimal]
+추천 테마 프리셋: [예: classic-ivory, minimal-light, cinematic-dark]
+추천 타이포그래피: [예: classic-elegant, modern-minimal, romantic-script]
 ```
+
+**주의**: 색상은 하드코딩(#FFFFFF) 대신 시맨틱 토큰(var(--fg-default))을 사용합니다.
+이렇게 하면 테마 변경 시 자동으로 색상이 적용됩니다.
 
 **4. 애니메이션 힌트**
 ```
@@ -100,11 +105,19 @@
    - 스타일: {{styleDescription}}
 {{/each}}
 
-### 시각 스타일
+### 시각 스타일 (Design Token 매핑)
 - 무드: {{mood}}
-- 색상 스킴: {{colorScheme}}
-- 추천 테마: {{recommendedTheme}}
-- 추천 타이포그래피: {{recommendedTypography}}
+- 추천 테마 프리셋: {{recommendedTheme}}
+- 추천 타이포그래피 프리셋: {{recommendedTypography}}
+
+### 토큰 사용 가이드
+| 요소 역할 | 색상 토큰 | 폰트 토큰 | 크기 토큰 |
+|-----------|----------|----------|----------|
+| 제목/이름 | fg-emphasis | font-heading | text-2xl~4xl |
+| 본문 | fg-default | font-body | text-base~lg |
+| 보조 텍스트 | fg-muted | font-body | text-sm~base |
+| 날짜/숫자 | fg-default | font-accent | text-xl~2xl |
+| 버튼 | fg-on-accent | font-body | text-base |
 
 ### 데이터 바인딩 요약
 **필수:**
@@ -192,18 +205,31 @@ element:
     label: "버튼 텍스트"
     action: link | phone | map | copy | share
 
-  # 스타일
+  # 스타일 (Design Token 사용 권장)
   style:
     text:
-      fontFamily: "Noto Serif KR"
-      fontSize: 24
-      fontWeight: 400
-      color: "#1A1A1A"
+      # 폰트: 토큰 참조 또는 직접 지정
+      fontFamily: "var(--font-heading)" | "var(--font-body)" | "var(--font-accent)"
+      # 크기: 타입 스케일 토큰
+      fontSize: "var(--text-2xl)" | "var(--text-base)" | 24
+      fontWeight: "var(--font-weight-heading)" | 400
+      # 색상: 시맨틱 토큰 (하드코딩 지양)
+      color: "var(--fg-default)" | "var(--fg-emphasis)" | "var(--fg-muted)"
       textAlign: left | center | right
       lineHeight: 1.6
       letterSpacing: 0.05
-    background: "#FFFFFF" | gradient
+    # 배경: 시맨틱 토큰 또는 오버레이
+    background: "var(--bg-section)" | "var(--bg-card)" | "var(--bg-overlay)"
     opacity: 1
+
+  # tokenStyle 단축 표기 (권장)
+  # 자주 사용하는 스타일 조합을 미리 정의
+  tokenStyle:
+    role: "heading" | "body" | "caption" | "accent"
+    # heading: font-heading, font-weight-heading, fg-emphasis, text-2xl
+    # body: font-body, font-weight-body, fg-default, text-base
+    # caption: font-body, font-weight-body, fg-muted, text-sm
+    # accent: font-accent, font-weight-accent, accent-default, text-lg
 ```
 
 </check>
@@ -348,6 +374,7 @@ const {{PRESET_CONST_NAME}}: BlockPreset = {
   description: '{{description}}',
   tags: [{{tags}}] as const,
 
+  // 요소 정의 (Design Token 기반 스타일)
   elements: [
     {{#each elements}}
     {
@@ -357,7 +384,22 @@ const {{PRESET_CONST_NAME}}: BlockPreset = {
       size: { width: {{size.width}}, height: {{size.height}} },
       {{#if binding}}binding: '{{binding}}',{{/if}}
       {{#if defaultContent}}defaultContent: '{{defaultContent}}',{{/if}}
-      {{#if tokenStyle}}tokenStyle: {{tokenStyle}},{{/if}}
+      // tokenStyle: 토큰 기반 스타일 (권장)
+      {{#if tokenStyle}}tokenStyle: {
+        role: '{{tokenStyle.role}}',  // heading | body | caption | accent
+        // 시맨틱 토큰 참조
+        color: 'var(--{{tokenStyle.color}})',         // fg-default, fg-emphasis, fg-muted
+        fontFamily: 'var(--{{tokenStyle.font}})',     // font-heading, font-body, font-accent
+        fontSize: 'var(--{{tokenStyle.size}})',       // text-xs ~ text-4xl
+      },{{/if}}
+      // style: 직접 지정 (tokenStyle 없을 때만 사용)
+      {{#if style}}style: {
+        text: {
+          color: 'var(--fg-default)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--text-base)',
+        }
+      },{{/if}}
     },
     {{/each}}
   ],
@@ -368,8 +410,13 @@ const {{PRESET_CONST_NAME}}: BlockPreset = {
   recommendedAnimations: [{{recommendedAnimations}}] as const,
   {{/if}}
 
+  // 추천 테마/타이포그래피 프리셋
   {{#if recommendedThemes}}
-  recommendedThemes: [{{recommendedThemes}}] as const,
+  recommendedThemes: [{{recommendedThemes}}] as const,  // 예: 'classic-ivory', 'minimal-light'
+  {{/if}}
+
+  {{#if recommendedTypography}}
+  recommendedTypography: [{{recommendedTypography}}] as const,  // 예: 'classic-elegant', 'modern-minimal'
   {{/if}}
 
   {{#if layoutOptions}}
@@ -383,6 +430,24 @@ const {{PRESET_CONST_NAME}}: BlockPreset = {
   },
 }
 ```
+
+### Design Token 사용 규칙
+
+1. **색상은 반드시 시맨틱 토큰 사용**
+   - ❌ `color: '#1A1A1A'`
+   - ✅ `color: 'var(--fg-default)'`
+
+2. **폰트는 토큰 또는 프리셋 사용**
+   - ❌ `fontFamily: 'Noto Serif KR'`
+   - ✅ `fontFamily: 'var(--font-heading)'`
+
+3. **크기는 타입 스케일 토큰 사용**
+   - ❌ `fontSize: 24`
+   - ✅ `fontSize: 'var(--text-2xl)'`
+
+4. **테마 호환성 확보**
+   - 프리셋에 `recommendedThemes`, `recommendedTypography` 명시
+   - 다크/라이트 테마 모두에서 동작하도록 fg/bg 토큰 사용
 
 <ask>
 **최종 확인**
@@ -491,7 +556,109 @@ npx tsc --noEmit src/lib/super-editor-v2/presets/block-presets.ts
 
 ---
 
-## 부록: VariablePath 전체 목록
+## 부록 A: Design Token 빠른 참조
+
+### 색상 토큰 (SemanticTokens)
+```typescript
+// 배경
+'var(--bg-page)'        // 페이지 전체 배경
+'var(--bg-section)'     // 기본 섹션 배경
+'var(--bg-section-alt)' // 대체 섹션 배경
+'var(--bg-card)'        // 카드/컨테이너 배경
+'var(--bg-overlay)'     // 이미지 오버레이
+
+// 전경 (텍스트)
+'var(--fg-default)'     // 기본 텍스트
+'var(--fg-muted)'       // 보조 텍스트
+'var(--fg-emphasis)'    // 강조 텍스트
+'var(--fg-inverse)'     // 반전 배경 위 텍스트
+'var(--fg-on-accent)'   // 액센트 배경 위 텍스트
+
+// 강조
+'var(--accent-default)'   // 기본 액센트 (버튼, 링크)
+'var(--accent-hover)'     // 호버 상태
+'var(--accent-active)'    // 활성 상태
+'var(--accent-secondary)' // 보조 액센트
+
+// 보더
+'var(--border-default)'   // 기본 테두리
+'var(--border-emphasis)'  // 강조 테두리
+'var(--border-muted)'     // 연한 테두리
+```
+
+### 타이포그래피 토큰
+```typescript
+// 폰트 패밀리
+'var(--font-heading)'  // 제목용 (예: Noto Serif KR)
+'var(--font-body)'     // 본문용 (예: Pretendard)
+'var(--font-accent)'   // 강조용 (예: Playfair Display)
+
+// 폰트 웨이트
+'var(--font-weight-heading)'  // 제목 굵기
+'var(--font-weight-body)'     // 본문 굵기
+'var(--font-weight-accent)'   // 강조 굵기
+
+// 타입 스케일 (크기)
+'var(--text-xs)'    // 0.75rem (12px)
+'var(--text-sm)'    // 0.875rem (14px)
+'var(--text-base)'  // 1rem (16px)
+'var(--text-lg)'    // 1.125rem (18px)
+'var(--text-xl)'    // 1.25rem (20px)
+'var(--text-2xl)'   // 1.5rem (24px)
+'var(--text-3xl)'   // 1.875rem (30px)
+'var(--text-4xl)'   // 2.25rem (36px)
+```
+
+### 테마 프리셋 ID
+```typescript
+type ThemePresetId =
+  | 'minimal-light'    // 밝은 미니멀
+  | 'minimal-dark'     // 어두운 미니멀
+  | 'classic-ivory'    // 아이보리 클래식
+  | 'classic-gold'     // 골드 클래식
+  | 'modern-mono'      // 모노크롬 모던
+  | 'modern-contrast'  // 고대비 모던
+  | 'romantic-blush'   // 블러쉬 핑크
+  | 'romantic-garden'  // 가든 그린
+  | 'cinematic-dark'   // 다크 시네마틱
+  | 'cinematic-warm'   // 따뜻한 시네마틱
+```
+
+### 타이포그래피 프리셋 ID
+```typescript
+type TypographyPresetId =
+  // 클래식/우아
+  | 'classic-elegant'      // Playfair + Noto Serif
+  | 'classic-traditional'  // Cinzel + Nanum Myeongjo
+  | 'classic-romantic'     // Cormorant + Gowun Batang
+  // 모던/미니멀
+  | 'modern-minimal'       // Montserrat + Pretendard
+  | 'modern-clean'         // Inter + Noto Sans
+  | 'modern-geometric'     // Poppins + Pretendard
+  // 로맨틱/감성
+  | 'romantic-script'      // Great Vibes + Gowun Batang
+  | 'romantic-italian'     // Italianno + Noto Serif
+  | 'romantic-soft'        // Pinyon Script + Hahmlet
+  // 내추럴/손글씨
+  | 'natural-handwritten'  // High Summit + 마포금빛나루
+  | 'natural-brush'        // Alex Brush + 나눔붓글씨
+  | 'natural-warm'         // Dancing Script + 고운돋움
+```
+
+### 요소 역할별 권장 토큰 조합
+| 역할 | color | fontFamily | fontSize |
+|------|-------|------------|----------|
+| 메인 제목 | fg-emphasis | font-heading | text-3xl~4xl |
+| 부제목 | fg-default | font-heading | text-xl~2xl |
+| 본문 | fg-default | font-body | text-base~lg |
+| 캡션/설명 | fg-muted | font-body | text-sm~base |
+| 날짜/숫자 | fg-default | font-accent | text-xl~2xl |
+| 강조 텍스트 | accent-default | font-accent | text-lg |
+| 버튼 텍스트 | fg-on-accent | font-body | text-base |
+
+---
+
+## 부록 B: VariablePath 전체 목록
 
 ```typescript
 type VariablePath =

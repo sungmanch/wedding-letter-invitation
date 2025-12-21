@@ -36,35 +36,49 @@ analysis_targets:
     - static_elements: "정적 디자인 요소"
     - interactive_elements: "버튼, 링크 등 인터랙티브 요소"
 
-# 사용 가능한 BlockType
+# 사용 가능한 BlockType (순서 = 일반적인 청첩장 배치 순서)
 available_block_types:
-  - hero
-  - greeting
-  - calendar
-  - gallery
-  - location
-  - parents
-  - contact
-  - account
-  - message
-  - rsvp
-  - loading
-  - quote
-  - profile
-  - parents-contact
-  - timeline
-  - video
-  - interview
-  - transport
-  - notice
-  - announcement
-  - flower-gift
-  - together-time
-  - dday
-  - guest-snap
-  - ending
-  - music
-  - custom
+  - hero              # 히어로 (메인 사진, 이름, 날짜)
+  - greeting-parents  # 인사말/혼주정보
+  - profile           # 신랑신부 소개/인터뷰
+  - calendar          # 예식일시 (달력/D-day)
+  - gallery           # 갤러리 (사진/영상)
+  - rsvp              # 참석 여부
+  - location          # 오시는길 (지도/교통)
+  - notice            # 공지사항/안내
+  - account           # 축의금 계좌
+  - message           # 방명록
+  - ending            # 축하화환/공유/엔딩
+  - music             # BGM 컨트롤
+  - loading           # 로딩 화면
+  - custom            # 사용자 정의 블록
+
+# 블록 카테고리 (UI 그룹핑/AI 맥락용, 프리셋 구조와 무관)
+block_categories:
+  - name: "히어로"
+    types: [hero]
+  - name: "인사말/혼주정보"
+    types: [greeting-parents]
+  - name: "신랑신부 소개/인터뷰"
+    types: [profile]
+  - name: "예식일시"
+    types: [calendar]
+  - name: "갤러리"
+    types: [gallery]
+  - name: "RSVP"
+    types: [rsvp]
+  - name: "오시는길"
+    types: [location]
+  - name: "공지사항"
+    types: [notice]
+  - name: "축의금 계좌"
+    types: [account]
+  - name: "방명록"
+    types: [message]
+  - name: "축하화환/공유/엔딩"
+    types: [ending]
+  - name: "기타기능"
+    types: [music, loading, custom]
 
 # 사용 가능한 ElementType
 available_element_types:
@@ -76,6 +90,150 @@ available_element_types:
   - divider
   - map
   - calendar
+
+# ============================================================
+# Design Token System
+# ============================================================
+
+# 시맨틱 컬러 토큰 (CSS 변수로 렌더링됨)
+semantic_color_tokens:
+  background:
+    - name: "bg-page"
+      description: "페이지 전체 배경"
+      css_var: "var(--bg-page)"
+    - name: "bg-section"
+      description: "기본 섹션 배경"
+      css_var: "var(--bg-section)"
+    - name: "bg-section-alt"
+      description: "대체 섹션 배경 (교차용)"
+      css_var: "var(--bg-section-alt)"
+    - name: "bg-card"
+      description: "카드/컨테이너 배경"
+      css_var: "var(--bg-card)"
+    - name: "bg-overlay"
+      description: "이미지 오버레이"
+      css_var: "var(--bg-overlay)"
+
+  foreground:
+    - name: "fg-default"
+      description: "기본 텍스트"
+      css_var: "var(--fg-default)"
+    - name: "fg-muted"
+      description: "보조 텍스트 (날짜, 설명 등)"
+      css_var: "var(--fg-muted)"
+    - name: "fg-emphasis"
+      description: "강조 텍스트 (이름, 제목 등)"
+      css_var: "var(--fg-emphasis)"
+    - name: "fg-inverse"
+      description: "반전 배경 위 텍스트"
+      css_var: "var(--fg-inverse)"
+    - name: "fg-on-accent"
+      description: "액센트 배경 위 텍스트"
+      css_var: "var(--fg-on-accent)"
+
+  accent:
+    - name: "accent-default"
+      description: "기본 액센트 (버튼, 링크)"
+      css_var: "var(--accent-default)"
+    - name: "accent-hover"
+      description: "호버 상태"
+      css_var: "var(--accent-hover)"
+    - name: "accent-active"
+      description: "활성 상태"
+      css_var: "var(--accent-active)"
+    - name: "accent-secondary"
+      description: "보조 액센트 (듀오톤)"
+      css_var: "var(--accent-secondary)"
+
+  border:
+    - name: "border-default"
+      description: "기본 테두리"
+      css_var: "var(--border-default)"
+    - name: "border-emphasis"
+      description: "강조 테두리"
+      css_var: "var(--border-emphasis)"
+    - name: "border-muted"
+      description: "연한 테두리"
+      css_var: "var(--border-muted)"
+
+# 타이포그래피 토큰
+typography_tokens:
+  font_families:
+    - name: "font-heading"
+      description: "제목용 폰트"
+      css_var: "var(--font-heading)"
+    - name: "font-body"
+      description: "본문용 폰트"
+      css_var: "var(--font-body)"
+    - name: "font-accent"
+      description: "강조용 폰트 (영문 장식 등)"
+      css_var: "var(--font-accent)"
+
+  font_weights:
+    - name: "font-weight-heading"
+      css_var: "var(--font-weight-heading)"
+    - name: "font-weight-body"
+      css_var: "var(--font-weight-body)"
+    - name: "font-weight-accent"
+      css_var: "var(--font-weight-accent)"
+
+  type_scale:
+    - name: "xs"
+      size: "0.75rem"
+      css_var: "var(--text-xs)"
+    - name: "sm"
+      size: "0.875rem"
+      css_var: "var(--text-sm)"
+    - name: "base"
+      size: "1rem"
+      css_var: "var(--text-base)"
+    - name: "lg"
+      size: "1.125rem"
+      css_var: "var(--text-lg)"
+    - name: "xl"
+      size: "1.25rem"
+      css_var: "var(--text-xl)"
+    - name: "2xl"
+      size: "1.5rem"
+      css_var: "var(--text-2xl)"
+    - name: "3xl"
+      size: "1.875rem"
+      css_var: "var(--text-3xl)"
+    - name: "4xl"
+      size: "2.25rem"
+      css_var: "var(--text-4xl)"
+
+# 테마 프리셋 ID
+theme_preset_ids:
+  - minimal-light      # 밝은 미니멀
+  - minimal-dark       # 어두운 미니멀
+  - classic-ivory      # 아이보리 클래식
+  - classic-gold       # 골드 클래식
+  - modern-mono        # 모노크롬 모던
+  - modern-contrast    # 고대비 모던
+  - romantic-blush     # 블러쉬 핑크
+  - romantic-garden    # 가든 그린
+  - cinematic-dark     # 다크 시네마틱
+  - cinematic-warm     # 따뜻한 시네마틱
+
+# 타이포그래피 프리셋 ID
+typography_preset_ids:
+  classic:
+    - classic-elegant      # Playfair + Noto Serif
+    - classic-traditional  # Cinzel + Nanum Myeongjo
+    - classic-romantic     # Cormorant + Gowun Batang
+  modern:
+    - modern-minimal       # Montserrat + Pretendard
+    - modern-clean         # Inter + Noto Sans
+    - modern-geometric     # Poppins + Pretendard
+  romantic:
+    - romantic-script      # Great Vibes + Gowun Batang
+    - romantic-italian     # Italianno + Noto Serif
+    - romantic-soft        # Pinyon Script + Hahmlet
+  natural:
+    - natural-handwritten  # High Summit + 마포금빛나루
+    - natural-brush        # Alex Brush + 나눔붓글씨
+    - natural-warm         # Dancing Script + 고운돋움
 
 # ============================================================
 # Source and target references
