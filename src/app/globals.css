@@ -237,6 +237,35 @@ body {
 }
 
 /* ==========================================
+   Sage Theme Scrollbar (Editor - Fresh Natural)
+   ========================================== */
+
+/* 에디터 패널용 세이지 스크롤바 */
+.scrollbar-sage {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 155, 107, 0.3) transparent;
+}
+
+.scrollbar-sage::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-sage::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-sage::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 155, 107, 0.3);
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.scrollbar-sage::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 155, 107, 0.6);
+  box-shadow: 0 0 8px rgba(107, 155, 107, 0.3);
+}
+
+/* ==========================================
    Scrollytelling Landing Page Styles
    ========================================== */
 
@@ -549,4 +578,25 @@ body {
     -2px -2px 2px rgba(0, 0, 0, 0.1),
     /* 전체 부드러운 글로우 */
     0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================== */
+/* Typewriter Animation - Landing Hero */
+/* ========================================== */
+
+@keyframes typewriterBlink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--sage-500);
+  font-weight: 300;
+  animation: typewriterBlink 0.7s step-end infinite;
 }
