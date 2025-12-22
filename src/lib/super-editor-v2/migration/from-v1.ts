@@ -96,10 +96,13 @@ export function migrateV1ToV2(input: MigrationInput): MigrationResult {
   const blocks: Block[] = [heroBlock, ...sectionBlocks]
 
   // 6. EditorDocument 구성
+  const groomName = weddingData.groom?.name || weddingData.couple?.groom?.name || '신랑'
+  const brideName = weddingData.bride?.name || weddingData.couple?.bride?.name || '신부'
+
   const document: Omit<EditorDocument, 'id'> = {
     version: 2,
     meta: {
-      title: `${weddingData.groom.name} ♥ ${weddingData.bride.name} 결혼합니다`,
+      title: `${groomName} ♥ ${brideName} 결혼합니다`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -120,20 +123,18 @@ export function migrateV1ToV2(input: MigrationInput): MigrationResult {
 // ============================================
 
 function convertToWeddingData(basicInfo: BasicInfoData): WeddingData {
-  const dateDisplay = formatDateKorean(basicInfo.weddingDate)
-  const timeDisplay = formatTimeKorean(basicInfo.weddingTime)
+  const groomName = basicInfo.groomName || '신랑'
+  const brideName = basicInfo.brideName || '신부'
 
   return {
-    groom: {
-      name: basicInfo.groomName || '신랑',
-    },
-    bride: {
-      name: basicInfo.brideName || '신부',
+    // 새 구조 (couple)
+    couple: {
+      groom: { name: groomName },
+      bride: { name: brideName },
     },
     wedding: {
       date: basicInfo.weddingDate,
       time: basicInfo.weddingTime,
-      dateDisplay,
     },
     venue: {
       name: basicInfo.venueName || '예식장',
@@ -146,6 +147,9 @@ function convertToWeddingData(basicInfo: BasicInfoData): WeddingData {
       title: '저희 결혼합니다',
       content: '서로의 마음을 확인하고\n평생을 함께 하고자 합니다.\n\n바쁘시더라도 부디 오셔서\n저희의 앞날을 축복해 주세요.',
     },
+    // Legacy 호환
+    groom: { name: groomName },
+    bride: { name: brideName },
   }
 }
 
