@@ -2,17 +2,17 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { User, LogIn } from 'lucide-react'
-import { Button } from '@/components/ui'
 import { createClient } from '@/lib/supabase/server'
-import { NaturalHeroLanding } from '@/components/landing/NaturalHeroLanding'
+import { PromptHeroLanding } from '@/components/landing/PromptHeroLanding'
+import { BeforeAfterDemo } from '@/components/landing/BeforeAfterDemo'
 
 export const metadata: Metadata = {
-  title: 'Maison de Letter - 원하는 분위기를 말하면, AI가 바로 시안을 만들어 드립니다',
-  description: '3분만에 나만의 특별한 청첩장을 완성하세요. AI 채팅으로 분위기를 말하면 바로 시안을 만들어 드립니다.',
+  title: 'Maison de Letter - 원하는 느낌만 말하세요, AI가 바로 만들어드립니다',
+  description: '느낌만 말하면 AI가 청첩장을 만들어드립니다. 럭셔리하게, 심플하게, 따뜻하게 - 원하는 분위기만 말씀하세요.',
   keywords: ['모바일 청첩장', '청첩장 만들기', 'AI 청첩장', '웨딩 초대장', '결혼 청첩장', '인터랙티브 청첩장', 'Maison de Letter'],
   openGraph: {
-    title: 'Maison de Letter - 원하는 분위기를 말하면, AI가 바로 시안을 만들어 드립니다',
-    description: '3분만에 나만의 특별한 청첩장을 완성하세요. AI 채팅으로 분위기를 말하면 바로 시안을 만들어 드립니다.',
+    title: 'Maison de Letter - 원하는 느낌만 말하세요, AI가 바로 만들어드립니다',
+    description: '느낌만 말하면 AI가 청첩장을 만들어드립니다. 럭셔리하게, 심플하게, 따뜻하게 - 원하는 분위기만 말씀하세요.',
     type: 'website',
     locale: 'ko_KR',
   },
@@ -51,17 +51,15 @@ export default async function WeddingLandingPage() {
                 <span className="hidden sm:inline">로그인</span>
               </Link>
             )}
-            <Link href="/login?redirect=/se/create">
-              <Button className="bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white rounded-full px-4 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base font-medium h-auto">
-                시작하기
-              </Button>
-            </Link>
           </div>
         </div>
       </header>
 
-      {/* Natural Hero Landing */}
-      <NaturalHeroLanding />
+      {/* Prompt Hero Landing */}
+      <PromptHeroLanding user={user} />
+
+      {/* Before → After Demo */}
+      <BeforeAfterDemo />
 
       {/* Footer */}
       <footer className="border-t border-[var(--sand-100)] px-6 py-10 bg-[var(--ivory-50)]">

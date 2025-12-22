@@ -45,6 +45,15 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-22: 새 문서 생성 시 샘플 데이터 제공
+- **이유**: 랜딩 → 편집 페이지 이동 시 빈 화면 표시 문제. 사용자가 청첩장 형태를 바로 확인할 수 없음
+- **변경**:
+  - `SAMPLE_WEDDING_DATA` 상수 추가 (샘플 이름, 날짜, 장소, 사진, 인사말)
+  - `getSampleWeddingDate()` 함수로 동적 날짜 계산 (오늘 + 5개월 후 토요일)
+  - `createDocument()`에 `useSampleData` 옵션 추가
+  - 랜딩 `/api/landing/generate`, `/se2/create` 모두 `useSampleData: true` 적용
+- **파일**: `schema/index.ts`, `actions/document.ts`, `create/page.tsx`, `api/landing/generate/route.ts`
+
 ### 2025-12-15: Super Editor v2 블록 높이 기준 요소 위치 계산 수정
 - **이유**: 블록 높이 조절 시 요소가 블록 밖으로 넘쳐서 다음 블록과 겹침
 - **원인**: element-renderer에서 요소 y/height를 viewport.height 기준으로 계산함 (블록 높이 기준이 아님)

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // AI 프롬프트 생성
-    const systemPrompt = buildSystemPrompt(context, body.targetBlockId)
+    const systemPrompt = buildSystemPrompt(context, body.targetBlockId, body.referenceAnalysis)
     const userPrompt = buildUserPrompt(body.prompt, body.context)
 
     // 디버깅: 프롬프트 크기 확인
@@ -135,7 +135,8 @@ export async function POST(request: NextRequest) {
 
 function buildSystemPrompt(
   context: Awaited<ReturnType<typeof getDocumentContextForAI>>,
-  targetBlockId?: string
+  targetBlockId?: string,
+  referenceAnalysis?: AIEditRequest['referenceAnalysis']
 ): string {
   if (!context) return ''
 
@@ -244,6 +245,23 @@ ${context.blockSummary}
 - 날짜: ${context.data.wedding?.date || '(미입력)'}
 - 장소: ${context.data.venue?.name || '(미입력)'}
 ${targetBlockInfo}
+${referenceAnalysis ? `
+## 참고 레퍼런스 분석 결과
+사용자가 제공한 레퍼런스 이미지/URL을 분석한 결과입니다.
+이 스타일을 참고하여 청첩장을 디자인해주세요.
+
+- 분위기: ${referenceAnalysis.mood.join(', ')}
+- 색상 팔레트: ${referenceAnalysis.colors.join(', ')}
+- 타이포그래피: ${referenceAnalysis.typography}
+- 레이아웃 스타일: ${referenceAnalysis.layout}
+- 키워드: ${referenceAnalysis.keywords.join(', ')}
+- 스타일 요약: ${referenceAnalysis.summary}
+
+위 분석 결과를 반영하여:
+1. style.preset을 적절히 선택하거나 (minimal-light, minimal-dark, classic-serif 등)
+2. 블록의 style.background.color로 배경색을 지정하고
+3. 텍스트 요소의 style.text.color로 글자색을 지정하세요
+` : ''}
 
 ## 출력 형식
 
