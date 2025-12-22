@@ -73,14 +73,13 @@ export const DEFAULT_ANIMATION: GlobalAnimation = {
 }
 
 /**
- * 기본 WeddingData
+ * 기본 WeddingData (section-data.md v2.2 기준)
  */
 export const DEFAULT_WEDDING_DATA: WeddingData = {
-  groom: {
-    name: '',
-  },
-  bride: {
-    name: '',
+  // ═══ 공유 필드 ═══
+  couple: {
+    groom: { name: '' },
+    bride: { name: '' },
   },
   wedding: {
     date: '',
@@ -88,11 +87,78 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
   },
   venue: {
     name: '',
-    address: '',
   },
   photos: {
     gallery: [],
   },
+
+  // ═══ Legacy 호환 ═══
+  groom: { name: '' },
+  bride: { name: '' },
+}
+
+/**
+ * 샘플 결혼식 날짜 계산 (오늘 + 5개월 후 토요일)
+ */
+function getSampleWeddingDate(): string {
+  const date = new Date()
+  date.setMonth(date.getMonth() + 5)
+  const dayOfWeek = date.getDay()
+  const daysUntilSaturday = (6 - dayOfWeek + 7) % 7
+  date.setDate(date.getDate() + daysUntilSaturday)
+  return date.toISOString().split('T')[0]
+}
+
+/**
+ * 샘플 WeddingData (새 문서 생성 시 미리보기용)
+ * - 신랑/신부 이름, 날짜, 장소, 사진, 인사말만 포함
+ * - 혼주, 계좌 정보는 사용자가 직접 입력
+ */
+export const SAMPLE_WEDDING_DATA: WeddingData = {
+  // ═══ 커플 정보 ═══
+  couple: {
+    groom: { name: '김민준' },
+    bride: { name: '이서연' },
+  },
+
+  // ═══ 결혼식 일시 ═══
+  wedding: {
+    date: getSampleWeddingDate(),
+    time: '14:00',
+  },
+
+  // ═══ 예식장 정보 ═══
+  venue: {
+    name: '더채플앳청담',
+    hall: '아이리스홀',
+    address: '서울특별시 강남구 선릉로 158길 11',
+  },
+
+  // ═══ 사진 (예시 이미지) ═══
+  photos: {
+    main: '/examples/images/example_wedding_image.png',
+    gallery: [
+      '/examples/images/example_wedding_image2.png',
+      '/examples/images/example_wedding_image3.png',
+      '/examples/images/example_wedding_image4.png',
+      '/examples/images/example_wedding_image5.png',
+      '/examples/images/example_wedding_image6.png',
+    ],
+  },
+
+  // ═══ 인사말 ═══
+  greeting: {
+    title: '저희 결혼합니다',
+    content: `서로 다른 두 사람이 만나
+하나의 길을 함께 걸어가고자 합니다.
+
+저희의 새로운 시작을 축복해 주시면
+더없는 기쁨으로 간직하겠습니다.`,
+  },
+
+  // ═══ Legacy 호환 ═══
+  groom: { name: '김민준' },
+  bride: { name: '이서연' },
 }
 
 /**

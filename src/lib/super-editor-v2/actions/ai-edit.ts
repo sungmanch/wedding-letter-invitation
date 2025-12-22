@@ -26,6 +26,14 @@ export interface AIEditRequest {
       height: number
     }
   }
+  referenceAnalysis?: {  // 레퍼런스 이미지 분석 결과
+    mood: string[]
+    colors: string[]
+    typography: string
+    layout: string
+    keywords: string[]
+    summary: string
+  }
 }
 
 export interface AIEditResponse {

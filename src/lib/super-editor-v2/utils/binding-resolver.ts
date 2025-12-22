@@ -113,10 +113,21 @@ export function getValueByPath(
 // ============================================
 
 const COMPUTED_FIELDS = [
+  // 날짜/시간 표시
   'wedding.dateDisplay',
-  'wedding.dday',
-  'wedding.dayOfWeek',
   'wedding.timeDisplay',
+  'wedding.dday',
+  // 날짜 분해 필드
+  'wedding.month',
+  'wedding.day',
+  'wedding.weekday',  // dayOfWeek → weekday로 rename
+  // 실시간 카운트다운
+  'countdown.days',
+  'countdown.hours',
+  'countdown.minutes',
+  'countdown.seconds',
+  // Legacy 호환
+  'wedding.dayOfWeek',
 ] as const
 
 type ComputedField = typeof COMPUTED_FIELDS[number]
@@ -130,18 +141,39 @@ function resolveComputedField(
   field: ComputedField,
   options: ResolveOptions
 ): BindingValue {
+  const dateStr = data.wedding.date
+
   switch (field) {
     case 'wedding.dateDisplay':
-      return formatWeddingDate(data.wedding.date, options.dateFormat)
-
-    case 'wedding.dday':
-      return calculateDday(data.wedding.date)
-
-    case 'wedding.dayOfWeek':
-      return getDayOfWeek(data.wedding.date)
+      return formatWeddingDate(dateStr, options.dateFormat)
 
     case 'wedding.timeDisplay':
       return formatTime(data.wedding.time)
+
+    case 'wedding.dday':
+      return calculateDday(dateStr)
+
+    case 'wedding.month':
+      return getMonth(dateStr)
+
+    case 'wedding.day':
+      return getDay(dateStr)
+
+    case 'wedding.weekday':
+    case 'wedding.dayOfWeek':  // Legacy 호환
+      return getDayOfWeek(dateStr)
+
+    case 'countdown.days':
+      return getCountdown(dateStr).days
+
+    case 'countdown.hours':
+      return getCountdown(dateStr).hours
+
+    case 'countdown.minutes':
+      return getCountdown(dateStr).minutes
+
+    case 'countdown.seconds':
+      return getCountdown(dateStr).seconds
 
     default:
       return null
@@ -214,6 +246,54 @@ export function getDayOfWeek(dateStr: string): string {
 }
 
 /**
+ * 월 반환
+ */
+export function getMonth(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  return String(date.getMonth() + 1)
+}
+
+/**
+ * 일 반환
+ */
+export function getDay(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  return String(date.getDate())
+}
+
+/**
+ * 카운트다운 계산 (실시간 갱신용)
+ */
+export function getCountdown(dateStr: string): {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+} {
+  const weddingDate = new Date(dateStr)
+  const now = new Date()
+
+  if (isNaN(weddingDate.getTime())) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
+
+  const diff = weddingDate.getTime() - now.getTime()
+
+  if (diff <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+  return { days, hours, minutes, seconds }
+}
+
+/**
  * 시간 포맷팅
  * @param timeStr HH:mm 형식 (14:00)
  */
@@ -242,24 +322,62 @@ export function isValidVariablePath(path: string): path is VariablePath {
   }
 
   const validPaths: string[] = [
-    // 신랑
+    // ─── 공유 필드 (◆ 원본) ───
+    'couple.groom.name', 'couple.groom.phone', 'couple.groom.intro',
+    'couple.groom.photo', 'couple.groom.birthDate', 'couple.groom.mbti', 'couple.groom.tags',
+    'couple.bride.name', 'couple.bride.phone', 'couple.bride.intro',
+    'couple.bride.photo', 'couple.bride.birthDate', 'couple.bride.mbti', 'couple.bride.tags',
+    'couple.photo', 'couple.photos',
+    'wedding.date', 'wedding.time',
+
+    // ─── 자동 계산 (__HIDDEN__) ───
+    'wedding.dateDisplay', 'wedding.timeDisplay', 'wedding.dday',
+    'wedding.month', 'wedding.day', 'wedding.weekday',
+    'countdown.days', 'countdown.hours', 'countdown.minutes', 'countdown.seconds',
+
+    // ─── 혼주 ───
+    'parents.deceasedIcon',
+    'parents.groom.father.name', 'parents.groom.father.status', 'parents.groom.father.phone',
+    'parents.groom.mother.name', 'parents.groom.mother.status', 'parents.groom.mother.phone',
+    'parents.bride.father.name', 'parents.bride.father.status', 'parents.bride.father.phone',
+    'parents.bride.mother.name', 'parents.bride.mother.status', 'parents.bride.mother.phone',
+
+    // ─── 장소 ───
+    'venue.name', 'venue.hall', 'venue.address', 'venue.tel',
+    'venue.lat', 'venue.lng',
+    'venue.naverUrl', 'venue.kakaoUrl', 'venue.tmapUrl',
+    'venue.transportation.bus', 'venue.transportation.subway',
+    'venue.transportation.shuttle', 'venue.transportation.parking', 'venue.transportation.etc',
+
+    // ─── 사진 ───
+    'photos.main', 'photos.gallery',
+
+    // ─── 섹션 설정 ───
+    'intro.message',
+    'greeting.title', 'greeting.content',
+    'contact.showParents',
+    'gallery.effect',
+    'accounts.groom', 'accounts.bride', 'accounts.kakaopay.groom', 'accounts.kakaopay.bride',
+    'rsvp.title', 'rsvp.description', 'rsvp.deadline',
+    'notice.items',
+    'guestbook.title', 'guestbook.placeholder',
+    'ending.message', 'ending.photo',
+    'bgm.trackId', 'bgm.title', 'bgm.artist',
+    'video.type', 'video.url', 'video.title',
+
+    // ─── 확장 섹션 ───
+    'interview.title', 'interview.subtitle', 'interview.items',
+    'timeline.title', 'timeline.subtitle', 'timeline.items',
+
+    // ─── Legacy 호환 ───
     'groom.name', 'groom.nameEn', 'groom.fatherName', 'groom.motherName',
     'groom.fatherPhone', 'groom.motherPhone', 'groom.phone', 'groom.account',
-    // 신부
     'bride.name', 'bride.nameEn', 'bride.fatherName', 'bride.motherName',
     'bride.fatherPhone', 'bride.motherPhone', 'bride.phone', 'bride.account',
-    // 예식
-    'wedding.date', 'wedding.time', 'wedding.dateDisplay', 'wedding.dday',
-    // 예식장
-    'venue.name', 'venue.hall', 'venue.floor', 'venue.address',
-    'venue.addressDetail', 'venue.coordinates', 'venue.phone',
-    'venue.parkingInfo', 'venue.transportInfo',
-    // 사진
-    'photos.main', 'photos.gallery',
-    // 인사말
-    'greeting.title', 'greeting.content',
-    // 음악
+    'venue.floor', 'venue.addressDetail', 'venue.coordinates',
+    'venue.phone', 'venue.parkingInfo', 'venue.transportInfo',
     'music.url', 'music.title', 'music.artist',
+    'wedding.dayOfWeek',
   ]
 
   return validPaths.includes(path)

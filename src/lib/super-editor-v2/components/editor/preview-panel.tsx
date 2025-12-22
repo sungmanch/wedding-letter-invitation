@@ -129,7 +129,7 @@ export function PreviewPanel({
         }
 
         .se2-preview--highlighting .se2-block[data-block-id="${highlightedBlockId}"] {
-          box-shadow: 0 0 0 2px #C9A962;
+          box-shadow: 0 0 0 2px var(--sage-500);
         }
       `}</style>
     </div>
@@ -223,14 +223,14 @@ function PhoneFrame({
     >
       {/* 폰 프레임 외곽 */}
       <div
-        className="absolute inset-0 rounded-[40px] bg-[#1A1A1A] shadow-2xl"
+        className="absolute inset-0 rounded-[40px] bg-[var(--sand-200)] shadow-2xl"
         style={{
           padding: '12px',
         }}
       >
         {/* 노치 */}
         <div
-          className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#0A0806] rounded-full z-10"
+          className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-[var(--text-primary)] rounded-full z-10"
         />
 
         {/* 스크린 영역 */}
@@ -248,7 +248,7 @@ function PhoneFrame({
 
       {/* 하단 홈 인디케이터 */}
       <div
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 w-32 h-1 bg-[var(--sand-100)] rounded-full"
       />
     </div>
   )
@@ -272,15 +272,15 @@ export function PreviewControls({
   onDeviceChange,
 }: PreviewControlsProps) {
   return (
-    <div className="flex items-center gap-4 px-4 py-2 bg-[#1A1A1A] border-b border-white/10">
+    <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-[var(--sand-100)]">
       {/* 디바이스 전환 */}
-      <div className="flex items-center gap-1 rounded-lg border border-white/10 overflow-hidden">
+      <div className="flex items-center gap-1 rounded-lg border border-[var(--sand-100)] overflow-hidden">
         <button
           onClick={() => onDeviceChange('mobile')}
           className={`px-3 py-1.5 text-sm transition-colors ${
             device === 'mobile'
-              ? 'bg-[#C9A962] text-[#0A0806]'
-              : 'text-[#F5E6D3]/60 hover:bg-white/5'
+              ? 'bg-[var(--sage-500)] text-white'
+              : 'text-[var(--text-muted)] hover:bg-[var(--sage-50)]'
           }`}
         >
           <MobileIcon className="w-4 h-4" />
@@ -289,8 +289,8 @@ export function PreviewControls({
           onClick={() => onDeviceChange('tablet')}
           className={`px-3 py-1.5 text-sm transition-colors ${
             device === 'tablet'
-              ? 'bg-[#C9A962] text-[#0A0806]'
-              : 'text-[#F5E6D3]/60 hover:bg-white/5'
+              ? 'bg-[var(--sage-500)] text-white'
+              : 'text-[var(--text-muted)] hover:bg-[var(--sage-50)]'
           }`}
         >
           <TabletIcon className="w-4 h-4" />
@@ -301,16 +301,16 @@ export function PreviewControls({
       <div className="flex items-center gap-2">
         <button
           onClick={() => onZoomChange(Math.max(0.5, zoom - 0.1))}
-          className="p-1.5 text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5 rounded"
+          className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)] rounded"
         >
           <MinusIcon className="w-4 h-4" />
         </button>
-        <span className="text-sm text-[#F5E6D3]/60 min-w-[3rem] text-center">
+        <span className="text-sm text-[var(--text-muted)] min-w-[3rem] text-center">
           {Math.round(zoom * 100)}%
         </span>
         <button
           onClick={() => onZoomChange(Math.min(1.5, zoom + 0.1))}
-          className="p-1.5 text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5 rounded"
+          className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)] rounded"
         >
           <PlusIcon className="w-4 h-4" />
         </button>

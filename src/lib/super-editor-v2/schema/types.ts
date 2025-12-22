@@ -198,50 +198,63 @@ export interface CalendarProps {
 // ============================================
 
 export type VariablePath =
-  // 신랑 정보
-  | 'groom.name'
-  | 'groom.nameEn'
-  | 'groom.fatherName'
-  | 'groom.motherName'
-  | 'groom.fatherPhone'
-  | 'groom.motherPhone'
-  | 'groom.phone'
-  | 'groom.account'
-  // 신부 정보
-  | 'bride.name'
-  | 'bride.nameEn'
-  | 'bride.fatherName'
-  | 'bride.motherName'
-  | 'bride.fatherPhone'
-  | 'bride.motherPhone'
-  | 'bride.phone'
-  | 'bride.account'
-  // 예식 정보
-  | 'wedding.date'
-  | 'wedding.time'
-  | 'wedding.dateDisplay'
-  | 'wedding.dday'
-  // 예식장 정보
-  | 'venue.name'
-  | 'venue.hall'
-  | 'venue.floor'
-  | 'venue.address'
-  | 'venue.addressDetail'
-  | 'venue.coordinates'
-  | 'venue.phone'
-  | 'venue.parkingInfo'
-  | 'venue.transportInfo'
-  // 사진
-  | 'photos.main'
-  | 'photos.gallery'
-  // 인사말
-  | 'greeting.title'
-  | 'greeting.content'
-  // 음악
-  | 'music.url'
-  | 'music.title'
-  | 'music.artist'
-  // 커스텀 변수 (AI 생성 텍스트 등)
+  // ─── 공유 필드 (◆ 원본) ───
+  | 'couple.groom.name' | 'couple.groom.phone' | 'couple.groom.intro'
+  | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags'
+  | 'couple.bride.name' | 'couple.bride.phone' | 'couple.bride.intro'
+  | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags'
+  | 'couple.photo' | 'couple.photos'
+  | 'wedding.date' | 'wedding.time'
+
+  // ─── 자동 계산 (__HIDDEN__) ───
+  | 'wedding.dateDisplay' | 'wedding.timeDisplay' | 'wedding.dday'
+  | 'wedding.month' | 'wedding.day' | 'wedding.weekday'
+  | 'countdown.days' | 'countdown.hours' | 'countdown.minutes' | 'countdown.seconds'
+
+  // ─── 혼주 ───
+  | 'parents.deceasedIcon'
+  | 'parents.groom.father.name' | 'parents.groom.father.status' | 'parents.groom.father.phone'
+  | 'parents.groom.mother.name' | 'parents.groom.mother.status' | 'parents.groom.mother.phone'
+  | 'parents.bride.father.name' | 'parents.bride.father.status' | 'parents.bride.father.phone'
+  | 'parents.bride.mother.name' | 'parents.bride.mother.status' | 'parents.bride.mother.phone'
+
+  // ─── 장소 ───
+  | 'venue.name' | 'venue.hall' | 'venue.address' | 'venue.tel'
+  | 'venue.lat' | 'venue.lng'
+  | 'venue.naverUrl' | 'venue.kakaoUrl' | 'venue.tmapUrl'
+  | 'venue.transportation.bus' | 'venue.transportation.subway'
+  | 'venue.transportation.shuttle' | 'venue.transportation.parking' | 'venue.transportation.etc'
+
+  // ─── 사진 ───
+  | 'photos.main' | 'photos.gallery'
+
+  // ─── 섹션 설정 ───
+  | 'intro.message'
+  | 'greeting.title' | 'greeting.content'
+  | 'contact.showParents'
+  | 'gallery.effect'
+  | 'accounts.groom' | 'accounts.bride' | 'accounts.kakaopay.groom' | 'accounts.kakaopay.bride'
+  | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline'
+  | 'notice.items'
+  | 'guestbook.title' | 'guestbook.placeholder'
+  | 'ending.message' | 'ending.photo'
+  | 'bgm.trackId' | 'bgm.title' | 'bgm.artist'
+  | 'video.type' | 'video.url' | 'video.title'
+
+  // ─── 확장 섹션 ───
+  | 'interview.title' | 'interview.subtitle' | 'interview.items'
+  | 'timeline.title' | 'timeline.subtitle' | 'timeline.items'
+
+  // ─── Legacy 호환 ───
+  | 'groom.name' | 'groom.nameEn' | 'groom.fatherName' | 'groom.motherName'
+  | 'groom.fatherPhone' | 'groom.motherPhone' | 'groom.phone' | 'groom.account'
+  | 'bride.name' | 'bride.nameEn' | 'bride.fatherName' | 'bride.motherName'
+  | 'bride.fatherPhone' | 'bride.motherPhone' | 'bride.phone' | 'bride.account'
+  | 'venue.floor' | 'venue.addressDetail' | 'venue.coordinates'
+  | 'venue.phone' | 'venue.parkingInfo' | 'venue.transportInfo'
+  | 'music.url' | 'music.title' | 'music.artist'
+
+  // ─── 커스텀 ───
   | `custom.${string}`
 
 // ============================================
@@ -793,56 +806,102 @@ export interface Interaction {
 
 // ============================================
 // 10. 정형 데이터 (WeddingData)
+// section-data.md v2.2 기준
 // ============================================
 
 export interface WeddingData {
-  groom: PersonInfo
-  bride: PersonInfo
+  // ═══════════════════════════════════════════════
+  // 공유 필드 (원본 정의)
+  // ═══════════════════════════════════════════════
+
+  couple: {
+    groom: PersonInfo      // ◆ 원본: intro
+    bride: PersonInfo      // ◆ 원본: intro
+    photo?: string         // 커플 대표 사진
+    photos?: string[]      // 인터뷰 진입점용 카드 이미지들
+  }
 
   wedding: {
-    date: string          // ISO 8601: '2025-03-15'
-    time: string          // 'HH:mm': '14:00'
-    dateDisplay?: string  // 표시용 (computed)
+    date: string           // ◆ 원본: intro (ISO 형식)
+    time: string           // date 섹션
   }
+
+  // ═══════════════════════════════════════════════
+  // 혼주 정보 (greeting 섹션)
+  // ═══════════════════════════════════════════════
+
+  parents?: {
+    deceasedIcon?: '故' | '고' | '✿'
+    groom: { father?: ParentInfo; mother?: ParentInfo }
+    bride: { father?: ParentInfo; mother?: ParentInfo }
+  }
+
+  // ═══════════════════════════════════════════════
+  // 기타 공유 데이터
+  // ═══════════════════════════════════════════════
 
   venue: VenueInfo
+  photos: { main?: string; gallery?: string[] }
 
-  photos: {
-    main?: PhotoData
-    gallery: PhotoData[]
-  }
+  // ═══════════════════════════════════════════════
+  // 섹션별 설정
+  // ═══════════════════════════════════════════════
 
-  greeting?: {
-    title?: string
-    content: string
-  }
+  intro?: { message?: string }
+  greeting?: { title?: string; content?: string }
+  contact?: { showParents?: boolean }
+  gallery?: { effect?: GalleryEffect }
+  accounts?: AccountsConfig
+  rsvp?: RsvpConfig
+  notice?: { items?: NoticeItem[] }
+  guestbook?: GuestbookConfig
+  ending?: EndingConfig
+  bgm?: { trackId?: string; title?: string; artist?: string }
+  video?: VideoConfig
 
+  // ═══════════════════════════════════════════════
+  // 확장 섹션 (About Us, Interview, Timeline)
+  // ═══════════════════════════════════════════════
+
+  interview?: InterviewConfig    // Q&A 팝업
+  timeline?: TimelineConfig      // 연애 스토리
+
+  // 커스텀 변수 (AI 생성용)
+  custom?: Record<string, string>
+
+  // ═══════════════════════════════════════════════
+  // Legacy 호환 필드 (점진적 마이그레이션)
+  // ═══════════════════════════════════════════════
+  /** @deprecated couple.groom 사용 권장 */
+  groom?: PersonInfo
+  /** @deprecated couple.bride 사용 권장 */
+  bride?: PersonInfo
+  /** @deprecated accounts 사용 권장 */
   additionalAccounts?: AccountInfo[]
-
+  /** @deprecated bgm 사용 권장 */
   music?: {
     url: string
     title?: string
     artist?: string
     autoPlay: boolean
   }
-
-  guestbook?: {
-    enabled: boolean
-    requirePassword: boolean
-  }
-
-  // 커스텀 변수 (AI가 생성한 텍스트 등)
-  custom?: Record<string, string>
 }
 
 export interface PersonInfo {
   name: string
+  phone?: string
+  intro?: string        // 소개글
+  // 프로필 확장 (About Us)
+  photo?: string        // 개인 사진
+  birthDate?: string    // "1990-12-10"
+  mbti?: string         // "ISTP"
+  tags?: string[]       // ["캠핑", "러닝"]
+  // Legacy 호환
   nameEn?: string
   fatherName?: string
   motherName?: string
   fatherPhone?: string
   motherPhone?: string
-  phone?: string
   account?: {
     bank: string
     number: string
@@ -853,8 +912,22 @@ export interface PersonInfo {
 export interface VenueInfo {
   name: string
   hall?: string
+  address?: string      // ⚙️ 자동
+  lat?: number          // ⚙️ 자동
+  lng?: number          // ⚙️ 자동
+  tel?: string
+  naverUrl?: string
+  kakaoUrl?: string
+  tmapUrl?: string
+  transportation?: {
+    bus?: string
+    subway?: string
+    shuttle?: string
+    parking?: string
+    etc?: string
+  }
+  // Legacy 호환
   floor?: string
-  address: string
   addressDetail?: string
   coordinates?: {
     lat: number
@@ -880,4 +953,105 @@ export interface AccountInfo {
   bank: string
   number: string
   holder: string
+}
+
+// ═══════════════════════════════════════════════
+// 신규 서브 타입 (section-data.md v2.2)
+// ═══════════════════════════════════════════════
+
+export interface ParentInfo {
+  name?: string
+  status?: '' | '故'
+  baptismalName?: string
+  phone?: string
+}
+
+export interface AccountsConfig {
+  groom?: AccountItem[]  // max 3
+  bride?: AccountItem[]  // max 3
+  kakaopay?: { groom?: string; bride?: string }
+}
+
+export interface AccountItem {
+  relation: string  // 본인 | 아버지 | 어머니
+  bank: string
+  number: string
+  holder: string
+}
+
+export interface RsvpConfig {
+  title?: string
+  description?: string
+  showGuestCount?: boolean  // 기본: true
+  showMeal?: boolean        // 기본: false
+  showMessage?: boolean     // 기본: true
+  showSide?: boolean
+  showBusOption?: boolean
+  deadline?: string
+  privacyPolicyUrl?: string
+  privacyPolicyText?: string
+}
+
+export interface NoticeItem {
+  title: string
+  content: string
+  icon?: 'bus' | 'car' | 'utensils' | 'info' | 'gift' | 'clock'
+  image?: string
+  imagePosition?: 'top' | 'bottom'
+}
+
+export interface GuestbookConfig {
+  title?: string
+  placeholder?: string
+  requireName?: boolean  // 기본: true
+  maxLength?: number     // 기본: 500
+  // Legacy 호환
+  enabled?: boolean
+  requirePassword?: boolean
+}
+
+export interface EndingConfig {
+  message?: string
+  photo?: string
+  showCredit?: boolean  // 기본: true
+  wreath?: { enabled?: boolean; vendorUrl?: string; vendorName?: string }
+  share?: { kakao?: boolean; link?: boolean; sms?: boolean }
+}
+
+export interface VideoConfig {
+  type?: 'youtube' | 'vimeo'
+  url?: string
+  title?: string
+  autoplay?: boolean  // 기본: false
+  muted?: boolean     // 기본: true
+}
+
+export type GalleryEffect = 'slide' | 'fade' | 'coverflow' | 'cards' | 'cube'
+
+// Q&A 인터뷰 (팝업)
+export interface InterviewConfig {
+  title?: string        // "우리에게 물었습니다"
+  subtitle?: string     // "결혼을 앞두고 저희 두 사람의 인터뷰를 준비했습니다"
+  items: InterviewItem[]  // max 5
+}
+
+export interface InterviewItem {
+  question: string      // "첫인상은 어땠나요?"
+  groomAnswer: string   // 신랑 답변
+  brideAnswer: string   // 신부 답변
+}
+
+// 타임라인 (연애 스토리)
+export interface TimelineConfig {
+  title?: string        // "우리의 이야기"
+  subtitle?: string     // "처음 만난 순간부터 지금까지"
+  items: TimelineItem[]
+}
+
+export interface TimelineItem {
+  date: string          // "14년 1월 16일" 또는 "연애 기간 11년"
+  title: string         // "CGV 아르바이트"
+  content?: string      // "같은 곳에서 함께 일하다..."
+  image?: string
+  type?: 'event' | 'milestone'  // milestone = 강조 표시
 }
