@@ -64,9 +64,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 1. 새 문서 생성
+    // 1. 새 문서 생성 (샘플 데이터로 시작)
     const document = await createDocument({
       title: `AI 생성 청첩장 - ${body.prompt.slice(0, 20)}...`,
+      useSampleData: true,
     })
 
     // 2. 문서 컨텍스트 조회

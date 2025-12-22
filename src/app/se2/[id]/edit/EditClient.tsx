@@ -314,10 +314,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       <header className="flex-shrink-0 h-14 border-b border-[var(--sand-100)] bg-[var(--ivory-100)]/95 backdrop-blur-sm flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Link
-            href="/se2/create"
+            href="/"
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
-            ← 목록
+            ← 돌아가기
           </Link>
           <h1 className="font-medium text-[var(--text-primary)]">{editorDoc.meta.title}</h1>
 

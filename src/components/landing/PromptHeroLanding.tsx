@@ -292,6 +292,32 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
     [handleGenerate]
   )
 
+  // Create from scratch (no AI)
+  const handleCreateFromScratch = useCallback(async () => {
+    if (!user) {
+      router.push('/login?redirect=/')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const response = await fetch('/api/landing/create-blank', {
+        method: 'POST',
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        router.push(`/se2/${data.documentId}/edit`)
+      } else {
+        setError(data.error || '문서 생성에 실패했습니다')
+        setIsGenerating(false)
+      }
+    } catch {
+      setError('문서 생성에 실패했습니다')
+      setIsGenerating(false)
+    }
+  }, [user, router])
+
   const hasValidInput = prompt.trim().length > 0
 
   return (
@@ -580,6 +606,18 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
               </svg>
               카드 등록 없이 무료 체험
             </span>
+          </div>
+
+          {/* Create from scratch option */}
+          <div className="text-center pt-3">
+            <span className="text-[var(--text-light)] text-sm">또는</span>
+            <button
+              onClick={handleCreateFromScratch}
+              disabled={isGenerating}
+              className="ml-2 text-sm text-[var(--sage-600)] hover:text-[var(--sage-700)] underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              처음부터 내가 만들기 →
+            </button>
           </div>
         </div>
       </div>

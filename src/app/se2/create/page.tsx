@@ -56,7 +56,7 @@ export default function SE2CreatePage() {
   // 입력 검증 - 프롬프트는 필수
   const hasValidInput = prompt.trim()
 
-  // 빈 문서로 시작
+  // 빈 문서로 시작 (샘플 데이터로 미리보기 제공)
   const handleCreateEmpty = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -64,6 +64,7 @@ export default function SE2CreatePage() {
     try {
       const document = await createDocument({
         title: '새 청첩장',
+        useSampleData: true,
       })
       router.push(`/se2/${document.id}/edit`)
     } catch (err) {
@@ -84,9 +85,10 @@ export default function SE2CreatePage() {
     setError(null)
 
     try {
-      // 먼저 빈 문서 생성
+      // 먼저 샘플 데이터로 문서 생성 (AI가 스타일만 수정)
       const document = await createDocument({
         title: prompt.slice(0, 50) || '새 청첩장',
+        useSampleData: true,
       })
 
       // 프롬프트 구성 (레퍼런스 분석 결과 포함)
