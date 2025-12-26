@@ -283,7 +283,7 @@ function BlockAccordion({
           {editableFields.length > 0 ? (
             editableFields.map(field => (
               <VariableField
-                key={field.elementId}
+                key={field.binding}
                 binding={field.binding}
                 value={field.value}
                 onChange={(value) => onFieldChange(field.binding, value)}
