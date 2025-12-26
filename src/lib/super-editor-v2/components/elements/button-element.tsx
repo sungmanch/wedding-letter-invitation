@@ -17,7 +17,7 @@ import { ContactModal } from '../ui/contact-modal'
 
 export interface ButtonElementProps {
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
   value?: unknown
   style?: ElementStyle
   editable?: boolean

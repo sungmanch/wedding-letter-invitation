@@ -886,20 +886,26 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 커플 정보 (신규)
   'couple.groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
   'couple.groom.phone': { label: '신랑 연락처', type: 'phone' },
+  'couple.groom.baptismalName': { label: '신랑 세례명', type: 'text', placeholder: '미카엘' },
   'couple.bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
   'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
+  'couple.bride.baptismalName': { label: '신부 세례명', type: 'text', placeholder: '마리아' },
 
   // 혼주 정보 (신규)
   'parents.groom.birthOrder': { label: '신랑 서열', type: 'text', placeholder: '장남' },
   'parents.groom.father.name': { label: '신랑 아버지 성함', type: 'text' },
   'parents.groom.father.phone': { label: '신랑 아버지 연락처', type: 'phone' },
+  'parents.groom.father.baptismalName': { label: '신랑 아버지 세례명', type: 'text' },
   'parents.groom.mother.name': { label: '신랑 어머니 성함', type: 'text' },
   'parents.groom.mother.phone': { label: '신랑 어머니 연락처', type: 'phone' },
+  'parents.groom.mother.baptismalName': { label: '신랑 어머니 세례명', type: 'text' },
   'parents.bride.birthOrder': { label: '신부 서열', type: 'text', placeholder: '차녀' },
   'parents.bride.father.name': { label: '신부 아버지 성함', type: 'text' },
   'parents.bride.father.phone': { label: '신부 아버지 연락처', type: 'phone' },
+  'parents.bride.father.baptismalName': { label: '신부 아버지 세례명', type: 'text' },
   'parents.bride.mother.name': { label: '신부 어머니 성함', type: 'text' },
   'parents.bride.mother.phone': { label: '신부 어머니 연락처', type: 'phone' },
+  'parents.bride.mother.baptismalName': { label: '신부 어머니 세례명', type: 'text' },
 
   // 신랑 정보 (레거시)
   'groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
@@ -960,6 +966,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   account: '💳',
   message: '💬',
   ending: '🎬',
+  contact: '📞',
   music: '🎵',
   loading: '⏳',
   custom: '🔧',

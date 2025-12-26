@@ -146,6 +146,8 @@ export const DEFAULT_BLOCK_HEIGHTS: Record<Block['type'], number> = {
   account: 80,
   message: 100,
   ending: 60,
+  // 오버레이/모달
+  contact: 85,
   // 기타 기능
   music: 20,
   loading: 100,
@@ -168,6 +170,8 @@ export const BLOCK_TYPE_LABELS: Record<Block['type'], string> = {
   account: '축의금',
   message: '방명록',
   ending: '엔딩',
+  // 오버레이/모달
+  contact: '연락처',
   // 기타 기능
   music: 'BGM',
   loading: '로딩',
