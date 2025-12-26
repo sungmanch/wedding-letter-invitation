@@ -174,6 +174,9 @@ export interface BlockPreset {
     useCase: readonly string[]
   }
 
+  /** Related preset IDs (same style family) */
+  relatedPresets?: readonly string[]
+
   /** Modal configuration (for blocks with popup UI like RSVP) */
   modal?: ModalPreset
 }

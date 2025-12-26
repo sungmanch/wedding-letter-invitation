@@ -595,21 +595,18 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
     style: { background: 'var(--border-muted)' },
   },
   // ═══════════════════════════════════════════════
-  // 신랑측 (이름 + 세례명)
+  // 신랑측 (이름 + 세례명 - 개별 정렬)
   // ═══════════════════════════════════════════════
-  // 5. 신랑측 부모 이름 + 서열 + 신랑 이름
+  // 5. 신랑 아버지 이름
   {
     type: 'text',
-    x: 10,
-    y: 48,
-    width: 80,
+    x: 8,
+    y: 47,
+    width: 18,
     height: 5,
     zIndex: 1,
-    props: {
-      type: 'text',
-      format:
-        '{parents.groom.father.name} · {parents.groom.mother.name}의 {parents.groom.birthOrder} {couple.groom.name}',
-    },
+    binding: 'parents.groom.father.name',
+    props: { type: 'text' },
     style: {
       text: {
         fontFamily: 'var(--font-body)',
@@ -621,19 +618,16 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 6. 신랑측 세례명 (작은 글씨)
+  // 6. 신랑 아버지 세례명
   {
     type: 'text',
-    x: 10,
-    y: 54,
-    width: 80,
-    height: 4,
+    x: 8,
+    y: 52,
+    width: 18,
+    height: 3,
     zIndex: 1,
-    props: {
-      type: 'text',
-      format:
-        '{parents.groom.father.baptismalName}    {parents.groom.mother.baptismalName}           {couple.groom.baptismalName}',
-    },
+    binding: 'parents.groom.father.baptismalName',
+    props: { type: 'text' },
     style: {
       text: {
         fontFamily: 'var(--font-body)',
@@ -642,26 +636,19 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
         color: 'var(--fg-muted)',
         textAlign: 'center',
         lineHeight: 1.2,
-        letterSpacing: 0.05,
       },
     },
   },
-  // ═══════════════════════════════════════════════
-  // 신부측 (이름 + 세례명)
-  // ═══════════════════════════════════════════════
-  // 7. 신부측 부모 이름 + 서열 + 신부 이름
+  // 7. 구분점 ·
   {
     type: 'text',
-    x: 10,
-    y: 62,
-    width: 80,
+    x: 26,
+    y: 47,
+    width: 4,
     height: 5,
     zIndex: 1,
-    props: {
-      type: 'text',
-      format:
-        '{parents.bride.father.name} · {parents.bride.mother.name}의 {parents.bride.birthOrder} {couple.bride.name}',
-    },
+    value: '·',
+    props: { type: 'text' },
     style: {
       text: {
         fontFamily: 'var(--font-body)',
@@ -673,19 +660,37 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 8. 신부측 세례명 (작은 글씨)
+  // 8. 신랑 어머니 이름
   {
     type: 'text',
-    x: 10,
-    y: 68,
-    width: 80,
-    height: 4,
+    x: 30,
+    y: 47,
+    width: 18,
+    height: 5,
     zIndex: 1,
-    props: {
-      type: 'text',
-      format:
-        '{parents.bride.father.baptismalName}    {parents.bride.mother.baptismalName}           {couple.bride.baptismalName}',
+    binding: 'parents.groom.mother.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 14,
+        fontWeight: 400,
+        color: 'var(--fg-default)',
+        textAlign: 'center',
+        lineHeight: 1.4,
+      },
     },
+  },
+  // 9. 신랑 어머니 세례명
+  {
+    type: 'text',
+    x: 30,
+    y: 52,
+    width: 18,
+    height: 3,
+    zIndex: 1,
+    binding: 'parents.groom.mother.baptismalName',
+    props: { type: 'text' },
     style: {
       text: {
         fontFamily: 'var(--font-body)',
@@ -694,7 +699,244 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
         color: 'var(--fg-muted)',
         textAlign: 'center',
         lineHeight: 1.2,
-        letterSpacing: 0.05,
+      },
+    },
+  },
+  // 10. "의" + 서열
+  {
+    type: 'text',
+    x: 48,
+    y: 47,
+    width: 16,
+    height: 5,
+    zIndex: 1,
+    props: {
+      type: 'text',
+      format: '의 {parents.groom.birthOrder}',
+    },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 14,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'center',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 11. 신랑 이름
+  {
+    type: 'text',
+    x: 64,
+    y: 47,
+    width: 28,
+    height: 5,
+    zIndex: 1,
+    binding: 'couple.groom.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 15,
+        fontWeight: 500,
+        color: 'var(--fg-emphasis)',
+        textAlign: 'left',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 12. 신랑 세례명
+  {
+    type: 'text',
+    x: 64,
+    y: 52,
+    width: 28,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.groom.baptismalName',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 11,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'left',
+        lineHeight: 1.2,
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════
+  // 신부측 (이름 + 세례명 - 개별 정렬)
+  // ═══════════════════════════════════════════════
+  // 13. 신부 아버지 이름
+  {
+    type: 'text',
+    x: 8,
+    y: 60,
+    width: 18,
+    height: 5,
+    zIndex: 1,
+    binding: 'parents.bride.father.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 14,
+        fontWeight: 400,
+        color: 'var(--fg-default)',
+        textAlign: 'center',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 14. 신부 아버지 세례명
+  {
+    type: 'text',
+    x: 8,
+    y: 65,
+    width: 18,
+    height: 3,
+    zIndex: 1,
+    binding: 'parents.bride.father.baptismalName',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 11,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'center',
+        lineHeight: 1.2,
+      },
+    },
+  },
+  // 15. 구분점 ·
+  {
+    type: 'text',
+    x: 26,
+    y: 60,
+    width: 4,
+    height: 5,
+    zIndex: 1,
+    value: '·',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 14,
+        fontWeight: 400,
+        color: 'var(--fg-default)',
+        textAlign: 'center',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 16. 신부 어머니 이름
+  {
+    type: 'text',
+    x: 30,
+    y: 60,
+    width: 18,
+    height: 5,
+    zIndex: 1,
+    binding: 'parents.bride.mother.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 14,
+        fontWeight: 400,
+        color: 'var(--fg-default)',
+        textAlign: 'center',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 17. 신부 어머니 세례명
+  {
+    type: 'text',
+    x: 30,
+    y: 65,
+    width: 18,
+    height: 3,
+    zIndex: 1,
+    binding: 'parents.bride.mother.baptismalName',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 11,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'center',
+        lineHeight: 1.2,
+      },
+    },
+  },
+  // 18. "의" + 서열
+  {
+    type: 'text',
+    x: 48,
+    y: 60,
+    width: 16,
+    height: 5,
+    zIndex: 1,
+    props: {
+      type: 'text',
+      format: '의 {parents.bride.birthOrder}',
+    },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 14,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'center',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 19. 신부 이름
+  {
+    type: 'text',
+    x: 64,
+    y: 60,
+    width: 28,
+    height: 5,
+    zIndex: 1,
+    binding: 'couple.bride.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 15,
+        fontWeight: 500,
+        color: 'var(--fg-emphasis)',
+        textAlign: 'left',
+        lineHeight: 1.4,
+      },
+    },
+  },
+  // 20. 신부 세례명
+  {
+    type: 'text',
+    x: 64,
+    y: 65,
+    width: 28,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.bride.baptismalName',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 11,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'left',
+        lineHeight: 1.2,
       },
     },
   },

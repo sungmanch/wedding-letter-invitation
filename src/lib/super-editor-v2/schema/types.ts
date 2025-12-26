@@ -81,6 +81,8 @@ export type BlockType =
   | 'account'           // 축의금 계좌
   | 'message'           // 방명록/축하 메시지
   | 'ending'            // 축하화환/공유/엔딩
+  // ─── 오버레이/모달 ───
+  | 'contact'           // 연락처 (오버레이로 표시)
   // ─── 기타 기능 ───
   | 'music'             // BGM 컨트롤
   | 'loading'           // 로딩 화면
@@ -155,7 +157,8 @@ export interface ShapeProps {
 export interface ButtonProps {
   type: 'button'
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
+  targetBlockType?: BlockType  // action: 'show-block'일 때 표시할 블록 타입
 }
 
 export interface IconProps {
@@ -189,9 +192,9 @@ export interface CalendarProps {
 
 export type VariablePath =
   // ─── 공유 필드 (◆ 원본) ───
-  | 'couple.groom.name' | 'couple.groom.phone' | 'couple.groom.intro'
+  | 'couple.groom.name' | 'couple.groom.phone' | 'couple.groom.intro' | 'couple.groom.baptismalName'
   | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags'
-  | 'couple.bride.name' | 'couple.bride.phone' | 'couple.bride.intro'
+  | 'couple.bride.name' | 'couple.bride.phone' | 'couple.bride.intro' | 'couple.bride.baptismalName'
   | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags'
   | 'couple.photo' | 'couple.photos'
   | 'wedding.date' | 'wedding.time'
@@ -204,10 +207,10 @@ export type VariablePath =
   // ─── 혼주 ───
   | 'parents.deceasedIcon'
   | 'parents.groom.birthOrder' | 'parents.bride.birthOrder'
-  | 'parents.groom.father.name' | 'parents.groom.father.status' | 'parents.groom.father.phone'
-  | 'parents.groom.mother.name' | 'parents.groom.mother.status' | 'parents.groom.mother.phone'
-  | 'parents.bride.father.name' | 'parents.bride.father.status' | 'parents.bride.father.phone'
-  | 'parents.bride.mother.name' | 'parents.bride.mother.status' | 'parents.bride.mother.phone'
+  | 'parents.groom.father.name' | 'parents.groom.father.status' | 'parents.groom.father.phone' | 'parents.groom.father.baptismalName'
+  | 'parents.groom.mother.name' | 'parents.groom.mother.status' | 'parents.groom.mother.phone' | 'parents.groom.mother.baptismalName'
+  | 'parents.bride.father.name' | 'parents.bride.father.status' | 'parents.bride.father.phone' | 'parents.bride.father.baptismalName'
+  | 'parents.bride.mother.name' | 'parents.bride.mother.status' | 'parents.bride.mother.phone' | 'parents.bride.mother.baptismalName'
 
   // ─── 장소 ───
   | 'venue.name' | 'venue.hall' | 'venue.address' | 'venue.tel'
@@ -882,6 +885,7 @@ export interface PersonInfo {
   name: string
   phone?: string
   intro?: string        // 소개글
+  baptismalName?: string // 세례명
   // 프로필 확장 (About Us)
   photo?: string        // 개인 사진
   birthDate?: string    // "1990-12-10"
