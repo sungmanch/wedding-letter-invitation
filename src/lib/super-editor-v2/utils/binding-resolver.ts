@@ -251,7 +251,7 @@ export function getDayOfWeek(dateStr: string): string {
 export function getMonth(dateStr: string): string {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return ''
-  return String(date.getMonth() + 1)
+  return String(date.getMonth() + 1).padStart(2, '0')
 }
 
 /**
@@ -260,7 +260,7 @@ export function getMonth(dateStr: string): string {
 export function getDay(dateStr: string): string {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return ''
-  return String(date.getDate())
+  return String(date.getDate()).padStart(2, '0')
 }
 
 /**

@@ -112,17 +112,17 @@ export function ShareTab({
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* OG 메타데이터 편집 */}
         <section>
-          <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">
             공유 시 표시 정보
           </h3>
-          <p className="text-xs text-[#F5E6D3]/60 mb-4">
+          <p className="text-xs text-[var(--text-muted)] mb-4">
             카카오톡, 문자 등으로 공유할 때 표시되는 정보입니다.
           </p>
 
           <div className="space-y-4">
             {/* 제목 */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-[#F5E6D3]/80">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-[var(--text-secondary)]">
                 제목
               </label>
               <input
@@ -130,13 +130,13 @@ export function ShareTab({
                 value={og.title || defaultOg.title}
                 onChange={(e) => handleTextChange('title', e.target.value)}
                 placeholder={defaultOg.title}
-                className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962]"
+                className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent"
               />
             </div>
 
             {/* 설명 */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-[#F5E6D3]/80">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-[var(--text-secondary)]">
                 설명
               </label>
               <textarea
@@ -144,21 +144,21 @@ export function ShareTab({
                 onChange={(e) => handleTextChange('description', e.target.value)}
                 placeholder={defaultOg.description}
                 rows={2}
-                className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962] resize-none"
+                className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent resize-none"
               />
             </div>
 
             {/* OG 이미지 */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-[#F5E6D3]/80">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-[var(--text-secondary)]">
                 대표 이미지
               </label>
-              <p className="text-xs text-[#F5E6D3]/50 mb-2">
+              <p className="text-xs text-[var(--text-light)] mb-2">
                 권장 크기: 1200 x 630px (1.91:1 비율)
               </p>
 
               {og.imageUrl ? (
-                <div className="relative aspect-[1.91/1] bg-[#2A2A2A] rounded-lg overflow-hidden">
+                <div className="relative aspect-[1.91/1] bg-[var(--sand-100)] rounded-lg overflow-hidden border border-[var(--sand-200)]">
                   <img
                     src={og.imageUrl}
                     alt="OG Preview"
@@ -166,7 +166,7 @@ export function ShareTab({
                   />
                   <button
                     onClick={handleImageRemove}
-                    className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70"
+                    className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
                   >
                     <XIcon className="w-4 h-4" />
                   </button>
@@ -175,7 +175,7 @@ export function ShareTab({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-full aspect-[1.91/1] flex flex-col items-center justify-center gap-2 bg-[#2A2A2A] border border-dashed border-white/20 rounded-lg text-[#F5E6D3]/60 hover:bg-[#333333] hover:border-white/30 transition-colors disabled:opacity-50"
+                  className="w-full aspect-[1.91/1] flex flex-col items-center justify-center gap-2 bg-[var(--ivory-50)] border-2 border-dashed border-[var(--sand-200)] rounded-lg text-[var(--text-muted)] hover:bg-[var(--sand-100)] hover:border-[var(--sage-400)] transition-colors disabled:opacity-50"
                 >
                   {uploading ? (
                     <>
@@ -204,7 +204,7 @@ export function ShareTab({
 
         {/* OG 미리보기 */}
         <section>
-          <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
             미리보기
           </h3>
 
@@ -217,7 +217,7 @@ export function ShareTab({
 
         {/* 공유 링크 */}
         <section>
-          <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
             공유 링크
           </h3>
 
@@ -228,23 +228,23 @@ export function ShareTab({
                   type="text"
                   value={shareUrl}
                   readOnly
-                  className="flex-1 px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm"
+                  className="flex-1 px-3 py-2 bg-[var(--ivory-50)] border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm"
                 />
                 <button
                   onClick={handleCopyUrl}
-                  className="px-4 py-2 bg-[#C9A962] text-[#0A0806] rounded-lg text-sm font-medium hover:bg-[#B8A052] transition-colors"
+                  className="px-4 py-2 bg-[var(--sage-500)] text-white rounded-lg text-sm font-medium hover:bg-[var(--sage-600)] transition-colors"
                 >
                   {copySuccess ? '복사됨!' : '복사'}
                 </button>
               </div>
-              <p className="text-xs text-[#F5E6D3]/50">
+              <p className="text-xs text-[var(--text-light)]">
                 이 링크는 1시간 동안 유효합니다.
               </p>
             </div>
           ) : (
             <button
               onClick={onGenerateShareUrl}
-              className="w-full px-4 py-3 bg-[#C9A962] text-[#0A0806] rounded-lg text-sm font-medium hover:bg-[#B8A052] transition-colors"
+              className="w-full px-4 py-3 bg-[var(--sage-500)] text-white rounded-lg text-sm font-medium hover:bg-[var(--sage-600)] transition-colors"
             >
               공유 링크 생성
             </button>
@@ -254,7 +254,7 @@ export function ShareTab({
         {/* 공유 버튼들 */}
         {shareUrl && (
           <section>
-            <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">
+            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
               공유하기
             </h3>
 
@@ -263,6 +263,7 @@ export function ShareTab({
                 icon={<KakaoIcon />}
                 label="카카오톡"
                 onClick={() => shareToKakao(shareUrl)}
+                variant="kakao"
               />
               <ShareButton
                 icon={<SmsIcon />}
@@ -299,10 +300,10 @@ interface OgPreviewCardProps {
 
 function OgPreviewCard({ title, description, imageUrl }: OgPreviewCardProps) {
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg max-w-sm">
+    <div className="bg-white rounded-lg overflow-hidden shadow-md border border-[var(--sand-200)]">
       {/* 이미지 영역 */}
       {imageUrl ? (
-        <div className="aspect-[1.91/1] bg-gray-100">
+        <div className="aspect-[1.91/1] bg-[var(--sand-100)]">
           <img
             src={imageUrl}
             alt="Preview"
@@ -310,20 +311,20 @@ function OgPreviewCard({ title, description, imageUrl }: OgPreviewCardProps) {
           />
         </div>
       ) : (
-        <div className="aspect-[1.91/1] bg-gray-100 flex items-center justify-center">
-          <ImageIcon className="w-12 h-12 text-gray-300" />
+        <div className="aspect-[1.91/1] bg-[var(--sand-100)] flex items-center justify-center">
+          <ImageIcon className="w-12 h-12 text-[var(--sand-300)]" />
         </div>
       )}
 
       {/* 텍스트 영역 */}
       <div className="p-3">
-        <p className="text-sm font-medium text-gray-900 line-clamp-1">
+        <p className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">
           {title}
         </p>
-        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+        <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">
           {description}
         </p>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-[var(--text-light)] mt-2">
           maisondeletter.com
         </p>
       </div>
@@ -339,14 +340,17 @@ interface ShareButtonProps {
   icon: React.ReactNode
   label: string
   onClick: () => void
+  variant?: 'default' | 'kakao'
 }
 
-function ShareButton({ icon, label, onClick }: ShareButtonProps) {
+function ShareButton({ icon, label, onClick, variant = 'default' }: ShareButtonProps) {
+  const baseClass = "flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors"
+  const variantClass = variant === 'kakao'
+    ? "bg-[#FEE500] text-[#3C1E1E] hover:bg-[#F5DC00]"
+    : "bg-[var(--ivory-50)] border border-[var(--sand-200)] text-[var(--text-primary)] hover:bg-[var(--sand-100)]"
+
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm hover:bg-[#333333] transition-colors"
-    >
+    <button onClick={onClick} className={`${baseClass} ${variantClass}`}>
       {icon}
       {label}
     </button>

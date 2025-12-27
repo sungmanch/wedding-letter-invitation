@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { User, LogIn } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PromptHeroLanding } from '@/components/landing/PromptHeroLanding'
-import { BeforeAfterDemo } from '@/components/landing/BeforeAfterDemo'
+import { TemplateGallery } from '@/components/landing/TemplateGallery'
 
 export const metadata: Metadata = {
   title: 'Maison de Letter - 원하는 느낌만 말하세요, AI가 바로 만들어드립니다',
@@ -58,8 +58,7 @@ export default async function WeddingLandingPage() {
       {/* Prompt Hero Landing */}
       <PromptHeroLanding user={user} />
 
-      {/* Before → After Demo */}
-      <BeforeAfterDemo />
+
 
       {/* Footer */}
       <footer className="border-t border-[var(--sand-100)] px-6 py-10 bg-[var(--ivory-50)]">
