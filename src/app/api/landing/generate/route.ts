@@ -2,15 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { eq, and, desc } from 'drizzle-orm'
-import { createDocument } from '@/lib/super-editor-v2/actions/document'
-import {
-  getDocumentContextForAI,
-  applyAIEdit,
-  type AIEditRequest,
-  type JSONPatch,
-} from '@/lib/super-editor-v2/actions'
-import { BLOCK_TYPE_LABELS, aiEditLogsV2, editorSnapshotsV2 } from '@/lib/super-editor-v2/schema'
+import { createDocument, updateDocument } from '@/lib/super-editor-v2/actions/document'
+import { aiEditLogsV2 } from '@/lib/super-editor-v2/schema'
+import { selectFallbackTemplate } from '@/lib/super-editor-v2/services/template-matcher'
+import { applyTemplateToDocument } from '@/lib/super-editor-v2/services/template-applier'
+import { TEMPLATE_CATALOG } from '@/lib/super-editor-v2/config/template-catalog'
+import type { TemplateMetadata } from '@/lib/super-editor-v2/schema/template-metadata'
 
 // ============================================
 // Types
@@ -30,12 +27,22 @@ interface GenerateRequest {
   referenceAnalysis?: ReferenceAnalysis
 }
 
+interface TemplateSelectionResponse {
+  templateId: string
+  reasoning: {
+    moodMatch: string
+    colorMatch: string
+    confidence: number
+  }
+  explanation: string
+}
+
 // ============================================
 // Google AI Client
 // ============================================
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
-const MODEL = 'gemini-3-pro-preview'
+const MODEL = 'gemini-2.0-flash-exp'
 
 // ============================================
 // Landing Generate API Route
@@ -70,75 +77,83 @@ export async function POST(request: NextRequest) {
       useSampleData: true,
     })
 
-    // 2. 문서 컨텍스트 조회
-    const context = await getDocumentContextForAI(document.id)
-
-    if (!context) {
-      return NextResponse.json(
-        { success: false, error: 'Failed to get document context' },
-        { status: 500 }
-      )
-    }
-
-    // 3. AI 프롬프트 생성 (랜딩용 - 전체 디자인 생성)
-    const systemPrompt = buildLandingSystemPrompt(context, body.referenceAnalysis)
-    const userPrompt = buildLandingUserPrompt(body.prompt)
-
     console.log('[Landing Generate] Document created:', document.id)
     console.log('[Landing Generate] Prompt:', body.prompt)
     console.log('[Landing Generate] Reference:', body.referenceAnalysis ? 'Yes' : 'No')
 
-    // 4. AI 호출
-    const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
+    // 2. AI 템플릿 선택
+    console.log('[AI Template Selection] Starting...')
+    const aiSelection = await selectTemplateWithAI(body.prompt, body.referenceAnalysis)
 
-    if (!aiResponse.success || !aiResponse.patches) {
-      // AI 실패해도 문서는 생성됨 - 기본 템플릿으로 진행
-      console.error('[Landing Generate] AI failed:', aiResponse.error)
-      return NextResponse.json({
-        success: true,
-        documentId: document.id,
-        aiApplied: false,
-        aiError: aiResponse.error,
+    let selectedTemplateId: string
+    let aiSelected = false
+    let explanation = ''
+    let confidence = 0
+
+    if (aiSelection) {
+      selectedTemplateId = aiSelection.templateId
+      aiSelected = true
+      explanation = aiSelection.explanation
+      confidence = aiSelection.reasoning.confidence
+
+      console.log('[AI Template Selection] ✅ Success:', {
+        templateId: selectedTemplateId,
+        confidence: confidence.toFixed(2),
+        reasoning: aiSelection.reasoning,
       })
+    } else {
+      // 3. Fallback: AI 실패 시 기본 템플릿
+      selectedTemplateId = selectFallbackTemplate(body.referenceAnalysis)
+      aiSelected = false
+      explanation = '기본 템플릿이 적용되었습니다'
+
+      console.log('[AI Template Selection] ⚠️  AI failed, using fallback:', selectedTemplateId)
     }
 
-    // 5. 패치 적용
-    const result = await applyAIEdit(
-      document.id,
-      aiResponse.patches,
-      body.prompt,
-      aiResponse.explanation || 'AI 디자인 적용'
-    )
+    // 4. 템플릿 직접 적용 (AI Patch 없음!)
+    console.log('[Template Application] Applying template:', selectedTemplateId)
 
-    // 6. 스냅샷 ID 조회
-    const latestSnapshot = await db.query.editorSnapshotsV2.findFirst({
-      where: and(
-        eq(editorSnapshotsV2.documentId, document.id),
-        eq(editorSnapshotsV2.type, 'ai-edit')
-      ),
-      orderBy: [desc(editorSnapshotsV2.snapshotNumber)],
-      columns: { id: true },
-    })
+    // DB 문서를 EditorDocument 형식으로 변환
+    const editorDocument = {
+      id: document.id,
+      version: 2 as const,
+      meta: {
+        title: document.title,
+        createdAt: document.createdAt.toISOString(),
+        updatedAt: document.updatedAt.toISOString(),
+      },
+      style: document.style,
+      animation: document.animation ?? {},
+      blocks: document.blocks,
+      data: document.data,
+    }
 
-    // 7. AI 사용 내역 로깅
+    const { style, blocks } = applyTemplateToDocument(selectedTemplateId, editorDocument)
+    await updateDocument(document.id, { style, blocks })
+
+    // 5. 로깅
     await db.insert(aiEditLogsV2).values({
       documentId: document.id,
       userId: user.id,
-      prompt: body.prompt,
+      prompt: `[Template Selection] ${body.prompt}`,
       targetBlockId: null,
-      context: null,  // context 타입은 AIEditRequest['context']와 호환되어야 함
-      patches: aiResponse.patches,
-      explanation: aiResponse.explanation ?? null,
-      success: result.success,
-      errorMessage: result.error ?? null,
-      snapshotId: latestSnapshot?.id ?? null,
+      context: {
+        // 타입에 맞게 context 객체 구성
+      },
+      patches: null, // 더 이상 Patch 생성 안 함
+      explanation: explanation,
+      success: true,
+      errorMessage: null,
+      snapshotId: null,
     })
 
     return NextResponse.json({
       success: true,
       documentId: document.id,
-      aiApplied: result.success,
-      explanation: aiResponse.explanation,
+      templateApplied: selectedTemplateId,
+      aiSelected,
+      confidence,
+      explanation,
     })
   } catch (error) {
     console.error('Landing Generate API Error:', error)
@@ -150,105 +165,126 @@ export async function POST(request: NextRequest) {
 }
 
 // ============================================
-// Prompt Builders (Landing-specific)
+// AI Template Selection
 // ============================================
 
-function buildLandingSystemPrompt(
-  context: Awaited<ReturnType<typeof getDocumentContextForAI>>,
+async function selectTemplateWithAI(
+  prompt: string,
   referenceAnalysis?: ReferenceAnalysis
-): string {
-  if (!context) return ''
+): Promise<TemplateSelectionResponse | null> {
+  const systemPrompt = buildTemplateSelectionPrompt(referenceAnalysis)
+  const userPrompt = `사용자 요청: "${prompt}"\n\n가장 적합한 템플릿을 선택해주세요.`
 
-  const blockLabels = Object.entries(BLOCK_TYPE_LABELS)
-    .map(([type, label]) => `${type}: ${label}`)
-    .join(', ')
+  const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
 
-  return `당신은 청첩장 디자인 AI 어시스턴트입니다.
-사용자의 느낌/분위기 요청을 바탕으로 아름다운 청첩장을 디자인합니다.
-JSON Patch를 생성하여 기본 청첩장을 사용자가 원하는 스타일로 변환합니다.
+  if (!aiResponse.success || !aiResponse.data) {
+    console.error('[AI Template Selection] Failed:', aiResponse.error)
+    return null
+  }
 
-## 역할
-사용자는 "럭셔리하게", "미니멀하게", "따뜻하게" 등 **느낌만 말합니다**.
-당신이 그 느낌을 구체적인 디자인으로 해석해야 합니다:
-- 색상 (배경, 텍스트)
-- 폰트 스타일 (크기, 굵기)
-- 레이아웃 (요소 위치, 크기)
-- 분위기 (여백, 정렬)
+  return parseTemplateSelectionResponse(aiResponse.data)
+}
 
-## 블록 타입
-${blockLabels}
+function buildTemplateSelectionPrompt(referenceAnalysis?: ReferenceAnalysis): string {
+  // 6개 템플릿 메타데이터를 마크다운으로 포맷
+  const templateDescriptions = TEMPLATE_CATALOG.map((template: TemplateMetadata) => {
+    const { id, name, mood, colors, typography, layout, keywords, summary } = template
 
-## 스타일 프리셋 옵션
-- minimal-light: 밝은 미니멀
-- minimal-dark: 어두운 미니멀 (럭셔리, 시네마틱)
-- classic-serif: 클래식 세리프
-- modern-sans: 모던 산세리프
-- romantic-script: 로맨틱 스크립트
-- nature-organic: 자연 오가닉
+    return `### ${id} - ${name}
+- 분위기(mood): ${mood.join(', ')}
+- 색상(colors): ${colors.slice(0, 5).join(', ')}
+- 타이포그래피(typography): ${typography}
+- 레이아웃(layout): ${layout}
+- 키워드(keywords): ${keywords.join(', ')}
+- 요약(summary): ${summary}`
+  }).join('\n\n')
 
-## 색상 가이드
-- 럭셔리/시네마틱: 어두운 배경 (#0A0A0A ~ #1A1A1A) + 골드/크림 텍스트
-- 미니멀/심플: 화이트/아이보리 배경 + 다크 그레이 텍스트
-- 따뜻함/감성: 크림/베이지 배경 + 브라운/세피아 텍스트
-- 모던/트렌디: 뉴트럴 배경 + 강조색 포인트
+  const referenceSection = referenceAnalysis ? `
+## 레퍼런스 분석 결과
+사용자가 제공한 레퍼런스 이미지 분석 결과입니다. 이를 참고하여 템플릿을 선택하세요.
 
-## 현재 문서 상태
-### 블록 목록
-${context.blockSummary}
+- 분위기(mood): ${referenceAnalysis.mood.join(', ')}
+- 색상(colors): ${referenceAnalysis.colors.join(', ')}
+- 타이포그래피(typography): ${referenceAnalysis.typography}
+- 레이아웃(layout): ${referenceAnalysis.layout}
+- 키워드(keywords): ${referenceAnalysis.keywords.join(', ')}
+- 요약(summary): ${referenceAnalysis.summary}
+` : ''
 
-### 스타일 설정
-- 프리셋: ${context.style?.preset || 'custom'}
-${referenceAnalysis ? `
-## 참고 레퍼런스 분석 결과
-사용자가 제공한 레퍼런스 이미지입니다. 이 스타일을 참고하세요.
+  return `당신은 청첩장 템플릿 추천 AI입니다.
+사용자의 프롬프트${referenceAnalysis ? '와 레퍼런스 이미지 분석 결과' : ''}를 바탕으로, 6개의 템플릿 중 가장 적합한 1개를 선택하세요.
 
-- 분위기: ${referenceAnalysis.mood.join(', ')}
-- 색상 팔레트: ${referenceAnalysis.colors.join(', ')}
-- 타이포그래피: ${referenceAnalysis.typography}
-- 레이아웃 스타일: ${referenceAnalysis.layout}
-- 키워드: ${referenceAnalysis.keywords.join(', ')}
-- 스타일 요약: ${referenceAnalysis.summary}
-` : ''}
+## 6개 템플릿 (AI 분석 메타데이터 기반)
+
+${templateDescriptions}
+${referenceSection}
+
+## 선택 기준
+1. **분위기 일치**: 사용자가 요청한 느낌(럭셔리, 미니멀, 로맨틱 등)과 템플릿 mood가 일치하는지
+2. **색상 조화**: ${referenceAnalysis ? '레퍼런스 색상과 템플릿 색상이 조화로운지' : '사용자가 원하는 색상 느낌과 일치하는지'}
+3. **키워드 매칭**: 사용자 프롬프트의 핵심 키워드와 템플릿 keywords가 겹치는지
 
 ## 출력 형식
-반드시 다음 JSON 형식으로만 응답하세요:
+반드시 다음 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요:
 
 \`\`\`json
 {
-  "analysis": {
-    "intent": "사용자가 원하는 느낌 해석",
-    "styleDirection": "적용할 스타일 방향",
-    "colorPalette": ["#색상1", "#색상2", "#색상3"]
+  "templateId": "unique1",
+  "reasoning": {
+    "moodMatch": "사용자가 원하는 [구체적 느낌]은 템플릿의 [mood] 분위기와 일치합니다",
+    "colorMatch": "사용자가 원하는 [색상 느낌]은 템플릿의 [색상 팔레트]와 조화롭습니다",
+    "confidence": 0.85
   },
-  "patches": [
-    { "op": "replace", "path": "/style/preset", "value": "minimal-dark" },
-    { "op": "replace", "path": "/blocks/0/style/background/color", "value": "#0A0A0A" }
-  ],
-  "explanation": "사용자에게 보여줄 변경 설명 (한국어, 친근하게)"
+  "explanation": "사용자에게 보여줄 선택 이유 (한국어, 친근하게, 1-2문장)"
 }
 \`\`\`
 
-## 주요 수정 대상
-1. /style/preset - 전체 스타일 프리셋
-2. /blocks/{index}/style/background/color - 블록 배경색
-3. /blocks/{index}/elements/{index}/style/text/color - 텍스트 색상
-4. /blocks/{index}/elements/{index}/style/text/fontSize - 폰트 크기
-5. /blocks/{index}/height - 블록 높이 (vh)
-
 ## 주의사항
-- 사용자는 디자인 전문가가 아닙니다. 느낌만 말합니다.
-- 당신이 전문가로서 느낌을 구체적인 디자인으로 해석하세요.
-- 첫 인상이 중요합니다 - intro 블록(인덱스 0)에 특히 신경 쓰세요.
-- 일관된 색상 팔레트를 유지하세요.
+- confidence는 0.0 ~ 1.0 사이의 숫자입니다 (0.7 이상이면 높은 확신)
+- templateId는 반드시 위 6개 중 하나여야 합니다 (unique1 ~ unique6)
+- explanation은 사용자가 읽을 내용이므로 친근하고 이해하기 쉽게 작성하세요
 `
 }
 
-function buildLandingUserPrompt(prompt: string): string {
-  return `## 사용자 요청
-"${prompt}"
+function parseTemplateSelectionResponse(content: string): TemplateSelectionResponse | null {
+  try {
+    // JSON 블록 추출
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/)
+    const jsonStr = jsonMatch ? jsonMatch[1] : content
 
-위 느낌을 가진 청첩장으로 디자인해주세요.
-사용자의 의도를 잘 해석하여 전체적인 스타일을 적용해주세요.`
+    const parsed = JSON.parse(jsonStr.trim())
+
+    // 필수 필드 검증
+    if (
+      typeof parsed.templateId !== 'string' ||
+      typeof parsed.reasoning !== 'object' ||
+      typeof parsed.reasoning.confidence !== 'number' ||
+      typeof parsed.explanation !== 'string'
+    ) {
+      console.error('[Parse Template Selection] Invalid response structure:', parsed)
+      return null
+    }
+
+    // templateId 유효성 검증
+    const validIds = ['unique1', 'unique2', 'unique3', 'unique4', 'unique5', 'unique6']
+    if (!validIds.includes(parsed.templateId)) {
+      console.error('[Parse Template Selection] Invalid templateId:', parsed.templateId)
+      return null
+    }
+
+    return {
+      templateId: parsed.templateId,
+      reasoning: {
+        moodMatch: parsed.reasoning.moodMatch || '',
+        colorMatch: parsed.reasoning.colorMatch || '',
+        confidence: parsed.reasoning.confidence,
+      },
+      explanation: parsed.explanation,
+    }
+  } catch (error) {
+    console.error('[Parse Template Selection] Failed:', error, content)
+    return null
+  }
 }
 
 // ============================================
@@ -257,8 +293,7 @@ function buildLandingUserPrompt(prompt: string): string {
 
 interface GeminiResponse {
   success: boolean
-  patches?: JSONPatch[]
-  explanation?: string
+  data?: string
   error?: string
 }
 
@@ -284,8 +319,8 @@ async function callGeminiAPI(
         },
       ],
       generationConfig: {
-        maxOutputTokens: 8192,
-        temperature: 0.5, // 약간의 창의성
+        maxOutputTokens: 2048,
+        temperature: 0.3, // 낮은 temperature로 일관성 확보
       },
     })
 
@@ -299,30 +334,9 @@ async function callGeminiAPI(
       }
     }
 
-    // JSON 파싱
-    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/)
-    if (!jsonMatch) {
-      try {
-        const parsed = JSON.parse(content)
-        return {
-          success: true,
-          patches: parsed.patches,
-          explanation: parsed.explanation,
-        }
-      } catch {
-        return {
-          success: false,
-          error: 'Failed to parse AI response',
-        }
-      }
-    }
-
-    const parsed = JSON.parse(jsonMatch[1])
-
     return {
       success: true,
-      patches: parsed.patches,
-      explanation: parsed.explanation,
+      data: content,
     }
   } catch (error) {
     console.error('Gemini API call failed:', error)

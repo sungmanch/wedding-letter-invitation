@@ -61,6 +61,21 @@ SE2에서 사용자가 프롬프트를 입력하면 AI가 청첩장 데이터를
 │ 분석 결과 표시    │◀────────────────────────│ AnalysisResult   │
 │ (태그, 요약)      │                         │ JSON 반환        │
 └──────────────────┘                         └──────────────────┘
+       │
+       │ Landing Generate 시 사용
+       ▼
+┌──────────────────┐    ┌───────────────┐    ┌──────────────────┐
+│ Template         │───▶│ Match Best    │───▶│ Apply Template   │
+│ Matching         │    │ Template      │    │ to Document      │
+│ (선택)           │    │ (로컬 계산)    │    │ (AI 우회)        │
+└──────────────────┘    └───────────────┘    └──────────────────┘
+       │
+       │ score < 0.4 or 레퍼런스 없음
+       ▼
+┌──────────────────┐
+│ AI 생성 플로우    │
+│ (fallback)       │
+└──────────────────┘
 ```
 
 ### 편집 페이지에서 AI 수정 플로우
@@ -173,6 +188,287 @@ const result = await model.generateContent({
   contents: [{ role: 'user', parts: [{ text: prompt }, { inlineData: imageData }] }],
 })
 ```
+
+---
+
+## 템플릿 매칭 시스템 (Template Matching System)
+
+### 개요
+
+사용자가 레퍼런스 이미지를 제공하면, **AI 생성을 우회하고** 사전 정의된 6개 템플릿(unique1~6.png) 중 가장 유사한 것을 자동으로 선택하여 적용합니다.
+
+**핵심 이점:**
+- ⚡ **속도**: AI 호출 없이 로컬 계산 (~100ms vs AI ~3-5s)
+- 💰 **비용**: Gemini API 비용 절감
+- 🎯 **일관성**: 사전 큐레이션된 고품질 디자인 보장
+
+### 템플릿 사전 분석 (One-Time Setup)
+
+unique1~6.png를 한 번만 분석하여 메타데이터를 정적 파일로 저장:
+
+```bash
+# 스크립트 실행 (한 번만)
+tsx scripts/analyze-intro-templates.ts
+```
+
+이 스크립트는 각 템플릿 이미지를 Gemini Vision으로 분석하여 다음을 추출:
+- mood, colors, typography, layout, keywords
+- Primary/Secondary/Tertiary 컬러 팔레트
+- designPattern (introType, imageLayout, textLayout, colorTheme, stylePreset)
+
+결과는 `src/lib/super-editor-v2/config/template-catalog.ts`에 자동 생성됩니다.
+
+### 템플릿 메타데이터 스키마
+
+```typescript
+// src/lib/super-editor-v2/schema/template-metadata.ts
+
+export interface TemplateMetadata {
+  id: string                    // 'unique1' ~ 'unique6'
+  name: string                  // '클래식 엘레강스' 등
+  imagePath: string             // '/examples/unique1.png'
+
+  // AI 분석 결과 (AnalysisResult와 동일 구조)
+  mood: string[]
+  colors: string[]
+  typography: string
+  layout: string
+  keywords: string[]
+  summary: string
+
+  // 디자인 패턴 메타데이터
+  designPattern: {
+    introType: 'elegant' | 'minimal' | 'romantic' | 'cinematic' | 'polaroid'
+    imageLayout: 'fullscreen-bg' | 'centered' | 'card' | 'split-left'
+    textLayout: 'bottom-overlay' | 'center' | 'below-image' | 'side-right'
+    colorTheme: 'light' | 'dark' | 'overlay' | 'warm'
+    stylePreset?: 'minimal-light' | 'minimal-dark' | 'classic-serif' | 'modern-sans' | 'romantic-script' | 'nature-organic'
+
+    // Primary/Secondary/Tertiary 컬러 팔레트
+    colorPalette: {
+      primary: [string, string, string]      // 메인 텍스트, 강조 요소
+      secondary: [string, string, string]    // 배경, 카드 surface
+      tertiary: [string, string, string]     // 하이라이트, 버튼, 링크
+    }
+  }
+
+  version: number
+  createdAt: string
+  updatedAt: string
+}
+```
+
+### Primary/Secondary/Tertiary 컬러 시스템
+
+템플릿 색상은 60-30-10 법칙에 따라 3개 그룹으로 구성:
+
+| 그룹 | 사용처 | 예시 (unique1) |
+|------|--------|---------------|
+| **Primary** (3개) | 메인 텍스트, 제목, 강조 요소 | `#1A1A1A`, `#8B7355`, `#C9A962` |
+| **Secondary** (3개) | 배경, 카드 surface, 밝은 톤 | `#FFFFFF`, `#F8F6F3`, `#FAF8F5` |
+| **Tertiary** (3개) | 버튼, 링크, 장식, 중간 톤 | `#D4C5A9`, `#E6DCC8`, `#C2B490` |
+
+### 템플릿 매칭 알고리즘
+
+```typescript
+// src/lib/super-editor-v2/services/template-matcher.ts
+
+export function matchBestTemplate(
+  userAnalysis: AnalysisResult,
+  options?: { minScore?: number }
+): MatchResult | null
+
+interface MatchResult {
+  templateId: string
+  score: number  // 0.0 ~ 1.0
+  matchDetails: {
+    moodScore: number
+    colorScore: number
+    typographyScore: number
+    layoutScore: number
+    keywordScore: number
+  }
+}
+```
+
+**유사도 계산 가중치:**
+- mood: 25% (Jaccard similarity)
+- color: 20% (RGB Euclidean distance)
+- typography: 15% (exact/similar match)
+- layout: 20% (exact/similar match)
+- keyword: 20% (Jaccard similarity)
+
+**핵심 함수:**
+- `jaccardSimilarity(a, b)`: 교집합 크기 / 합집합 크기
+- `calculateColorSimilarity(userColors, templateColors)`: RGB 거리 기반 유사도
+- `rgbDistance(rgb1, rgb2)`: Euclidean distance
+- `hexToRgb(hex)`: HEX → RGB 변환
+
+### 템플릿 적용 (Template Applier)
+
+```typescript
+// src/lib/super-editor-v2/services/template-applier.ts
+
+export function applyTemplateToDocument(
+  templateId: string,
+  document: EditorDocument
+): { style: StyleSystem; blocks: Block[] }
+```
+
+**적용 과정:**
+1. 템플릿 메타데이터에서 스타일 시스템 생성
+2. 인트로 블록을 템플릿 패턴으로 재구성
+3. 다른 섹션(greeting, gallery, venue 등)에 일관된 색상 적용
+
+**색상 적용 규칙:**
+- **Intro 블록**: 템플릿 패턴 그대로 적용
+- **Content 섹션**: Primary/Secondary/Tertiary 색상 적용
+  - 배경: Secondary[0] (가장 밝은 색상)
+  - 텍스트: Primary[0] (가장 진한 색상)
+  - 버튼/링크: Tertiary[0~1]
+  - 구분선: Tertiary[2]
+
+**콘솔 로그 (디버깅용):**
+```typescript
+console.log('[Template Applier] 🎨 Applying template "클래식 엘레강스" (unique1)')
+console.log('[Template Applier] Template details:', {
+  mood: 'elegant, romantic, classic',
+  colorTheme: 'light',
+  stylePreset: 'classic-serif',
+  primary: ['#1A1A1A', '#8B7355', '#C9A962'],
+  secondary: ['#FFFFFF', '#F8F6F3', '#FAF8F5'],
+  tertiary: ['#D4C5A9', '#E6DCC8', '#C2B490'],
+})
+console.log('[Template Applier] ✅ Applied colors to 8 blocks')
+```
+
+### Landing Generate 통합
+
+```typescript
+// src/app/api/landing/generate/route.ts
+
+export async function POST(request: NextRequest) {
+  // 1. 문서 생성
+  const document = await createDocument({
+    title: `AI 생성 청첩장 - ${body.prompt.slice(0, 20)}...`,
+    useSampleData: true,
+  })
+
+  // 2. 템플릿 매칭 (레퍼런스가 있을 때)
+  if (body.referenceAnalysis) {
+    const matchResult = matchBestTemplate(body.referenceAnalysis, { minScore: 0.4 })
+
+    if (matchResult) {
+      // ✅ 템플릿 적용 (AI 우회)
+      const { style, blocks } = applyTemplateToDocument(matchResult.templateId, document)
+      await updateDocument(document.id, { style, blocks })
+
+      console.log('[Template Match] ✅ Template matched:', {
+        templateId: matchResult.templateId,
+        score: matchResult.score.toFixed(3),
+        details: {
+          mood: matchResult.matchDetails.moodScore.toFixed(3),
+          color: matchResult.matchDetails.colorScore.toFixed(3),
+          typography: matchResult.matchDetails.typographyScore.toFixed(3),
+          layout: matchResult.matchDetails.layoutScore.toFixed(3),
+          keyword: matchResult.matchDetails.keywordScore.toFixed(3),
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        documentId: document.id,
+        templateApplied: matchResult.templateId,
+        matchScore: matchResult.score,
+        aiApplied: false,  // AI 호출 스킵
+        explanation: `레퍼런스 이미지와 ${Math.round(matchResult.score * 100)}% 유사한 템플릿을 적용했습니다.`,
+      })
+    } else {
+      // Fallback: mood 기반 휴리스틱 선택
+      const fallbackTemplateId = selectFallbackTemplate(body.referenceAnalysis)
+      const { style, blocks } = applyTemplateToDocument(fallbackTemplateId, document)
+      await updateDocument(document.id, { style, blocks })
+
+      return NextResponse.json({
+        success: true,
+        documentId: document.id,
+        templateApplied: fallbackTemplateId,
+        matchScore: 0,
+        aiApplied: false,
+        explanation: `레퍼런스 분위기에 맞는 템플릿을 적용했습니다.`,
+      })
+    }
+  }
+
+  // 3. Fallback: AI 생성 플로우 (레퍼런스 없을 때)
+  // ... 기존 AI 호출 코드 ...
+}
+```
+
+### Fallback Template Selection
+
+점수가 낮을 때 mood 기반으로 적절한 템플릿 선택:
+
+```typescript
+export function selectFallbackTemplate(userAnalysis: AnalysisResult): string {
+  const moods = userAnalysis.mood.map(m => m.toLowerCase())
+
+  // Dark/Dramatic → unique4
+  if (moods.some(m => ['dark', 'dramatic', '어두운', '드라마틱'].includes(m))) {
+    return 'unique4'
+  }
+
+  // Minimal/Modern → unique3
+  if (moods.some(m => ['minimal', 'modern', '미니멀', '모던'].includes(m))) {
+    return 'unique3'
+  }
+
+  // Playful/Casual → unique2
+  if (moods.some(m => ['playful', 'casual', '캐주얼', '재미있는'].includes(m))) {
+    return 'unique2'
+  }
+
+  // Bold/Fashion → unique6
+  if (moods.some(m => ['bold', 'fashion', '대담한', '패션'].includes(m))) {
+    return 'unique6'
+  }
+
+  // Bright/Sky → unique5
+  if (moods.some(m => ['bright', 'sky', '밝은', '하늘'].includes(m))) {
+    return 'unique5'
+  }
+
+  // Default: unique1 (클래식 엘레강스)
+  return 'unique1'
+}
+```
+
+### 템플릿 vs AI 생성 비교
+
+| 항목 | 템플릿 매칭 | AI 생성 |
+|------|------------|---------|
+| **속도** | ~100ms | ~3-5s |
+| **비용** | 무료 (로컬 계산) | Gemini API 비용 |
+| **품질** | 사전 큐레이션 (일관성 높음) | 변동 가능 |
+| **조건** | 레퍼런스 제공 필수 | 프롬프트만으로 가능 |
+| **적용 범위** | 6개 템플릿 | 무한 (창의적) |
+| **사용 시점** | Landing → Generate (레퍼런스 O) | Landing → Generate (레퍼런스 X)<br/>편집 페이지 AI 수정 |
+
+### 주요 파일 경로
+
+| 역할 | 파일 경로 |
+|------|-----------|
+| **템플릿 메타데이터** | |
+| Schema | `src/lib/super-editor-v2/schema/template-metadata.ts` |
+| Catalog (auto-generated) | `src/lib/super-editor-v2/config/template-catalog.ts` |
+| **템플릿 시스템** | |
+| Matcher Service | `src/lib/super-editor-v2/services/template-matcher.ts` |
+| Applier Service | `src/lib/super-editor-v2/services/template-applier.ts` |
+| **스크립트** | |
+| Analysis Script | `scripts/analyze-intro-templates.ts` |
+| **API 통합** | |
+| Landing Generate | `src/app/api/landing/generate/route.ts` (템플릿 우선) |
+| Analyze Reference | `src/app/api/super-editor-v2/analyze-reference/route.ts` |
 
 ### (폴백) /se2/create 페이지
 
@@ -543,8 +839,14 @@ const handleSave = async () => {
 | Landing Hero | `src/components/landing/PromptHeroLanding.tsx` |
 | Typewriter 컴포넌트 | `src/components/landing/Typewriter.tsx` |
 | Before/After 데모 | `src/components/landing/BeforeAfterDemo.tsx` |
-| Landing 생성 API | `src/app/api/landing/generate/route.ts` |
+| Landing 생성 API | `src/app/api/landing/generate/route.ts` (템플릿 매칭 통합) |
 | 레퍼런스 분석 API | `src/app/api/super-editor-v2/analyze-reference/route.ts` |
+| **템플릿 시스템 (NEW)** | |
+| 템플릿 메타데이터 Schema | `src/lib/super-editor-v2/schema/template-metadata.ts` |
+| 템플릿 카탈로그 (auto-generated) | `src/lib/super-editor-v2/config/template-catalog.ts` |
+| 템플릿 매칭 서비스 | `src/lib/super-editor-v2/services/template-matcher.ts` |
+| 템플릿 적용 서비스 | `src/lib/super-editor-v2/services/template-applier.ts` |
+| 템플릿 분석 스크립트 | `scripts/analyze-intro-templates.ts` |
 | **Editor** | |
 | Edit 페이지 | `src/app/se2/[id]/edit/page.tsx` |
 | Edit 클라이언트 | `src/app/se2/[id]/edit/EditClient.tsx` |

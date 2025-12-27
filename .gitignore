@@ -42,3 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 mocks/
+
+# Auto Claude data directory
+.auto-claude/

@@ -512,7 +512,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               >
                 <div
                   ref={scrollContainerRef}
-                  className="w-full h-full overflow-y-auto overflow-x-hidden"
+                  className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide"
                   style={{
                     borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
                     ...cssVariables,
