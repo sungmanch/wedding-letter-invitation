@@ -28,6 +28,7 @@ import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/e
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
 import { FloatingPresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/floating-preset-sidebar'
 import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
+import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
 // ============================================
 // Types
@@ -155,6 +156,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 스타일 해석 및 CSS 변수 생성
   const resolvedStyle = useMemo(() => resolveStyle(editorDoc.style), [editorDoc.style])
   const cssVariables = useMemo(() => styleToCSSVariables(resolvedStyle), [resolvedStyle])
+
+  // 편집 모드: 모든 프리셋 폰트 미리 로드
+  useEditorFonts()
 
   // AI 편집 훅
   const aiEdit = useAIEdit({
