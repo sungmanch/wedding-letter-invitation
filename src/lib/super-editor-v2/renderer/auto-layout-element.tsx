@@ -21,6 +21,7 @@ import type {
   DividerProps,
   MapProps,
   CalendarProps,
+  GroupProps,
   GradientValue,
 } from '../schema/types'
 import { useDocument } from '../context/document-context'
@@ -240,6 +241,15 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         />
       )
 
+    case 'group':
+      return (
+        <GroupElement
+          element={element}
+          layout={(props as GroupProps).layout}
+          editable={editable}
+        />
+      )
+
     default:
       return (
         <div className="se2-element--unknown">
@@ -247,6 +257,54 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         </div>
       )
   }
+}
+
+// ============================================
+// Group Element Component
+// ============================================
+
+interface GroupElementProps {
+  element: Element
+  layout?: GroupProps['layout']
+  editable: boolean
+}
+
+function GroupElement({ element, layout, editable }: GroupElementProps) {
+  const groupStyle = useMemo<CSSProperties>(() => {
+    const direction = layout?.direction ?? 'vertical'
+    const reverse = layout?.reverse ?? false
+
+    let flexDirection: CSSProperties['flexDirection']
+    if (direction === 'horizontal') {
+      flexDirection = reverse ? 'row-reverse' : 'row'
+    } else {
+      flexDirection = reverse ? 'column-reverse' : 'column'
+    }
+
+    return {
+      display: 'flex',
+      flexDirection,
+      gap: layout?.gap ? `${layout.gap}px` : undefined,
+      alignItems: layout?.alignItems ?? 'stretch',
+      justifyContent: layout?.justifyContent ?? 'start',
+      width: '100%',
+      height: '100%',
+    }
+  }, [layout])
+
+  const children = element.children ?? []
+
+  return (
+    <div className="se2-group" style={groupStyle}>
+      {children.map((child) => (
+        <AutoLayoutElement
+          key={child.id}
+          element={child}
+          editable={editable}
+        />
+      ))}
+    </div>
+  )
 }
 
 // ============================================

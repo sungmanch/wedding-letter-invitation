@@ -56,7 +56,7 @@ type SizeMode =
 ```typescript
 interface Element {
   id: string
-  type: ElementType
+  type: ElementType  // 'text' | 'image' | ... | 'group'
 
   // ─── 레이아웃 모드 선택 ───
   layoutMode?: 'absolute' | 'auto'  // 기본: 'absolute' (하위 호환)
@@ -90,10 +90,46 @@ interface Element {
   value?: string | number
   props: ElementProps
   style?: ElementStyle
+
+  // ─── Group 요소 전용 ───
+  children?: Element[]  // type: 'group'일 때 자식 요소들
 }
 ```
 
-### 3.3 Block Layout 설정
+### 3.3 Group 요소 (중첩 레이아웃)
+
+```typescript
+interface GroupProps {
+  type: 'group'
+  // 그룹 내부 레이아웃 설정
+  layout?: {
+    direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
+    gap?: number                            // px
+    alignItems?: 'start' | 'center' | 'end' | 'stretch'
+    justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+    reverse?: boolean  // flex-direction: row-reverse / column-reverse
+  }
+}
+```
+
+**사용 예시 (Profile 좌우 교차 배치)**:
+```typescript
+// 신랑: 사진(왼쪽) + 정보(오른쪽)
+{
+  type: 'group',
+  props: { type: 'group', layout: { direction: 'horizontal', gap: 16 } },
+  children: [photo, infoGroup]
+}
+
+// 신부: 정보(왼쪽) + 사진(오른쪽) ← reverse로 교차 배치
+{
+  type: 'group',
+  props: { type: 'group', layout: { direction: 'horizontal', gap: 16, reverse: true } },
+  children: [photo, infoGroup]  // DOM 순서는 동일, 시각적으로만 뒤집힘
+}
+```
+
+### 3.4 Block Layout 설정
 
 ```typescript
 interface Block {
@@ -164,8 +200,15 @@ interface BlockLayout {
   - ⏭️ baptismal, box-style, ribbon: absolute 유지 (복잡한 레이아웃)
 - [x] `presets/blocks/rsvp-presets.ts` - rsvp-basic auto-layout
 - [x] `presets/blocks/notice-presets.ts` - notice-classic-label auto-layout
-- ⏭️ `presets/blocks/profile-presets.ts` - absolute 유지 (좌우 교차 배치)
 - ⏭️ `presets/blocks/calendar-presets.ts` - absolute 유지 (정밀 배치 필요)
+
+### Phase 4.5: Group 요소 및 Profile 마이그레이션 ✅ 완료 (2025-12-27)
+- [x] `schema/types.ts` - `group` ElementType 및 `GroupProps` 추가
+- [x] `schema/types.ts` - `Element.children` 필드 추가 (중첩 레이아웃 지원)
+- [x] `renderer/auto-layout-element.tsx` - `GroupElement` 컴포넌트 추가
+- [x] `presets/blocks/profile-presets.ts` - profile-dual-card auto-layout + group
+- [x] `presets/blocks/profile-presets.ts` - profile-split-photo auto-layout + group
+  - ✅ 신랑/신부 좌우 교차 배치를 `reverse` 속성으로 구현
 
 ### Phase 5: AI 통합
 - [ ] `docs/super-editor-v2/06_ai_prompt.md` 업데이트
