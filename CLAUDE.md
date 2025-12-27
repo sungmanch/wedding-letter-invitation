@@ -45,6 +45,22 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2025-12-27: 편집 가능한 템플릿 v2 시스템 구축
+- **이유**: 템플릿 이미지를 정적 PNG가 아닌 편집 가능한 Block/Element 구조로 전환. 사용자가 텍스트/이미지/색상을 자유롭게 수정
+- **변경**:
+  - **TemplateV2 인터페이스**: `blockStructure` (Block 배열), `editableFields` (필드 매핑)
+  - **unique1 템플릿 구현**: Hero, Greeting, Calendar, Location, Gallery, Contact 블록 정의
+  - **template-block-builder**: BlockTemplate → Block 인스턴스 변환 (WeddingData 바인딩, 색상 팔레트 적용)
+  - **template-applier v2 지원**: v2 템플릿이면 Block 구조 전체 교체, v1이면 색상만 적용
+  - **DocumentMeta 확장**: `templateId`, `templateVersion` (1 | 2) 필드 추가
+- **파일**:
+  - `src/lib/super-editor-v2/config/template-catalog-v2.ts` - TemplateV2 정의
+  - `src/lib/super-editor-v2/services/template-block-builder.ts` - Block 빌더
+  - `src/lib/super-editor-v2/services/template-applier.ts` - v1/v2 분기 처리
+  - `src/lib/super-editor-v2/schema/types.ts` - DocumentMeta 확장
+  - `src/app/api/landing/generate/route.ts` - meta 업데이트
+- **다음 단계**: unique2-6 구현, 색상 팔레트 편집기, Visual Template Picker
+
 ### 2025-12-27: AI 템플릿 선택 시스템으로 전환
 - **이유**: AI가 JSON Patch를 생성하는 방식은 복잡하고 일관성 부족. 사용자는 "원하는 느낌"만 입력하면 AI가 6개 템플릿 중 최적 선택
 - **변경**:
