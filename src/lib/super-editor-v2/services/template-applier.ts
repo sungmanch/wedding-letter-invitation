@@ -10,7 +10,7 @@
 import { getTemplateById } from '../config/template-catalog'
 import { getTemplateV2ById, isTemplateV2Available } from '../config/template-catalog-v2'
 import type { TemplateMetadata } from '../schema/template-metadata'
-import type { EditorDocument, Block, StyleSystem, WeddingData, DocumentMeta } from '../schema/types'
+import type { EditorDocument, Block, StyleSystem, WeddingData, DocumentMeta, ThemePresetId } from '../schema/types'
 import { buildBlocksFromTemplate } from './template-block-builder'
 
 // ============================================
@@ -147,8 +147,8 @@ function buildStyleSystemFromTemplate(
 ): StyleSystem {
   const { designPattern } = template
 
-  // 스타일 프리셋 추론
-  const preset = designPattern.stylePreset || inferStylePreset(template)
+  // 스타일 프리셋 추론 (레거시 프리셋 → 새 프리셋 매핑)
+  const preset = mapToThemePresetId(designPattern.stylePreset) || inferStylePreset(template)
 
   // Quick 스타일 (Primary/Secondary/Tertiary 컬러 적용)
   const quick = {
@@ -164,6 +164,26 @@ function buildStyleSystemFromTemplate(
     quick,
     // typography, effects는 기존 설정 유지 (또는 프리셋에서 자동 적용)
   }
+}
+
+/**
+ * 레거시 stylePreset을 ThemePresetId로 매핑
+ */
+function mapToThemePresetId(
+  stylePreset?: string
+): ThemePresetId | undefined {
+  if (!stylePreset) return undefined
+
+  const mapping: Record<string, ThemePresetId> = {
+    'minimal-light': 'minimal-light',
+    'minimal-dark': 'minimal-dark',
+    'classic-serif': 'classic-ivory',
+    'modern-sans': 'modern-mono',
+    'romantic-script': 'romantic-blush',
+    'nature-organic': 'romantic-garden',
+  }
+
+  return mapping[stylePreset]
 }
 
 /**
@@ -186,15 +206,15 @@ function inferStylePreset(
   }
 
   if (mood.includes('elegant') || mood.includes('classic')) {
-    return 'classic-serif'
+    return 'classic-ivory'
   }
 
   if (mood.includes('romantic')) {
-    return 'romantic-script'
+    return 'romantic-blush'
   }
 
   if (mood.includes('nature') || mood.includes('warm')) {
-    return 'nature-organic'
+    return 'cinematic-warm'
   }
 
   // Default
@@ -203,19 +223,25 @@ function inferStylePreset(
 
 /**
  * 템플릿으로부터 mood 추론
+ * QuickStyleConfig.mood는 'warm' | 'cool' | 'neutral' 만 허용
  */
 function inferMoodFromTemplate(
   template: TemplateMetadata
 ): NonNullable<StyleSystem['quick']>['mood'] {
   const { mood } = template
 
-  if (mood.includes('minimal') || mood.includes('modern')) return 'minimal'
-  if (mood.includes('romantic')) return 'romantic'
-  if (mood.includes('elegant') || mood.includes('classic')) return 'elegant'
-  if (mood.includes('warm') || mood.includes('nature')) return 'warm'
-  if (mood.includes('playful') || mood.includes('casual')) return 'playful'
+  // warm 계열
+  if (mood.includes('warm') || mood.includes('romantic') || mood.includes('nature')) {
+    return 'warm'
+  }
 
-  return 'elegant' // Default
+  // cool 계열
+  if (mood.includes('minimal') || mood.includes('modern') || mood.includes('cool')) {
+    return 'cool'
+  }
+
+  // neutral (default)
+  return 'neutral'
 }
 
 // ============================================
@@ -247,17 +273,14 @@ function applyTemplateColorsToBlock(
   // 강조 색상: Tertiary (중간 톤) 사용
   const accentColor = colorPalette.tertiary[0]
 
-  // 블록 스타일 오버라이드
+  // 블록 스타일 오버라이드 (background는 { color } 형태로 설정)
   const blockStyle = {
     ...block.style,
-    background: {
-      ...block.style?.background,
-      color: backgroundColor,
-    },
+    background: { color: backgroundColor },
   }
 
   // 요소별 색상 적용
-  const elements = block.elements.map((element) => {
+  const elements: typeof block.elements = block.elements.map((element) => {
     if (element.type === 'text') {
       return {
         ...element,
@@ -280,21 +303,21 @@ function applyTemplateColorsToBlock(
             ...element.style?.text,
             color: accentColor,
           },
-          background: {
-            ...element.style?.background,
-            color: colorPalette.tertiary[1], // 버튼 배경은 Tertiary 2번째 색상
-          },
+          background: colorPalette.tertiary[1], // 버튼 배경은 Tertiary 2번째 색상
         },
       }
     }
 
     if (element.type === 'divider') {
+      const existingBorder = element.style?.border
       return {
         ...element,
         style: {
           ...element.style,
           border: {
-            ...element.style?.border,
+            width: existingBorder?.width ?? 1,
+            style: existingBorder?.style ?? 'solid',
+            radius: existingBorder?.radius ?? 0,
             color: colorPalette.tertiary[2], // Divider는 Tertiary 3번째 색상
           },
         },

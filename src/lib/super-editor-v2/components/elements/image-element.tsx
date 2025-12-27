@@ -56,8 +56,7 @@ export function ImageElement({
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: isLoading ? 'var(--bg-section-alt)' : undefined,
-    // 스타일 적용: filter, opacity, borderRadius
-    filter: style?.filter,
+    // 스타일 적용: opacity, borderRadius
     opacity: style?.opacity,
     borderRadius: style?.border?.radius ? `${style.border.radius}px` : undefined,
   }), [isLoading, style])

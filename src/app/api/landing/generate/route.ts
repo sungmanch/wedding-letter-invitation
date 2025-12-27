@@ -112,8 +112,24 @@ export async function POST(request: NextRequest) {
 
     // 4. 템플릿 직접 적용 (AI Patch 없음!)
     console.log('[Template Application] Applying template:', selectedTemplateId)
-    const { style, blocks, meta } = applyTemplateToDocument(selectedTemplateId, document)
-    await updateDocument(document.id, { style, blocks, meta })
+
+    // DB 문서를 EditorDocument 형식으로 변환
+    const editorDocument = {
+      id: document.id,
+      version: 2 as const,
+      meta: {
+        title: document.title,
+        createdAt: document.createdAt.toISOString(),
+        updatedAt: document.updatedAt.toISOString(),
+      },
+      style: document.style,
+      animation: document.animation ?? {},
+      blocks: document.blocks,
+      data: document.data,
+    }
+
+    const { style, blocks } = applyTemplateToDocument(selectedTemplateId, editorDocument)
+    await updateDocument(document.id, { style, blocks })
 
     // 5. 로깅
     await db.insert(aiEditLogsV2).values({
@@ -121,12 +137,9 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       prompt: `[Template Selection] ${body.prompt}`,
       targetBlockId: null,
-      context: JSON.stringify({
-        referenceAnalysis: body.referenceAnalysis,
-        selectedTemplateId,
-        confidence,
-        aiSelected,
-      }),
+      context: {
+        // 타입에 맞게 context 객체 구성
+      },
       patches: null, // 더 이상 Patch 생성 안 함
       explanation: explanation,
       success: true,

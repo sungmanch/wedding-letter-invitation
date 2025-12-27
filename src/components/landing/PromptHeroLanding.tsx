@@ -299,7 +299,7 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
         Background: Multiple Marquee Rows 
         We use 3 rows moving at different speeds/directions to create a rich collage effect.
       */}
-      <div className="absolute inset-0 z-0 overflow-hidden flex flex-col justify-center gap-6 opacity-60 grayscale-[30%]">
+      <div className="absolute inset-0 z-0 overflow-hidden flex flex-col justify-center gap-6 opacity-80">
         {/* Row 1: Move Left */}
         <div className="flex gap-6 animate-marquee">
            {[...TEMPLATE_IMAGES, ...TEMPLATE_IMAGES].map((src, i) => (
@@ -318,9 +318,9 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
         </div>
       </div>
 
-       {/* Overlay Gradient for focus */}
-       <div className="absolute inset-0 z-0 bg-white/70 backdrop-blur-[2px]" />
-       <div className="absolute inset-0 z-0 bg-gradient-to-b from-white via-white/40 to-white/90" />
+       {/* Overlay Gradient for focus - Adjusted for better visibility */}
+       <div className="absolute inset-0 z-0 bg-white/30 backdrop-blur-[1px]" />
+       <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/95 via-white/40 to-white/95" />
 
       {/* Main Glassmorphism Overlay */}
       <div className="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center">

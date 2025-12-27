@@ -234,30 +234,30 @@ export function updateBlocksWithCustomPalette(
 
       const updatedStyle = { ...element.style }
 
-      // 배경색 매핑
-      if (updatedStyle.backgroundColor) {
+      // 배경색 매핑 (background가 string인 경우만 처리)
+      if (typeof updatedStyle.background === 'string') {
         // Primary 색상이면 교체
-        if (isColorInPalette(updatedStyle.backgroundColor, 'primary')) {
-          updatedStyle.backgroundColor = newPalette.primary[0]
+        if (isColorInPalette(updatedStyle.background, 'primary')) {
+          updatedStyle.background = newPalette.primary[0]
         }
         // Secondary 색상이면 교체
-        else if (isColorInPalette(updatedStyle.backgroundColor, 'secondary')) {
-          updatedStyle.backgroundColor = newPalette.secondary[0]
+        else if (isColorInPalette(updatedStyle.background, 'secondary')) {
+          updatedStyle.background = newPalette.secondary[0]
         }
         // Tertiary 색상이면 교체
-        else if (isColorInPalette(updatedStyle.backgroundColor, 'tertiary')) {
-          updatedStyle.backgroundColor = newPalette.tertiary[0]
+        else if (isColorInPalette(updatedStyle.background, 'tertiary')) {
+          updatedStyle.background = newPalette.tertiary[0]
         }
       }
 
       // 텍스트 색상 매핑
-      if (updatedStyle.color) {
-        if (isColorInPalette(updatedStyle.color, 'primary')) {
-          updatedStyle.color = newPalette.primary[0]
-        } else if (isColorInPalette(updatedStyle.color, 'secondary')) {
-          updatedStyle.color = newPalette.secondary[0]
-        } else if (isColorInPalette(updatedStyle.color, 'tertiary')) {
-          updatedStyle.color = newPalette.tertiary[0]
+      if (updatedStyle.text?.color) {
+        if (isColorInPalette(updatedStyle.text.color, 'primary')) {
+          updatedStyle.text = { ...updatedStyle.text, color: newPalette.primary[0] }
+        } else if (isColorInPalette(updatedStyle.text.color, 'secondary')) {
+          updatedStyle.text = { ...updatedStyle.text, color: newPalette.secondary[0] }
+        } else if (isColorInPalette(updatedStyle.text.color, 'tertiary')) {
+          updatedStyle.text = { ...updatedStyle.text, color: newPalette.tertiary[0] }
         }
       }
 

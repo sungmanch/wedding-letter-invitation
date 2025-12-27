@@ -331,8 +331,13 @@ function calculateLayoutScore(
  * mood 기반으로 가장 적절한 템플릿을 휴리스틱하게 선택
  */
 export function selectFallbackTemplate(
-  userAnalysis: AnalysisResult
+  userAnalysis?: AnalysisResult
 ): string {
+  // undefined인 경우 기본 템플릿 반환
+  if (!userAnalysis) {
+    return 'unique1'
+  }
+
   const moods = userAnalysis.mood.map((m) => m.toLowerCase())
 
   // Dark/Dramatic → unique4

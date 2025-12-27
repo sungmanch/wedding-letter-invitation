@@ -36,17 +36,19 @@ export function ShapeElement({
   style,
   className = '',
 }: ShapeElementProps) {
+  // background를 string으로 변환 (GradientValue는 문자열로 변환 불가)
+  const backgroundStr = typeof style?.background === 'string' ? style.background : undefined
+
   const containerStyle: CSSProperties = {
     width: '100%',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    // 스타일 적용: background, opacity, borderRadius, filter
-    backgroundColor: style?.background || undefined,
+    // 스타일 적용: background, opacity, borderRadius
+    backgroundColor: backgroundStr,
     opacity: style?.opacity,
     borderRadius: style?.border?.radius ? `${style.border.radius}px` : undefined,
-    filter: style?.filter,
   }
 
   return (
@@ -56,7 +58,7 @@ export function ShapeElement({
     >
       <ShapeRenderer
         shape={shape}
-        fill={style?.background || fill}
+        fill={backgroundStr || fill}
         stroke={stroke}
         strokeWidth={strokeWidth}
         svgPath={svgPath}
