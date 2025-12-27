@@ -157,12 +157,14 @@ function inferMoodFromTemplate(
 // ============================================
 
 /**
- * 블록에 템플릿 색상 적용
+ * 블록에 템플릿 색상 적용 (개선 버전)
  *
  * Primary/Secondary/Tertiary 컬러 시스템 적용:
  * - Primary: 메인 텍스트, 강조 요소
  * - Secondary: 배경, 카드 surface
  * - Tertiary: 하이라이트, 버튼, 링크
+ *
+ * ✅ 변경: 모든 블록에 일관된 색상 적용 (hero 포함)
  */
 function applyTemplateColorsToBlock(
   block: Block,
@@ -170,23 +172,8 @@ function applyTemplateColorsToBlock(
 ): Block {
   const { colorPalette } = template.designPattern
 
-  // 블록 타입에 따라 배경색 선택
-  const shouldUseSurface = [
-    'greeting',
-    'gallery',
-    'location',
-    'venue',
-    'account',
-    'parents',
-    'contact',
-    'guestbook',
-    'message',
-  ].includes(block.type)
-
-  // 배경색: Secondary (밝은 톤) 사용
-  const backgroundColor = shouldUseSurface
-    ? colorPalette.secondary[0] // 가장 밝은 색상
-    : '#FFFFFF' // 기본 흰색
+  // ✅ 모든 블록에 Secondary 배경 적용 (일관성 강화)
+  const backgroundColor = colorPalette.secondary[0] // 가장 밝은 색상
 
   // 텍스트 색상: Primary (진한 톤) 사용
   const textColor = colorPalette.primary[0] // 가장 진한 색상
