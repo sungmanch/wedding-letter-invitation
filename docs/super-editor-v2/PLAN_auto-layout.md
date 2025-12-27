@@ -213,10 +213,21 @@ interface BlockLayout {
   - ✅ 월 구분선 그룹 (divider - month text - divider)
   - ✅ 카운트다운 박스 중첩 그룹 (4개 박스 × 라벨+값)
 
-### Phase 5: AI 통합
-- [ ] `docs/super-editor-v2/06_ai_prompt.md` 업데이트
-- [ ] AI가 auto layout 사용하도록 가이드 추가
-- [ ] 블록 유형별 기본 layout 권장사항
+### Phase 5: AI 통합 ✅ 완료 (2025-12-28)
+- [x] `docs/super-editor-v2/06_ai_prompt.md` 업데이트
+  - ✅ Block 구조에 BlockLayout, SizeMode 타입 추가
+  - ✅ Element 구조에 layoutMode, sizing, constraints, alignSelf, children 추가
+  - ✅ Group 요소 Props 문서화
+- [x] AI가 auto layout 사용하도록 가이드 추가
+  - ✅ 10. Auto Layout 가이드 섹션 (언제 어떤 레이아웃 사용, SizeMode 선택 기준)
+  - ✅ 10.4 Group 요소 활용 (reverse 속성 예시)
+  - ✅ 10.5 Mixed 모드 (Absolute + Auto 혼합)
+- [x] 블록 유형별 기본 layout 권장사항
+  - ✅ 10.2 블록 유형별 권장 설정 표
+- [x] Auto Layout Patch 패턴 추가
+  - ✅ 11. Auto Layout Patch 패턴 섹션
+- [x] 시스템 프롬프트 템플릿 업데이트
+  - ✅ 규칙 7-9 추가 (Auto Layout 선호, Group 활용, 블록 높이)
 
 ### Phase 6: 문서화
 - [ ] `docs/super-editor-v2/08_auto_layout.md` 작성
