@@ -3,11 +3,11 @@
  *
  * 1컬러 시스템: Primary 색상에서 Secondary, Tertiary 자동 계산
  *
- * 규칙:
- * - Primary: 사용자 지정 메인 컬러
- * - Secondary: H 유지, S*0.5, L=97% (연한 배경)
- * - Tertiary: H 유지, S*0.9, L=85% (중간톤)
- * - FgEmphasis: H 유지, S*0.8, L=25% (제목용 어두운 톤)
+ * 매핑:
+ * - Primary: 제목, 아이콘, 강조 문구, 활성 탭/버튼 (fg-emphasis, accent-default)
+ * - Secondary: 카드 배경, 비활성 탭 배경 (bg-card) - H 유지, S*0.5, L=97%
+ * - Tertiary: hover/보조 상태 (accent-hover, accent-secondary) - H 유지, S*0.9, L=85%
+ * - 배경: #FFFFFF 통일
  */
 
 // ============================================

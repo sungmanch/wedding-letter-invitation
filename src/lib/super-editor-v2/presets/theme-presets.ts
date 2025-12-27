@@ -5,10 +5,10 @@
  * Level 1 스타일 시스템용
  *
  * 1컬러 시스템 (디자이너 확정):
- * - Primary: 메인 컬러
- * - Secondary: H 유지, S*0.5, L=97% (연한 배경)
- * - Tertiary: H 유지, S*0.9, L=85% (중간톤)
- * - FgEmphasis: H 유지, S*0.8, L=25% (제목용)
+ * - Primary: 제목, 아이콘, 강조 문구, 활성 탭/버튼, 탭 밑줄 (fg-emphasis, accent-default)
+ * - Secondary: 카드 배경, 비활성 탭 배경 (bg-card)
+ * - Tertiary: hover/보조 상태 (accent-hover, accent-secondary)
+ * - 배경: #FFFFFF 통일
  */
 
 import type {
@@ -45,21 +45,21 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     category: 'simple',
     tokens: {
       'bg-page': '#FFFFFF',
-      'bg-section': SIMPLE_COLOR_PRESETS.pink.secondary,
-      'bg-section-alt': '#FAFAFA',
-      'bg-card': SIMPLE_COLOR_PRESETS.pink.secondary,
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.pink.secondary,         // S: 카드/비활성탭 배경
       'bg-overlay': 'rgba(0, 0, 0, 0.4)',
       'fg-default': '#1A1A1A',
       'fg-muted': '#6B7280',
-      'fg-emphasis': SIMPLE_COLOR_PRESETS.pink.fgEmphasis,
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.pink.primary,       // P: 제목
       'fg-inverse': '#FFFFFF',
       'fg-on-accent': '#FFFFFF',
-      'accent-default': SIMPLE_COLOR_PRESETS.pink.primary,
-      'accent-hover': SIMPLE_COLOR_PRESETS.pink.tertiary,
+      'accent-default': SIMPLE_COLOR_PRESETS.pink.primary,    // P: 아이콘, 강조, 활성탭/버튼
+      'accent-hover': SIMPLE_COLOR_PRESETS.pink.tertiary,     // T: hover 상태
       'accent-active': SIMPLE_COLOR_PRESETS.pink.primary,
-      'accent-secondary': SIMPLE_COLOR_PRESETS.pink.tertiary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.pink.tertiary, // T: 보조
       'border-default': '#E5E7EB',
-      'border-emphasis': SIMPLE_COLOR_PRESETS.pink.tertiary,
+      'border-emphasis': SIMPLE_COLOR_PRESETS.pink.primary,   // P: 강조 테두리
       'border-muted': '#F3F4F6',
     },
     quick: {
@@ -78,21 +78,21 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     category: 'simple',
     tokens: {
       'bg-page': '#FFFFFF',
-      'bg-section': SIMPLE_COLOR_PRESETS.coral.secondary,
-      'bg-section-alt': '#FAFAFA',
-      'bg-card': SIMPLE_COLOR_PRESETS.coral.secondary,
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.coral.secondary,         // S: 카드/비활성탭 배경
       'bg-overlay': 'rgba(0, 0, 0, 0.4)',
       'fg-default': '#1A1A1A',
       'fg-muted': '#6B7280',
-      'fg-emphasis': SIMPLE_COLOR_PRESETS.coral.fgEmphasis,
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.coral.primary,       // P: 제목
       'fg-inverse': '#FFFFFF',
       'fg-on-accent': '#FFFFFF',
-      'accent-default': SIMPLE_COLOR_PRESETS.coral.primary,
-      'accent-hover': SIMPLE_COLOR_PRESETS.coral.tertiary,
+      'accent-default': SIMPLE_COLOR_PRESETS.coral.primary,    // P: 아이콘, 강조, 활성탭/버튼
+      'accent-hover': SIMPLE_COLOR_PRESETS.coral.tertiary,     // T: hover 상태
       'accent-active': SIMPLE_COLOR_PRESETS.coral.primary,
-      'accent-secondary': SIMPLE_COLOR_PRESETS.coral.tertiary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.coral.tertiary, // T: 보조
       'border-default': '#E5E7EB',
-      'border-emphasis': SIMPLE_COLOR_PRESETS.coral.tertiary,
+      'border-emphasis': SIMPLE_COLOR_PRESETS.coral.primary,   // P: 강조 테두리
       'border-muted': '#F3F4F6',
     },
     quick: {
@@ -111,21 +111,21 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     category: 'simple',
     tokens: {
       'bg-page': '#FFFFFF',
-      'bg-section': SIMPLE_COLOR_PRESETS.blue.secondary,
-      'bg-section-alt': '#FAFAFA',
-      'bg-card': SIMPLE_COLOR_PRESETS.blue.secondary,
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.blue.secondary,         // S: 카드/비활성탭 배경
       'bg-overlay': 'rgba(0, 0, 0, 0.4)',
       'fg-default': '#1A1A1A',
       'fg-muted': '#6B7280',
-      'fg-emphasis': SIMPLE_COLOR_PRESETS.blue.fgEmphasis,
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.blue.primary,       // P: 제목
       'fg-inverse': '#FFFFFF',
       'fg-on-accent': '#FFFFFF',
-      'accent-default': SIMPLE_COLOR_PRESETS.blue.primary,
-      'accent-hover': SIMPLE_COLOR_PRESETS.blue.tertiary,
+      'accent-default': SIMPLE_COLOR_PRESETS.blue.primary,    // P: 아이콘, 강조, 활성탭/버튼
+      'accent-hover': SIMPLE_COLOR_PRESETS.blue.tertiary,     // T: hover 상태
       'accent-active': SIMPLE_COLOR_PRESETS.blue.primary,
-      'accent-secondary': SIMPLE_COLOR_PRESETS.blue.tertiary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.blue.tertiary, // T: 보조
       'border-default': '#E5E7EB',
-      'border-emphasis': SIMPLE_COLOR_PRESETS.blue.tertiary,
+      'border-emphasis': SIMPLE_COLOR_PRESETS.blue.primary,   // P: 강조 테두리
       'border-muted': '#F3F4F6',
     },
     quick: {
