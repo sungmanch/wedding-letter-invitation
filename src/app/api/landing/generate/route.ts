@@ -112,8 +112,8 @@ export async function POST(request: NextRequest) {
 
     // 4. 템플릿 직접 적용 (AI Patch 없음!)
     console.log('[Template Application] Applying template:', selectedTemplateId)
-    const { style, blocks } = applyTemplateToDocument(selectedTemplateId, document)
-    await updateDocument(document.id, { style, blocks })
+    const { style, blocks, meta } = applyTemplateToDocument(selectedTemplateId, document)
+    await updateDocument(document.id, { style, blocks, meta })
 
     // 5. 로깅
     await db.insert(aiEditLogsV2).values({

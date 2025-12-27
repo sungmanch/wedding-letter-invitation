@@ -8,8 +8,10 @@
  */
 
 import { getTemplateById } from '../config/template-catalog'
+import { getTemplateV2ById, isTemplateV2Available } from '../config/template-catalog-v2'
 import type { TemplateMetadata } from '../schema/template-metadata'
-import type { EditorDocument, Block, StyleSystem, WeddingData } from '../schema/types'
+import type { EditorDocument, Block, StyleSystem, WeddingData, DocumentMeta } from '../schema/types'
+import { buildBlocksFromTemplate } from './template-block-builder'
 
 // ============================================
 // Main Application Function
@@ -25,14 +27,20 @@ import type { EditorDocument, Block, StyleSystem, WeddingData } from '../schema/
 export function applyTemplateToDocument(
   templateId: string,
   document: EditorDocument
-): { style: StyleSystem; blocks: Block[] } {
+): { style: StyleSystem; blocks: Block[]; meta: DocumentMeta } {
+  // ✅ v2 템플릿이 있으면 우선 사용
+  if (isTemplateV2Available(templateId)) {
+    return applyTemplateV2ToDocument(templateId, document)
+  }
+
+  // ✅ v1 템플릿 (기존 색상만 적용)
   const template = getTemplateById(templateId)
 
   if (!template) {
     throw new Error(`Template not found: ${templateId}`)
   }
 
-  console.log(`[Template Applier] 🎨 Applying template "${template.name}" (${templateId})`)
+  console.log(`[Template Applier] 🎨 Applying template v1 "${template.name}" (${templateId})`)
   console.log('[Template Applier] Template details:', {
     mood: template.mood.join(', '),
     colorTheme: template.designPattern.colorTheme,
@@ -63,9 +71,67 @@ export function applyTemplateToDocument(
     }
   })
 
+  // 3. ✅ 메타데이터 업데이트
+  const meta: DocumentMeta = {
+    ...document.meta,
+    templateId,
+    templateVersion: 1,
+  }
+
   console.log(`[Template Applier] ✅ Applied colors to ${blocks.length} blocks`)
 
-  return { style, blocks }
+  return { style, blocks, meta }
+}
+
+/**
+ * ✅ 템플릿 v2를 문서에 적용 (Block 구조 전체 교체)
+ *
+ * @param templateId 템플릿 ID (unique1~6)
+ * @param document 적용할 문서
+ * @returns 수정된 스타일 시스템과 블록들
+ */
+function applyTemplateV2ToDocument(
+  templateId: string,
+  document: EditorDocument
+): { style: StyleSystem; blocks: Block[]; meta: DocumentMeta } {
+  const template = getTemplateV2ById(templateId)
+
+  if (!template) {
+    throw new Error(`Template v2 not found: ${templateId}`)
+  }
+
+  console.log(`[Template Applier] 🎨 Applying template v2 "${template.name}" (${templateId})`)
+  console.log('[Template Applier] Template v2 details:', {
+    blockCount: template.blockStructure.length,
+    editableFields: Object.keys(template.editableFields).length,
+    colorTheme: template.designPattern.colorTheme,
+    stylePreset: template.designPattern.stylePreset,
+  })
+
+  // 1. 전역 스타일 시스템 생성
+  const style = buildStyleSystemFromTemplate(template, document.style)
+
+  console.log('[Template Applier] Style system created:', {
+    preset: style.preset,
+    dominantColor: style.quick?.dominantColor,
+    accentColor: style.quick?.accentColor,
+    mood: style.quick?.mood,
+  })
+
+  // 2. ✅ 템플릿 Block 구조로 전체 교체
+  const blocks = buildBlocksFromTemplate(template, document.data)
+
+  console.log(`[Template Applier] ✅ Built ${blocks.length} blocks from template v2`)
+  console.log('[Template Applier] Block types:', blocks.map((b) => b.type).join(', '))
+
+  // 3. ✅ 메타데이터 업데이트
+  const meta: DocumentMeta = {
+    ...document.meta,
+    templateId,
+    templateVersion: 2,
+  }
+
+  return { style, blocks, meta }
 }
 
 // ============================================

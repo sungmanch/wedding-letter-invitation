@@ -37,6 +37,12 @@ export interface DocumentMeta {
   title: string
   createdAt: string
   updatedAt: string
+
+  /** 적용된 템플릿 ID (unique1~6) */
+  templateId?: string
+
+  /** 템플릿 버전 (v1: 색상만, v2: Block 구조) */
+  templateVersion?: 1 | 2
 }
 
 // ============================================
