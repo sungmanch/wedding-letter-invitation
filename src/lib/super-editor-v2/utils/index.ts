@@ -44,3 +44,15 @@ export {
   BINDING_TO_ID,
   ID_TO_BINDING,
 } from './element-id'
+
+// Size Resolution (Auto Layout)
+export {
+  resolveBlockHeightNumber,
+  resolveBlockHeightStyle,
+  isAutoLayoutBlock,
+  hasAbsolutePosition,
+  getElementPosition,
+  resolveSizeMode,
+  isAutoLayoutElement,
+  getAutoLayoutElementStyle,
+} from './size-resolver'

@@ -43,6 +43,35 @@ export interface DocumentMeta {
 // 2. 블록 시스템
 // ============================================
 
+// ─── Auto Layout 크기 모드 ───
+export type SizeMode =
+  | { type: 'fixed'; value: number; unit?: 'px' | 'vh' | 'vw' | '%' }
+  | { type: 'hug' }                         // fit-content
+  | { type: 'fill' }                        // 100% + flex: 1
+  | { type: 'fill-portion'; value: number } // flex 비율
+
+// ─── 블록 레이아웃 설정 ───
+export interface BlockLayout {
+  mode: 'absolute' | 'auto'  // 기본: 'absolute'
+
+  // Auto 모드 전용
+  direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
+  gap?: number              // px, 자식 간 간격
+  padding?: {
+    top?: number
+    right?: number
+    bottom?: number
+    left?: number
+  }
+
+  // 정렬
+  alignItems?: 'start' | 'center' | 'end' | 'stretch'
+  justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+
+  // 래핑 (horizontal일 때)
+  wrap?: boolean
+}
+
 export interface Block {
   id: string
 
@@ -55,8 +84,11 @@ export interface Block {
   // 블록 활성화 여부
   enabled: boolean
 
-  // 블록 높이 (vh 단위)
-  height: number
+  // ─── 레이아웃 설정 (신규) ───
+  layout?: BlockLayout
+
+  // 블록 높이 (vh 단위 또는 SizeMode)
+  height: number | SizeMode
 
   // 요소들 (변수 바인딩 포함)
   elements: Element[]
@@ -92,16 +124,40 @@ export type BlockType =
 // 3. 요소 시스템 (Element)
 // ============================================
 
+// ─── 요소 크기 제약 ───
+export interface ElementConstraints {
+  minWidth?: number   // px
+  maxWidth?: number   // px
+  minHeight?: number  // px
+  maxHeight?: number  // px
+}
+
+// ─── 요소 크기 설정 ───
+export interface ElementSizing {
+  width?: SizeMode   // 기본: { type: 'fill' }
+  height?: SizeMode  // 기본: { type: 'hug' }
+}
+
 export interface Element {
   id: string
   type: ElementType
 
-  // 위치/크기 (vw/vh 기준, 뷰포트 상대 좌표)
-  x: number       // vw
-  y: number       // vh (블록 내 상대 위치)
-  width: number   // vw
-  height: number  // vh
+  // ─── 레이아웃 모드 선택 ───
+  layoutMode?: 'absolute' | 'auto'  // 기본: 'absolute' (하위 호환)
+
+  // ─── Absolute 모드 (기존) ───
+  x?: number       // vw (absolute 모드에서 사용)
+  y?: number       // vh (블록 내 상대 위치)
+  width?: number   // vw (absolute 모드 또는 고정 너비)
+  height?: number  // vh (absolute 모드 또는 고정 높이)
   rotation?: number // degrees (기본값: 0)
+
+  // ─── Auto Layout 모드 (신규) ───
+  sizing?: ElementSizing
+  constraints?: ElementConstraints
+
+  // 부모 Auto Layout 내에서 자기 정렬
+  alignSelf?: 'start' | 'center' | 'end' | 'stretch'
 
   // z-index
   zIndex: number

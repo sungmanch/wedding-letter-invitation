@@ -16,6 +16,7 @@ import type {
 import type { ResolvedTokens } from '../renderer/style-resolver'
 import { useDocument } from './document-context'
 import { useBlockVisibility } from './animation-context'
+import { resolveBlockHeightNumber } from '../utils/size-resolver'
 
 // ============================================
 // Types
@@ -176,7 +177,7 @@ export function BlockProvider({
     getElement,
     tokens,
     animation: block.animation,
-    height: block.height,
+    height: resolveBlockHeightNumber(block.height),
     onSelectElement,
     onUpdateElement,
   }), [

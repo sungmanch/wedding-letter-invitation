@@ -27,6 +27,7 @@ import { useDocument } from '../context/document-context'
 import { useBlock } from '../context/block-context'
 import { resolveBinding } from '../utils/binding-resolver'
 import { interpolate } from '../utils/interpolate'
+import { getElementPosition } from '../utils/size-resolver'
 
 // Element Components
 import { TextElement } from '../components/elements/text-element'
@@ -83,16 +84,19 @@ export function ElementRenderer({
     // 블록 높이를 px로 계산
     const blockHeightPx = (blockHeight / 100) * viewport.height
 
+    // 요소 위치/크기 가져오기 (optional 필드 처리)
+    const pos = getElementPosition(element)
+
     // width/height: 루트 필드 우선, 없으면 style.size에서 가져옴
-    const elemWidth = element.width ?? element.style?.size?.width ?? 0
-    const elemHeight = element.height ?? element.style?.size?.height ?? 0
+    const elemWidth = pos.width ?? element.style?.size?.width ?? 0
+    const elemHeight = pos.height ?? element.style?.size?.height ?? 0
 
     // x, width는 viewport.width 기준 (가로는 블록과 동일)
-    const leftPx = (element.x / 100) * viewport.width
+    const leftPx = (pos.x / 100) * viewport.width
     const widthPx = (elemWidth / 100) * viewport.width
 
     // y, height는 블록 높이 기준 (블록 내 상대 위치)
-    const topPx = (element.y / 100) * blockHeightPx
+    const topPx = (pos.y / 100) * blockHeightPx
     const heightPx = (elemHeight / 100) * blockHeightPx
 
     const style: CSSProperties = {
@@ -198,6 +202,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           stroke={(props as ShapeProps).stroke}
           strokeWidth={(props as ShapeProps).strokeWidth}
           svgPath={(props as ShapeProps).svgPath}
+          svgViewBox={(props as ShapeProps).svgViewBox}
           style={element.style}
         />
       )
@@ -247,6 +252,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           value={value}
           showDday={(props as CalendarProps).showDday}
           highlightColor={(props as CalendarProps).highlightColor}
+          markerType={(props as CalendarProps).markerType}
           style={element.style}
         />
       )

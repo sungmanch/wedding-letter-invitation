@@ -12,6 +12,7 @@ import type { Block, BlockType, BlockStyleOverride, GradientValue } from '../sch
 import { BlockProvider, useBlockTokens } from '../context/block-context'
 import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
+import { resolveBlockHeightNumber } from '../utils/size-resolver'
 
 // ============================================
 // Types
@@ -85,7 +86,8 @@ function BlockContainer({
   // 블록 스타일 계산 (viewport.height 기반으로 높이 계산)
   const blockStyle = useMemo<CSSProperties>(() => {
     // vh 대신 viewport.height를 기준으로 계산
-    const heightInPx = (block.height / 100) * viewport.height
+    const heightVh = resolveBlockHeightNumber(block.height)
+    const heightInPx = (heightVh / 100) * viewport.height
 
     const style: CSSProperties = {
       position: 'relative',
