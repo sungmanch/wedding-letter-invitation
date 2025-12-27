@@ -13,6 +13,8 @@ import {
 import { BLOCK_TYPE_LABELS, aiEditLogsV2, editorSnapshotsV2 } from '@/lib/super-editor-v2/schema'
 import { matchBestTemplate, selectFallbackTemplate } from '@/lib/super-editor-v2/services/template-matcher'
 import { applyTemplateToDocument } from '@/lib/super-editor-v2/services/template-applier'
+import { getTemplateById } from '@/lib/super-editor-v2/config/template-catalog'
+import type { TemplateMetadata } from '@/lib/super-editor-v2/schema/template-metadata'
 
 // ============================================
 // Types
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
     console.log('[Landing Generate] Prompt:', body.prompt)
     console.log('[Landing Generate] Reference:', body.referenceAnalysis ? 'Yes' : 'No')
 
-    // 2. 템플릿 매칭 (레퍼런스가 있을 때)
+    // 2. 템플릿 매칭 (레퍼런스가 있을 때) → 템플릿 가이드 AI 생성
     if (body.referenceAnalysis) {
       console.log('[Template Matching] Starting template matching...')
 
@@ -95,27 +97,145 @@ export async function POST(request: NextRequest) {
           },
         })
 
-        // 템플릿 적용
-        const { style, blocks } = applyTemplateToDocument(matchResult.templateId, document)
+        // 🎨 NEW: 템플릿을 AI guide로 사용
+        const template = getTemplateById(matchResult.templateId)
 
-        // 문서 업데이트
-        await updateDocument(document.id, { style, blocks })
+        if (!template) {
+          return NextResponse.json(
+            { success: false, error: 'Template not found' },
+            { status: 500 }
+          )
+        }
 
-        console.log('[Template Match] Template applied successfully')
+        const context = await getDocumentContextForAI(document.id)
+        if (!context) {
+          return NextResponse.json(
+            { success: false, error: 'Failed to get document context' },
+            { status: 500 }
+          )
+        }
+
+        // 템플릿 가이드 시스템 프롬프트 생성
+        const systemPrompt = buildTemplateGuidedSystemPrompt(context, template)
+        const userPrompt = buildLandingUserPrompt(body.prompt)
+
+        // AI 호출 (템플릿 컨텍스트 포함)
+        const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
+
+        if (!aiResponse.success || !aiResponse.patches) {
+          // AI 실패 시 fallback: 템플릿 직접 적용
+          console.warn('[Template-Guided AI] AI failed, using direct template application')
+          const { style, blocks } = applyTemplateToDocument(matchResult.templateId, document)
+          await updateDocument(document.id, { style, blocks })
+
+          return NextResponse.json({
+            success: true,
+            documentId: document.id,
+            templateApplied: matchResult.templateId,
+            matchScore: matchResult.score,
+            aiApplied: false,
+            explanation: `템플릿을 직접 적용했습니다 (AI 실패)`,
+          })
+        }
+
+        // 패치 적용
+        const result = await applyAIEdit(
+          document.id,
+          aiResponse.patches,
+          body.prompt,
+          aiResponse.explanation || 'AI 디자인 적용'
+        )
+
+        // 스냅샷 ID 조회
+        const latestSnapshot = await db.query.editorSnapshotsV2.findFirst({
+          where: and(
+            eq(editorSnapshotsV2.documentId, document.id),
+            eq(editorSnapshotsV2.type, 'ai-edit')
+          ),
+          orderBy: [desc(editorSnapshotsV2.snapshotNumber)],
+          columns: { id: true },
+        })
+
+        // AI 사용 내역 로깅
+        await db.insert(aiEditLogsV2).values({
+          documentId: document.id,
+          userId: user.id,
+          prompt: `[Template-Guided: ${template.name}] ${body.prompt}`,
+          targetBlockId: null,
+          context: null,
+          patches: aiResponse.patches,
+          explanation: aiResponse.explanation ?? null,
+          success: result.success,
+          errorMessage: result.error ?? null,
+          snapshotId: latestSnapshot?.id ?? null,
+        })
 
         return NextResponse.json({
           success: true,
           documentId: document.id,
           templateApplied: matchResult.templateId,
           matchScore: matchResult.score,
-          aiApplied: false,
-          explanation: `레퍼런스 이미지와 ${Math.round(matchResult.score * 100)}% 유사한 템플릿을 적용했습니다.`,
+          aiApplied: true,  // ✅ AI 사용됨 (템플릿 가이드)
+          explanation: aiResponse.explanation,
         })
       } else {
-        // Fallback: 점수가 너무 낮음
+        // Fallback: 점수가 너무 낮음 → AI 가이드 방식 사용
         const fallbackTemplateId = selectFallbackTemplate(body.referenceAnalysis)
-        console.log('[Template Match] ⚠️  No good match, using fallback:', fallbackTemplateId)
+        console.log('[Template Match] ⚠️  No good match, using fallback + AI:', fallbackTemplateId)
 
+        const template = getTemplateById(fallbackTemplateId)
+        if (template) {
+          const context = await getDocumentContextForAI(document.id)
+          if (context) {
+            const systemPrompt = buildTemplateGuidedSystemPrompt(context, template)
+            const userPrompt = buildLandingUserPrompt(body.prompt)
+            const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
+
+            if (aiResponse.success && aiResponse.patches) {
+              const result = await applyAIEdit(
+                document.id,
+                aiResponse.patches,
+                body.prompt,
+                aiResponse.explanation || ''
+              )
+
+              // 스냅샷 ID 조회
+              const latestSnapshot = await db.query.editorSnapshotsV2.findFirst({
+                where: and(
+                  eq(editorSnapshotsV2.documentId, document.id),
+                  eq(editorSnapshotsV2.type, 'ai-edit')
+                ),
+                orderBy: [desc(editorSnapshotsV2.snapshotNumber)],
+                columns: { id: true },
+              })
+
+              // AI 로깅
+              await db.insert(aiEditLogsV2).values({
+                documentId: document.id,
+                userId: user.id,
+                prompt: `[Template-Guided Fallback: ${template.name}] ${body.prompt}`,
+                targetBlockId: null,
+                context: null,
+                patches: aiResponse.patches,
+                explanation: aiResponse.explanation ?? null,
+                success: result.success,
+                errorMessage: result.error ?? null,
+                snapshotId: latestSnapshot?.id ?? null,
+              })
+
+              return NextResponse.json({
+                success: true,
+                documentId: document.id,
+                templateApplied: fallbackTemplateId,
+                matchScore: 0,
+                aiApplied: true,
+                explanation: aiResponse.explanation,
+              })
+            }
+          }
+        }
+
+        // Double fallback: 템플릿 직접 적용
         const { style, blocks } = applyTemplateToDocument(fallbackTemplateId, document)
         await updateDocument(document.id, { style, blocks })
 
@@ -307,6 +427,97 @@ function buildLandingUserPrompt(prompt: string): string {
 
 위 느낌을 가진 청첩장으로 디자인해주세요.
 사용자의 의도를 잘 해석하여 전체적인 스타일을 적용해주세요.`
+}
+
+/**
+ * 템플릿 메타데이터를 AI에게 design guide로 전달하는 시스템 프롬프트 생성
+ */
+function buildTemplateGuidedSystemPrompt(
+  context: Awaited<ReturnType<typeof getDocumentContextForAI>>,
+  template: TemplateMetadata
+): string {
+  if (!context) return ''
+
+  const { designPattern } = template
+  const blockLabels = Object.entries(BLOCK_TYPE_LABELS)
+    .map(([type, label]) => `${type}: ${label}`)
+    .join(', ')
+
+  return `당신은 청첩장 디자인 AI 어시스턴트입니다.
+사용자의 요청과 선택된 템플릿을 바탕으로 아름다운 청첩장을 디자인합니다.
+
+## 선택된 템플릿: ${template.name} (${template.id})
+
+### 템플릿 분위기
+${template.mood.join(', ')} - ${template.summary}
+
+### 색상 시스템 (반드시 이 팔레트 사용)
+**Primary Colors** (메인 텍스트, 강조 요소):
+- ${designPattern.colorPalette.primary[0]} (다크)
+- ${designPattern.colorPalette.primary[1]} (미드톤)
+- ${designPattern.colorPalette.primary[2]} (하이라이트)
+
+**Secondary Colors** (배경, 카드 surface):
+- ${designPattern.colorPalette.secondary[0]} (가장 밝음)
+- ${designPattern.colorPalette.secondary[1]} (중간 밝기)
+- ${designPattern.colorPalette.secondary[2]} (약간 어두움)
+
+**Tertiary Colors** (강조색, 버튼, 링크):
+- ${designPattern.colorPalette.tertiary[0]} (주 강조)
+- ${designPattern.colorPalette.tertiary[1]} (보조 강조)
+- ${designPattern.colorPalette.tertiary[2]} (divider, border)
+
+### 타이포그래피 가이드
+- 스타일: ${template.typography}
+- 레이아웃 특성: ${template.layout}
+
+### 디자인 원칙
+1. **일관성**: 모든 블록이 위 컬러 팔레트를 사용해야 합니다
+2. **계층**: Primary(텍스트) > Secondary(배경) > Tertiary(강조)
+3. **분위기**: ${template.mood.join(', ')} 느낌을 유지하세요
+4. **전체 적용**: intro뿐만 아니라 greeting, gallery, venue 등 모든 섹션에 일관되게 적용
+
+## 블록 타입
+${blockLabels}
+
+## 현재 문서 상태
+### 블록 목록
+${context.blockSummary}
+
+### 스타일 설정
+- 프리셋: ${context.style?.preset || 'custom'}
+
+## 출력 형식
+반드시 다음 JSON 형식으로만 응답하세요:
+
+\`\`\`json
+{
+  "analysis": {
+    "templateUsed": "${template.id}",
+    "colorStrategy": "위 Primary/Secondary/Tertiary 팔레트 적용 방식 설명",
+    "moodInterpretation": "템플릿 분위기를 어떻게 반영했는지"
+  },
+  "patches": [
+    { "op": "replace", "path": "/style/preset", "value": "${designPattern.stylePreset || 'custom'}" },
+    { "op": "replace", "path": "/blocks/0/style/background/color", "value": "${designPattern.colorPalette.secondary[0]}" },
+    { "op": "replace", "path": "/blocks/0/elements/0/style/text/color", "value": "${designPattern.colorPalette.primary[0]}" }
+  ],
+  "explanation": "사용자에게 보여줄 변경 설명 (한국어, 친근하게)"
+}
+\`\`\`
+
+## 주요 수정 대상
+1. /style/preset - ${designPattern.stylePreset || 'custom'}
+2. /blocks/{index}/style/background/color - Secondary 팔레트 사용
+3. /blocks/{index}/elements/{index}/style/text/color - Primary 팔레트 사용
+4. /blocks/{index}/elements/{index}/style/text/fontSize - 템플릿 분위기에 맞게
+5. 버튼/강조 요소 - Tertiary 팔레트 사용
+
+## 주의사항
+- 템플릿 색상을 정확히 따르세요 (HEX 코드 그대로 사용)
+- 모든 블록에 일관된 색상 시스템을 적용하세요
+- 첫 인상이 중요합니다 - intro 블록(인덱스 0)에 특히 신경 쓰세요
+`
 }
 
 // ============================================
