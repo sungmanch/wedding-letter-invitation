@@ -56,7 +56,7 @@ export function ShapeElement({
     >
       <ShapeRenderer
         shape={shape}
-        fill={fill}
+        fill={style?.background || fill}
         stroke={stroke}
         strokeWidth={strokeWidth}
         svgPath={svgPath}

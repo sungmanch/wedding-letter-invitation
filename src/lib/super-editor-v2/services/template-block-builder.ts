@@ -107,16 +107,16 @@ function applyTemplateColorsToElementStyle(
   const textStyle: any = {}
   if (style.fontFamily) textStyle.fontFamily = style.fontFamily
   if (style.fontSize) {
-    // rem/px 문자열을 숫자로 변환
+    // rem/px 문자열을 px 문자열로 변환
     if (typeof style.fontSize === 'string') {
       const match = style.fontSize.match(/([\d.]+)(rem|px)?/)
       if (match) {
         const value = parseFloat(match[1])
         const unit = match[2]
-        textStyle.fontSize = unit === 'rem' ? value * 16 : value
+        textStyle.fontSize = unit === 'rem' ? `${value * 16}px` : `${value}px`
       }
     } else {
-      textStyle.fontSize = style.fontSize
+      textStyle.fontSize = `${style.fontSize}px`
     }
   }
   if (style.fontWeight) textStyle.fontWeight = style.fontWeight
@@ -124,14 +124,14 @@ function applyTemplateColorsToElementStyle(
   if (style.textAlign) textStyle.textAlign = style.textAlign
   if (style.lineHeight) textStyle.lineHeight = style.lineHeight
   if (style.letterSpacing) {
-    // em 문자열을 숫자로 변환
+    // em 문자열 유지 (CSS에서 em 단위 필요)
     if (typeof style.letterSpacing === 'string') {
       const match = style.letterSpacing.match(/([\d.]+)em/)
       if (match) {
-        textStyle.letterSpacing = parseFloat(match[1])
+        textStyle.letterSpacing = `${parseFloat(match[1])}em`
       }
     } else {
-      textStyle.letterSpacing = style.letterSpacing
+      textStyle.letterSpacing = `${style.letterSpacing}em`
     }
   }
 
