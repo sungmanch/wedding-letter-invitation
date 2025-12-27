@@ -176,9 +176,12 @@ export interface Element {
 
   // 요소별 애니메이션
   animation?: ElementAnimationConfig
+
+  // ─── Group 요소 전용 ───
+  children?: Element[]  // type: 'group'일 때 자식 요소들
 }
 
-export type ElementType = 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar'
+export type ElementType = 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar' | 'group'
 
 export type ElementProps =
   | TextProps
@@ -189,6 +192,7 @@ export type ElementProps =
   | DividerProps
   | MapProps
   | CalendarProps
+  | GroupProps
 
 export interface TextProps {
   type: 'text'
@@ -242,6 +246,18 @@ export interface CalendarProps {
   showDday?: boolean
   highlightColor?: string
   markerType?: 'circle' | 'heart'  // 날짜 선택 마커 타입
+}
+
+export interface GroupProps {
+  type: 'group'
+  // 그룹 내부 레이아웃 설정
+  layout?: {
+    direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
+    gap?: number                            // px
+    alignItems?: 'start' | 'center' | 'end' | 'stretch'
+    justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+    reverse?: boolean                       // flex-direction: row-reverse / column-reverse
+  }
 }
 
 // ============================================
@@ -331,25 +347,22 @@ export interface StyleSystem {
 }
 
 export type ThemePresetId =
+  // 1컬러 시스템 (디자이너 컬러셋)
+  | 'simple-pink'
+  | 'simple-coral'
+  | 'simple-blue'
   // 기본
   | 'minimal-light'
-  | 'minimal-dark'
   // 클래식
   | 'classic-ivory'
   | 'classic-gold'
   // 모던
   | 'modern-mono'
-  | 'modern-contrast'
   // 로맨틱
   | 'romantic-blush'
   | 'romantic-garden'
-  // 시네마틱
-  | 'cinematic-dark'
-  | 'cinematic-warm'
   // 특수
   | 'photo-adaptive'
-  | 'duotone'
-  | 'gradient-hero'
 
 export interface QuickStyleConfig {
   // 색상 조정
