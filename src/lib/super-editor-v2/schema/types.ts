@@ -152,6 +152,7 @@ export interface ShapeProps {
   stroke?: string
   strokeWidth?: number
   svgPath?: string  // custom shape용
+  svgViewBox?: string  // custom shape viewBox (예: "0 0 50 50")
 }
 
 export interface ButtonProps {
@@ -184,6 +185,7 @@ export interface CalendarProps {
   type: 'calendar'
   showDday?: boolean
   highlightColor?: string
+  markerType?: 'circle' | 'heart'  // 날짜 선택 마커 타입
 }
 
 // ============================================
@@ -430,6 +432,7 @@ export type TypographyPresetId =
   | 'natural-handwritten'
   | 'natural-brush'
   | 'natural-warm'
+  | 'natural-witty'
 
 export interface TypeScale {
   xs: string

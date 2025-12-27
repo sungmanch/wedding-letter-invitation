@@ -159,6 +159,11 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: ['Nanum Pen Script:400'],
   },
+  bujangnimNunchi: {
+    family: ['BujangnimNunchi', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: [], // CDN @font-face
+  },
 } as const
 
 // ============================================
@@ -425,6 +430,24 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     },
     scale: DEFAULT_SCALE,
     recommendedThemes: ['romantic-garden', 'classic-ivory'],
+  },
+
+  'natural-witty': {
+    id: 'natural-witty',
+    name: 'Natural Witty',
+    nameKo: '내추럴 위티',
+    description: '부장님눈치체의 재치있고 캐주얼한 손글씨 스타일',
+    category: 'natural',
+    fontStacks: {
+      heading: FONT_STACKS.bujangnimNunchi,
+      body: FONT_STACKS.bujangnimNunchi,
+    },
+    weights: {
+      heading: 400,
+      body: 400,
+    },
+    scale: COMPACT_SCALE,
+    recommendedThemes: ['romantic-garden', 'minimal-light'],
   },
 }
 
