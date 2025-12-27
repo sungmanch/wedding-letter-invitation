@@ -118,7 +118,7 @@ const FONT_STACKS = {
   nanumMyeongjo: {
     family: ['Nanum Myeongjo', 'Batang', 'serif'],
     fallback: 'serif',
-    googleFonts: ['Nanum Myeongjo:400,700'],
+    googleFonts: ['Nanum Myeongjo:400,700,800'],
   },
   gowunBatang: {
     family: ['Gowun Batang', 'Batang', 'serif'],
