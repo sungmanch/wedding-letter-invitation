@@ -731,12 +731,516 @@ export const UNIQUE1_TEMPLATE_V2: TemplateV2 = {
   editableFields: UNIQUE1_EDITABLE_FIELDS,
 }
 
+// ============================================
+// UNIQUE2: 캐주얼 플레이풀
+// ============================================
+
 /**
- * 템플릿 v2 카탈로그
- * - 현재는 unique1만 구현
- * - 향후 unique2~6 추가 예정
+ * Unique2 템플릿의 블록 구조
+ *
+ * 디자인 분석 (unique2.png):
+ * - 상단: "The Wedding Day" (스크립트 폰트)
+ * - 중앙: 메인 사진 (세로 카드)
+ * - 하단: 이름 "Sanghoon · Najin" (스크립트)
+ * - 최하단: "2026.09.23 Save The Date"
  */
-export const TEMPLATE_CATALOG_V2: TemplateV2[] = [UNIQUE1_TEMPLATE_V2]
+const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
+  {
+    type: 'hero',
+    enabled: true,
+    height: 100,
+    elements: [
+      // 배경
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      // "The Wedding Day" 제목
+      {
+        type: 'text',
+        x: 0,
+        y: 5,
+        width: 100,
+        height: 10,
+        zIndex: 2,
+        value: 'The Wedding Day',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2.5rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      // 메인 사진
+      {
+        type: 'image',
+        x: 15,
+        y: 18,
+        width: 70,
+        height: 50,
+        zIndex: 1,
+        binding: 'photos.main',
+        props: { type: 'image', objectFit: 'cover' },
+        style: { borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' },
+      },
+      // 신랑·신부 이름
+      {
+        type: 'text',
+        x: 0,
+        y: 72,
+        width: 100,
+        height: 8,
+        zIndex: 2,
+        props: { type: 'text', format: '{couple.groom.name} · {couple.bride.name}' },
+        binding: 'couple.groom.name',
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      // Save The Date
+      {
+        type: 'text',
+        x: 0,
+        y: 85,
+        width: 100,
+        height: 6,
+        zIndex: 2,
+        binding: 'wedding.date',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '0.9rem',
+          fontWeight: 400,
+          color: '#8B7355',
+          textAlign: 'center',
+          letterSpacing: '0.15em',
+        },
+      },
+    ],
+  },
+]
+
+const UNIQUE2_EDITABLE_FIELDS: EditableFieldMap = {
+  mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '메인 사진' },
+  groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
+  brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
+  weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
+}
+
+export const UNIQUE2_TEMPLATE_V2: TemplateV2 = {
+  ...(getTemplateById('unique2')!),
+  blockStructure: UNIQUE2_BLOCK_STRUCTURE,
+  editableFields: UNIQUE2_EDITABLE_FIELDS,
+}
+
+// ============================================
+// UNIQUE3: 미니멀 모던
+// ============================================
+
+const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
+  {
+    type: 'hero',
+    enabled: true,
+    height: 100,
+    elements: [
+      // 배경 이미지 (전체)
+      {
+        type: 'image',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        binding: 'photos.main',
+        props: { type: 'image', objectFit: 'cover' },
+        style: {},
+      },
+      // 텍스트 카드 오버레이
+      {
+        type: 'shape',
+        x: 10,
+        y: 35,
+        width: 80,
+        height: 25,
+        zIndex: 1,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF', opacity: 0.95, borderRadius: '12px' },
+      },
+      // "We're getting married"
+      {
+        type: 'text',
+        x: 15,
+        y: 40,
+        width: 70,
+        height: 8,
+        zIndex: 2,
+        value: "We're getting married",
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.1rem',
+          fontWeight: 500,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      // 날짜
+      {
+        type: 'text',
+        x: 15,
+        y: 50,
+        width: 70,
+        height: 6,
+        zIndex: 2,
+        binding: 'wedding.dateDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.95rem',
+          fontWeight: 400,
+          color: '#4A4A4A',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+]
+
+const UNIQUE3_EDITABLE_FIELDS: EditableFieldMap = {
+  mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
+  weddingDate: { blockType: 'hero', binding: 'wedding.dateDisplay', label: '예식 날짜' },
+}
+
+export const UNIQUE3_TEMPLATE_V2: TemplateV2 = {
+  ...(getTemplateById('unique3')!),
+  blockStructure: UNIQUE3_BLOCK_STRUCTURE,
+  editableFields: UNIQUE3_EDITABLE_FIELDS,
+}
+
+// ============================================
+// UNIQUE4: 다크 로맨틱
+// ============================================
+
+const UNIQUE4_BLOCK_STRUCTURE: BlockTemplate[] = [
+  {
+    type: 'hero',
+    enabled: true,
+    height: 100,
+    elements: [
+      // 배경 이미지
+      {
+        type: 'image',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        binding: 'photos.main',
+        props: { type: 'image', objectFit: 'cover', overlay: 'rgba(0,0,0,0.4)' },
+        style: {},
+      },
+      // 신랑 이름 (좌측 상단)
+      {
+        type: 'text',
+        x: 10,
+        y: 10,
+        width: 35,
+        height: 8,
+        zIndex: 2,
+        binding: 'couple.groom.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.1rem',
+          fontWeight: 400,
+          color: '#FFFFFF',
+          textAlign: 'left',
+        },
+      },
+      // 신부 이름 (우측 상단)
+      {
+        type: 'text',
+        x: 55,
+        y: 10,
+        width: 35,
+        height: 8,
+        zIndex: 2,
+        binding: 'couple.bride.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.1rem',
+          fontWeight: 400,
+          color: '#FFFFFF',
+          textAlign: 'right',
+        },
+      },
+      // "The Wedding Day"
+      {
+        type: 'text',
+        x: 0,
+        y: 55,
+        width: 100,
+        height: 15,
+        zIndex: 2,
+        value: 'The\nWedding\nDay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '3.5rem',
+          fontWeight: 400,
+          color: '#FFB6C1',
+          textAlign: 'center',
+          lineHeight: 1.1,
+        },
+      },
+      // 날짜
+      {
+        type: 'text',
+        x: 0,
+        y: 85,
+        width: 100,
+        height: 8,
+        zIndex: 2,
+        binding: 'wedding.date',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.5rem',
+          fontWeight: 300,
+          color: '#FFB6C1',
+          textAlign: 'center',
+          letterSpacing: '0.1em',
+        },
+      },
+    ],
+  },
+]
+
+const UNIQUE4_EDITABLE_FIELDS: EditableFieldMap = {
+  mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
+  groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
+  brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
+  weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
+}
+
+export const UNIQUE4_TEMPLATE_V2: TemplateV2 = {
+  ...(getTemplateById('unique4')!),
+  blockStructure: UNIQUE4_BLOCK_STRUCTURE,
+  editableFields: UNIQUE4_EDITABLE_FIELDS,
+}
+
+// ============================================
+// UNIQUE5: 브라이트 캐주얼
+// ============================================
+
+const UNIQUE5_BLOCK_STRUCTURE: BlockTemplate[] = [
+  {
+    type: 'hero',
+    enabled: true,
+    height: 100,
+    elements: [
+      // 배경 이미지
+      {
+        type: 'image',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        binding: 'photos.main',
+        props: { type: 'image', objectFit: 'cover', overlay: 'rgba(255,255,255,0.2)' },
+        style: {},
+      },
+      // "05" 큰 숫자
+      {
+        type: 'text',
+        x: 0,
+        y: 15,
+        width: 100,
+        height: 20,
+        zIndex: 2,
+        value: '05',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Bangers', cursive",
+          fontSize: '8rem',
+          fontWeight: 400,
+          color: '#FFFFFF',
+          textAlign: 'center',
+          lineHeight: 1,
+        },
+      },
+      // "We are getting married"
+      {
+        type: 'text',
+        x: 0,
+        y: 40,
+        width: 100,
+        height: 15,
+        zIndex: 2,
+        value: 'We are\ngetting\nmarried',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '3rem',
+          fontWeight: 400,
+          color: '#4169E1',
+          textAlign: 'center',
+          lineHeight: 1.2,
+        },
+      },
+      // 이름
+      {
+        type: 'text',
+        x: 0,
+        y: 75,
+        width: 100,
+        height: 8,
+        zIndex: 2,
+        props: { type: 'text', format: '{couple.groom.name} & {couple.bride.name}' },
+        binding: 'couple.groom.name',
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.2rem',
+          fontWeight: 500,
+          color: '#FFFFFF',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+]
+
+const UNIQUE5_EDITABLE_FIELDS: EditableFieldMap = {
+  mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
+  groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
+  brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
+}
+
+export const UNIQUE5_TEMPLATE_V2: TemplateV2 = {
+  ...(getTemplateById('unique5')!),
+  blockStructure: UNIQUE5_BLOCK_STRUCTURE,
+  editableFields: UNIQUE5_EDITABLE_FIELDS,
+}
+
+// ============================================
+// UNIQUE6: 모노크롬 볼드
+// ============================================
+
+const UNIQUE6_BLOCK_STRUCTURE: BlockTemplate[] = [
+  {
+    type: 'hero',
+    enabled: true,
+    height: 100,
+    elements: [
+      // 배경 이미지 (흑백 필터)
+      {
+        type: 'image',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        binding: 'photos.main',
+        props: { type: 'image', objectFit: 'cover' },
+        style: { filter: 'grayscale(100%)' },
+      },
+      // 이름 (상단)
+      {
+        type: 'text',
+        x: 0,
+        y: 15,
+        width: 100,
+        height: 10,
+        zIndex: 2,
+        props: { type: 'text', format: '{couple.groom.name} ♥ {couple.bride.name}' },
+        binding: 'couple.groom.name',
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.3rem',
+          fontWeight: 500,
+          color: '#FF69B4',
+          textAlign: 'center',
+        },
+      },
+      // "The Wedding Day"
+      {
+        type: 'text',
+        x: 0,
+        y: 50,
+        width: 100,
+        height: 18,
+        zIndex: 2,
+        value: 'The\nWedding\nDay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Calistoga', cursive",
+          fontSize: '3.5rem',
+          fontWeight: 400,
+          color: '#FF69B4',
+          textAlign: 'center',
+          lineHeight: 1.1,
+        },
+      },
+      // 날짜
+      {
+        type: 'text',
+        x: 0,
+        y: 82,
+        width: 100,
+        height: 8,
+        zIndex: 2,
+        binding: 'wedding.date',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.5rem',
+          fontWeight: 500,
+          color: '#FFFFFF',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+]
+
+const UNIQUE6_EDITABLE_FIELDS: EditableFieldMap = {
+  mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
+  groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
+  brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
+  weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
+}
+
+export const UNIQUE6_TEMPLATE_V2: TemplateV2 = {
+  ...(getTemplateById('unique6')!),
+  blockStructure: UNIQUE6_BLOCK_STRUCTURE,
+  editableFields: UNIQUE6_EDITABLE_FIELDS,
+}
+
+/**
+ * 템플릿 v2 카탈로그 (전체 6개)
+ */
+export const TEMPLATE_CATALOG_V2: TemplateV2[] = [
+  UNIQUE1_TEMPLATE_V2,
+  UNIQUE2_TEMPLATE_V2,
+  UNIQUE3_TEMPLATE_V2,
+  UNIQUE4_TEMPLATE_V2,
+  UNIQUE5_TEMPLATE_V2,
+  UNIQUE6_TEMPLATE_V2,
+]
 
 /**
  * 템플릿 ID로 v2 템플릿 조회
