@@ -49,8 +49,8 @@ export function EditModeToggle({
   return (
     <div
       className={`
-        inline-flex items-center rounded-lg border border-white/10 overflow-hidden
-        bg-[#1A1A1A]
+        inline-flex items-center rounded-lg border border-[var(--sand-100)] overflow-hidden
+        bg-white
         ${disabled ? 'opacity-50 pointer-events-none' : ''}
         ${className}
       `}
@@ -110,8 +110,8 @@ function ModeButton({
         flex items-center gap-1.5 transition-colors
         ${size}
         ${active
-          ? 'bg-[#C9A962] text-[#0A0806] font-medium'
-          : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
+          ? 'bg-[var(--sage-500)] text-white font-medium'
+          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)]'
         }
       `}
     >
@@ -142,7 +142,7 @@ export function CompactModeToggle({
     <div
       className={`
         inline-flex items-center gap-1 p-1 rounded-lg
-        bg-[#2A2A2A] border border-white/10
+        bg-[var(--sand-100)] border border-[var(--sand-200)]
         ${disabled ? 'opacity-50 pointer-events-none' : ''}
         ${className}
       `}
@@ -155,8 +155,8 @@ export function CompactModeToggle({
         className={`
           p-1.5 rounded transition-colors
           ${mode === 'form'
-            ? 'bg-[#C9A962] text-[#0A0806]'
-            : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/10'
+            ? 'bg-[var(--sage-500)] text-white'
+            : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-100)]'
           }
         `}
       >
@@ -170,8 +170,8 @@ export function CompactModeToggle({
         className={`
           p-1.5 rounded transition-colors
           ${mode === 'direct'
-            ? 'bg-[#C9A962] text-[#0A0806]'
-            : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/10'
+            ? 'bg-[var(--sage-500)] text-white'
+            : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-100)]'
           }
         `}
       >

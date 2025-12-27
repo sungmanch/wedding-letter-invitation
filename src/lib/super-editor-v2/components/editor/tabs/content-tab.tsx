@@ -279,7 +279,7 @@ function BlockAccordion({
 
       {/* 펼침 콘텐츠 */}
       {expanded && (
-        <div className="bg-[#1F1F1F] p-4 space-y-4">
+        <div className="bg-[var(--ivory-50)] p-4 space-y-4">
           {editableFields.length > 0 ? (
             editableFields.map(field => (
               <VariableField
@@ -291,7 +291,7 @@ function BlockAccordion({
               />
             ))
           ) : (
-            <p className="text-sm text-[#F5E6D3]/50">
+            <p className="text-sm text-[var(--text-light)]">
               편집 가능한 필드가 없습니다
             </p>
           )}
@@ -336,7 +336,7 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
 
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-[#F5E6D3]/80">
+      <label className="block text-sm font-medium text-[var(--text-body)]">
         {label}
       </label>
 
@@ -346,7 +346,7 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           value={String(value ?? '')}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962]"
+          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
         />
       )}
 
@@ -356,7 +356,7 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962] resize-none"
+          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
         />
       )}
 
@@ -365,7 +365,7 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           type="date"
           value={String(value ?? '')}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962]"
+          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
         />
       )}
 
@@ -374,7 +374,7 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           type="time"
           value={String(value ?? '')}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962]"
+          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
         />
       )}
 
@@ -384,7 +384,7 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           value={String(value ?? '')}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? '010-0000-0000'}
-          className="w-full px-3 py-2 bg-[#2A2A2A] border border-white/10 rounded-lg text-[#F5E6D3] text-sm focus:outline-none focus:ring-1 focus:ring-[#C9A962]"
+          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
         />
       )}
 
@@ -604,7 +604,7 @@ function GalleryFieldLocal({
             onDragOver={(e) => handleImageDragOver(e, index)}
             onDragEnd={handleImageDragEnd}
             className={`
-              relative aspect-square rounded-lg overflow-hidden cursor-move bg-[#2A2A2A]
+              relative aspect-square rounded-lg overflow-hidden cursor-move bg-[var(--sand-100)]
               ${draggedIndex === index ? 'opacity-50' : ''}
             `}
           >
@@ -643,10 +643,10 @@ function GalleryFieldLocal({
             className={`
               aspect-square rounded-lg border-2 border-dashed
               flex flex-col items-center justify-center cursor-pointer
-              transition-colors bg-[#2A2A2A]
+              transition-colors bg-white
               ${isDragging
-                ? 'border-[#C9A962] bg-[#C9A962]/10'
-                : 'border-white/20 hover:border-[#C9A962]/50'
+                ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
+                : 'border-[var(--sand-200)] hover:border-[var(--sage-400)]'
               }
             `}
           >
@@ -660,11 +660,11 @@ function GalleryFieldLocal({
             />
 
             {isLoading ? (
-              <div className="w-6 h-6 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[var(--sage-500)] border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <PlusIcon className="w-6 h-6 text-[#F5E6D3]/40" />
-                <span className="text-xs text-[#F5E6D3]/40 mt-1">추가</span>
+                <PlusIcon className="w-6 h-6 text-[var(--text-light)]" />
+                <span className="text-xs text-[var(--text-light)] mt-1">추가</span>
               </>
             )}
           </div>
@@ -672,7 +672,7 @@ function GalleryFieldLocal({
       </div>
 
       {/* 카운터 */}
-      <p className="text-xs text-[#F5E6D3]/50">
+      <p className="text-xs text-[var(--text-light)]">
         {value.length}/{maxImages}장
       </p>
 
@@ -759,7 +759,7 @@ function ImageField({ value, onChange, onUploadImage }: ImageFieldProps) {
       />
 
       {value && (
-        <div className="relative aspect-video bg-[#2A2A2A] rounded-lg overflow-hidden">
+        <div className="relative aspect-video bg-[var(--sand-100)] rounded-lg overflow-hidden">
           <img
             src={value}
             alt="Preview"
@@ -779,11 +779,11 @@ function ImageField({ value, onChange, onUploadImage }: ImageFieldProps) {
         type="button"
         onClick={handleClick}
         disabled={isLoading}
-        className="w-full px-3 py-2 bg-[#2A2A2A] border border-dashed border-white/20 rounded-lg text-[#F5E6D3]/60 text-sm hover:bg-[#333333] hover:border-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full px-3 py-2 bg-white border border-dashed border-[var(--sand-200)] rounded-lg text-[var(--text-muted)] text-sm hover:bg-[var(--sage-50)] hover:border-[var(--sage-400)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>
-            <div className="w-4 h-4 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-[var(--sage-500)] border-t-transparent rounded-full animate-spin" />
             업로드 중...
           </>
         ) : (
@@ -811,10 +811,10 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="relative pt-4 border-t border-white/10 mt-4">
+    <div className="relative pt-4 border-t border-[var(--sand-100)] mt-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm text-[#C9A962] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 rounded-lg transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm text-[var(--sage-600)] bg-[var(--sage-50)] hover:bg-[var(--sage-100)] rounded-lg transition-colors"
       >
         <PlusIcon className="w-4 h-4" />
         섹션 추가
@@ -822,7 +822,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-2 bg-[#2A2A2A] border border-white/10 rounded-lg shadow-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
+        <div className="absolute left-0 right-0 mt-2 bg-white border border-[var(--sand-100)] rounded-lg shadow-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
           {availableTypes.map(type => (
             <button
               key={type}
@@ -830,10 +830,10 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
                 onAdd(type)
                 setIsOpen(false)
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--sage-50)] transition-colors"
             >
               <span className="text-lg">{BLOCK_TYPE_ICONS[type]}</span>
-              <span className="text-sm text-[#F5E6D3]">{BLOCK_TYPE_LABELS[type]}</span>
+              <span className="text-sm text-[var(--text-primary)]">{BLOCK_TYPE_LABELS[type]}</span>
             </button>
           ))}
         </div>

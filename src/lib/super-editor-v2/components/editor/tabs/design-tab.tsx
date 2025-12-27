@@ -148,15 +148,15 @@ function LevelTabs({ activeLevel, onLevelChange }: LevelTabsProps) {
   ]
 
   return (
-    <div className="flex border-b border-white/10 px-2 shrink-0">
+    <div className="flex border-b border-[var(--sand-100)] px-2 shrink-0">
       {levels.map(level => (
         <button
           key={level.id}
           onClick={() => onLevelChange(level.id)}
           className={`flex-1 px-2 py-2.5 text-xs font-medium transition-colors ${
             activeLevel === level.id
-              ? 'text-[#C9A962] border-b-2 border-[#C9A962]'
-              : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3]'
+              ? 'text-[var(--sage-600)] border-b-2 border-[var(--sage-500)]'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
           }`}
         >
           {level.label}
@@ -203,7 +203,7 @@ function PresetLevel({
     <div className="space-y-6">
       {/* 테마 프리셋 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">테마 프리셋</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">테마 프리셋</h3>
 
         {themeCategories.map(category => {
           const presets = getPresetsByCategory(category.id)
@@ -211,7 +211,7 @@ function PresetLevel({
 
           return (
             <div key={category.id} className="mb-4">
-              <h4 className="text-xs text-[#F5E6D3]/60 mb-2">{category.label}</h4>
+              <h4 className="text-xs text-[var(--text-muted)] mb-2">{category.label}</h4>
               <div className="grid grid-cols-2 gap-2">
                 {presets.map(preset => (
                   <ThemePresetCard
@@ -229,7 +229,7 @@ function PresetLevel({
 
       {/* 타이포그래피 프리셋 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">타이포그래피</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">타이포그래피</h3>
 
         {typographyCategories.map(category => {
           const presets = getTypographyPresetsByCategory(category.id)
@@ -237,7 +237,7 @@ function PresetLevel({
 
           return (
             <div key={category.id} className="mb-4">
-              <h4 className="text-xs text-[#F5E6D3]/60 mb-2">{category.label}</h4>
+              <h4 className="text-xs text-[var(--text-muted)] mb-2">{category.label}</h4>
               <div className="grid grid-cols-1 gap-2">
                 {presets.map(preset => (
                   <TypographyPresetCard
@@ -276,35 +276,35 @@ function ThemePresetCard({ preset, selected, onClick }: ThemePresetCardProps) {
       onClick={onClick}
       className={`relative p-3 rounded-lg border transition-all ${
         selected
-          ? 'border-[#C9A962] ring-1 ring-[#C9A962]'
-          : 'border-white/10 hover:border-white/20'
+          ? 'border-[var(--sage-500)] ring-1 ring-[var(--sage-500)]'
+          : 'border-[var(--sand-100)] hover:border-[var(--sand-200)]'
       }`}
     >
       {/* 색상 미리보기 */}
       <div className="flex gap-1 mb-2">
         <div
-          className="w-6 h-6 rounded-full border border-white/10"
+          className="w-6 h-6 rounded-full border border-[var(--sand-100)]"
           style={{ backgroundColor: bgColor }}
         />
         <div
-          className="w-6 h-6 rounded-full border border-white/10"
+          className="w-6 h-6 rounded-full border border-[var(--sand-100)]"
           style={{ backgroundColor: fgColor }}
         />
         <div
-          className="w-6 h-6 rounded-full border border-white/10"
+          className="w-6 h-6 rounded-full border border-[var(--sand-100)]"
           style={{ backgroundColor: accentColor }}
         />
       </div>
 
       {/* 프리셋 이름 */}
-      <p className="text-xs font-medium text-[#F5E6D3] text-left">
+      <p className="text-xs font-medium text-[var(--text-primary)] text-left">
         {preset.nameKo}
       </p>
 
       {/* 선택 표시 */}
       {selected && (
         <div className="absolute top-2 right-2">
-          <CheckIcon className="w-4 h-4 text-[#C9A962]" />
+          <CheckIcon className="w-4 h-4 text-[var(--sage-500)]" />
         </div>
       )}
     </button>
@@ -327,19 +327,19 @@ function TypographyPresetCard({ preset, selected, onClick }: TypographyPresetCar
       onClick={onClick}
       className={`relative p-3 rounded-lg border transition-all text-left ${
         selected
-          ? 'border-[#C9A962] ring-1 ring-[#C9A962]'
-          : 'border-white/10 hover:border-white/20'
+          ? 'border-[var(--sage-500)] ring-1 ring-[var(--sage-500)]'
+          : 'border-[var(--sand-100)] hover:border-[var(--sand-200)]'
       }`}
     >
       {/* 폰트 미리보기 */}
       <p
-        className="text-lg mb-1"
+        className="text-lg mb-1 text-[var(--text-primary)]"
         style={{ fontFamily: preset.fontStacks.heading.family.join(', ') }}
       >
         {preset.nameKo}
       </p>
       <p
-        className="text-xs text-[#F5E6D3]/60"
+        className="text-xs text-[var(--text-muted)]"
         style={{ fontFamily: preset.fontStacks.body.family.join(', ') }}
       >
         {preset.description}
@@ -348,7 +348,7 @@ function TypographyPresetCard({ preset, selected, onClick }: TypographyPresetCar
       {/* 선택 표시 */}
       {selected && (
         <div className="absolute top-2 right-2">
-          <CheckIcon className="w-4 h-4 text-[#C9A962]" />
+          <CheckIcon className="w-4 h-4 text-[var(--sage-500)]" />
         </div>
       )}
     </button>
@@ -369,7 +369,7 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
     <div className="space-y-6">
       {/* 색상 조정 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">색상 조정</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">색상 조정</h3>
 
         <div className="space-y-4">
           <ColorPicker
@@ -392,7 +392,7 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
 
       {/* 무드 설정 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">무드</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">무드</h3>
 
         <div className="grid grid-cols-3 gap-2">
           {(['warm', 'neutral', 'cool'] as const).map(mood => (
@@ -401,8 +401,8 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
               onClick={() => onChange({ mood })}
               className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                 quick?.mood === mood
-                  ? 'bg-[#C9A962] text-[#0A0806]'
-                  : 'bg-white/5 text-[#F5E6D3]/60 hover:bg-white/10'
+                  ? 'bg-[var(--sage-500)] text-white'
+                  : 'bg-[var(--sand-100)] text-[var(--text-muted)] hover:bg-[var(--sage-100)]'
               }`}
             >
               {mood === 'warm' ? '따뜻한' : mood === 'neutral' ? '중립' : '차가운'}
@@ -413,7 +413,7 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
 
       {/* 대비 설정 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">대비</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">대비</h3>
 
         <div className="grid grid-cols-3 gap-2">
           {(['low', 'medium', 'high'] as const).map(contrast => (
@@ -422,8 +422,8 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
               onClick={() => onChange({ contrast })}
               className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                 quick?.contrast === contrast
-                  ? 'bg-[#C9A962] text-[#0A0806]'
-                  : 'bg-white/5 text-[#F5E6D3]/60 hover:bg-white/10'
+                  ? 'bg-[var(--sage-500)] text-white'
+                  : 'bg-[var(--sand-100)] text-[var(--text-muted)] hover:bg-[var(--sage-100)]'
               }`}
             >
               {contrast === 'low' ? '낮음' : contrast === 'medium' ? '중간' : '높음'}
@@ -434,7 +434,7 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
 
       {/* 채도 설정 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">채도</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">채도</h3>
 
         <div className="grid grid-cols-3 gap-2">
           {(['muted', 'normal', 'vivid'] as const).map(saturation => (
@@ -443,8 +443,8 @@ function QuickLevel({ quick, onChange }: QuickLevelProps) {
               onClick={() => onChange({ saturation })}
               className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                 quick?.saturation === saturation
-                  ? 'bg-[#C9A962] text-[#0A0806]'
-                  : 'bg-white/5 text-[#F5E6D3]/60 hover:bg-white/10'
+                  ? 'bg-[var(--sage-500)] text-white'
+                  : 'bg-[var(--sand-100)] text-[var(--text-muted)] hover:bg-[var(--sage-100)]'
               }`}
             >
               {saturation === 'muted' ? '차분한' : saturation === 'normal' ? '기본' : '선명한'}
@@ -489,7 +489,7 @@ function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
     <div className="space-y-6">
       {/* 배경 색상 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">배경</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">배경</h3>
         <div className="space-y-3">
           <ColorPicker
             label="페이지 배경"
@@ -511,7 +511,7 @@ function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
 
       {/* 텍스트 색상 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">텍스트</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">텍스트</h3>
         <div className="space-y-3">
           <ColorPicker
             label="기본 텍스트"
@@ -533,7 +533,7 @@ function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
 
       {/* 강조 색상 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">강조</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">강조</h3>
         <div className="space-y-3">
           <ColorPicker
             label="기본 강조"
@@ -555,7 +555,7 @@ function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
 
       {/* 테두리 */}
       <section>
-        <h3 className="text-sm font-medium text-[#F5E6D3] mb-3">테두리</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">테두리</h3>
         <div className="space-y-3">
           <ColorPicker
             label="기본 테두리"
@@ -594,13 +594,13 @@ function ColorPicker({ label, value, onChange }: ColorPickerProps) {
           className="absolute inset-0 w-8 h-8 opacity-0 cursor-pointer"
         />
         <div
-          className="w-8 h-8 rounded-lg border border-white/20"
+          className="w-8 h-8 rounded-lg border border-[var(--sand-200)]"
           style={{ backgroundColor: value }}
         />
       </div>
       <div className="flex-1">
-        <p className="text-sm text-[#F5E6D3]">{label}</p>
-        <p className="text-xs text-[#F5E6D3]/50 font-mono">{value}</p>
+        <p className="text-sm text-[var(--text-primary)]">{label}</p>
+        <p className="text-xs text-[var(--text-light)] font-mono">{value}</p>
       </div>
     </div>
   )

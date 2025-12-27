@@ -602,7 +602,7 @@ export function NaturalHeroLanding() {
           {/* Bottom: CTA */}
           <div className="text-center">
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/login?redirect=/se/create">
+              <Link href="/login?redirect=/se2/create">
                 <Button
                   className="bg-[var(--sage-500)] hover:bg-[var(--sage-600)] text-white px-8 py-3.5 text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-300 h-auto w-full sm:w-auto"
                   style={{ fontFamily: 'Pretendard, sans-serif' }}

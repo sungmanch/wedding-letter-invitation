@@ -70,7 +70,7 @@ export function EditorPanel({
       <TabNavigation activeTab={activeTab} onTabChange={onTabChange} />
 
       {/* 탭 콘텐츠 */}
-      <div className="flex-1 overflow-y-auto scrollbar-gold">
+      <div className="flex-1 overflow-y-auto scrollbar-sage">
         {activeTab === 'content' && contentTab}
         {activeTab === 'design' && designTab}
         {activeTab === 'share' && shareTab}
@@ -108,15 +108,15 @@ function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   ]
 
   return (
-    <div className="flex border-b border-white/10 shrink-0">
+    <div className="flex border-b border-[var(--sand-100)] shrink-0">
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors ${
             activeTab === tab.id
-              ? 'text-[#C9A962] border-b-2 border-[#C9A962] bg-[#C9A962]/10'
-              : 'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5'
+              ? 'text-[var(--sage-600)] border-b-2 border-[var(--sage-500)] bg-[var(--sage-50)]'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)]'
           }`}
         >
           {tab.icon}
@@ -150,14 +150,14 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   return (
     <div
-      className={`flex items-center justify-between px-4 py-2 border-b border-white/10 bg-[#1A1A1A] ${className}`}
+      className={`flex items-center justify-between px-4 py-2 border-b border-[var(--sand-100)] bg-white ${className}`}
     >
       {/* 왼쪽: Undo/Redo */}
       <div className="flex items-center gap-1">
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className="p-2 rounded-lg text-[#F5E6D3] hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg text-[var(--text-primary)] hover:bg-[var(--sage-50)] disabled:opacity-50 disabled:cursor-not-allowed"
           title="실행 취소"
         >
           <UndoIcon className="w-5 h-5" />
@@ -165,14 +165,14 @@ export function EditorToolbar({
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className="p-2 rounded-lg text-[#F5E6D3] hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg text-[var(--text-primary)] hover:bg-[var(--sage-50)] disabled:opacity-50 disabled:cursor-not-allowed"
           title="다시 실행"
         >
           <RedoIcon className="w-5 h-5" />
         </button>
 
         {dirty && (
-          <span className="ml-2 text-xs text-[#C9A962]">저장되지 않음</span>
+          <span className="ml-2 text-xs text-[var(--sage-600)]">저장되지 않음</span>
         )}
       </div>
     </div>
@@ -227,14 +227,14 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-center gap-2 px-4 py-3 bg-[#2A2A2A] rounded-lg cursor-pointer hover:bg-[#333333] transition-colors ${className}`}
+      className={`flex items-center gap-2 px-4 py-3 bg-[var(--sand-100)] rounded-lg cursor-pointer hover:bg-[var(--sage-100)] transition-colors ${className}`}
       onClick={onExpand}
     >
       {/* 아이콘 */}
       <span className="text-lg">{icon}</span>
 
       {/* 라벨 */}
-      <span className={`flex-1 text-sm font-medium ${enabled ? 'text-[#F5E6D3]' : 'text-[#F5E6D3]/40'}`}>
+      <span className={`flex-1 text-sm font-medium ${enabled ? 'text-[var(--text-primary)]' : 'text-[var(--text-light)]'}`}>
         {label}
       </span>
 
@@ -244,14 +244,14 @@ export function SectionHeader({
           <button
             onClick={onMoveUp}
             disabled={!canMoveUp}
-            className="p-1 text-[#F5E6D3]/40 hover:text-[#F5E6D3] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1 text-[var(--text-light)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronUpIcon className="w-4 h-4" />
           </button>
           <button
             onClick={onMoveDown}
             disabled={!canMoveDown}
-            className="p-1 text-[#F5E6D3]/40 hover:text-[#F5E6D3] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1 text-[var(--text-light)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronDownIcon className="w-4 h-4" />
           </button>
@@ -265,7 +265,7 @@ export function SectionHeader({
 
       {/* 펼침 인디케이터 */}
       <ChevronIcon
-        className={`w-4 h-4 text-[#F5E6D3]/40 transition-transform ${expanded ? 'rotate-180' : ''}`}
+        className={`w-4 h-4 text-[var(--text-light)] transition-transform ${expanded ? 'rotate-180' : ''}`}
       />
     </div>
   )
@@ -285,7 +285,7 @@ function ToggleSwitch({ enabled, onChange }: ToggleSwitchProps) {
     <button
       onClick={onChange}
       className={`relative w-10 h-5 rounded-full transition-colors ${
-        enabled ? 'bg-[#C9A962]' : 'bg-white/20'
+        enabled ? 'bg-[var(--sage-500)]' : 'bg-[var(--sand-200)]'
       }`}
     >
       <span

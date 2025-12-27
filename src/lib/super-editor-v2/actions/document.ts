@@ -14,6 +14,7 @@ import {
   DEFAULT_STYLE_SYSTEM,
   DEFAULT_ANIMATION,
   DEFAULT_WEDDING_DATA,
+  SAMPLE_WEDDING_DATA,
   createDefaultBlocks,
 } from '../schema'
 import type {
@@ -29,6 +30,7 @@ import type {
 
 /**
  * 새 문서 생성
+ * @param data.useSampleData - true이면 샘플 데이터로 시작 (미리보기용)
  */
 export async function createDocument(data?: {
   title?: string
@@ -36,6 +38,7 @@ export async function createDocument(data?: {
   style?: StyleSystem
   animation?: GlobalAnimation
   weddingData?: WeddingData
+  useSampleData?: boolean
 }): Promise<EditorDocumentV2> {
   const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
@@ -44,13 +47,17 @@ export async function createDocument(data?: {
     throw new Error('Authentication required')
   }
 
+  // weddingData 우선순위: 직접 전달 > useSampleData > 기본값
+  const weddingData = data?.weddingData
+    ?? (data?.useSampleData ? SAMPLE_WEDDING_DATA : DEFAULT_WEDDING_DATA)
+
   const [document] = await db.insert(editorDocumentsV2).values({
     userId: user.id,
     title: data?.title ?? '새 청첩장',
     blocks: data?.blocks ?? createDefaultBlocks(),
     style: data?.style ?? DEFAULT_STYLE_SYSTEM,
     animation: data?.animation ?? DEFAULT_ANIMATION,
-    data: data?.weddingData ?? DEFAULT_WEDDING_DATA,
+    data: weddingData,
     status: 'draft',
   }).returning()
 
