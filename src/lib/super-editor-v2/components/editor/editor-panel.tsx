@@ -312,6 +312,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   notice: '📢',
   account: '💳',
   message: '💬',
+  wreath: '💐',
   ending: '🎬',
   contact: '📞',
   music: '🎵',

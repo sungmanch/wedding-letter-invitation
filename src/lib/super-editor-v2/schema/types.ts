@@ -112,7 +112,8 @@ export type BlockType =
   | 'notice'            // 공지사항/안내
   | 'account'           // 축의금 계좌
   | 'message'           // 방명록/축하 메시지
-  | 'ending'            // 축하화환/공유/엔딩
+  | 'wreath'            // 화환 안내 (사양/허용)
+  | 'ending'            // 공유/엔딩
   // ─── 오버레이/모달 ───
   | 'contact'           // 연락처 (오버레이로 표시)
   // ─── 기타 기능 ───
@@ -1062,9 +1063,12 @@ export interface RsvpConfig {
 export interface NoticeItem {
   title: string
   content: string
-  icon?: 'bus' | 'car' | 'utensils' | 'info' | 'gift' | 'clock'
-  image?: string
-  imagePosition?: 'top' | 'bottom'
+  // SVG 아이콘 타입 (card-icon 프리셋용)
+  iconType?: 'rings' | 'birds' | 'hearts'
+  // 카드 배경색 (P-S-T 시스템의 S 변형)
+  backgroundColor?: string
+  // 카드 테두리 색상
+  borderColor?: string
 }
 
 export interface GuestbookConfig {
