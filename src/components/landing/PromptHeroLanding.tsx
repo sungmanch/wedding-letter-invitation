@@ -330,7 +330,7 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
                 결혼식의 설렘, <br className="sm:hidden"/> <span className="text-[var(--sage-600)]">상상하는 대로</span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 font-medium font-['Pretendard'] max-w-3xl mx-auto break-keep">
-                원하는 분위기를 말하면 AI가 세상에 단 하나뿐인 청첩장을 만들어드립니다
+                원하는 분위기를 말하면 AI가 세상에 단 하나뿐인 모바일 청첩장을 만들어드립니다
             </p>
         </div>
 
