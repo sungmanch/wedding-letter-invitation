@@ -200,15 +200,18 @@ interface BlockLayout {
   - ⏭️ baptismal, box-style, ribbon: absolute 유지 (복잡한 레이아웃)
 - [x] `presets/blocks/rsvp-presets.ts` - rsvp-basic auto-layout
 - [x] `presets/blocks/notice-presets.ts` - notice-classic-label auto-layout
-- ⏭️ `presets/blocks/calendar-presets.ts` - absolute 유지 (정밀 배치 필요)
+- [x] `presets/blocks/calendar-presets.ts` - calendar-korean-countdown-box auto-layout + group
 
-### Phase 4.5: Group 요소 및 Profile 마이그레이션 ✅ 완료 (2025-12-27)
+### Phase 4.5: Group 요소 및 Profile/Calendar 마이그레이션 ✅ 완료 (2025-12-28)
 - [x] `schema/types.ts` - `group` ElementType 및 `GroupProps` 추가
 - [x] `schema/types.ts` - `Element.children` 필드 추가 (중첩 레이아웃 지원)
 - [x] `renderer/auto-layout-element.tsx` - `GroupElement` 컴포넌트 추가
 - [x] `presets/blocks/profile-presets.ts` - profile-dual-card auto-layout + group
 - [x] `presets/blocks/profile-presets.ts` - profile-split-photo auto-layout + group
   - ✅ 신랑/신부 좌우 교차 배치를 `reverse` 속성으로 구현
+- [x] `presets/blocks/calendar-presets.ts` - calendar-korean-countdown-box auto-layout + group
+  - ✅ 월 구분선 그룹 (divider - month text - divider)
+  - ✅ 카운트다운 박스 중첩 그룹 (4개 박스 × 라벨+값)
 
 ### Phase 5: AI 통합
 - [ ] `docs/super-editor-v2/06_ai_prompt.md` 업데이트
