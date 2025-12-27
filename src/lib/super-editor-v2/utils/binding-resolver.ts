@@ -323,9 +323,9 @@ export function isValidVariablePath(path: string): path is VariablePath {
 
   const validPaths: string[] = [
     // ─── 공유 필드 (◆ 원본) ───
-    'couple.groom.name', 'couple.groom.phone', 'couple.groom.intro',
+    'couple.groom.name', 'couple.groom.phone', 'couple.groom.intro', 'couple.groom.baptismalName',
     'couple.groom.photo', 'couple.groom.birthDate', 'couple.groom.mbti', 'couple.groom.tags',
-    'couple.bride.name', 'couple.bride.phone', 'couple.bride.intro',
+    'couple.bride.name', 'couple.bride.phone', 'couple.bride.intro', 'couple.bride.baptismalName',
     'couple.bride.photo', 'couple.bride.birthDate', 'couple.bride.mbti', 'couple.bride.tags',
     'couple.photo', 'couple.photos',
     'wedding.date', 'wedding.time',
@@ -337,10 +337,11 @@ export function isValidVariablePath(path: string): path is VariablePath {
 
     // ─── 혼주 ───
     'parents.deceasedIcon',
-    'parents.groom.father.name', 'parents.groom.father.status', 'parents.groom.father.phone',
-    'parents.groom.mother.name', 'parents.groom.mother.status', 'parents.groom.mother.phone',
-    'parents.bride.father.name', 'parents.bride.father.status', 'parents.bride.father.phone',
-    'parents.bride.mother.name', 'parents.bride.mother.status', 'parents.bride.mother.phone',
+    'parents.groom.birthOrder', 'parents.bride.birthOrder',
+    'parents.groom.father.name', 'parents.groom.father.status', 'parents.groom.father.phone', 'parents.groom.father.baptismalName',
+    'parents.groom.mother.name', 'parents.groom.mother.status', 'parents.groom.mother.phone', 'parents.groom.mother.baptismalName',
+    'parents.bride.father.name', 'parents.bride.father.status', 'parents.bride.father.phone', 'parents.bride.father.baptismalName',
+    'parents.bride.mother.name', 'parents.bride.mother.status', 'parents.bride.mother.phone', 'parents.bride.mother.baptismalName',
 
     // ─── 장소 ───
     'venue.name', 'venue.hall', 'venue.address', 'venue.tel',

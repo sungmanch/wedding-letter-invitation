@@ -30,6 +30,7 @@ import {
   copyIdToClipboard,
   pxToPercent,
 } from '../../../utils/element-id'
+import { resolveBlockHeightNumber } from '../../../utils/size-resolver'
 
 // ============================================
 // Types
@@ -297,7 +298,8 @@ export function EditableCanvas({
         if (!block.enabled) return null
 
         // 블록 높이 계산 (vh 기준 -> px)
-        const blockHeightPx = (block.height / 100) * canvasHeight
+        const blockHeightVh = resolveBlockHeightNumber(block.height)
+        const blockHeightPx = (blockHeightVh / 100) * canvasHeight
 
         // 블록별 스타일 오버라이드 가져오기
         const blockTokens = style.blockOverrides.get(block.id) ?? style.tokens
@@ -406,7 +408,7 @@ export function EditableCanvas({
             {onBlockHeightChange && (
               <BlockResizeHandle
                 blockId={block.id}
-                blockHeight={block.height}
+                blockHeight={blockHeightVh}
                 canvasHeight={canvasHeight}
                 onHeightChange={onBlockHeightChange}
               />

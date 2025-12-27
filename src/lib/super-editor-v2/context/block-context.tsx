@@ -16,6 +16,7 @@ import type {
 import type { ResolvedTokens } from '../renderer/style-resolver'
 import { useDocument } from './document-context'
 import { useBlockVisibility } from './animation-context'
+import { resolveBlockHeightNumber } from '../utils/size-resolver'
 
 // ============================================
 // Types
@@ -176,7 +177,7 @@ export function BlockProvider({
     getElement,
     tokens,
     animation: block.animation,
-    height: block.height,
+    height: resolveBlockHeightNumber(block.height),
     onSelectElement,
     onUpdateElement,
   }), [
@@ -207,27 +208,19 @@ export function BlockProvider({
 export function getDefaultBlockHeight(type: BlockType): number {
   const heights: Partial<Record<BlockType, number>> = {
     hero: 100,
-    loading: 100,
-    greeting: 60,
+    'greeting-parents': 80,
+    profile: 80,
     calendar: 80,
     gallery: 120,
+    rsvp: 60,
     location: 100,
-    parents: 50,
-    contact: 60,
+    notice: 40,
     account: 80,
     message: 100,
-    rsvp: 60,
-    quote: 40,
-    profile: 80,
-    timeline: 100,
-    video: 80,
-    interview: 100,
-    transport: 60,
-    notice: 40,
-    announcement: 50,
-    dday: 40,
     ending: 60,
+    contact: 85,
     music: 20,
+    loading: 100,
     custom: 50,
   }
   return heights[type] ?? 50
@@ -239,31 +232,19 @@ export function getDefaultBlockHeight(type: BlockType): number {
 export function getBlockTypeLabel(type: BlockType): string {
   const labels: Record<BlockType, string> = {
     hero: '메인 커버',
-    loading: '로딩 화면',
-    greeting: '인사말',
-    calendar: '캘린더',
+    'greeting-parents': '인사말/혼주',
+    profile: '신랑신부 소개',
+    calendar: '예식일시',
     gallery: '갤러리',
-    location: '오시는 길',
-    parents: '혼주 소개',
-    contact: '연락처',
+    rsvp: '참석 여부',
+    location: '오시는길',
+    notice: '공지사항',
     account: '축의금',
     message: '방명록',
-    rsvp: '참석 여부',
-    quote: '글귀',
-    profile: '프로필',
-    'parents-contact': '혼주 연락처',
-    timeline: '타임라인',
-    video: '영상',
-    interview: '웨딩 인터뷰',
-    transport: '교통 안내',
-    notice: '안내사항',
-    announcement: '안내문',
-    'flower-gift': '화환 보내기',
-    'together-time': '함께한 시간',
-    dday: 'D-DAY',
-    'guest-snap': '게스트스냅',
     ending: '엔딩',
+    contact: '연락처',
     music: '배경음악',
+    loading: '로딩 화면',
     custom: '커스텀',
   }
   return labels[type] ?? type

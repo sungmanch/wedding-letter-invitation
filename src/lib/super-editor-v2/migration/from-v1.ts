@@ -63,11 +63,10 @@ const DEFAULT_BLOCK_HEIGHT = 100 // vh
 // 기본 섹션 순서
 const DEFAULT_SECTION_ORDER: Array<{ type: Block['type']; enabled: boolean }> = [
   { type: 'hero', enabled: true },
-  { type: 'greeting', enabled: true },
+  { type: 'greeting-parents', enabled: true },
   { type: 'calendar', enabled: true },
   { type: 'gallery', enabled: true },
   { type: 'location', enabled: true },
-  { type: 'parents', enabled: false },
   { type: 'account', enabled: true },
   { type: 'message', enabled: true },
 ]
@@ -445,7 +444,7 @@ function createGreetingBlock(): Block {
 
   return {
     id: uuid(),
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: DEFAULT_BLOCK_HEIGHT,
     elements,
@@ -685,7 +684,7 @@ function createParentsBlock(): Block {
 
   return {
     id: uuid(),
-    type: 'parents',
+    type: 'contact',
     enabled: false, // 기본 비활성화
     height: DEFAULT_BLOCK_HEIGHT,
     elements,

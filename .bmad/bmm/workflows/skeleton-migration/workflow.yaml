@@ -1,0 +1,184 @@
+name: skeleton-migration
+description: "Migrate super-editor skeletons to super-editor-v2 block presets. Supports per-section selective migration."
+author: "BMad"
+
+# Critical variables from config
+config_source: "{project-root}/.bmad/bmm/config.yaml"
+output_folder: "{config_source}:output_folder"
+communication_language: "{config_source}:communication_language"
+document_output_language: "{config_source}:document_output_language"
+date: system-generated
+
+# ============================================================
+# SECTION & VARIANT SELECTION - User Input Required
+# ============================================================
+# Specify which sections/variants to migrate. Options:
+#   - "all": Migrate all sections with all variants
+#   - Section names: "gallery,greeting,venue" (all variants)
+#   - Section:variant format: "gallery:grid,gallery:masonry" (specific variants)
+#   - Mixed: "gallery:grid,gallery:masonry,greeting:*,venue"
+#   - Wildcard: "gallery:*" = all gallery variants
+#
+# Examples:
+#   "gallery:grid,gallery:carousel"  → gallery 섹션의 grid, carousel만
+#   "gallery:*,greeting:elegant"     → gallery 전체 + greeting의 elegant만
+#   "gallery,greeting"               → 두 섹션의 모든 variants
+target_sections: ""  # Will be asked during workflow execution
+target_variants: {}  # Parsed from target_sections: { gallery: ['grid', 'carousel'], greeting: ['*'] }
+
+# Available sections and variants for reference:
+available_sections:
+  - id: intro
+    file: "sections/intro.ts"
+    target_block: hero
+    complexity: high
+    description: "인트로/히어로 블록 (가장 복잡)"
+    variants: [minimal, elegant, romantic, modern, cinematic]
+  - id: greeting
+    file: "sections/greeting.ts"
+    target_block: greeting
+    complexity: low
+    description: "인사말 블록"
+    variants: [minimal, elegant, card]
+  - id: gallery
+    file: "sections/gallery.ts"
+    target_block: gallery
+    complexity: high
+    description: "갤러리 블록 (16 variants)"
+    variants: [grid, grid-seamless, elegant-dark, accordion-stack, masonry, carousel, coverflow-dark, film-strip, vertical-swipe, polaroid, magazine, split-scroll, flip-cards, parallax-stack]
+  - id: venue
+    file: "sections/venue.ts"
+    target_block: location
+    complexity: medium
+    description: "장소/위치 블록"
+    variants: [minimal, detailed, elegant]
+  - id: date
+    file: "sections/date.ts"
+    target_block: calendar
+    complexity: medium
+    description: "날짜/캘린더 블록"
+    variants: [minimal, countdown, elegant]
+  - id: parents
+    file: "sections/parents.ts"
+    target_block: parents
+    complexity: medium
+    description: "양가 부모님 블록"
+    variants: [minimal, detailed, elegant]
+  - id: contact
+    file: "sections/contact.ts"
+    target_block: contact
+    complexity: low
+    description: "연락처 블록"
+    variants: [minimal, card]
+  - id: accounts
+    file: "sections/accounts.ts"
+    target_block: account
+    complexity: medium
+    description: "계좌정보 블록"
+    variants: [simple, tabbed, accordion]
+  - id: guestbook
+    file: "sections/guestbook.ts"
+    target_block: message
+    complexity: medium
+    description: "방명록/메시지 블록"
+    variants: [simple, card, timeline]
+  - id: rsvp
+    file: "sections/rsvp.ts"
+    target_block: rsvp
+    complexity: low
+    description: "참석여부 블록"
+    variants: [minimal, form]
+  - id: music
+    file: "sections/music.ts"
+    target_block: music
+    complexity: low
+    description: "배경음악 블록"
+    variants: [fab, minimal]
+  - id: notice
+    file: "sections/notice.ts"
+    target_block: notice
+    complexity: low
+    description: "공지사항 블록"
+    variants: [minimal, card]
+
+# ============================================================
+# Source and target directories
+# ============================================================
+source_dir: "{project-root}/src/lib/super-editor/skeletons"
+target_dir: "{project-root}/src/lib/super-editor-v2/presets"
+v1_types: "{project-root}/src/lib/super-editor/skeletons/types.ts"
+v2_types: "{project-root}/src/lib/super-editor-v2/schema/types.ts"
+
+# Input file patterns for context loading
+input_file_patterns:
+  skeleton_types:
+    description: "v1 skeleton type definitions"
+    whole: "{source_dir}/types.ts"
+    load_strategy: "FULL_LOAD"
+  skeleton_registry:
+    description: "v1 skeleton registry with all section lookups"
+    whole: "{source_dir}/registry.ts"
+    load_strategy: "FULL_LOAD"
+  skeleton_sections:
+    description: "All section skeleton files"
+    sharded: "{source_dir}/sections/*.ts"
+    load_strategy: "FULL_LOAD"
+  intro_blocks:
+    description: "Intro block composition system"
+    whole: "{source_dir}/intro-blocks.ts"
+    load_strategy: "FULL_LOAD"
+  intro_builder:
+    description: "Intro block builder"
+    whole: "{source_dir}/intro-block-builder.ts"
+    load_strategy: "FULL_LOAD"
+  v2_schema:
+    description: "v2 schema types for target structure"
+    whole: "{target_dir}/../schema/types.ts"
+    load_strategy: "FULL_LOAD"
+  v2_presets:
+    description: "Existing v2 presets for reference"
+    sharded: "{target_dir}/*.ts"
+    load_strategy: "FULL_LOAD"
+
+# Output files to generate
+outputs:
+  block_presets:
+    path: "{target_dir}/block-presets.ts"
+    description: "Block variant presets with element layouts"
+  block_bindings:
+    path: "{target_dir}/block-bindings.ts"
+    description: "Block data binding requirements"
+  type_mapping:
+    path: "{project-root}/.bmad/bmm/workflows/skeleton-migration/type-mapping.md"
+    description: "Documentation of type mappings"
+
+# Workflow components
+installed_path: "{project-root}/.bmad/bmm/workflows/skeleton-migration"
+instructions: "{installed_path}/instructions.md"
+validation: "{installed_path}/checklist.md"
+
+# Migration phases
+phases:
+  - id: "analysis"
+    name: "Analysis Phase"
+    description: "Analyze v1 skeletons and v2 preset structure"
+  - id: "type-design"
+    name: "Type Design Phase"
+    description: "Design BlockPreset and BlockBinding types"
+  - id: "extraction"
+    name: "Extraction Phase"
+    description: "Extract variants from each skeleton section"
+  - id: "transformation"
+    name: "Transformation Phase"
+    description: "Transform SkeletonVariant to BlockPreset"
+  - id: "generation"
+    name: "Generation Phase"
+    description: "Generate block-presets.ts and block-bindings.ts"
+  - id: "integration"
+    name: "Integration Phase"
+    description: "Update index.ts exports and verify imports"
+  - id: "validation"
+    name: "Validation Phase"
+    description: "Type check and verify all exports"
+
+standalone: true

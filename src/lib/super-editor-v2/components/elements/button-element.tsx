@@ -3,11 +3,17 @@
 /**
  * Button Element - 버튼 요소
  *
- * 링크, 전화, 지도, 복사, 공유 액션 버튼
+ * 링크, 전화, 지도, 복사, 공유, 연락하기 모달 액션 버튼
+ * - Absolute 모드: 부모 컨테이너 100% 채움
+ * - Auto Layout (hug) 모드: 콘텐츠에 맞게 크기 조정
  */
 
-import { useCallback, useMemo, type CSSProperties } from 'react'
+import { useCallback, useMemo, useState, type CSSProperties } from 'react'
 import type { ElementStyle } from '../../schema/types'
+import { useDocument } from '../../context/document-context'
+import { ContactModal } from '../ui/contact-modal'
+import { RsvpModal } from '../ui/rsvp-modal'
+import { pxToRem } from '../../utils'
 
 // ============================================
 // Types
@@ -15,11 +21,13 @@ import type { ElementStyle } from '../../schema/types'
 
 export interface ButtonElementProps {
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
   value?: unknown
   style?: ElementStyle
   editable?: boolean
   className?: string
+  /** Auto Layout hug 모드 여부 */
+  hugMode?: boolean
 }
 
 // ============================================
@@ -33,12 +41,18 @@ export function ButtonElement({
   style,
   editable = false,
   className = '',
+  hugMode = false,
 }: ButtonElementProps) {
+  const { document, data } = useDocument()
+  const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [rsvpModalOpen, setRsvpModalOpen] = useState(false)
+
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
-      width: '100%',
-      height: '100%',
+      // Hug 모드: 콘텐츠에 맞춤, Absolute 모드: 부모 채움
+      width: hugMode ? 'auto' : '100%',
+      height: hugMode ? 'auto' : '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -63,8 +77,9 @@ export function ButtonElement({
     if (style?.text?.color) {
       css.color = style.text.color
     }
+    // 접근성: px → rem 변환
     if (style?.text?.fontSize) {
-      css.fontSize = style.text.fontSize
+      css.fontSize = pxToRem(style.text.fontSize)
     }
     if (style?.border) {
       css.borderWidth = style.border.width
@@ -74,7 +89,7 @@ export function ButtonElement({
     }
 
     return css
-  }, [style, editable])
+  }, [style, editable, hugMode])
 
   // 액션 핸들러
   const handleClick = useCallback(() => {
@@ -134,6 +149,14 @@ export function ButtonElement({
           })
         }
         break
+
+      case 'contact-modal':
+        setContactModalOpen(true)
+        break
+
+      case 'rsvp-modal':
+        setRsvpModalOpen(true)
+        break
     }
   }, [action, value, editable])
 
@@ -183,22 +206,59 @@ export function ButtonElement({
           </svg>
         )
 
+      case 'contact-modal':
+        return (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+        )
+
+      case 'rsvp-modal':
+        return (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+        )
+
       default:
         return null
     }
   }, [action])
 
   return (
-    <button
-      type="button"
-      className={`se2-button-element se2-button-element--${action} ${className}`}
-      style={buttonStyle}
-      onClick={handleClick}
-      disabled={editable}
-    >
-      {ActionIcon}
-      <span>{label}</span>
-    </button>
+    <>
+      <button
+        type="button"
+        className={`se2-button-element se2-button-element--${action} ${className}`}
+        style={buttonStyle}
+        onClick={handleClick}
+        disabled={editable}
+      >
+        {ActionIcon}
+        <span>{label}</span>
+      </button>
+
+      {/* 연락하기 모달 */}
+      {action === 'contact-modal' && (
+        <ContactModal
+          open={contactModalOpen}
+          onOpenChange={setContactModalOpen}
+          data={data}
+        />
+      )}
+
+      {/* RSVP 모달 */}
+      {action === 'rsvp-modal' && (
+        <RsvpModal
+          open={rsvpModalOpen}
+          onOpenChange={setRsvpModalOpen}
+          invitationId={document.id}
+          data={data}
+          config={data.rsvp}
+        />
+      )}
+    </>
   )
 }
 
