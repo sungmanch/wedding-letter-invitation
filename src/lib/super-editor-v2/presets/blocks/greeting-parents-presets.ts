@@ -595,14 +595,14 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
     style: { background: 'var(--border-muted)' },
   },
   // ═══════════════════════════════════════════════
-  // 신랑측 (이름 + 세례명 - 개별 정렬)
+  // 신랑측 (이름 + 세례명 - 중앙 정렬)
   // ═══════════════════════════════════════════════
   // 5. 신랑 아버지 이름
   {
     type: 'text',
-    x: 8,
+    x: 10,
     y: 47,
-    width: 18,
+    width: 16,
     height: 5,
     zIndex: 1,
     binding: 'parents.groom.father.name',
@@ -621,9 +621,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 6. 신랑 아버지 세례명
   {
     type: 'text',
-    x: 8,
+    x: 10,
     y: 52,
-    width: 18,
+    width: 16,
     height: 3,
     zIndex: 1,
     binding: 'parents.groom.father.baptismalName',
@@ -665,7 +665,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
     type: 'text',
     x: 30,
     y: 47,
-    width: 18,
+    width: 16,
     height: 5,
     zIndex: 1,
     binding: 'parents.groom.mother.name',
@@ -686,7 +686,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
     type: 'text',
     x: 30,
     y: 52,
-    width: 18,
+    width: 16,
     height: 3,
     zIndex: 1,
     binding: 'parents.groom.mother.baptismalName',
@@ -705,9 +705,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 10. "의" + 서열
   {
     type: 'text',
-    x: 48,
+    x: 46,
     y: 47,
-    width: 16,
+    width: 14,
     height: 5,
     zIndex: 1,
     props: {
@@ -728,9 +728,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 11. 신랑 이름
   {
     type: 'text',
-    x: 64,
+    x: 60,
     y: 47,
-    width: 28,
+    width: 30,
     height: 5,
     zIndex: 1,
     binding: 'couple.groom.name',
@@ -741,7 +741,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
         fontSize: 15,
         fontWeight: 500,
         color: 'var(--fg-emphasis)',
-        textAlign: 'left',
+        textAlign: 'center',
         lineHeight: 1.4,
       },
     },
@@ -749,9 +749,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 12. 신랑 세례명
   {
     type: 'text',
-    x: 64,
+    x: 60,
     y: 52,
-    width: 28,
+    width: 30,
     height: 3,
     zIndex: 1,
     binding: 'couple.groom.baptismalName',
@@ -762,20 +762,20 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
         fontSize: 11,
         fontWeight: 400,
         color: 'var(--fg-muted)',
-        textAlign: 'left',
+        textAlign: 'center',
         lineHeight: 1.2,
       },
     },
   },
   // ═══════════════════════════════════════════════
-  // 신부측 (이름 + 세례명 - 개별 정렬)
+  // 신부측 (이름 + 세례명 - 중앙 정렬)
   // ═══════════════════════════════════════════════
   // 13. 신부 아버지 이름
   {
     type: 'text',
-    x: 8,
+    x: 10,
     y: 60,
-    width: 18,
+    width: 16,
     height: 5,
     zIndex: 1,
     binding: 'parents.bride.father.name',
@@ -794,9 +794,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 14. 신부 아버지 세례명
   {
     type: 'text',
-    x: 8,
+    x: 10,
     y: 65,
-    width: 18,
+    width: 16,
     height: 3,
     zIndex: 1,
     binding: 'parents.bride.father.baptismalName',
@@ -838,7 +838,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
     type: 'text',
     x: 30,
     y: 60,
-    width: 18,
+    width: 16,
     height: 5,
     zIndex: 1,
     binding: 'parents.bride.mother.name',
@@ -859,7 +859,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
     type: 'text',
     x: 30,
     y: 65,
-    width: 18,
+    width: 16,
     height: 3,
     zIndex: 1,
     binding: 'parents.bride.mother.baptismalName',
@@ -878,9 +878,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 18. "의" + 서열
   {
     type: 'text',
-    x: 48,
+    x: 46,
     y: 60,
-    width: 16,
+    width: 14,
     height: 5,
     zIndex: 1,
     props: {
@@ -901,9 +901,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 19. 신부 이름
   {
     type: 'text',
-    x: 64,
+    x: 60,
     y: 60,
-    width: 28,
+    width: 30,
     height: 5,
     zIndex: 1,
     binding: 'couple.bride.name',
@@ -914,7 +914,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
         fontSize: 15,
         fontWeight: 500,
         color: 'var(--fg-emphasis)',
-        textAlign: 'left',
+        textAlign: 'center',
         lineHeight: 1.4,
       },
     },
@@ -922,9 +922,9 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
   // 20. 신부 세례명
   {
     type: 'text',
-    x: 64,
+    x: 60,
     y: 65,
-    width: 28,
+    width: 30,
     height: 3,
     zIndex: 1,
     binding: 'couple.bride.baptismalName',
@@ -935,7 +935,7 @@ const BAPTISMAL_ELEMENTS: PresetElement[] = [
         fontSize: 11,
         fontWeight: 400,
         color: 'var(--fg-muted)',
-        textAlign: 'left',
+        textAlign: 'center',
         lineHeight: 1.2,
       },
     },
