@@ -3,9 +3,25 @@
  *
  * 참석 여부 확인 블록 프리셋
  * 팝업 모달 스타일 포함
+ * Phase 4: Auto Layout 마이그레이션 완료
  */
 
 import type { BlockPreset, PresetElement } from './types'
+import type { BlockLayout, SizeMode } from '../../schema/types'
+
+// ============================================
+// Auto Layout Configuration
+// ============================================
+
+const AUTO_LAYOUT_VERTICAL: BlockLayout = {
+  mode: 'auto',
+  direction: 'vertical',
+  gap: 16,
+  padding: { top: 40, right: 32, bottom: 40, left: 32 },
+  alignItems: 'center',
+}
+
+const HUG_HEIGHT: SizeMode = { type: 'hug' }
 
 // ============================================
 // RSVP Preset IDs
@@ -21,11 +37,8 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
   // English Title (R.S.V.P.)
   {
     type: 'text',
-    x: 10,
-    y: 20,
-    width: 80,
-    height: 8,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'custom.rsvpEngTitle',
     value: 'R.S.V.P.',
     props: { type: 'text' },
@@ -43,11 +56,8 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
   // Korean Title
   {
     type: 'text',
-    x: 10,
-    y: 30,
-    width: 80,
-    height: 12,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'rsvp.title',
     value: '참석 의사 전달',
     props: { type: 'text' },
@@ -61,14 +71,11 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // Description
+  // Description (hug 모드로 텍스트 길이에 맞게 확장)
   {
     type: 'text',
-    x: 10,
-    y: 45,
-    width: 80,
-    height: 15,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'rsvp.description',
     value: '신랑, 신부에게 참석의사를\n미리 전달할 수 있어요.',
     props: { type: 'text' },
@@ -86,11 +93,9 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
   // CTA Button
   {
     type: 'button',
-    x: 15,
-    y: 68,
-    width: 70,
-    height: 12,
     zIndex: 1,
+    sizing: { width: { type: 'fixed', value: 70, unit: '%' }, height: { type: 'hug' } },
+    alignSelf: 'center',
     props: {
       type: 'button',
       label: '✓ 참석 의사 전달하기',
@@ -123,10 +128,11 @@ export const RSVP_PRESETS: Record<RsvpPresetId, BlockPreset> = {
     name: 'Basic RSVP',
     nameKo: '기본형',
     description: '심플한 중앙 정렬 RSVP 섹션으로 팝업 모달을 트리거합니다',
-    tags: ['minimal', 'centered', 'light', 'simple'],
+    tags: ['minimal', 'centered', 'light', 'simple', 'auto-layout'],
     complexity: 'low',
     bindings: ['rsvp.title', 'rsvp.description', 'custom.rsvpEngTitle'],
-    defaultHeight: 45,
+    defaultHeight: HUG_HEIGHT,
+    layout: AUTO_LAYOUT_VERTICAL,
     defaultElements: RSVP_BASIC_ELEMENTS,
     specialComponents: ['rsvp-modal'],
     recommendedAnimations: ['fade-in', 'slide-up'],

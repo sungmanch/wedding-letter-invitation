@@ -3,9 +3,25 @@
  *
  * 공지사항/안내 블록 프리셋
  * 화환안내, 포토부스, 식사안내, 주차안내 등
+ * Phase 4: Auto Layout 마이그레이션 완료
  */
 
 import type { BlockPreset, PresetElement } from './types'
+import type { BlockLayout, SizeMode } from '../../schema/types'
+
+// ============================================
+// Auto Layout Configuration
+// ============================================
+
+const AUTO_LAYOUT_VERTICAL: BlockLayout = {
+  mode: 'auto',
+  direction: 'vertical',
+  gap: 16,
+  padding: { top: 32, right: 32, bottom: 32, left: 32 },
+  alignItems: 'center',
+}
+
+const HUG_HEIGHT: SizeMode = { type: 'hug' }
 
 // ============================================
 // Notice Preset IDs
@@ -18,7 +34,7 @@ export type NoticePresetId = 'notice-classic-label'
 // ============================================
 
 /**
- * Classic Label 스타일 요소
+ * Classic Label 스타일 요소 (Auto Layout)
  * - 영문 NOTICE 라벨
  * - 한글 제목 (accent 색상)
  * - 본문 내용
@@ -31,11 +47,8 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
   // English Label (NOTICE)
   {
     type: 'text',
-    x: 0,
-    y: 2,
-    width: 100,
-    height: 5,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     value: 'NOTICE',
     props: { type: 'text' },
     style: {
@@ -52,11 +65,8 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
   // Korean Title (바인딩: notice.items[].title)
   {
     type: 'text',
-    x: 10,
-    y: 8,
-    width: 80,
-    height: 8,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     value: '공지사항 제목',
     props: { type: 'text' },
     style: {
@@ -70,14 +80,11 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // Content (바인딩: notice.items[].content)
+  // Content (바인딩: notice.items[].content) - hug 모드로 텍스트 길이에 맞게 확장
   {
     type: 'text',
-    x: 10,
-    y: 18,
-    width: 80,
-    height: 20,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     value: '공지사항 내용이 여기에 표시됩니다.\n여러 줄로 작성할 수 있습니다.',
     props: { type: 'text' },
     style: {
@@ -94,11 +101,8 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
   // Optional Image (바인딩: notice.items[].image, 조건부 렌더링)
   {
     type: 'image',
-    x: 10,
-    y: 42,
-    width: 80,
-    height: 50,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 200, unit: 'px' } },
     props: {
       type: 'image',
       objectFit: 'cover',
@@ -118,10 +122,11 @@ export const NOTICE_PRESETS: Record<NoticePresetId, BlockPreset> = {
     name: 'Classic Label',
     nameKo: '클래식 라벨',
     description: '영문 NOTICE 라벨과 한글 제목이 조화롭게 배치된 클래식 공지 스타일',
-    tags: ['elegant', 'classic', 'centered', 'label', 'minimal', 'light'],
+    tags: ['elegant', 'classic', 'centered', 'label', 'minimal', 'light', 'auto-layout'],
     complexity: 'low',
     bindings: ['notice.items'],
-    defaultHeight: 45, // 이미지 없을 때 기준, 이미지 있으면 동적 조정
+    defaultHeight: HUG_HEIGHT,
+    layout: AUTO_LAYOUT_VERTICAL,
     defaultElements: NOTICE_CLASSIC_LABEL_ELEMENTS,
     specialComponents: ['notice-item-renderer'],
     recommendedAnimations: ['fade-in', 'slide-up'],
