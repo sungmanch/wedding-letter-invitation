@@ -199,6 +199,48 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: ['Nanum Brush Script:400'],
   },
+
+  // Calistoga (영문 세리프)
+  calistoga: {
+    family: ['Calistoga', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Calistoga:400'],
+  },
+
+  // The Nautigal (영문 스크립트)
+  theNautigal: {
+    family: ['The Nautigal', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['The Nautigal:400,700'],
+  },
+
+  // Inknut Antiqua (영문 세리프)
+  inknutAntiqua: {
+    family: ['Inknut Antiqua', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Inknut Antiqua:300,400,500,600,700,800,900'],
+  },
+
+  // Kodchasan (태국/영문 산세리프)
+  kodchasan: {
+    family: ['Kodchasan', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: ['Kodchasan:200,300,400,500,600,700'],
+  },
+
+  // Bangers (영문 디스플레이)
+  bangers: {
+    family: ['Bangers', 'system-ui'],
+    fallback: 'system-ui',
+    googleFonts: ['Bangers:400'],
+  },
+
+  // Alata (영문 산세리프)
+  alata: {
+    family: ['Alata', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: ['Alata:400'],
+  },
 } as const
 
 // ============================================
