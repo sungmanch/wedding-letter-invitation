@@ -4,6 +4,8 @@
  * Text Element - 텍스트 요소
  *
  * 변수 바인딩된 텍스트 또는 직접 입력 텍스트 렌더링
+ * - Absolute 모드: 부모 컨테이너 100% 채움
+ * - Auto Layout (hug) 모드: 콘텐츠에 맞게 크기 조정
  */
 
 import { useMemo, type CSSProperties } from 'react'
@@ -18,6 +20,8 @@ export interface TextElementProps {
   style?: TextStyle
   editable?: boolean
   className?: string
+  /** Auto Layout hug 모드 여부 */
+  hugMode?: boolean
 }
 
 // ============================================
@@ -29,12 +33,14 @@ export function TextElement({
   style,
   editable = false,
   className = '',
+  hugMode = false,
 }: TextElementProps) {
   // 텍스트 스타일 계산
   const textStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
-      width: '100%',
-      height: '100%',
+      // Hug 모드: 콘텐츠에 맞춤, Absolute 모드: 부모 채움
+      width: hugMode ? 'auto' : '100%',
+      height: hugMode ? 'auto' : '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: style?.textAlign === 'left'
@@ -57,7 +63,7 @@ export function TextElement({
     }
 
     return css
-  }, [style])
+  }, [style, hugMode])
 
   // 줄바꿈 처리
   const formattedValue = useMemo(() => {

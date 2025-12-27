@@ -128,9 +128,23 @@ interface ElementTypeRendererProps {
   editable: boolean
 }
 
+/**
+ * 요소가 hug 모드인지 확인
+ */
+function isHugMode(element: Element): boolean {
+  const sizing = element.sizing
+  if (!sizing) return true // Auto Layout에서 기본값은 hug
+
+  const widthIsHug = !sizing.width || sizing.width.type === 'hug'
+  const heightIsHug = !sizing.height || sizing.height.type === 'hug'
+
+  return widthIsHug || heightIsHug
+}
+
 function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
   const props = element.props
   const elementType = element.type || props?.type
+  const hugMode = isHugMode(element)
 
   if (!elementType) {
     return (
@@ -147,6 +161,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           value={value as string}
           style={element.style?.text}
           editable={editable}
+          hugMode={hugMode}
         />
       )
 
@@ -177,6 +192,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     case 'button':
       return (
         <ButtonElement
+          hugMode={hugMode}
           label={(props as ButtonProps).label}
           action={(props as ButtonProps).action}
           value={value}

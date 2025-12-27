@@ -4,6 +4,8 @@
  * Button Element - 버튼 요소
  *
  * 링크, 전화, 지도, 복사, 공유, 연락하기 모달 액션 버튼
+ * - Absolute 모드: 부모 컨테이너 100% 채움
+ * - Auto Layout (hug) 모드: 콘텐츠에 맞게 크기 조정
  */
 
 import { useCallback, useMemo, useState, type CSSProperties } from 'react'
@@ -22,6 +24,8 @@ export interface ButtonElementProps {
   style?: ElementStyle
   editable?: boolean
   className?: string
+  /** Auto Layout hug 모드 여부 */
+  hugMode?: boolean
 }
 
 // ============================================
@@ -35,6 +39,7 @@ export function ButtonElement({
   style,
   editable = false,
   className = '',
+  hugMode = false,
 }: ButtonElementProps) {
   const { data } = useDocument()
   const [contactModalOpen, setContactModalOpen] = useState(false)
@@ -42,8 +47,9 @@ export function ButtonElement({
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
-      width: '100%',
-      height: '100%',
+      // Hug 모드: 콘텐츠에 맞춤, Absolute 모드: 부모 채움
+      width: hugMode ? 'auto' : '100%',
+      height: hugMode ? 'auto' : '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -79,7 +85,7 @@ export function ButtonElement({
     }
 
     return css
-  }, [style, editable])
+  }, [style, editable, hugMode])
 
   // 액션 핸들러
   const handleClick = useCallback(() => {
