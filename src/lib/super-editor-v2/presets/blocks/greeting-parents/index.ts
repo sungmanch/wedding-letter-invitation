@@ -14,6 +14,7 @@ import { GREETING_PARENTS_BAPTISMAL } from './baptismal'
 import { GREETING_PARENTS_BALLOON_HEART } from './balloon-heart'
 import { GREETING_PARENTS_BOX_STYLE } from './box-style'
 import { GREETING_PARENTS_RIBBON } from './ribbon'
+import { GREETING_PARENTS_CARD_DUAL_HEART } from './card-dual-heart'
 
 // ============================================
 // Type Exports
@@ -27,6 +28,7 @@ export type GreetingParentsPresetId =
   | 'greeting-parents-balloon-heart'
   | 'greeting-parents-box-style'
   | 'greeting-parents-ribbon'
+  | 'greeting-parents-card-dual-heart'
 
 // ============================================
 // Preset Registry
@@ -40,6 +42,7 @@ export const GREETING_PARENTS_PRESETS: Record<GreetingParentsPresetId, BlockPres
   'greeting-parents-balloon-heart': GREETING_PARENTS_BALLOON_HEART,
   'greeting-parents-box-style': GREETING_PARENTS_BOX_STYLE,
   'greeting-parents-ribbon': GREETING_PARENTS_RIBBON,
+  'greeting-parents-card-dual-heart': GREETING_PARENTS_CARD_DUAL_HEART,
 }
 
 // ============================================

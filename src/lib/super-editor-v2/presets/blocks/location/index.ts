@@ -6,6 +6,7 @@
 
 import type { BlockPreset } from '../types'
 import { LOCATION_MINIMAL } from './minimal'
+import { LOCATION_WITH_TRANSPORT } from './with-transport'
 
 // ============================================
 // Preset Registry
@@ -13,13 +14,14 @@ import { LOCATION_MINIMAL } from './minimal'
 
 export const LOCATION_PRESETS: Record<LocationPresetId, BlockPreset> = {
   'location-minimal': LOCATION_MINIMAL,
+  'location-with-transport': LOCATION_WITH_TRANSPORT,
 }
 
 // ============================================
 // Types
 // ============================================
 
-export type LocationPresetId = 'location-minimal'
+export type LocationPresetId = 'location-minimal' | 'location-with-transport'
 
 // ============================================
 // Helper Functions
@@ -50,3 +52,4 @@ export function getLocationPresetsByComplexity(
 
 // Re-export individual presets
 export { LOCATION_MINIMAL } from './minimal'
+export { LOCATION_WITH_TRANSPORT } from './with-transport'

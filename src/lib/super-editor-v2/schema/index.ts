@@ -205,6 +205,7 @@ export const DEFAULT_BLOCK_HEIGHTS: Record<Block['type'], number> = {
   notice: 40,
   account: 80,
   message: 100,
+  wreath: 40,
   ending: 60,
   // 오버레이/모달
   contact: 85,
@@ -228,6 +229,7 @@ export const BLOCK_TYPE_LABELS: Record<Block['type'], string> = {
   location: '오시는길',
   notice: '공지사항',
   account: '축의금',
+  wreath: '화환 안내',
   message: '방명록',
   ending: '엔딩',
   // 오버레이/모달

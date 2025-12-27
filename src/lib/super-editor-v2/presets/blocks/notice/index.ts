@@ -9,12 +9,13 @@ import type { BlockPreset } from '../types'
 
 // Individual Preset Imports
 import { NOTICE_CLASSIC_LABEL } from './classic-label'
+import { NOTICE_CARD_ICON } from './card-icon'
 
 // ============================================
 // Type Exports
 // ============================================
 
-export type NoticePresetId = 'notice-classic-label'
+export type NoticePresetId = 'notice-classic-label' | 'notice-card-icon'
 
 // ============================================
 // Preset Registry
@@ -22,6 +23,7 @@ export type NoticePresetId = 'notice-classic-label'
 
 export const NOTICE_PRESETS: Record<NoticePresetId, BlockPreset> = {
   'notice-classic-label': NOTICE_CLASSIC_LABEL,
+  'notice-card-icon': NOTICE_CARD_ICON,
 }
 
 // ============================================

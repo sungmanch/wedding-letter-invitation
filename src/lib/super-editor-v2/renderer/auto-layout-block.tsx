@@ -16,6 +16,7 @@ import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
 import { AutoLayoutElement } from './auto-layout-element'
 import { resolveBlockHeightStyle } from '../utils/size-resolver'
+import { NoticeSwiper } from '../components/blocks/notice-swiper'
 
 // ============================================
 // Types
@@ -117,6 +118,9 @@ export function AutoLayoutBlock({
           onClick={onElementClick}
         />
       ))}
+
+      {/* Notice Swiper (notice 블록의 card-icon 변형) */}
+      {block.type === 'notice' && <NoticeSwiper />}
     </div>
   )
 }
