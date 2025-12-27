@@ -171,6 +171,13 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: [], // CDN @font-face
   },
+
+  // 나눔스퀘어
+  nanumSquare: {
+    family: ['NanumSquare', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // CDN @import
+  },
 } as const
 
 // ============================================
