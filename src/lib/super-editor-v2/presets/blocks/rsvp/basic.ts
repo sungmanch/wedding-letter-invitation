@@ -69,15 +69,15 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // CTA Button
+  // CTA Button (이미지 디자인: rounded border 스타일)
   {
     type: 'button',
     zIndex: 1,
-    sizing: { width: { type: 'fixed', value: 70, unit: '%' }, height: { type: 'hug' } },
+    sizing: { width: { type: 'fixed', value: 85, unit: '%' }, height: { type: 'hug' } },
     alignSelf: 'center',
     props: {
       type: 'button',
-      label: '✓ 참석 의사 전달하기',
+      label: '참석 의사 전달하기',
       action: 'rsvp-modal',
     },
     style: {
@@ -88,9 +88,8 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
         color: 'var(--fg-default)',
         textAlign: 'center',
       },
-      background: 'var(--bg-card)',
-      border: { width: 0, color: 'transparent', style: 'solid', radius: 50 },
-      shadow: '0 2px 8px rgba(0,0,0,0.08)',
+      background: 'transparent',
+      border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 50 },
     },
   },
 ]

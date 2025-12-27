@@ -1,52 +1,55 @@
 /**
  * Profile Block - Dual Card Preset
  *
- * 신랑/신부 프로필을 교차 배치 카드로 보여주는 카드 형식 (Auto Layout)
+ * 신랑/신부 프로필을 좌우로 나란히 배치하고 MBTI, 태그를 표시하는 레이아웃
  */
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
 
 const ELEMENTS: PresetElement[] = [
-  // Section Title (English)
+  // Section Label (English)
   {
+    id: 'section-label',
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    value: 'About Us',
+    value: 'ABOUT US',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'Cormorant Garamond',
-        fontSize: 18,
-        fontWeight: 400,
+        fontFamily: 'var(--font-body)',
+        fontSize: 12,
+        fontWeight: 600,
         color: 'var(--accent-default)',
         textAlign: 'center',
-        letterSpacing: 0.1,
+        letterSpacing: 2,
       },
     },
   },
   // Section Title (Korean)
   {
+    id: 'section-title',
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    value: '저희를 소개합니다',
+    value: '저희를 소개합니다.',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'Noto Serif KR',
-        fontSize: 22,
-        fontWeight: 500,
+        fontFamily: 'var(--font-heading)',
+        fontSize: 24,
+        fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
       },
     },
   },
   // ═══════════════════════════════════════
-  // 신랑 그룹 (사진 왼쪽, 정보 오른쪽)
+  // 프로필 카드 그룹 (좌우 2컬럼 - 나란히 배치)
   // ═══════════════════════════════════════
   {
+    id: 'profile-cards',
     type: 'group',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
@@ -54,303 +57,279 @@ const ELEMENTS: PresetElement[] = [
       type: 'group',
       layout: {
         direction: 'horizontal',
-        gap: 16,
+        gap: 8,
         alignItems: 'start',
+        justifyContent: 'center',
       },
     },
     children: [
-      // Groom Photo (42%)
+      // ─── 신부 프로필 카드 (왼쪽) ───
       {
-        id: 'groom-photo',
-        type: 'image',
-        zIndex: 1,
-        sizing: { width: { type: 'fixed', value: 42, unit: '%' }, height: { type: 'fixed', value: 200, unit: 'px' } },
-        binding: 'couple.groom.photo',
-        props: { type: 'image', objectFit: 'cover' },
-      },
-      // Groom Info Group
-      {
-        id: 'groom-info',
+        id: 'bride-card',
         type: 'group',
         zIndex: 1,
-        sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+        sizing: { width: { type: 'fill-portion', value: 1 }, height: { type: 'hug' } },
         props: {
           type: 'group',
           layout: {
             direction: 'vertical',
             gap: 8,
-            alignItems: 'start',
+            alignItems: 'center',
           },
         },
         children: [
-          // Groom Label (신랑 뱃지)
+          // 신부 사진
           {
-            id: 'groom-label',
-            type: 'text',
+            id: 'bride-photo',
+            type: 'image',
             zIndex: 1,
-            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
-            value: '신랑',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 400,
-                color: 'var(--fg-muted)',
-                textAlign: 'center',
-              },
-              border: {
-                width: 1,
-                color: 'var(--border-default)',
-                style: 'solid',
-                radius: 12,
-              },
+            sizing: {
+              width: { type: 'fill' },
+              height: { type: 'fixed', value: 200, unit: 'px' },
             },
+            binding: 'couple.bride.photo',
+            props: { type: 'image', objectFit: 'cover' },
           },
-          // Groom Name
-          {
-            id: 'groom-name',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'couple.groom.name',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontFamily: 'Noto Serif KR',
-                fontSize: 20,
-                fontWeight: 600,
-                color: 'var(--fg-default)',
-                textAlign: 'left',
-              },
-            },
-          },
-          // Groom Parents
-          {
-            id: 'groom-parents',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            props: {
-              type: 'text',
-              format: '{parents.groom.father.name} · {parents.groom.mother.name}의 {parents.groom.birthOrder}',
-            },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 400,
-                color: 'var(--fg-muted)',
-                textAlign: 'left',
-              },
-            },
-          },
-          // Groom Birth Date
-          {
-            id: 'groom-birthdate',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'couple.groom.birthDate',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 400,
-                color: 'var(--fg-muted)',
-                textAlign: 'left',
-              },
-            },
-          },
-          // Groom MBTI
-          {
-            id: 'groom-mbti',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
-            binding: 'couple.groom.mbti',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 500,
-                color: 'var(--fg-default)',
-                textAlign: 'left',
-              },
-            },
-          },
-          // Groom Tags
-          {
-            id: 'groom-tags',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'couple.groom.tags',
-            value: '#캠핑 #러닝',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 400,
-                color: 'var(--fg-muted)',
-                textAlign: 'left',
-              },
-            },
-          },
-        ],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════
-  // 신부 그룹 (정보 왼쪽, 사진 오른쪽 - reverse)
-  // ═══════════════════════════════════════
-  {
-    type: 'group',
-    zIndex: 1,
-    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    props: {
-      type: 'group',
-      layout: {
-        direction: 'horizontal',
-        gap: 16,
-        alignItems: 'start',
-        reverse: true,  // 사진이 오른쪽으로 이동
-      },
-    },
-    children: [
-      // Bride Photo (42%)
-      {
-        id: 'bride-photo',
-        type: 'image',
-        zIndex: 1,
-        sizing: { width: { type: 'fixed', value: 42, unit: '%' }, height: { type: 'fixed', value: 200, unit: 'px' } },
-        binding: 'couple.bride.photo',
-        props: { type: 'image', objectFit: 'cover' },
-      },
-      // Bride Info Group
-      {
-        id: 'bride-info',
-        type: 'group',
-        zIndex: 1,
-        sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-        props: {
-          type: 'group',
-          layout: {
-            direction: 'vertical',
-            gap: 8,
-            alignItems: 'start',
-          },
-        },
-        children: [
-          // Bride Label (신부 뱃지)
-          {
-            id: 'bride-label',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
-            value: '신부',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 400,
-                color: 'var(--fg-muted)',
-                textAlign: 'center',
-              },
-              border: {
-                width: 1,
-                color: 'var(--border-default)',
-                style: 'solid',
-                radius: 12,
-              },
-            },
-          },
-          // Bride Name
+          // 신부 이름
           {
             id: 'bride-name',
             type: 'text',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+            sizing: { height: { type: 'hug' } },
             binding: 'couple.bride.name',
             props: { type: 'text' },
             style: {
               text: {
-                fontFamily: 'Noto Serif KR',
-                fontSize: 20,
-                fontWeight: 600,
+                fontFamily: 'var(--font-heading)',
+                fontSize: 18,
+                fontWeight: 500,
                 color: 'var(--fg-default)',
-                textAlign: 'left',
+                textAlign: 'center',
               },
             },
           },
-          // Bride Parents
-          {
-            id: 'bride-parents',
-            type: 'text',
-            zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            props: {
-              type: 'text',
-              format: '{parents.bride.father.name} · {parents.bride.mother.name}의 {parents.bride.birthOrder}',
-            },
-            style: {
-              text: {
-                fontSize: 12,
-                fontWeight: 400,
-                color: 'var(--fg-muted)',
-                textAlign: 'left',
-              },
-            },
-          },
-          // Bride Birth Date
+          // 신부 생년월일
           {
             id: 'bride-birthdate',
             type: 'text',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+            sizing: { height: { type: 'hug' } },
             binding: 'couple.bride.birthDate',
             props: { type: 'text' },
             style: {
               text: {
-                fontSize: 12,
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
-                textAlign: 'left',
+                textAlign: 'center',
               },
             },
           },
-          // Bride MBTI
+          // 신부 직업/소개
           {
-            id: 'bride-mbti',
+            id: 'bride-intro',
             type: 'text',
             zIndex: 1,
-            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
-            binding: 'couple.bride.mbti',
+            sizing: { height: { type: 'hug' } },
+            binding: 'couple.bride.intro',
             props: { type: 'text' },
             style: {
               text: {
-                fontSize: 12,
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
+            },
+          },
+          // 신부 태그 그룹 (MBTI + tags)
+          {
+            id: 'bride-tags-group',
+            type: 'group',
+            zIndex: 1,
+            sizing: { height: { type: 'hug' } },
+            props: {
+              type: 'group',
+              layout: {
+                direction: 'horizontal',
+                gap: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+            },
+            children: [
+              {
+                id: 'bride-mbti',
+                type: 'text',
+                zIndex: 1,
+                sizing: { height: { type: 'hug' } },
+                binding: 'couple.bride.mbti',
+                props: { type: 'text' },
+                style: {
+                  text: {
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: 'var(--accent-default)',
+                    textAlign: 'center',
+                  },
+                },
+              },
+              {
+                id: 'bride-tags',
+                type: 'text',
+                zIndex: 1,
+                sizing: { height: { type: 'hug' } },
+                binding: 'couple.bride.tags',
+                props: { type: 'text' },
+                style: {
+                  text: {
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: 'var(--accent-default)',
+                    textAlign: 'center',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+      // ─── 신랑 프로필 카드 (오른쪽) ───
+      {
+        id: 'groom-card',
+        type: 'group',
+        zIndex: 1,
+        sizing: { width: { type: 'fill-portion', value: 1 }, height: { type: 'hug' } },
+        props: {
+          type: 'group',
+          layout: {
+            direction: 'vertical',
+            gap: 8,
+            alignItems: 'center',
+          },
+        },
+        children: [
+          // 신랑 사진
+          {
+            id: 'groom-photo',
+            type: 'image',
+            zIndex: 1,
+            sizing: {
+              width: { type: 'fill' },
+              height: { type: 'fixed', value: 200, unit: 'px' },
+            },
+            binding: 'couple.groom.photo',
+            props: { type: 'image', objectFit: 'cover' },
+          },
+          // 신랑 이름
+          {
+            id: 'groom-name',
+            type: 'text',
+            zIndex: 1,
+            sizing: { height: { type: 'hug' } },
+            binding: 'couple.groom.name',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-heading)',
+                fontSize: 18,
                 fontWeight: 500,
                 color: 'var(--fg-default)',
-                textAlign: 'left',
+                textAlign: 'center',
               },
             },
           },
-          // Bride Tags
+          // 신랑 생년월일
           {
-            id: 'bride-tags',
+            id: 'groom-birthdate',
             type: 'text',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'couple.bride.tags',
-            value: '#스노우보드 #캠핑',
+            sizing: { height: { type: 'hug' } },
+            binding: 'couple.groom.birthDate',
             props: { type: 'text' },
             style: {
               text: {
-                fontSize: 12,
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
-                textAlign: 'left',
+                textAlign: 'center',
               },
             },
+          },
+          // 신랑 직업/소개
+          {
+            id: 'groom-intro',
+            type: 'text',
+            zIndex: 1,
+            sizing: { height: { type: 'hug' } },
+            binding: 'couple.groom.intro',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
+            },
+          },
+          // 신랑 태그 그룹 (MBTI + tags)
+          {
+            id: 'groom-tags-group',
+            type: 'group',
+            zIndex: 1,
+            sizing: { height: { type: 'hug' } },
+            props: {
+              type: 'group',
+              layout: {
+                direction: 'horizontal',
+                gap: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+            },
+            children: [
+              {
+                id: 'groom-mbti',
+                type: 'text',
+                zIndex: 1,
+                sizing: { height: { type: 'hug' } },
+                binding: 'couple.groom.mbti',
+                props: { type: 'text' },
+                style: {
+                  text: {
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: 'var(--accent-default)',
+                    textAlign: 'center',
+                  },
+                },
+              },
+              {
+                id: 'groom-tags',
+                type: 'text',
+                zIndex: 1,
+                sizing: { height: { type: 'hug' } },
+                binding: 'couple.groom.tags',
+                props: { type: 'text' },
+                style: {
+                  text: {
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: 'var(--accent-default)',
+                    textAlign: 'center',
+                  },
+                },
+              },
+            ],
           },
         ],
       },
@@ -363,37 +342,33 @@ export const PROFILE_DUAL_CARD: BlockPreset = {
   blockType: 'profile',
   variant: 'dual-card',
   name: 'Dual Card',
-  nameKo: '듀얼 카드',
-  description: '신랑/신부 프로필을 교차 배치 카드로 보여주는 카드 형식 (Auto Layout)',
-  tags: ['elegant', 'minimal', 'modern', 'card', 'dual', 'alternate', 'light', 'auto-layout'],
+  nameKo: '좌우 프로필',
+  description: '신랑/신부 프로필을 좌우로 나란히 배치하고 MBTI, 태그를 표시하는 레이아웃',
+  tags: ['modern', 'dual-column', 'minimal', 'card', 'auto-layout'],
   complexity: 'medium',
   bindings: [
-    'couple.groom.name',
-    'couple.groom.photo',
-    'couple.groom.birthDate',
-    'couple.groom.mbti',
-    'couple.groom.tags',
     'couple.bride.name',
     'couple.bride.photo',
     'couple.bride.birthDate',
+    'couple.bride.intro',
     'couple.bride.mbti',
     'couple.bride.tags',
-    'parents.groom.father.name',
-    'parents.groom.mother.name',
-    'parents.groom.birthOrder',
-    'parents.bride.father.name',
-    'parents.bride.mother.name',
-    'parents.bride.birthOrder',
+    'couple.groom.name',
+    'couple.groom.photo',
+    'couple.groom.birthDate',
+    'couple.groom.intro',
+    'couple.groom.mbti',
+    'couple.groom.tags',
   ],
   defaultHeight: HUG_HEIGHT,
   layout: AUTO_LAYOUT_VERTICAL,
   defaultElements: ELEMENTS,
-  specialComponents: ['card', 'badge', 'tag-list', 'group'],
-  recommendedAnimations: ['fade-in', 'stagger-fade-up', 'slide-in-left', 'slide-in-right'],
-  recommendedThemes: ['classic-ivory', 'minimal-light', 'romantic-blush'],
+  specialComponents: ['card', 'tag-list', 'group'],
+  recommendedAnimations: ['fade-in', 'stagger-fade-up'],
+  recommendedThemes: ['simple-pink', 'minimal-light', 'romantic-blush'],
   aiHints: {
-    mood: ['elegant', 'warm', 'friendly'],
-    style: ['card-layout', 'alternating', 'clean', 'auto-layout'],
+    mood: ['modern', 'minimal', 'friendly'],
+    style: ['dual-column', 'side-by-side', 'card', 'auto-layout'],
     useCase: ['커플 소개', 'About Us', '프로필 정보'],
   },
 }

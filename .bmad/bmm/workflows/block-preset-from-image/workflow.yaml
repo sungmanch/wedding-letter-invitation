@@ -13,22 +13,35 @@ date: system-generated
 # Image Analysis Settings
 # ============================================================
 
+# ⚠️ Auto Layout First 원칙
+# Hero 블록을 제외한 모든 블록은 Auto Layout (layout.mode: 'auto')을 기본으로 사용
+# 장식 요소나 지원하기 어려운 디자인에서만 absolute 사용
+layout_strategy:
+  default_mode: auto  # Hero 제외 모든 블록 기본값
+  hero_mode: absolute  # Hero 블록만 absolute
+  exceptions:
+    - decoration_elements: absolute  # 배경 장식 (sparkle, leaf, ornament)
+    - map_elements: absolute  # 지도/캐러셀 등 외부 라이브러리 영역
+    - gallery_carousel: absolute  # 갤러리 캐러셀
+
 # 이미지 분석 시 추출할 정보
 analysis_targets:
   layout:
-    - element_positions: "각 UI 요소의 위치 (상단/중앙/하단, 좌/중/우)"
+    - layout_mode: "Auto Layout (auto) vs Absolute (absolute) 결정"
+    - direction: "vertical | horizontal (Auto Layout 시)"
     - element_hierarchy: "요소들의 시각적 계층구조"
-    - spacing_pattern: "여백 및 간격 패턴"
-    - grid_structure: "그리드 또는 레이아웃 구조"
+    - spacing_pattern: "gap, padding 패턴"
+    - decoration_elements: "장식 요소 (absolute로 처리)"
 
   typography:
-    - font_styles: "폰트 스타일 (세리프/산세리프, 두께, 크기)"
+    - font_family_role: "display/heading/body 3-Family 분류"
     - text_hierarchy: "제목/본문/캡션 등 텍스트 계층"
     - text_alignment: "텍스트 정렬 방식"
 
   visual_style:
-    - color_scheme: "주요 색상 및 배색"
-    - contrast_level: "명암 대비 수준"
+    - color_system_type: "1컬러 (P-S-T) vs 2컬러 (P-S-T+A)"
+    - primary_color: "Primary (P) - 제목, 강조"
+    - accent_color: "Accent (A) - 버튼, 아이콘 (2컬러 시)"
     - mood: "전체적인 분위기 (minimal, elegant, romantic 등)"
 
   content_mapping:
@@ -90,131 +103,166 @@ available_element_types:
   - divider
   - map
   - calendar
+  - group     # 중첩 레이아웃 (Auto Layout 컨테이너)
 
 # ============================================================
-# Design Token System
+# P-S-T 컬러 시스템
 # ============================================================
 
-# 시맨틱 컬러 토큰 (CSS 변수로 렌더링됨)
+# 컬러 시스템 타입
+color_system:
+  one_color_pst:
+    description: "1컬러 시스템 - Primary만 입력, S/T 자동 계산"
+    input: ["Primary (P)"]
+    auto_generated: ["Secondary (S)", "Tertiary (T)"]
+    formula:
+      S: "H 유지, S×0.5, L=97%"
+      T: "H 유지, S×0.9, L=85%"
+
+  two_color_psta:
+    description: "2컬러 시스템 - Primary + Accent 입력, S/T 자동 계산"
+    input: ["Primary (P)", "Accent (A)"]
+    auto_generated: ["Secondary (S)", "Tertiary (T)"]
+    formula:
+      S: "P에서 L=97%"
+      T: "P에서 L=85%"
+
+# 시맨틱 토큰 매핑 (17개)
 semantic_color_tokens:
   background:
     - name: "bg-page"
       description: "페이지 전체 배경"
-      css_var: "var(--bg-page)"
+      default: "#FFFFFF"
     - name: "bg-section"
       description: "기본 섹션 배경"
-      css_var: "var(--bg-section)"
+      default: "#FFFFFF"
     - name: "bg-section-alt"
-      description: "대체 섹션 배경 (교차용)"
-      css_var: "var(--bg-section-alt)"
+      description: "대체 섹션 배경"
+      default: "#FFFFFF"
     - name: "bg-card"
-      description: "카드/컨테이너 배경"
-      css_var: "var(--bg-card)"
+      description: "카드 배경"
+      mapping: "Secondary (S)"
     - name: "bg-overlay"
-      description: "이미지 오버레이"
-      css_var: "var(--bg-overlay)"
+      description: "오버레이/모달 딤"
+      default: "rgba(0,0,0,0.4)"
 
   foreground:
     - name: "fg-default"
-      description: "기본 텍스트"
-      css_var: "var(--fg-default)"
+      description: "기본 본문 텍스트"
+      default: "#1A1A1A"
     - name: "fg-muted"
-      description: "보조 텍스트 (날짜, 설명 등)"
-      css_var: "var(--fg-muted)"
+      description: "보조 텍스트, 캡션"
+      default: "#6B7280"
     - name: "fg-emphasis"
-      description: "강조 텍스트 (이름, 제목 등)"
-      css_var: "var(--fg-emphasis)"
+      description: "제목, 강조 텍스트"
+      mapping: "Primary (P)"
     - name: "fg-inverse"
       description: "반전 배경 위 텍스트"
-      css_var: "var(--fg-inverse)"
+      default: "#FFFFFF"
     - name: "fg-on-accent"
-      description: "액센트 배경 위 텍스트"
-      css_var: "var(--fg-on-accent)"
+      description: "액센트 버튼 위 텍스트"
+      default: "#FFFFFF"
 
   accent:
     - name: "accent-default"
-      description: "기본 액센트 (버튼, 링크)"
-      css_var: "var(--accent-default)"
+      description: "아이콘, 버튼, 활성 탭"
+      mapping_1color: "Primary (P)"
+      mapping_2color: "Accent (A)"
     - name: "accent-hover"
       description: "호버 상태"
-      css_var: "var(--accent-hover)"
+      mapping_1color: "Tertiary (T)"
+      mapping_2color: "A (L+10%)"
     - name: "accent-active"
-      description: "활성 상태"
-      css_var: "var(--accent-active)"
+      description: "클릭/활성 상태"
+      mapping_1color: "Primary (P)"
+      mapping_2color: "A (L-5%)"
     - name: "accent-secondary"
-      description: "보조 액센트 (듀오톤)"
-      css_var: "var(--accent-secondary)"
+      description: "보조 강조"
+      mapping: "Tertiary (T)"
 
   border:
     - name: "border-default"
       description: "기본 테두리"
-      css_var: "var(--border-default)"
+      default: "#E5E7EB"
     - name: "border-emphasis"
       description: "강조 테두리"
-      css_var: "var(--border-emphasis)"
+      mapping_1color: "Primary (P)"
+      mapping_2color: "Accent (A)"
     - name: "border-muted"
       description: "연한 테두리"
-      css_var: "var(--border-muted)"
+      default: "#F3F4F6"
 
-# 타이포그래피 토큰
+# 테마 프리셋 ID
+theme_preset_ids:
+  one_color:
+    - simple-pink      # P: #EF90CB
+    - simple-coral     # P: #EC8A87
+    - simple-blue      # P: #002BFF
+  classic:
+    - minimal-light
+    - classic-ivory
+    - classic-gold
+  modern:
+    - modern-mono
+  romantic:
+    - romantic-blush
+    - romantic-garden
+  special:
+    - photo-adaptive   # 사진에서 색상 추출
+
+# ============================================================
+# 3-Family 타이포그래피 시스템
+# ============================================================
+
+# 폰트 역할
 typography_tokens:
   font_families:
+    - name: "font-display"
+      description: "히어로/인트로용 (예술적, 장식적)"
+      css_var: "var(--font-display)"
     - name: "font-heading"
-      description: "제목용 폰트"
+      description: "섹션 제목용 (명조/세리프 계열)"
       css_var: "var(--font-heading)"
     - name: "font-body"
-      description: "본문용 폰트"
+      description: "섹션 본문용 (고딕/산세리프 계열)"
       css_var: "var(--font-body)"
-    - name: "font-accent"
-      description: "강조용 폰트 (영문 장식 등)"
-      css_var: "var(--font-accent)"
 
   font_weights:
+    - name: "font-weight-display"
+      css_var: "var(--font-weight-display)"
     - name: "font-weight-heading"
       css_var: "var(--font-weight-heading)"
     - name: "font-weight-body"
       css_var: "var(--font-weight-body)"
-    - name: "font-weight-accent"
-      css_var: "var(--font-weight-accent)"
 
-  type_scale:
+  # ⚠️ fontSize는 number (px 단위)로 프리셋에 저장
+  # 렌더링 시 pxToRem()으로 자동 변환 → 접근성 지원 (사용자 시스템 폰트 설정 존중)
+  # 아래는 참고용 px 값
+  type_scale_reference:
     - name: "xs"
-      size: "0.75rem"
-      css_var: "var(--text-xs)"
+      px: 12
+      description: "캡션, 주석"
     - name: "sm"
-      size: "0.875rem"
-      css_var: "var(--text-sm)"
+      px: 14
+      description: "보조 텍스트"
     - name: "base"
-      size: "1rem"
-      css_var: "var(--text-base)"
+      px: 16
+      description: "본문 기본"
     - name: "lg"
-      size: "1.125rem"
-      css_var: "var(--text-lg)"
+      px: 18
+      description: "본문 강조"
     - name: "xl"
-      size: "1.25rem"
-      css_var: "var(--text-xl)"
+      px: 20
+      description: "소제목"
     - name: "2xl"
-      size: "1.5rem"
-      css_var: "var(--text-2xl)"
+      px: 24
+      description: "섹션 제목"
     - name: "3xl"
-      size: "1.875rem"
-      css_var: "var(--text-3xl)"
+      px: 30
+      description: "블록 제목"
     - name: "4xl"
-      size: "2.25rem"
-      css_var: "var(--text-4xl)"
-
-# 테마 프리셋 ID
-theme_preset_ids:
-  - minimal-light      # 밝은 미니멀
-  - minimal-dark       # 어두운 미니멀
-  - classic-ivory      # 아이보리 클래식
-  - classic-gold       # 골드 클래식
-  - modern-mono        # 모노크롬 모던
-  - modern-contrast    # 고대비 모던
-  - romantic-blush     # 블러쉬 핑크
-  - romantic-garden    # 가든 그린
-  - cinematic-dark     # 다크 시네마틱
-  - cinematic-warm     # 따뜻한 시네마틱
+      px: 36
+      description: "히어로 제목"
 
 # 타이포그래피 프리셋 ID
 typography_preset_ids:
@@ -234,6 +282,7 @@ typography_preset_ids:
     - natural-handwritten  # High Summit + 마포금빛나루
     - natural-brush        # Alex Brush + 나눔붓글씨
     - natural-warm         # Dancing Script + 고운돋움
+    - natural-witty
 
 # ============================================================
 # Source and target references

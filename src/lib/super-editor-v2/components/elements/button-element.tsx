@@ -12,6 +12,8 @@ import { useCallback, useMemo, useState, type CSSProperties } from 'react'
 import type { ElementStyle } from '../../schema/types'
 import { useDocument } from '../../context/document-context'
 import { ContactModal } from '../ui/contact-modal'
+import { RsvpModal } from '../ui/rsvp-modal'
+import { pxToRem } from '../../utils'
 
 // ============================================
 // Types
@@ -41,8 +43,9 @@ export function ButtonElement({
   className = '',
   hugMode = false,
 }: ButtonElementProps) {
-  const { data } = useDocument()
+  const { document, data } = useDocument()
   const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [rsvpModalOpen, setRsvpModalOpen] = useState(false)
 
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
@@ -74,8 +77,9 @@ export function ButtonElement({
     if (style?.text?.color) {
       css.color = style.text.color
     }
+    // 접근성: px → rem 변환
     if (style?.text?.fontSize) {
-      css.fontSize = style.text.fontSize
+      css.fontSize = pxToRem(style.text.fontSize)
     }
     if (style?.border) {
       css.borderWidth = style.border.width
@@ -149,6 +153,10 @@ export function ButtonElement({
       case 'contact-modal':
         setContactModalOpen(true)
         break
+
+      case 'rsvp-modal':
+        setRsvpModalOpen(true)
+        break
     }
   }, [action, value, editable])
 
@@ -205,6 +213,14 @@ export function ButtonElement({
           </svg>
         )
 
+      case 'rsvp-modal':
+        return (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+        )
+
       default:
         return null
     }
@@ -229,6 +245,17 @@ export function ButtonElement({
           open={contactModalOpen}
           onOpenChange={setContactModalOpen}
           data={data}
+        />
+      )}
+
+      {/* RSVP 모달 */}
+      {action === 'rsvp-modal' && (
+        <RsvpModal
+          open={rsvpModalOpen}
+          onOpenChange={setRsvpModalOpen}
+          invitationId={document.id}
+          data={data}
+          config={data.rsvp}
         />
       )}
     </>

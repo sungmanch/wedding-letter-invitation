@@ -6,10 +6,13 @@
  * 변수 바인딩된 텍스트 또는 직접 입력 텍스트 렌더링
  * - Absolute 모드: 부모 컨테이너 100% 채움
  * - Auto Layout (hug) 모드: 콘텐츠에 맞게 크기 조정
+ *
+ * 접근성: fontSize는 rem 단위로 렌더링하여 사용자 시스템 폰트 설정 존중
  */
 
 import { useMemo, type CSSProperties } from 'react'
 import type { TextStyle } from '../../schema/types'
+import { pxToRem } from '../../utils'
 
 // ============================================
 // Types
@@ -54,7 +57,8 @@ export function TextElement({
 
     if (style) {
       if (style.fontFamily) css.fontFamily = style.fontFamily
-      if (style.fontSize) css.fontSize = style.fontSize
+      // 접근성: px → rem 변환으로 시스템 폰트 크기 설정 존중
+      if (style.fontSize) css.fontSize = pxToRem(style.fontSize)
       if (style.fontWeight) css.fontWeight = style.fontWeight
       if (style.color) css.color = style.color
       if (style.textAlign) css.textAlign = style.textAlign

@@ -74,6 +74,26 @@ export {
   type ContactPresetId,
 } from './contact'
 
+// Gallery Presets (갤러리/사진)
+export {
+  GALLERY_PRESETS,
+  getGalleryPreset,
+  getGalleryPresetIds,
+  getGalleryPresetsByComplexity,
+  getGalleryPresetsByColumns,
+  getGalleryPresetsByAspectRatio,
+  type GalleryPresetId,
+} from './gallery'
+
+// Location Presets (오시는길)
+export {
+  LOCATION_PRESETS,
+  getLocationPreset,
+  getLocationPresetIds,
+  getLocationPresetsByComplexity,
+  type LocationPresetId,
+} from './location'
+
 // Future block presets will be added here:
 // export { HERO_PRESETS, ... } from './hero-presets'
 // export { GALLERY_PRESETS, ... } from './gallery-presets'
@@ -93,13 +113,15 @@ import { GREETING_PARENTS_PRESETS, type GreetingParentsPresetId } from './greeti
 import { RSVP_PRESETS, type RsvpPresetId } from './rsvp'
 import { NOTICE_PRESETS, type NoticePresetId } from './notice'
 import { CONTACT_PRESETS, type ContactPresetId } from './contact'
+import { GALLERY_PRESETS, type GalleryPresetId } from './gallery'
+import { LOCATION_PRESETS, type LocationPresetId } from './location'
 
 // ============================================
 // Combined Types
 // ============================================
 
-export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId | ContactPresetId
-// Future: | HeroPresetId | GalleryPresetId | ...
+export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId | ContactPresetId | GalleryPresetId | LocationPresetId
+// Future: | HeroPresetId | AccountPresetId | ...
 
 // ============================================
 // Combined Registry
@@ -112,8 +134,10 @@ export const BLOCK_PRESETS: Record<string, BlockPreset> = {
   ...RSVP_PRESETS,
   ...NOTICE_PRESETS,
   ...CONTACT_PRESETS,
+  ...GALLERY_PRESETS,
+  ...LOCATION_PRESETS,
   // Future: ...HERO_PRESETS,
-  // Future: ...GALLERY_PRESETS,
+  // Future: ...ACCOUNT_PRESETS,
 }
 
 // ============================================

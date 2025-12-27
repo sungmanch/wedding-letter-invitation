@@ -40,6 +40,7 @@ export {
   vhToPx,
   pxToPercent,
   percentToPx,
+  pxToRem,
   // 상수
   BINDING_TO_ID,
   ID_TO_BINDING,
