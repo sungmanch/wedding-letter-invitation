@@ -858,6 +858,24 @@ export const FONT_PRESETS: FontPreset[] = [
     description: '순수하고 밝은 손글씨체',
     recommended: ['accent'],
   },
+  {
+    id: 'bujangnim-nunchi',
+    family: 'BujangnimNunchi',
+    label: '부장님 눈치체',
+    labelEn: 'Bujangnim Nunchi',
+    category: 'handwriting-ko',
+    source: 'fontface',
+    fontFace: {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_02@1.0/Bujangnim_nunchi.woff',
+      format: 'woff',
+    },
+    weights: [{ value: 400, label: '보통' }],
+    defaultWeight: 400,
+    fallback: 'cursive',
+    license: 'OFL',
+    description: '재치있는 손글씨체',
+    recommended: ['accent'],
+  },
 
   // ============================================
   // 한글 고딕 (projectnoonnu)
