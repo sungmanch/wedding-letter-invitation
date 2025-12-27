@@ -61,7 +61,15 @@ AI 기반 청첩장 에디터 시스템의 기술 문서입니다.
 
 ---
 
-## 7. 기타
+## 7. 레이아웃 시스템
+
+| 문서 | 내용 | 토큰 |
+|------|------|------|
+| [08_auto_layout.md](./08_auto_layout.md) | Auto Layout 시스템 (Figma 스타일) | ~800 |
+
+---
+
+## 8. 기타
 
 | 문서 | 내용 | 토큰 |
 |------|------|------|
@@ -101,7 +109,8 @@ super-editor-v2/
 │
 ├── 06_ai_prompt.md              # AI 프롬프트 시스템
 ├── 06_web_worker.md             # Web Worker
-└── 07_typography_system.md      # 타이포그래피
+├── 07_typography_system.md      # 타이포그래피
+└── 08_auto_layout.md            # Auto Layout 시스템
 ```
 
 ---
@@ -116,6 +125,7 @@ super-editor-v2/
 - `AnimationAction`, `Trigger` → [02a_triggers_actions.md](./02a_triggers_actions.md)
 - `AnimationStateMachine` → [02b_state_machine.md](./02b_state_machine.md)
 - `AVAILABLE_VARIABLES` → [03_variables.md](./03_variables.md)
+- `SizeMode`, `BlockLayout` → [08_auto_layout.md](./08_auto_layout.md)
 
 ### 주요 컴포넌트
 

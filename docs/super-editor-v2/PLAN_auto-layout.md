@@ -229,9 +229,22 @@ interface BlockLayout {
 - [x] 시스템 프롬프트 템플릿 업데이트
   - ✅ 규칙 7-9 추가 (Auto Layout 선호, Group 활용, 블록 높이)
 
-### Phase 6: 문서화
-- [ ] `docs/super-editor-v2/08_auto_layout.md` 작성
-- [ ] 프리셋 작성 가이드 업데이트
+### Phase 6: 문서화 ✅ 완료 (2025-12-28)
+- [x] `docs/super-editor-v2/08_auto_layout.md` 작성
+  - ✅ SizeMode, BlockLayout, Group 요소 상세 설명
+  - ✅ Mixed 모드 (Absolute + Auto) 활용법
+  - ✅ 블록 유형별 권장 설정 표
+  - ✅ CSS 변환 로직 (resolveSizeMode)
+  - ✅ 마이그레이션 가이드 및 체크리스트
+- [x] 프리셋 작성 가이드 업데이트
+  - ✅ `src/lib/super-editor-v2/presets/PRESET_GUIDE.md` 신규 작성
+  - ✅ Auto Layout 프리셋 작성 템플릿
+  - ✅ Group 요소 활용 예시 (카운트다운, 좌우 교차 배치)
+  - ✅ SizeMode 선택 가이드 플로우차트
+  - ✅ 체크리스트 (Auto Layout, Auto 요소, 장식, Group)
+- [x] `docs/super-editor-v2/index.md` 업데이트
+  - ✅ 레이아웃 시스템 섹션 추가
+  - ✅ 빠른 참조에 SizeMode, BlockLayout 추가
 
 ---
 
