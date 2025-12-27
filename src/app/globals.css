@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+/* ==========================================
+   Custom Fonts (@font-face)
+   ========================================== */
+
+/* 기쁨밝음체 (JoyBrightness) */
+@font-face {
+  font-family: 'JoyBrightness';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_04@1.0/GibbemBalgeum.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
 :root {
   /* Wedding Theme Colors - Purple/Lavender Palette */
   --primary-purple: #8b5cf6;

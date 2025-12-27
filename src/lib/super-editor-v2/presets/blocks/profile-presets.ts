@@ -11,7 +11,7 @@ import type { BlockPreset, PresetElement } from './types'
 // Profile Preset IDs
 // ============================================
 
-export type ProfilePresetId = 'profile-dual-card'
+export type ProfilePresetId = 'profile-dual-card' | 'profile-split-photo'
 
 // ============================================
 // Default Elements for Dual Card Preset
@@ -326,6 +326,288 @@ const DUAL_CARD_ELEMENTS: PresetElement[] = [
 ]
 
 // ============================================
+// Default Elements for Split Photo Preset
+// ============================================
+
+const SPLIT_PHOTO_ELEMENTS: PresetElement[] = [
+  // Section Title (English) - centered
+  {
+    type: 'text',
+    x: 0,
+    y: 4,
+    width: 100,
+    height: 4,
+    zIndex: 1,
+    value: 'ABOUT US',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 12,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'center',
+        letterSpacing: 0.2,
+      },
+    },
+  },
+  // Section Title (Korean) - centered
+  {
+    type: 'text',
+    x: 0,
+    y: 8,
+    width: 100,
+    height: 5,
+    zIndex: 1,
+    value: '저희를 소개합니다',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 20,
+        fontWeight: 500,
+        color: 'var(--fg-default)',
+        textAlign: 'center',
+      },
+    },
+  },
+  // ═══════════════════════════════════════
+  // 신랑 섹션: y 18~48 (photo height 30)
+  // 사진 왼쪽, 정보 오른쪽
+  // ═══════════════════════════════════════
+  // Groom Photo (left)
+  {
+    type: 'image',
+    x: 0,
+    y: 18,
+    width: 48,
+    height: 30,
+    zIndex: 1,
+    binding: 'couple.groom.photo',
+    props: { type: 'image', objectFit: 'cover' },
+  },
+  // Groom Name
+  {
+    type: 'text',
+    x: 52,
+    y: 22,
+    width: 45,
+    height: 4,
+    zIndex: 1,
+    binding: 'couple.groom.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 18,
+        fontWeight: 600,
+        color: 'var(--fg-default)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Groom Birth Date
+  {
+    type: 'text',
+    x: 52,
+    y: 28,
+    width: 45,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.groom.birthDate',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Groom Job
+  {
+    type: 'text',
+    x: 52,
+    y: 33,
+    width: 45,
+    height: 3,
+    zIndex: 1,
+    binding: 'custom.groomJob',
+    value: '직업',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        fontWeight: 400,
+        color: 'var(--fg-default)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Groom MBTI
+  {
+    type: 'text',
+    x: 52,
+    y: 38,
+    width: 20,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.groom.mbti',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 12,
+        fontWeight: 500,
+        color: 'var(--accent-default)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Groom Tags
+  {
+    type: 'text',
+    x: 52,
+    y: 42,
+    width: 45,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.groom.tags',
+    value: '#취미 #관심사',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 11,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // ═══════════════════════════════════════
+  // 신부 섹션: y 54~84 (간격 6vh, photo height 30)
+  // 사진 오른쪽, 정보 왼쪽
+  // ═══════════════════════════════════════
+  // Bride Photo (right)
+  {
+    type: 'image',
+    x: 52,
+    y: 54,
+    width: 48,
+    height: 30,
+    zIndex: 1,
+    binding: 'couple.bride.photo',
+    props: { type: 'image', objectFit: 'cover' },
+  },
+  // Bride Name
+  {
+    type: 'text',
+    x: 4,
+    y: 58,
+    width: 45,
+    height: 4,
+    zIndex: 1,
+    binding: 'couple.bride.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 18,
+        fontWeight: 600,
+        color: 'var(--fg-default)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Bride Birth Date
+  {
+    type: 'text',
+    x: 4,
+    y: 64,
+    width: 45,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.bride.birthDate',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Bride Job
+  {
+    type: 'text',
+    x: 4,
+    y: 69,
+    width: 45,
+    height: 3,
+    zIndex: 1,
+    binding: 'custom.brideJob',
+    value: '직업',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        fontWeight: 400,
+        color: 'var(--fg-default)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Bride MBTI
+  {
+    type: 'text',
+    x: 4,
+    y: 74,
+    width: 20,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.bride.mbti',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 12,
+        fontWeight: 500,
+        color: 'var(--accent-default)',
+        textAlign: 'left',
+      },
+    },
+  },
+  // Bride Tags
+  {
+    type: 'text',
+    x: 4,
+    y: 78,
+    width: 45,
+    height: 3,
+    zIndex: 1,
+    binding: 'couple.bride.tags',
+    value: '#취미 #관심사',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-body)',
+        fontSize: 11,
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+        textAlign: 'left',
+      },
+    },
+  },
+]
+
+// ============================================
 // Profile Block Presets
 // ============================================
 
@@ -366,6 +648,39 @@ export const PROFILE_PRESETS: Record<ProfilePresetId, BlockPreset> = {
       useCase: ['커플 소개', 'About Us', '프로필 정보'],
     },
   },
+  'profile-split-photo': {
+    id: 'profile-split-photo',
+    blockType: 'profile',
+    variant: 'split-photo',
+    name: 'Split Photo',
+    nameKo: '스플릿 포토',
+    description: '신랑/신부 사진과 정보를 좌우 교차 배치하는 미니멀한 프로필 레이아웃',
+    tags: ['minimal', 'clean', 'split', 'alternating', 'light', 'modern', 'profile', 'about-us'],
+    complexity: 'medium',
+    bindings: [
+      'couple.groom.name',
+      'couple.groom.photo',
+      'couple.groom.birthDate',
+      'couple.groom.mbti',
+      'couple.groom.tags',
+      'couple.bride.name',
+      'couple.bride.photo',
+      'couple.bride.birthDate',
+      'couple.bride.mbti',
+      'couple.bride.tags',
+    ],
+    defaultHeight: 90,
+    defaultElements: SPLIT_PHOTO_ELEMENTS,
+    specialComponents: ['photo-info-pair'],
+    recommendedAnimations: ['fade-in', 'slide-in-left', 'slide-in-right', 'stagger-fade-up'],
+    recommendedThemes: ['minimal-light', 'classic-ivory', 'modern-mono'],
+    aiHints: {
+      mood: ['minimal', 'clean', 'friendly'],
+      style: ['split-layout', 'alternating', 'photo-info-pair'],
+      useCase: ['커플 소개', 'About Us', '프로필 정보', '신랑신부 소개'],
+    },
+    relatedPresets: ['profile-dual-card'],
+  },
 }
 
 // ============================================
@@ -383,5 +698,5 @@ export function getProfilePresetIds(): ProfilePresetId[] {
 export function getProfilePresetsByComplexity(
   complexity: 'low' | 'medium' | 'high'
 ): BlockPreset[] {
-  return Object.values(PROFILE_PRESETS).filter(p => p.complexity === complexity)
+  return Object.values(PROFILE_PRESETS).filter((p) => p.complexity === complexity)
 }

@@ -19,6 +19,7 @@ export interface ShapeElementProps {
   stroke?: string
   strokeWidth?: number
   svgPath?: string
+  svgViewBox?: string // 커스텀 SVG viewBox (예: "0 0 50 50")
   style?: ElementStyle
   className?: string
 }
@@ -33,6 +34,7 @@ export function ShapeElement({
   stroke = 'var(--border-default)',
   strokeWidth = 1,
   svgPath,
+  svgViewBox,
   style,
   className = '',
 }: ShapeElementProps) {
@@ -55,6 +57,7 @@ export function ShapeElement({
         stroke={stroke}
         strokeWidth={strokeWidth}
         svgPath={svgPath}
+        svgViewBox={svgViewBox}
       />
     </div>
   )
@@ -70,6 +73,7 @@ interface ShapeRendererProps {
   stroke: string
   strokeWidth: number
   svgPath?: string
+  svgViewBox?: string
 }
 
 function ShapeRenderer({
@@ -78,6 +82,7 @@ function ShapeRenderer({
   stroke,
   strokeWidth,
   svgPath,
+  svgViewBox,
 }: ShapeRendererProps) {
   const svgStyle: CSSProperties = {
     width: '100%',
@@ -149,7 +154,7 @@ function ShapeRenderer({
         )
       }
       return (
-        <svg viewBox="0 0 100 100" style={svgStyle}>
+        <svg viewBox={svgViewBox || '0 0 100 100'} style={svgStyle}>
           <path
             d={svgPath}
             fill={fill}

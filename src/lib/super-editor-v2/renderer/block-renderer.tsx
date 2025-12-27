@@ -12,7 +12,8 @@ import type { Block, BlockType, BlockStyleOverride, GradientValue } from '../sch
 import { BlockProvider, useBlockTokens } from '../context/block-context'
 import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
-import { resolveBlockHeightNumber } from '../utils/size-resolver'
+import { AutoLayoutBlock } from './auto-layout-block'
+import { resolveBlockHeightNumber, isAutoLayoutBlock } from '../utils/size-resolver'
 
 // ============================================
 // Types
@@ -47,15 +48,28 @@ export function BlockRenderer({
     onElementClick?.(block.id, elementId)
   }, [block.id, onElementClick])
 
+  // Auto Layout 모드 체크
+  const isAutoLayout = isAutoLayoutBlock(block)
+
   return (
     <BlockProvider block={block} blockIndex={blockIndex}>
-      <BlockContainer
-        block={block}
-        blockIndex={blockIndex}
-        editable={editable}
-        onClick={handleBlockClick}
-        onElementClick={handleElementClick}
-      />
+      {isAutoLayout ? (
+        // Auto Layout 블록 렌더링
+        <AutoLayoutBlock
+          block={block}
+          editable={editable}
+          onElementClick={handleElementClick}
+        />
+      ) : (
+        // 기존 Absolute 블록 렌더링
+        <BlockContainer
+          block={block}
+          blockIndex={blockIndex}
+          editable={editable}
+          onClick={handleBlockClick}
+          onElementClick={handleElementClick}
+        />
+      )}
     </BlockProvider>
   )
 }

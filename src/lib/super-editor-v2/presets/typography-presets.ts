@@ -164,6 +164,13 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: [], // CDN @font-face
   },
+
+  // 기쁨밝음체
+  joyBrightness: {
+    family: ['JoyBrightness', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: [], // CDN @font-face
+  },
 } as const
 
 // ============================================
