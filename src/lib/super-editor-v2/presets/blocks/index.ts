@@ -27,7 +27,7 @@ export {
   getCalendarPresetIds,
   getCalendarPresetsByComplexity,
   type CalendarPresetId,
-} from './calendar-presets'
+} from './calendar'
 
 // Profile Presets (profile skeleton → profile block)
 export {
@@ -36,7 +36,7 @@ export {
   getProfilePresetIds,
   getProfilePresetsByComplexity,
   type ProfilePresetId,
-} from './profile-presets'
+} from './profile'
 
 // Greeting Parents Presets (greeting + parents info)
 export {
@@ -45,7 +45,7 @@ export {
   getGreetingParentsPresetIds,
   getGreetingParentsPresetsByComplexity,
   type GreetingParentsPresetId,
-} from './greeting-parents-presets'
+} from './greeting-parents'
 
 // RSVP Presets (attendance confirmation with modal)
 export {
@@ -54,7 +54,7 @@ export {
   getRsvpPresetIds,
   getRsvpPresetsByComplexity,
   type RsvpPresetId,
-} from './rsvp-presets'
+} from './rsvp'
 
 // Notice Presets (공지사항/안내)
 export {
@@ -63,7 +63,16 @@ export {
   getNoticePresetIds,
   getNoticePresetsByComplexity,
   type NoticePresetId,
-} from './notice-presets'
+} from './notice'
+
+// Contact Presets (연락처 오버레이)
+export {
+  CONTACT_PRESETS,
+  getContactPreset,
+  getContactPresetIds,
+  getContactPresetsByComplexity,
+  type ContactPresetId,
+} from './contact'
 
 // Future block presets will be added here:
 // export { HERO_PRESETS, ... } from './hero-presets'
@@ -78,17 +87,18 @@ export {
 // Imports for aggregation
 // ============================================
 
-import { CALENDAR_PRESETS, type CalendarPresetId } from './calendar-presets'
-import { PROFILE_PRESETS, type ProfilePresetId } from './profile-presets'
-import { GREETING_PARENTS_PRESETS, type GreetingParentsPresetId } from './greeting-parents-presets'
-import { RSVP_PRESETS, type RsvpPresetId } from './rsvp-presets'
-import { NOTICE_PRESETS, type NoticePresetId } from './notice-presets'
+import { CALENDAR_PRESETS, type CalendarPresetId } from './calendar'
+import { PROFILE_PRESETS, type ProfilePresetId } from './profile'
+import { GREETING_PARENTS_PRESETS, type GreetingParentsPresetId } from './greeting-parents'
+import { RSVP_PRESETS, type RsvpPresetId } from './rsvp'
+import { NOTICE_PRESETS, type NoticePresetId } from './notice'
+import { CONTACT_PRESETS, type ContactPresetId } from './contact'
 
 // ============================================
 // Combined Types
 // ============================================
 
-export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId
+export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId | ContactPresetId
 // Future: | HeroPresetId | GalleryPresetId | ...
 
 // ============================================
@@ -101,6 +111,7 @@ export const BLOCK_PRESETS: Record<string, BlockPreset> = {
   ...GREETING_PARENTS_PRESETS,
   ...RSVP_PRESETS,
   ...NOTICE_PRESETS,
+  ...CONTACT_PRESETS,
   // Future: ...HERO_PRESETS,
   // Future: ...GALLERY_PRESETS,
 }

@@ -1,38 +1,14 @@
 /**
- * Super Editor v2 - Calendar Block Presets
+ * Calendar Block - Korean Countdown Box Preset
  *
- * date skeleton → calendar block 마이그레이션
- * Phase 5: Auto Layout + Group 마이그레이션
+ * 한글 전체 날짜 표기와 4칸 박스형 카운트다운,
+ * 커플 이름과 D-day 메시지가 포함된 따뜻한 캘린더 (Auto Layout)
  */
 
-import type { BlockPreset, PresetElement } from './types'
-import type { BlockLayout, SizeMode } from '../../schema/types'
+import type { BlockPreset, PresetElement } from '../types'
+import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
 
-// ============================================
-// Auto Layout Configuration
-// ============================================
-
-const AUTO_LAYOUT_VERTICAL: BlockLayout = {
-  mode: 'auto',
-  direction: 'vertical',
-  gap: 16,
-  padding: { top: 32, right: 20, bottom: 32, left: 20 },
-  alignItems: 'center',
-}
-
-const HUG_HEIGHT: SizeMode = { type: 'hug' }
-
-// ============================================
-// Calendar Preset IDs
-// ============================================
-
-export type CalendarPresetId = 'calendar-korean-countdown-box'
-
-// ============================================
-// Korean Countdown Box Elements (Auto Layout + Group)
-// ============================================
-
-const KOREAN_COUNTDOWN_BOX_ELEMENTS: PresetElement[] = [
+const ELEMENTS: PresetElement[] = [
   // 1. Wedding Day Title
   {
     type: 'text',
@@ -326,61 +302,37 @@ const KOREAN_COUNTDOWN_BOX_ELEMENTS: PresetElement[] = [
   },
 ]
 
-// ============================================
-// Calendar Block Presets
-// ============================================
-
-export const CALENDAR_PRESETS: Record<CalendarPresetId, BlockPreset> = {
-  'calendar-korean-countdown-box': {
-    id: 'calendar-korean-countdown-box',
-    blockType: 'calendar',
-    variant: 'korean-countdown-box',
-    name: 'Korean Countdown Box',
-    nameKo: '한글 카운트다운 박스',
-    description:
-      '한글 전체 날짜 표기와 4칸 박스형 카운트다운, 커플 이름과 D-day 메시지가 포함된 따뜻한 캘린더 (Auto Layout)',
-    tags: ['korean', 'countdown', 'warm', 'romantic', 'box-style', 'auto-layout'],
-    complexity: 'medium',
-    bindings: [
-      'wedding.date',
-      'wedding.dateDisplay',
-      'wedding.month',
-      'wedding.dday',
-      'countdown.days',
-      'countdown.hours',
-      'countdown.minutes',
-      'countdown.seconds',
-      'couple.groom.name',
-      'couple.bride.name',
-    ],
-    defaultHeight: HUG_HEIGHT,
-    layout: AUTO_LAYOUT_VERTICAL,
-    defaultElements: KOREAN_COUNTDOWN_BOX_ELEMENTS,
-    specialComponents: ['calendar', 'countdown', 'group'],
-    recommendedAnimations: ['fade-in', 'stagger-fade-up', 'number-flip'],
-    recommendedThemes: ['classic-ivory', 'romantic-blush', 'cinematic-warm'],
-    aiHints: {
-      mood: ['warm', 'romantic', 'elegant'],
-      style: ['korean-style', 'box-countdown', 'full-date', 'auto-layout'],
-      useCase: ['한글 청첩장', '카운트다운 강조', 'D-day 표시'],
-    },
+export const CALENDAR_KOREAN_COUNTDOWN_BOX: BlockPreset = {
+  id: 'calendar-korean-countdown-box',
+  blockType: 'calendar',
+  variant: 'korean-countdown-box',
+  name: 'Korean Countdown Box',
+  nameKo: '한글 카운트다운 박스',
+  description:
+    '한글 전체 날짜 표기와 4칸 박스형 카운트다운, 커플 이름과 D-day 메시지가 포함된 따뜻한 캘린더 (Auto Layout)',
+  tags: ['korean', 'countdown', 'warm', 'romantic', 'box-style', 'auto-layout'],
+  complexity: 'medium',
+  bindings: [
+    'wedding.date',
+    'wedding.dateDisplay',
+    'wedding.month',
+    'wedding.dday',
+    'countdown.days',
+    'countdown.hours',
+    'countdown.minutes',
+    'countdown.seconds',
+    'couple.groom.name',
+    'couple.bride.name',
+  ],
+  defaultHeight: HUG_HEIGHT,
+  layout: AUTO_LAYOUT_VERTICAL,
+  defaultElements: ELEMENTS,
+  specialComponents: ['calendar', 'countdown', 'group'],
+  recommendedAnimations: ['fade-in', 'stagger-fade-up', 'number-flip'],
+  recommendedThemes: ['classic-ivory', 'romantic-blush', 'cinematic-warm'],
+  aiHints: {
+    mood: ['warm', 'romantic', 'elegant'],
+    style: ['korean-style', 'box-countdown', 'full-date', 'auto-layout'],
+    useCase: ['한글 청첩장', '카운트다운 강조', 'D-day 표시'],
   },
-}
-
-// ============================================
-// Helper Functions
-// ============================================
-
-export function getCalendarPreset(id: CalendarPresetId): BlockPreset {
-  return CALENDAR_PRESETS[id]
-}
-
-export function getCalendarPresetIds(): CalendarPresetId[] {
-  return Object.keys(CALENDAR_PRESETS) as CalendarPresetId[]
-}
-
-export function getCalendarPresetsByComplexity(
-  complexity: 'low' | 'medium' | 'high'
-): BlockPreset[] {
-  return Object.values(CALENDAR_PRESETS).filter((p) => p.complexity === complexity)
 }

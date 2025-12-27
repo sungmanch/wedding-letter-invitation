@@ -1,20 +1,14 @@
 /**
- * Super Editor v2 - Contact Block Presets
+ * Contact Block - Minimal Preset
  *
- * 연락처 오버레이 블록 프리셋
- * 버튼 클릭 시 표시되는 연락처 정보 블록
+ * 깔끔한 카드형 연락처 오버레이
+ * 신랑측/신부측 탭 전환, 전화하기/문자 보내기 버튼 포함
  */
 
-import type { BlockPreset, PresetElement } from './types'
+import type { BlockPreset, PresetElement } from '../types'
 
 // ============================================
-// Contact Preset IDs
-// ============================================
-
-export type ContactPresetId = 'contact-minimal'
-
-// ============================================
-// Minimal Contact Elements
+// Default Elements
 // ============================================
 
 const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
@@ -530,56 +524,42 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
 ]
 
 // ============================================
-// Contact Block Presets
+// Contact Minimal Preset
 // ============================================
 
-export const CONTACT_PRESETS: Record<ContactPresetId, BlockPreset> = {
-  'contact-minimal': {
-    id: 'contact-minimal',
-    blockType: 'contact',
-    variant: 'minimal',
-    name: 'Minimal',
-    nameKo: '미니멀',
-    description:
-      '깔끔한 카드형 연락처 오버레이. 신랑측/신부측 탭 전환, 전화하기/문자 보내기 버튼 포함.',
-    tags: ['minimal', 'clean', 'card', 'overlay', 'tab'],
-    complexity: 'medium',
-    bindings: [
-      'couple.groom.name',
-      'couple.groom.phone',
-      'couple.bride.name',
-      'couple.bride.phone',
-      'parents.groom.father.name',
-      'parents.groom.father.phone',
-      'parents.groom.mother.name',
-      'parents.groom.mother.phone',
-      'parents.bride.father.name',
-      'parents.bride.father.phone',
-      'parents.bride.mother.name',
-      'parents.bride.mother.phone',
-    ],
-    defaultHeight: 85,
-    defaultElements: MINIMAL_CONTACT_ELEMENTS,
-    specialComponents: ['tab-toggle', 'phone-action', 'sms-action'],
-    recommendedAnimations: ['fade-in', 'slide-up'],
-    recommendedThemes: ['minimal-light', 'classic-ivory'],
-    relatedPresets: ['greeting-parents-minimal'],
-    aiHints: {
-      mood: ['minimal', 'clean', 'functional'],
-      style: ['card-based', 'tabbed', 'accessible'],
-      useCase: ['contact-overlay', 'phone-directory', 'family-contacts'],
-    },
+export const CONTACT_MINIMAL: BlockPreset = {
+  id: 'contact-minimal',
+  blockType: 'contact',
+  variant: 'minimal',
+  name: 'Minimal',
+  nameKo: '미니멀',
+  description:
+    '깔끔한 카드형 연락처 오버레이. 신랑측/신부측 탭 전환, 전화하기/문자 보내기 버튼 포함.',
+  tags: ['minimal', 'clean', 'card', 'overlay', 'tab'],
+  complexity: 'medium',
+  bindings: [
+    'couple.groom.name',
+    'couple.groom.phone',
+    'couple.bride.name',
+    'couple.bride.phone',
+    'parents.groom.father.name',
+    'parents.groom.father.phone',
+    'parents.groom.mother.name',
+    'parents.groom.mother.phone',
+    'parents.bride.father.name',
+    'parents.bride.father.phone',
+    'parents.bride.mother.name',
+    'parents.bride.mother.phone',
+  ],
+  defaultHeight: 85,
+  defaultElements: MINIMAL_CONTACT_ELEMENTS,
+  specialComponents: ['tab-toggle', 'phone-action', 'sms-action'],
+  recommendedAnimations: ['fade-in', 'slide-up'],
+  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  relatedPresets: ['greeting-parents-minimal'],
+  aiHints: {
+    mood: ['minimal', 'clean', 'functional'],
+    style: ['card-based', 'tabbed', 'accessible'],
+    useCase: ['contact-overlay', 'phone-directory', 'family-contacts'],
   },
-}
-
-// ============================================
-// Helper Functions
-// ============================================
-
-export function getContactPreset(id: ContactPresetId): BlockPreset {
-  return CONTACT_PRESETS[id]
-}
-
-export function getContactPresetIds(): ContactPresetId[] {
-  return Object.keys(CONTACT_PRESETS) as ContactPresetId[]
 }
