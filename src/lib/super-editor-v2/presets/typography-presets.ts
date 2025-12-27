@@ -192,6 +192,13 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: [], // CDN @font-face
   },
+
+  // 나눔 붓글씨
+  nanumBrushScript: {
+    family: ['Nanum Brush Script', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Nanum Brush Script:400'],
+  },
 } as const
 
 // ============================================
