@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { eq, and, desc } from 'drizzle-orm'
-import { createDocument } from '@/lib/super-editor-v2/actions/document'
+import { createDocument, updateDocument } from '@/lib/super-editor-v2/actions/document'
 import {
   getDocumentContextForAI,
   applyAIEdit,
@@ -11,6 +11,8 @@ import {
   type JSONPatch,
 } from '@/lib/super-editor-v2/actions'
 import { BLOCK_TYPE_LABELS, aiEditLogsV2, editorSnapshotsV2 } from '@/lib/super-editor-v2/schema'
+import { matchBestTemplate, selectFallbackTemplate } from '@/lib/super-editor-v2/services/template-matcher'
+import { applyTemplateToDocument } from '@/lib/super-editor-v2/services/template-applier'
 
 // ============================================
 // Types
@@ -70,7 +72,67 @@ export async function POST(request: NextRequest) {
       useSampleData: true,
     })
 
-    // 2. 문서 컨텍스트 조회
+    console.log('[Landing Generate] Document created:', document.id)
+    console.log('[Landing Generate] Prompt:', body.prompt)
+    console.log('[Landing Generate] Reference:', body.referenceAnalysis ? 'Yes' : 'No')
+
+    // 2. 템플릿 매칭 (레퍼런스가 있을 때)
+    if (body.referenceAnalysis) {
+      console.log('[Template Matching] Starting template matching...')
+
+      const matchResult = matchBestTemplate(body.referenceAnalysis, { minScore: 0.4 })
+
+      if (matchResult) {
+        console.log('[Template Match] ✅ Template matched:', {
+          templateId: matchResult.templateId,
+          score: matchResult.score.toFixed(3),
+          details: {
+            mood: matchResult.matchDetails.moodScore.toFixed(3),
+            color: matchResult.matchDetails.colorScore.toFixed(3),
+            typography: matchResult.matchDetails.typographyScore.toFixed(3),
+            layout: matchResult.matchDetails.layoutScore.toFixed(3),
+            keyword: matchResult.matchDetails.keywordScore.toFixed(3),
+          },
+        })
+
+        // 템플릿 적용
+        const { style, blocks } = applyTemplateToDocument(matchResult.templateId, document)
+
+        // 문서 업데이트
+        await updateDocument(document.id, { style, blocks })
+
+        console.log('[Template Match] Template applied successfully')
+
+        return NextResponse.json({
+          success: true,
+          documentId: document.id,
+          templateApplied: matchResult.templateId,
+          matchScore: matchResult.score,
+          aiApplied: false,
+          explanation: `레퍼런스 이미지와 ${Math.round(matchResult.score * 100)}% 유사한 템플릿을 적용했습니다.`,
+        })
+      } else {
+        // Fallback: 점수가 너무 낮음
+        const fallbackTemplateId = selectFallbackTemplate(body.referenceAnalysis)
+        console.log('[Template Match] ⚠️  No good match, using fallback:', fallbackTemplateId)
+
+        const { style, blocks } = applyTemplateToDocument(fallbackTemplateId, document)
+        await updateDocument(document.id, { style, blocks })
+
+        return NextResponse.json({
+          success: true,
+          documentId: document.id,
+          templateApplied: fallbackTemplateId,
+          matchScore: 0,
+          aiApplied: false,
+          explanation: `레퍼런스 분위기에 맞는 템플릿을 적용했습니다.`,
+        })
+      }
+    }
+
+    // 3. AI 생성 플로우 (레퍼런스 없을 때 or 템플릿 매칭 스킵)
+    console.log('[Landing Generate] Using AI generation (no reference)')
+
     const context = await getDocumentContextForAI(document.id)
 
     if (!context) {
@@ -80,15 +142,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. AI 프롬프트 생성 (랜딩용 - 전체 디자인 생성)
+    // 4. AI 프롬프트 생성 (랜딩용 - 전체 디자인 생성)
     const systemPrompt = buildLandingSystemPrompt(context, body.referenceAnalysis)
     const userPrompt = buildLandingUserPrompt(body.prompt)
 
-    console.log('[Landing Generate] Document created:', document.id)
-    console.log('[Landing Generate] Prompt:', body.prompt)
-    console.log('[Landing Generate] Reference:', body.referenceAnalysis ? 'Yes' : 'No')
-
-    // 4. AI 호출
+    // 5. AI 호출
     const aiResponse = await callGeminiAPI(systemPrompt, userPrompt)
 
     if (!aiResponse.success || !aiResponse.patches) {
@@ -102,7 +160,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 5. 패치 적용
+    // 6. 패치 적용
     const result = await applyAIEdit(
       document.id,
       aiResponse.patches,
@@ -110,7 +168,7 @@ export async function POST(request: NextRequest) {
       aiResponse.explanation || 'AI 디자인 적용'
     )
 
-    // 6. 스냅샷 ID 조회
+    // 7. 스냅샷 ID 조회
     const latestSnapshot = await db.query.editorSnapshotsV2.findFirst({
       where: and(
         eq(editorSnapshotsV2.documentId, document.id),
@@ -120,7 +178,7 @@ export async function POST(request: NextRequest) {
       columns: { id: true },
     })
 
-    // 7. AI 사용 내역 로깅
+    // 8. AI 사용 내역 로깅
     await db.insert(aiEditLogsV2).values({
       documentId: document.id,
       userId: user.id,
