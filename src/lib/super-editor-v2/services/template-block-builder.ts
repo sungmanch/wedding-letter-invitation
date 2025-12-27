@@ -87,32 +87,88 @@ function buildElementFromTemplate(
 /**
  * Element 스타일에 템플릿 색상 팔레트 적용
  *
- * 템플릿 스타일에 하드코딩된 색상을 그대로 사용하되,
- * 향후 사용자가 색상 팔레트를 수정할 수 있도록 준비
+ * 템플릿에서 flat 형식으로 정의된 스타일을 ElementStyle 중첩 구조로 변환
+ * (템플릿 정의의 편의성을 위해 flat 형식 허용, 런타임에 변환)
  */
 function applyTemplateColorsToElementStyle(
   style: any,
   template: TemplateV2,
   elementType: string
 ): any {
-  const { colorPalette } = template.designPattern
-
-  // 기본 스타일 복사
-  const appliedStyle = { ...style }
-
-  // 배경색이 템플릿 Secondary 색상인 경우 그대로 유지
-  // (향후 색상 커스터마이징 시 동적으로 변경 가능)
-  if (appliedStyle.backgroundColor) {
-    // 현재는 템플릿 색상 그대로 사용
-    // 나중에 사용자 커스터마이징 로직 추가 가능
+  // ✅ 이미 중첩 구조라면 그대로 반환
+  if (style.text || style.background || style.border || style.shadow) {
+    return style
   }
 
-  // 텍스트 색상이 템플릿 Primary 색상인 경우 그대로 유지
-  if (appliedStyle.color) {
-    // 현재는 템플릿 색상 그대로 사용
+  // ✅ flat 구조를 ElementStyle 중첩 구조로 변환
+  const elementStyle: any = {}
+
+  // 텍스트 스타일 추출
+  const textStyle: any = {}
+  if (style.fontFamily) textStyle.fontFamily = style.fontFamily
+  if (style.fontSize) {
+    // rem/px 문자열을 숫자로 변환
+    if (typeof style.fontSize === 'string') {
+      const match = style.fontSize.match(/([\d.]+)(rem|px)?/)
+      if (match) {
+        const value = parseFloat(match[1])
+        const unit = match[2]
+        textStyle.fontSize = unit === 'rem' ? value * 16 : value
+      }
+    } else {
+      textStyle.fontSize = style.fontSize
+    }
+  }
+  if (style.fontWeight) textStyle.fontWeight = style.fontWeight
+  if (style.color) textStyle.color = style.color
+  if (style.textAlign) textStyle.textAlign = style.textAlign
+  if (style.lineHeight) textStyle.lineHeight = style.lineHeight
+  if (style.letterSpacing) {
+    // em 문자열을 숫자로 변환
+    if (typeof style.letterSpacing === 'string') {
+      const match = style.letterSpacing.match(/([\d.]+)em/)
+      if (match) {
+        textStyle.letterSpacing = parseFloat(match[1])
+      }
+    } else {
+      textStyle.letterSpacing = style.letterSpacing
+    }
   }
 
-  return appliedStyle
+  if (Object.keys(textStyle).length > 0) {
+    elementStyle.text = textStyle
+  }
+
+  // 배경 스타일
+  if (style.backgroundColor) {
+    elementStyle.background = style.backgroundColor
+  } else if (style.background) {
+    elementStyle.background = style.background
+  }
+
+  // 보더 스타일
+  if (style.borderRadius || style.borderWidth || style.borderColor) {
+    elementStyle.border = {
+      width: style.borderWidth || 0,
+      color: style.borderColor || 'transparent',
+      style: style.borderStyle || 'solid',
+      radius: typeof style.borderRadius === 'string'
+        ? parseInt(style.borderRadius)
+        : (style.borderRadius || 0),
+    }
+  }
+
+  // 그림자
+  if (style.boxShadow) {
+    elementStyle.shadow = style.boxShadow
+  }
+
+  // 투명도
+  if (style.opacity !== undefined) {
+    elementStyle.opacity = style.opacity
+  }
+
+  return elementStyle
 }
 
 /**

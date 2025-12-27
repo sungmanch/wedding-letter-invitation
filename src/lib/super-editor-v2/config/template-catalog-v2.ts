@@ -118,7 +118,7 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
           type: 'text',
         },
         style: {
-          fontFamily: "'Tangerine', cursive",
+          fontFamily: "'Great Vibes', cursive",
           fontSize: '3rem',
           fontWeight: 400,
           color: '#1A1A1A', // Primary[0]
