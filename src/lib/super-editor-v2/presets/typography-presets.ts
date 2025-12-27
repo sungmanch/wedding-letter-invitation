@@ -24,14 +24,14 @@ export interface TypographyPreset {
   description: string
   category: 'classic' | 'modern' | 'romantic' | 'natural'
   fontStacks: {
-    heading: FontStack
-    body: FontStack
-    accent?: FontStack
+    display: FontStack  // 히어로/인트로용 (예술적)
+    heading: FontStack  // 섹션 제목용
+    body: FontStack     // 섹션 본문용
   }
   weights: {
+    display: number
     heading: number
     body: number
-    accent?: number
   }
   scale: TypeScale
   // 추천 테마 프리셋
@@ -293,10 +293,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Playfair Display와 Noto Serif KR의 우아한 조합',
     category: 'classic',
     fontStacks: {
+      display: FONT_STACKS.greatVibes,
       heading: FONT_STACKS.playfair,
       body: FONT_STACKS.notoSerifKr,
     },
     weights: {
+      display: 400,
       heading: 600,
       body: 400,
     },
@@ -311,10 +313,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Cinzel과 나눔명조의 격조 있는 조합',
     category: 'classic',
     fontStacks: {
+      display: FONT_STACKS.theNautigal,
       heading: FONT_STACKS.cinzel,
       body: FONT_STACKS.nanumMyeongjo,
     },
     weights: {
+      display: 400,
       heading: 500,
       body: 400,
     },
@@ -329,10 +333,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Cormorant와 고운바탕의 로맨틱한 조합',
     category: 'classic',
     fontStacks: {
+      display: FONT_STACKS.italianno,
       heading: FONT_STACKS.cormorant,
       body: FONT_STACKS.gowunBatang,
     },
     weights: {
+      display: 400,
       heading: 500,
       body: 400,
     },
@@ -348,10 +354,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Montserrat과 Pretendard의 깔끔한 조합',
     category: 'modern',
     fontStacks: {
+      display: FONT_STACKS.alata,
       heading: FONT_STACKS.montserrat,
       body: FONT_STACKS.pretendard,
     },
     weights: {
+      display: 400,
       heading: 600,
       body: 400,
     },
@@ -366,10 +374,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Inter와 Noto Sans KR의 가독성 좋은 조합',
     category: 'modern',
     fontStacks: {
+      display: FONT_STACKS.kodchasan,
       heading: FONT_STACKS.inter,
       body: FONT_STACKS.notoSansKr,
     },
     weights: {
+      display: 300,
       heading: 600,
       body: 400,
     },
@@ -384,10 +394,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Poppins과 Pretendard의 기하학적 조합',
     category: 'modern',
     fontStacks: {
+      display: FONT_STACKS.calistoga,
       heading: FONT_STACKS.poppins,
       body: FONT_STACKS.pretendard,
     },
     weights: {
+      display: 400,
       heading: 600,
       body: 400,
     },
@@ -403,14 +415,14 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Great Vibes와 고운바탕의 감성적 조합',
     category: 'romantic',
     fontStacks: {
-      heading: FONT_STACKS.greatVibes,
+      display: FONT_STACKS.greatVibes,
+      heading: FONT_STACKS.playfair,
       body: FONT_STACKS.gowunBatang,
-      accent: FONT_STACKS.playfair,
     },
     weights: {
-      heading: 400,
+      display: 400,
+      heading: 500,
       body: 400,
-      accent: 500,
     },
     scale: ELEGANT_SCALE,
     recommendedThemes: ['romantic-blush', 'romantic-garden'],
@@ -423,14 +435,14 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Italianno와 Noto Serif KR의 화려한 조합',
     category: 'romantic',
     fontStacks: {
-      heading: FONT_STACKS.italianno,
+      display: FONT_STACKS.italianno,
+      heading: FONT_STACKS.cormorant,
       body: FONT_STACKS.notoSerifKr,
-      accent: FONT_STACKS.cormorant,
     },
     weights: {
-      heading: 400,
+      display: 400,
+      heading: 500,
       body: 400,
-      accent: 500,
     },
     scale: ELEGANT_SCALE,
     recommendedThemes: ['cinematic-warm', 'classic-gold'],
@@ -443,11 +455,13 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Pinyon Script와 함렛의 부드러운 조합',
     category: 'romantic',
     fontStacks: {
-      heading: FONT_STACKS.pinyonScript,
+      display: FONT_STACKS.pinyonScript,
+      heading: FONT_STACKS.hahmlet,
       body: FONT_STACKS.hahmlet,
     },
     weights: {
-      heading: 400,
+      display: 400,
+      heading: 600,
       body: 400,
     },
     scale: ELEGANT_SCALE,
@@ -462,10 +476,12 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'High Summit과 마포금빛나루의 자연스러운 조합',
     category: 'natural',
     fontStacks: {
-      heading: FONT_STACKS.highSummit,
+      display: FONT_STACKS.highSummit,
+      heading: FONT_STACKS.gowunDodum,
       body: FONT_STACKS.mapoGoldNaru,
     },
     weights: {
+      display: 400,
       heading: 400,
       body: 400,
     },
@@ -480,11 +496,13 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Alex Brush와 나눔펜스크립트의 붓글씨 조합',
     category: 'natural',
     fontStacks: {
-      heading: FONT_STACKS.alexBrush,
+      display: FONT_STACKS.alexBrush,
+      heading: FONT_STACKS.nanumSquare,
       body: FONT_STACKS.nanumPen,
     },
     weights: {
-      heading: 400,
+      display: 400,
+      heading: 700,
       body: 400,
     },
     scale: COMPACT_SCALE,
@@ -498,11 +516,13 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: 'Dancing Script와 고운돋움의 따뜻한 조합',
     category: 'natural',
     fontStacks: {
-      heading: FONT_STACKS.dancingScript,
+      display: FONT_STACKS.dancingScript,
+      heading: FONT_STACKS.nanumSquare,
       body: FONT_STACKS.gowunDodum,
     },
     weights: {
-      heading: 500,
+      display: 500,
+      heading: 700,
       body: 400,
     },
     scale: DEFAULT_SCALE,
@@ -516,11 +536,13 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
     description: '부장님눈치체의 재치있고 캐주얼한 손글씨 스타일',
     category: 'natural',
     fontStacks: {
-      heading: FONT_STACKS.bujangnimNunchi,
+      display: FONT_STACKS.bujangnimNunchi,
+      heading: FONT_STACKS.nanumSquare,
       body: FONT_STACKS.bujangnimNunchi,
     },
     weights: {
-      heading: 400,
+      display: 400,
+      heading: 700,
       body: 400,
     },
     scale: COMPACT_SCALE,
@@ -569,19 +591,19 @@ export function getGoogleFontsUrl(presetId: TypographyPresetId): string {
   const preset = TYPOGRAPHY_PRESETS[presetId]
   const fonts: string[] = []
 
-  // heading
+  // display (히어로용)
+  if (preset.fontStacks.display.googleFonts?.length) {
+    fonts.push(...preset.fontStacks.display.googleFonts)
+  }
+
+  // heading (섹션 제목용)
   if (preset.fontStacks.heading.googleFonts?.length) {
     fonts.push(...preset.fontStacks.heading.googleFonts)
   }
 
-  // body
+  // body (섹션 본문용)
   if (preset.fontStacks.body.googleFonts?.length) {
     fonts.push(...preset.fontStacks.body.googleFonts)
-  }
-
-  // accent
-  if (preset.fontStacks.accent?.googleFonts?.length) {
-    fonts.push(...preset.fontStacks.accent.googleFonts)
   }
 
   if (fonts.length === 0) return ''

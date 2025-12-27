@@ -2,9 +2,25 @@
  * Super Editor v2 - Greeting Parents Block Presets
  *
  * 인사말 + 혼주정보 블록 프리셋
+ * Phase 4: Auto Layout 마이그레이션 완료
  */
 
 import type { BlockPreset, PresetElement } from './types'
+import type { BlockLayout, SizeMode } from '../../schema/types'
+
+// ============================================
+// Auto Layout Configuration
+// ============================================
+
+const AUTO_LAYOUT_VERTICAL: BlockLayout = {
+  mode: 'auto',
+  direction: 'vertical',
+  gap: 24,
+  padding: { top: 40, right: 32, bottom: 40, left: 32 },
+  alignItems: 'center',
+}
+
+const HUG_HEIGHT: SizeMode = { type: 'hug' }
 
 // ============================================
 // Greeting Parents Preset IDs

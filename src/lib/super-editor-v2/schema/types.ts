@@ -458,14 +458,14 @@ export interface TypographyConfig {
   preset?: TypographyPresetId
   custom?: {
     fontStacks?: {
-      heading?: string
-      body?: string
-      accent?: string
+      display?: string  // 히어로/인트로용 (예술적)
+      heading?: string  // 섹션 제목용
+      body?: string     // 섹션 본문용
     }
     weights?: {
+      display?: number
       heading?: number
       body?: number
-      accent?: number
     }
     scale?: Partial<TypeScale>
   }

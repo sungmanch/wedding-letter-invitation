@@ -4,7 +4,7 @@
  * 블록 프리셋 공통 타입 정의
  */
 
-import type { BlockType, VariablePath, Element } from '../../schema/types'
+import type { BlockType, VariablePath, Element, BlockLayout, SizeMode } from '../../schema/types'
 
 /**
  * Preset element definition - simplified Element for preset defaults
@@ -152,8 +152,11 @@ export interface BlockPreset {
   /** Required data bindings */
   bindings: readonly VariablePath[]
 
-  /** Default block height in vh */
-  defaultHeight?: number
+  /** Default block height in vh or SizeMode */
+  defaultHeight?: number | SizeMode
+
+  /** Block layout configuration (auto-layout support) */
+  layout?: BlockLayout
 
   /** Default elements for this preset */
   defaultElements?: PresetElement[]
