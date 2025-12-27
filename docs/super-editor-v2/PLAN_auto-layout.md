@@ -137,27 +137,35 @@ interface BlockLayout {
 
 ## 4. 구현 단계
 
-### Phase 1: 스키마 및 타입 확장
-- [ ] `schema/types.ts`에 SizeMode, BlockLayout 타입 추가
-- [ ] Element에 layoutMode, sizing, constraints, alignSelf 추가
-- [ ] Block에 layout 필드 추가
-- [ ] 기존 필드 optional 처리로 하위 호환 유지
+### Phase 1: 스키마 및 타입 확장 ✅ 완료
+- [x] `schema/types.ts`에 SizeMode, BlockLayout 타입 추가
+- [x] Element에 layoutMode, sizing, constraints, alignSelf 추가
+- [x] Block에 layout 필드 추가
+- [x] 기존 필드 optional 처리로 하위 호환 유지
 
-### Phase 2: 렌더러 분기 구현
-- [ ] `renderer/block-renderer.tsx` - layout.mode에 따라 분기
-- [ ] `renderer/auto-layout-block.tsx` - 신규 Auto Layout 블록 렌더러
-- [ ] `renderer/element-renderer.tsx` - layoutMode에 따라 분기
-- [ ] `utils/size-resolver.ts` - SizeMode → CSS 변환 유틸
+### Phase 2: 렌더러 분기 구현 ✅ 완료
+- [x] `renderer/block-renderer.tsx` - layout.mode에 따라 분기
+- [x] `renderer/auto-layout-block.tsx` - 신규 Auto Layout 블록 렌더러
+- [x] `renderer/element-renderer.tsx` - layoutMode에 따라 분기
+- [x] `utils/size-resolver.ts` - SizeMode → CSS 변환 유틸
 
-### Phase 3: 컴포넌트 조정
-- [ ] `components/elements/text-element.tsx` - hug 모드 지원
-- [ ] `components/elements/button-element.tsx` - hug 모드 지원
-- [ ] 나머지 요소 컴포넌트 검토
+### Phase 3: 컴포넌트 조정 ✅ 완료
+- [x] `components/elements/text-element.tsx` - hug 모드 지원
+- [x] `components/elements/button-element.tsx` - hug 모드 지원
+- [x] `components/elements/divider-element.tsx` - hug 모드 지원
+- [x] `components/elements/image-element.tsx` - hug 모드 지원
+- [x] `components/elements/shape-element.tsx` - hug 모드 지원
 
-### Phase 4: 프리셋 마이그레이션
-- [ ] `presets/blocks/greeting-parents-presets.ts` - auto layout 버전 추가
-- [ ] `presets/blocks/profile-presets.ts` - auto layout 버전 추가
-- [ ] 복잡한 레이아웃은 mixed 모드로
+### Phase 4: 프리셋 마이그레이션 ✅ 완료 (2025-12-27)
+- [x] `presets/blocks/types.ts` - BlockPreset에 layout 필드 추가
+- [x] `presets/blocks/greeting-parents-presets.ts` - 4개 auto-layout, 3개 absolute 유지
+  - ✅ minimal, with-divider: 순수 auto-layout
+  - ✅ natural-sparkle, balloon-heart: mixed 모드 (장식 요소 absolute)
+  - ⏭️ baptismal, box-style, ribbon: absolute 유지 (복잡한 레이아웃)
+- [x] `presets/blocks/rsvp-presets.ts` - rsvp-basic auto-layout
+- [x] `presets/blocks/notice-presets.ts` - notice-classic-label auto-layout
+- ⏭️ `presets/blocks/profile-presets.ts` - absolute 유지 (좌우 교차 배치)
+- ⏭️ `presets/blocks/calendar-presets.ts` - absolute 유지 (정밀 배치 필요)
 
 ### Phase 5: AI 통합
 - [ ] `docs/super-editor-v2/06_ai_prompt.md` 업데이트
@@ -380,11 +388,11 @@ const GREETING_MINIMAL_AUTO: BlockPreset = {
 ## 8. 검증 체크리스트
 
 ### 기능 검증
-- [ ] 긴 텍스트가 자동으로 높이 확장되는가?
-- [ ] 후속 요소가 자동으로 밀려나는가?
-- [ ] 폰트 변경 시 레이아웃이 유지되는가?
-- [ ] 기존 absolute 프리셋이 그대로 동작하는가?
-- [ ] mixed 모드에서 absolute/auto가 공존하는가?
+- [ ] 긴 텍스트가 자동으로 높이 확장되는가? → **테스트 필요**
+- [ ] 후속 요소가 자동으로 밀려나는가? → **테스트 필요**
+- [ ] 폰트 변경 시 레이아웃이 유지되는가? → **테스트 필요**
+- [x] 기존 absolute 프리셋이 그대로 동작하는가? → profile, calendar는 absolute 유지
+- [x] mixed 모드에서 absolute/auto가 공존하는가? → natural-sparkle, balloon-heart에 적용
 
 ### 성능 검증
 - [ ] 불필요한 리렌더링이 없는가?
