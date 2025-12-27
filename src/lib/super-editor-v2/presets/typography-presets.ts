@@ -178,6 +178,13 @@ const FONT_STACKS = {
     fallback: 'sans-serif',
     googleFonts: [], // CDN @import
   },
+
+  // 아빠의 연애편지
+  dadsLoveLetter: {
+    family: ['DadSLoveLetter', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: [], // CDN @font-face
+  },
 } as const
 
 // ============================================

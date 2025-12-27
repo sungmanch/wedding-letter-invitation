@@ -13,6 +13,14 @@
   font-display: swap;
 }
 
+/* 아빠의 연애편지 (DadSLoveLetter) */
+@font-face {
+  font-family: 'DadSLoveLetter';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_03@1.0/Father_loveletter.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
 :root {
   /* Wedding Theme Colors - Purple/Lavender Palette */
   --primary-purple: #8b5cf6;
