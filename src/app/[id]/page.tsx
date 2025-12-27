@@ -23,6 +23,10 @@ interface PageProps {
 
 // SE invitation 조회 헬퍼
 async function getSuperEditorInvitation(id: string) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return null
+  }
+
   const invitation = await db.query.superEditorInvitations.findFirst({
     where: and(eq(superEditorInvitations.id, id), eq(superEditorInvitations.status, 'published')),
   })

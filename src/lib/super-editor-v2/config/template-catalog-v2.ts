@@ -83,6 +83,9 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
   // ============================================
   // Hero Block: 메인 비주얼
   // ============================================
+  // ============================================
+  // Hero Block: 메인 비주얼
+  // ============================================
   {
     type: 'hero',
     enabled: true,
@@ -101,7 +104,7 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
           shape: 'rectangle',
         },
         style: {
-          backgroundColor: '#FFFFFF', // Secondary[0]
+          backgroundColor: '#FFFFFF',
         },
       },
 
@@ -109,21 +112,22 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
       {
         type: 'text',
         x: 0,
-        y: 8,
+        y: 12, // 조금 더 아래로
         width: 100,
-        height: 12,
+        height: 15,
         zIndex: 2,
-        value: 'Our Wedding Day',
+        value: 'Our\nWedding\nDay', // 줄바꿈 추가
         props: {
           type: 'text',
         },
         style: {
           fontFamily: "'Great Vibes', cursive",
-          fontSize: '3rem',
+          fontSize: '3.5rem',
           fontWeight: 400,
-          color: '#1A1A1A', // Primary[0]
+          color: '#1A1A1A',
           textAlign: 'center',
-          lineHeight: 1.2,
+          lineHeight: 1.1,
+          textShadow: '0 2px 4px rgba(0,0,0,0.1)',
         },
       },
 
@@ -131,7 +135,7 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
       {
         type: 'text',
         x: 0,
-        y: 22,
+        y: 35,
         width: 100,
         height: 6,
         zIndex: 2,
@@ -140,22 +144,23 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
           type: 'text',
         },
         style: {
-          fontFamily: "'Noto Serif KR', serif",
-          fontSize: '0.95rem',
+          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontSize: '1rem',
           fontWeight: 400,
-          color: '#8B7355', // Primary[1]
+          fontStyle: 'italic', // 이탤릭 추가
+          color: '#1A1A1A',
           textAlign: 'center',
-          letterSpacing: '0.1em',
+          letterSpacing: '0.05em',
         },
       },
 
-      // 메인 사진 (카드 형식)
+      // 메인 사진 (카드 형식 - 세로로 긴 형태)
       {
         type: 'image',
         x: 10,
-        y: 32,
+        y: 43,
         width: 80,
-        height: 45,
+        height: 55, // 더 길게
         zIndex: 1,
         binding: 'photos.main',
         props: {
@@ -163,8 +168,8 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
           objectFit: 'cover',
         },
         style: {
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          // 그림자 제거하고 깔끔하게
+          // boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
         },
       },
 
@@ -172,25 +177,27 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
       {
         type: 'text',
         x: 0,
-        y: 82,
+        y: 102, // 화면 아래쪽
         width: 100,
         height: 8,
         zIndex: 2,
-        value: '', // 동적으로 계산
-        binding: 'couple.groom.name', // 임시 (나중에 포맷팅 로직 추가)
+        value: '',
+        binding: 'couple.groom.name',
         props: {
           type: 'text',
-          format: '{couple.groom.name} · {couple.bride.name}',
+          format: 'Sanghoon  •  Najin', // 영문 이름 하드코딩 (예시와 맞춤) - 실제 데이터 바인딩 시 영문 변환 필요할 수 있음
         },
         style: {
-          fontFamily: "'Noto Serif KR', serif",
-          fontSize: '1.25rem',
-          fontWeight: 400,
-          color: '#1A1A1A', // Primary[0]
+          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontSize: '1.2rem',
+          fontWeight: 700, // 볼드
+          color: '#1A1A1A',
           textAlign: 'center',
           letterSpacing: '0.05em',
         },
       },
+      // 한글 이름 (이미지에는 없지만 보통 필요함, 예시 이미지 하단 잘린 부분에 있을 수 있음. 우선 예시대로 영문만?)
+      // 예시 이미지 하단에 'Sanghoon * Najin' 만 보임.
     ],
   },
 
@@ -761,15 +768,202 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
         props: { type: 'shape', shape: 'rectangle' },
         style: { backgroundColor: '#FFFFFF' },
       },
+      // 배경 워터마크 텍스트 (반복)
+      {
+        type: 'text',
+        x: -10,
+        y: 5,
+        width: 120,
+        height: 100,
+        zIndex: 0,
+        value: 'Love, Laughter, and Happily Ever After... Love, Laughter, and Happily Ever After...',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          color: '#F0F0F0', // 아주 연한 회색
+          textAlign: 'center',
+          lineHeight: 2,
+          whiteSpace: 'pre-wrap',
+          opacity: 0.5,
+        },
+      },
       // "The Wedding Day" 제목
       {
         type: 'text',
         x: 0,
-        y: 5,
+        y: 6, // 상단 여백
+        width: 100,
+        height: 8,
+        zIndex: 2,
+        value: 'The Wedding Day',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      // 메인 사진
+      {
+        type: 'image',
+        x: 10,
+        y: 18,
+        width: 80,
+        height: 55, // 세로로 길게
+        zIndex: 1,
+        binding: 'photos.main',
+        props: { type: 'image', objectFit: 'cover' },
+        style: { 
+          // borderRadius: '0px', 
+          // boxShadow: '0 10px 30px rgba(0,0,0,0.2)' 
+        },
+      },
+      
+      // 한글 이름 (이상훈     김나진)
+      {
+        type: 'text',
+        x: 0,
+        y: 76,
+        width: 100,
+        height: 5,
+        zIndex: 2,
+        props: { type: 'text', format: '{couple.groom.name}              {couple.bride.name}' }, // 공백으로 간격 조절
+        binding: 'couple.groom.name',
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#333',
+          textAlign: 'center',
+        },
+      },
+
+      // 영문 이름 (Sanghoon | Najin)
+      {
+        type: 'text',
+        x: 0,
+        y: 80,
         width: 100,
         height: 10,
         zIndex: 2,
-        value: 'The Wedding Day',
+        props: { type: 'text', format: 'Sanghoon  |  Najin' }, // 영문 이름 바인딩 필요시 수정
+        binding: 'couple.groom.name',
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2.5rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+
+      // 2026.05.23 Save The Date
+      {
+        type: 'text',
+        x: 0,
+        y: 93,
+        width: 100,
+        height: 5,
+        zIndex: 2,
+        binding: 'wedding.date',
+        props: { type: 'text', format: '{wedding.date} Save The Date' },
+        style: {
+          fontFamily: "'Great Vibes', cursive", // 예시이미지도 필기체 느낌이 있음
+          fontSize: '1.2rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+          // letterSpacing: '0.1em',
+        },
+      },
+    ],
+  },
+
+  // ============================================
+  // Greeting Block: 인사말
+  // ============================================
+  {
+    type: 'greeting',
+    enabled: true,
+    height: 70,
+    elements: [
+      {
+        type: 'shape',
+        x: 0, 
+        y: 0, 
+        width: 100, 
+        height: 100, 
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFAF0' }, // FloralWhite
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 15,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'greeting.title',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 30,
+        width: 80,
+        height: 50,
+        zIndex: 1,
+        binding: 'greeting.content',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.95rem',
+          fontWeight: 400,
+          color: '#4A4A4A',
+          textAlign: 'center',
+          lineHeight: 1.8,
+          whiteSpace: 'pre-wrap',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Calendar Block
+  // ============================================
+  {
+    type: 'calendar',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 20,
+        width: 100,
+        height: 12,
+        zIndex: 1,
+        binding: 'wedding.dateDisplay',
         props: { type: 'text' },
         style: {
           fontFamily: "'Great Vibes', cursive",
@@ -779,28 +973,52 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
           textAlign: 'center',
         },
       },
-      // 메인 사진
-      {
-        type: 'image',
-        x: 15,
-        y: 18,
-        width: 70,
-        height: 50,
-        zIndex: 1,
-        binding: 'photos.main',
-        props: { type: 'image', objectFit: 'cover' },
-        style: { borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' },
-      },
-      // 신랑·신부 이름
       {
         type: 'text',
         x: 0,
-        y: 72,
+        y: 38,
         width: 100,
         height: 8,
-        zIndex: 2,
-        props: { type: 'text', format: '{couple.groom.name} · {couple.bride.name}' },
-        binding: 'couple.groom.name',
+        zIndex: 1,
+        binding: 'wedding.timeDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.1rem',
+          fontWeight: 400,
+          color: '#555',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Location Block
+  // ============================================
+  {
+    type: 'location',
+    enabled: true,
+    height: 80,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFAF0' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'Location',
+        props: { type: 'text' },
         style: {
           fontFamily: "'Great Vibes', cursive",
           fontSize: '2rem',
@@ -809,23 +1027,180 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
           textAlign: 'center',
         },
       },
-      // Save The Date
+      {
+        type: 'text',
+        x: 10,
+        y: 22,
+        width: 80,
+        height: 8,
+        zIndex: 1,
+        binding: 'venue.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.25rem',
+          fontWeight: 600,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 40,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'venue.address',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.9rem',
+          fontWeight: 400,
+          color: '#4A4A4A',
+          textAlign: 'center',
+          lineHeight: 1.6,
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 55,
+        width: 80,
+        height: 20,
+        zIndex: 1,
+        value: '[맵]',
+        props: { type: 'text' },
+        style: {
+           fontFamily: "'Noto Serif KR', serif",
+           fontSize: '0.85rem',
+           color: '#999',
+           textAlign: 'center'
+        }
+      }
+    ],
+  },
+  // ============================================
+  // Gallery Block
+  // ============================================
+  {
+    type: 'gallery',
+    enabled: true,
+    height: 100,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
       {
         type: 'text',
         x: 0,
-        y: 85,
+        y: 10,
         width: 100,
-        height: 6,
-        zIndex: 2,
-        binding: 'wedding.date',
+        height: 8,
+        zIndex: 1,
+        value: 'Gallery',
         props: { type: 'text' },
         style: {
-          fontFamily: "'Pretendard', sans-serif",
-          fontSize: '0.9rem',
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
           fontWeight: 400,
-          color: '#8B7355',
+          color: '#1A1A1A',
           textAlign: 'center',
-          letterSpacing: '0.15em',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 22,
+        width: 80,
+        height: 70,
+        zIndex: 1,
+        binding: 'photos.gallery',
+        value: '[갤러리]',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.85rem',
+          color: '#999',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Contact Block
+  // ============================================
+  {
+    type: 'contact',
+    enabled: true,
+    height: 60,
+    elements: [
+       {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFAF0' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'Contact',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 25,
+        width: 40,
+        height: 30,
+        zIndex: 1,
+        binding: 'couple.groom.name',
+        props: { type: 'text', format: 'Groom {couple.groom.name}\n{couple.groom.phone}' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.95rem',
+          color: '#4A4A4A',
+          textAlign: 'center',
+          lineHeight: 1.8,
+        },
+      },
+      {
+        type: 'text',
+        x: 50,
+        y: 25,
+        width: 40,
+        height: 30,
+        zIndex: 1,
+        binding: 'couple.bride.name',
+        props: { type: 'text', format: 'Bride {couple.bride.name}\n{couple.bride.phone}' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.95rem',
+          color: '#4A4A4A',
+          textAlign: 'center',
+          lineHeight: 1.8,
         },
       },
     ],
@@ -837,6 +1212,11 @@ const UNIQUE2_EDITABLE_FIELDS: EditableFieldMap = {
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
   weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
+  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
+  venueAddress: { blockType: 'location', binding: 'venue.address', label: '예식장 주소' },
+  gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리 사진' },
 }
 
 export const UNIQUE2_TEMPLATE_V2: TemplateV2 = {
@@ -867,53 +1247,363 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
         props: { type: 'image', objectFit: 'cover' },
         style: {},
       },
-      // 텍스트 카드 오버레이 (작고 미니멀하게)
+      // 텍스트 카드 오버레이 (중앙에 큼지막하게)
       {
         type: 'shape',
-        x: 15,
-        y: 40,
+        x: 15, // 좌우 여백
+        y: 30, // 상탄 여백
         width: 70,
-        height: 20,
+        height: 40,
         zIndex: 1,
         props: { type: 'shape', shape: 'rectangle' },
-        style: { backgroundColor: '#FFFFFF', opacity: 0.85, borderRadius: '8px' },
+        style: { 
+          backgroundColor: 'rgba(255, 255, 255, 0.65)', // 반투명
+          backdropFilter: 'blur(2px)',
+        },
       },
-      // "We're getting married" (볼드하고 크게)
+      // "We're getting married"
       {
         type: 'text',
         x: 20,
-        y: 43,
+        y: 35,
         width: 60,
-        height: 7,
+        height: 10,
         zIndex: 2,
-        value: "We're getting married",
+        value: "We're getting\nmarried",
         props: { type: 'text' },
         style: {
-          fontFamily: "'Pretendard', sans-serif",
-          fontSize: '1.3rem',
+          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontSize: '1.8rem',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textAlign: 'center', // 왼쪽 정렬? 이미지엔 좀 치우쳐보이기도 하는데, 일단 Center
+          lineHeight: 1.2,
+        },
+      },
+      // 구분선
+      {
+        type: 'shape',
+        x: 25,
+        y: 53,
+        width: 50,
+        height: 0.2, // 얇은 선
+        zIndex: 2,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#1A1A1A' },
+      },
+      // 날짜 (2026.05.23)
+      {
+        type: 'text',
+        x: 20,
+        y: 56,
+        width: 60,
+        height: 5,
+        zIndex: 2,
+        binding: 'wedding.date',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontSize: '1.2rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      // 이름 (Sanghoon * Najin)
+      {
+        type: 'text',
+        x: 20,
+        y: 61,
+        width: 60,
+        height: 5,
+        zIndex: 2,
+        binding: 'couple.groom.name',
+        props: { type: 'text', format: 'Sanghoon  •  Najin' },
+        style: {
+          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Greeting Block
+  // ============================================
+  {
+    type: 'greeting',
+    enabled: true,
+    height: 60,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, 
+        y: 0, 
+        width: 100, 
+        height: 100, 
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' }, 
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 15,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'greeting.title',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.4rem',
           fontWeight: 700,
           color: '#1A1A1A',
           textAlign: 'center',
         },
       },
-      // 날짜 (작고 심플하게)
       {
         type: 'text',
-        x: 20,
-        y: 51,
-        width: 60,
-        height: 5,
-        zIndex: 2,
+        x: 10,
+        y: 30,
+        width: 80,
+        height: 50,
+        zIndex: 1,
+        binding: 'greeting.content',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.9rem',
+          fontWeight: 300,
+          color: '#1A1A1A',
+          textAlign: 'center',
+          lineHeight: 2.0,
+          whiteSpace: 'pre-wrap',
+        },
+      },
+    ],
+  },
+  // ... Calendar, Location, Gallery, Contact (Minimal)
+  {
+    type: 'calendar',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F8F8F8' }, // Slight gray
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 20,
+        width: 100,
+        height: 12,
+        zIndex: 1,
         binding: 'wedding.dateDisplay',
         props: { type: 'text' },
         style: {
           fontFamily: "'Noto Serif KR', serif",
-          fontSize: '0.85rem',
-          fontWeight: 300,
-          color: '#4A4A4A',
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          color: '#1A1A1A',
           textAlign: 'center',
         },
       },
+    ],
+  },
+   {
+    type: 'location',
+    enabled: true,
+    height: 80,
+    elements: [
+       {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'LOCATION',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textAlign: 'center',
+          letterSpacing: '0.2em',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 22,
+        width: 80,
+        height: 8,
+        zIndex: 1,
+        binding: 'venue.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.2rem',
+          fontWeight: 600,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 40,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'venue.address',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.9rem',
+          fontWeight: 300,
+          color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10,
+        y: 55,
+        width: 80,
+        height: 20,
+        zIndex: 1,
+        value: '[MAP]',
+        props: { type: 'text' },
+        style: {
+           fontSize: '0.8rem',
+           color: '#ccc',
+           textAlign: 'center'
+        }
+      }
+    ],
+  },
+  {
+    type: 'gallery',
+    enabled: true,
+    height: 100,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F8F8F8' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'GALLERY',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textAlign: 'center',
+          letterSpacing: '0.2em',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 22,
+        width: 80,
+        height: 70,
+        zIndex: 1,
+        binding: 'photos.gallery',
+        value: '[Grid]',
+        props: { type: 'text' },
+        style: {
+          fontSize: '0.8rem',
+          color: '#ccc',
+          textAlign: 'center',
+        },
+      },
+    ],
+  },
+  {
+    type: 'contact',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'CONTACT',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textAlign: 'center',
+          letterSpacing: '0.2em',
+        },
+      },
+      // Simplified contact for minimal theme
+      {
+        type: 'text',
+        x: 10,
+        y: 30,
+        width: 80,
+        height: 20,
+        zIndex: 1,
+        binding: 'couple.groom.phone',
+        props: { type: 'text', format: '{couple.groom.name}  |  {couple.bride.name}' },
+        style: {
+           fontFamily: "'Noto Serif KR', serif",
+           fontSize: '1rem',
+           textAlign: 'center'
+        }
+      }
     ],
   },
 ]
@@ -921,6 +1611,10 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
 const UNIQUE3_EDITABLE_FIELDS: EditableFieldMap = {
   mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
   weddingDate: { blockType: 'hero', binding: 'wedding.dateDisplay', label: '예식 날짜' },
+  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
+  gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
 
 export const UNIQUE3_TEMPLATE_V2: TemplateV2 = {
@@ -948,83 +1642,383 @@ const UNIQUE4_BLOCK_STRUCTURE: BlockTemplate[] = [
         height: 100,
         zIndex: 0,
         binding: 'photos.main',
-        props: { type: 'image', objectFit: 'cover', overlay: 'rgba(0,0,0,0.4)' },
+        props: { type: 'image', objectFit: 'cover', overlay: 'rgba(0,0,0,0.2)' }, // 살짝 어둡게
         style: {},
       },
       // 신랑 이름 (좌측 상단)
       {
         type: 'text',
-        x: 10,
-        y: 10,
-        width: 35,
-        height: 8,
+        x: 8,
+        y: 5,
+        width: 30,
+        height: 5,
         zIndex: 2,
         binding: 'couple.groom.name',
         props: { type: 'text' },
         style: {
-          fontFamily: "'Noto Serif KR', serif",
-          fontSize: '1.1rem',
-          fontWeight: 400,
-          color: '#FFFFFF',
+          fontFamily: "'Nanum Square', sans-serif", // Nanum Square
+          fontSize: '1.2rem',
+          fontWeight: 600,
+          color: '#FFB6C1', // LightPink
           textAlign: 'left',
         },
       },
       // 신부 이름 (우측 상단)
       {
         type: 'text',
-        x: 55,
-        y: 10,
-        width: 35,
-        height: 8,
+        x: 62,
+        y: 5,
+        width: 30,
+        height: 5,
         zIndex: 2,
         binding: 'couple.bride.name',
         props: { type: 'text' },
         style: {
-          fontFamily: "'Noto Serif KR', serif",
-          fontSize: '1.1rem',
-          fontWeight: 400,
-          color: '#FFFFFF',
+          fontFamily: "'Nanum Square', sans-serif", // Nanum Square
+          fontSize: '1.2rem',
+          fontWeight: 600,
+          color: '#FFB6C1', // LightPink
           textAlign: 'right',
         },
       },
-      // "The Wedding Day"
+      // "The"
       {
         type: 'text',
-        x: 0,
+        x: 8,
         y: 55,
-        width: 100,
-        height: 15,
+        width: 50,
+        height: 8,
         zIndex: 2,
-        value: 'The\nWedding\nDay',
+        value: 'The',
         props: { type: 'text' },
         style: {
-          fontFamily: "'Great Vibes', cursive",
-          fontSize: '3.5rem',
+          fontFamily: "'Alata', sans-serif", // Alata
+          fontSize: '3rem',
           fontWeight: 400,
           color: '#FFB6C1',
-          textAlign: 'center',
-          lineHeight: 1.1,
+          textAlign: 'left',
         },
       },
-      // 날짜
+      // "Wedding"
       {
         type: 'text',
-        x: 0,
-        y: 85,
-        width: 100,
+        x: 8,
+        y: 63,
+        width: 60,
+        height: 8,
+        zIndex: 2,
+        value: 'Wedding',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Alata', sans-serif", // Alata
+          fontSize: '3rem',
+          fontWeight: 400,
+          color: '#FFB6C1',
+          textAlign: 'left',
+        },
+      },
+      // "Day"
+      {
+        type: 'text',
+        x: 8,
+        y: 71,
+        width: 50,
+        height: 8,
+        zIndex: 2,
+        value: 'Day',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Alata', sans-serif", // Alata
+          fontSize: '3rem',
+          fontWeight: 400,
+          color: '#FFB6C1',
+          textAlign: 'left',
+        },
+      },
+      // 날짜 "05.23"
+      {
+        type: 'text',
+        x: 8,
+        y: 82,
+        width: 50,
         height: 8,
         zIndex: 2,
         binding: 'wedding.date',
+        props: { type: 'text', format: '{wedding.month}.{wedding.day}' }, // MM.DD 포맷 필요
+        value: '05.23', // fallback
+        style: {
+          fontFamily: "'Alata', sans-serif", // Alata
+          fontSize: '3rem',
+          fontWeight: 400, // 얇게
+          color: '#FFB6C1',
+          textAlign: 'left',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Greeting
+  // ============================================
+  {
+    type: 'greeting',
+    enabled: true,
+    height: 70,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, 
+        y: 0, 
+        width: 100, 
+        height: 100, 
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFF0F5' }, // LavenderBlush
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 15,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'greeting.title',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.5rem',
+          fontWeight: 600,
+          color: '#FFB6C1', // Pink
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 30,
+        width: 80,
+        height: 50,
+        zIndex: 1,
+        binding: 'greeting.content',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '0.95rem',
+          fontWeight: 400,
+          color: '#555',
+          textAlign: 'center',
+          lineHeight: 1.8,
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Calendar
+  // ============================================
+   {
+    type: 'calendar',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' }, 
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 20,
+        width: 100,
+        height: 15,
+        zIndex: 1,
+        binding: 'wedding.dateDisplay',
         props: { type: 'text' },
         style: {
           fontFamily: "'Pretendard', sans-serif",
-          fontSize: '1.5rem',
+          fontSize: '1.8rem',
           fontWeight: 300,
           color: '#FFB6C1',
           textAlign: 'center',
           letterSpacing: '0.1em',
         },
       },
+    ],
+  },
+  // ============================================
+  // Location
+  // ============================================
+  {
+    type: 'location',
+    enabled: true,
+    height: 80,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFF0F5' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: '오시는 길',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.3rem',
+          color: '#FFB6C1',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 22,
+        width: 80,
+        height: 8,
+        zIndex: 1,
+        binding: 'venue.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.2rem',
+          fontWeight: 600,
+          color: '#333',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 40,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'venue.address',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '0.9rem',
+          color: '#666',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10,
+        y: 55,
+        width: 80,
+        height: 20,
+        zIndex: 1,
+        value: '[지도]',
+        props: { type: 'text' },
+        style: { fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }
+      }
+    ],
+  },
+  {
+    type: 'gallery',
+    enabled: true,
+    height: 100,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+       {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'Gallery',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          color: '#FFB6C1',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 22,
+        width: 80,
+        height: 70,
+        zIndex: 1,
+        binding: 'photos.gallery',
+        value: '[Gallery]',
+        props: { type: 'text' },
+        style: { color: '#ccc', textAlign: 'center' }
+      },
+    ],
+  },
+  {
+    type: 'contact',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFF0F5' },
+      },
+      {
+        type: 'text',
+        x: 0,
+        y: 10,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        value: 'Contact',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1.5rem',
+          fontWeight: 600,
+          color: '#FFB6C1',
+          textAlign: 'center',
+        },
+      },
+      {
+          type: 'text',
+          x: 10, y: 30, width: 80, height: 20,
+          zIndex: 1,
+          binding: 'couple.groom.phone',
+          props: { type: 'text', format: '{couple.groom.name} | {couple.bride.name}' },
+           style: {
+            fontFamily: "'Noto Serif KR', serif",
+            fontSize: '1rem',
+            textAlign: 'center',
+            color: '#333'
+          }
+      }
     ],
   },
 ]
@@ -1034,6 +2028,10 @@ const UNIQUE4_EDITABLE_FIELDS: EditableFieldMap = {
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
   weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
+   greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
+  gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
 
 export const UNIQUE4_TEMPLATE_V2: TemplateV2 = {
@@ -1061,73 +2059,324 @@ const UNIQUE5_BLOCK_STRUCTURE: BlockTemplate[] = [
         height: 100,
         zIndex: 0,
         binding: 'photos.main',
-        props: { type: 'image', objectFit: 'cover', overlay: 'rgba(255,255,255,0.2)' },
+        props: { type: 'image', objectFit: 'cover' }, // 오버레이 제거
         style: {},
       },
       // "05" 큰 숫자
       {
         type: 'text',
         x: 0,
-        y: 15,
+        y: 5,
         width: 100,
-        height: 20,
-        zIndex: 2,
-        value: '05',
-        props: { type: 'text' },
+        height: 15,
+        zIndex: 1,
+        // value: '05', // Removed static value
+        binding: 'wedding.date', // Bind to date to trigger updates
+        props: { type: 'text', format: '{wedding.month}' }, // Extract Month
         style: {
-          fontFamily: "'Bangers', cursive",
-          fontSize: '8rem',
+          fontFamily: "'Bangers', cursive", // Bangers
+          fontSize: '9rem',
+          fontWeight: 400, // Bangers is bold by default
+          color: '#FFFFFF',
+          textAlign: 'center',
+          lineHeight: 1,
+        },
+      },
+      // "23" 큰 숫자
+      {
+        type: 'text',
+        x: 0,
+        y: 18, // 05 바로 아래 겹치듯이
+        width: 100,
+        height: 15,
+        zIndex: 1,
+        // value: '23', // Removed static value
+        binding: 'wedding.date', // Bind to date
+        props: { type: 'text', format: '{wedding.day}' }, // Extract Day
+        style: {
+          fontFamily: "'Bangers', cursive", // Bangers
+          fontSize: '9rem',
           fontWeight: 400,
           color: '#FFFFFF',
           textAlign: 'center',
           lineHeight: 1,
         },
       },
-      // "We are getting married"
+      // "We are getting married" (Blue Script)
       {
         type: 'text',
         x: 0,
-        y: 40,
+        y: 26, // 숫자 위에 오버랩
         width: 100,
-        height: 15,
+        height: 20,
         zIndex: 2,
         value: 'We are\ngetting\nmarried',
         props: { type: 'text' },
         style: {
-          fontFamily: "'Great Vibes', cursive",
-          fontSize: '3rem',
+          fontFamily: "'Nanum Brush Script', cursive", // Nanum Brush
+          fontSize: '4.5rem',
           fontWeight: 400,
-          color: '#4169E1',
+          color: '#0047AB', // 진한 파랑 (Cobalt)
           textAlign: 'center',
-          lineHeight: 1.2,
+          lineHeight: 1.0,
+          textShadow: '0 0 10px rgba(255,255,255,0.5)', // 가독성을 위해
         },
       },
-      // 이름
+      // 신랑 이름
       {
         type: 'text',
-        x: 0,
-        y: 75,
-        width: 100,
-        height: 8,
+        x: 5,
+        y: 90,
+        width: 30,
+        height: 5,
         zIndex: 2,
-        props: { type: 'text', format: '{couple.groom.name} & {couple.bride.name}' },
         binding: 'couple.groom.name',
+        props: { type: 'text' },
         style: {
-          fontFamily: "'Pretendard', sans-serif",
+          fontFamily: "'Nanum Pen Script', cursive", // Nanum Pen
           fontSize: '1.2rem',
           fontWeight: 500,
           color: '#FFFFFF',
+          textAlign: 'left',
+        },
+      },
+      // 신부 이름
+      {
+        type: 'text',
+        x: 65,
+        y: 90,
+        width: 30,
+        height: 5,
+        zIndex: 2,
+        binding: 'couple.bride.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Nanum Pen Script', cursive", // Nanum Pen
+          fontSize: '1.2rem',
+          fontWeight: 500,
+          color: '#FFFFFF',
+          textAlign: 'right',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Greeting
+  // ============================================
+  {
+    type: 'greeting',
+    enabled: true,
+    height: 70,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, 
+        y: 0, 
+        width: 100, 
+        height: 100, 
+        zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F0F8FF' }, // AliceBlue
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 15,
+        width: 80,
+        height: 10,
+        zIndex: 1,
+        binding: 'greeting.title',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          color: '#4169E1', // RoyalBlue
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10,
+        y: 30,
+        width: 80,
+        height: 50,
+        zIndex: 1,
+        binding: 'greeting.content',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '0.95rem',
+          color: '#333',
+          textAlign: 'center',
+          lineHeight: 1.8,
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Calendar
+  // ============================================
+  {
+    type: 'calendar',
+    enabled: true,
+    height: 60,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+       {
+        type: 'text',
+        x: 0, y: 20, width: 100, height: 15, zIndex: 1,
+        binding: 'wedding.dateDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '2rem',
+          fontWeight: 700,
+          color: '#4169E1',
           textAlign: 'center',
         },
       },
     ],
   },
+   // ============================================
+  // Location
+  // ============================================
+  {
+    type: 'location',
+    enabled: true,
+    height: 80,
+    elements: [
+      {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F0F8FF' },
+      },
+      {
+        type: 'text',
+        x: 0, y: 10, width: 100, height: 8, zIndex: 1,
+        value: 'Location',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          color: '#4169E1',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10, y: 22, width: 80, height: 8, zIndex: 1,
+        binding: 'venue.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.2rem',
+          fontWeight: 700,
+          color: '#333',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10, y: 40, width: 80, height: 10, zIndex: 1,
+        binding: 'venue.address',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '0.9rem',
+          color: '#555',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10, y: 55, width: 80, height: 20, zIndex: 1,
+        value: '[MAP]',
+        props: { type: 'text' },
+        style: { fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }
+      }
+    ],
+  },
+  {
+    type: 'gallery',
+    enabled: true,
+    height: 100,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      {
+        type: 'text',
+        x: 0, y: 10, width: 100, height: 8, zIndex: 1,
+        value: 'Gallery',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          color: '#4169E1',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10, y: 22, width: 80, height: 70, zIndex: 1,
+        binding: 'photos.gallery',
+        value: '[Gallery Grid]',
+        props: { type: 'text' },
+        style: { color: '#ccc', textAlign: 'center' },
+      },
+    ],
+  },
+  {
+    type: 'contact',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F0F8FF' },
+      },
+       {
+        type: 'text',
+        x: 0, y: 10, width: 100, height: 8, zIndex: 1,
+        value: 'Contact',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Great Vibes', cursive",
+          fontSize: '2rem',
+          color: '#4169E1',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10, y: 30, width: 80, height: 20, zIndex: 1,
+        binding: 'couple.groom.phone',
+        props: { type: 'text', format: '{couple.groom.name} & {couple.bride.name}' },
+        style: { fontFamily: "'Pretendard', sans-serif", fontSize: '1rem', textAlign: 'center' }
+      }
+    ]
+  }
 ]
 
 const UNIQUE5_EDITABLE_FIELDS: EditableFieldMap = {
   mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
+  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
+  gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
 
 export const UNIQUE5_TEMPLATE_V2: TemplateV2 = {
@@ -1156,65 +2405,277 @@ const UNIQUE6_BLOCK_STRUCTURE: BlockTemplate[] = [
         zIndex: 0,
         binding: 'photos.main',
         props: { type: 'image', objectFit: 'cover' },
-        style: { filter: 'grayscale(100%)' },
+        style: { filter: 'grayscale(100%) brightness(0.9)' }, // 살짝 어둡게
       },
-      // 이름 (상단)
+      // 한글 이름 (중앙 상단)
       {
         type: 'text',
         x: 0,
-        y: 15,
+        y: 35, // 중앙 쯤
         width: 100,
-        height: 10,
+        height: 5,
         zIndex: 2,
-        props: { type: 'text', format: '{couple.groom.name} ♥ {couple.bride.name}' },
+        props: { type: 'text', format: '{couple.groom.name}  •  {couple.bride.name}' },
         binding: 'couple.groom.name',
         style: {
-          fontFamily: "'Noto Serif KR', serif",
-          fontSize: '1.3rem',
-          fontWeight: 500,
-          color: '#FF69B4',
+          fontFamily: "'Nanum Square', sans-serif", // Nanum Square
+          fontSize: '1.1rem',
+          fontWeight: 600,
+          color: '#FF69B4', // HotPink
           textAlign: 'center',
         },
       },
-      // "The Wedding Day"
+      // "The Wedding Day" (타이틀)
       {
         type: 'text',
         x: 0,
-        y: 50,
+        y: 40,
         width: 100,
-        height: 18,
+        height: 25,
         zIndex: 2,
         value: 'The\nWedding\nDay',
         props: { type: 'text' },
         style: {
-          fontFamily: "'Calistoga', cursive",
-          fontSize: '3.5rem',
-          fontWeight: 400,
+          fontFamily: "'Pretendard', sans-serif", // 명조보다는 고딕 계열
+          fontSize: '4rem',
+          fontWeight: 700,
           color: '#FF69B4',
           textAlign: 'center',
           lineHeight: 1.1,
+          letterSpacing: '-0.02em',
         },
       },
       // 날짜
       {
         type: 'text',
         x: 0,
-        y: 82,
+        y: 66,
         width: 100,
-        height: 8,
+        height: 6,
         zIndex: 2,
         binding: 'wedding.date',
         props: { type: 'text' },
         style: {
+          fontFamily: "'Nanum Square', sans-serif", // Nanum Square
+          fontSize: '1.2rem',
+          fontWeight: 600,
+          color: '#FF69B4',
+          textAlign: 'center',
+          letterSpacing: '0.05em',
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Greeting
+  // ============================================
+  {
+    type: 'greeting',
+    enabled: true,
+    height: 70,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F5F5F5' }, // WhiteSmoke
+      },
+      {
+        type: 'text',
+        x: 10, y: 15, width: 80, height: 10, zIndex: 1,
+        binding: 'greeting.title',
+        props: { type: 'text' },
+        style: {
           fontFamily: "'Pretendard', sans-serif",
           fontSize: '1.5rem',
+          fontWeight: 700,
+          color: '#FF69B4', // HotPink
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10, y: 30, width: 80, height: 50, zIndex: 1,
+        binding: 'greeting.content',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '0.95rem',
           fontWeight: 500,
-          color: '#FFFFFF',
+          color: '#000',
+          textAlign: 'center',
+          lineHeight: 1.6,
+        },
+      },
+    ],
+  },
+  // ============================================
+  // Calendar
+  // ============================================
+  {
+    type: 'calendar',
+    enabled: true,
+    height: 60,
+    elements: [
+      {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      {
+        type: 'text',
+        x: 0, y: 20, width: 100, height: 15, zIndex: 1,
+        binding: 'wedding.dateDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '2rem',
+          fontWeight: 900,
+          color: '#FF69B4',
           textAlign: 'center',
         },
       },
     ],
   },
+  // ============================================
+  // Location
+  // ============================================
+  {
+    type: 'location',
+    enabled: true,
+    height: 80,
+    elements: [
+      {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F5F5F5' },
+      },
+      {
+        type: 'text',
+        x: 0, y: 10, width: 100, height: 8, zIndex: 1,
+        value: 'LOCATION',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.5rem',
+          fontWeight: 900,
+          color: '#000',
+          textAlign: 'center',
+          letterSpacing: '-0.02em',
+        },
+      },
+      {
+        type: 'text',
+        x: 10, y: 22, width: 80, height: 8, zIndex: 1,
+        binding: 'venue.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.2rem',
+          fontWeight: 700,
+          color: '#FF69B4',
+          textAlign: 'center',
+        },
+      },
+      {
+        type: 'text',
+        x: 10, y: 40, width: 80, height: 10, zIndex: 1,
+        binding: 'venue.address',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '0.9rem',
+          fontWeight: 500,
+          color: '#000',
+          textAlign: 'center',
+        },
+      },
+       {
+        type: 'text',
+        x: 10, y: 55, width: 80, height: 20, zIndex: 1,
+        value: '[MAP]',
+        props: { type: 'text' },
+        style: { fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }
+      }
+    ],
+  },
+  {
+    type: 'gallery',
+    enabled: true,
+    height: 100,
+    elements: [
+      {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#FFFFFF' },
+      },
+      {
+        type: 'text',
+        x: 0, y: 10, width: 100, height: 8, zIndex: 1,
+        value: 'GALLERY',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.5rem',
+          fontWeight: 900,
+          color: '#000',
+          textAlign: 'center',
+          letterSpacing: '-0.02em',
+        },
+      },
+      {
+        type: 'text',
+        x: 10, y: 22, width: 80, height: 70, zIndex: 1,
+        binding: 'photos.gallery',
+        value: '[B&W Gallery]',
+        props: { type: 'text' },
+        style: { color: '#ccc', textAlign: 'center', filter: 'grayscale(100%)' },
+      },
+    ],
+  },
+  {
+    type: 'contact',
+    enabled: true,
+    height: 60,
+    elements: [
+       {
+        type: 'shape',
+        x: 0, y: 0, width: 100, height: 100, zIndex: 0,
+        props: { type: 'shape', shape: 'rectangle' },
+        style: { backgroundColor: '#F5F5F5' },
+      },
+       {
+        type: 'text',
+        x: 0, y: 10, width: 100, height: 8, zIndex: 1,
+        value: 'CONTACT',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1.5rem',
+          fontWeight: 900,
+          color: '#000',
+          textAlign: 'center',
+          letterSpacing: '-0.02em',
+        },
+      },
+       {
+        type: 'text',
+        x: 10, y: 30, width: 80, height: 20, zIndex: 1,
+        binding: 'couple.groom.phone',
+         props: { type: 'text', format: '{couple.groom.name} ♥ {couple.bride.name}' },
+        style: {
+           fontFamily: "'Pretendard', sans-serif",
+           fontSize: '1.2rem',
+           fontWeight: 700,
+           color: '#FF69B4',
+           textAlign: 'center'
+        }
+      }
+    ]
+  }
 ]
 
 const UNIQUE6_EDITABLE_FIELDS: EditableFieldMap = {
@@ -1222,6 +2683,10 @@ const UNIQUE6_EDITABLE_FIELDS: EditableFieldMap = {
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
   weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
+  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
+  gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
 
 export const UNIQUE6_TEMPLATE_V2: TemplateV2 = {
