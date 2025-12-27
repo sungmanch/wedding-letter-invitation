@@ -21,6 +21,14 @@
   font-display: swap;
 }
 
+/* 손편지체 (Sonpyeonji) */
+@font-face {
+  font-family: 'Sonpyeonji';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_05@1.0/Handletter.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
 :root {
   /* Wedding Theme Colors - Purple/Lavender Palette */
   --primary-purple: #8b5cf6;

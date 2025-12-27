@@ -185,6 +185,13 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: [], // CDN @font-face
   },
+
+  // 손편지체
+  sonpyeonji: {
+    family: ['Sonpyeonji', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: [], // CDN @font-face
+  },
 } as const
 
 // ============================================
