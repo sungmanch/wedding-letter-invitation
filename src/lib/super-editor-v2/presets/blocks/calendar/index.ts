@@ -8,12 +8,13 @@ import type { BlockPreset } from '../types'
 
 // Individual Preset Imports
 import { CALENDAR_KOREAN_COUNTDOWN_BOX } from './korean-countdown-box'
+import { CALENDAR_WEEK_STRIP } from './week-strip'
 
 // ============================================
 // Type Exports
 // ============================================
 
-export type CalendarPresetId = 'calendar-korean-countdown-box'
+export type CalendarPresetId = 'calendar-korean-countdown-box' | 'calendar-week-strip'
 
 // ============================================
 // Preset Registry
@@ -21,6 +22,7 @@ export type CalendarPresetId = 'calendar-korean-countdown-box'
 
 export const CALENDAR_PRESETS: Record<CalendarPresetId, BlockPreset> = {
   'calendar-korean-countdown-box': CALENDAR_KOREAN_COUNTDOWN_BOX,
+  'calendar-week-strip': CALENDAR_WEEK_STRIP,
 }
 
 // ============================================
