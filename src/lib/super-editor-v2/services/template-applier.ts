@@ -32,8 +32,25 @@ export function applyTemplateToDocument(
     throw new Error(`Template not found: ${templateId}`)
   }
 
+  console.log(`[Template Applier] 🎨 Applying template "${template.name}" (${templateId})`)
+  console.log('[Template Applier] Template details:', {
+    mood: template.mood.join(', '),
+    colorTheme: template.designPattern.colorTheme,
+    stylePreset: template.designPattern.stylePreset,
+    primary: template.designPattern.colorPalette.primary,
+    secondary: template.designPattern.colorPalette.secondary,
+    tertiary: template.designPattern.colorPalette.tertiary,
+  })
+
   // 1. 전역 스타일 시스템 생성
   const style = buildStyleSystemFromTemplate(template, document.style)
+
+  console.log('[Template Applier] Style system created:', {
+    preset: style.preset,
+    dominantColor: style.quick?.dominantColor,
+    accentColor: style.quick?.accentColor,
+    mood: style.quick?.mood,
+  })
 
   // 2. 블록별 색상 적용
   const blocks = document.blocks.map((block) => {
@@ -45,6 +62,8 @@ export function applyTemplateToDocument(
       return applyTemplateColorsToBlock(block, template)
     }
   })
+
+  console.log(`[Template Applier] ✅ Applied colors to ${blocks.length} blocks`)
 
   return { style, blocks }
 }
