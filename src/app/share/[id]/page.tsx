@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { getPublishedDocument } from '@/lib/super-editor-v2/actions/document'
 import { GuestViewClient } from './GuestViewClient'
+import { getFontLinkHrefs } from '@/lib/super-editor-v2/fonts'
+import type { StyleSystem } from '@/lib/super-editor-v2/schema/types'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -49,5 +51,23 @@ export default async function SharePage({ params }: PageProps) {
     notFound()
   }
 
-  return <GuestViewClient document={document} />
+  // SSR: 폰트 link 태그 미리 로드
+  const style = document.style as StyleSystem | undefined
+  const fontHrefs = style ? getFontLinkHrefs(style) : []
+
+  return (
+    <>
+      {/* SSR 폰트 preload */}
+      {fontHrefs.length > 0 && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          {fontHrefs.map((href, i) => (
+            <link key={i} href={href} rel="stylesheet" />
+          ))}
+        </>
+      )}
+      <GuestViewClient document={document} />
+    </>
+  )
 }

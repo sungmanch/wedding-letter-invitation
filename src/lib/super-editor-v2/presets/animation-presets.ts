@@ -129,7 +129,7 @@ export const ENTRANCE_PRESETS: AnimationPreset[] = [
     description: '작아지면서 나타나기',
     meta: {
       mood: ['elegant', 'subtle'],
-      suitableFor: ['hero', 'gallery', 'greeting'],
+      suitableFor: ['hero', 'gallery', 'greeting-parents'],
       intensity: 'medium',
       keywords: {
         ko: ['확대', '스케일'],
@@ -278,7 +278,7 @@ export const ENTRANCE_PRESETS: AnimationPreset[] = [
     description: '아래에서 드러나기',
     meta: {
       mood: ['dramatic', 'cinematic'],
-      suitableFor: ['hero', 'greeting', 'gallery'],
+      suitableFor: ['hero', 'greeting-parents', 'gallery'],
       intensity: 'dramatic',
       keywords: {
         ko: ['드러나는', '리빌', '클립'],
@@ -372,7 +372,7 @@ export const ENTRANCE_PRESETS: AnimationPreset[] = [
     description: '요소들이 순차적으로 올라오기',
     meta: {
       mood: ['elegant', 'subtle'],
-      suitableFor: ['gallery', 'parents', 'account', 'message'],
+      suitableFor: ['gallery', 'greeting-parents', 'account', 'message'],
       intensity: 'medium',
       keywords: {
         ko: ['순차', '연속', '차례'],
@@ -403,7 +403,7 @@ export const ENTRANCE_PRESETS: AnimationPreset[] = [
     description: '요소들이 순차적으로 커지며 나타나기',
     meta: {
       mood: ['playful', 'elegant'],
-      suitableFor: ['gallery', 'parents'],
+      suitableFor: ['gallery', 'greeting-parents'],
       intensity: 'medium',
       keywords: {
         ko: ['순차', '스케일'],

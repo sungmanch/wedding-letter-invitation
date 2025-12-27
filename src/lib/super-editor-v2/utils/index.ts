@@ -40,7 +40,31 @@ export {
   vhToPx,
   pxToPercent,
   percentToPx,
+  pxToRem,
   // 상수
   BINDING_TO_ID,
   ID_TO_BINDING,
 } from './element-id'
+
+// Size Resolution (Auto Layout)
+export {
+  resolveBlockHeightNumber,
+  resolveBlockHeightStyle,
+  isAutoLayoutBlock,
+  hasAbsolutePosition,
+  getElementPosition,
+  resolveSizeMode,
+  isAutoLayoutElement,
+  getAutoLayoutElementStyle,
+} from './size-resolver'
+
+// Color Generator (1컬러 시스템)
+export {
+  generateColorSet,
+  deriveFgEmphasis,
+  hexToHSL,
+  hslToHex,
+  SIMPLE_COLOR_PRESETS,
+  type SimpleColorSet,
+  type HSL,
+} from './color-generator'

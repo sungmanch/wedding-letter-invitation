@@ -1,8 +1,14 @@
 /**
  * Super Editor v2 - Theme Presets
  *
- * 13개 테마 프리셋 정의
+ * 10개 테마 프리셋 정의 (1컬러 3개 + 기존 Light 7개)
  * Level 1 스타일 시스템용
+ *
+ * 1컬러 시스템 (디자이너 확정):
+ * - Primary: 제목, 아이콘, 강조 문구, 활성 탭/버튼, 탭 밑줄 (fg-emphasis, accent-default)
+ * - Secondary: 카드 배경, 비활성 탭 배경 (bg-card)
+ * - Tertiary: hover/보조 상태 (accent-hover, accent-secondary)
+ * - 배경: #FFFFFF 통일
  */
 
 import type {
@@ -11,6 +17,7 @@ import type {
   GradientValue,
   QuickStyleConfig,
 } from '../schema/types'
+import { SIMPLE_COLOR_PRESETS } from '../utils/color-generator'
 
 // ============================================
 // Theme Preset 정의
@@ -21,7 +28,7 @@ export interface ThemePreset {
   name: string
   nameKo: string
   description: string
-  category: 'basic' | 'classic' | 'modern' | 'romantic' | 'cinematic' | 'special'
+  category: 'simple' | 'basic' | 'classic' | 'modern' | 'romantic' | 'special'
   tokens: SemanticTokens
   quick?: Partial<QuickStyleConfig>
   // 추천 타이포그래피 프리셋
@@ -29,6 +36,106 @@ export interface ThemePreset {
 }
 
 export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
+  // ─── 1컬러 시스템 (Simple) ───
+  'simple-pink': {
+    id: 'simple-pink',
+    name: 'Simple Pink',
+    nameKo: '심플 핑크',
+    description: '부드러운 핑크 컬러 테마',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.pink.secondary,         // S: 카드/비활성탭 배경
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.pink.primary,       // P: 제목
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': SIMPLE_COLOR_PRESETS.pink.primary,    // P: 아이콘, 강조, 활성탭/버튼
+      'accent-hover': SIMPLE_COLOR_PRESETS.pink.tertiary,     // T: hover 상태
+      'accent-active': SIMPLE_COLOR_PRESETS.pink.primary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.pink.tertiary, // T: 보조
+      'border-default': '#E5E7EB',
+      'border-emphasis': SIMPLE_COLOR_PRESETS.pink.primary,   // P: 강조 테두리
+      'border-muted': '#F3F4F6',
+    },
+    quick: {
+      mood: 'warm',
+      contrast: 'medium',
+      saturation: 'normal',
+    },
+    recommendedTypography: 'romantic-soft',
+  },
+
+  'simple-coral': {
+    id: 'simple-coral',
+    name: 'Simple Coral',
+    nameKo: '심플 다홍',
+    description: '따뜻한 다홍 컬러 테마',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.coral.secondary,         // S: 카드/비활성탭 배경
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.coral.primary,       // P: 제목
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': SIMPLE_COLOR_PRESETS.coral.primary,    // P: 아이콘, 강조, 활성탭/버튼
+      'accent-hover': SIMPLE_COLOR_PRESETS.coral.tertiary,     // T: hover 상태
+      'accent-active': SIMPLE_COLOR_PRESETS.coral.primary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.coral.tertiary, // T: 보조
+      'border-default': '#E5E7EB',
+      'border-emphasis': SIMPLE_COLOR_PRESETS.coral.primary,   // P: 강조 테두리
+      'border-muted': '#F3F4F6',
+    },
+    quick: {
+      mood: 'warm',
+      contrast: 'medium',
+      saturation: 'normal',
+    },
+    recommendedTypography: 'romantic-soft',
+  },
+
+  'simple-blue': {
+    id: 'simple-blue',
+    name: 'Simple Blue',
+    nameKo: '심플 블루',
+    description: '시원한 블루 컬러 테마',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.blue.secondary,         // S: 카드/비활성탭 배경
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.blue.primary,       // P: 제목
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': SIMPLE_COLOR_PRESETS.blue.primary,    // P: 아이콘, 강조, 활성탭/버튼
+      'accent-hover': SIMPLE_COLOR_PRESETS.blue.tertiary,     // T: hover 상태
+      'accent-active': SIMPLE_COLOR_PRESETS.blue.primary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.blue.tertiary, // T: 보조
+      'border-default': '#E5E7EB',
+      'border-emphasis': SIMPLE_COLOR_PRESETS.blue.primary,   // P: 강조 테두리
+      'border-muted': '#F3F4F6',
+    },
+    quick: {
+      mood: 'cool',
+      contrast: 'medium',
+      saturation: 'normal',
+    },
+    recommendedTypography: 'modern-clean',
+  },
+
   // ─── 기본 (Basic) ───
   'minimal-light': {
     id: 'minimal-light',
@@ -58,39 +165,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     quick: {
       mood: 'neutral',
       contrast: 'medium',
-      saturation: 'muted',
-    },
-    recommendedTypography: 'modern-minimal',
-  },
-
-  'minimal-dark': {
-    id: 'minimal-dark',
-    name: 'Minimal Dark',
-    nameKo: '미니멀 다크',
-    description: '세련된 다크 모드 디자인',
-    category: 'basic',
-    tokens: {
-      'bg-page': '#0A0A0A',
-      'bg-section': '#141414',
-      'bg-section-alt': '#1F1F1F',
-      'bg-card': '#1A1A1A',
-      'bg-overlay': 'rgba(0, 0, 0, 0.6)',
-      'fg-default': '#F5F5F5',
-      'fg-muted': '#A3A3A3',
-      'fg-emphasis': '#FFFFFF',
-      'fg-inverse': '#0A0A0A',
-      'fg-on-accent': '#0A0A0A',
-      'accent-default': '#FFFFFF',
-      'accent-hover': '#E5E5E5',
-      'accent-active': '#D4D4D4',
-      'accent-secondary': '#737373',
-      'border-default': '#262626',
-      'border-emphasis': '#404040',
-      'border-muted': '#1A1A1A',
-    },
-    quick: {
-      mood: 'cool',
-      contrast: 'high',
       saturation: 'muted',
     },
     recommendedTypography: 'modern-minimal',
@@ -197,39 +271,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     recommendedTypography: 'modern-geometric',
   },
 
-  'modern-contrast': {
-    id: 'modern-contrast',
-    name: 'Modern Contrast',
-    nameKo: '모던 하이 콘트라스트',
-    description: '강렬한 대비의 현대적 디자인',
-    category: 'modern',
-    tokens: {
-      'bg-page': '#0F0F0F',
-      'bg-section': '#1A1A1A',
-      'bg-section-alt': '#262626',
-      'bg-card': '#1F1F1F',
-      'bg-overlay': 'rgba(0, 0, 0, 0.7)',
-      'fg-default': '#FFFFFF',
-      'fg-muted': '#A3A3A3',
-      'fg-emphasis': '#FFFFFF',
-      'fg-inverse': '#0F0F0F',
-      'fg-on-accent': '#0F0F0F',
-      'accent-default': '#FF3B30',
-      'accent-hover': '#FF5349',
-      'accent-active': '#E62E24',
-      'accent-secondary': '#FF6B5B',
-      'border-default': '#333333',
-      'border-emphasis': '#4D4D4D',
-      'border-muted': '#262626',
-    },
-    quick: {
-      mood: 'cool',
-      contrast: 'high',
-      saturation: 'vivid',
-    },
-    recommendedTypography: 'modern-clean',
-  },
-
   // ─── 로맨틱 (Romantic) ───
   'romantic-blush': {
     id: 'romantic-blush',
@@ -297,91 +338,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     recommendedTypography: 'natural-warm',
   },
 
-  // ─── 시네마틱 (Cinematic) ───
-  'cinematic-dark': {
-    id: 'cinematic-dark',
-    name: 'Cinematic Dark',
-    nameKo: '시네마틱 다크',
-    description: '영화적 무드의 다크 테마',
-    category: 'cinematic',
-    tokens: {
-      'bg-page': '#0D0D0D',
-      'bg-section': '#151515',
-      'bg-section-alt': '#1A1A1A',
-      'bg-card': '#1F1F1F',
-      'bg-overlay': 'rgba(0, 0, 0, 0.7)',
-      'fg-default': '#E5E5E5',
-      'fg-muted': '#8A8A8A',
-      'fg-emphasis': '#FFFFFF',
-      'fg-inverse': '#0D0D0D',
-      'fg-on-accent': '#0D0D0D',
-      'accent-default': '#C9A962',
-      'accent-hover': '#D4B872',
-      'accent-active': '#B8983F',
-      'accent-secondary': '#A08040',
-      'border-default': '#2A2A2A',
-      'border-emphasis': '#3D3D3D',
-      'border-muted': '#1F1F1F',
-      'gradient-hero': {
-        type: 'radial',
-        shape: 'ellipse',
-        position: 'center',
-        stops: [
-          { color: '#000000', position: 0, opacity: 0 },
-          { color: '#000000', position: 70, opacity: 0.5 },
-          { color: '#000000', position: 100, opacity: 0.8 },
-        ],
-      },
-    },
-    quick: {
-      mood: 'warm',
-      contrast: 'high',
-      saturation: 'muted',
-    },
-    recommendedTypography: 'classic-elegant',
-  },
-
-  'cinematic-warm': {
-    id: 'cinematic-warm',
-    name: 'Cinematic Warm',
-    nameKo: '시네마틱 웜',
-    description: '따뜻한 영화적 색감',
-    category: 'cinematic',
-    tokens: {
-      'bg-page': '#1A1510',
-      'bg-section': '#211A14',
-      'bg-section-alt': '#2A2118',
-      'bg-card': '#2A2118',
-      'bg-overlay': 'rgba(20, 15, 10, 0.6)',
-      'fg-default': '#E8DDD0',
-      'fg-muted': '#A89880',
-      'fg-emphasis': '#FFF8F0',
-      'fg-inverse': '#1A1510',
-      'fg-on-accent': '#1A1510',
-      'accent-default': '#D4A05A',
-      'accent-hover': '#E0B06A',
-      'accent-active': '#C4904A',
-      'accent-secondary': '#B08040',
-      'border-default': '#3D3228',
-      'border-emphasis': '#4D4238',
-      'border-muted': '#2A2118',
-      'gradient-overlay': {
-        type: 'linear',
-        angle: 180,
-        stops: [
-          { color: '#1A1510', position: 0, opacity: 0 },
-          { color: '#1A1510', position: 100, opacity: 0.8 },
-        ],
-      },
-    },
-    quick: {
-      mood: 'warm',
-      contrast: 'medium',
-      saturation: 'muted',
-    },
-    recommendedTypography: 'romantic-italian',
-  },
-
   // ─── 특수 (Special) ───
   'photo-adaptive': {
     id: 'photo-adaptive',
@@ -421,89 +377,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     },
     recommendedTypography: 'modern-minimal',
   },
-
-  'duotone': {
-    id: 'duotone',
-    name: 'Duotone',
-    nameKo: '듀오톤',
-    description: '두 가지 색상의 조화',
-    category: 'special',
-    tokens: {
-      'bg-page': '#1A1A2E',
-      'bg-section': '#16213E',
-      'bg-section-alt': '#0F3460',
-      'bg-card': '#1A1A2E',
-      'bg-overlay': 'rgba(10, 10, 20, 0.6)',
-      'fg-default': '#E8E8E8',
-      'fg-muted': '#A0A0B0',
-      'fg-emphasis': '#FFFFFF',
-      'fg-inverse': '#1A1A2E',
-      'fg-on-accent': '#1A1A2E',
-      'accent-default': '#E94560',
-      'accent-hover': '#F05070',
-      'accent-active': '#D83550',
-      'accent-secondary': '#533483',
-      'border-default': '#2A2A4E',
-      'border-emphasis': '#3A3A6E',
-      'border-muted': '#1A1A2E',
-    },
-    quick: {
-      mood: 'cool',
-      contrast: 'high',
-      saturation: 'vivid',
-    },
-    recommendedTypography: 'modern-geometric',
-  },
-
-  'gradient-hero': {
-    id: 'gradient-hero',
-    name: 'Gradient Hero',
-    nameKo: '그라데이션 히어로',
-    description: '화려한 그라데이션 중심 디자인',
-    category: 'special',
-    tokens: {
-      'bg-page': '#0F0F1A',
-      'bg-section': '#1A1A2E',
-      'bg-section-alt': '#252540',
-      'bg-card': '#1F1F35',
-      'bg-overlay': 'rgba(15, 15, 26, 0.5)',
-      'fg-default': '#F0F0F5',
-      'fg-muted': '#A0A0B5',
-      'fg-emphasis': '#FFFFFF',
-      'fg-inverse': '#0F0F1A',
-      'fg-on-accent': '#FFFFFF',
-      'accent-default': '#8B5CF6',
-      'accent-hover': '#9D6FF8',
-      'accent-active': '#7C4DE8',
-      'accent-secondary': '#EC4899',
-      'border-default': '#2D2D4A',
-      'border-emphasis': '#3D3D6A',
-      'border-muted': '#1A1A30',
-      'gradient-hero': {
-        type: 'linear',
-        angle: 135,
-        stops: [
-          { color: '#667EEA', position: 0 },
-          { color: '#764BA2', position: 50 },
-          { color: '#F093FB', position: 100 },
-        ],
-      },
-      'gradient-accent': {
-        type: 'linear',
-        angle: 90,
-        stops: [
-          { color: '#8B5CF6', position: 0 },
-          { color: '#EC4899', position: 100 },
-        ],
-      },
-    },
-    quick: {
-      mood: 'cool',
-      contrast: 'high',
-      saturation: 'vivid',
-    },
-    recommendedTypography: 'modern-clean',
-  },
 }
 
 // ============================================
@@ -529,11 +402,11 @@ export function getPresetsByCategory(category: ThemePreset['category']): ThemePr
  */
 export function getAllThemePresets(): ThemePreset[] {
   const categoryOrder: ThemePreset['category'][] = [
+    'simple',   // 1컬러 시스템 (최상단)
     'basic',
     'classic',
     'modern',
     'romantic',
-    'cinematic',
     'special',
   ]
 

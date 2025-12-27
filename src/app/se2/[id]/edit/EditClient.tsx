@@ -26,6 +26,9 @@ import { useLocalStorage } from '@/lib/super-editor-v2/hooks/useLocalStorage'
 import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/editor/direct/edit-mode-toggle'
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
+import { FloatingPresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/floating-preset-sidebar'
+import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
+import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
 // ============================================
 // Types
@@ -96,6 +99,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [editMode, setEditMode] = useState<EditMode>('form')
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+  const [showPresetSidebar, setShowPresetSidebar] = useState(false)
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -152,6 +156,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 스타일 해석 및 CSS 변수 생성
   const resolvedStyle = useMemo(() => resolveStyle(editorDoc.style), [editorDoc.style])
   const cssVariables = useMemo(() => styleToCSSVariables(resolvedStyle), [resolvedStyle])
+
+  // 편집 모드: 모든 프리셋 폰트 미리 로드
+  useEditorFonts()
 
   // AI 편집 훅
   const aiEdit = useAIEdit({
@@ -223,6 +230,40 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       blocks: prev.blocks.map(block =>
         block.id === blockId ? { ...block, height } : block
       ),
+    }))
+  }, [updateDocument])
+
+  // 블록 프리셋 변경
+  const handlePresetChange = useCallback((
+    blockId: string,
+    presetId: string
+  ) => {
+    const preset = getBlockPreset(presetId)
+    if (!preset) {
+      console.warn(`Preset not found: ${presetId}`)
+      return
+    }
+
+    updateDocument(prev => ({
+      ...prev,
+      blocks: prev.blocks.map(block => {
+        if (block.id !== blockId) return block
+
+        // 프리셋의 기본 요소가 있으면 적용
+        const newElements = preset.defaultElements
+          ? preset.defaultElements.map((el, idx) => ({
+              ...el,
+              id: el.id || `${blockId}-el-${idx}`,
+            }))
+          : block.elements
+
+        return {
+          ...block,
+          presetId,
+          height: preset.defaultHeight ?? block.height,
+          elements: newElements,
+        }
+      }),
     }))
   }, [updateDocument])
 
@@ -444,7 +485,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         </div>
 
         {/* 프리뷰 패널 */}
-        <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50">
+        <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50 relative">
           {/* 디바이스 선택 바 + 모드 토글 */}
           <div className="flex-shrink-0 h-12 border-b border-[var(--sand-100)] bg-white flex items-center justify-between px-4">
             <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
@@ -567,6 +608,14 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               )}
             </div>
           </div>
+
+          {/* 프리셋 사이드바 */}
+          <FloatingPresetSidebar
+            selectedBlock={selectedBlock ?? null}
+            onPresetChange={handlePresetChange}
+            isOpen={showPresetSidebar}
+            onOpenChange={setShowPresetSidebar}
+          />
         </div>
       </div>
 

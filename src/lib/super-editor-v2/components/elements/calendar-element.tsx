@@ -18,6 +18,7 @@ export interface CalendarElementProps {
   value?: unknown // ISO 날짜 문자열 "2025-03-15"
   showDday?: boolean
   highlightColor?: string
+  markerType?: 'circle' | 'heart'  // 날짜 선택 마커 타입
   style?: ElementStyle
   className?: string
 }
@@ -26,10 +27,30 @@ export interface CalendarElementProps {
 // Component
 // ============================================
 
+// 하트 마커 SVG 컴포넌트
+function HeartMarker({ color, size = 35 }: { color: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 35 35"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+    >
+      <path
+        d="M34.6935 12.1109C34.659 12.2319 34.6198 12.3515 34.579 12.4679C31.087 22.3557 22.7068 29.007 14.2278 34.5734C12.7673 28.2759 7.74737 23.6347 5.16994 17.7843C3.7471 14.5556 2.55643 10.9948 3.33766 7.55968C4.12046 4.12301 7.59364 1.07595 11.0464 1.93435C14.3235 2.74772 15.9126 6.33806 17.039 9.49067C19.3638 6.39394 22.0699 3.46486 25.5133 1.65805C32.0031 -1.74758 36.2026 6.90618 34.6935 12.1124V12.1109Z"
+        fill={color}
+      />
+    </svg>
+  )
+}
+
 export function CalendarElement({
   value,
   showDday = true,
   highlightColor = 'var(--accent-default)',
+  markerType = 'circle',
   style,
   className = '',
 }: CalendarElementProps) {
@@ -189,6 +210,7 @@ export function CalendarElement({
         {calendarGrid.map((d, i) => {
           const isSelected = d === dateInfo.day
           const dayIndex = i % 7
+          const useHeartMarker = isSelected && markerType === 'heart'
 
           return (
             <div
@@ -201,20 +223,22 @@ export function CalendarElement({
                 fontSize: 'var(--text-sm)',
                 fontWeight: isSelected ? 600 : 400,
                 color: isSelected
-                  ? 'var(--fg-on-accent)'
+                  ? useHeartMarker ? highlightColor : 'var(--fg-on-accent)'
                   : d === null
                     ? 'transparent'
                     : dayIndex === 0
-                      ? '#ef4444'
+                      ? highlightColor
                       : dayIndex === 6
                         ? '#3b82f6'
                         : 'var(--fg-default)',
-                backgroundColor: isSelected ? highlightColor : 'transparent',
-                borderRadius: isSelected ? '50%' : 0,
+                backgroundColor: isSelected && !useHeartMarker ? highlightColor : 'transparent',
+                borderRadius: isSelected && !useHeartMarker ? '50%' : 0,
                 transition: 'all 0.2s ease',
+                position: 'relative',
               }}
             >
-              {d}
+              {useHeartMarker && <HeartMarker color={highlightColor} size={32} />}
+              <span style={{ position: 'relative', zIndex: 1 }}>{d}</span>
             </div>
           )
         })}

@@ -68,13 +68,13 @@ export interface ResolvedTokens {
 }
 
 export interface ResolvedTypography {
-  fontFamilyHeading: string
-  fontFamilyBody: string
-  fontFamilyAccent: string
+  fontFamilyDisplay: string  // 히어로/인트로용
+  fontFamilyHeading: string  // 섹션 제목용
+  fontFamilyBody: string     // 섹션 본문용
 
+  fontWeightDisplay: number
   fontWeightHeading: number
   fontWeightBody: number
-  fontWeightAccent: number
 
   scale: TypeScale
 }
@@ -122,13 +122,13 @@ const DEFAULT_TOKENS: ResolvedTokens = {
 }
 
 const DEFAULT_TYPOGRAPHY: ResolvedTypography = {
-  fontFamilyHeading: '"Noto Serif KR", serif',
-  fontFamilyBody: '"Pretendard", sans-serif',
-  fontFamilyAccent: '"Playfair Display", serif',
+  fontFamilyDisplay: '"Great Vibes", cursive',  // 히어로/인트로용
+  fontFamilyHeading: '"Playfair Display", serif',  // 섹션 제목용
+  fontFamilyBody: '"Noto Serif KR", serif',  // 섹션 본문용
 
-  fontWeightHeading: 400,
+  fontWeightDisplay: 400,
+  fontWeightHeading: 600,
   fontWeightBody: 400,
-  fontWeightAccent: 400,
 
   scale: {
     xs: '0.75rem',
@@ -350,35 +350,35 @@ function resolveTypography(config: StyleSystem['typography']): ResolvedTypograph
   if (config.preset) {
     const preset = TYPOGRAPHY_PRESETS[config.preset]
     if (preset) {
+      result.fontFamilyDisplay = fontStackToCSS(preset.fontStacks.display)
       result.fontFamilyHeading = fontStackToCSS(preset.fontStacks.heading)
       result.fontFamilyBody = fontStackToCSS(preset.fontStacks.body)
-      result.fontFamilyAccent = fontStackToCSS(preset.fontStacks.accent || preset.fontStacks.heading)
 
+      result.fontWeightDisplay = preset.weights.display
       result.fontWeightHeading = preset.weights.heading
       result.fontWeightBody = preset.weights.body
-      result.fontWeightAccent = preset.weights.accent || preset.weights.heading
     }
   }
 
   // 커스텀 오버라이드
   if (config.custom) {
+    if (config.custom.fontStacks?.display) {
+      result.fontFamilyDisplay = config.custom.fontStacks.display
+    }
     if (config.custom.fontStacks?.heading) {
       result.fontFamilyHeading = config.custom.fontStacks.heading
     }
     if (config.custom.fontStacks?.body) {
       result.fontFamilyBody = config.custom.fontStacks.body
     }
-    if (config.custom.fontStacks?.accent) {
-      result.fontFamilyAccent = config.custom.fontStacks.accent
+    if (config.custom.weights?.display) {
+      result.fontWeightDisplay = config.custom.weights.display
     }
     if (config.custom.weights?.heading) {
       result.fontWeightHeading = config.custom.weights.heading
     }
     if (config.custom.weights?.body) {
       result.fontWeightBody = config.custom.weights.body
-    }
-    if (config.custom.weights?.accent) {
-      result.fontWeightAccent = config.custom.weights.accent
     }
     if (config.custom.scale) {
       result.scale = { ...result.scale, ...config.custom.scale }
@@ -531,12 +531,12 @@ export function styleToCSSVariables(style: ResolvedStyle): Record<string, string
   }
 
   // 타이포그래피
+  vars['--font-display'] = style.typography.fontFamilyDisplay
   vars['--font-heading'] = style.typography.fontFamilyHeading
   vars['--font-body'] = style.typography.fontFamilyBody
-  vars['--font-accent'] = style.typography.fontFamilyAccent
+  vars['--font-weight-display'] = String(style.typography.fontWeightDisplay)
   vars['--font-weight-heading'] = String(style.typography.fontWeightHeading)
   vars['--font-weight-body'] = String(style.typography.fontWeightBody)
-  vars['--font-weight-accent'] = String(style.typography.fontWeightAccent)
 
   vars['--text-xs'] = style.typography.scale.xs
   vars['--text-sm'] = style.typography.scale.sm

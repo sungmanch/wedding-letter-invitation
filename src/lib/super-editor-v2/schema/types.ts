@@ -49,17 +49,52 @@ export interface DocumentMeta {
 // 2. 블록 시스템
 // ============================================
 
+// ─── Auto Layout 크기 모드 ───
+export type SizeMode =
+  | { type: 'fixed'; value: number; unit?: 'px' | 'vh' | 'vw' | '%' }
+  | { type: 'hug' }                         // fit-content
+  | { type: 'fill' }                        // 100% + flex: 1
+  | { type: 'fill-portion'; value: number } // flex 비율
+
+// ─── 블록 레이아웃 설정 ───
+export interface BlockLayout {
+  mode: 'absolute' | 'auto'  // 기본: 'absolute'
+
+  // Auto 모드 전용
+  direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
+  gap?: number              // px, 자식 간 간격
+  padding?: {
+    top?: number
+    right?: number
+    bottom?: number
+    left?: number
+  }
+
+  // 정렬
+  alignItems?: 'start' | 'center' | 'end' | 'stretch'
+  justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+
+  // 래핑 (horizontal일 때)
+  wrap?: boolean
+}
+
 export interface Block {
   id: string
 
   // 의미적 타입 (AI 맥락 이해용)
   type: BlockType
 
+  // 프리셋 ID (e.g., 'calendar-countdown', 'profile-dual-card')
+  presetId?: string
+
   // 블록 활성화 여부
   enabled: boolean
 
-  // 블록 높이 (vh 단위)
-  height: number
+  // ─── 레이아웃 설정 (신규) ───
+  layout?: BlockLayout
+
+  // 블록 높이 (vh 단위 또는 SizeMode)
+  height: number | SizeMode
 
   // 요소들 (변수 바인딩 포함)
   elements: Element[]
@@ -74,48 +109,61 @@ export interface Block {
 export type BlockType =
   // ─── 핵심 섹션 ───
   | 'hero'              // 메인 히어로 (메인 사진, 이름, 날짜)
-  | 'greeting'          // 인사말
-  | 'calendar'          // 달력/D-day
-  | 'gallery'           // 포토 갤러리
-  | 'location'          // 예식장 정보 + 지도
-  | 'parents'           // 혼주 소개
-  | 'contact'           // 연락처
-  | 'account'           // 축의금 계좌
-  | 'message'           // 축하 메시지/방명록
+  | 'greeting-parents'  // 인사말 + 혼주 소개 (통합)
+  | 'profile'           // 신랑신부 소개/인터뷰
+  | 'calendar'          // 예식일시 (달력/D-day)
+  | 'gallery'           // 갤러리 (사진/영상)
   | 'rsvp'              // 참석 여부
-  // ─── 확장 섹션 ───
-  | 'loading'           // 로딩 화면
-  | 'quote'             // 글귀
-  | 'profile'           // 프로필형 소개
-  | 'parents-contact'   // 혼주 연락처
-  | 'timeline'          // 타임라인/스토리
-  | 'video'             // 영상
-  | 'interview'         // 웨딩 인터뷰
-  | 'transport'         // 교통수단
-  | 'notice'            // 안내사항
-  | 'announcement'      // 안내문
-  | 'flower-gift'       // 화환 보내기
-  | 'together-time'     // 함께한 시간
-  | 'dday'              // D-DAY 카운트다운
-  | 'guest-snap'        // 게스트스냅
-  | 'ending'            // 엔딩 크레딧
+  | 'location'          // 오시는길 (예식장 정보 + 지도 + 교통)
+  | 'notice'            // 공지사항/안내
+  | 'account'           // 축의금 계좌
+  | 'message'           // 방명록/축하 메시지
+  | 'ending'            // 축하화환/공유/엔딩
+  // ─── 오버레이/모달 ───
+  | 'contact'           // 연락처 (오버레이로 표시)
+  // ─── 기타 기능 ───
   | 'music'             // BGM 컨트롤
+  | 'loading'           // 로딩 화면
   | 'custom'            // 사용자 정의 블록
 
 // ============================================
 // 3. 요소 시스템 (Element)
 // ============================================
 
+// ─── 요소 크기 제약 ───
+export interface ElementConstraints {
+  minWidth?: number   // px
+  maxWidth?: number   // px
+  minHeight?: number  // px
+  maxHeight?: number  // px
+}
+
+// ─── 요소 크기 설정 ───
+export interface ElementSizing {
+  width?: SizeMode   // 기본: { type: 'fill' }
+  height?: SizeMode  // 기본: { type: 'hug' }
+}
+
 export interface Element {
   id: string
   type: ElementType
 
-  // 위치/크기 (vw/vh 기준, 뷰포트 상대 좌표)
-  x: number       // vw
-  y: number       // vh (블록 내 상대 위치)
-  width: number   // vw
-  height: number  // vh
+  // ─── 레이아웃 모드 선택 ───
+  layoutMode?: 'absolute' | 'auto'  // 기본: 'absolute' (하위 호환)
+
+  // ─── Absolute 모드 (기존) ───
+  x?: number       // vw (absolute 모드에서 사용)
+  y?: number       // vh (블록 내 상대 위치)
+  width?: number   // vw (absolute 모드 또는 고정 너비)
+  height?: number  // vh (absolute 모드 또는 고정 높이)
   rotation?: number // degrees (기본값: 0)
+
+  // ─── Auto Layout 모드 (신규) ───
+  sizing?: ElementSizing
+  constraints?: ElementConstraints
+
+  // 부모 Auto Layout 내에서 자기 정렬
+  alignSelf?: 'start' | 'center' | 'end' | 'stretch'
 
   // z-index
   zIndex: number
@@ -134,9 +182,12 @@ export interface Element {
 
   // 요소별 애니메이션
   animation?: ElementAnimationConfig
+
+  // ─── Group 요소 전용 ───
+  children?: Element[]  // type: 'group'일 때 자식 요소들
 }
 
-export type ElementType = 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar'
+export type ElementType = 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar' | 'group'
 
 export type ElementProps =
   | TextProps
@@ -147,6 +198,7 @@ export type ElementProps =
   | DividerProps
   | MapProps
   | CalendarProps
+  | GroupProps
 
 export interface TextProps {
   type: 'text'
@@ -166,12 +218,14 @@ export interface ShapeProps {
   stroke?: string
   strokeWidth?: number
   svgPath?: string  // custom shape용
+  svgViewBox?: string  // custom shape viewBox (예: "0 0 50 50")
 }
 
 export interface ButtonProps {
   type: 'button'
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
+  targetBlockType?: BlockType  // action: 'show-block'일 때 표시할 블록 타입
 }
 
 export interface IconProps {
@@ -197,6 +251,19 @@ export interface CalendarProps {
   type: 'calendar'
   showDday?: boolean
   highlightColor?: string
+  markerType?: 'circle' | 'heart'  // 날짜 선택 마커 타입
+}
+
+export interface GroupProps {
+  type: 'group'
+  // 그룹 내부 레이아웃 설정
+  layout?: {
+    direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
+    gap?: number                            // px
+    alignItems?: 'start' | 'center' | 'end' | 'stretch'
+    justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+    reverse?: boolean                       // flex-direction: row-reverse / column-reverse
+  }
 }
 
 // ============================================
@@ -205,9 +272,9 @@ export interface CalendarProps {
 
 export type VariablePath =
   // ─── 공유 필드 (◆ 원본) ───
-  | 'couple.groom.name' | 'couple.groom.phone' | 'couple.groom.intro'
+  | 'couple.groom.name' | 'couple.groom.phone' | 'couple.groom.intro' | 'couple.groom.baptismalName'
   | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags'
-  | 'couple.bride.name' | 'couple.bride.phone' | 'couple.bride.intro'
+  | 'couple.bride.name' | 'couple.bride.phone' | 'couple.bride.intro' | 'couple.bride.baptismalName'
   | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags'
   | 'couple.photo' | 'couple.photos'
   | 'wedding.date' | 'wedding.time'
@@ -219,10 +286,11 @@ export type VariablePath =
 
   // ─── 혼주 ───
   | 'parents.deceasedIcon'
-  | 'parents.groom.father.name' | 'parents.groom.father.status' | 'parents.groom.father.phone'
-  | 'parents.groom.mother.name' | 'parents.groom.mother.status' | 'parents.groom.mother.phone'
-  | 'parents.bride.father.name' | 'parents.bride.father.status' | 'parents.bride.father.phone'
-  | 'parents.bride.mother.name' | 'parents.bride.mother.status' | 'parents.bride.mother.phone'
+  | 'parents.groom.birthOrder' | 'parents.bride.birthOrder'
+  | 'parents.groom.father.name' | 'parents.groom.father.status' | 'parents.groom.father.phone' | 'parents.groom.father.baptismalName'
+  | 'parents.groom.mother.name' | 'parents.groom.mother.status' | 'parents.groom.mother.phone' | 'parents.groom.mother.baptismalName'
+  | 'parents.bride.father.name' | 'parents.bride.father.status' | 'parents.bride.father.phone' | 'parents.bride.father.baptismalName'
+  | 'parents.bride.mother.name' | 'parents.bride.mother.status' | 'parents.bride.mother.phone' | 'parents.bride.mother.baptismalName'
 
   // ─── 장소 ───
   | 'venue.name' | 'venue.hall' | 'venue.address' | 'venue.tel'
@@ -285,25 +353,22 @@ export interface StyleSystem {
 }
 
 export type ThemePresetId =
+  // 1컬러 시스템 (디자이너 컬러셋)
+  | 'simple-pink'
+  | 'simple-coral'
+  | 'simple-blue'
   // 기본
   | 'minimal-light'
-  | 'minimal-dark'
   // 클래식
   | 'classic-ivory'
   | 'classic-gold'
   // 모던
   | 'modern-mono'
-  | 'modern-contrast'
   // 로맨틱
   | 'romantic-blush'
   | 'romantic-garden'
-  // 시네마틱
-  | 'cinematic-dark'
-  | 'cinematic-warm'
   // 특수
   | 'photo-adaptive'
-  | 'duotone'
-  | 'gradient-hero'
 
 export interface QuickStyleConfig {
   // 색상 조정
@@ -412,14 +477,14 @@ export interface TypographyConfig {
   preset?: TypographyPresetId
   custom?: {
     fontStacks?: {
-      heading?: string
-      body?: string
-      accent?: string
+      display?: string  // 히어로/인트로용 (예술적)
+      heading?: string  // 섹션 제목용
+      body?: string     // 섹션 본문용
     }
     weights?: {
+      display?: number
       heading?: number
       body?: number
-      accent?: number
     }
     scale?: Partial<TypeScale>
   }
@@ -442,6 +507,7 @@ export type TypographyPresetId =
   | 'natural-handwritten'
   | 'natural-brush'
   | 'natural-warm'
+  | 'natural-witty'
 
 export interface TypeScale {
   xs: string
@@ -838,8 +904,8 @@ export interface WeddingData {
 
   parents?: {
     deceasedIcon?: '故' | '고' | '✿'
-    groom: { father?: ParentInfo; mother?: ParentInfo }
-    bride: { father?: ParentInfo; mother?: ParentInfo }
+    groom: { father?: ParentInfo; mother?: ParentInfo; birthOrder?: string }
+    bride: { father?: ParentInfo; mother?: ParentInfo; birthOrder?: string }
   }
 
   // ═══════════════════════════════════════════════
@@ -897,6 +963,7 @@ export interface PersonInfo {
   name: string
   phone?: string
   intro?: string        // 소개글
+  baptismalName?: string // 세례명
   // 프로필 확장 (About Us)
   photo?: string        // 개인 사진
   birthDate?: string    // "1990-12-10"

@@ -12,6 +12,7 @@ import type { Element, Block, TextProps, ImageProps, ShapeProps, DividerProps, C
 import { useDocument } from '../../../context/document-context'
 import { resolveBinding } from '../../../utils/binding-resolver'
 import { interpolate } from '../../../utils/interpolate'
+import { pxToRem } from '../../../utils'
 
 // Element Components
 import { TextElement } from '../../elements/text-element'
@@ -115,7 +116,8 @@ export function StyledElementRenderer({ element, block }: StyledElementRendererP
           style={{
             backgroundColor: element.style?.background as string || '#C9A962',
             color: element.style?.text?.color || '#fff',
-            fontSize: element.style?.text?.fontSize || 14,
+            // 접근성: px → rem 변환
+            fontSize: element.style?.text?.fontSize ? pxToRem(element.style.text.fontSize) : '0.875rem',
             fontFamily: element.style?.text?.fontFamily,
           }}
         >

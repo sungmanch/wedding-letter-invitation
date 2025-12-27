@@ -18,6 +18,7 @@ import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DocumentProvider } from '@/lib/super-editor-v2/context/document-context'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
+import { useViewerFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
 // iPhone 13 기준 (비율 1:2.164)
 const MOBILE_BREAKPOINT = 430 // 모바일 최대 너비
@@ -38,6 +39,9 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
     () => resolveStyle(editorDoc.style),
     [editorDoc.style]
   )
+
+  // 공유 모드: 현재 스타일의 폰트만 로드
+  useViewerFonts(editorDoc.style)
 
   // 클라이언트 마운트 상태
   const [isMounted, setIsMounted] = useState(false)

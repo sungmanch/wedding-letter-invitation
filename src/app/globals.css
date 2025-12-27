@@ -1,4 +1,33 @@
 @import 'tailwindcss';
+@import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
+
+/* ==========================================
+   Custom Fonts (@font-face)
+   ========================================== */
+
+/* 기쁨밝음체 (JoyBrightness) */
+@font-face {
+  font-family: 'JoyBrightness';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_04@1.0/GibbemBalgeum.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
+/* 아빠의 연애편지 (DadSLoveLetter) */
+@font-face {
+  font-family: 'DadSLoveLetter';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_03@1.0/Father_loveletter.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
+/* 손편지체 (Sonpyeonji) */
+@font-face {
+  font-family: 'Sonpyeonji';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_05@1.0/Handletter.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
 
 :root {
   /* Wedding Theme Colors - Purple/Lavender Palette */
