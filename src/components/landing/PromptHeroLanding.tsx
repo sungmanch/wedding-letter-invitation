@@ -54,6 +54,7 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const autoGenerateTriggeredRef = useRef(false)
 
   // Restore from sessionStorage on mount (after login redirect)
   useEffect(() => {
@@ -81,8 +82,9 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
       }
     }
 
-    // Auto-generate if user is logged in and has saved data
-    if (user && savedPrompt) {
+    // Auto-generate if user is logged in and has saved data (only once)
+    if (user && savedPrompt && !autoGenerateTriggeredRef.current) {
+      autoGenerateTriggeredRef.current = true
       handleGenerate()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -134,16 +134,11 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     address: '서울특별시 강남구 선릉로 158길 11',
   },
 
-  // ═══ 사진 (템플릿 참조 이미지 - unique1~6) ═══
+  // ═══ 사진 (실제 웨딩 이미지 사용) ═══
   photos: {
-    main: '/examples/unique1.png',
+    main: '/examples/wedding_image.png',
     gallery: [
-      '/examples/unique1.png',
-      '/examples/unique2.png',
-      '/examples/unique3.png',
-      '/examples/unique4.png',
-      '/examples/unique5.png',
-      '/examples/unique6.png',
+      '/examples/wedding_image.png',
     ],
   },
 

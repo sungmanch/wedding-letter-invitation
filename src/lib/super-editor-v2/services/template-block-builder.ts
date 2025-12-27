@@ -168,6 +168,16 @@ function applyTemplateColorsToElementStyle(
     elementStyle.opacity = style.opacity
   }
 
+  // 필터 (grayscale, blur 등)
+  if (style.filter) {
+    elementStyle.filter = style.filter
+  }
+
+  // 텍스트 공백 처리
+  if (style.whiteSpace) {
+    elementStyle.whiteSpace = style.whiteSpace
+  }
+
   return elementStyle
 }
 

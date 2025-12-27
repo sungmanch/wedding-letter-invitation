@@ -56,7 +56,11 @@ export function ImageElement({
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: isLoading ? 'var(--bg-section-alt)' : undefined,
-  }), [isLoading])
+    // 스타일 적용: filter, opacity, borderRadius
+    filter: style?.filter,
+    opacity: style?.opacity,
+    borderRadius: style?.border?.radius ? `${style.border.radius}px` : undefined,
+  }), [isLoading, style])
 
   // 오버레이 스타일
   const overlayStyle = useMemo<CSSProperties | undefined>(() => {

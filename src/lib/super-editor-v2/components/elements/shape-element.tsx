@@ -42,6 +42,11 @@ export function ShapeElement({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    // 스타일 적용: background, opacity, borderRadius, filter
+    backgroundColor: style?.background || undefined,
+    opacity: style?.opacity,
+    borderRadius: style?.border?.radius ? `${style.border.radius}px` : undefined,
+    filter: style?.filter,
   }
 
   return (

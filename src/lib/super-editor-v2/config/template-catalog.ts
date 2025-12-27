@@ -1,10 +1,10 @@
 /**
- * Template Catalog (Auto-generated)
+ * Template Catalog (Manually Enhanced)
  *
- * 이 파일은 scripts/analyze-intro-templates.ts에 의해 자동 생성되었습니다.
- * 수동으로 편집하지 마세요.
+ * template-catalog-v2.ts의 실제 구현을 기반으로 차별화된 메타데이터를 작성했습니다.
+ * 각 템플릿의 고유한 특징(폰트, 색상, 레이아웃)이 AI 선택에 반영됩니다.
  *
- * Generated at: 2025-12-27T12:59:10.614Z
+ * Updated at: 2025-12-28T00:00:00.000Z
  */
 
 import type { TemplateCatalog } from '../schema/template-metadata'
@@ -22,19 +22,20 @@ export const TEMPLATE_CATALOG: TemplateCatalog = [
     "imagePath": "/examples/unique1.png",
     "mood": [
       "elegant",
-      "romantic",
-      "classic"
+      "classic",
+      "simple",
+      "timeless"
     ],
     "colors": [
       "#1A1A1A",
-      "#8B7355",
-      "#C9A962",
+      "#2A2A2A",
+      "#4A4A4A",
       "#FFFFFF",
-      "#F8F6F3",
-      "#FAF8F5",
-      "#D4C5A9",
-      "#E6DCC8",
-      "#C2B490"
+      "#F8F8F8",
+      "#F0F0F0",
+      "#E8E8E8",
+      "#D0D0D0",
+      "#C0C0C0"
     ],
     "typography": "script",
     "layout": "photo-dominant",
@@ -43,10 +44,13 @@ export const TEMPLATE_CATALOG: TemplateCatalog = [
       "nature",
       "classic",
       "white-bg",
-      "script",
-      "wedding"
+      "black-text",
+      "simple",
+      "great-vibes",
+      "centered-photo",
+      "minimalist"
     ],
-    "summary": "야외 웨딩 사진과 스크립트 폰트를 사용하여 우아하고 로맨틱한 분위기를 연출하는 청첩장 디자인입니다.",
+    "summary": "흰 배경에 검정 스크립트 폰트와 야외 사진으로 클래식하고 심플한 분위기를 연출하는 청첩장 디자인입니다.",
     "designPattern": {
       "introType": "elegant",
       "imageLayout": "centered",
@@ -56,142 +60,152 @@ export const TEMPLATE_CATALOG: TemplateCatalog = [
       "colorPalette": {
         "primary": [
           "#1A1A1A",
-          "#8B7355",
-          "#C9A962"
+          "#2A2A2A",
+          "#4A4A4A"
         ],
         "secondary": [
           "#FFFFFF",
-          "#F8F6F3",
-          "#FAF8F5"
+          "#F8F8F8",
+          "#F0F0F0"
         ],
         "tertiary": [
-          "#D4C5A9",
-          "#E6DCC8",
-          "#C2B490"
+          "#E8E8E8",
+          "#D0D0D0",
+          "#C0C0C0"
         ]
       }
     },
     "version": 1,
     "createdAt": "2025-12-27T12:58:47.584Z",
-    "updatedAt": "2025-12-27T12:58:47.585Z"
+    "updatedAt": "2025-12-28T00:00:00.000Z"
   },
   {
     "id": "unique2",
     "name": "캐주얼 플레이풀",
     "imagePath": "/examples/unique2.png",
     "mood": [
-      "elegant",
-      "romantic",
-      "classic"
+      "casual",
+      "playful",
+      "joyful",
+      "friendly"
     ],
     "colors": [
       "#1A1A1A",
-      "#8B7355",
-      "#C9A962",
+      "#2A2A2A",
+      "#4A4A4A",
       "#FFFFFF",
-      "#F8F6F3",
-      "#FAF8F5",
-      "#E6DCC8",
-      "#D4C5A9",
-      "#C2B490"
+      "#F5F5F5",
+      "#EBEBEB",
+      "#CCCCCC",
+      "#B8B8B8",
+      "#A0A0A0"
     ],
     "typography": "script",
-    "layout": "photo-dominant",
+    "layout": "card",
     "keywords": [
-      "outdoor",
-      "nature",
-      "classic",
+      "studio",
+      "portrait",
+      "vertical-photo",
+      "photo-card",
+      "casual",
       "white-bg",
-      "script",
-      "centered"
+      "black-white",
+      "playful-pose",
+      "save-the-date",
+      "great-vibes"
     ],
-    "summary": "사진을 중심으로 스크립트 폰트를 사용하여 우아하고 로맨틱한 분위기를 연출하는 클래식한 청첩장 디자인입니다.",
+    "summary": "스튜디오 촬영 사진과 세로형 카드 레이아웃으로 캐주얼하고 즐거운 분위기를 연출하는 청첩장 디자인입니다.",
     "designPattern": {
-      "introType": "elegant",
-      "imageLayout": "centered",
+      "introType": "romantic",
+      "imageLayout": "card",
       "textLayout": "below-image",
       "colorTheme": "light",
       "stylePreset": "classic-serif",
       "colorPalette": {
         "primary": [
           "#1A1A1A",
-          "#8B7355",
-          "#C9A962"
+          "#2A2A2A",
+          "#4A4A4A"
         ],
         "secondary": [
           "#FFFFFF",
-          "#F8F6F3",
-          "#FAF8F5"
+          "#F5F5F5",
+          "#EBEBEB"
         ],
         "tertiary": [
-          "#E6DCC8",
-          "#D4C5A9",
-          "#C2B490"
+          "#CCCCCC",
+          "#B8B8B8",
+          "#A0A0A0"
         ]
       }
     },
     "version": 1,
     "createdAt": "2025-12-27T12:58:51.808Z",
-    "updatedAt": "2025-12-27T12:58:51.808Z"
+    "updatedAt": "2025-12-28T00:00:00.000Z"
   },
   {
     "id": "unique3",
     "name": "미니멀 모던",
     "imagePath": "/examples/unique3.png",
     "mood": [
-      "romantic",
-      "elegant",
-      "warm"
+      "minimal",
+      "modern",
+      "clean",
+      "simple"
     ],
     "colors": [
       "#1A1A1A",
-      "#8B7355",
-      "#C9A962",
-      "#FAF8F5",
-      "#F8F6F3",
+      "#2A2A2A",
+      "#4A4A4A",
       "#FFFFFF",
-      "#C2B490",
-      "#D4C5A9",
-      "#E6DCC8"
+      "#F8F8F8",
+      "#F0F0F0",
+      "#87CEEB",
+      "#B0E0E6",
+      "#ADD8E6"
     ],
-    "typography": "script",
-    "layout": "photo-dominant",
+    "typography": "sans-serif",
+    "layout": "fullscreen-bg",
     "keywords": [
       "outdoor",
-      "nature",
-      "romantic",
-      "white-bg",
-      "script",
-      "classic"
+      "sky",
+      "fullscreen-bg",
+      "white-card-overlay",
+      "minimal",
+      "modern",
+      "clean",
+      "simple-text",
+      "pretendard",
+      "noto-serif"
     ],
-    "summary": "야외 자연 배경에 스크립트 폰트를 사용하여 로맨틱하고 우아한 분위기를 연출하는 청첩장 디자인입니다.",
+    "summary": "야외 전체 배경 이미지 위에 흰색 카드 오버레이로 미니멀하고 모던한 느낌을 주는 청첩장 디자인입니다.",
     "designPattern": {
-      "introType": "romantic",
-      "imageLayout": "centered",
-      "textLayout": "below-image",
+      "introType": "minimal",
+      "imageLayout": "fullscreen-bg",
+      "textLayout": "center",
       "colorTheme": "light",
-      "stylePreset": "classic-serif",
+      "stylePreset": "minimal-light",
       "colorPalette": {
         "primary": [
           "#1A1A1A",
-          "#8B7355",
-          "#C9A962"
+          "#2A2A2A",
+          "#4A4A4A"
         ],
         "secondary": [
-          "#FAF8F5",
-          "#F8F6F3",
-          "#FFFFFF"
+          "#FFFFFF",
+          "#F8F8F8",
+          "#F0F0F0"
         ],
         "tertiary": [
-          "#C2B490",
-          "#D4C5A9",
-          "#E6DCC8"
+          "#87CEEB",
+          "#B0E0E6",
+          "#ADD8E6"
         ]
       }
     },
     "version": 1,
     "createdAt": "2025-12-27T12:58:56.276Z",
-    "updatedAt": "2025-12-27T12:58:56.276Z"
+    "updatedAt": "2025-12-28T00:00:00.000Z"
   },
   {
     "id": "unique4",
@@ -199,175 +213,193 @@ export const TEMPLATE_CATALOG: TemplateCatalog = [
     "imagePath": "/examples/unique4.png",
     "mood": [
       "romantic",
-      "elegant",
-      "warm"
+      "dramatic",
+      "emotional",
+      "cinematic"
     ],
     "colors": [
       "#1A1A1A",
-      "#8B7355",
-      "#C9A962",
-      "#FAF8F5",
-      "#F8F6F3",
+      "#0A0A0A",
+      "#2A2A2A",
       "#FFFFFF",
-      "#C2B490",
-      "#D4C5A9",
-      "#E6DCC8"
+      "#F5F5F5",
+      "#EBEBEB",
+      "#FF7F7F",
+      "#FF9999",
+      "#FFB3B3"
     ],
     "typography": "script",
-    "layout": "photo-dominant",
+    "layout": "fullscreen-bg",
     "keywords": [
-      "outdoor",
-      "nature",
+      "dark-bg",
+      "dark-overlay",
+      "dramatic",
+      "coral-pink-accent",
+      "salmon-pink",
+      "fullscreen-bg",
       "romantic",
-      "white-bg",
-      "script",
-      "centered"
+      "great-vibes",
+      "emotional",
+      "split-names"
     ],
-    "summary": "자연스러운 야외 배경과 스크립트 폰트가 어우러진 로맨틱하고 우아한 청첩장 디자인입니다.",
+    "summary": "어두운 배경과 산호/연어 핑크 강조색으로 드라마틱하고 감성적인 분위기를 연출하는 청첩장 디자인입니다.",
     "designPattern": {
-      "introType": "romantic",
-      "imageLayout": "centered",
-      "textLayout": "below-image",
-      "colorTheme": "light",
+      "introType": "cinematic",
+      "imageLayout": "fullscreen-bg",
+      "textLayout": "center",
+      "colorTheme": "dark",
       "stylePreset": "romantic-script",
       "colorPalette": {
         "primary": [
-          "#1A1A1A",
-          "#8B7355",
-          "#C9A962"
-        ],
-        "secondary": [
-          "#FAF8F5",
-          "#F8F6F3",
+          "#FF7F7F",
+          "#FF9999",
           "#FFFFFF"
         ],
+        "secondary": [
+          "#1A1A1A",
+          "#0A0A0A",
+          "#2A2A2A"
+        ],
         "tertiary": [
-          "#C2B490",
-          "#D4C5A9",
-          "#E6DCC8"
+          "#FFB3B3",
+          "#FFC0CB",
+          "#FFD0D0"
         ]
       }
     },
     "version": 1,
     "createdAt": "2025-12-27T12:59:00.770Z",
-    "updatedAt": "2025-12-27T12:59:00.770Z"
+    "updatedAt": "2025-12-28T00:00:00.000Z"
   },
   {
     "id": "unique5",
     "name": "브라이트 캐주얼",
     "imagePath": "/examples/unique5.png",
     "mood": [
-      "romantic",
+      "bright",
       "casual",
-      "modern"
+      "modern",
+      "fun",
+      "youthful"
     ],
     "colors": [
-      "#191970",
-      "#000080",
       "#4169E1",
+      "#1E90FF",
+      "#6495ED",
       "#FFFFFF",
       "#F0F8FF",
-      "#E6E6FA",
-      "#ADD8E6",
+      "#E6F2FF",
+      "#87CEEB",
       "#B0E0E6",
-      "#87CEFA"
+      "#ADD8E6"
     ],
-    "typography": "script",
-    "layout": "photo-dominant",
+    "typography": "display",
+    "layout": "fullscreen-bg",
     "keywords": [
-      "outdoor",
-      "nature",
+      "blue-theme",
+      "bright",
+      "sky-bg",
       "modern",
-      "white-bg",
-      "script",
-      "overlay"
+      "bangers-font",
+      "big-number",
+      "white-number",
+      "casual",
+      "fun",
+      "youthful"
     ],
-    "summary": "하늘을 배경으로 한 커플 사진과 스크립트 폰트를 사용하여 로맨틱하고 현대적인 느낌을 주는 청첩장 디자인입니다.",
+    "summary": "하늘 배경에 흰색 큰 숫자와 블루 스크립트로 밝고 즐거운 느낌을 주는 청첩장 디자인입니다.",
     "designPattern": {
-      "introType": "romantic",
-      "imageLayout": "centered",
-      "textLayout": "bottom-overlay",
+      "introType": "polaroid",
+      "imageLayout": "fullscreen-bg",
+      "textLayout": "center",
       "colorTheme": "light",
-      "stylePreset": "romantic-script",
+      "stylePreset": "modern-sans",
       "colorPalette": {
         "primary": [
-          "#191970",
-          "#000080",
-          "#4169E1"
+          "#4169E1",
+          "#1E90FF",
+          "#6495ED"
         ],
         "secondary": [
           "#FFFFFF",
           "#F0F8FF",
-          "#E6E6FA"
+          "#E6F2FF"
         ],
         "tertiary": [
-          "#ADD8E6",
+          "#87CEEB",
           "#B0E0E6",
-          "#87CEFA"
+          "#ADD8E6"
         ]
       }
     },
     "version": 1,
     "createdAt": "2025-12-27T12:59:05.376Z",
-    "updatedAt": "2025-12-27T12:59:05.376Z"
+    "updatedAt": "2025-12-28T00:00:00.000Z"
   },
   {
     "id": "unique6",
     "name": "모노크롬 볼드",
     "imagePath": "/examples/unique6.png",
     "mood": [
-      "elegant",
-      "romantic",
-      "minimal"
+      "bold",
+      "minimal",
+      "modern",
+      "striking",
+      "edgy"
     ],
     "colors": [
       "#1A1A1A",
-      "#8B7355",
-      "#C9A962",
+      "#0A0A0A",
+      "#2A2A2A",
       "#FFFFFF",
-      "#F8F6F3",
-      "#FAF8F5",
-      "#E6DCC8",
-      "#D4C5A9",
-      "#C2B490"
+      "#F0F0F0",
+      "#E0E0E0",
+      "#FF1493",
+      "#FF69B4",
+      "#FFB6C1"
     ],
-    "typography": "script",
-    "layout": "photo-dominant",
+    "typography": "display",
+    "layout": "fullscreen-bg",
     "keywords": [
-      "outdoor",
-      "nature",
-      "white-bg",
-      "script",
-      "overlay"
+      "monochrome",
+      "black-white",
+      "grayscale-filter",
+      "hot-pink-accent",
+      "deep-pink",
+      "bold",
+      "calistoga-font",
+      "minimal",
+      "modern",
+      "striking"
     ],
-    "summary": "사진 오버레이와 스크립트 폰트를 사용하여 우아하고 로맨틱한 분위기를 연출하는 웨딩 청첩장 디자인입니다.",
+    "summary": "흑백 필터와 딥핫핑크 강조색으로 볼드하고 세련된 느낌을 주는 청첩장 디자인입니다.",
     "designPattern": {
-      "introType": "elegant",
-      "imageLayout": "centered",
-      "textLayout": "below-image",
-      "colorTheme": "light",
-      "stylePreset": "classic-serif",
+      "introType": "minimal",
+      "imageLayout": "fullscreen-bg",
+      "textLayout": "center",
+      "colorTheme": "overlay",
+      "stylePreset": "minimal-dark",
       "colorPalette": {
         "primary": [
-          "#1A1A1A",
-          "#8B7355",
-          "#C9A962"
+          "#FF1493",
+          "#FF69B4",
+          "#FFFFFF"
         ],
         "secondary": [
-          "#FFFFFF",
-          "#F8F6F3",
-          "#FAF8F5"
+          "#1A1A1A",
+          "#0A0A0A",
+          "#2A2A2A"
         ],
         "tertiary": [
-          "#E6DCC8",
-          "#D4C5A9",
-          "#C2B490"
+          "#FFB6C1",
+          "#FFC0CB",
+          "#E0E0E0"
         ]
       }
     },
     "version": 1,
     "createdAt": "2025-12-27T12:59:09.613Z",
-    "updatedAt": "2025-12-27T12:59:09.613Z"
+    "updatedAt": "2025-12-28T00:00:00.000Z"
   }
 ]
 
