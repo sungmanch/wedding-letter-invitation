@@ -20,6 +20,26 @@ import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
 import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 
 // ============================================
+// Computed Field Mapping
+// ============================================
+
+/**
+ * Computed field → Source field 매핑
+ * 자동 계산 필드를 편집하면 실제로 소스 필드를 수정해야 함
+ */
+const COMPUTED_TO_SOURCE: Record<string, VariablePath> = {
+  'wedding.timeDisplay': 'wedding.time',
+  'wedding.dateDisplay': 'wedding.date',
+}
+
+/**
+ * 바인딩 경로가 computed field면 source field로 변환
+ */
+function getEditableBinding(binding: VariablePath): VariablePath {
+  return (COMPUTED_TO_SOURCE[binding] as VariablePath) || binding
+}
+
+// ============================================
 // Types
 // ============================================
 
@@ -197,11 +217,13 @@ function BlockAccordion({
     for (const el of block.elements ?? []) {
       if (!el.binding) continue
 
-      // 같은 바인딩은 한 번만 표시
-      if (seenBindings.has(el.binding)) continue
-      seenBindings.add(el.binding)
+      // Computed field는 source field로 변환 (wedding.timeDisplay → wedding.time)
+      const binding = getEditableBinding(el.binding)
 
-      const binding = el.binding
+      // 같은 바인딩은 한 번만 표시
+      if (seenBindings.has(binding)) continue
+      seenBindings.add(binding)
+
       // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
       if (binding === 'photos.gallery') {
@@ -817,7 +839,13 @@ interface FieldConfig {
 }
 
 const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
-  // 신랑 정보
+  // 신랑/신부 정보 (couple.* 경로)
+  'couple.groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
+  'couple.bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
+  'couple.groom.phone': { label: '신랑 연락처', type: 'phone' },
+  'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
+
+  // 신랑 정보 (legacy 경로)
   'groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
   'groom.nameEn': { label: '신랑 영문 이름', type: 'text', placeholder: 'Gildong' },
   'groom.phone': { label: '신랑 연락처', type: 'phone' },
@@ -826,7 +854,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'groom.fatherPhone': { label: '신랑 아버지 연락처', type: 'phone' },
   'groom.motherPhone': { label: '신랑 어머니 연락처', type: 'phone' },
 
-  // 신부 정보
+  // 신부 정보 (legacy 경로)
   'bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
   'bride.nameEn': { label: '신부 영문 이름', type: 'text', placeholder: 'Younghee' },
   'bride.phone': { label: '신부 연락처', type: 'phone' },
@@ -838,6 +866,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 예식 정보
   'wedding.date': { label: '예식 날짜', type: 'date' },
   'wedding.time': { label: '예식 시간', type: 'time' },
+  'wedding.timeDisplay': { label: '예식 시간', type: 'time' },
 
   // 예식장 정보
   'venue.name': { label: '예식장 이름', type: 'text', placeholder: '○○웨딩홀' },

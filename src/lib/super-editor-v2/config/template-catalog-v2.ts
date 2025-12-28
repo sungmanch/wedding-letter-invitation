@@ -173,31 +173,71 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
         },
       },
 
-      // 신랑·신부 이름
+      // 신랑 이름
       {
         type: 'text',
         x: 0,
         y: 102, // 화면 아래쪽
-        width: 100,
+        width: 45,
         height: 8,
         zIndex: 2,
         value: '',
         binding: 'couple.groom.name',
         props: {
           type: 'text',
-          format: 'Sanghoon  •  Najin', // 영문 이름 하드코딩 (예시와 맞춤) - 실제 데이터 바인딩 시 영문 변환 필요할 수 있음
         },
         style: {
-          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontFamily: "'Nanum Myeongjo', serif",
           fontSize: '1.2rem',
-          fontWeight: 700, // 볼드
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textAlign: 'right',
+          letterSpacing: '0.05em',
+        },
+      },
+      // 구분자
+      {
+        type: 'text',
+        x: 45,
+        y: 102,
+        width: 10,
+        height: 8,
+        zIndex: 2,
+        value: '•',
+        props: {
+          type: 'text',
+        },
+        style: {
+          fontFamily: "'Nanum Myeongjo', serif",
+          fontSize: '1.2rem',
+          fontWeight: 700,
           color: '#1A1A1A',
           textAlign: 'center',
           letterSpacing: '0.05em',
         },
       },
-      // 한글 이름 (이미지에는 없지만 보통 필요함, 예시 이미지 하단 잘린 부분에 있을 수 있음. 우선 예시대로 영문만?)
-      // 예시 이미지 하단에 'Sanghoon * Najin' 만 보임.
+      // 신부 이름
+      {
+        type: 'text',
+        x: 55,
+        y: 102,
+        width: 45,
+        height: 8,
+        zIndex: 2,
+        value: '',
+        binding: 'couple.bride.name',
+        props: {
+          type: 'text',
+        },
+        style: {
+          fontFamily: "'Nanum Myeongjo', serif",
+          fontSize: '1.2rem',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textAlign: 'left',
+          letterSpacing: '0.05em',
+        },
+      },
     ],
   },
 
@@ -822,26 +862,61 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
         },
       },
       
-      // 한글 이름 (이상훈     김나진)
+      // 신랑 한글 이름
       {
         type: 'text',
         x: 0,
         y: 76,
-        width: 100,
+        width: 45,
         height: 5,
         zIndex: 2,
-        props: { type: 'text', format: '{couple.groom.name}              {couple.bride.name}' }, // 공백으로 간격 조절
+        props: { type: 'text' },
         binding: 'couple.groom.name',
         style: {
           fontFamily: "'Noto Serif KR', serif",
           fontSize: '1rem',
           fontWeight: 400,
           color: '#333',
+          textAlign: 'right',
+        },
+      },
+      // 구분 공백
+      {
+        type: 'text',
+        x: 45,
+        y: 76,
+        width: 10,
+        height: 5,
+        zIndex: 2,
+        value: '',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1rem',
+          color: '#333',
           textAlign: 'center',
         },
       },
+      // 신부 한글 이름
+      {
+        type: 'text',
+        x: 55,
+        y: 76,
+        width: 45,
+        height: 5,
+        zIndex: 2,
+        props: { type: 'text' },
+        binding: 'couple.bride.name',
+        style: {
+          fontFamily: "'Noto Serif KR', serif",
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#333',
+          textAlign: 'left',
+        },
+      },
 
-      // 영문 이름 (Sanghoon | Najin)
+      // 영문 이름 구분자
       {
         type: 'text',
         x: 0,
@@ -849,8 +924,8 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
         width: 100,
         height: 10,
         zIndex: 2,
-        props: { type: 'text', format: 'Sanghoon  |  Najin' }, // 영문 이름 바인딩 필요시 수정
-        binding: 'couple.groom.name',
+        value: '|',
+        props: { type: 'text' },
         style: {
           fontFamily: "'Great Vibes', cursive",
           fontSize: '2.5rem',
@@ -1309,22 +1384,58 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
           textAlign: 'center',
         },
       },
-      // 이름 (Sanghoon * Najin)
+      // 신랑 이름
       {
         type: 'text',
         x: 20,
         y: 61,
-        width: 60,
+        width: 25,
         height: 5,
         zIndex: 2,
         binding: 'couple.groom.name',
-        props: { type: 'text', format: 'Sanghoon  •  Najin' },
+        props: { type: 'text' },
         style: {
-          fontFamily: "'Nanum Myeongjo', serif", // Nanum Myeongjo
+          fontFamily: "'Nanum Myeongjo', serif",
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'right',
+        },
+      },
+      // 구분자
+      {
+        type: 'text',
+        x: 45,
+        y: 61,
+        width: 10,
+        height: 5,
+        zIndex: 2,
+        value: '•',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Nanum Myeongjo', serif",
           fontSize: '1rem',
           fontWeight: 400,
           color: '#1A1A1A',
           textAlign: 'center',
+        },
+      },
+      // 신부 이름
+      {
+        type: 'text',
+        x: 55,
+        y: 61,
+        width: 25,
+        height: 5,
+        zIndex: 2,
+        binding: 'couple.bride.name',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Nanum Myeongjo', serif",
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#1A1A1A',
+          textAlign: 'left',
         },
       },
     ],
@@ -1415,6 +1526,24 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
           fontSize: '1.5rem',
           fontWeight: 700,
           color: '#1A1A1A',
+          textAlign: 'center',
+        },
+      },
+      // 시간 표시
+      {
+        type: 'text',
+        x: 0,
+        y: 35,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        binding: 'wedding.timeDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#555',
           textAlign: 'center',
         },
       },
@@ -1847,6 +1976,24 @@ const UNIQUE4_BLOCK_STRUCTURE: BlockTemplate[] = [
           letterSpacing: '0.1em',
         },
       },
+      // 시간 표시
+      {
+        type: 'text',
+        x: 0,
+        y: 38,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        binding: 'wedding.timeDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 300,
+          color: '#FFB6C1',
+          textAlign: 'center',
+        },
+      },
     ],
   },
   // ============================================
@@ -2240,6 +2387,24 @@ const UNIQUE5_BLOCK_STRUCTURE: BlockTemplate[] = [
           textAlign: 'center',
         },
       },
+      // 시간 표시
+      {
+        type: 'text',
+        x: 0,
+        y: 38,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        binding: 'wedding.timeDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 400,
+          color: '#4169E1',
+          textAlign: 'center',
+        },
+      },
     ],
   },
    // ============================================
@@ -2407,22 +2572,58 @@ const UNIQUE6_BLOCK_STRUCTURE: BlockTemplate[] = [
         props: { type: 'image', objectFit: 'cover' },
         style: { filter: 'grayscale(100%) brightness(0.9)' }, // 살짝 어둡게
       },
-      // 한글 이름 (중앙 상단)
+      // 신랑 이름
       {
         type: 'text',
         x: 0,
-        y: 35, // 중앙 쯤
-        width: 100,
+        y: 35,
+        width: 45,
         height: 5,
         zIndex: 2,
-        props: { type: 'text', format: '{couple.groom.name}  •  {couple.bride.name}' },
+        props: { type: 'text' },
         binding: 'couple.groom.name',
         style: {
-          fontFamily: "'Nanum Square', sans-serif", // Nanum Square
+          fontFamily: "'Nanum Square', sans-serif",
           fontSize: '1.1rem',
           fontWeight: 600,
-          color: '#FF69B4', // HotPink
+          color: '#FF69B4',
+          textAlign: 'right',
+        },
+      },
+      // 구분자
+      {
+        type: 'text',
+        x: 45,
+        y: 35,
+        width: 10,
+        height: 5,
+        zIndex: 2,
+        value: '•',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Nanum Square', sans-serif",
+          fontSize: '1.1rem',
+          fontWeight: 600,
+          color: '#FF69B4',
           textAlign: 'center',
+        },
+      },
+      // 신부 이름
+      {
+        type: 'text',
+        x: 55,
+        y: 35,
+        width: 45,
+        height: 5,
+        zIndex: 2,
+        props: { type: 'text' },
+        binding: 'couple.bride.name',
+        style: {
+          fontFamily: "'Nanum Square', sans-serif",
+          fontSize: '1.1rem',
+          fontWeight: 600,
+          color: '#FF69B4',
+          textAlign: 'left',
         },
       },
       // "The Wedding Day" (타이틀)
@@ -2532,6 +2733,24 @@ const UNIQUE6_BLOCK_STRUCTURE: BlockTemplate[] = [
           fontFamily: "'Pretendard', sans-serif",
           fontSize: '2rem',
           fontWeight: 900,
+          color: '#FF69B4',
+          textAlign: 'center',
+        },
+      },
+      // 시간 표시
+      {
+        type: 'text',
+        x: 0,
+        y: 38,
+        width: 100,
+        height: 8,
+        zIndex: 1,
+        binding: 'wedding.timeDisplay',
+        props: { type: 'text' },
+        style: {
+          fontFamily: "'Pretendard', sans-serif",
+          fontSize: '1rem',
+          fontWeight: 700,
           color: '#FF69B4',
           textAlign: 'center',
         },
