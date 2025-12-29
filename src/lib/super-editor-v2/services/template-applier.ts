@@ -176,7 +176,7 @@ function mapToThemePresetId(
 
   const mapping: Record<string, ThemePresetId> = {
     'minimal-light': 'minimal-light',
-    'minimal-dark': 'minimal-dark',
+    'minimal-dark': 'modern-mono', // minimal-dark가 제거되어 modern-mono로 대체
     'classic-serif': 'classic-ivory',
     'modern-sans': 'modern-mono',
     'romantic-script': 'romantic-blush',
@@ -194,10 +194,10 @@ function inferStylePreset(
 ): NonNullable<StyleSystem['preset']> {
   const { mood, designPattern } = template
 
-  // Dark theme
+  // Dark theme (minimal-dark가 제거되어 modern-mono로 대체)
   if (designPattern.colorTheme === 'dark') {
     if (mood.includes('romantic')) return 'romantic-blush'
-    return 'minimal-dark'
+    return 'modern-mono'
   }
 
   // Light theme
@@ -214,7 +214,7 @@ function inferStylePreset(
   }
 
   if (mood.includes('nature') || mood.includes('warm')) {
-    return 'cinematic-warm'
+    return 'romantic-garden' // cinematic-warm이 제거되어 romantic-garden으로 대체
   }
 
   // Default

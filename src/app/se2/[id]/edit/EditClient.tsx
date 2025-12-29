@@ -261,6 +261,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           ...block,
           presetId,
           height: preset.defaultHeight ?? block.height,
+          layout: preset.layout,
           elements: newElements,
         }
       }),

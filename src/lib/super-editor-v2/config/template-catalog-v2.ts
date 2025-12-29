@@ -245,7 +245,7 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
   // Greeting Block: 인사말
   // ============================================
   {
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: 70,
     elements: [
@@ -727,12 +727,12 @@ const UNIQUE1_EDITABLE_FIELDS: EditableFieldMap = {
     label: '예식 날짜',
   },
   greetingTitle: {
-    blockType: 'greeting',
+    blockType: 'greeting-parents',
     binding: 'greeting.title',
     label: '인사말 제목',
   },
   greetingContent: {
-    blockType: 'greeting',
+    blockType: 'greeting-parents',
     binding: 'greeting.content',
     label: '인사말 내용',
     description: '청첩장 인사말 본문',
@@ -961,7 +961,7 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
   // Greeting Block: 인사말
   // ============================================
   {
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: 70,
     elements: [
@@ -1287,8 +1287,8 @@ const UNIQUE2_EDITABLE_FIELDS: EditableFieldMap = {
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
   weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
-  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
-  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  greetingTitle: { blockType: 'greeting-parents', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting-parents', binding: 'greeting.content', label: '인사말 내용' },
   venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
   venueAddress: { blockType: 'location', binding: 'venue.address', label: '예식장 주소' },
   gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리 사진' },
@@ -1444,7 +1444,7 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
   // Greeting Block
   // ============================================
   {
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: 60,
     elements: [
@@ -1740,8 +1740,8 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
 const UNIQUE3_EDITABLE_FIELDS: EditableFieldMap = {
   mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
   weddingDate: { blockType: 'hero', binding: 'wedding.dateDisplay', label: '예식 날짜' },
-  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
-  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  greetingTitle: { blockType: 'greeting-parents', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting-parents', binding: 'greeting.content', label: '인사말 내용' },
   venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
   gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
@@ -1889,7 +1889,7 @@ const UNIQUE4_BLOCK_STRUCTURE: BlockTemplate[] = [
   // Greeting
   // ============================================
   {
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: 70,
     elements: [
@@ -2175,8 +2175,8 @@ const UNIQUE4_EDITABLE_FIELDS: EditableFieldMap = {
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
   weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
-   greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
-  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+   greetingTitle: { blockType: 'greeting-parents', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting-parents', binding: 'greeting.content', label: '인사말 내용' },
   venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
   gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
@@ -2311,7 +2311,7 @@ const UNIQUE5_BLOCK_STRUCTURE: BlockTemplate[] = [
   // Greeting
   // ============================================
   {
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: 70,
     elements: [
@@ -2538,8 +2538,8 @@ const UNIQUE5_EDITABLE_FIELDS: EditableFieldMap = {
   mainPhoto: { blockType: 'hero', binding: 'photos.main', label: '배경 사진' },
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
-  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
-  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  greetingTitle: { blockType: 'greeting-parents', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting-parents', binding: 'greeting.content', label: '인사말 내용' },
   venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
   gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }
@@ -2671,7 +2671,7 @@ const UNIQUE6_BLOCK_STRUCTURE: BlockTemplate[] = [
   // Greeting
   // ============================================
   {
-    type: 'greeting',
+    type: 'greeting-parents',
     enabled: true,
     height: 70,
     elements: [
@@ -2902,8 +2902,8 @@ const UNIQUE6_EDITABLE_FIELDS: EditableFieldMap = {
   groomName: { blockType: 'hero', binding: 'couple.groom.name', label: '신랑 이름' },
   brideName: { blockType: 'hero', binding: 'couple.bride.name', label: '신부 이름' },
   weddingDate: { blockType: 'hero', binding: 'wedding.date', label: '예식 날짜' },
-  greetingTitle: { blockType: 'greeting', binding: 'greeting.title', label: '인사말 제목' },
-  greetingContent: { blockType: 'greeting', binding: 'greeting.content', label: '인사말 내용' },
+  greetingTitle: { blockType: 'greeting-parents', binding: 'greeting.title', label: '인사말 제목' },
+  greetingContent: { blockType: 'greeting-parents', binding: 'greeting.content', label: '인사말 내용' },
   venueName: { blockType: 'location', binding: 'venue.name', label: '예식장 이름' },
   gallery: { blockType: 'gallery', binding: 'photos.gallery', label: '갤러리' },
 }

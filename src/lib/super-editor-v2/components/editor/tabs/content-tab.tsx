@@ -228,11 +228,11 @@ function BlockAccordion({
       }
 
       // Computed field는 source field로 변환 (wedding.timeDisplay → wedding.time)
-      const binding = getEditableBinding(el.binding)
+      finalBinding = getEditableBinding(finalBinding)
 
       // 같은 바인딩은 한 번만 표시
-      if (seenBindings.has(binding)) continue
-      seenBindings.add(binding)
+      if (seenBindings.has(finalBinding)) return
+      seenBindings.add(finalBinding)
 
       // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
