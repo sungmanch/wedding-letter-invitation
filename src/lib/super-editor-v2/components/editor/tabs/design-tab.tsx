@@ -184,11 +184,11 @@ function PresetLevel({
   onTypographyChange,
 }: PresetLevelProps) {
   const themeCategories = [
+    { id: 'simple', label: '1컬러' },
     { id: 'basic', label: '기본' },
     { id: 'classic', label: '클래식' },
     { id: 'modern', label: '모던' },
     { id: 'romantic', label: '로맨틱' },
-    { id: 'cinematic', label: '시네마틱' },
     { id: 'special', label: '특수' },
   ] as const
 

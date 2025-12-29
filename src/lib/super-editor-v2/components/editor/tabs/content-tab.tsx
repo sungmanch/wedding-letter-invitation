@@ -214,8 +214,18 @@ function BlockAccordion({
       value: unknown
     }> = []
 
-    for (const el of block.elements ?? []) {
-      if (!el.binding) continue
+    // 바인딩 추가 헬퍼 함수
+    const addBinding = (elementId: string, binding: VariablePath, type: string) => {
+      // 자동 계산 필드는 대응 입력 필드로 변환
+      let finalBinding: VariablePath = binding
+      if (HIDDEN_VARIABLE_PATHS.has(binding)) {
+        const inputBinding = DERIVED_TO_INPUT_MAP[binding]
+        if (inputBinding) {
+          finalBinding = inputBinding
+        } else {
+          return // 매핑 없으면 숨김
+        }
+      }
 
       // Computed field는 source field로 변환 (wedding.timeDisplay → wedding.time)
       const binding = getEditableBinding(el.binding)
@@ -226,22 +236,49 @@ function BlockAccordion({
 
       // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
-      if (binding === 'photos.gallery') {
+      if (finalBinding === 'photos.gallery') {
         value = data.photos?.gallery ?? []
-      } else if (isCustomVariablePath(binding)) {
-        // 커스텀 변수는 data.custom에서 가져옴
-        const key = getCustomVariableKey(binding)
+      } else if (isCustomVariablePath(finalBinding)) {
+        const key = getCustomVariableKey(finalBinding)
         value = key ? data.custom?.[key] ?? '' : ''
       } else {
-        value = resolveBinding(data, binding)
+        value = resolveBinding(data, finalBinding)
       }
 
       fields.push({
-        elementId: el.id,
-        binding,
-        type: el.type,
+        elementId,
+        binding: finalBinding,
+        type,
         value,
       })
+    }
+
+    for (const el of block.elements ?? []) {
+      // 1. 직접 바인딩된 요소
+      if (el.binding) {
+        addBinding(el.id, el.binding, el.type)
+      }
+
+      // 2. format 속성에서 변수 추출 (예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}')
+      const props = el.props as { format?: string; action?: string }
+      if (props.format) {
+        const formatVars = extractFormatVariables(props.format)
+        for (const varPath of formatVars) {
+          addBinding(el.id, varPath as VariablePath, el.type)
+        }
+      }
+
+      // 3. contact-modal 버튼이 있으면 전화번호 필드들 자동 추가
+      if (el.type === 'button' && props.action === 'contact-modal') {
+        // 신랑측 전화번호
+        addBinding(el.id, 'couple.groom.phone', 'phone')
+        addBinding(el.id, 'parents.groom.father.phone', 'phone')
+        addBinding(el.id, 'parents.groom.mother.phone', 'phone')
+        // 신부측 전화번호
+        addBinding(el.id, 'couple.bride.phone', 'phone')
+        addBinding(el.id, 'parents.bride.father.phone', 'phone')
+        addBinding(el.id, 'parents.bride.mother.phone', 'phone')
+      }
     }
 
     return fields
@@ -269,7 +306,7 @@ function BlockAccordion({
           {editableFields.length > 0 ? (
             editableFields.map(field => (
               <VariableField
-                key={field.elementId}
+                key={field.binding}
                 binding={field.binding}
                 value={field.value}
                 onChange={(value) => onFieldChange(field.binding, value)}
@@ -838,14 +875,62 @@ interface FieldConfig {
   placeholder?: string
 }
 
-const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
-  // 신랑/신부 정보 (couple.* 경로)
-  'couple.groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
-  'couple.bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
-  'couple.groom.phone': { label: '신랑 연락처', type: 'phone' },
-  'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
+// 자동 계산되는 필드 (편집기에서 숨김)
+const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
+  // 날짜/시간 파생 필드
+  'wedding.dateDisplay',
+  'wedding.timeDisplay',
+  'wedding.dday',
+  'wedding.month',
+  'wedding.day',
+  'wedding.weekday',
+  // 카운트다운 (실시간 계산)
+  'countdown.days',
+  'countdown.hours',
+  'countdown.minutes',
+  'countdown.seconds',
+])
 
-  // 신랑 정보 (legacy 경로)
+// 자동 계산 필드 → 입력 필드 매핑 (표시용 바인딩 대신 입력용 바인딩 표시)
+const DERIVED_TO_INPUT_MAP: Record<string, VariablePath> = {
+  'wedding.dateDisplay': 'wedding.date',
+  'wedding.timeDisplay': 'wedding.time',
+  'wedding.dday': 'wedding.date',
+  'wedding.month': 'wedding.date',
+  'wedding.day': 'wedding.date',
+  'wedding.weekday': 'wedding.date',
+  'countdown.days': 'wedding.date',
+  'countdown.hours': 'wedding.date',
+  'countdown.minutes': 'wedding.date',
+  'countdown.seconds': 'wedding.date',
+}
+
+const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
+  // 커플 정보 (신규)
+  'couple.groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
+  'couple.groom.phone': { label: '신랑 연락처', type: 'phone' },
+  'couple.groom.baptismalName': { label: '신랑 세례명', type: 'text', placeholder: '미카엘' },
+  'couple.bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
+  'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
+  'couple.bride.baptismalName': { label: '신부 세례명', type: 'text', placeholder: '마리아' },
+
+  // 혼주 정보 (신규)
+  'parents.groom.birthOrder': { label: '신랑 서열', type: 'text', placeholder: '장남' },
+  'parents.groom.father.name': { label: '신랑 아버지 성함', type: 'text' },
+  'parents.groom.father.phone': { label: '신랑 아버지 연락처', type: 'phone' },
+  'parents.groom.father.baptismalName': { label: '신랑 아버지 세례명', type: 'text' },
+  'parents.groom.mother.name': { label: '신랑 어머니 성함', type: 'text' },
+  'parents.groom.mother.phone': { label: '신랑 어머니 연락처', type: 'phone' },
+  'parents.groom.mother.baptismalName': { label: '신랑 어머니 세례명', type: 'text' },
+  'parents.bride.birthOrder': { label: '신부 서열', type: 'text', placeholder: '차녀' },
+  'parents.bride.father.name': { label: '신부 아버지 성함', type: 'text' },
+  'parents.bride.father.phone': { label: '신부 아버지 연락처', type: 'phone' },
+  'parents.bride.father.baptismalName': { label: '신부 아버지 세례명', type: 'text' },
+  'parents.bride.mother.name': { label: '신부 어머니 성함', type: 'text' },
+  'parents.bride.mother.phone': { label: '신부 어머니 연락처', type: 'phone' },
+  'parents.bride.mother.baptismalName': { label: '신부 어머니 세례명', type: 'text' },
+
+  // 신랑 정보 (레거시)
   'groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
   'groom.nameEn': { label: '신랑 영문 이름', type: 'text', placeholder: 'Gildong' },
   'groom.phone': { label: '신랑 연락처', type: 'phone' },
@@ -854,7 +939,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'groom.fatherPhone': { label: '신랑 아버지 연락처', type: 'phone' },
   'groom.motherPhone': { label: '신랑 어머니 연락처', type: 'phone' },
 
-  // 신부 정보 (legacy 경로)
+  // 신부 정보 (레거시)
   'bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
   'bride.nameEn': { label: '신부 영문 이름', type: 'text', placeholder: 'Younghee' },
   'bride.phone': { label: '신부 연락처', type: 'phone' },
@@ -895,37 +980,43 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
 // Block type icons (editor-panel.tsx와 동일)
 const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   hero: '🖼️',
-  greeting: '💌',
+  'greeting-parents': '💌',
+  profile: '👤',
   calendar: '📅',
   gallery: '🎨',
+  rsvp: '✅',
   location: '📍',
-  parents: '👨‍👩‍👧',
-  contact: '📞',
+  notice: '📢',
   account: '💳',
   message: '💬',
-  rsvp: '✅',
-  loading: '⏳',
-  quote: '✨',
-  profile: '👤',
-  'parents-contact': '📱',
-  timeline: '📆',
-  video: '🎬',
-  interview: '🎤',
-  transport: '🚗',
-  notice: '📢',
-  announcement: '📝',
-  'flower-gift': '💐',
-  'together-time': '⏰',
-  dday: '🎯',
-  'guest-snap': '📸',
+  wreath: '💐',
   ending: '🎬',
+  contact: '📞',
   music: '🎵',
+  loading: '⏳',
   custom: '🔧',
 }
 
 // ============================================
 // Utility Functions
 // ============================================
+
+/**
+ * format 문자열에서 변수 경로 추출
+ * 예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}'
+ *     → ['parents.groom.father.name', 'parents.groom.mother.name', 'couple.groom.name']
+ */
+function extractFormatVariables(format: string): string[] {
+  const regex = /\{([^}]+)\}/g
+  const matches: string[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(format)) !== null) {
+    matches.push(match[1])
+  }
+
+  return matches
+}
 
 /**
  * 중첩된 객체에 값 설정 (immutable)

@@ -92,6 +92,22 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
     gallery: [],
   },
 
+  // ═══ 혼주 정보 ═══
+  parents: {
+    groom: { father: { name: '' }, mother: { name: '' } },
+    bride: { father: { name: '' }, mother: { name: '' } },
+  },
+
+  // ═══ 섹션별 설정 ═══
+  greeting: {
+    title: '',
+    content: '',
+  },
+  accounts: {
+    groom: [],
+    bride: [],
+  },
+
   // ═══ Legacy 호환 ═══
   groom: { name: '' },
   bride: { name: '' },
@@ -162,13 +178,16 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
  */
 export const DEFAULT_BLOCK_ORDER: Block['type'][] = [
   'hero',
-  'greeting',
+  'greeting-parents',
+  'profile',
   'calendar',
   'gallery',
+  'rsvp',
   'location',
-  'parents',
+  'notice',
   'account',
   'message',
+  'ending',
 ]
 
 /**
@@ -177,32 +196,22 @@ export const DEFAULT_BLOCK_ORDER: Block['type'][] = [
 export const DEFAULT_BLOCK_HEIGHTS: Record<Block['type'], number> = {
   // 핵심 섹션
   hero: 100,
-  greeting: 60,
+  'greeting-parents': 80,
+  profile: 80,
   calendar: 80,
   gallery: 100,
+  rsvp: 60,
   location: 80,
-  parents: 60,
-  contact: 40,
+  notice: 40,
   account: 80,
   message: 100,
-  rsvp: 60,
-  // 확장 섹션
-  loading: 100,
-  quote: 40,
-  profile: 80,
-  'parents-contact': 40,
-  timeline: 100,
-  video: 60,
-  interview: 80,
-  transport: 60,
-  notice: 40,
-  announcement: 40,
-  'flower-gift': 60,
-  'together-time': 60,
-  dday: 40,
-  'guest-snap': 80,
+  wreath: 40,
   ending: 60,
+  // 오버레이/모달
+  contact: 85,
+  // 기타 기능
   music: 20,
+  loading: 100,
   custom: 60,
 }
 
@@ -212,32 +221,22 @@ export const DEFAULT_BLOCK_HEIGHTS: Record<Block['type'], number> = {
 export const BLOCK_TYPE_LABELS: Record<Block['type'], string> = {
   // 핵심 섹션
   hero: '메인',
-  greeting: '인사말',
-  calendar: '날짜/달력',
+  'greeting-parents': '인사말/혼주',
+  profile: '신랑신부 소개',
+  calendar: '예식일시',
   gallery: '갤러리',
-  location: '예식장',
-  parents: '혼주 소개',
-  contact: '연락처',
-  account: '축의금',
-  message: '방명록',
   rsvp: '참석 여부',
-  // 확장 섹션
-  loading: '로딩',
-  quote: '글귀',
-  profile: '프로필',
-  'parents-contact': '혼주 연락처',
-  timeline: '타임라인',
-  video: '영상',
-  interview: '인터뷰',
-  transport: '교통 안내',
-  notice: '안내사항',
-  announcement: '안내문',
-  'flower-gift': '화환',
-  'together-time': '함께한 시간',
-  dday: 'D-Day',
-  'guest-snap': '게스트스냅',
+  location: '오시는길',
+  notice: '공지사항',
+  account: '축의금',
+  wreath: '화환 안내',
+  message: '방명록',
   ending: '엔딩',
+  // 오버레이/모달
+  contact: '연락처',
+  // 기타 기능
   music: 'BGM',
+  loading: '로딩',
   custom: '커스텀',
 }
 
@@ -265,14 +264,14 @@ export function createDefaultBlocks(): Block[] {
           id: 'hero-groom-name',
           type: 'text',
           x: 20, y: 40, width: 25, height: 10, zIndex: 1,
-          binding: 'groom.name',
+          binding: 'couple.groom.name',
           props: { type: 'text' },
         },
         {
           id: 'hero-bride-name',
           type: 'text',
           x: 55, y: 40, width: 25, height: 10, zIndex: 1,
-          binding: 'bride.name',
+          binding: 'couple.bride.name',
           props: { type: 'text' },
         },
         {
@@ -284,25 +283,147 @@ export function createDefaultBlocks(): Block[] {
         },
       ],
     },
-    // 인사말
+    // 인사말/혼주
     {
-      id: 'greeting-1',
-      type: 'greeting',
+      id: 'greeting-parents-1',
+      type: 'greeting-parents',
       enabled: true,
-      height: DEFAULT_BLOCK_HEIGHTS.greeting,
+      height: DEFAULT_BLOCK_HEIGHTS['greeting-parents'],
       elements: [
         {
           id: 'greeting-title',
           type: 'text',
-          x: 10, y: 10, width: 80, height: 15, zIndex: 1,
+          x: 10, y: 5, width: 80, height: 10, zIndex: 1,
           binding: 'greeting.title',
           props: { type: 'text' },
         },
         {
           id: 'greeting-content',
           type: 'text',
-          x: 10, y: 30, width: 80, height: 50, zIndex: 1,
+          x: 10, y: 18, width: 80, height: 30, zIndex: 1,
           binding: 'greeting.content',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-groom-father',
+          type: 'text',
+          x: 10, y: 55, width: 35, height: 8, zIndex: 1,
+          binding: 'parents.groom.father.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-groom-mother',
+          type: 'text',
+          x: 10, y: 65, width: 35, height: 8, zIndex: 1,
+          binding: 'parents.groom.mother.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-bride-father',
+          type: 'text',
+          x: 55, y: 55, width: 35, height: 8, zIndex: 1,
+          binding: 'parents.bride.father.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'parents-bride-mother',
+          type: 'text',
+          x: 55, y: 65, width: 35, height: 8, zIndex: 1,
+          binding: 'parents.bride.mother.name',
+          props: { type: 'text' },
+        },
+      ],
+    },
+    // 신랑신부 소개 (Profile)
+    {
+      id: 'profile-1',
+      type: 'profile',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.profile,
+      presetId: 'profile-dual-card',
+      elements: [
+        {
+          id: 'profile-title-en',
+          type: 'text',
+          x: 20, y: 3, width: 60, height: 4, zIndex: 1,
+          value: 'About Us',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-title-ko',
+          type: 'text',
+          x: 10, y: 8, width: 80, height: 5, zIndex: 1,
+          value: '저희를 소개합니다',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-groom-photo',
+          type: 'image',
+          x: 5, y: 16, width: 42, height: 30, zIndex: 1,
+          binding: 'couple.groom.photo',
+          props: { type: 'image', objectFit: 'cover' },
+        },
+        {
+          id: 'profile-groom-label',
+          type: 'text',
+          x: 52, y: 17, width: 15, height: 3, zIndex: 1,
+          value: '신랑',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-groom-name',
+          type: 'text',
+          x: 52, y: 22, width: 43, height: 4, zIndex: 1,
+          binding: 'couple.groom.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-groom-birth',
+          type: 'text',
+          x: 52, y: 28, width: 43, height: 3, zIndex: 1,
+          binding: 'couple.groom.birthDate',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-groom-mbti',
+          type: 'text',
+          x: 52, y: 33, width: 20, height: 3, zIndex: 1,
+          binding: 'couple.groom.mbti',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-bride-photo',
+          type: 'image',
+          x: 53, y: 54, width: 42, height: 30, zIndex: 1,
+          binding: 'couple.bride.photo',
+          props: { type: 'image', objectFit: 'cover' },
+        },
+        {
+          id: 'profile-bride-label',
+          type: 'text',
+          x: 5, y: 55, width: 15, height: 3, zIndex: 1,
+          value: '신부',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-bride-name',
+          type: 'text',
+          x: 5, y: 60, width: 43, height: 4, zIndex: 1,
+          binding: 'couple.bride.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-bride-birth',
+          type: 'text',
+          x: 5, y: 66, width: 43, height: 3, zIndex: 1,
+          binding: 'couple.bride.birthDate',
+          props: { type: 'text' },
+        },
+        {
+          id: 'profile-bride-mbti',
+          type: 'text',
+          x: 5, y: 71, width: 20, height: 3, zIndex: 1,
+          binding: 'couple.bride.mbti',
           props: { type: 'text' },
         },
       ],
@@ -376,43 +497,6 @@ export function createDefaultBlocks(): Block[] {
         },
       ],
     },
-    // 혼주
-    {
-      id: 'parents-1',
-      type: 'parents',
-      enabled: true,
-      height: DEFAULT_BLOCK_HEIGHTS.parents,
-      elements: [
-        {
-          id: 'parents-groom-father',
-          type: 'text',
-          x: 10, y: 20, width: 35, height: 8, zIndex: 1,
-          binding: 'groom.fatherName',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-groom-mother',
-          type: 'text',
-          x: 10, y: 32, width: 35, height: 8, zIndex: 1,
-          binding: 'groom.motherName',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-bride-father',
-          type: 'text',
-          x: 55, y: 20, width: 35, height: 8, zIndex: 1,
-          binding: 'bride.fatherName',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-bride-mother',
-          type: 'text',
-          x: 55, y: 32, width: 35, height: 8, zIndex: 1,
-          binding: 'bride.motherName',
-          props: { type: 'text' },
-        },
-      ],
-    },
     // 축의금
     {
       id: 'account-1',
@@ -424,14 +508,14 @@ export function createDefaultBlocks(): Block[] {
           id: 'account-groom',
           type: 'text',
           x: 10, y: 20, width: 80, height: 30, zIndex: 1,
-          binding: 'groom.account',
+          binding: 'accounts.groom',
           props: { type: 'text' },
         },
         {
           id: 'account-bride',
           type: 'text',
           x: 10, y: 55, width: 80, height: 30, zIndex: 1,
-          binding: 'bride.account',
+          binding: 'accounts.bride',
           props: { type: 'text' },
         },
       ],

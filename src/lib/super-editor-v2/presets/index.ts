@@ -40,3 +40,38 @@ export {
   type ScrollPreset,
   type HoverPreset,
 } from './animation-presets'
+
+// Block Presets (skeleton → block migration)
+export {
+  // Types
+  type BlockPreset,
+  type BlockPresetId,
+  type CalendarPresetId,
+  // Registries
+  BLOCK_PRESETS,
+  CALENDAR_PRESETS,
+  // Generic helpers
+  getBlockPreset,
+  getBlockPresetsByType,
+  getBlockPresetsByTag,
+  getBlockPresetsByMood,
+  getBlockPresetsByComplexity,
+  getAllBlockPresetIds,
+  findPresetsForPrompt,
+  // Calendar-specific helpers
+  getCalendarPreset,
+  getCalendarPresetIds,
+  getCalendarPresetsByComplexity,
+} from './blocks'
+
+// Block Bindings (data requirements)
+export {
+  type BlockDataBinding,
+  BLOCK_BINDINGS,
+  getBlockBindings,
+  getRequiredPaths,
+  getAllPaths,
+  getBindingInfo,
+  validateBindings,
+  getDefaultValues,
+} from './block-bindings'

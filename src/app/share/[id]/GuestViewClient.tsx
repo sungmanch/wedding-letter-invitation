@@ -13,6 +13,7 @@ import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DocumentProvider } from '@/lib/super-editor-v2/context/document-context'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
+import { useViewerFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
 interface GuestViewClientProps {
   document: EditorDocumentV2
@@ -27,6 +28,9 @@ export function GuestViewClient({ document: dbDocument }: GuestViewClientProps) 
     () => resolveStyle(editorDoc.style),
     [editorDoc.style]
   )
+
+  // 공유 모드: 현재 스타일의 폰트만 로드
+  useViewerFonts(editorDoc.style)
 
   return (
     <div className="min-h-screen">

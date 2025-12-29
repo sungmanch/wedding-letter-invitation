@@ -12,6 +12,8 @@ import type { Block, BlockType, BlockStyleOverride, GradientValue } from '../sch
 import { BlockProvider, useBlockTokens } from '../context/block-context'
 import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
+import { AutoLayoutBlock } from './auto-layout-block'
+import { resolveBlockHeightNumber, isAutoLayoutBlock } from '../utils/size-resolver'
 
 // ============================================
 // Types
@@ -46,15 +48,28 @@ export function BlockRenderer({
     onElementClick?.(block.id, elementId)
   }, [block.id, onElementClick])
 
+  // Auto Layout 모드 체크
+  const isAutoLayout = isAutoLayoutBlock(block)
+
   return (
     <BlockProvider block={block} blockIndex={blockIndex}>
-      <BlockContainer
-        block={block}
-        blockIndex={blockIndex}
-        editable={editable}
-        onClick={handleBlockClick}
-        onElementClick={handleElementClick}
-      />
+      {isAutoLayout ? (
+        // Auto Layout 블록 렌더링
+        <AutoLayoutBlock
+          block={block}
+          editable={editable}
+          onElementClick={handleElementClick}
+        />
+      ) : (
+        // 기존 Absolute 블록 렌더링
+        <BlockContainer
+          block={block}
+          blockIndex={blockIndex}
+          editable={editable}
+          onClick={handleBlockClick}
+          onElementClick={handleElementClick}
+        />
+      )}
     </BlockProvider>
   )
 }
@@ -85,7 +100,8 @@ function BlockContainer({
   // 블록 스타일 계산 (viewport.height 기반으로 높이 계산)
   const blockStyle = useMemo<CSSProperties>(() => {
     // vh 대신 viewport.height를 기준으로 계산
-    const heightInPx = (block.height / 100) * viewport.height
+    const heightVh = resolveBlockHeightNumber(block.height)
+    const heightInPx = (heightVh / 100) * viewport.height
 
     const style: CSSProperties = {
       position: 'relative',
@@ -357,31 +373,20 @@ function gradientToCSS(gradient: GradientValue): string {
 function getBlockTypeLabel(type: BlockType): string {
   const labels: Record<BlockType, string> = {
     hero: '메인 커버',
-    loading: '로딩',
-    greeting: '인사말',
-    calendar: '캘린더',
+    'greeting-parents': '인사말/혼주',
+    profile: '신랑신부 소개',
+    calendar: '예식일시',
     gallery: '갤러리',
-    location: '오시는 길',
-    parents: '혼주 소개',
-    contact: '연락처',
+    rsvp: '참석 여부',
+    location: '오시는길',
+    notice: '공지사항',
     account: '축의금',
     message: '방명록',
-    rsvp: '참석 여부',
-    quote: '글귀',
-    profile: '프로필',
-    'parents-contact': '혼주 연락처',
-    timeline: '타임라인',
-    video: '영상',
-    interview: '인터뷰',
-    transport: '교통 안내',
-    notice: '안내사항',
-    announcement: '안내문',
-    'flower-gift': '화환',
-    'together-time': '함께한 시간',
-    dday: 'D-DAY',
-    'guest-snap': '게스트스냅',
+    wreath: '화환 안내',
     ending: '엔딩',
+    contact: '연락처',
     music: '음악',
+    loading: '로딩',
     custom: '커스텀',
   }
   return labels[type] ?? type

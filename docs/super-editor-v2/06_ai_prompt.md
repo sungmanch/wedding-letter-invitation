@@ -48,47 +48,120 @@ interface EditorDocument {
 }
 ```
 
-### 2.2 Block 타입
+### 2.2 Block 구조
 
 ```typescript
+interface Block {
+  id: string
+  type: BlockType
+  enabled: boolean
+
+  // ─── 레이아웃 설정 (Auto Layout 지원) ───
+  layout?: BlockLayout
+  height: number | SizeMode  // vh 또는 SizeMode
+
+  elements: Element[]
+  style?: BlockStyleOverride
+  animation?: BlockAnimationConfig
+}
+
+interface BlockLayout {
+  mode: 'absolute' | 'auto'  // 기본: 'absolute'
+
+  // Auto 모드 전용
+  direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
+  gap?: number              // px, 자식 간 간격
+  padding?: {
+    top?: number
+    right?: number
+    bottom?: number
+    left?: number
+  }
+
+  // 정렬
+  alignItems?: 'start' | 'center' | 'end' | 'stretch'
+  justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+  wrap?: boolean  // horizontal일 때 줄바꿈
+}
+
+// 크기 모드 (Figma 스타일)
+type SizeMode =
+  | { type: 'fixed'; value: number; unit?: 'px' | 'vh' | 'vw' | '%' }
+  | { type: 'hug' }                         // fit-content (콘텐츠에 맞춤)
+  | { type: 'fill' }                        // 100% (부모 채우기)
+  | { type: 'fill-portion'; value: number } // flex 비율
+
 type BlockType =
   // 핵심 섹션
-  | 'hero'        // 메인 히어로 (메인 사진, 이름, 날짜)
-  | 'greeting'    // 인사말
-  | 'calendar'    // 달력/D-day
-  | 'gallery'     // 포토 갤러리
-  | 'location'    // 예식장 정보 + 지도
-  | 'parents'     // 혼주 소개
-  | 'contact'     // 연락처
-  | 'account'     // 축의금 계좌
-  | 'message'     // 축하 메시지/방명록
-  | 'rsvp'        // 참석 여부
-  // 확장 섹션
-  | 'loading' | 'quote' | 'profile' | 'parents-contact'
-  | 'timeline' | 'video' | 'interview' | 'transport'
-  | 'notice' | 'announcement' | 'flower-gift' | 'together-time'
-  | 'dday' | 'guest-snap' | 'ending' | 'music' | 'custom'
+  | 'hero'              // 메인 히어로 (메인 사진, 이름, 날짜)
+  | 'greeting-parents'  // 인사말 + 혼주 소개
+  | 'profile'           // 신랑신부 소개
+  | 'calendar'          // 예식일시 (달력/D-day)
+  | 'gallery'           // 포토 갤러리
+  | 'rsvp'              // 참석 여부
+  | 'location'          // 오시는길
+  | 'notice'            // 공지사항/안내
+  | 'account'           // 축의금 계좌
+  | 'message'           // 방명록
+  | 'ending'            // 엔딩
+  | 'contact'           // 연락처 (오버레이)
+  | 'music' | 'loading' | 'custom'
 ```
 
 ### 2.3 Element 타입
 
 ```typescript
-type ElementType = 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar'
+type ElementType = 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar' | 'group'
 
 interface Element {
   id: string
   type: ElementType
-  x: number       // % (0-100, 중앙 기준)
-  y: number       // % (0-100, 블록 내 상대)
-  width: number   // %
-  height: number  // %
+
+  // ─── 레이아웃 모드 선택 ───
+  layoutMode?: 'absolute' | 'auto'  // 기본: 'absolute' (하위 호환)
+
+  // ─── Absolute 모드 (기존) ───
+  x?: number       // vw % (absolute 모드)
+  y?: number       // vh % (블록 내 상대)
+  width?: number   // vw %
+  height?: number  // vh %
   rotation?: number  // degrees
+
+  // ─── Auto Layout 모드 (신규) ───
+  sizing?: {
+    width?: SizeMode   // 기본: { type: 'fill' }
+    height?: SizeMode  // 기본: { type: 'hug' }
+  }
+  constraints?: {
+    minWidth?: number   // px
+    maxWidth?: number   // px
+    minHeight?: number  // px
+    maxHeight?: number  // px
+  }
+  alignSelf?: 'start' | 'center' | 'end' | 'stretch'
+
+  // ─── 공통 ───
   zIndex: number
   binding?: string   // 변수 경로 (예: 'groom.name')
   value?: string     // binding 없을 때 직접 값
   props: ElementProps
   style?: ElementStyle
   animation?: ElementAnimationConfig
+
+  // ─── Group 요소 전용 ───
+  children?: Element[]  // type: 'group'일 때 자식 요소들
+}
+
+// Group 요소 Props (중첩 레이아웃)
+interface GroupProps {
+  type: 'group'
+  layout?: {
+    direction?: 'vertical' | 'horizontal'
+    gap?: number
+    alignItems?: 'start' | 'center' | 'end' | 'stretch'
+    justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
+    reverse?: boolean  // flex-direction: row-reverse / column-reverse
+  }
 }
 ```
 
@@ -424,11 +497,18 @@ interface JsonPatch {
 ## 규칙
 
 1. **변수 바인딩 유지**: 기존 binding은 변경하지 마세요. 위치/스타일만 수정합니다.
-2. **좌표 시스템**: x, y, width, height는 0-100 범위의 % 값입니다.
+2. **좌표 시스템**: absolute 요소의 x, y, width, height는 0-100 범위의 % 값입니다.
 3. **ID 참조**: 프롬프트에 #id가 있으면 해당 요소만 수정하세요.
 4. **최소 변경**: 요청된 변경만 수행하고, 불필요한 수정은 피하세요.
 5. **애니메이션**: entrance, scroll, hover 등 트리거별로 분리하세요.
 6. **스타일 레벨**: 가능하면 quick 레벨(Level 2)에서 변경하세요.
+7. **Auto Layout 선호**: 텍스트 중심 블록(greeting-parents, profile, notice, rsvp)은 auto layout 사용
+   - 가변 높이 요소: `sizing.height: { type: 'hug' }`
+   - 부모 채우기: `sizing.width: { type: 'fill' }`
+   - 장식/배경만: `layoutMode: 'absolute'`
+8. **Group 활용**: 여러 요소를 그룹화할 때 `type: 'group'` + `children[]` 사용
+   - 좌우 교차 배치: `props.layout.reverse: true`
+9. **블록 높이**: auto layout 블록은 `height: { type: 'hug' }`로 콘텐츠에 맞게 자동 조절
 
 ## 현재 컨텍스트
 
@@ -669,7 +749,259 @@ function validateVariableExtension(ext: AIVariableExtension): boolean {
 
 ---
 
-## 10. 관련 문서
+## 10. Auto Layout 가이드
+
+### 10.1 언제 어떤 레이아웃을 사용하는가?
+
+| 요소/상황 | layoutMode | sizing | 이유 |
+|----------|------------|--------|------|
+| 텍스트 콘텐츠 (인사말, 설명) | `auto` | `height: hug` | 길이 가변, 자동 확장 |
+| 버튼, 레이블 | `auto` | `height: hug` | 텍스트에 맞춤 |
+| 배경 이미지 | `absolute` | - | 전체 덮기, 정확한 위치 |
+| 장식 (별, 리본, 꽃) | `absolute` | - | 정밀 배치 필요 |
+| 카드/박스 | `auto` | `width: fill` | 부모 채우기 |
+| 신랑신부 정보 그룹 | `group` + `auto` | - | 중첩 레이아웃, 교차 배치 |
+
+### 10.2 블록 유형별 권장 설정
+
+| 블록 타입 | layout.mode | height | direction | 이유 |
+|----------|-------------|--------|-----------|------|
+| `greeting-parents` | `auto` | `hug` | `vertical` | 텍스트 중심, 가변 높이 |
+| `profile` | `auto` | `hug` | `vertical` | 정보 나열, 그룹 중첩 |
+| `rsvp` | `auto` | `hug` | `vertical` | 폼 요소 나열 |
+| `notice` | `auto` | `hug` | `vertical` | 안내 항목 가변 |
+| `calendar` | `auto` | `hug` | `vertical` | 카운트다운 그룹 |
+| `hero` | `absolute` | 고정 vh | - | 배경 중심, 정밀 배치 |
+| `gallery` | `absolute` | 고정 vh | - | 그리드/캐러셀 |
+| `location` | `absolute` | 고정 vh | - | 지도 배치 |
+
+### 10.3 SizeMode 선택 기준
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 질문: 이 요소의 크기는 무엇에 의해 결정되어야 하는가?       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  콘텐츠 길이에 따라? ──────────────► { type: 'hug' }        │
+│                                                             │
+│  부모 너비를 채워야? ──────────────► { type: 'fill' }       │
+│                                                             │
+│  정확한 픽셀 값이 필요? ───────────► { type: 'fixed',       │
+│                                        value: 200,          │
+│                                        unit: 'px' }         │
+│                                                             │
+│  다른 형제와 비율 분할? ───────────► { type: 'fill-portion',│
+│                                        value: 2 }           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 10.4 Group 요소 활용
+
+**언제 Group을 사용하는가:**
+- 신랑/신부 정보를 좌우 교차 배치할 때
+- 여러 요소를 수평으로 나란히 배치할 때
+- 카운트다운 박스 (숫자 + 라벨)를 그룹화할 때
+- 구분선 + 텍스트 + 구분선 조합
+
+**reverse 속성 활용 예시:**
+```typescript
+// 신랑: 사진(왼쪽) + 정보(오른쪽)
+{
+  type: 'group',
+  props: { type: 'group', layout: { direction: 'horizontal', gap: 16 } },
+  children: [photo, infoGroup]  // 왼쪽 → 오른쪽
+}
+
+// 신부: 정보(왼쪽) + 사진(오른쪽) ← reverse로 시각적 교차
+{
+  type: 'group',
+  props: { type: 'group', layout: { direction: 'horizontal', gap: 16, reverse: true } },
+  children: [photo, infoGroup]  // DOM은 동일, 시각적으로 뒤집힘
+}
+```
+
+### 10.5 Mixed 모드 (Absolute + Auto 혼합)
+
+배경/장식은 `absolute`, 콘텐츠는 `auto`로 혼합 가능:
+
+```typescript
+{
+  id: 'block-greeting',
+  type: 'greeting-parents',
+  layout: {
+    mode: 'auto',  // 블록 자체는 auto
+    direction: 'vertical',
+    gap: 24,
+    padding: { top: 60, right: 40, bottom: 60, left: 40 },
+    alignItems: 'center',
+  },
+  height: { type: 'hug' },
+  elements: [
+    // 배경 장식 (absolute)
+    {
+      id: 'sparkle-1',
+      type: 'image',
+      layoutMode: 'absolute',  // absolute로 명시
+      x: 10, y: 5, width: 8, height: 10,
+      zIndex: 0,
+      props: { type: 'image', objectFit: 'contain' },
+    },
+    // 콘텐츠 (auto - layoutMode 생략하거나 'auto')
+    {
+      id: 'title',
+      type: 'text',
+      layoutMode: 'auto',
+      sizing: { height: { type: 'hug' } },
+      binding: 'greeting.title',
+      zIndex: 1,
+      props: { type: 'text' },
+    },
+    // ...
+  ],
+}
+```
+
+---
+
+## 11. Auto Layout Patch 패턴
+
+### 11.1 블록을 Auto Layout으로 변환
+
+```json
+{
+  "op": "replace",
+  "path": "/blocks/{blockIdx}/layout",
+  "value": {
+    "mode": "auto",
+    "direction": "vertical",
+    "gap": 24,
+    "padding": { "top": 40, "right": 40, "bottom": 40, "left": 40 },
+    "alignItems": "center"
+  }
+}
+```
+
+```json
+{
+  "op": "replace",
+  "path": "/blocks/{blockIdx}/height",
+  "value": { "type": "hug" }
+}
+```
+
+### 11.2 요소를 Auto 모드로 변경
+
+```json
+{
+  "op": "replace",
+  "path": "/blocks/{blockIdx}/elements/{elemIdx}/layoutMode",
+  "value": "auto"
+}
+```
+
+```json
+{
+  "op": "add",
+  "path": "/blocks/{blockIdx}/elements/{elemIdx}/sizing",
+  "value": {
+    "width": { "type": "fill" },
+    "height": { "type": "hug" }
+  }
+}
+```
+
+### 11.3 최소/최대 높이 제약 추가
+
+```json
+{
+  "op": "add",
+  "path": "/blocks/{blockIdx}/elements/{elemIdx}/constraints",
+  "value": {
+    "minHeight": 100,
+    "maxHeight": 400
+  }
+}
+```
+
+### 11.4 Group 요소 추가
+
+```json
+{
+  "op": "add",
+  "path": "/blocks/{blockIdx}/elements/-",
+  "value": {
+    "id": "countdown-group",
+    "type": "group",
+    "layoutMode": "auto",
+    "sizing": { "height": { "type": "hug" } },
+    "zIndex": 5,
+    "props": {
+      "type": "group",
+      "layout": {
+        "direction": "horizontal",
+        "gap": 12,
+        "alignItems": "center",
+        "justifyContent": "center"
+      }
+    },
+    "children": [
+      {
+        "id": "days-box",
+        "type": "group",
+        "layoutMode": "auto",
+        "props": { "type": "group", "layout": { "direction": "vertical", "gap": 4, "alignItems": "center" } },
+        "children": [
+          { "id": "days-value", "type": "text", "binding": "countdown.days", "props": { "type": "text" }, "zIndex": 1 },
+          { "id": "days-label", "type": "text", "value": "일", "props": { "type": "text" }, "zIndex": 1 }
+        ],
+        "zIndex": 1
+      }
+      // ... 시, 분, 초 박스
+    ]
+  }
+}
+```
+
+### 11.5 정렬 변경
+
+```json
+{
+  "op": "replace",
+  "path": "/blocks/{blockIdx}/layout/alignItems",
+  "value": "center"
+}
+```
+
+```json
+{
+  "op": "replace",
+  "path": "/blocks/{blockIdx}/elements/{elemIdx}/alignSelf",
+  "value": "start"
+}
+```
+
+---
+
+## 12. 시스템 프롬프트 업데이트 (Auto Layout 규칙)
+
+기존 시스템 프롬프트의 `## 규칙` 섹션에 추가:
+
+```handlebars
+7. **Auto Layout 선호**: 텍스트 중심 블록(greeting, profile, notice, rsvp)은 auto layout을 사용하세요.
+   - 콘텐츠 길이가 가변적인 요소는 `sizing.height: { type: 'hug' }`
+   - 부모 너비를 채우는 요소는 `sizing.width: { type: 'fill' }`
+   - 장식/배경 요소만 `layoutMode: 'absolute'`로 유지
+
+8. **Group 활용**: 여러 요소를 수평/수직으로 그룹화할 때는 `type: 'group'` 사용
+   - 좌우 교차 배치는 `props.layout.reverse: true` 활용
+   - 카운트다운, 프로필 카드 등에 적합
+
+9. **블록 높이**: auto layout 블록은 `height: { type: 'hug' }`로 콘텐츠에 맞게 자동 조절
+```
+
+---
+
+## 13. 관련 문서
 
 | 문서 | 내용 |
 |------|------|
@@ -678,3 +1010,4 @@ function validateVariableExtension(ext: AIVariableExtension): boolean {
 | [02a_triggers_actions.md](./02a_triggers_actions.md) | 애니메이션 트리거/액션 |
 | [03_variables.md](./03_variables.md) | 변수 시스템 |
 | [04d_ai_context.md](./04d_ai_context.md) | AI 컨텍스트 압축 |
+| [PLAN_auto-layout.md](./PLAN_auto-layout.md) | Auto Layout 구현 계획 |

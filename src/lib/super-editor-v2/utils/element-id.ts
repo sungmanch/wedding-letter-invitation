@@ -254,3 +254,17 @@ export function pxToPercent(px: number, containerSize: number): number {
 export function percentToPx(percent: number, containerSize: number): number {
   return (percent / 100) * containerSize
 }
+
+/**
+ * px를 rem으로 변환 (접근성)
+ *
+ * 사용자의 브라우저/시스템 폰트 크기 설정을 존중하기 위해
+ * fontSize에 rem 단위를 사용합니다.
+ *
+ * @param px 픽셀 값
+ * @param baseFontSize 기준 폰트 크기 (기본 16px)
+ * @returns rem 문자열 (예: "1.5rem")
+ */
+export function pxToRem(px: number, baseFontSize: number = 16): string {
+  return `${px / baseFontSize}rem`
+}
