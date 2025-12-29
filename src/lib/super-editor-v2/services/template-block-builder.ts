@@ -37,6 +37,7 @@ function buildBlockFromTemplate(
     type: blockTemplate.type,
     enabled: blockTemplate.enabled,
     height: blockTemplate.height,
+    layout: blockTemplate.layout,
     elements: blockTemplate.elements.map((elementTemplate) =>
       buildElementFromTemplate(elementTemplate, template, weddingData)
     ),

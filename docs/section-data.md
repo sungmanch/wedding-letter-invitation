@@ -6,6 +6,60 @@
 
 ---
 
+## 🎨 디자이너를 위한 데이터 구조 요약
+
+이 섹션은 디자이너가 작업할 때 **어떤 데이터가 필수**이고, **어떤 부분이 선택(옵션)**인지 한눈에 파악하기 위한 가이드입니다.
+
+### 1. 섹션 구성도
+
+* **실선 박스(Blue)**: 필수 섹션 (모든 청첩장에 반드시 포함됨)
+* **점선 박스(Gray)**: 선택 섹션 (유저가 켜거나 끌 수 있음)
+
+```mermaid
+graph TD
+    subgraph Required ["✅ 필수 섹션 (기본 뼈대)"]
+        intro[Intro<br/>메인 사진 + 이름 + 날짜]
+        greeting[Greeting<br/>인사말 + 혼주 + 연락처]
+        date[Date<br/>예식일시 + D-day]
+        venue[Venue<br/>오시는길 + 지도]
+        gallery[Gallery<br/>사진 갤러리]
+    end
+
+    subgraph Optional ["○ 선택 섹션 (추가 모듈)"]
+        accounts[Accounts<br/>계좌번호]
+        couple[Couple<br/>신랑신부 소개/인터뷰]
+        rsvp[RSVP<br/>참석의사 전달]
+        notice[Notice<br/>공지사항]
+        guestbook[Guestbook<br/>방명록]
+        ending[Ending<br/>마무리 + 공유]
+        video[Video<br/>홍보 영상]
+        music[Music<br/>배경음악]
+    end
+
+    style Required fill:#e6f3ff,stroke:#0066cc,stroke-width:2px
+    style Optional fill:#fff,stroke:#999,stroke-dasharray: 5 5
+```
+
+### 2. 섹션별 디자인 체크리스트
+
+디자인 시 아래 데이터들이 **화면에 어떻게 배치될지** 고려해야 합니다.
+
+| 섹션 | 필수 데이터 (Must Design) | 선택 데이터 (Optional / Variable) |
+|:---:|:---|:---|
+| **Intro** | • **메인 사진** (3:4 비율 권장) <br> • **신랑/신부 이름** <br> • **예식 날짜/시간** | • 인트로 문구 (한 줄 메시지) |
+| **Greeting** | • (데이터 없음, 텍스트 레이아웃) | • 인사말 제목/내용 <br> • **혼주 정보** (부모님 성함, 故 표기, 세례명) <br> • **연락처** (전화걸기 버튼) |
+| **Date** | • **예식 시간** | • 캘린더 뷰 표기 <br> • D-day 카운트다운 |
+| **Venue** | • **예식장 이름** <br> • **지도 영역** (약도/Map) | • 홀 이름 (예: 그랜드볼룸) <br> • 교통편 텍스트 (버스/지하철/주차) <br> • 네비게이션 앱 링크 버튼 (네이버/카카오/T맵) |
+| **Gallery** | • (데이터 없음) | • **사진 목록** (최대 40장, 슬라이드/그리드) <br> *※ 유저가 사진을 안 올릴 수도 있음* |
+| **Accounts** | • 예금주 / 은행명 / 계좌번호 | • **복사하기 버튼** <br> • 카카오페이 송금 링크 |
+| **Couple** | • 질문 / 답변 텍스트 | • 커플 프로필 사진 <br> • 신랑/신부 각각의 소개글 |
+| **RSVP** | • 참석여부 폼 (Form) | • 식사 여부 / 동행인 수 / 버스 탑승 여부 확인 |
+| **Notice** | • 공지 제목 / 내용 | • 아이콘 <br> • 참고 이미지 (식순, 메뉴판 등) |
+| **Guestbook** | • (PC/Mobile 무관 리스트) | • 축하 메시지 목록 <br> • 메시지 작성 버튼 |
+| **Ending** | • (없음) | • 엔딩 사진 <br> • 마무리 인사말 <br> • 화환 업체 링크 / 공유하기(카카오톡) 버튼 |
+
+---
+
 ## 데이터 구조 트리
 
 ```

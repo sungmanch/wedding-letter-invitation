@@ -21,6 +21,7 @@ import type {
   DividerProps,
   MapProps,
   CalendarProps,
+  GroupProps,
   GradientValue,
 } from '../schema/types'
 import { useDocument } from '../context/document-context'
@@ -257,6 +258,15 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         />
       )
 
+    case 'group':
+      return (
+        <GroupElement
+          element={element}
+          layout={(props as GroupProps).layout}
+          editable={editable}
+        />
+      )
+
     default:
       return (
         <div className="se2-element--unknown">
@@ -316,6 +326,162 @@ function gradientToCSS(gradient: GradientValue): string {
     return `radial-gradient(${shape} at ${position}, ${stops})`
   } else {
     return `conic-gradient(from ${gradient.angle ?? 0}deg, ${stops})`
+  }
+}
+
+// ============================================
+// Group Element Component
+// ============================================
+
+interface GroupElementProps {
+  element: Element
+  layout?: GroupProps['layout']
+  editable: boolean
+}
+
+function GroupElement({ element, layout, editable }: GroupElementProps) {
+  const groupStyle = useMemo<CSSProperties>(() => {
+    const direction = layout?.direction ?? 'vertical'
+    const reverse = layout?.reverse ?? false
+
+    let flexDirection: CSSProperties['flexDirection']
+    if (direction === 'horizontal') {
+      flexDirection = reverse ? 'row-reverse' : 'row'
+    } else {
+      flexDirection = reverse ? 'column-reverse' : 'column'
+    }
+
+    return {
+      display: 'flex',
+      flexDirection,
+      gap: layout?.gap ? `${layout.gap}px` : undefined,
+      alignItems: layout?.alignItems ?? 'stretch',
+      justifyContent: layout?.justifyContent ?? 'start',
+      width: '100%',
+      height: '100%',
+    }
+  }, [layout])
+
+  const children = element.children ?? []
+
+  return (
+    <div className="se2-group" style={groupStyle}>
+      {children.map((child) => (
+        <GroupChildElement
+          key={child.id}
+          element={child}
+          editable={editable}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ============================================
+// Group Child Element (재귀적 렌더링)
+// ============================================
+
+interface GroupChildElementProps {
+  element: Element
+  editable: boolean
+}
+
+function GroupChildElement({ element, editable }: GroupChildElementProps) {
+  const { data } = useDocument()
+  const props = element.props
+  const elementType = element.type || props?.type
+
+  // 값 해석
+  const resolvedValue = useMemo(() => {
+    if (element.binding) {
+      return resolveBinding(data, element.binding)
+    }
+    return element.value ?? (element as { content?: string }).content
+  }, [element.binding, element.value, data, element])
+
+  const formattedValue = useMemo(() => {
+    if (props?.type === 'text' && (props as TextProps).format) {
+      return interpolate((props as TextProps).format!, data)
+    }
+    return resolvedValue
+  }, [props, resolvedValue, data])
+
+  const value = formattedValue
+
+  switch (elementType) {
+    case 'text':
+      return (
+        <TextElement
+          value={value as string}
+          style={element.style?.text}
+          editable={editable}
+        />
+      )
+
+    case 'image':
+      return (
+        <ImageElement
+          src={value as string}
+          objectFit={(props as ImageProps).objectFit}
+          overlay={(props as ImageProps).overlay}
+          style={element.style}
+          editable={editable}
+        />
+      )
+
+    case 'shape':
+      return (
+        <ShapeElement
+          shape={(props as ShapeProps).shape}
+          fill={(props as ShapeProps).fill}
+          stroke={(props as ShapeProps).stroke}
+          strokeWidth={(props as ShapeProps).strokeWidth}
+          svgPath={(props as ShapeProps).svgPath}
+          svgViewBox={(props as ShapeProps).svgViewBox}
+          style={element.style}
+        />
+      )
+
+    case 'button':
+      return (
+        <ButtonElement
+          label={(props as ButtonProps).label}
+          action={(props as ButtonProps).action}
+          value={value}
+          style={element.style}
+          editable={editable}
+        />
+      )
+
+    case 'icon':
+      return (
+        <IconElement
+          icon={(props as IconProps).icon}
+          size={(props as IconProps).size}
+          color={(props as IconProps).color}
+        />
+      )
+
+    case 'divider':
+      return (
+        <DividerElement
+          dividerStyle={(props as DividerProps).dividerStyle}
+          ornamentId={(props as DividerProps).ornamentId}
+          style={element.style}
+        />
+      )
+
+    case 'group':
+      return (
+        <GroupElement
+          element={element}
+          layout={(props as GroupProps).layout}
+          editable={editable}
+        />
+      )
+
+    default:
+      return null
   }
 }
 

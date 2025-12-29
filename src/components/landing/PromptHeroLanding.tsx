@@ -337,11 +337,28 @@ export function PromptHeroLanding({ user }: PromptHeroLandingProps) {
         {/* Input Card Container */}
         <div className="w-full bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-[0_30px_60px_-12px_rgba(0,0,0,0.12)] p-2 sm:p-4 overflow-hidden transition-all duration-300 transform hover:shadow-[0_35px_70px_-15px_rgba(0,0,0,0.15)] ring-1 ring-black/5">
             
+            {/* Helper Text */}
+             <div className="mb-3 px-1 flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 animate-fade-in-up delay-200">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--sage-500)]" />
+                <span>뭐라고 할지 잘 모르시겠어요?</span>
+                <button 
+                    onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setShowReferenceInput(true); 
+                        setReferenceInputMode('upload');
+                    }} 
+                    className="font-medium text-[var(--sage-600)] hover:underline decoration-1 underline-offset-2 hover:text-[var(--sage-700)] transition-colors"
+                >
+                    생각나는 이미지를 알려주세요
+                </button>
+            </div>
+
             {/* 1. Prompt Input Area */}
             <div 
                 className={`relative rounded-2xl bg-white border transition-all duration-200 ${isInputMode ? 'border-[var(--sage-400)] ring-4 ring-[var(--sage-100)]' : 'border-gray-100'}`}
                 onClick={!isInputMode ? handleInputAreaClick : undefined}
             >
+
                 {isInputMode ? (
                   <div className="p-4 sm:p-5">
                     <textarea

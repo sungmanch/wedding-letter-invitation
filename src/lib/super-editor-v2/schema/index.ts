@@ -17,8 +17,15 @@ import type {
   GlobalAnimation,
   WeddingData,
   Block,
+  Element,
   SemanticTokens,
+  SizeMode,
 } from './types'
+import { nanoid } from 'nanoid'
+import {
+  getBlockPreset,
+  type PresetElement,
+} from '../presets/blocks'
 
 /**
  * 기본 시맨틱 토큰 (minimal-light 프리셋 기반)
@@ -188,6 +195,7 @@ export const DEFAULT_BLOCK_ORDER: Block['type'][] = [
   'account',
   'message',
   'ending',
+  'music',
 ]
 
 /**
@@ -241,12 +249,135 @@ export const BLOCK_TYPE_LABELS: Record<Block['type'], string> = {
 }
 
 /**
+ * 재귀적으로 모든 요소에 새 ID 부여 (Group children 포함)
+ */
+function regenerateElementIds(el: PresetElement): Element {
+  const newEl: Element = {
+    ...el,
+    id: nanoid(8),
+  } as Element
+
+  // Group children 재귀 처리
+  if (el.children && el.children.length > 0) {
+    newEl.children = el.children.map(child => regenerateElementIds(child as PresetElement))
+  }
+
+  return newEl
+}
+
+/**
+ * 프리셋에서 블록 생성 헬퍼
+ */
+function createBlockFromPreset(
+  blockId: string,
+  presetId: string,
+  enabled: boolean = true,
+  fallbackHeight: number = 80
+): Block | null {
+  const preset = getBlockPreset(presetId)
+  if (!preset) return null
+
+  // height 처리: SizeMode 객체면 숫자로 변환 (hug는 fallback 사용)
+  let height: number | SizeMode = fallbackHeight
+  if (preset.defaultHeight) {
+    if (typeof preset.defaultHeight === 'number') {
+      height = preset.defaultHeight
+    } else {
+      height = preset.defaultHeight // SizeMode 그대로 전달
+    }
+  }
+
+  return {
+    id: blockId,
+    type: preset.blockType,
+    enabled,
+    presetId,
+    height,
+    layout: preset.layout,
+    elements: preset.defaultElements
+      ? preset.defaultElements.map(el => regenerateElementIds(el))
+      : [],
+  }
+}
+
+/**
  * 기본 블록 템플릿 생성
- * 각 블록 타입별 기본 elements와 binding 포함
+ * 프리셋 시스템을 활용하여 Auto Layout 기반 블록 생성
  */
 export function createDefaultBlocks(): Block[] {
+  // 프리셋 기반 블록들
+  const greetingBlock = createBlockFromPreset(
+    'greeting-parents-1',
+    'greeting-parents-minimal',
+    true,
+    DEFAULT_BLOCK_HEIGHTS['greeting-parents']
+  )
+
+  const profileBlock = createBlockFromPreset(
+    'profile-1',
+    'profile-dual-card',
+    false, // 기본 비활성화
+    DEFAULT_BLOCK_HEIGHTS.profile
+  )
+
+  const calendarBlock = createBlockFromPreset(
+    'calendar-1',
+    'calendar-korean-countdown-box',
+    true,
+    DEFAULT_BLOCK_HEIGHTS.calendar
+  )
+
+  const galleryBlock = createBlockFromPreset(
+    'gallery-1',
+    'gallery-square-3col',
+    true,
+    DEFAULT_BLOCK_HEIGHTS.gallery
+  )
+
+  const locationBlock = createBlockFromPreset(
+    'location-1',
+    'location-minimal',
+    true,
+    DEFAULT_BLOCK_HEIGHTS.location
+  )
+
+  const accountBlock = createBlockFromPreset(
+    'account-1',
+    'account-tab-card',
+    true,
+    DEFAULT_BLOCK_HEIGHTS.account
+  )
+
+  const messageBlock = createBlockFromPreset(
+    'message-1',
+    'message-minimal',
+    false, // 선택 섹션 → 기본 비활성화
+    DEFAULT_BLOCK_HEIGHTS.message
+  )
+
+  const endingBlock = createBlockFromPreset(
+    'ending-1',
+    'ending-quote-share',
+    false, // 선택 섹션 → 기본 비활성화
+    DEFAULT_BLOCK_HEIGHTS.ending
+  )
+
+  const rsvpBlock = createBlockFromPreset(
+    'rsvp-1',
+    'rsvp-basic',
+    false, // 선택 섹션 → 기본 비활성화
+    DEFAULT_BLOCK_HEIGHTS.rsvp
+  )
+
+  const noticeBlock = createBlockFromPreset(
+    'notice-1',
+    'notice-classic-label',
+    false, // 선택 섹션 → 기본 비활성화
+    DEFAULT_BLOCK_HEIGHTS.notice
+  )
+
   return [
-    // 메인 (Hero)
+    // 메인 (Hero) - absolute 레이아웃 유지 (프리셋 없음)
     {
       id: 'hero-1',
       type: 'hero',
@@ -283,249 +414,108 @@ export function createDefaultBlocks(): Block[] {
         },
       ],
     },
-    // 인사말/혼주
-    {
+    // 인사말/혼주 - 프리셋 적용
+    greetingBlock ?? {
       id: 'greeting-parents-1',
       type: 'greeting-parents',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS['greeting-parents'],
       elements: [
-        {
-          id: 'greeting-title',
-          type: 'text',
-          x: 10, y: 5, width: 80, height: 10, zIndex: 1,
-          binding: 'greeting.title',
-          props: { type: 'text' },
-        },
-        {
-          id: 'greeting-content',
-          type: 'text',
-          x: 10, y: 18, width: 80, height: 30, zIndex: 1,
-          binding: 'greeting.content',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-groom-father',
-          type: 'text',
-          x: 10, y: 55, width: 35, height: 8, zIndex: 1,
-          binding: 'parents.groom.father.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-groom-mother',
-          type: 'text',
-          x: 10, y: 65, width: 35, height: 8, zIndex: 1,
-          binding: 'parents.groom.mother.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-bride-father',
-          type: 'text',
-          x: 55, y: 55, width: 35, height: 8, zIndex: 1,
-          binding: 'parents.bride.father.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'parents-bride-mother',
-          type: 'text',
-          x: 55, y: 65, width: 35, height: 8, zIndex: 1,
-          binding: 'parents.bride.mother.name',
-          props: { type: 'text' },
-        },
+        { id: 'greeting-title', type: 'text', x: 10, y: 5, width: 80, height: 10, zIndex: 1, binding: 'greeting.title', props: { type: 'text' } },
+        { id: 'greeting-content', type: 'text', x: 10, y: 18, width: 80, height: 30, zIndex: 1, binding: 'greeting.content', props: { type: 'text' } },
       ],
     },
-    // 신랑신부 소개 (Profile)
-    {
+    // 신랑신부 소개 - 프리셋 적용
+    profileBlock ?? {
       id: 'profile-1',
       type: 'profile',
       enabled: false,
       height: DEFAULT_BLOCK_HEIGHTS.profile,
       presetId: 'profile-dual-card',
-      elements: [
-        {
-          id: 'profile-title-en',
-          type: 'text',
-          x: 20, y: 3, width: 60, height: 4, zIndex: 1,
-          value: 'About Us',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-title-ko',
-          type: 'text',
-          x: 10, y: 8, width: 80, height: 5, zIndex: 1,
-          value: '저희를 소개합니다',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-groom-photo',
-          type: 'image',
-          x: 5, y: 16, width: 42, height: 30, zIndex: 1,
-          binding: 'couple.groom.photo',
-          props: { type: 'image', objectFit: 'cover' },
-        },
-        {
-          id: 'profile-groom-label',
-          type: 'text',
-          x: 52, y: 17, width: 15, height: 3, zIndex: 1,
-          value: '신랑',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-groom-name',
-          type: 'text',
-          x: 52, y: 22, width: 43, height: 4, zIndex: 1,
-          binding: 'couple.groom.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-groom-birth',
-          type: 'text',
-          x: 52, y: 28, width: 43, height: 3, zIndex: 1,
-          binding: 'couple.groom.birthDate',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-groom-mbti',
-          type: 'text',
-          x: 52, y: 33, width: 20, height: 3, zIndex: 1,
-          binding: 'couple.groom.mbti',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-bride-photo',
-          type: 'image',
-          x: 53, y: 54, width: 42, height: 30, zIndex: 1,
-          binding: 'couple.bride.photo',
-          props: { type: 'image', objectFit: 'cover' },
-        },
-        {
-          id: 'profile-bride-label',
-          type: 'text',
-          x: 5, y: 55, width: 15, height: 3, zIndex: 1,
-          value: '신부',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-bride-name',
-          type: 'text',
-          x: 5, y: 60, width: 43, height: 4, zIndex: 1,
-          binding: 'couple.bride.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-bride-birth',
-          type: 'text',
-          x: 5, y: 66, width: 43, height: 3, zIndex: 1,
-          binding: 'couple.bride.birthDate',
-          props: { type: 'text' },
-        },
-        {
-          id: 'profile-bride-mbti',
-          type: 'text',
-          x: 5, y: 71, width: 20, height: 3, zIndex: 1,
-          binding: 'couple.bride.mbti',
-          props: { type: 'text' },
-        },
-      ],
+      elements: [],
     },
-    // 달력
-    {
+    // 달력 - 프리셋 적용
+    calendarBlock ?? {
       id: 'calendar-1',
       type: 'calendar',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.calendar,
       elements: [
-        {
-          id: 'calendar-date',
-          type: 'calendar',
-          x: 10, y: 10, width: 80, height: 60, zIndex: 1,
-          binding: 'wedding.date',
-          props: { type: 'calendar' },
-        },
-        {
-          id: 'calendar-time',
-          type: 'text',
-          x: 25, y: 75, width: 50, height: 10, zIndex: 1,
-          binding: 'wedding.time',
-          props: { type: 'text' },
-        },
+        { id: 'calendar-date', type: 'calendar', x: 10, y: 10, width: 80, height: 60, zIndex: 1, binding: 'wedding.date', props: { type: 'calendar' } },
+        { id: 'calendar-time', type: 'text', x: 25, y: 75, width: 50, height: 10, zIndex: 1, binding: 'wedding.time', props: { type: 'text' } },
       ],
     },
-    // 갤러리
-    {
+    // 5. 갤러리 - 프리셋 적용
+    galleryBlock ?? {
       id: 'gallery-1',
       type: 'gallery',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.gallery,
       elements: [
-        {
-          id: 'gallery-photos',
-          type: 'image',
-          x: 0, y: 0, width: 100, height: 100, zIndex: 0,
-          binding: 'photos.gallery',
-          props: { type: 'image', objectFit: 'cover' },
-        },
+        { id: 'gallery-photos', type: 'image', x: 0, y: 0, width: 100, height: 100, zIndex: 0, binding: 'photos.gallery', props: { type: 'image', objectFit: 'cover' } },
       ],
     },
-    // 예식장
-    {
+    // 6. RSVP - 프리셋 적용 (선택 섹션 → 기본 비활성화)
+    rsvpBlock ?? {
+      id: 'rsvp-1',
+      type: 'rsvp',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.rsvp,
+      elements: [],
+    },
+    // 7. 예식장 - 프리셋 적용
+    locationBlock ?? {
       id: 'location-1',
       type: 'location',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.location,
       elements: [
-        {
-          id: 'location-name',
-          type: 'text',
-          x: 10, y: 10, width: 80, height: 10, zIndex: 1,
-          binding: 'venue.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'location-address',
-          type: 'text',
-          x: 10, y: 22, width: 80, height: 8, zIndex: 1,
-          binding: 'venue.address',
-          props: { type: 'text' },
-        },
-        {
-          id: 'location-map',
-          type: 'map',
-          x: 5, y: 35, width: 90, height: 55, zIndex: 1,
-          binding: 'venue.address',
-          props: { type: 'map' },
-        },
+        { id: 'location-name', type: 'text', x: 10, y: 10, width: 80, height: 10, zIndex: 1, binding: 'venue.name', props: { type: 'text' } },
+        { id: 'location-address', type: 'text', x: 10, y: 22, width: 80, height: 8, zIndex: 1, binding: 'venue.address', props: { type: 'text' } },
+        { id: 'location-map', type: 'map', x: 5, y: 35, width: 90, height: 55, zIndex: 1, binding: 'venue.address', props: { type: 'map' } },
       ],
     },
-    // 축의금
-    {
+    // 8. 공지사항 - 프리셋 적용 (선택 섹션 → 기본 비활성화)
+    noticeBlock ?? {
+      id: 'notice-1',
+      type: 'notice',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.notice,
+      elements: [],
+    },
+    // 9. 축의금 - 프리셋 적용
+    accountBlock ?? {
       id: 'account-1',
       type: 'account',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.account,
       elements: [
-        {
-          id: 'account-groom',
-          type: 'text',
-          x: 10, y: 20, width: 80, height: 30, zIndex: 1,
-          binding: 'accounts.groom',
-          props: { type: 'text' },
-        },
-        {
-          id: 'account-bride',
-          type: 'text',
-          x: 10, y: 55, width: 80, height: 30, zIndex: 1,
-          binding: 'accounts.bride',
-          props: { type: 'text' },
-        },
+        { id: 'account-groom', type: 'text', x: 10, y: 20, width: 80, height: 30, zIndex: 1, binding: 'accounts.groom', props: { type: 'text' } },
+        { id: 'account-bride', type: 'text', x: 10, y: 55, width: 80, height: 30, zIndex: 1, binding: 'accounts.bride', props: { type: 'text' } },
       ],
     },
-    // 방명록
-    {
+    // 10. 방명록 - 프리셋 적용 (선택 섹션 → 기본 비활성화)
+    messageBlock ?? {
       id: 'message-1',
       type: 'message',
       enabled: false,
       height: DEFAULT_BLOCK_HEIGHTS.message,
+      elements: [],
+    },
+    // 11. 엔딩 - 프리셋 적용 (선택 섹션 → 기본 비활성화)
+    endingBlock ?? {
+      id: 'ending-1',
+      type: 'ending',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.ending,
+      elements: [],
+    },
+    // 12. 배경음악 - 프리셋 없음 (선택 섹션 → 기본 비활성화)
+    {
+      id: 'music-1',
+      type: 'music',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.music,
       elements: [],
     },
   ]

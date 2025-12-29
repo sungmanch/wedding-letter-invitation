@@ -20,6 +20,26 @@ import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
 import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 
 // ============================================
+// Computed Field Mapping
+// ============================================
+
+/**
+ * Computed field → Source field 매핑
+ * 자동 계산 필드를 편집하면 실제로 소스 필드를 수정해야 함
+ */
+const COMPUTED_TO_SOURCE: Record<string, VariablePath> = {
+  'wedding.timeDisplay': 'wedding.time',
+  'wedding.dateDisplay': 'wedding.date',
+}
+
+/**
+ * 바인딩 경로가 computed field면 source field로 변환
+ */
+function getEditableBinding(binding: VariablePath): VariablePath {
+  return (COMPUTED_TO_SOURCE[binding] as VariablePath) || binding
+}
+
+// ============================================
 // Types
 // ============================================
 
@@ -207,11 +227,14 @@ function BlockAccordion({
         }
       }
 
+      // Computed field는 source field로 변환 (wedding.timeDisplay → wedding.time)
+      finalBinding = getEditableBinding(finalBinding)
+
       // 같은 바인딩은 한 번만 표시
       if (seenBindings.has(finalBinding)) return
       seenBindings.add(finalBinding)
 
-      // 값 가져오기
+      // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
       if (finalBinding === 'photos.gallery') {
         value = data.photos?.gallery ?? []
@@ -230,7 +253,8 @@ function BlockAccordion({
       })
     }
 
-    for (const el of block.elements ?? []) {
+    // 요소 트리 재귀 순회 함수 (Group children 포함)
+    const processElementTree = (el: Element) => {
       // 1. 직접 바인딩된 요소
       if (el.binding) {
         addBinding(el.id, el.binding, el.type)
@@ -256,6 +280,18 @@ function BlockAccordion({
         addBinding(el.id, 'parents.bride.father.phone', 'phone')
         addBinding(el.id, 'parents.bride.mother.phone', 'phone')
       }
+
+      // 4. Group children 재귀 처리
+      if (el.children && el.children.length > 0) {
+        for (const child of el.children) {
+          processElementTree(child)
+        }
+      }
+    }
+
+    // 최상위 요소들 순회
+    for (const el of block.elements ?? []) {
+      processElementTree(el)
     }
 
     return fields
@@ -928,6 +964,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 예식 정보
   'wedding.date': { label: '예식 날짜', type: 'date' },
   'wedding.time': { label: '예식 시간', type: 'time' },
+  'wedding.timeDisplay': { label: '예식 시간', type: 'time' },
 
   // 예식장 정보
   'venue.name': { label: '예식장 이름', type: 'text', placeholder: '○○웨딩홀' },
@@ -942,6 +979,9 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 사진
   'photos.main': { label: '메인 사진', type: 'image' },
   'photos.gallery': { label: '갤러리 사진', type: 'gallery' },
+
+  // 엔딩
+  'ending.photo': { label: '엔딩 사진', type: 'image' },
 
   // 인사말
   'greeting.title': { label: '인사말 제목', type: 'text' },
