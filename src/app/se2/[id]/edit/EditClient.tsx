@@ -27,7 +27,8 @@ import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
 import { FloatingPresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/floating-preset-sidebar'
-import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
+import { getBlockPreset, type PresetElement } from '@/lib/super-editor-v2/presets/blocks'
+import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
 // ============================================
@@ -244,17 +245,29 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       return
     }
 
+    // 재귀적으로 모든 요소에 새 ID 부여 (Group children 포함)
+    const regenerateElementIds = (el: PresetElement): Element => {
+      const newEl: Element = {
+        ...el,
+        id: nanoid(8),
+      } as Element
+
+      // Group children 재귀 처리
+      if (el.children && el.children.length > 0) {
+        newEl.children = el.children.map(child => regenerateElementIds(child as PresetElement))
+      }
+
+      return newEl
+    }
+
     updateDocument(prev => ({
       ...prev,
       blocks: prev.blocks.map(block => {
         if (block.id !== blockId) return block
 
-        // 프리셋의 기본 요소가 있으면 적용
+        // 프리셋의 기본 요소가 있으면 적용 (재귀적 ID 재생성)
         const newElements = preset.defaultElements
-          ? preset.defaultElements.map((el, idx) => ({
-              ...el,
-              id: el.id || `${blockId}-el-${idx}`,
-            }))
+          ? preset.defaultElements.map(el => regenerateElementIds(el))
           : block.elements
 
         return {

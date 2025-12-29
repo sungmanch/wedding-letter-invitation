@@ -253,7 +253,8 @@ function BlockAccordion({
       })
     }
 
-    for (const el of block.elements ?? []) {
+    // 요소 트리 재귀 순회 함수 (Group children 포함)
+    const processElementTree = (el: Element) => {
       // 1. 직접 바인딩된 요소
       if (el.binding) {
         addBinding(el.id, el.binding, el.type)
@@ -279,6 +280,18 @@ function BlockAccordion({
         addBinding(el.id, 'parents.bride.father.phone', 'phone')
         addBinding(el.id, 'parents.bride.mother.phone', 'phone')
       }
+
+      // 4. Group children 재귀 처리
+      if (el.children && el.children.length > 0) {
+        for (const child of el.children) {
+          processElementTree(child)
+        }
+      }
+    }
+
+    // 최상위 요소들 순회
+    for (const el of block.elements ?? []) {
+      processElementTree(el)
     }
 
     return fields
@@ -966,6 +979,9 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 사진
   'photos.main': { label: '메인 사진', type: 'image' },
   'photos.gallery': { label: '갤러리 사진', type: 'gallery' },
+
+  // 엔딩
+  'ending.photo': { label: '엔딩 사진', type: 'image' },
 
   // 인사말
   'greeting.title': { label: '인사말 제목', type: 'text' },

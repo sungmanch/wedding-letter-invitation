@@ -5,7 +5,7 @@
  * 각 템플릿은 hero, greeting, gallery 등의 블록과 텍스트/이미지 요소를 포함합니다.
  */
 
-import type { Block, BlockType, Element, VariablePath } from '../schema/types'
+import type { Block, BlockType, BlockLayout, Element, VariablePath } from '../schema/types'
 import type { TemplateMetadata } from '../schema/template-metadata'
 
 /**
@@ -34,6 +34,7 @@ export interface BlockTemplate {
   type: BlockType
   enabled: boolean
   height: number // vh
+  layout?: BlockLayout // Auto Layout 설정 (없으면 absolute 모드)
   elements: ElementTemplate[]
 }
 

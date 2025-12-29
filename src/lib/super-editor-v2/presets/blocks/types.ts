@@ -9,8 +9,12 @@ import type { BlockType, VariablePath, Element, BlockLayout, SizeMode } from '..
 /**
  * Preset element definition - simplified Element for preset defaults
  * id is auto-generated when applying preset
+ * children are also PresetElement for nested Group structures
  */
-export type PresetElement = Omit<Element, 'id'> & { id?: string }
+export type PresetElement = Omit<Element, 'id' | 'children'> & {
+  id?: string
+  children?: PresetElement[] // 재귀적 정의 for Group children
+}
 
 // ============================================
 // Modal Types (for blocks with popup UI)
