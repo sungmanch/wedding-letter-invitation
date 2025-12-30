@@ -75,6 +75,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
       width: { type: 'fill' },
       height: { type: 'fixed', value: 200, unit: 'px' },
     },
+    binding: 'venue',
     props: {
       type: 'map',
       zoom: 15,

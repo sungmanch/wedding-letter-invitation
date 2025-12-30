@@ -294,6 +294,7 @@ export type VariablePath =
   | 'parents.bride.mother.name' | 'parents.bride.mother.status' | 'parents.bride.mother.phone' | 'parents.bride.mother.baptismalName'
 
   // ─── 장소 ───
+  | 'venue'
   | 'venue.name' | 'venue.hall' | 'venue.address' | 'venue.tel'
   | 'venue.lat' | 'venue.lng'
   | 'venue.naverUrl' | 'venue.kakaoUrl' | 'venue.tmapUrl'
