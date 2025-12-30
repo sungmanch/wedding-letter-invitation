@@ -21,3 +21,4 @@ export { GalleryField, type GalleryFieldProps, type GalleryImage } from './galle
 
 // Location fields
 export { AddressField, type AddressFieldProps, type AddressInfo } from './address-field'
+export { LocationSearchField, type LocationSearchFieldProps } from './location-search-field'

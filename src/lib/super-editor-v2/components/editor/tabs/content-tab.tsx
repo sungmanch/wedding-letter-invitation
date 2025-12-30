@@ -18,6 +18,7 @@ import type {
 } from '../../../schema/types'
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
 import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
+import { LocationSearchField } from '../fields/location-search-field'
 
 // ============================================
 // Computed Field Mapping
@@ -324,6 +325,8 @@ function BlockAccordion({
                 value={field.value}
                 onChange={(value) => onFieldChange(field.binding, value)}
                 onUploadImage={onUploadImage}
+                onFieldChange={onFieldChange}
+                data={data}
               />
             ))
           ) : (
@@ -346,9 +349,13 @@ interface VariableFieldProps {
   value: unknown
   onChange: (value: unknown) => void
   onUploadImage?: (file: File) => Promise<string>
+  /** 추가 필드 변경 (location 타입에서 좌표 업데이트용) */
+  onFieldChange?: (path: VariablePath, value: unknown) => void
+  /** WeddingData (location 타입에서 좌표 읽기용) */
+  data?: WeddingData
 }
 
-function VariableField({ binding, value, onChange, onUploadImage }: VariableFieldProps) {
+function VariableField({ binding, value, onChange, onUploadImage, onFieldChange, data }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
 
   // 커스텀 변수의 경우 키를 레이블로 사용
@@ -437,6 +444,21 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           value={Array.isArray(value) ? value : []}
           onChange={onChange}
           onUploadImage={onUploadImage}
+        />
+      )}
+
+      {type === 'location' && (
+        <LocationSearchField
+          value={String(value ?? '')}
+          lat={data?.venue?.lat}
+          lng={data?.venue?.lng}
+          onChange={(address) => onChange(address)}
+          onCoordsChange={(lat, lng) => {
+            if (onFieldChange) {
+              onFieldChange('venue.lat', lat)
+              onFieldChange('venue.lng', lng)
+            }
+          }}
         />
       )}
     </div>
@@ -884,7 +906,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location'
   placeholder?: string
 }
 
@@ -970,7 +992,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'venue.name': { label: '예식장 이름', type: 'text', placeholder: '○○웨딩홀' },
   'venue.hall': { label: '홀 이름', type: 'text', placeholder: '그랜드홀' },
   'venue.floor': { label: '층', type: 'text', placeholder: '5층' },
-  'venue.address': { label: '주소', type: 'text', placeholder: '서울특별시 강남구...' },
+  'venue.address': { label: '주소', type: 'location' },
   'venue.addressDetail': { label: '상세 주소', type: 'text' },
   'venue.phone': { label: '예식장 연락처', type: 'phone' },
   'venue.parkingInfo': { label: '주차 안내', type: 'textarea' },
