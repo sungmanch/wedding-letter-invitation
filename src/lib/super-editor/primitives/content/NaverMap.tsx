@@ -24,6 +24,8 @@ const NAVER_MAP_SCRIPT_ID = 'naver-map-script'
 
 function loadNaverMapScript(): Promise<void> {
   return new Promise((resolve, reject) => {
+    console.log('[NaverMap] loadNaverMapScript called')
+
     if (typeof window === 'undefined') {
       reject(new Error('Window is not defined'))
       return
@@ -31,6 +33,7 @@ function loadNaverMapScript(): Promise<void> {
 
     // 이미 로드된 경우
     if (window.naver?.maps) {
+      console.log('[NaverMap] SDK already loaded')
       resolve()
       return
     }
@@ -38,6 +41,7 @@ function loadNaverMapScript(): Promise<void> {
     // 이미 스크립트가 로딩 중인 경우
     const existingScript = document.getElementById(NAVER_MAP_SCRIPT_ID)
     if (existingScript) {
+      console.log('[NaverMap] Script already exists, waiting for load')
       existingScript.addEventListener('load', () => resolve())
       existingScript.addEventListener('error', () =>
         reject(new Error('Failed to load Naver Map script'))
@@ -46,6 +50,8 @@ function loadNaverMapScript(): Promise<void> {
     }
 
     const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID
+    console.log('[NaverMap] Client ID:', clientId ? `${clientId.slice(0, 8)}...` : 'MISSING')
+
     if (!clientId) {
       reject(new Error('NEXT_PUBLIC_NAVER_MAP_CLIENT_ID is not defined'))
       return
@@ -57,7 +63,10 @@ function loadNaverMapScript(): Promise<void> {
     script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`
     script.async = true
 
-    script.onload = () => resolve()
+    script.onload = () => {
+      console.log('[NaverMap] Script loaded successfully')
+      resolve()
+    }
     script.onerror = () => reject(new Error('Failed to load Naver Map script'))
 
     document.head.appendChild(script)
@@ -82,6 +91,8 @@ export function NaverMap({
   const [error, setError] = useState<string | null>(null)
 
   const initializeMap = useCallback(() => {
+    console.log('[NaverMap] initializeMap called', { lat, lng, mapRef: !!mapRef.current, naverMaps: !!window.naver?.maps })
+
     if (!mapRef.current || !window.naver?.maps) return
 
     const location = new window.naver.maps.LatLng(lat, lng)

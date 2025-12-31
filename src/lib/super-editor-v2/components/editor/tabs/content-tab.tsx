@@ -116,10 +116,48 @@ export function ContentTab({
 
   // 데이터 필드 변경
   const handleFieldChange = useCallback((path: VariablePath, value: unknown) => {
-    if (!onDataChange) return
+    console.log('[ContentTab] 🔄 handleFieldChange called:', { path, value })
+    console.log('[ContentTab] 🔄 onDataChange available:', !!onDataChange)
+    if (!onDataChange) {
+      console.log('[ContentTab] ⚠️ onDataChange is not available, skipping update')
+      return
+    }
 
+    console.log('[ContentTab] 🔄 Current document.data.venue:', document.data.venue)
     const newData = setNestedValue(document.data, path, value)
+    console.log('[ContentTab] 🔄 New data after setNestedValue:', { venue: newData.venue })
     onDataChange(newData)
+    console.log('[ContentTab] ✅ onDataChange called with new data')
+  }, [document.data, onDataChange])
+
+  // 위치 정보 일괄 변경 (address, lat, lng를 한 번에 업데이트하여 stale closure 방지)
+  // 좌표 기반으로 네이버맵/카카오맵/티맵 URL도 자동 생성
+  const handleLocationChange = useCallback((address: string, lat: number, lng: number) => {
+    console.log('[ContentTab] 🗺️ handleLocationChange called:', { address, lat, lng })
+    if (!onDataChange) {
+      console.log('[ContentTab] ⚠️ onDataChange is not available, skipping update')
+      return
+    }
+
+    // 지도 URL 자동 생성
+    const naverUrl = `https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh`
+    const kakaoUrl = `https://map.kakao.com/link/map/${lat},${lng}`
+    const tmapUrl = `https://apis.openapi.sk.com/tmap/app/routes?goalx=${lng}&goaly=${lat}`
+
+    // 한 번에 모든 venue 필드 업데이트
+    const newVenue = {
+      ...document.data.venue,
+      address,
+      lat,
+      lng,
+      naverUrl,
+      kakaoUrl,
+      tmapUrl,
+    }
+    const newData = { ...document.data, venue: newVenue }
+    console.log('[ContentTab] 🗺️ New venue data:', newVenue)
+    onDataChange(newData)
+    console.log('[ContentTab] ✅ onDataChange called with new location data')
   }, [document.data, onDataChange])
 
   // 고정 블록 (hero, loading 등 순서 변경 불가)
@@ -155,6 +193,7 @@ export function ContentTab({
               canMoveDown={!isFixed && index < document.blocks.length - 1}
               fixed={isFixed}
               onFieldChange={handleFieldChange}
+              onLocationChange={handleLocationChange}
               onUploadImage={onUploadImage}
             />
           )
@@ -188,6 +227,7 @@ interface BlockAccordionProps {
   canMoveDown: boolean
   fixed: boolean
   onFieldChange: (path: VariablePath, value: unknown) => void
+  onLocationChange: (address: string, lat: number, lng: number) => void
   onUploadImage?: (file: File) => Promise<string>
 }
 
@@ -203,6 +243,7 @@ function BlockAccordion({
   canMoveDown,
   fixed,
   onFieldChange,
+  onLocationChange,
   onUploadImage,
 }: BlockAccordionProps) {
   // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출 (바인딩 기준 dedupe)
@@ -325,7 +366,7 @@ function BlockAccordion({
                 value={field.value}
                 onChange={(value) => onFieldChange(field.binding, value)}
                 onUploadImage={onUploadImage}
-                onFieldChange={onFieldChange}
+                onLocationChange={onLocationChange}
                 data={data}
               />
             ))
@@ -349,13 +390,13 @@ interface VariableFieldProps {
   value: unknown
   onChange: (value: unknown) => void
   onUploadImage?: (file: File) => Promise<string>
-  /** 추가 필드 변경 (location 타입에서 좌표 업데이트용) */
-  onFieldChange?: (path: VariablePath, value: unknown) => void
+  /** 위치 정보 한 번에 변경 (address, lat, lng) */
+  onLocationChange?: (address: string, lat: number, lng: number) => void
   /** WeddingData (location 타입에서 좌표 읽기용) */
   data?: WeddingData
 }
 
-function VariableField({ binding, value, onChange, onUploadImage, onFieldChange, data }: VariableFieldProps) {
+function VariableField({ binding, value, onChange, onUploadImage, onLocationChange, data }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
 
   // 커스텀 변수의 경우 키를 레이블로 사용
@@ -452,11 +493,10 @@ function VariableField({ binding, value, onChange, onUploadImage, onFieldChange,
           value={String(value ?? '')}
           lat={data?.venue?.lat}
           lng={data?.venue?.lng}
-          onChange={(address) => onChange(address)}
-          onCoordsChange={(lat, lng) => {
-            if (onFieldChange) {
-              onFieldChange('venue.lat', lat)
-              onFieldChange('venue.lng', lng)
+          onLocationChange={(address, lat, lng) => {
+            console.log('[ContentTab] 📥 LocationSearchField onLocationChange received:', { address, lat, lng })
+            if (onLocationChange) {
+              onLocationChange(address, lat, lng)
             }
           }}
         />

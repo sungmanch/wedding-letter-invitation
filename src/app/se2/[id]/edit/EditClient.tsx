@@ -186,7 +186,14 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
 
   // 데이터 업데이트 (로컬 저장만)
   const handleDataChange = useCallback((newData: WeddingData) => {
-    updateDocument(prev => ({ ...prev, data: newData }))
+    console.log('[EditClient] 📥 handleDataChange received newData.venue:', newData.venue)
+    updateDocument(prev => {
+      console.log('[EditClient] 🔄 updateDocument - prev.data.venue:', prev.data.venue)
+      const next = { ...prev, data: newData }
+      console.log('[EditClient] 🔄 updateDocument - next.data.venue:', next.data.venue)
+      return next
+    })
+    console.log('[EditClient] ✅ updateDocument called')
   }, [updateDocument])
 
   // 블록 선택 (프리뷰에서)

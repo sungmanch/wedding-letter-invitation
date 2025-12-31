@@ -6,7 +6,6 @@
  * 주소 검색 필드
  * - Daum Postcode 팝업으로 주소 검색
  * - VWorld Geocoding API로 좌표 변환
- * - 카카오/네이버 지도 열기
  */
 
 import { useState, useCallback } from 'react'
@@ -24,10 +23,8 @@ export interface LocationSearchFieldProps {
   lat?: number
   /** 현재 경도 */
   lng?: number
-  /** 주소 변경 콜백 */
-  onChange: (address: string) => void
-  /** 좌표 변경 콜백 */
-  onCoordsChange: (lat: number, lng: number) => void
+  /** 주소 + 좌표 한 번에 변경 콜백 (stale closure 방지용) */
+  onLocationChange: (address: string, lat: number, lng: number) => void
   /** 비활성화 여부 */
   disabled?: boolean
   /** placeholder */
@@ -42,14 +39,16 @@ export interface LocationSearchFieldProps {
 
 export function LocationSearchField({
   value,
-  lat,
-  lng,
-  onChange,
-  onCoordsChange,
+  lat: _lat,
+  lng: _lng,
+  onLocationChange,
   disabled = false,
   placeholder = '주소를 검색해주세요',
   className = '',
 }: LocationSearchFieldProps) {
+  // lat, lng are passed for potential future use (e.g., showing current coords)
+  void _lat
+  void _lng
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -64,9 +63,6 @@ export function LocationSearchField({
         // 도로명주소 우선, 없으면 지번주소
         const address = data.roadAddress || data.jibunAddress
 
-        // 주소 업데이트
-        onChange(address)
-
         setError(null)
         setIsGeocoding(true)
 
@@ -75,7 +71,8 @@ export function LocationSearchField({
           const result = await geocodeAddress(address)
 
           if (result.success && result.lat && result.lng) {
-            onCoordsChange(result.lat, result.lng)
+            // 주소와 좌표를 한 번에 업데이트 (stale closure 방지)
+            onLocationChange(address, result.lat, result.lng)
           } else {
             setError(result.error || '좌표 변환에 실패했습니다')
           }
@@ -87,19 +84,7 @@ export function LocationSearchField({
         }
       },
     })
-  }, [openPostcode, onChange, onCoordsChange, disabled])
-
-  const openKakaoMap = useCallback(() => {
-    if (!lat || !lng) return
-    window.open(`https://map.kakao.com/link/map/${lat},${lng}`, '_blank')
-  }, [lat, lng])
-
-  const openNaverMap = useCallback(() => {
-    if (!lat || !lng) return
-    window.open(`https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh`, '_blank')
-  }, [lat, lng])
-
-  const hasCoords = lat !== undefined && lng !== undefined
+  }, [openPostcode, onLocationChange, disabled])
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -147,32 +132,6 @@ export function LocationSearchField({
         </p>
       )}
 
-      {/* 좌표 정보 + 지도 열기 */}
-      {hasCoords && (
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-[var(--text-light)]">
-            좌표: {lat!.toFixed(6)}, {lng!.toFixed(6)}
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={openKakaoMap}
-              className="flex items-center gap-1 text-[#FEE500] hover:underline"
-            >
-              <MapPinIcon className="w-3 h-3" />
-              카카오맵
-            </button>
-            <button
-              type="button"
-              onClick={openNaverMap}
-              className="flex items-center gap-1 text-[#03C75A] hover:underline"
-            >
-              <MapPinIcon className="w-3 h-3" />
-              네이버
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -185,15 +144,6 @@ function SearchIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  )
-}
-
-function MapPinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   )
 }

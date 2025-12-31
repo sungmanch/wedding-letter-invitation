@@ -221,6 +221,12 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
       )
 
     case 'map':
+      console.log('[AutoLayoutElement] 🗺️ map element:', {
+        elementId: element.id,
+        binding: element.binding,
+        value,
+        valueType: typeof value,
+      })
       return (
         <MapElement
           value={value}
