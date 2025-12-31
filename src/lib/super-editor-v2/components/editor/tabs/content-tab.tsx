@@ -116,28 +116,16 @@ export function ContentTab({
 
   // 데이터 필드 변경
   const handleFieldChange = useCallback((path: VariablePath, value: unknown) => {
-    console.log('[ContentTab] 🔄 handleFieldChange called:', { path, value })
-    console.log('[ContentTab] 🔄 onDataChange available:', !!onDataChange)
-    if (!onDataChange) {
-      console.log('[ContentTab] ⚠️ onDataChange is not available, skipping update')
-      return
-    }
+    if (!onDataChange) return
 
-    console.log('[ContentTab] 🔄 Current document.data.venue:', document.data.venue)
     const newData = setNestedValue(document.data, path, value)
-    console.log('[ContentTab] 🔄 New data after setNestedValue:', { venue: newData.venue })
     onDataChange(newData)
-    console.log('[ContentTab] ✅ onDataChange called with new data')
   }, [document.data, onDataChange])
 
   // 위치 정보 일괄 변경 (address, lat, lng를 한 번에 업데이트하여 stale closure 방지)
   // 좌표 기반으로 네이버맵/카카오맵/티맵 URL도 자동 생성
   const handleLocationChange = useCallback((address: string, lat: number, lng: number) => {
-    console.log('[ContentTab] 🗺️ handleLocationChange called:', { address, lat, lng })
-    if (!onDataChange) {
-      console.log('[ContentTab] ⚠️ onDataChange is not available, skipping update')
-      return
-    }
+    if (!onDataChange) return
 
     // 지도 URL 자동 생성
     const naverUrl = `https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh`
@@ -155,9 +143,7 @@ export function ContentTab({
       tmapUrl,
     }
     const newData = { ...document.data, venue: newVenue }
-    console.log('[ContentTab] 🗺️ New venue data:', newVenue)
     onDataChange(newData)
-    console.log('[ContentTab] ✅ onDataChange called with new location data')
   }, [document.data, onDataChange])
 
   // 고정 블록 (hero, loading 등 순서 변경 불가)
@@ -494,7 +480,6 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
           lat={data?.venue?.lat}
           lng={data?.venue?.lng}
           onLocationChange={(address, lat, lng) => {
-            console.log('[ContentTab] 📥 LocationSearchField onLocationChange received:', { address, lat, lng })
             if (onLocationChange) {
               onLocationChange(address, lat, lng)
             }
@@ -964,6 +949,8 @@ const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
   'countdown.hours',
   'countdown.minutes',
   'countdown.seconds',
+  // 복합 객체 필드 (JSON 형태로 표시되므로 숨김)
+  'venue',
 ])
 
 // 자동 계산 필드 → 입력 필드 매핑 (표시용 바인딩 대신 입력용 바인딩 표시)

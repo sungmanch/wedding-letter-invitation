@@ -238,12 +238,6 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
       )
 
     case 'map':
-      console.log('[ElementRenderer] 🗺️ map element:', {
-        elementId: element.id,
-        binding: element.binding,
-        value,
-        valueType: typeof value,
-      })
       return (
         <MapElement
           value={value}

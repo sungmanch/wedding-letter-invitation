@@ -139,12 +139,6 @@ export function StyledElementRenderer({ element, block }: StyledElementRendererP
 
     case 'map': {
       const mapProps = props as MapProps
-      console.log('[StyledElementRenderer] 🗺️ map element:', {
-        binding: element.binding,
-        resolvedValue,
-        formattedValue,
-        formattedValueType: typeof formattedValue,
-      })
       return (
         <div style={{ pointerEvents: 'none' }}>
           <MapElement
