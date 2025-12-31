@@ -56,8 +56,7 @@ export function resolveBlockHeightStyle(
     }
     case 'hug':
       return {
-        height: 'fit-content',
-        minHeight: 0,
+        height: 'auto',
       }
     case 'fill':
       return {

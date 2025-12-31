@@ -50,8 +50,9 @@ export function ButtonElement({
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
-      // Hug 모드: 콘텐츠에 맞춤, Absolute 모드: 부모 채움
-      width: hugMode ? 'auto' : '100%',
+      // Auto Layout에서는 부모 컨테이너가 크기를 제어하므로 항상 100% 채움
+      // height만 hug일 때는 auto로 설정
+      width: '100%',
       height: hugMode ? 'auto' : '100%',
       display: 'flex',
       alignItems: 'center',
