@@ -88,6 +88,11 @@ export function AutoLayoutBlock({
       color: tokens.fgDefault,
     }
 
+    // 개발 모드: 디자인 토큰 전체 출력
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[AutoLayoutBlock] ${block.type}`, { tokens, blockStyle: block.style })
+    }
+
     return style
   }, [layout, block.height, tokens, viewport])
 

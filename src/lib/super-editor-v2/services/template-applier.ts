@@ -151,9 +151,11 @@ export function buildStyleSystemFromTemplate(
   const preset = mapToThemePresetId(designPattern.stylePreset) || inferStylePreset(template)
 
   // Quick 스타일 (Primary/Secondary/Tertiary 컬러 적용)
+  // - dominantColor: 배경색 (secondary - 밝은 색)
+  // - accentColor: 강조색 (tertiary)
   const quick = {
-    dominantColor: designPattern.colorPalette.primary[0],
-    accentColor: designPattern.colorPalette.primary[1] || designPattern.colorPalette.tertiary[0],
+    dominantColor: designPattern.colorPalette.secondary[0],
+    accentColor: designPattern.colorPalette.tertiary[0],
     mood: inferMoodFromTemplate(template),
   }
 
