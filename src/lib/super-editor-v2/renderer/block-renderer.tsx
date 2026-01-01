@@ -14,6 +14,7 @@ import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
 import { AutoLayoutBlock } from './auto-layout-block'
 import { resolveBlockHeightNumber, isAutoLayoutBlock } from '../utils/size-resolver'
+import { getBlockPreset } from '../presets/blocks'
 
 // ============================================
 // Types
@@ -49,14 +50,30 @@ export function BlockRenderer({
   }, [block.id, onElementClick])
 
   // Auto Layout 모드 체크
-  const isAutoLayout = isAutoLayoutBlock(block)
+  // 1. block.layout.mode === 'auto' 인지 확인
+  // 2. 없으면 presetId로 프리셋의 layout을 확인
+  let isAutoLayout = isAutoLayoutBlock(block)
+  let effectiveLayout = block.layout
+
+  if (!isAutoLayout && block.presetId) {
+    const preset = getBlockPreset(block.presetId)
+    if (preset?.layout?.mode === 'auto') {
+      isAutoLayout = true
+      effectiveLayout = preset.layout
+    }
+  }
+
+  // effectiveLayout이 있으면 블록에 병합
+  const effectiveBlock = effectiveLayout && effectiveLayout !== block.layout
+    ? { ...block, layout: effectiveLayout }
+    : block
 
   return (
-    <BlockProvider block={block} blockIndex={blockIndex}>
+    <BlockProvider block={effectiveBlock} blockIndex={blockIndex}>
       {isAutoLayout ? (
         // Auto Layout 블록 렌더링
         <AutoLayoutBlock
-          block={block}
+          block={effectiveBlock}
           editable={editable}
           onElementClick={handleElementClick}
         />
@@ -109,6 +126,11 @@ function BlockContainer({
       overflow: 'hidden', // 블록 밖으로 넘치는 요소 잘라냄
       backgroundColor: tokens.bgSection,
       color: tokens.fgDefault,
+    }
+
+    // 개발 모드: 디자인 토큰 전체 출력
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[BlockRenderer] ${block.type}`, { tokens, blockStyle: block.style })
     }
 
     // 블록 레벨 스타일 오버라이드 적용
@@ -327,10 +349,11 @@ function resolveBlockStyleOverride(
     } else if ('type' in override.background && 'stops' in override.background) {
       // GradientValue 형식인 경우
       style.background = gradientToCSS(override.background)
-    } else if ('color' in override.background) {
-      // { color: string } 형식인 경우
+    } else if ('color' in override.background && override.background.color) {
+      // { color: string } 형식인 경우 (color 값이 있을 때만)
       style.backgroundColor = override.background.color
     }
+    // 조건에 맞지 않으면 기본 tokens.bgSection 유지 (투명 처리)
   }
 
   // 패딩
