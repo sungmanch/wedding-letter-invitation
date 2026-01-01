@@ -138,7 +138,7 @@ const createFamilyRow = (side: 'groom' | 'bride'): PresetElement => ({
     type: 'group',
     layout: {
       direction: 'horizontal',
-      gap: 8,
+      gap: 6,
       alignItems: 'start',
       justifyContent: 'center',
     },

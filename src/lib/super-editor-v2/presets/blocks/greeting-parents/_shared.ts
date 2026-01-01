@@ -10,7 +10,7 @@ import type { BlockLayout, SizeMode } from '../../../schema/types'
 export const AUTO_LAYOUT_VERTICAL: BlockLayout = {
   mode: 'auto',
   direction: 'vertical',
-  gap: 24,
+  gap: 16,
   padding: { top: 40, right: 32, bottom: 40, left: 32 },
   alignItems: 'center',
 }
