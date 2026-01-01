@@ -18,7 +18,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
   nameKo: '인용문 공유',
   description: '영화 인용문과 카카오톡/링크 공유 버튼이 포함된 엔딩 블록',
 
-  tags: [...ENDING_COMMON_TAGS, 'quote', 'movie', 'kakao', 'link', '인용문', '영화', '카카오톡'],
+  tags: [...ENDING_COMMON_TAGS, 'quote', 'movie', 'kakao', 'link', '인용문', '영화', '카카오톡', 'auto-layout'],
   complexity: 'medium',
   bindings: [...ENDING_COMMON_BINDINGS, 'custom.quoteText', 'custom.quoteSource'],
 
