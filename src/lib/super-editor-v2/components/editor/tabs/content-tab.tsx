@@ -18,6 +18,7 @@ import type {
 } from '../../../schema/types'
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
 import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
+import { LocationSearchField } from '../fields/location-search-field'
 
 // ============================================
 // Computed Field Mapping
@@ -121,6 +122,30 @@ export function ContentTab({
     onDataChange(newData)
   }, [document.data, onDataChange])
 
+  // 위치 정보 일괄 변경 (address, lat, lng를 한 번에 업데이트하여 stale closure 방지)
+  // 좌표 기반으로 네이버맵/카카오맵/티맵 URL도 자동 생성
+  const handleLocationChange = useCallback((address: string, lat: number, lng: number) => {
+    if (!onDataChange) return
+
+    // 지도 URL 자동 생성
+    const naverUrl = `https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh`
+    const kakaoUrl = `https://map.kakao.com/link/map/${lat},${lng}`
+    const tmapUrl = `https://apis.openapi.sk.com/tmap/app/routes?goalx=${lng}&goaly=${lat}`
+
+    // 한 번에 모든 venue 필드 업데이트
+    const newVenue = {
+      ...document.data.venue,
+      address,
+      lat,
+      lng,
+      naverUrl,
+      kakaoUrl,
+      tmapUrl,
+    }
+    const newData = { ...document.data, venue: newVenue }
+    onDataChange(newData)
+  }, [document.data, onDataChange])
+
   // 고정 블록 (hero, loading 등 순서 변경 불가)
   const fixedBlockTypes: BlockType[] = ['hero', 'loading']
 
@@ -154,6 +179,7 @@ export function ContentTab({
               canMoveDown={!isFixed && index < document.blocks.length - 1}
               fixed={isFixed}
               onFieldChange={handleFieldChange}
+              onLocationChange={handleLocationChange}
               onUploadImage={onUploadImage}
             />
           )
@@ -187,6 +213,7 @@ interface BlockAccordionProps {
   canMoveDown: boolean
   fixed: boolean
   onFieldChange: (path: VariablePath, value: unknown) => void
+  onLocationChange: (address: string, lat: number, lng: number) => void
   onUploadImage?: (file: File) => Promise<string>
 }
 
@@ -202,6 +229,7 @@ function BlockAccordion({
   canMoveDown,
   fixed,
   onFieldChange,
+  onLocationChange,
   onUploadImage,
 }: BlockAccordionProps) {
   // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출 (바인딩 기준 dedupe)
@@ -324,6 +352,8 @@ function BlockAccordion({
                 value={field.value}
                 onChange={(value) => onFieldChange(field.binding, value)}
                 onUploadImage={onUploadImage}
+                onLocationChange={onLocationChange}
+                data={data}
               />
             ))
           ) : (
@@ -346,9 +376,13 @@ interface VariableFieldProps {
   value: unknown
   onChange: (value: unknown) => void
   onUploadImage?: (file: File) => Promise<string>
+  /** 위치 정보 한 번에 변경 (address, lat, lng) */
+  onLocationChange?: (address: string, lat: number, lng: number) => void
+  /** WeddingData (location 타입에서 좌표 읽기용) */
+  data?: WeddingData
 }
 
-function VariableField({ binding, value, onChange, onUploadImage }: VariableFieldProps) {
+function VariableField({ binding, value, onChange, onUploadImage, onLocationChange, data }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
 
   // 커스텀 변수의 경우 키를 레이블로 사용
@@ -437,6 +471,19 @@ function VariableField({ binding, value, onChange, onUploadImage }: VariableFiel
           value={Array.isArray(value) ? value : []}
           onChange={onChange}
           onUploadImage={onUploadImage}
+        />
+      )}
+
+      {type === 'location' && (
+        <LocationSearchField
+          value={String(value ?? '')}
+          lat={data?.venue?.lat}
+          lng={data?.venue?.lng}
+          onLocationChange={(address, lat, lng) => {
+            if (onLocationChange) {
+              onLocationChange(address, lat, lng)
+            }
+          }}
         />
       )}
     </div>
@@ -884,7 +931,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location'
   placeholder?: string
 }
 
@@ -902,6 +949,8 @@ const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
   'countdown.hours',
   'countdown.minutes',
   'countdown.seconds',
+  // 복합 객체 필드 (JSON 형태로 표시되므로 숨김)
+  'venue',
 ])
 
 // 자동 계산 필드 → 입력 필드 매핑 (표시용 바인딩 대신 입력용 바인딩 표시)
@@ -970,7 +1019,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'venue.name': { label: '예식장 이름', type: 'text', placeholder: '○○웨딩홀' },
   'venue.hall': { label: '홀 이름', type: 'text', placeholder: '그랜드홀' },
   'venue.floor': { label: '층', type: 'text', placeholder: '5층' },
-  'venue.address': { label: '주소', type: 'text', placeholder: '서울특별시 강남구...' },
+  'venue.address': { label: '주소', type: 'location' },
   'venue.addressDetail': { label: '상세 주소', type: 'text' },
   'venue.phone': { label: '예식장 연락처', type: 'phone' },
   'venue.parkingInfo': { label: '주차 안내', type: 'textarea' },

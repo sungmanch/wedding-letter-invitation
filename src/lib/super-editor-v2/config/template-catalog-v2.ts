@@ -42,7 +42,7 @@ export interface BlockTemplate {
  * 요소 템플릿 (Element의 초기 구조)
  */
 export interface ElementTemplate {
-  type: 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider'
+  type: 'text' | 'image' | 'shape' | 'button' | 'icon' | 'divider' | 'map' | 'calendar'
   x: number // vw
   y: number // vh (블록 내 상대 위치)
   width: number // vw
@@ -1618,19 +1618,15 @@ const UNIQUE3_BLOCK_STRUCTURE: BlockTemplate[] = [
         },
       },
        {
-        type: 'text',
-        x: 10,
-        y: 55,
-        width: 80,
-        height: 20,
+        type: 'map',
+        x: 5,
+        y: 50,
+        width: 90,
+        height: 40,
         zIndex: 1,
-        value: '[MAP]',
-        props: { type: 'text' },
-        style: {
-           fontSize: '0.8rem',
-           color: '#ccc',
-           textAlign: 'center'
-        }
+        binding: 'venue',
+        props: { type: 'map', zoom: 15, showMarker: true },
+        style: {}
       }
     ],
   },
@@ -2460,11 +2456,11 @@ const UNIQUE5_BLOCK_STRUCTURE: BlockTemplate[] = [
         },
       },
        {
-        type: 'text',
-        x: 10, y: 55, width: 80, height: 20, zIndex: 1,
-        value: '[MAP]',
-        props: { type: 'text' },
-        style: { fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }
+        type: 'map',
+        x: 5, y: 50, width: 90, height: 40, zIndex: 1,
+        binding: 'venue',
+        props: { type: 'map', zoom: 15, showMarker: true },
+        style: {}
       }
     ],
   },
@@ -2813,11 +2809,11 @@ const UNIQUE6_BLOCK_STRUCTURE: BlockTemplate[] = [
         },
       },
        {
-        type: 'text',
-        x: 10, y: 55, width: 80, height: 20, zIndex: 1,
-        value: '[MAP]',
-        props: { type: 'text' },
-        style: { fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }
+        type: 'map',
+        x: 5, y: 50, width: 90, height: 40, zIndex: 1,
+        binding: 'venue',
+        props: { type: 'map', zoom: 15, showMarker: true },
+        style: {}
       }
     ],
   },
