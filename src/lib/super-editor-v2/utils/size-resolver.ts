@@ -125,10 +125,11 @@ export function resolveSizeMode(
     case 'hug':
       return { [prop]: 'fit-content' }
     case 'fill':
-      return {
-        [prop]: '100%',
-        ...(prop === 'width' ? { flex: '1 1 0' } : {}),
-      }
+      // flex는 main axis 방향에만 적용해야 함
+      // vertical 레이아웃에서 width: fill은 flex 없이 100%만 사용
+      // horizontal 레이아웃에서 height: fill도 flex 없이 100%만 사용
+      // flex가 필요한 경우 fill-portion을 사용하거나 부모 컨텍스트에서 처리
+      return { [prop]: '100%' }
     case 'fill-portion':
       return { flex: `${m.value} 1 0` }
     default:
