@@ -195,22 +195,43 @@ Absolute에서 중앙 정렬 (`x = (100 - width) / 2`)인 요소:
 }
 ```
 
-## 2.4 장식 요소 처리
+## 2.4 장식 요소 처리 (기본: 유지)
 
-**장식(sparkle, flower 등)은 선택적 처리:**
+**장식(sparkle, flower 등)은 기본적으로 `layoutMode: 'absolute'`를 유지합니다.**
 
-| 옵션 | 처리 방법 |
-|------|----------|
-| **유지** | `layoutMode: 'absolute'` 그대로 유지 (z-index로 레이어링) |
-| **제거** | 장식 요소 삭제 (미니멀한 버전) |
-| **CSS 배경** | `style.background` 이미지로 대체 |
+```typescript
+// 장식 요소 - absolute 유지
+{
+  type: 'image',
+  layoutMode: 'absolute',  // ✅ 유지
+  x: 5,
+  y: 8,
+  width: 8,
+  height: 8,
+  zIndex: 0,  // 콘텐츠 뒤 배경
+  props: {
+    type: 'image',
+    src: '/decorations/sparkle.png',
+  },
+}
+```
 
-<ask>
-장식 요소 처리 방법을 선택하세요:
-[k] Keep absolute - 장식은 absolute 유지
-[r] Remove - 장식 요소 제거
-[b] Background - 블록 배경 이미지로 이동
-</ask>
+### 장식 요소 식별 기준
+
+| 기준 | 장식 (absolute 유지) | 콘텐츠 (auto 변환) |
+|------|---------------------|------------------|
+| **zIndex** | 0 또는 음수 | 1 이상 |
+| **바인딩** | 없음 또는 고정 이미지 | 데이터 바인딩 있음 |
+| **역할** | 배경 장식, 아이콘 | 텍스트, 버튼, 사용자 이미지 |
+| **크기** | 작은 고정 크기 | fill 또는 가변 |
+
+### 선택적 처리 (필요시)
+
+| 옵션 | 처리 방법 | 사용 시점 |
+|------|----------|----------|
+| **유지 (기본)** | `layoutMode: 'absolute'` 그대로 | 대부분의 경우 |
+| **제거** | 장식 요소 삭제 | 미니멀 버전 생성 시 |
+| **CSS 배경** | `style.background` 이미지로 대체 | 성능 최적화 시 |
 
 ---
 
