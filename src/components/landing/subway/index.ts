@@ -1,7 +1,7 @@
 /**
  * Subway Builder Components
  *
- * 서브웨이 스타일 청첩장 빌더 컴포넌트 모음
+ * 청첩장 빌더 상태 관리 및 미리보기 컴포넌트
  */
 
 export { SubwayBuilderProvider, useSubwayBuilder } from './SubwayBuilderContext'
@@ -16,10 +16,5 @@ export {
   type TemplateId,
 } from './SubwayBuilderContext'
 
-export { HeroSelector } from './HeroSelector'
-export { SectionRow } from './SectionRow'
 export { PresetThumbnail } from './PresetThumbnail'
 export { MiniBlockRenderer, MiniHeroRenderer } from './MiniBlockRenderer'
-export { CenterPreview } from './CenterPreview'
-export { BottomCTA } from './BottomCTA'
-export { TimelineSectionContainer } from './TimelineSectionContainer'
