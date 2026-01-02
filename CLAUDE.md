@@ -5,7 +5,8 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 - **도메인**: maisondeletter.com
 - **브랜드 톤**: Ivory/Sage 내추럴, Fresh & Elegant
-- **캐치프레이즈**: "원하는 분위기를 말하면, AI가 바로 시안을 만들어 드립니다"
+- **캐치프레이즈**: "당신만의 이야기를 담은 청첩장"
+- **핵심 가치**: 랜딩에서 템플릿+섹션 미리 선택, 에디터에서 상세 편집
 
 ## 중요 규칙
 1. 모든 작업은 마이크로 단위로 작업에 대한 commit을 합니다.
@@ -45,52 +46,25 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
-### 2025-12-27: 편집 가능한 템플릿 v2 시스템 구축 (완료)
-- **이유**: 템플릿 이미지를 정적 PNG가 아닌 편집 가능한 Block/Element 구조로 전환. 사용자가 텍스트/이미지/색상을 자유롭게 수정
-- **변경**:
-  - **TemplateV2 인터페이스**: `blockStructure` (Block 배열), `editableFields` (필드 매핑)
-  - **6개 템플릿 모두 구현**: unique1(클래식), unique2(캐주얼), unique3(미니멀), unique4(다크), unique5(브라이트), unique6(모노크롬)
-  - **스타일 자동 변환**: flat 형식 → ElementStyle 중첩 구조 (rem/em → px 자동 변환)
-  - **Google Fonts 통합**: Great Vibes, Calistoga, Bangers, Inknut Antiqua, Kodchasan, Alata, Noto Sans/Serif KR, Pretendard
-  - **template-block-builder**: BlockTemplate → Block 인스턴스 변환 (WeddingData 바인딩, 색상 팔레트 적용)
-  - **template-applier v2 지원**: v2 템플릿이면 Block 구조 전체 교체, v1이면 색상만 적용
-  - **DocumentMeta 확장**: `templateId`, `templateVersion` (1 | 2) 필드 추가
-- **파일**:
-  - `src/lib/super-editor-v2/config/template-catalog-v2.ts` - 6개 템플릿 v2 정의 (1,250줄)
-  - `src/lib/super-editor-v2/services/template-block-builder.ts` - Block 빌더 + 스타일 변환
-  - `src/lib/super-editor-v2/services/template-applier.ts` - v1/v2 분기 처리
-  - `src/lib/super-editor-v2/schema/types.ts` - DocumentMeta 확장
-  - `src/app/api/landing/generate/route.ts` - meta 업데이트
-  - `src/app/layout.tsx` - Google Fonts preload
-- **다음 단계**: 색상 팔레트 편집기, Visual Template Picker, 추가 블록 구현
+### 2026-01-03: 랜딩 페이지 레거시 코드 정리
+- **이유**: AI 채팅 → SubwayBuilder → BuilderLanding 전환 과정에서 발생한 레거시 코드 제거
+- **삭제**: 레거시 랜딩 컴포넌트 7개, subway 컴포넌트 5개, API 라우트 2개, 이미지 6개
+- **현재 구조**: `BuilderLanding.tsx` + `builder/` (8개) + `subway/` (4개: Context, MiniBlockRenderer, PresetThumbnail, index.ts)
 
-### 2025-12-27: AI 템플릿 선택 시스템으로 전환
-- **이유**: AI가 JSON Patch를 생성하는 방식은 복잡하고 일관성 부족. 사용자는 "원하는 느낌"만 입력하면 AI가 6개 템플릿 중 최적 선택
-- **변경**:
-  - **AI 역할 변경**: JSON Patch 생성 (디자인 직접 수정) → 템플릿 선택만 담당
-  - **메인 플로우 단순화**: 330줄 → 335줄 (JSON Patch 로직 완전 제거)
-  - **항상 AI만 사용**: 알고리즘 매칭 제거, AI 실패 시에만 fallback 템플릿
-  - **모든 블록 일관성**: 템플릿 색상 팔레트를 hero 포함 전체 블록에 적용
-- **파일**:
-  - `src/app/api/landing/generate/route.ts` - 전면 재작성
-  - `src/lib/super-editor-v2/services/template-applier.ts` - 모든 블록 일관성 개선
-- **API 응답 형식**:
-  ```json
-  {
-    "templateId": "unique1",
-    "reasoning": { "moodMatch": "...", "colorMatch": "...", "confidence": 0.85 },
-    "explanation": "클래식한 우아함과 골드 포인트로 럭셔리한 느낌을 표현했습니다"
-  }
-  ```
+### 2026-01-02: BuilderLanding으로 전환
+- **이유**: "AI가 만들어준다"에서 "사용자가 직접 선택한다"로 핵심 가치 전환
+- **변경**: 템플릿 선택 → 섹션 프리셋 선택 → 에디터에서 완성 플로우
+- **파일**: `src/components/landing/BuilderLanding.tsx`, `src/components/landing/builder/`, `src/components/landing/subway/`
+
+### 2025-12-27: 편집 가능한 템플릿 v2 시스템 구축
+- **이유**: 템플릿 이미지를 편집 가능한 Block/Element 구조로 전환
+- **변경**: TemplateV2 인터페이스, 6개 템플릿 구현, Google Fonts 통합
+- **파일**: `template-catalog-v2.ts`, `template-block-builder.ts`, `template-applier.ts`
 
 ### 2025-12-22: 새 문서 생성 시 샘플 데이터 제공
-- **이유**: 랜딩 → 편집 페이지 이동 시 빈 화면 표시 문제. 사용자가 청첩장 형태를 바로 확인할 수 없음
-- **변경**:
-  - `SAMPLE_WEDDING_DATA` 상수 추가 (샘플 이름, 날짜, 장소, 사진, 인사말)
-  - `getSampleWeddingDate()` 함수로 동적 날짜 계산 (오늘 + 5개월 후 토요일)
-  - `createDocument()`에 `useSampleData` 옵션 추가
-  - 랜딩 `/api/landing/generate`, `/se2/create` 모두 `useSampleData: true` 적용
-- **파일**: `schema/index.ts`, `actions/document.ts`, `create/page.tsx`, `api/landing/generate/route.ts`
+- **이유**: 편집 페이지 이동 시 빈 화면 표시 문제 해결
+- **변경**: `SAMPLE_WEDDING_DATA` 상수, `getSampleWeddingDate()` 함수 추가
+- **파일**: `schema/index.ts`, `actions/document.ts`
 
 ### 2025-12-15: Super Editor v2 블록 높이 기준 요소 위치 계산 수정
 - **이유**: 블록 높이 조절 시 요소가 블록 밖으로 넘쳐서 다음 블록과 겹침
@@ -109,16 +83,6 @@ AI 기반 개인화 청첩장 서비스입니다.
   - AI 프롬프트에 커스텀 변수 생성 가이드 추가
   - ContentTab에서 바인딩 기준 dedupe (중복 필드 제거)
 - **파일**: `types.ts`, `binding-resolver.ts`, `content-tab.tsx`, `ai/route.ts`
-
-### 2025-12-09: 랜딩 페이지 Split Hero 리디자인
-- **이유**: Black & Gold 테마가 20-30대 여성에게 올드하게 느껴짐, 전환율 개선 필요
-- **변경**:
-  - 컬러 팔레트: Black & Gold → Ivory/Sand + Sage Green
-  - 레이아웃: Split Hero (왼쪽 텍스트/CTA + 오른쪽 템플릿 캐러셀)
-  - 폰트: Playfair Display(영문) + Noto Serif KR(한글) + Pretendard(본문)
-  - 템플릿 3종: 매거진, 올드 머니, 미니멀 (자동 4초 슬라이드)
-  - CTA: Above-the-fold + 모바일 플로팅 (스크롤 300px 후 표시)
-- **파일**: `src/components/landing/NaturalHeroLanding.tsx`
 
 ### 2025-12-08: 다양한 폰트 지원을 위한 폰트 시스템 구축
 - **이유**: 9개 고정 폰트만 사용 가능했고, 새 폰트 추가 시 여러 파일 수동 수정 필요
@@ -184,28 +148,6 @@ AI 기반 개인화 청첩장 서비스입니다.
   - `src/lib/super-editor/components/OgMetadataEditor.tsx` - OG 편집 UI
   - `src/app/se/[id]/page.tsx` - 동적 OG 메타데이터 적용
   - `src/app/se/[id]/edit/page.tsx` - 공유 탭 추가
-
-### 2025-12-06: 스크롤텔링 랜딩 페이지 리디자인
-- **이유**: 영화적 스토리텔링으로 전환율 극대화, Wong Kar-wai 화양연화 톤앤매너
-- **변경**:
-  - 6단계 스크롤텔링 구현 (Transition → Theme → Features → AI Demo → Pricing → CTA)
-  - 다크 테마 헤더 (골드/크림 텍스트, 투명 배경)
-  - S1: 영상 배경 + 딤 오버레이 + 도발적 질문
-  - S2: Sticky 아이폰 목업에서 Cinematic/Exhibition 테마 전환
-  - S3: 벤토 그리드 기능 쇼케이스 (인터뷰 영상 제거 → 포토 갤러리 메인 피처로 승격, 실제 웨딩 이미지 4장 적용)
-  - S4: 채팅 → AI 생성 시퀀스 데모
-  - S5: 프리미엄 가격 카드 (~~100,000원~~ → 50,000원)
-  - S6: 플로팅 CTA 바
-- **파일**:
-  - `src/components/landing/ScrollytellingLanding.tsx` - 메인 컨테이너
-  - `src/components/landing/sections/S1-S6*.tsx` - 6개 섹션 컴포넌트
-  - `src/components/landing/hooks/useScrollProgress.ts` - 스크롤 훅
-  - `src/app/globals.css` - Wong Kar-wai 색상 변수 + 애니메이션 keyframes
-  - `src/app/page.tsx` - 다크 테마 헤더 + 새 랜딩 통합
-- **계획**: [스크롤텔링 랜딩 계획](./.claude/plans/valiant-roaming-coral.md)
-
-### 2025-12-05: 랜딩페이지 리디자인 - 라이브 프리뷰 히어로 (이전 버전)
-- **파일**: `src/components/landing/HeroWithLivePreview.tsx` (deprecated)
 
 ### 2025-12-02: AI 템플릿 시스템 + 확장 섹션 컴포넌트
 - **이유**: Salon de Letter 수준의 30+ 섹션 지원, AI 동적 템플릿 저장, S3 정적 배포

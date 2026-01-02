@@ -4,10 +4,9 @@
  * 템플릿의 BlockTemplate을 실제 Block 인스턴스로 변환하는 서비스
  * - WeddingData를 바인딩하여 실제 값 주입
  * - 템플릿 색상 팔레트 적용
- * - 고유 ID 생성
+ * - 결정론적 ID 생성 (SSR hydration 안정성)
  */
 
-import { nanoid } from 'nanoid'
 import type { Block, Element, WeddingData } from '../schema/types'
 import type { TemplateV2, BlockTemplate, ElementTemplate } from '../config/template-catalog-v2'
 
@@ -19,41 +18,45 @@ import type { TemplateV2, BlockTemplate, ElementTemplate } from '../config/templ
  * @returns 실제 Block 배열 (편집 가능)
  */
 export function buildBlocksFromTemplate(template: TemplateV2, weddingData: WeddingData): Block[] {
-  return template.blockStructure.map((blockTemplate) =>
-    buildBlockFromTemplate(blockTemplate, template, weddingData)
+  return template.blockStructure.map((blockTemplate, blockIndex) =>
+    buildBlockFromTemplate(blockTemplate, template, weddingData, blockIndex)
   )
 }
 
 /**
- * 단일 BlockTemplate을 Block으로 변환
+ * 단일 BlockTemplate을 Block으로 변환 (결정론적 ID 사용)
  */
 function buildBlockFromTemplate(
   blockTemplate: BlockTemplate,
   template: TemplateV2,
-  weddingData: WeddingData
+  weddingData: WeddingData,
+  blockIndex: number
 ): Block {
+  const blockId = `${template.id}-b${blockIndex}`
   return {
-    id: nanoid(8),
+    id: blockId,
     type: blockTemplate.type,
     enabled: blockTemplate.enabled,
     height: blockTemplate.height,
     layout: blockTemplate.layout,
-    elements: blockTemplate.elements.map((elementTemplate) =>
-      buildElementFromTemplate(elementTemplate, template, weddingData)
+    elements: blockTemplate.elements.map((elementTemplate, elementIndex) =>
+      buildElementFromTemplate(elementTemplate, template, weddingData, blockId, elementIndex)
     ),
   }
 }
 
 /**
- * 단일 ElementTemplate을 Element로 변환
+ * 단일 ElementTemplate을 Element로 변환 (결정론적 ID 사용)
  */
 function buildElementFromTemplate(
   elementTemplate: ElementTemplate,
   template: TemplateV2,
-  weddingData: WeddingData
+  weddingData: WeddingData,
+  blockId: string,
+  elementIndex: number
 ): Element {
   const element: Element = {
-    id: nanoid(8),
+    id: `${blockId}-e${elementIndex}`,
     type: elementTemplate.type,
     x: elementTemplate.x,
     y: elementTemplate.y,

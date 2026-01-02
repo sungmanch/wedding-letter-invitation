@@ -33,6 +33,8 @@ export interface DocumentRendererProps {
   className?: string
   // 외부 DocumentProvider 사용 시 true (내부 Provider 스킵)
   skipProvider?: boolean
+  // 가상 뷰포트 크기 (프리뷰/썸네일용)
+  viewportOverride?: { width: number; height: number }
 }
 
 // ============================================
@@ -47,6 +49,7 @@ export function DocumentRenderer({
   onElementClick,
   className = '',
   skipProvider = false,
+  viewportOverride,
 }: DocumentRendererProps) {
   // 스타일 해석
   const resolvedStyle = useMemo<ResolvedStyle>(
@@ -130,7 +133,11 @@ export function DocumentRenderer({
   }
 
   return (
-    <DocumentProvider document={document} style={resolvedStyle}>
+    <DocumentProvider
+      document={document}
+      style={resolvedStyle}
+      viewportOverride={viewportOverride}
+    >
       {content}
     </DocumentProvider>
   )

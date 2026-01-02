@@ -13,6 +13,7 @@ import type { EditorDocument, Block, Element } from '../../schema/types'
 import { DocumentRenderer } from '../../renderer/document-renderer'
 import { EditableCanvas, type ContextMenuState } from './direct/editable-canvas'
 import { EditModeToggle, CompactModeToggle, type EditMode } from './direct/edit-mode-toggle'
+import { PhoneFrame } from '@/components/phone-frame'
 
 // ============================================
 // Types
@@ -196,63 +197,7 @@ export function PreviewPanel({
   )
 }
 
-// ============================================
-// Phone Frame Component
-// ============================================
-
-interface PhoneFrameProps {
-  children: React.ReactNode
-  width?: number
-  height?: number
-  className?: string
-}
-
-function PhoneFrame({
-  children,
-  width = 375,
-  height = 667,
-  className = '',
-}: PhoneFrameProps) {
-  return (
-    <div
-      className={`relative flex-shrink-0 ${className}`}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-    >
-      {/* 폰 프레임 외곽 */}
-      <div
-        className="absolute inset-0 rounded-[40px] bg-[var(--sand-200)] shadow-2xl"
-        style={{
-          padding: '12px',
-        }}
-      >
-        {/* 노치 */}
-        <div
-          className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-[var(--text-primary)] rounded-full z-10"
-        />
-
-        {/* 스크린 영역 */}
-        <div
-          className="relative w-full h-full rounded-[32px] overflow-hidden bg-white"
-          style={{
-            // 스크롤 가능한 컨테이너
-          }}
-        >
-          <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide">
-            {children}
-          </div>
-        </div>
-      </div>
-
-      {/* 하단 홈 인디케이터 */}
-      <div
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 w-32 h-1 bg-[var(--sand-100)] rounded-full"
-      />
-    </div>
-  )
-}
+// PhoneFrame은 '@/components/phone-frame'에서 import
 
 // ============================================
 // Preview Controls (줌, 디바이스 전환 등)

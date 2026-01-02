@@ -141,7 +141,7 @@ function applyTemplateV2ToDocument(
 /**
  * 템플릿으로부터 전역 스타일 시스템 생성
  */
-function buildStyleSystemFromTemplate(
+export function buildStyleSystemFromTemplate(
   template: TemplateMetadata,
   currentStyle: StyleSystem
 ): StyleSystem {

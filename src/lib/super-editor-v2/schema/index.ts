@@ -121,16 +121,13 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
 }
 
 /**
- * 샘플 결혼식 날짜 계산 (오늘 + 5개월 후 토요일)
+ * 샘플 결혼식 날짜 (고정값 - hydration 안정성)
+ *
+ * 동적 계산 대신 고정 날짜 사용:
+ * - SSR과 클라이언트에서 동일한 값 보장
+ * - 2025년 6월 7일 토요일 (샘플용)
  */
-function getSampleWeddingDate(): string {
-  const date = new Date()
-  date.setMonth(date.getMonth() + 5)
-  const dayOfWeek = date.getDay()
-  const daysUntilSaturday = (6 - dayOfWeek + 7) % 7
-  date.setDate(date.getDate() + daysUntilSaturday)
-  return date.toISOString().split('T')[0]
-}
+const SAMPLE_WEDDING_DATE = '2025-06-07'
 
 /**
  * 샘플 WeddingData (새 문서 생성 시 미리보기용)
@@ -146,7 +143,7 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
 
   // ═══ 결혼식 일시 ═══
   wedding: {
-    date: getSampleWeddingDate(),
+    date: SAMPLE_WEDDING_DATE,
     time: '14:00',
   },
 
@@ -178,6 +175,40 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
   // ═══ Legacy 호환 ═══
   groom: { name: '김민준' },
   bride: { name: '이서연' },
+}
+
+/**
+ * 템플릿 ID에서 숫자 추출 (unique1 → 1, unique2 → 2, ...)
+ */
+export function getTemplateNumber(templateId: string): number {
+  const match = templateId.match(/unique(\d+)/)
+  return match ? parseInt(match[1], 10) : 1
+}
+
+/**
+ * 템플릿별 샘플 이미지 경로 반환
+ * unique1 → /examples/wedding_images/1.png
+ * unique2 → /examples/wedding_images/2.png
+ * ...
+ */
+export function getTemplateSampleImage(templateId: string): string {
+  const num = getTemplateNumber(templateId)
+  return `/examples/wedding_images/${num}.png`
+}
+
+/**
+ * 템플릿별 샘플 WeddingData 생성
+ * 각 템플릿마다 다른 웨딩 이미지 사용
+ */
+export function getSampleWeddingDataForTemplate(templateId: string): WeddingData {
+  const imagePath = getTemplateSampleImage(templateId)
+  return {
+    ...SAMPLE_WEDDING_DATA,
+    photos: {
+      main: imagePath,
+      gallery: [imagePath],
+    },
+  }
 }
 
 /**

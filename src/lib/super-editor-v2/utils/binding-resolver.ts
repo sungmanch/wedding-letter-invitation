@@ -164,16 +164,16 @@ function resolveComputedField(
       return getDayOfWeek(dateStr)
 
     case 'countdown.days':
-      return getCountdown(dateStr).days
+      return getStaticCountdown(dateStr).days
 
     case 'countdown.hours':
-      return getCountdown(dateStr).hours
+      return getStaticCountdown(dateStr).hours
 
     case 'countdown.minutes':
-      return getCountdown(dateStr).minutes
+      return getStaticCountdown(dateStr).minutes
 
     case 'countdown.seconds':
-      return getCountdown(dateStr).seconds
+      return getStaticCountdown(dateStr).seconds
 
     default:
       return null
@@ -264,7 +264,40 @@ export function getDay(dateStr: string): string {
 }
 
 /**
- * 카운트다운 계산 (실시간 갱신용)
+ * 정적 카운트다운 (Hydration 안전)
+ *
+ * SSR/클라이언트에서 동일한 값을 반환하도록 설계:
+ * - days: 날짜 기준 계산 (시간 무시)
+ * - hours/minutes/seconds: 0으로 고정
+ *
+ * 실시간 업데이트가 필요하면 클라이언트에서 useCountdown 훅 사용
+ */
+function getStaticCountdown(dateStr: string): {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+} {
+  const weddingDate = new Date(dateStr)
+
+  if (isNaN(weddingDate.getTime())) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
+
+  // 날짜만 비교 (시간 제거) - 서버/클라이언트 동일 결과 보장
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  weddingDate.setHours(0, 0, 0, 0)
+
+  const diff = weddingDate.getTime() - today.getTime()
+  const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)))
+
+  // 시/분/초는 0으로 고정 (Hydration 안정성)
+  return { days, hours: 0, minutes: 0, seconds: 0 }
+}
+
+/**
+ * 카운트다운 계산 (실시간 갱신용 - 클라이언트 전용)
  */
 export function getCountdown(dateStr: string): {
   days: number

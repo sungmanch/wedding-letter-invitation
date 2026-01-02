@@ -610,22 +610,46 @@ body {
 }
 
 /* ========================================== */
-/* Typewriter Animation - Landing Hero */
+/* Marquee Animation - Multi-Line Card Carousel */
 /* ========================================== */
 
-@keyframes typewriterBlink {
-  0%, 100% {
-    opacity: 1;
+@keyframes marquee-left {
+  0% {
+    transform: translateX(0);
   }
-  50% {
-    opacity: 0;
+  100% {
+    transform: translateX(-33.333%);
   }
 }
 
-.typewriter-cursor {
-  display: inline-block;
-  margin-left: 2px;
-  color: var(--sage-500);
-  font-weight: 300;
-  animation: typewriterBlink 0.7s step-end infinite;
+@keyframes marquee-right {
+  0% {
+    transform: translateX(-33.333%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-left {
+  animation: marquee-left 20s linear infinite;
+}
+
+.animate-marquee-right {
+  animation: marquee-right 20s linear infinite;
+}
+
+/* Card highlight glow effect - 슬롯머신 하이라이트 */
+.card-highlight-glow {
+  box-shadow:
+    0 0 0 4px rgba(107, 155, 107, 0.6),
+    0 8px 32px rgba(107, 155, 107, 0.4),
+    0 0 60px rgba(107, 155, 107, 0.3);
+  filter: brightness(1.05);
+}
+
+/* 비활성 카드 흐리게 */
+.card-dimmed {
+  opacity: 0.6;
+  filter: grayscale(0.2);
 }
