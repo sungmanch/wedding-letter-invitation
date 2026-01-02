@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui'
 import { ArrowRight, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
+import { PhoneFrame } from '@/components/phone-frame'
 
 // Template data for carousel
 const templates = [
@@ -56,22 +57,67 @@ function AIChatVideo() {
   return (
     <div className="relative">
       {/* Phone mockup frame */}
-      <div className="relative w-[340px] sm:w-[400px] lg:w-[430px] mx-auto">
-        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
-          <div className="w-full aspect-[3/4] rounded-[2.25rem] overflow-hidden bg-black">
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-              poster="/examples/chat-poster.jpg"
-            >
-              <source src="/examples/1208_AICHAT.webm" type="video/webm" />
-            </video>
-          </div>
-        </div>
+      <div className="relative w-[340px] sm:w-[400px] lg:w-[430px] mx-auto flex justify-center">
+        <PhoneFrame
+          width={340}
+          height={453}
+          showNotch={true}
+          showHomeIndicator={true}
+          scrollable={false}
+          className="sm:hidden"
+        >
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover bg-black"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/examples/chat-poster.jpg"
+          >
+            <source src="/examples/1208_AICHAT.webm" type="video/webm" />
+          </video>
+        </PhoneFrame>
+        <PhoneFrame
+          width={400}
+          height={533}
+          showNotch={true}
+          showHomeIndicator={true}
+          scrollable={false}
+          className="hidden sm:block lg:hidden"
+        >
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover bg-black"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/examples/chat-poster.jpg"
+          >
+            <source src="/examples/1208_AICHAT.webm" type="video/webm" />
+          </video>
+        </PhoneFrame>
+        <PhoneFrame
+          width={430}
+          height={573}
+          showNotch={true}
+          showHomeIndicator={true}
+          scrollable={false}
+          className="hidden lg:block"
+        >
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover bg-black"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/examples/chat-poster.jpg"
+          >
+            <source src="/examples/1208_AICHAT.webm" type="video/webm" />
+          </video>
+        </PhoneFrame>
       </div>
       <p className="text-center mt-3 text-sm text-[var(--text-muted)]">AI 채팅으로 디자인</p>
     </div>
@@ -406,12 +452,40 @@ function TemplateCarousel() {
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       {/* Phone mockup frame */}
-      <div className="relative w-[255px] sm:w-[300px] lg:w-[322px] mx-auto">
-        <div className="bg-[var(--sand-200)] rounded-[2.5rem] p-1 shadow-xl">
-          <div className="w-full aspect-[9/16] rounded-[2.25rem] overflow-hidden relative">
-            {renderTemplate(currentIndex)}
-          </div>
-        </div>
+      <div className="relative w-[255px] sm:w-[300px] lg:w-[322px] mx-auto flex justify-center">
+        {/* Mobile */}
+        <PhoneFrame
+          width={255}
+          height={453}
+          showNotch={true}
+          showHomeIndicator={true}
+          scrollable={false}
+          className="sm:hidden"
+        >
+          {renderTemplate(currentIndex)}
+        </PhoneFrame>
+        {/* Tablet */}
+        <PhoneFrame
+          width={300}
+          height={533}
+          showNotch={true}
+          showHomeIndicator={true}
+          scrollable={false}
+          className="hidden sm:block lg:hidden"
+        >
+          {renderTemplate(currentIndex)}
+        </PhoneFrame>
+        {/* Desktop */}
+        <PhoneFrame
+          width={322}
+          height={572}
+          showNotch={true}
+          showHomeIndicator={true}
+          scrollable={false}
+          className="hidden lg:block"
+        >
+          {renderTemplate(currentIndex)}
+        </PhoneFrame>
 
         {/* Navigation arrows */}
         <button

@@ -26,6 +26,7 @@ import {
   SAMPLE_WEDDING_DATA,
   DEFAULT_STYLE_SYSTEM,
   DEFAULT_BLOCK_HEIGHTS,
+  getSampleWeddingDataForTemplate,
 } from '@/lib/super-editor-v2/schema'
 
 // ============================================
@@ -256,7 +257,9 @@ export function MiniHeroRenderer({
     const template = getTemplateV2ById(templateId)
     if (!template) return null
 
-    const blocks = buildBlocksFromTemplate(template, SAMPLE_WEDDING_DATA)
+    // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
+    const sampleData = getSampleWeddingDataForTemplate(templateId)
+    const blocks = buildBlocksFromTemplate(template, sampleData)
     const heroBlock = blocks.find((b: Block) => b.type === 'hero')
 
     if (!heroBlock) return null
@@ -266,7 +269,7 @@ export function MiniHeroRenderer({
       version: 2 as const,
       blocks: [heroBlock],
       style: DEFAULT_STYLE_SYSTEM,
-      data: SAMPLE_WEDDING_DATA,
+      data: sampleData,
       animation: { mood: 'minimal' as const, speed: 1, floatingElements: [] },
       meta: {
         title: '히어로 미리보기',
@@ -296,24 +299,19 @@ export function MiniHeroRenderer({
     )
   }
 
-  // 스케일 후 실제 렌더링 너비
-  const scaledWidth = ORIGINAL_WIDTH * scale
-  // 컨테이너 중앙 정렬을 위한 left 값
-  const leftOffset = (width - scaledWidth) / 2
-
   return (
     <div
-      className={`relative overflow-hidden rounded-lg ${className}`}
+      className={`relative overflow-hidden ${className}`}
       style={{
-        width,
-        height,
+        width: '100%',
+        height: '100%',
         backgroundColor: cssVariables['--bg-page'] || '#ffffff',
       }}
     >
       <div
         style={{
           position: 'absolute',
-          left: leftOffset,
+          left: 0,
           top: 0,
           width: ORIGINAL_WIDTH,
           height: ORIGINAL_HEIGHT,

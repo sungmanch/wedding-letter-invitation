@@ -3,15 +3,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { User, LogIn } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { SubwayBuilderLanding } from '@/components/landing/SubwayBuilderLanding'
+import { BuilderLanding } from '@/components/landing/BuilderLanding'
 
 export const metadata: Metadata = {
-  title: 'Maison de Letter - 나만의 청첩장 만들기',
-  description: '원하는 스타일을 선택하고 나만의 청첩장을 만들어보세요. 다양한 템플릿과 섹션 프리셋으로 쉽고 빠르게 완성할 수 있습니다.',
-  keywords: ['모바일 청첩장', '청첩장 만들기', 'AI 청첩장', '웨딩 초대장', '결혼 청첩장', '인터랙티브 청첩장', 'Maison de Letter'],
+  title: 'Maison de Letter - 당신만의 이야기를 담은 청첩장',
+  description: '6가지 프리미엄 템플릿과 섹션별 커스터마이징으로 세상에 하나뿐인 청첩장을 만들어보세요. 실시간 미리보기로 완벽한 결과물을 확인하세요.',
+  keywords: ['모바일 청첩장', '청첩장 만들기', 'AI 청첩장', '웨딩 초대장', '결혼 청첩장', '인터랙티브 청첩장', 'Maison de Letter', '프리미엄 청첩장'],
   openGraph: {
-    title: 'Maison de Letter - 나만의 청첩장 만들기',
-    description: '원하는 스타일을 선택하고 나만의 청첩장을 만들어보세요. 다양한 템플릿과 섹션 프리셋으로 쉽고 빠르게 완성할 수 있습니다.',
+    title: 'Maison de Letter - 당신만의 이야기를 담은 청첩장',
+    description: '6가지 프리미엄 템플릿과 섹션별 커스터마이징으로 세상에 하나뿐인 청첩장을 만들어보세요.',
     type: 'website',
     locale: 'ko_KR',
   },
@@ -54,8 +54,8 @@ export default async function WeddingLandingPage() {
         </div>
       </header>
 
-      {/* Subway Builder Landing */}
-      <SubwayBuilderLanding />
+      {/* Builder Landing (New Design) */}
+      <BuilderLanding />
 
 
 

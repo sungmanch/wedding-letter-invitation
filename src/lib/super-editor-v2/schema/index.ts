@@ -178,6 +178,40 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
 }
 
 /**
+ * 템플릿 ID에서 숫자 추출 (unique1 → 1, unique2 → 2, ...)
+ */
+export function getTemplateNumber(templateId: string): number {
+  const match = templateId.match(/unique(\d+)/)
+  return match ? parseInt(match[1], 10) : 1
+}
+
+/**
+ * 템플릿별 샘플 이미지 경로 반환
+ * unique1 → /examples/wedding_images/1.png
+ * unique2 → /examples/wedding_images/2.png
+ * ...
+ */
+export function getTemplateSampleImage(templateId: string): string {
+  const num = getTemplateNumber(templateId)
+  return `/examples/wedding_images/${num}.png`
+}
+
+/**
+ * 템플릿별 샘플 WeddingData 생성
+ * 각 템플릿마다 다른 웨딩 이미지 사용
+ */
+export function getSampleWeddingDataForTemplate(templateId: string): WeddingData {
+  const imagePath = getTemplateSampleImage(templateId)
+  return {
+    ...SAMPLE_WEDDING_DATA,
+    photos: {
+      main: imagePath,
+      gallery: [imagePath],
+    },
+  }
+}
+
+/**
  * 기본 블록 순서 (활성화된 블록)
  */
 export const DEFAULT_BLOCK_ORDER: Block['type'][] = [
