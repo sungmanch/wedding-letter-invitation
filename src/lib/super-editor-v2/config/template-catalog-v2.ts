@@ -168,10 +168,7 @@ const UNIQUE1_BLOCK_STRUCTURE: BlockTemplate[] = [
           type: 'image',
           objectFit: 'cover',
         },
-        style: {
-          // 그림자 제거하고 깔끔하게
-          // boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
-        },
+        style: {},
       },
 
       // 신랑 이름
@@ -857,10 +854,7 @@ const UNIQUE2_BLOCK_STRUCTURE: BlockTemplate[] = [
         zIndex: 1,
         binding: 'photos.main',
         props: { type: 'image', objectFit: 'cover' },
-        style: { 
-          // borderRadius: '0px', 
-          // boxShadow: '0 10px 30px rgba(0,0,0,0.2)' 
-        },
+        style: {},
       },
       
       // 신랑 한글 이름
