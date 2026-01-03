@@ -60,39 +60,6 @@ const ELEMENTS: PresetElement[] = [
       padding: { top: 0, bottom: 0, left: 16, right: 16 },
     },
     children: [
-      // 하트 마커 (absolute로 divider 위에 오버레이) - 날짜 행 중앙에 배치
-      {
-        id: 'heart-marker-overlay',
-        type: 'icon',
-        layoutMode: 'absolute',
-        x: 50, // 가로 중앙 (%)
-        y: 68, // 날짜 행 중앙 (요일 행 + divider 아래쪽)
-        width: 80,
-        height: 80,
-        zIndex: 5, // divider(zIndex:1)보다 높게
-        props: { type: 'icon', icon: 'calendar1', size: 80, color: '#EF90CB' },
-      },
-      // 중앙 날짜 텍스트 (하트 위에 오버레이)
-      {
-        id: 'day-3-overlay',
-        type: 'text',
-        layoutMode: 'absolute',
-        x: 50, // 가로 중앙 (%)
-        y: 68, // 하트와 동일한 위치
-        width: 50,
-        height: 40,
-        zIndex: 10, // 하트(zIndex:5)보다 높게
-        binding: 'wedding.day',
-        props: { type: 'text' },
-        style: {
-          text: {
-            fontSize: 28,
-            fontWeight: 600,
-            color: '#FFFFFF',
-            textAlign: 'center',
-          },
-        },
-      },
       // Divider 1 - 요일 위
       {
         id: 'divider-top',
@@ -237,22 +204,52 @@ const ELEMENTS: PresetElement[] = [
               text: { fontSize: 28, fontWeight: 400, color: 'var(--fg-default)', textAlign: 'center' },
             },
           },
-          // 중앙 날짜 플레이스홀더 (실제 텍스트는 absolute로 상위에 배치됨, 레이아웃 공간 확보용)
+          // 중앙 날짜 셀 (하트 마커 + 날짜 텍스트를 포함하는 relative 컨테이너)
           {
-            id: 'day-3-placeholder',
-            type: 'text',
+            id: 'day-3-cell',
+            type: 'group',
             zIndex: 1,
-            sizing: { width: { type: 'fixed', value: 50, unit: 'px' }, height: { type: 'hug' } },
-            binding: 'wedding.day',
-            props: { type: 'text' },
-            style: {
-              text: {
-                fontSize: 28,
-                fontWeight: 600,
-                color: 'transparent', // 투명 - 실제 텍스트는 overlay로 표시
-                textAlign: 'center',
+            sizing: { width: { type: 'fixed', value: 80, unit: 'px' }, height: { type: 'fixed', value: 80, unit: 'px' } },
+            props: {
+              type: 'group',
+              layout: {
+                direction: 'vertical',
+                gap: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
               },
             },
+            children: [
+              // 하트 마커 (셀 중앙에 absolute 배치, x:50 y:50은 자동 translate(-50%, -50%))
+              {
+                id: 'heart-marker',
+                type: 'icon',
+                layoutMode: 'absolute',
+                x: 50,
+                y: 50,
+                zIndex: 1,
+                props: { type: 'icon', icon: 'calendar1', size: 80, color: '#EF90CB' },
+              },
+              // 날짜 텍스트 (하트 위에 absolute 배치)
+              {
+                id: 'day-3-text',
+                type: 'text',
+                layoutMode: 'absolute',
+                x: 50,
+                y: 50,
+                zIndex: 2,
+                binding: 'wedding.day',
+                props: { type: 'text' },
+                style: {
+                  text: {
+                    fontSize: 28,
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    textAlign: 'center',
+                  },
+                },
+              },
+            ],
           },
           {
             id: 'day-4',
