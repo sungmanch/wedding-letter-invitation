@@ -15,6 +15,11 @@ import { ContactModal } from '../ui/contact-modal'
 import { RsvpModal } from '../ui/rsvp-modal'
 import { pxToRem } from '../../utils'
 
+// Navigation Icons
+import IconNaver from '@/assets/Icon_naver.svg'
+import IconKakao from '@/assets/Icon_kakao.svg'
+import IconTmap from '@/assets/Icon_tmap.svg'
+
 // ============================================
 // Types
 // ============================================
@@ -36,55 +41,17 @@ export interface ButtonElementProps {
 // Navigation Icons (Naver, Kakao, Tmap)
 // ============================================
 
-function NaverIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="30" height="30" rx="6" fill="#03C75A"/>
-      <path d="M17.5 8L17.5 15.2L12.5 8H8V22H12.5V14.8L17.5 22H22V8H17.5Z" fill="white"/>
-    </svg>
-  )
-}
-
-function KakaoIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="30" height="30" rx="6" fill="#FEE500"/>
-      <path fillRule="evenodd" clipRule="evenodd" d="M15 7C10.0294 7 6 10.1325 6 14.0147C6 16.4091 7.55882 18.5147 9.91176 19.75L8.91176 23.3971C8.82353 23.6912 9.17647 23.9265 9.44118 23.75L13.7647 20.8676C14.1765 20.9265 14.5882 20.9559 15 20.9559C19.9706 20.9559 24 17.8235 24 13.9412C24 10.0588 19.9706 7 15 7Z" fill="#3C1E1E"/>
-    </svg>
-  )
-}
-
-function TmapIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="tmap-grad-h" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#E91E8C"/>
-          <stop offset="50%" stopColor="#9B4DCA"/>
-          <stop offset="100%" stopColor="#2DD4A8"/>
-        </linearGradient>
-        <linearGradient id="tmap-grad-v" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#2DD4A8"/>
-          <stop offset="100%" stopColor="#3B82F6"/>
-        </linearGradient>
-      </defs>
-      {/* 가로 막대 */}
-      <rect x="5" y="5" width="20" height="6" rx="3" fill="url(#tmap-grad-h)"/>
-      {/* 세로 막대 (곡선 연결) */}
-      <path d="M15 8 C15 8, 15 8, 15 11 L15 25 C15 26.5 16 27 17 27 L17 27 C18.5 27 19 25.5 19 24 L19 14 C19 11 17 8 15 8 Z" fill="url(#tmap-grad-v)"/>
-    </svg>
-  )
-}
-
-/** 아이콘 프리셋 ID로 아이콘 컴포넌트 반환 */
+/** 아이콘 프리셋 ID로 이미지 컴포넌트 반환 */
 function getPresetIcon(iconId: string, size = 20): ReactNode {
+  const iconStyle = { width: size, height: size }
+
   switch (iconId) {
     case 'naver':
-      return <NaverIcon size={size} />
+      return <img src={IconNaver.src} alt="네이버 지도" style={iconStyle} />
     case 'kakao':
-      return <KakaoIcon size={size} />
+      return <img src={IconKakao.src} alt="카카오맵" style={iconStyle} />
     case 'tmap':
-      return <TmapIcon size={size} />
+      return <img src={IconTmap.src} alt="티맵" style={iconStyle} />
     case 'none':
       return null
     default:
