@@ -78,9 +78,11 @@ export function ButtonElement({
     if (style?.text?.color) {
       css.color = style.text.color
     }
-    // 접근성: px → rem 변환
+    // fontSize: 숫자면 rem 변환, 문자열(CSS 변수)이면 그대로 사용
     if (style?.text?.fontSize) {
-      css.fontSize = pxToRem(style.text.fontSize)
+      css.fontSize = typeof style.text.fontSize === 'string'
+        ? style.text.fontSize
+        : pxToRem(style.text.fontSize)
     }
     if (style?.border) {
       css.borderWidth = style.border.width

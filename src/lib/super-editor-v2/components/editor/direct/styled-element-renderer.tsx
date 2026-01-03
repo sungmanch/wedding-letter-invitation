@@ -116,8 +116,12 @@ export function StyledElementRenderer({ element, block }: StyledElementRendererP
           style={{
             backgroundColor: element.style?.background as string || '#C9A962',
             color: element.style?.text?.color || '#fff',
-            // 접근성: px → rem 변환
-            fontSize: element.style?.text?.fontSize ? pxToRem(element.style.text.fontSize) : '0.875rem',
+            // fontSize: 숫자면 rem 변환, 문자열(CSS 변수)이면 그대로 사용
+            fontSize: element.style?.text?.fontSize
+              ? (typeof element.style.text.fontSize === 'string'
+                  ? element.style.text.fontSize
+                  : pxToRem(element.style.text.fontSize))
+              : '0.875rem',
             fontFamily: element.style?.text?.fontFamily,
           }}
         >

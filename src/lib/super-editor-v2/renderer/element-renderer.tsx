@@ -196,7 +196,9 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
   }
 
   // photos.gallery 바인딩은 타입과 무관하게 갤러리로 렌더링
+  console.log('[ElementTypeRenderer] 🔍 element:', element.id, element.type, element.binding)
   if (element.binding === 'photos.gallery') {
+    console.log('[ElementTypeRenderer] 🖼️ Rendering GalleryElement for:', element.id)
     return (
       <GalleryElement
         element={element}
@@ -382,7 +384,14 @@ function GalleryElement({ element, editable }: GalleryElementProps) {
 
   // 갤러리 이미지 배열
   const galleryImages = useMemo(() => {
+    const rawGallery = data.photos?.gallery
+    console.log('[GalleryElement] 📸 Raw gallery data:', rawGallery)
+    console.log('[GalleryElement] 📸 Raw gallery type:', typeof rawGallery, Array.isArray(rawGallery))
+    if (Array.isArray(rawGallery) && rawGallery.length > 0) {
+      console.log('[GalleryElement] 📸 First item:', rawGallery[0])
+    }
     const images = resolveBinding(data, 'photos.gallery')
+    console.log('[GalleryElement] 📸 Resolved images:', images)
     if (Array.isArray(images)) {
       return images as string[]
     }

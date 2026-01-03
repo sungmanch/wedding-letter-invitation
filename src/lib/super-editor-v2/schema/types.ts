@@ -583,7 +583,7 @@ export interface ElementStyle {
 
 export interface TextStyle {
   fontFamily?: string
-  fontSize?: number
+  fontSize?: number | string  // number(px) 또는 CSS 변수 'var(--text-xl)'
   fontWeight?: number
   color?: string
   textAlign?: 'left' | 'center' | 'right'
@@ -930,7 +930,10 @@ export interface WeddingData {
   // ═══════════════════════════════════════════════
 
   venue: VenueInfo
-  photos: { main?: string; gallery?: string[] }
+  photos: {
+    main?: string
+    gallery?: Array<{ id: string; url: string; order: number }> | string[]
+  }
 
   // ═══════════════════════════════════════════════
   // 섹션별 설정

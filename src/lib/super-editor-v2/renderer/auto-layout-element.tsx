@@ -155,6 +155,19 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     )
   }
 
+  // photos.gallery 바인딩은 타입과 무관하게 갤러리로 렌더링
+  console.log('[AutoLayout ElementTypeRenderer] 🔍 element:', element.id, element.type, element.binding)
+  if (element.binding === 'photos.gallery') {
+    console.log('[AutoLayout ElementTypeRenderer] 🖼️ Rendering GroupElement (gallery) for:', element.id)
+    return (
+      <GroupElement
+        element={element}
+        layout={undefined}
+        editable={editable}
+      />
+    )
+  }
+
   switch (elementType) {
     case 'text':
       return (
@@ -298,11 +311,24 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
     return null
   }, [element.binding, data])
 
-  // 갤러리 설정
-  const galleryConfig = useMemo(() => {
-    // @ts-expect-error - gallery는 확장 props
-    return element.props?.gallery as GalleryConfig | undefined
-  }, [element.props])
+  // 갤러리 설정 (props에 없으면 기본값 사용)
+  const galleryConfig = useMemo((): GalleryConfig | null => {
+    // binding이 photos.gallery인 경우 항상 갤러리 설정 반환
+    if (element.binding === 'photos.gallery') {
+      // @ts-expect-error - gallery는 확장 props
+      const customConfig = element.props?.gallery as GalleryConfig | undefined
+      // 기본 갤러리 설정
+      const defaultConfig: GalleryConfig = {
+        columns: 3,
+        aspectRatio: '1:1',
+        gap: 8,
+        initialRows: 3,
+        showMoreButton: true,
+      }
+      return customConfig ?? defaultConfig
+    }
+    return null
+  }, [element.binding, element.props])
 
   const groupStyle = useMemo<CSSProperties>(() => {
     const direction = layout?.direction ?? 'vertical'

@@ -18,7 +18,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontSize: 14,
+        fontSize: 'var(--text-sm)',
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -35,7 +35,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontSize: 20,
+        fontSize: 'var(--text-xl)',
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'center',

@@ -19,7 +19,7 @@ import { pxToRem } from '../../utils'
 // ============================================
 
 export interface TextElementProps {
-  value?: string | null
+  value?: string | number | null
   style?: TextStyle
   editable?: boolean
   className?: string
@@ -57,8 +57,12 @@ export function TextElement({
 
     if (style) {
       if (style.fontFamily) css.fontFamily = style.fontFamily
-      // 접근성: px → rem 변환으로 시스템 폰트 크기 설정 존중
-      if (style.fontSize) css.fontSize = pxToRem(style.fontSize)
+      // fontSize: 숫자면 rem 변환, 문자열(CSS 변수)이면 그대로 사용
+      if (style.fontSize) {
+        css.fontSize = typeof style.fontSize === 'string'
+          ? style.fontSize
+          : pxToRem(style.fontSize)
+      }
       if (style.fontWeight) css.fontWeight = style.fontWeight
       if (style.color) css.color = style.color
       if (style.textAlign) css.textAlign = style.textAlign
@@ -70,14 +74,17 @@ export function TextElement({
     return css
   }, [style, hugMode])
 
-  // 줄바꿈 처리
+  // 줄바꿈 처리 및 숫자 → 문자열 변환
   const formattedValue = useMemo(() => {
-    if (!value) return ''
-    // \n을 실제 줄바꿈으로 변환
-    return value
+    if (value === null || value === undefined) return ''
+    // 숫자는 문자열로 변환
+    return String(value)
   }, [value])
 
-  if (!value) {
+  // null, undefined, 빈 문자열만 empty 처리 (숫자 0은 허용)
+  const isEmpty = value === null || value === undefined || value === ''
+
+  if (isEmpty) {
     return (
       <div
         className={`se2-text-element se2-text-element--empty ${className}`}

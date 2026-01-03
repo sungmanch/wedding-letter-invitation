@@ -42,69 +42,29 @@ const ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 3. Month Divider Group (divider - month - divider)
+  // 3. Divider
   {
-    type: 'group',
+    type: 'divider',
     zIndex: 1,
-    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    props: {
-      type: 'group',
-      layout: {
-        direction: 'horizontal',
-        gap: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
-    },
-    children: [
-      // Left Divider
-      {
-        id: 'month-divider-left',
-        type: 'divider',
-        zIndex: 1,
-        sizing: { width: { type: 'fixed', value: 80, unit: 'px' }, height: { type: 'fixed', value: 1, unit: 'px' } },
-        props: { type: 'divider', dividerStyle: 'solid' },
-        style: { background: 'var(--border-default)' },
-      },
-      // Month Title
-      {
-        id: 'month-title',
-        type: 'text',
-        zIndex: 2,
-        sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
-        binding: 'wedding.month',
-        props: { type: 'text', format: '{wedding.month}월' },
-        style: {
-          text: {
-            fontSize: 16,
-            fontWeight: 500,
-            color: 'var(--fg-default)',
-            textAlign: 'center',
-          },
-        },
-      },
-      // Right Divider
-      {
-        id: 'month-divider-right',
-        type: 'divider',
-        zIndex: 1,
-        sizing: { width: { type: 'fixed', value: 80, unit: 'px' }, height: { type: 'fixed', value: 1, unit: 'px' } },
-        props: { type: 'divider', dividerStyle: 'solid' },
-        style: { background: 'var(--border-default)' },
-      },
-    ],
+    sizing: { width: { type: 'fixed', value: 80, unit: '%' }, height: { type: 'fixed', value: 1, unit: 'px' } },
+    alignSelf: 'center',
+    props: { type: 'divider', dividerStyle: 'solid' },
+    style: { background: 'var(--border-default)' },
   },
   // 4. Calendar Grid with Heart Marker
   {
     type: 'calendar',
     zIndex: 1,
-    sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 280, unit: 'px' } },
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'wedding.date',
     props: {
       type: 'calendar',
       showDday: false,
+      showHeader: false,
+      showFooter: false,
       highlightColor: '#EF90CB',
       markerType: 'heart',
+      highlightTextColor: '#FFFFFF',
     },
   },
   // 5. Bottom Divider
@@ -116,24 +76,83 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'divider', dividerStyle: 'solid' },
     style: { background: 'var(--border-default)' },
   },
-  // 6. D-day Message Group (커플 이름 + 하트 + D-day)
+  // 6. D-day Message Group (커플 이름 + 하트 + D-day) - 인라인 그룹으로 분리
   {
-    type: 'text',
+    type: 'group',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     props: {
-      type: 'text',
-      format: '{couple.groom.name} ♥ {couple.bride.name}의 결혼식이 {wedding.dday}일 남았습니다.',
-    },
-    style: {
-      text: {
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.6,
+      type: 'group',
+      layout: {
+        direction: 'horizontal',
+        gap: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        wrap: true,
       },
     },
+    children: [
+      // 신랑 이름
+      {
+        id: 'dday-groom-name',
+        type: 'text',
+        zIndex: 1,
+        sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+        binding: 'couple.groom.name',
+        props: { type: 'text' },
+        style: {
+          text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
+        },
+      },
+      // 하트 아이콘 (외곽선 스타일)
+      {
+        id: 'dday-heart-icon',
+        type: 'icon',
+        zIndex: 1,
+        sizing: { width: { type: 'fixed', value: 20, unit: 'px' }, height: { type: 'fixed', value: 20, unit: 'px' } },
+        props: {
+          type: 'icon',
+          icon: 'heart-outline',
+          size: 16,
+          color: '#EF90CB',
+        },
+      },
+      // 신부 이름 + "의 결혼식이"
+      {
+        id: 'dday-bride-text',
+        type: 'text',
+        zIndex: 1,
+        sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+        props: { type: 'text', format: '{couple.bride.name}의 결혼식이 ' },
+        style: {
+          text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
+        },
+      },
+      // D-day 숫자 (강조 색상)
+      {
+        id: 'dday-number',
+        type: 'text',
+        zIndex: 1,
+        sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+        binding: 'wedding.dday',
+        props: { type: 'text' },
+        style: {
+          text: { fontSize: 14, fontWeight: 600, color: '#EF90CB', lineHeight: 1.6 },
+        },
+      },
+      // "일 남았습니다."
+      {
+        id: 'dday-suffix',
+        type: 'text',
+        zIndex: 1,
+        sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+        value: '일 남았습니다.',
+        props: { type: 'text' },
+        style: {
+          text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
+        },
+      },
+    ],
   },
   // 7. Countdown Boxes Group (DAYS, HOURS, MINUTES, SECONDS)
   {
@@ -150,7 +169,7 @@ const ELEMENTS: PresetElement[] = [
       },
     },
     children: [
-      // Days Box
+      // Days Box - 2겹 박스 구조
       {
         id: 'countdown-days',
         type: 'group',
@@ -158,36 +177,57 @@ const ELEMENTS: PresetElement[] = [
         sizing: { width: { type: 'fixed', value: 70, unit: 'px' }, height: { type: 'hug' } },
         props: {
           type: 'group',
-          layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
+          layout: { direction: 'vertical', gap: 0, alignItems: 'center' },
+        },
+        style: {
+          background: 'var(--bg-card)',
+          border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 8 },
+          padding: { top: 8, right: 8, bottom: 8, left: 8 },
         },
         children: [
+          // 내부 박스
           {
-            id: 'label-days',
-            type: 'text',
-            zIndex: 2,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            value: 'DAYS',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
-            },
-          },
-          {
-            id: 'value-days',
-            type: 'text',
+            id: 'inner-box-days',
+            type: 'group',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 60, unit: 'px' } },
-            binding: 'countdown.days',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
-              background: 'var(--bg-card)',
-              border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 8 },
+            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+            props: {
+              type: 'group',
+              layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
             },
+            style: {
+              background: 'var(--bg-card)',
+              border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 2 },
+              padding: { top: 8, right: 8, bottom: 12, left: 8 },
+            },
+            children: [
+              {
+                id: 'label-days',
+                type: 'text',
+                zIndex: 2,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                value: 'DAYS',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                },
+              },
+              {
+                id: 'value-days',
+                type: 'text',
+                zIndex: 1,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                binding: 'countdown.days',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                },
+              },
+            ],
           },
         ],
       },
-      // Hours Box
+      // Hours Box - 2겹 박스 구조
       {
         id: 'countdown-hours',
         type: 'group',
@@ -195,36 +235,57 @@ const ELEMENTS: PresetElement[] = [
         sizing: { width: { type: 'fixed', value: 70, unit: 'px' }, height: { type: 'hug' } },
         props: {
           type: 'group',
-          layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
+          layout: { direction: 'vertical', gap: 0, alignItems: 'center' },
+        },
+        style: {
+          background: 'var(--bg-card)',
+          border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 8 },
+          padding: { top: 8, right: 8, bottom: 8, left: 8 },
         },
         children: [
+          // 내부 박스
           {
-            id: 'label-hours',
-            type: 'text',
-            zIndex: 2,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            value: 'HOURS',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
-            },
-          },
-          {
-            id: 'value-hours',
-            type: 'text',
+            id: 'inner-box-hours',
+            type: 'group',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 60, unit: 'px' } },
-            binding: 'countdown.hours',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
-              background: 'var(--bg-card)',
-              border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 8 },
+            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+            props: {
+              type: 'group',
+              layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
             },
+            style: {
+              background: 'var(--bg-card)',
+              border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 2 },
+              padding: { top: 8, right: 8, bottom: 12, left: 8 },
+            },
+            children: [
+              {
+                id: 'label-hours',
+                type: 'text',
+                zIndex: 2,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                value: 'HOURS',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                },
+              },
+              {
+                id: 'value-hours',
+                type: 'text',
+                zIndex: 1,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                binding: 'countdown.hours',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                },
+              },
+            ],
           },
         ],
       },
-      // Minutes Box
+      // Minutes Box - 2겹 박스 구조
       {
         id: 'countdown-minutes',
         type: 'group',
@@ -232,36 +293,57 @@ const ELEMENTS: PresetElement[] = [
         sizing: { width: { type: 'fixed', value: 70, unit: 'px' }, height: { type: 'hug' } },
         props: {
           type: 'group',
-          layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
+          layout: { direction: 'vertical', gap: 0, alignItems: 'center' },
+        },
+        style: {
+          background: 'var(--bg-card)',
+          border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 8 },
+          padding: { top: 8, right: 8, bottom: 8, left: 8 },
         },
         children: [
+          // 내부 박스
           {
-            id: 'label-minutes',
-            type: 'text',
-            zIndex: 2,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            value: 'MINUTES',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
-            },
-          },
-          {
-            id: 'value-minutes',
-            type: 'text',
+            id: 'inner-box-minutes',
+            type: 'group',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 60, unit: 'px' } },
-            binding: 'countdown.minutes',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
-              background: 'var(--bg-card)',
-              border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 8 },
+            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+            props: {
+              type: 'group',
+              layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
             },
+            style: {
+              background: 'var(--bg-card)',
+              border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 2 },
+              padding: { top: 8, right: 8, bottom: 12, left: 8 },
+            },
+            children: [
+              {
+                id: 'label-minutes',
+                type: 'text',
+                zIndex: 2,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                value: 'MINUTES',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                },
+              },
+              {
+                id: 'value-minutes',
+                type: 'text',
+                zIndex: 1,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                binding: 'countdown.minutes',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                },
+              },
+            ],
           },
         ],
       },
-      // Seconds Box
+      // Seconds Box - 2겹 박스 구조
       {
         id: 'countdown-seconds',
         type: 'group',
@@ -269,32 +351,53 @@ const ELEMENTS: PresetElement[] = [
         sizing: { width: { type: 'fixed', value: 70, unit: 'px' }, height: { type: 'hug' } },
         props: {
           type: 'group',
-          layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
+          layout: { direction: 'vertical', gap: 0, alignItems: 'center' },
+        },
+        style: {
+          background: 'var(--bg-card)',
+          border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 8 },
+          padding: { top: 8, right: 8, bottom: 8, left: 8 },
         },
         children: [
+          // 내부 박스
           {
-            id: 'label-seconds',
-            type: 'text',
-            zIndex: 2,
-            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            value: 'SECONDS',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
-            },
-          },
-          {
-            id: 'value-seconds',
-            type: 'text',
+            id: 'inner-box-seconds',
+            type: 'group',
             zIndex: 1,
-            sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 60, unit: 'px' } },
-            binding: 'countdown.seconds',
-            props: { type: 'text' },
-            style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
-              background: 'var(--bg-card)',
-              border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 8 },
+            sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+            props: {
+              type: 'group',
+              layout: { direction: 'vertical', gap: 4, alignItems: 'center' },
             },
+            style: {
+              background: 'var(--bg-card)',
+              border: { width: 1, color: 'var(--border-muted)', style: 'solid', radius: 2 },
+              padding: { top: 8, right: 8, bottom: 12, left: 8 },
+            },
+            children: [
+              {
+                id: 'label-seconds',
+                type: 'text',
+                zIndex: 2,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                value: 'SECONDS',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                },
+              },
+              {
+                id: 'value-seconds',
+                type: 'text',
+                zIndex: 1,
+                sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+                binding: 'countdown.seconds',
+                props: { type: 'text' },
+                style: {
+                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                },
+              },
+            ],
           },
         ],
       },
@@ -315,7 +418,6 @@ export const CALENDAR_KOREAN_COUNTDOWN_BOX: BlockPreset = {
   bindings: [
     'wedding.date',
     'wedding.dateDisplay',
-    'wedding.month',
     'wedding.dday',
     'countdown.days',
     'countdown.hours',
