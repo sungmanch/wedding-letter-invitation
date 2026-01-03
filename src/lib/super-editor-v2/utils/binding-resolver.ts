@@ -120,9 +120,12 @@ export function getValueByPath(
 const COMPUTED_FIELDS = [
   // 날짜/시간 표시
   'wedding.dateDisplay',
+  'wedding.dateDot',  // YYYY.MM.DD 형식
+  'wedding.dateMonthDay',  // MM.DD 형식
   'wedding.timeDisplay',
   'wedding.dday',
   // 날짜 분해 필드
+  'wedding.year',
   'wedding.month',
   'wedding.day',
   'wedding.weekday',  // dayOfWeek → weekday로 rename
@@ -143,6 +146,14 @@ const COMPUTED_FIELDS = [
   // Legacy 호환
   'wedding.dayOfWeek',
 ] as const
+
+// 공지 카드 아이콘 타입 → SVG 경로 매핑 (카드 렌더링에서 사용)
+export const NOTICE_ICON_PATHS: Record<string, string | null> = {
+  'birds-blue': '/assets/notice1.svg',
+  'birds-orange': '/assets/notice2.svg',
+  'birds-green': '/assets/notice3.svg',
+  'none': null,
+}
 
 type ComputedField = typeof COMPUTED_FIELDS[number]
 
@@ -166,11 +177,20 @@ function resolveComputedField(
     case 'wedding.dateDisplay':
       return formatWeddingDateWithTime(dateStr, data.wedding?.time, options.dateFormat)
 
+    case 'wedding.dateDot':
+      return formatDateDot(dateStr)  // YYYY.MM.DD 형식
+
+    case 'wedding.dateMonthDay':
+      return formatDateMonthDay(dateStr)  // MM.DD 형식
+
     case 'wedding.timeDisplay':
       return formatTime(data.wedding?.time)
 
     case 'wedding.dday':
       return calculateDday(dateStr)
+
+    case 'wedding.year':
+      return getYear(dateStr)
 
     case 'wedding.month':
       return getMonth(dateStr)
@@ -355,12 +375,44 @@ export function getDayOffset(dateStr: string, offset: number): string {
 }
 
 /**
+ * 년도 반환
+ */
+export function getYear(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  return String(date.getFullYear())
+}
+
+/**
  * 월 반환
  */
 export function getMonth(dateStr: string): string {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return ''
   return String(date.getMonth() + 1).padStart(2, '0')
+}
+
+/**
+ * YYYY.MM.DD 형식으로 날짜 포맷
+ */
+export function formatDateDot(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}.${month}.${day}`
+}
+
+/**
+ * MM.DD 형식으로 날짜 포맷
+ */
+export function formatDateMonthDay(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${month}.${day}`
 }
 
 /**
@@ -473,8 +525,8 @@ export function isValidVariablePath(path: string): path is VariablePath {
     'wedding.date', 'wedding.time',
 
     // ─── 자동 계산 (__HIDDEN__) ───
-    'wedding.dateDisplay', 'wedding.timeDisplay', 'wedding.dday',
-    'wedding.month', 'wedding.day', 'wedding.weekday',
+    'wedding.dateDisplay', 'wedding.dateDot', 'wedding.timeDisplay', 'wedding.dday',
+    'wedding.year', 'wedding.month', 'wedding.day', 'wedding.weekday',
     'wedding.weekdayMinus2', 'wedding.weekdayMinus1', 'wedding.weekdayPlus1', 'wedding.weekdayPlus2',
     'wedding.dayMinus2', 'wedding.dayMinus1', 'wedding.dayPlus1', 'wedding.dayPlus2',
     'countdown.days', 'countdown.hours', 'countdown.minutes', 'countdown.seconds',
@@ -504,7 +556,7 @@ export function isValidVariablePath(path: string): path is VariablePath {
     'gallery.effect',
     'accounts.groom', 'accounts.bride', 'accounts.kakaopay.groom', 'accounts.kakaopay.bride',
     'rsvp.title', 'rsvp.description', 'rsvp.deadline',
-    'notice.items',
+    'notice.sectionTitle', 'notice.title', 'notice.description', 'notice.items',
     'guestbook.title', 'guestbook.placeholder',
     'ending.message', 'ending.photo',
     'bgm.trackId', 'bgm.title', 'bgm.artist',

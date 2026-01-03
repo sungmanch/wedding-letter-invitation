@@ -31,9 +31,16 @@ export interface ModalPreset {
   /** Modal header configuration */
   header: {
     title: string
+    subtitle?: string
     showCloseButton: boolean
     style: {
       text: {
+        fontFamily: string
+        fontSize: string
+        fontWeight: number
+        color: string
+      }
+      subtitleText?: {
         fontFamily: string
         fontSize: string
         fontWeight: number
@@ -64,6 +71,7 @@ export type ModalSection =
   | ToggleSectionConfig
   | TabSectionConfig
   | TextInputSectionConfig
+  | TextareaSectionConfig
   | RadioSectionConfig
   | CheckboxSectionConfig
 
@@ -98,6 +106,17 @@ export interface TabSectionConfig extends BaseSectionConfig {
 export interface TextInputSectionConfig extends BaseSectionConfig {
   type: 'text-input'
   placeholder?: string
+  style: {
+    labelColor: string
+    inputBorderColor: string
+    placeholderColor: string
+  }
+}
+
+export interface TextareaSectionConfig extends BaseSectionConfig {
+  type: 'textarea'
+  placeholder?: string
+  maxLength?: number
   style: {
     labelColor: string
     inputBorderColor: string

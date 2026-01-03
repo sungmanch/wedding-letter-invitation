@@ -5,13 +5,14 @@
  */
 
 import type { BlockLayout, SizeMode } from '../../../schema/types'
+import { BLOCK_GAP, BLOCK_PADDING } from '../tokens'
 
 // Auto Layout 기본 설정
 export const AUTO_LAYOUT_VERTICAL: BlockLayout = {
   mode: 'auto',
   direction: 'vertical',
-  gap: 16,
-  padding: { top: 40, right: 32, bottom: 40, left: 32 },
+  gap: BLOCK_GAP,
+  padding: BLOCK_PADDING,
   alignItems: 'center',
 }
 

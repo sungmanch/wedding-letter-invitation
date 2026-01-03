@@ -48,17 +48,18 @@ export const NOTICE_CARD_COLORS = {
  * 카드 영역은 notice-swiper 컴포넌트에서 동적 렌더링
  */
 const NOTICE_CARD_ICON_ELEMENTS: PresetElement[] = [
-  // English Label (INFORMATION)
+  // 섹션 제목 (영문 라벨)
   {
     type: 'text',
     layoutMode: 'auto',
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     zIndex: 1,
-    value: 'INFORMATION',
+    binding: 'notice.sectionTitle',
+    value: 'NOTICE',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-body)',
+        fontFamily: 'var(--font-accent)',
         fontSize: 12,
         fontWeight: 500,
         color: 'var(--fg-muted)',
@@ -67,13 +68,14 @@ const NOTICE_CARD_ICON_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // Korean Title (블록 제목)
+  // 블록 제목 (한글)
   {
     type: 'text',
     layoutMode: 'auto',
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     zIndex: 1,
-    value: '예식 안내사항',
+    binding: 'notice.title',
+    value: '예식 안내사항',  // 기본값 (바인딩 없을 때)
     props: { type: 'text' },
     style: {
       text: {
@@ -92,7 +94,8 @@ const NOTICE_CARD_ICON_ELEMENTS: PresetElement[] = [
     layoutMode: 'auto',
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     zIndex: 1,
-    value: '저희 웨딩에 대한 사전 안내를 드립니다.',
+    binding: 'notice.description',
+    value: '저희 웨딩에 대한 사전 안내를 드립니다.',  // 기본값 (바인딩 없을 때)
     props: { type: 'text' },
     style: {
       text: {
@@ -204,7 +207,7 @@ export const NOTICE_CARD_ICON: BlockPreset = {
     'auto-layout',
   ],
   complexity: 'medium',
-  bindings: ['notice.items'],
+  bindings: ['notice.sectionTitle', 'notice.title', 'notice.description', 'notice.items'],
   defaultHeight: HUG_HEIGHT,
   layout: {
     ...AUTO_LAYOUT_VERTICAL,

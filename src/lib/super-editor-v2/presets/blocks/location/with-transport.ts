@@ -85,24 +85,6 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
       background: '#E5E7EB',
     },
   },
-  // Navigation Guide Text
-  {
-    type: 'text',
-    zIndex: 1,
-    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.navGuide',
-    value: '원하시는 내비게이션 앱을 선택해 주세요!',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 15,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-      },
-    },
-  },
   // Navigation Button Group
   {
     type: 'group',
@@ -631,7 +613,8 @@ export const LOCATION_WITH_TRANSPORT: BlockPreset = {
   variant: 'with-transport',
   name: 'Location with Transport Info',
   nameKo: '교통 정보',
-  description: '지도, 네비게이션 버튼, 대중교통/셔틀버스/주차/전세버스 상세 안내를 포함한 오시는길 섹션',
+  description:
+    '지도, 네비게이션 버튼, 대중교통/셔틀버스/주차/전세버스 상세 안내를 포함한 오시는길 섹션',
   tags: ['detailed', 'transport', 'centered', 'light', 'map', 'navigation', 'auto-layout'],
   complexity: 'medium',
   bindings: [

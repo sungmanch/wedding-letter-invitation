@@ -13,6 +13,7 @@ import type { ElementStyle } from '../../schema/types'
 import { useDocument } from '../../context/document-context'
 import { ContactModal } from '../ui/contact-modal'
 import { RsvpModal } from '../ui/rsvp-modal'
+import { GuestbookModal } from '../ui/guestbook-modal'
 import { pxToRem } from '../../utils'
 
 // Navigation Icons
@@ -26,7 +27,7 @@ import IconTmap from '@/assets/Icon_tmap.svg'
 
 export interface ButtonElementProps {
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block' | 'guestbook-modal'
   value?: unknown
   style?: ElementStyle
   editable?: boolean
@@ -35,6 +36,8 @@ export interface ButtonElementProps {
   hugMode?: boolean
   /** 커스텀 아이콘 (프리셋 ID 또는 'none') */
   icon?: 'naver' | 'kakao' | 'tmap' | 'none' | string
+  /** show-block 액션에서 표시할 블록 타입 */
+  targetBlockType?: string
 }
 
 // ============================================
@@ -72,10 +75,12 @@ export function ButtonElement({
   className = '',
   hugMode = false,
   icon,
+  targetBlockType,
 }: ButtonElementProps) {
   const { document, data } = useDocument()
   const [contactModalOpen, setContactModalOpen] = useState(false)
   const [rsvpModalOpen, setRsvpModalOpen] = useState(false)
+  const [guestbookModalOpen, setGuestbookModalOpen] = useState(false)
 
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
@@ -190,8 +195,19 @@ export function ButtonElement({
       case 'rsvp-modal':
         setRsvpModalOpen(true)
         break
+
+      case 'guestbook-modal':
+        setGuestbookModalOpen(true)
+        break
+
+      case 'show-block':
+        // targetBlockType에 따라 적절한 모달 열기
+        if (targetBlockType === 'message') {
+          setGuestbookModalOpen(true)
+        }
+        break
     }
-  }, [action, value, editable])
+  }, [action, value, editable, targetBlockType])
 
   // 액션별 아이콘
   const ActionIcon = useMemo(() => {
@@ -295,6 +311,16 @@ export function ButtonElement({
           invitationId={document.id}
           data={data}
           config={data.rsvp}
+        />
+      )}
+
+      {/* 방명록 모달 */}
+      {(action === 'guestbook-modal' || (action === 'show-block' && targetBlockType === 'message')) && (
+        <GuestbookModal
+          open={guestbookModalOpen}
+          onOpenChange={setGuestbookModalOpen}
+          invitationId={document.id}
+          config={data.guestbook}
         />
       )}
     </>

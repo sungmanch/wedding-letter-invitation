@@ -220,7 +220,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.days',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],
@@ -278,7 +278,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.hours',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],
@@ -336,7 +336,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.minutes',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],
@@ -394,7 +394,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.seconds',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 28, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],

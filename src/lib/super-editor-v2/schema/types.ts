@@ -110,7 +110,8 @@ export type BlockType =
   // ─── 핵심 섹션 ───
   | 'hero'              // 메인 히어로 (메인 사진, 이름, 날짜)
   | 'greeting-parents'  // 인사말 + 혼주 소개 (통합)
-  | 'profile'           // 신랑신부 소개/인터뷰
+  | 'profile'           // 신랑신부 소개 (About Us)
+  | 'interview'         // 인터뷰 Q&A (아코디언)
   | 'calendar'          // 예식일시 (달력/D-day)
   | 'gallery'           // 갤러리 (사진/영상)
   | 'rsvp'              // 참석 여부
@@ -171,6 +172,9 @@ export interface Element {
 
   // 변수 바인딩 (AI가 의미 파악)
   binding?: VariablePath
+
+  // 바인딩 값이 없을 때 fallback 바인딩
+  bindingFallback?: VariablePath
 
   // 바인딩 없을 때 직접 값
   value?: string | number
@@ -323,7 +327,7 @@ export type VariablePath =
   | 'gallery.effect'
   | 'accounts.groom' | 'accounts.bride' | 'accounts.kakaopay.groom' | 'accounts.kakaopay.bride'
   | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline'
-  | 'notice.icon' | 'notice.title' | 'notice.description' | 'notice.items'
+  | 'notice.sectionTitle' | 'notice.title' | 'notice.description' | 'notice.items'
   | 'guestbook.title' | 'guestbook.placeholder'
   | 'ending.message' | 'ending.photo'
   | 'bgm.trackId' | 'bgm.title' | 'bgm.artist'
@@ -909,8 +913,8 @@ export type NoticeIconType = 'birds-blue' | 'birds-orange' | 'birds-green' | 'no
 export interface NoticeItem {
   title: string
   content: string
-  // SVG 아이콘 타입 (card-icon 프리셋용)
-  iconType?: 'rings' | 'birds' | 'hearts'
+  // SVG 아이콘 타입 (배경색+아이콘 스타일)
+  iconType?: NoticeIconType
   // 카드 배경색 (P-S-T 시스템의 S 변형)
   backgroundColor?: string
   // 카드 테두리 색상
@@ -965,10 +969,10 @@ export interface WeddingData {
   accounts?: AccountsConfig
   rsvp?: RsvpConfig
   notice?: {
-    icon?: NoticeIconType  // 상단 아이콘 (새, 하트 등)
+    sectionTitle?: string  // 상단 라벨 ("NOTICE", "INFORMATION" 등)
     title?: string         // 블록 제목 ("포토부스 안내")
     description?: string   // 설명 텍스트
-    items?: NoticeItem[]
+    items?: NoticeItem[]   // 카드 배열 (swipe)
   }
   guestbook?: GuestbookConfig
   ending?: EndingConfig

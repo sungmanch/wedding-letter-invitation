@@ -28,7 +28,7 @@ const ELEMENTS: PresetElement[] = [
     id: 'title-our',
     type: 'text',
     x: 0,
-    y: 8,
+    y: 13,
     width: 100,
     height: 5,
     zIndex: 2,
@@ -37,7 +37,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: "'Great Vibes', cursive",
-        fontSize: 36,
+        fontSize: 44,
         fontWeight: 400,
         color: '#1A1A1A',
         textAlign: 'center',
@@ -49,7 +49,7 @@ const ELEMENTS: PresetElement[] = [
     id: 'title-wedding',
     type: 'text',
     x: 0,
-    y: 12,
+    y: 17,
     width: 100,
     height: 6,
     zIndex: 2,
@@ -58,7 +58,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: "'Great Vibes', cursive",
-        fontSize: 48,
+        fontSize: 56,
         fontWeight: 400,
         color: '#1A1A1A',
         textAlign: 'center',
@@ -70,7 +70,7 @@ const ELEMENTS: PresetElement[] = [
     id: 'title-day',
     type: 'text',
     x: 0,
-    y: 18,
+    y: 23,
     width: 100,
     height: 5,
     zIndex: 2,
@@ -79,7 +79,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: "'Great Vibes', cursive",
-        fontSize: 36,
+        fontSize: 44,
         fontWeight: 400,
         color: '#1A1A1A',
         textAlign: 'center',
@@ -91,11 +91,11 @@ const ELEMENTS: PresetElement[] = [
     id: 'wedding-date',
     type: 'text',
     x: 0,
-    y: 28,
+    y: 38,
     width: 100,
     height: 4,
     zIndex: 2,
-    binding: 'wedding.date',
+    binding: 'wedding.dateDot',
     props: { type: 'text' },
     style: {
       text: {
@@ -112,23 +112,24 @@ const ELEMENTS: PresetElement[] = [
     id: 'main-image',
     type: 'image',
     x: 10,
-    y: 35,
+    y: 43,
     width: 80,
     height: 45,
     zIndex: 1,
     binding: 'photos.main',
     props: { type: 'image', objectFit: 'cover' },
   },
-  // 신랑 이름 (Calistoga)
+  // 신랑 이름 (영어 우선, 없으면 한글)
   {
     id: 'groom-name',
     type: 'text',
     x: 0,
-    y: 84,
+    y: 89,
     width: 45,
     height: 6,
     zIndex: 2,
-    binding: 'couple.groom.name',
+    binding: 'couple.groom.nameEn',
+    bindingFallback: 'couple.groom.name',
     props: { type: 'text' },
     style: {
       text: {
@@ -146,7 +147,7 @@ const ELEMENTS: PresetElement[] = [
     id: 'separator',
     type: 'text',
     x: 45,
-    y: 84,
+    y: 89,
     width: 10,
     height: 6,
     zIndex: 2,
@@ -162,16 +163,17 @@ const ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 신부 이름 (Calistoga)
+  // 신부 이름 (영어 우선, 없으면 한글)
   {
     id: 'bride-name',
     type: 'text',
     x: 55,
-    y: 84,
+    y: 89,
     width: 45,
     height: 6,
     zIndex: 2,
-    binding: 'couple.bride.name',
+    binding: 'couple.bride.nameEn',
+    bindingFallback: 'couple.bride.name',
     props: { type: 'text' },
     style: {
       text: {
@@ -197,9 +199,11 @@ export const HERO_CLASSIC_ELEGANT: BlockPreset = {
   complexity: 'medium',
   bindings: [
     'photos.main',
+    'couple.groom.nameEn',
     'couple.groom.name',
+    'couple.bride.nameEn',
     'couple.bride.name',
-    'wedding.date',
+    'wedding.dateDot',
   ],
   defaultHeight: HERO_HEIGHT,
   layout: undefined,

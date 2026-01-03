@@ -36,10 +36,10 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Square', sans-serif",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 19,
         fontWeight: 600,
-        color: '#FFB6C1',
+        color: '#EC8A87',
         textAlign: 'left',
       },
     },
@@ -57,10 +57,10 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Square', sans-serif",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 19,
         fontWeight: 600,
-        color: '#FFB6C1',
+        color: '#EC8A87',
         textAlign: 'right',
       },
     },
@@ -78,11 +78,13 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Alata', sans-serif",
-        fontSize: 48,
+        fontFamily: "'Kodchasan', sans-serif",
+        fontSize: 64,
         fontWeight: 400,
-        color: '#FFB6C1',
+        color: '#EC8A87',
         textAlign: 'left',
+        lineHeight: 66,
+        letterSpacing: -3.2, // -5% of 64px
       },
     },
   },
@@ -99,11 +101,13 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Alata', sans-serif",
-        fontSize: 48,
+        fontFamily: "'Kodchasan', sans-serif",
+        fontSize: 64,
         fontWeight: 400,
-        color: '#FFB6C1',
+        color: '#EC8A87',
         textAlign: 'left',
+        lineHeight: 66,
+        letterSpacing: -3.2, // -5% of 64px
       },
     },
   },
@@ -120,11 +124,13 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Alata', sans-serif",
-        fontSize: 48,
+        fontFamily: "'Kodchasan', sans-serif",
+        fontSize: 64,
         fontWeight: 400,
-        color: '#FFB6C1',
+        color: '#EC8A87',
         textAlign: 'left',
+        lineHeight: 66,
+        letterSpacing: -3.2, // -5% of 64px
       },
     },
   },
@@ -137,14 +143,14 @@ const ELEMENTS: PresetElement[] = [
     width: 50,
     height: 8,
     zIndex: 2,
-    binding: 'wedding.date',
+    binding: 'wedding.dateMonthDay',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Alata', sans-serif",
+        fontFamily: "'Kodchasan', sans-serif",
         fontSize: 48,
         fontWeight: 400,
-        color: '#FFB6C1',
+        color: '#EC8A87',
         textAlign: 'left',
       },
     },
@@ -164,7 +170,7 @@ export const HERO_DARK_ROMANTIC: BlockPreset = {
     'photos.main',
     'couple.groom.name',
     'couple.bride.name',
-    'wedding.date',
+    'wedding.dateMonthDay',
   ],
   defaultHeight: HERO_HEIGHT,
   layout: undefined,

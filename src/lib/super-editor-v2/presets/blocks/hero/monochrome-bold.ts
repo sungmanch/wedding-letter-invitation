@@ -10,6 +10,12 @@
 import type { BlockPreset, PresetElement } from '../types'
 import { HERO_HEIGHT } from './_shared'
 
+// 포인트 컬러
+const ACCENT_COLOR = '#EF90CB'
+
+// 요소 간 간격
+const GAP = 0 // vh
+
 const ELEMENTS: PresetElement[] = [
   // 배경 이미지 (흑백 필터)
   {
@@ -23,24 +29,25 @@ const ELEMENTS: PresetElement[] = [
     binding: 'photos.main',
     props: { type: 'image', objectFit: 'cover', filter: 'grayscale(100%) brightness(0.9)' },
   },
-  // 신랑 이름
+  // 신랑 이름 (y=35, height=3)
   {
     id: 'groom-name',
     type: 'text',
     x: 0,
     y: 35,
     width: 45,
-    height: 5,
+    height: 3,
     zIndex: 2,
     binding: 'couple.groom.name',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Square', sans-serif",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 18,
         fontWeight: 600,
-        color: '#FF69B4',
+        color: ACCENT_COLOR,
         textAlign: 'right',
+        letterSpacing: -0.72, // -4%
       },
     },
   },
@@ -51,16 +58,16 @@ const ELEMENTS: PresetElement[] = [
     x: 45,
     y: 35,
     width: 10,
-    height: 5,
+    height: 3,
     zIndex: 2,
     value: '•',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Square', sans-serif",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 18,
         fontWeight: 600,
-        color: '#FF69B4',
+        color: ACCENT_COLOR,
         textAlign: 'center',
       },
     },
@@ -72,62 +79,63 @@ const ELEMENTS: PresetElement[] = [
     x: 55,
     y: 35,
     width: 45,
-    height: 5,
+    height: 3,
     zIndex: 2,
     binding: 'couple.bride.name',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Square', sans-serif",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 18,
         fontWeight: 600,
-        color: '#FF69B4',
+        color: ACCENT_COLOR,
         textAlign: 'left',
+        letterSpacing: -0.72, // -4%
       },
     },
   },
-  // "The Wedding Day" 타이틀 (3줄)
+  // "The Wedding Day" 타이틀 (3줄) - 이름 끝(38) + GAP(0) = 38
   {
     id: 'title',
     type: 'text',
     x: 0,
-    y: 40,
+    y: 38,
     width: 100,
-    height: 25,
+    height: 22,
     zIndex: 2,
     value: 'The\nWedding\nDay',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Pretendard', sans-serif",
-        fontSize: 64,
-        fontWeight: 700,
-        color: '#FF69B4',
+        fontFamily: "'Alata', sans-serif",
+        fontSize: 60,
+        fontWeight: 400,
+        color: ACCENT_COLOR,
         textAlign: 'center',
-        lineHeight: 1.1,
-        letterSpacing: -1,
+        lineHeight: 0.83, // 50px at 60px font
+        letterSpacing: -2.4, // -4%
       },
     },
   },
-  // 날짜
+  // 날짜 (YYYY.MM.DD 형식) - 타이틀 끝(60) + 1vh = 61
   {
     id: 'wedding-date',
     type: 'text',
     x: 0,
-    y: 66,
+    y: 61,
     width: 100,
-    height: 6,
+    height: 4,
     zIndex: 2,
-    binding: 'wedding.date',
+    binding: 'wedding.dateDot',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Square', sans-serif",
+        fontFamily: "'Alata', sans-serif",
         fontSize: 19,
-        fontWeight: 600,
-        color: '#FF69B4',
+        fontWeight: 400,
+        color: ACCENT_COLOR,
         textAlign: 'center',
-        letterSpacing: 1,
+        letterSpacing: -0.76, // -4%
       },
     },
   },
@@ -146,7 +154,7 @@ export const HERO_MONOCHROME_BOLD: BlockPreset = {
     'photos.main',
     'couple.groom.name',
     'couple.bride.name',
-    'wedding.date',
+    'wedding.dateDot',
   ],
   defaultHeight: HERO_HEIGHT,
   layout: undefined,

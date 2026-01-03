@@ -23,49 +23,50 @@ const ELEMENTS: PresetElement[] = [
     binding: 'photos.main',
     props: { type: 'image', objectFit: 'cover' },
   },
-  // 월 숫자 (상단)
+  // 날짜 (MM\nDD 형식)
   {
-    id: 'month-number',
+    id: 'date-number',
     type: 'text',
     x: 0,
-    y: 5,
+    y: 10, // +5% top padding
     width: 100,
-    height: 15,
+    height: 25,
     zIndex: 1,
     binding: 'wedding.date',
-    props: { type: 'text' },
+    props: { type: 'text', format: '{wedding.month}\n{wedding.day}' },
     style: {
       text: {
         fontFamily: "'Bangers', cursive",
-        fontSize: 144,
+        fontSize: 150,
         fontWeight: 400,
         color: '#FFFFFF',
         textAlign: 'center',
-        lineHeight: 1,
+        lineHeight: 0.8, // 120px / 150px
         textShadow: OVERLAY_TEXT_SHADOW,
       },
     },
   },
-  // "We are getting married" (브러쉬 스크립트)
+  // "We are getting married" (Great Vibes 스크립트, 12.79도 회전)
   {
     id: 'title',
     type: 'text',
     x: 0,
-    y: 26,
+    y: 34, // 21 + 10% padding + 3% extra
     width: 100,
     height: 20,
     zIndex: 2,
+    rotation: -12.79,
     value: 'We are\ngetting\nmarried',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Brush Script', cursive",
-        fontSize: 72,
+        fontFamily: "'Great Vibes', cursive",
+        fontSize: 80,
         fontWeight: 400,
         color: '#0047AB',
         textAlign: 'center',
-        lineHeight: 1.0,
-        textShadow: '0 0 10px rgba(255,255,255,0.5)',
+        lineHeight: 0.925, // 74px / 80px
+        letterSpacing: 4, // 5% of 80px
       },
     },
   },
@@ -82,7 +83,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Pen Script', cursive",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 19,
         fontWeight: 500,
         color: '#FFFFFF',
@@ -104,7 +105,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: "'Nanum Pen Script', cursive",
+        fontFamily: "'Pretendard', sans-serif",
         fontSize: 19,
         fontWeight: 500,
         color: '#FFFFFF',
@@ -124,12 +125,7 @@ export const HERO_BRIGHT_CASUAL: BlockPreset = {
   description: '화사하고 밝은 느낌. 큰 숫자와 브러쉬 스크립트 폰트',
   tags: ['bright', 'casual', 'bold-numbers', 'brush-script', 'absolute'],
   complexity: 'high',
-  bindings: [
-    'photos.main',
-    'couple.groom.name',
-    'couple.bride.name',
-    'wedding.date',
-  ],
+  bindings: ['photos.main', 'couple.groom.name', 'couple.bride.name', 'wedding.date'],
   defaultHeight: HERO_HEIGHT,
   layout: undefined,
   defaultElements: ELEMENTS,

@@ -47,6 +47,7 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   music: '음악',
   loading: '로딩',
   custom: '커스텀',
+  interview: '인터뷰',
 }
 
 // ============================================

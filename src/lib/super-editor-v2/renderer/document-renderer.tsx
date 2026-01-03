@@ -103,6 +103,22 @@ export function DocumentRenderer({
           ))}
         </div>
 
+        {/* Credit - 항상 맨 아래에 표시 */}
+        <div
+          className="se2-credit"
+          style={{
+            padding: '24px 0 40px',
+            textAlign: 'center',
+            fontFamily: 'var(--font-display)',
+            fontSize: '14px',
+            fontWeight: 400,
+            color: 'var(--fg-muted)',
+            letterSpacing: '1px',
+          }}
+        >
+          maison de letter
+        </div>
+
         {/* 플로팅 요소 렌더링 */}
         {floatingElements.length > 0 && (
           <FloatingRenderer elements={floatingElements} />
@@ -188,6 +204,22 @@ export function StaticDocumentRenderer({
           style={resolvedStyle}
         />
       ))}
+
+      {/* Credit - 항상 맨 아래에 표시 */}
+      <div
+        className="se2-credit"
+        style={{
+          padding: '24px 0 40px',
+          textAlign: 'center',
+          fontFamily: 'var(--font-display)',
+          fontSize: '14px',
+          fontWeight: 400,
+          color: 'var(--fg-muted)',
+          letterSpacing: '1px',
+        }}
+      >
+        maison de letter
+      </div>
     </div>
   )
 }

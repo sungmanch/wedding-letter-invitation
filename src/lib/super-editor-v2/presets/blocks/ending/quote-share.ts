@@ -265,29 +265,6 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
       ],
     },
 
-    // 4. 로고/크레딧
-    {
-      id: 'credit',
-      type: 'text',
-      layoutMode: 'auto',
-      sizing: {
-        width: { type: 'hug' },
-        height: { type: 'hug' },
-      },
-      zIndex: 1,
-      value: 'maison de letter',
-      props: { type: 'text' },
-      style: {
-        text: {
-          fontFamily: 'var(--font-display)',
-          fontSize: 14,
-          fontWeight: 400,
-          color: 'var(--fg-muted)',
-          textAlign: 'center',
-          letterSpacing: 1,
-        },
-      },
-    },
   ],
 
   // ─── AI Hints ───

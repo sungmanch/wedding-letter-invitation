@@ -314,6 +314,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   hero: '🖼️',
   'greeting-parents': '💌',
   profile: '👤',
+  interview: '💬',
   calendar: '📅',
   gallery: '🎨',
   rsvp: '✅',

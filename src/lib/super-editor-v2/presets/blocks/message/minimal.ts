@@ -22,6 +22,7 @@ const MINIMAL_MODAL: ModalPreset = {
 
   header: {
     title: '방명록 남기기',
+    subtitle: '직접 축하의 마음을 전해보세요.',
     showCloseButton: true,
     style: {
       text: {
@@ -30,27 +31,35 @@ const MINIMAL_MODAL: ModalPreset = {
         fontWeight: 600,
         color: 'var(--fg-default)',
       },
+      subtitleText: {
+        fontFamily: 'var(--font-body)',
+        fontSize: '14px',
+        fontWeight: 400,
+        color: 'var(--fg-muted)',
+      },
     },
   },
 
   sections: [
     {
-      id: 'description',
+      id: 'name',
       type: 'text-input',
-      label: '직접 축하의 마음을 전해보세요.',
-      required: false,
+      label: '성함을 입력해 주세요.',
+      placeholder: '성함',
+      required: true,
       style: {
-        labelColor: 'var(--fg-muted)',
+        labelColor: 'var(--fg-default)',
         inputBorderColor: 'var(--border-default)',
         placeholderColor: 'var(--fg-muted)',
       },
     },
     {
       id: 'message',
-      type: 'text-input',
+      type: 'textarea',
       label: '방명록을 작성해 주세요.',
       placeholder: '방명록 (최대 50자)',
       required: true,
+      maxLength: 50,
       style: {
         labelColor: 'var(--fg-default)',
         inputBorderColor: 'var(--border-default)',
@@ -185,7 +194,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       type: 'button',
       layoutMode: 'auto',
       sizing: {
-        width: { type: 'fixed', value: 200, unit: 'px' },
+        width: { type: 'fill' },
         height: { type: 'hug' },
       },
       zIndex: 1,
@@ -208,30 +217,13 @@ export const MESSAGE_MINIMAL: BlockPreset = {
           width: 1,
           color: 'var(--border-default)',
           style: 'solid',
-          radius: 30,
+          radius: 0,
         },
-      },
-    },
-
-    // 5. 전체 보기 링크
-    {
-      id: 'view-all',
-      type: 'text',
-      layoutMode: 'auto',
-      sizing: {
-        width: { type: 'hug' },
-        height: { type: 'hug' },
-      },
-      zIndex: 1,
-      value: '전체 보기',
-      props: { type: 'text' },
-      style: {
-        text: {
-          fontFamily: 'var(--font-body)',
-          fontSize: 14,
-          fontWeight: 500,
-          color: 'var(--fg-default)',
-          textAlign: 'center',
+        padding: {
+          top: 8,
+          right: 16,
+          bottom: 8,
+          left: 16,
         },
       },
     },

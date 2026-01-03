@@ -281,7 +281,7 @@ function NoticeCard({ item, index, tokens }: NoticeCardProps) {
   const template = NOTICE_CARD_TEMPLATE
 
   const cardStyle: CSSProperties = {
-    flex: '0 0 100%',
+    flex: '0 0 calc(100% - 48px)',  // 좌우 마진(24px * 2)을 고려한 너비
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

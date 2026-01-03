@@ -23,11 +23,13 @@ import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
  * 각 아이템은 이 요소 구조를 따름
  */
 const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
-  // English Label (NOTICE)
+  // 섹션 제목 (영문 라벨)
   {
     type: 'text',
+    layoutMode: 'auto',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'notice.sectionTitle',
     value: 'NOTICE',
     props: { type: 'text' },
     style: {
@@ -41,12 +43,14 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // Korean Title (바인딩: notice.items[].title)
+  // Korean Title (블록 제목)
   {
     type: 'text',
+    layoutMode: 'auto',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    value: '공지사항 제목',
+    binding: 'notice.title',
+    value: '공지사항',  // 기본값 (바인딩 없을 때)
     props: { type: 'text' },
     style: {
       text: {
@@ -59,12 +63,14 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // Content (바인딩: notice.items[].content) - hug 모드로 텍스트 길이에 맞게 확장
+  // Description (블록 설명)
   {
     type: 'text',
+    layoutMode: 'auto',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    value: '공지사항 내용이 여기에 표시됩니다.\n여러 줄로 작성할 수 있습니다.',
+    binding: 'notice.description',
+    value: '공지사항 내용이 여기에 표시됩니다.\n여러 줄로 작성할 수 있습니다.',  // 기본값 (바인딩 없을 때)
     props: { type: 'text' },
     style: {
       text: {
@@ -102,7 +108,7 @@ export const NOTICE_CLASSIC_LABEL: BlockPreset = {
   description: '영문 NOTICE 라벨과 한글 제목이 조화롭게 배치된 클래식 공지 스타일',
   tags: ['elegant', 'classic', 'centered', 'label', 'minimal', 'light', 'auto-layout'],
   complexity: 'low',
-  bindings: ['notice.items'],
+  bindings: ['notice.sectionTitle', 'notice.title', 'notice.description', 'notice.items'],
   defaultHeight: HUG_HEIGHT,
   layout: AUTO_LAYOUT_VERTICAL,
   defaultElements: NOTICE_CLASSIC_LABEL_ELEMENTS,

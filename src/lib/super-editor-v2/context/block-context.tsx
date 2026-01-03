@@ -234,6 +234,7 @@ export function getBlockTypeLabel(type: BlockType): string {
     hero: '메인 커버',
     'greeting-parents': '인사말/혼주',
     profile: '신랑신부 소개',
+    interview: '인터뷰',
     calendar: '예식일시',
     gallery: '갤러리',
     rsvp: '참석 여부',

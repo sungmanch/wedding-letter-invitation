@@ -67,11 +67,16 @@ export function ElementRenderer({
   // content 필드도 확인 (일부 요소는 value 대신 content 사용)
   const resolvedValue = useMemo(() => {
     if (element.binding) {
-      return resolveBinding(data, element.binding)
+      const value = resolveBinding(data, element.binding)
+      // 바인딩 값이 비어있으면 fallback 바인딩 사용
+      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
+        return resolveBinding(data, element.bindingFallback)
+      }
+      return value
     }
     // value가 없으면 content 필드 확인
     return element.value ?? (element as { content?: string }).content
-  }, [element.binding, element.value, data, element])
+  }, [element.binding, element.bindingFallback, element.value, data, element])
 
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
@@ -196,9 +201,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
   }
 
   // photos.gallery 바인딩은 타입과 무관하게 갤러리로 렌더링
-  console.log('[ElementTypeRenderer] 🔍 element:', element.id, element.type, element.binding)
   if (element.binding === 'photos.gallery') {
-    console.log('[ElementTypeRenderer] 🖼️ Rendering GalleryElement for:', element.id)
     return (
       <GalleryElement
         element={element}
@@ -211,9 +214,10 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     case 'text':
       return (
         <TextElement
-          value={value as string}
+          value={value as string | string[]}
           style={element.style?.text}
           editable={editable}
+          listStyle={(props as TextProps).listStyle}
         />
       )
 
@@ -223,6 +227,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           src={value as string}
           objectFit={(props as ImageProps).objectFit}
           overlay={(props as ImageProps).overlay}
+          filter={(props as ImageProps).filter}
           style={element.style}
           editable={editable}
         />
@@ -385,14 +390,7 @@ function GalleryElement({ element, editable }: GalleryElementProps) {
 
   // 갤러리 이미지 배열
   const galleryImages = useMemo(() => {
-    const rawGallery = data.photos?.gallery
-    console.log('[GalleryElement] 📸 Raw gallery data:', rawGallery)
-    console.log('[GalleryElement] 📸 Raw gallery type:', typeof rawGallery, Array.isArray(rawGallery))
-    if (Array.isArray(rawGallery) && rawGallery.length > 0) {
-      console.log('[GalleryElement] 📸 First item:', rawGallery[0])
-    }
     const images = resolveBinding(data, 'photos.gallery')
-    console.log('[GalleryElement] 📸 Resolved images:', images)
     if (Array.isArray(images)) {
       return images as string[]
     }
@@ -496,7 +494,7 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       flexDirection = reverse ? 'column-reverse' : 'column'
     }
 
-    return {
+    const style: CSSProperties = {
       display: 'flex',
       flexDirection,
       flexWrap: layout?.wrap ? 'wrap' : undefined,
@@ -505,8 +503,35 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       justifyContent: layout?.justifyContent ?? 'start',
       width: '100%',
       height: '100%',
+      boxSizing: 'border-box',
     }
-  }, [layout])
+
+    // background 적용
+    if (element.style?.background) {
+      if (typeof element.style.background === 'string') {
+        style.backgroundColor = element.style.background
+      }
+    }
+
+    // padding 적용
+    if (element.style?.padding) {
+      const p = element.style.padding
+      style.paddingTop = p.top ?? 0
+      style.paddingRight = p.right ?? 0
+      style.paddingBottom = p.bottom ?? 0
+      style.paddingLeft = p.left ?? 0
+    }
+
+    // border 적용
+    if (element.style?.border) {
+      style.borderWidth = element.style.border.width
+      style.borderColor = element.style.border.color
+      style.borderStyle = element.style.border.style
+      style.borderRadius = element.style.border.radius
+    }
+
+    return style
+  }, [layout, element.style])
 
   const children = element.children ?? []
 
@@ -540,10 +565,15 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
   // 값 해석
   const resolvedValue = useMemo(() => {
     if (element.binding) {
-      return resolveBinding(data, element.binding)
+      const value = resolveBinding(data, element.binding)
+      // 바인딩 값이 비어있으면 fallback 바인딩 사용
+      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
+        return resolveBinding(data, element.bindingFallback)
+      }
+      return value
     }
     return element.value ?? (element as { content?: string }).content
-  }, [element.binding, element.value, data, element])
+  }, [element.binding, element.bindingFallback, element.value, data, element])
 
   const formattedValue = useMemo(() => {
     if (props?.type === 'text' && (props as TextProps).format) {
@@ -582,9 +612,10 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
       case 'text':
         return (
           <TextElement
-            value={value as string}
+            value={value as string | string[]}
             style={element.style?.text}
             editable={editable}
+            listStyle={(props as TextProps).listStyle}
           />
         )
 
@@ -594,6 +625,7 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
             src={value as string}
             objectFit={(props as ImageProps).objectFit}
             overlay={(props as ImageProps).overlay}
+            filter={(props as ImageProps).filter}
             style={element.style}
             editable={editable}
           />
