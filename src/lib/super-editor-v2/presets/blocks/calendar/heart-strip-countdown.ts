@@ -98,7 +98,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.weekdayMinus2',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -109,7 +114,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.weekdayMinus1',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -136,7 +146,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.weekdayPlus1',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -147,7 +162,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.weekdayPlus2',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
         ],
@@ -190,7 +210,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.dayMinus2',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 28, fontWeight: 400, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 28,
+                fontWeight: 400,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -201,15 +226,23 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.dayMinus1',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 28, fontWeight: 400, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 28,
+                fontWeight: 400,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
             },
           },
           // 중앙 날짜 셀 (하트 마커 + 날짜 텍스트를 포함하는 relative 컨테이너)
           {
             id: 'day-3-cell',
             type: 'group',
-            zIndex: 1,
-            sizing: { width: { type: 'fixed', value: 80, unit: 'px' }, height: { type: 'fixed', value: 80, unit: 'px' } },
+            zIndex: 10, // divider(zIndex:1)보다 높게
+            sizing: {
+              width: { type: 'fixed', value: 50, unit: 'px' },
+              height: { type: 'fixed', value: 50, unit: 'px' },
+            },
             props: {
               type: 'group',
               layout: {
@@ -259,7 +292,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.dayPlus1',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 28, fontWeight: 400, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 28,
+                fontWeight: 400,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -270,7 +308,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'wedding.dayPlus2',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 28, fontWeight: 400, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 28,
+                fontWeight: 400,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
             },
           },
         ],
@@ -321,7 +364,10 @@ const ELEMENTS: PresetElement[] = [
         id: 'dday-heart-icon',
         type: 'icon',
         zIndex: 1,
-        sizing: { width: { type: 'fixed', value: 20, unit: 'px' }, height: { type: 'fixed', value: 20, unit: 'px' } },
+        sizing: {
+          width: { type: 'fixed', value: 20, unit: 'px' },
+          height: { type: 'fixed', value: 20, unit: 'px' },
+        },
         props: {
           type: 'icon',
           icon: 'heart-outline',
@@ -400,7 +446,12 @@ const ELEMENTS: PresetElement[] = [
             value: 'DAYS',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 10,
+                fontWeight: 500,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -411,7 +462,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'countdown.days',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 32,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
               border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 4 },
             },
           },
@@ -436,7 +492,12 @@ const ELEMENTS: PresetElement[] = [
             value: 'HOURS',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 10,
+                fontWeight: 500,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -447,7 +508,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'countdown.hours',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 32,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
               border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 4 },
             },
           },
@@ -472,7 +538,12 @@ const ELEMENTS: PresetElement[] = [
             value: 'MINUTES',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 10,
+                fontWeight: 500,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -483,7 +554,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'countdown.minutes',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 32,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
               border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 4 },
             },
           },
@@ -508,7 +584,12 @@ const ELEMENTS: PresetElement[] = [
             value: 'SECONDS',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+              text: {
+                fontSize: 10,
+                fontWeight: 500,
+                color: 'var(--fg-muted)',
+                textAlign: 'center',
+              },
             },
           },
           {
@@ -519,7 +600,12 @@ const ELEMENTS: PresetElement[] = [
             binding: 'countdown.seconds',
             props: { type: 'text' },
             style: {
-              text: { fontSize: 32, fontWeight: 600, color: 'var(--fg-default)', textAlign: 'center' },
+              text: {
+                fontSize: 32,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'center',
+              },
               border: { width: 1, color: 'var(--border-default)', style: 'solid', radius: 4 },
             },
           },
@@ -568,7 +654,13 @@ export const CALENDAR_HEART_STRIP_COUNTDOWN: BlockPreset = {
   recommendedThemes: ['simple-pink', 'romantic-blush', 'classic-ivory'],
   aiHints: {
     mood: ['romantic', 'warm', 'elegant'],
-    style: ['strip-calendar', 'heart-marker', 'inline-dday', 'border-only-countdown', 'auto-layout'],
+    style: [
+      'strip-calendar',
+      'heart-marker',
+      'inline-dday',
+      'border-only-countdown',
+      'auto-layout',
+    ],
     useCase: ['한글 청첩장', '카운트다운 강조', 'D-day 표시', '로맨틱 스타일'],
   },
 }
