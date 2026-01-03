@@ -30,14 +30,40 @@ type TabSide = 'groom' | 'bride'
 // ============================================
 
 /**
- * 계좌 정보가 유효한지 확인 (필수 필드: 은행명, 계좌번호, 예금주)
+ * 계좌 정보가 유효한지 확인 (필수 필드: 은행명, 계좌번호)
+ * holder는 선택적 (비어있으면 렌더링 시 이름으로 fallback)
  */
 function isValidAccount(account: AccountItem): boolean {
   return !!(
     account.bank?.trim() &&
-    account.number?.trim() &&
-    account.holder?.trim()
+    account.number?.trim()
   )
+}
+
+/**
+ * relation과 side로 이름 데이터 경로를 찾아 반환
+ */
+function getHolderFallback(
+  data: ReturnType<typeof useDocument>['data'],
+  side: TabSide,
+  relation: string
+): string {
+  if (relation === '본인') {
+    return side === 'groom'
+      ? data?.couple?.groom?.name ?? ''
+      : data?.couple?.bride?.name ?? ''
+  }
+  if (relation === '아버지') {
+    return side === 'groom'
+      ? data?.parents?.groom?.father?.name ?? ''
+      : data?.parents?.bride?.father?.name ?? ''
+  }
+  if (relation === '어머니') {
+    return side === 'groom'
+      ? data?.parents?.groom?.mother?.name ?? ''
+      : data?.parents?.bride?.mother?.name ?? ''
+  }
+  return ''
 }
 
 // ============================================
@@ -49,10 +75,12 @@ export function AccountTabView({ className }: AccountTabViewProps) {
   const tokens = useBlockTokens()
   const [activeSide, setActiveSide] = useState<TabSide>('groom')
 
+  const data = document?.data
+
   // 계좌 데이터 (유효한 계좌만 필터링)
-  const groomAccounts = (document?.data?.accounts?.groom ?? []).filter(isValidAccount)
-  const brideAccounts = (document?.data?.accounts?.bride ?? []).filter(isValidAccount)
-  const kakaopay = document?.data?.accounts?.kakaopay
+  const groomAccounts = (data?.accounts?.groom ?? []).filter(isValidAccount)
+  const brideAccounts = (data?.accounts?.bride ?? []).filter(isValidAccount)
+  const kakaopay = data?.accounts?.kakaopay
 
   // 현재 선택된 탭의 계좌 목록
   const currentAccounts = activeSide === 'groom' ? groomAccounts : brideAccounts
@@ -149,6 +177,7 @@ export function AccountTabView({ className }: AccountTabViewProps) {
             tokens={tokens}
             onCopy={handleCopy}
             onKakaopay={handleKakaopay}
+            holderFallback={getHolderFallback(data, activeSide, account.relation)}
           />
         ))}
       </div>
@@ -206,6 +235,8 @@ interface AccountCardProps {
   tokens: ReturnType<typeof useBlockTokens>
   onCopy: (account: AccountItem) => void
   onKakaopay: (url: string) => void
+  /** holder가 비어있을 때 사용할 fallback 이름 */
+  holderFallback?: string
 }
 
 function AccountCard({
@@ -215,11 +246,15 @@ function AccountCard({
   tokens,
   onCopy,
   onKakaopay,
+  holderFallback,
 }: AccountCardProps) {
   const sideLabel = side === 'groom' ? '신랑' : '신부'
   const relationLabel = account.relation === '본인'
     ? sideLabel
     : `${sideLabel} ${account.relation}`
+
+  // holder가 비어있으면 fallback 사용
+  const displayHolder = account.holder?.trim() || holderFallback || ''
 
   const cardStyle: CSSProperties = {
     display: 'flex',
@@ -321,7 +356,7 @@ function AccountCard({
         </div>
         <div>
           <div style={relationStyle}>{relationLabel}</div>
-          <div style={holderStyle}>{account.holder}</div>
+          <div style={holderStyle}>{displayHolder}</div>
         </div>
       </div>
 
