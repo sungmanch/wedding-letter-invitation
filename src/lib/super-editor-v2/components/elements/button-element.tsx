@@ -216,7 +216,7 @@ export function ButtonElement({
   const ActionIcon = useMemo(() => {
     // 커스텀 아이콘이 지정된 경우 우선 사용
     if (icon) {
-      return getPresetIcon(icon, 20)
+      return getPresetIcon(icon, 30)
     }
 
     // 기본 액션별 아이콘
