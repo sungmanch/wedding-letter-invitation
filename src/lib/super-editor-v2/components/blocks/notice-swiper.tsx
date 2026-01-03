@@ -30,7 +30,7 @@ if (typeof window !== 'undefined') {
 const ICON_TO_COLOR: Record<string, keyof typeof NOTICE_CARD_COLORS> = {
   rings: 'blue',
   birds: 'orange',
-  hearts: 'pink',
+  hearts: 'green',
 }
 
 // ============================================
