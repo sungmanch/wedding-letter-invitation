@@ -120,33 +120,43 @@ export function FamilyTableField({
   onFieldChange,
   visibleColumns = ['name', 'phone', 'deceased', 'birthOrder', 'baptismalName'],
 }: FamilyTableFieldProps) {
-  const [expandedSide, setExpandedSide] = useState<'groom' | 'bride' | null>(null)
+  // 신랑측/신부측 각각 독립적으로 펼침 상태 관리
+  const [expandedSides, setExpandedSides] = useState<Set<'groom' | 'bride'>>(new Set())
 
-  // 데이터에서 값 가져오기
-  const getValue = useCallback((path: VariablePath): string => {
+  const toggleSide = useCallback((side: 'groom' | 'bride') => {
+    setExpandedSides(prev => {
+      const next = new Set(prev)
+      if (next.has(side)) {
+        next.delete(side)
+      } else {
+        next.add(side)
+      }
+      return next
+    })
+  }, [])
+
+  // 데이터에서 값 가져오기 (useCallback 제거하여 항상 최신 data 참조)
+  const getValue = (path: VariablePath): string => {
     const value = getNestedValue(data as unknown as Record<string, unknown>, path)
     if (value === undefined || value === null) return ''
     return String(value)
-  }, [data])
+  }
 
   // 고인 여부 확인 (status가 '故'이면 true)
-  const isDeceased = useCallback((path: VariablePath): boolean => {
+  const isDeceased = (path: VariablePath): boolean => {
     const value = getValue(path)
     return value === '故' || value === '고'
-  }, [getValue])
+  }
 
   // 고인 여부 토글
-  const toggleDeceased = useCallback((path: VariablePath) => {
+  const toggleDeceased = (path: VariablePath) => {
     const current = getValue(path)
     const newValue = (current === '故' || current === '고') ? '' : '故'
     onFieldChange(path, newValue)
-  }, [getValue, onFieldChange])
-
-  // 컬럼 표시 여부
-  const showColumn = useCallback((col: string) => visibleColumns.includes(col as typeof visibleColumns[number]), [visibleColumns])
+  }
 
   // 셀 렌더링
-  const renderCell = useCallback((role: FamilyRole, column: string) => {
+  const renderCell = (role: FamilyRole, column: string) => {
     const paths = FAMILY_PATHS[role]
     const isCouple = role === 'groom' || role === 'bride'
     const isParent = !isCouple
@@ -232,23 +242,23 @@ export function FamilyTableField({
       default:
         return null
     }
-  }, [getValue, onFieldChange, toggleDeceased, isDeceased])
+  }
 
   // 신랑측/신부측 행 렌더링
-  const renderSideRows = useCallback((side: 'groom' | 'bride') => {
+  const renderSideRows = (side: 'groom' | 'bride') => {
     const roles: FamilyRole[] = side === 'groom'
       ? ['groom', 'groom-father', 'groom-mother']
       : ['bride', 'bride-father', 'bride-mother']
 
     const sideLabel = side === 'groom' ? '신랑측' : '신부측'
-    const isExpanded = expandedSide === side
+    const isExpanded = expandedSides.has(side)
 
     return (
       <>
         {/* 사이드 헤더 (접기/펼치기) */}
         <tr
           className="cursor-pointer hover:bg-[var(--sage-50)] transition-colors"
-          onClick={() => setExpandedSide(isExpanded ? null : side)}
+          onClick={() => toggleSide(side)}
         >
           <td
             colSpan={visibleColumns.length + 1}
@@ -289,7 +299,7 @@ export function FamilyTableField({
         ))}
       </>
     )
-  }, [expandedSide, visibleColumns, getValue, renderCell])
+  }
 
   // 컬럼 헤더 라벨 및 너비
   const columnConfig: Record<string, { label: string; width: string }> = {
