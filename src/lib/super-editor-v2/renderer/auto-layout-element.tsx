@@ -280,6 +280,10 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         />
       )
 
+    case 'box':
+      // box는 스타일만 적용되는 빈 컨테이너 (오버레이 등에 사용)
+      return <div className="se2-box" style={{ width: '100%', height: '100%' }} />
+
     default:
       return (
         <div className="se2-element--unknown">
@@ -525,6 +529,23 @@ function AbsoluteChildElement({ element, editable }: AbsoluteChildElementProps) 
       }
       if (element.y !== undefined) {
         style.top = `${element.y}%`
+      }
+    }
+
+    // width, height 설정 (% 단위)
+    if (element.width !== undefined) {
+      style.width = `${element.width}%`
+    }
+    if (element.height !== undefined) {
+      style.height = `${element.height}%`
+    }
+
+    // 배경 스타일 적용
+    if (element.style?.background) {
+      if (typeof element.style.background === 'string') {
+        style.backgroundColor = element.style.background
+      } else {
+        style.background = gradientToCSS(element.style.background)
       }
     }
 
