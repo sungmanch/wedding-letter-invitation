@@ -18,6 +18,7 @@ import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/rendere
 import { DocumentProvider } from '@/lib/super-editor-v2/context/document-context'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
 import { ContentTab } from '@/lib/super-editor-v2/components/editor/tabs/content-tab'
+import { DataTab } from '@/lib/super-editor-v2/components/editor/tabs/data-tab'
 import { DesignTab } from '@/lib/super-editor-v2/components/editor/tabs/design-tab'
 import { ShareTab, type OgMetadata } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
 import { FloatingPromptInput } from '@/lib/super-editor-v2/components/editor/ai/prompt-input'
@@ -39,7 +40,7 @@ interface EditClientProps {
   document: EditorDocumentV2
 }
 
-type TabType = 'content' | 'design' | 'share'
+type TabType = 'content' | 'data' | 'design' | 'share'
 
 // 디바이스 프리셋
 const DEVICE_PRESETS = [
@@ -449,7 +450,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <div className="w-[400px] flex-shrink-0 border-r border-[var(--sand-100)] bg-white flex flex-col">
           {/* 탭 네비게이션 */}
           <div className="flex border-b border-[var(--sand-100)]">
-            {(['content', 'design', 'share'] as const).map((tab) => (
+            {(['content', 'data', 'design', 'share'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -462,6 +463,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 `}
               >
                 {tab === 'content' && '콘텐츠'}
+                {tab === 'data' && '데이터'}
                 {tab === 'design' && '디자인'}
                 {tab === 'share' && '공유'}
               </button>
@@ -478,6 +480,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 onBlocksChange={handleBlocksChange}
                 onDataChange={handleDataChange}
                 onUploadImage={handleUploadImage}
+              />
+            )}
+            {activeTab === 'data' && (
+              <DataTab
+                data={editorDoc.data}
+                onDataChange={handleDataChange}
               />
             )}
             {activeTab === 'design' && (
