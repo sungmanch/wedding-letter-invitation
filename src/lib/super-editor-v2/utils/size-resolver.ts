@@ -149,8 +149,8 @@ export function isAutoLayoutElement(element: Element): boolean {
  */
 export function getAutoLayoutElementStyle(element: Element): CSSProperties {
   const style: CSSProperties = {
-    // 크기
-    ...resolveSizeMode('width', element.sizing?.width, { type: 'fill' }),
+    // 크기 (기본값: hug - 콘텐츠에 맞춤)
+    ...resolveSizeMode('width', element.sizing?.width, { type: 'hug' }),
     ...resolveSizeMode('height', element.sizing?.height, { type: 'hug' }),
 
     // 제약
