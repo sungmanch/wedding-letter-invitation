@@ -357,7 +357,7 @@ function BlockAccordion({
 
     // 7. music 블록은 FAB로 렌더링되므로 필수 필드 강제 추가
     if (block.type === 'music') {
-      const musicBindings: VariablePath[] = ['music.url', 'music.title', 'music.artist', 'music.autoPlay']
+      const musicBindings: VariablePath[] = ['music.url', 'music.autoPlay']
       for (const binding of musicBindings) {
         if (!seenBindings.has(binding)) {
           addBinding(`music-${binding}`, binding, 'text')
@@ -594,6 +594,13 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
             {placeholder || '활성화'}
           </span>
         </label>
+      )}
+
+      {type === 'bgm-selector' && (
+        <BgmSelectorField
+          value={String(value ?? '')}
+          onChange={onChange}
+        />
       )}
     </div>
   )
@@ -1323,6 +1330,198 @@ function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
 }
 
 // ============================================
+// BGM Selector Field (프리셋 + 유튜브 URL)
+// ============================================
+
+import { bgmPresets, getBgmCategories, type BgmPreset, type BgmCategory } from '../../../audio/bgm-presets'
+
+interface BgmSelectorFieldProps {
+  value: string
+  onChange: (value: unknown) => void
+}
+
+function BgmSelectorField({ value, onChange }: BgmSelectorFieldProps) {
+  const [activeTab, setActiveTab] = useState<'preset' | 'youtube'>('preset')
+  const [selectedCategory, setSelectedCategory] = useState<BgmCategory>('romantic')
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+
+  const categories = getBgmCategories()
+  const filteredPresets = bgmPresets.filter(p => p.category === selectedCategory)
+
+  // 현재 선택된 프리셋 찾기
+  const selectedPreset = bgmPresets.find(p => p.url === value)
+
+  // 유튜브 URL인지 확인
+  const isYoutubeUrl = value?.includes('youtube.com') || value?.includes('youtu.be')
+
+  // 유튜브 URL에서 비디오 ID 추출
+  const extractYoutubeId = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    ]
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match) return match[1]
+    }
+    return null
+  }
+
+  // 유튜브 URL을 오디오 스트림 URL로 변환 (실제로는 백엔드 처리 필요)
+  const handleYoutubeSubmit = useCallback(() => {
+    if (!youtubeUrl) return
+    const videoId = extractYoutubeId(youtubeUrl)
+    if (videoId) {
+      // 유튜브 URL 그대로 저장 (재생은 별도 처리)
+      onChange(youtubeUrl)
+    }
+  }, [youtubeUrl, onChange])
+
+  return (
+    <div className="space-y-3">
+      {/* 탭 */}
+      <div className="flex gap-1 p-1 bg-[var(--sand-50)] rounded-lg">
+        <button
+          type="button"
+          onClick={() => setActiveTab('preset')}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === 'preset'
+              ? 'bg-white text-[var(--text-primary)] shadow-sm'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
+          }`}
+        >
+          프리셋
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('youtube')}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === 'youtube'
+              ? 'bg-white text-[var(--text-primary)] shadow-sm'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
+          }`}
+        >
+          유튜브
+        </button>
+      </div>
+
+      {/* 프리셋 탭 */}
+      {activeTab === 'preset' && (
+        <div className="space-y-3">
+          {/* 카테고리 선택 */}
+          <div className="flex flex-wrap gap-1">
+            {categories.map(cat => (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => setSelectedCategory(cat.value)}
+                className={`px-2.5 py-1 text-xs rounded-full transition-colors ${
+                  selectedCategory === cat.value
+                    ? 'bg-[var(--sage-500)] text-white'
+                    : 'bg-[var(--sand-100)] text-[var(--text-muted)] hover:bg-[var(--sand-200)]'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 프리셋 목록 */}
+          <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+            {filteredPresets.map(preset => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => onChange(preset.url)}
+                className={`flex items-center gap-3 p-2 rounded-lg border-2 transition-all text-left ${
+                  value === preset.url
+                    ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
+                    : 'border-[var(--sand-100)] hover:border-[var(--sand-200)]'
+                }`}
+              >
+                <div className="w-8 h-8 rounded-full bg-[var(--sage-100)] flex items-center justify-center flex-shrink-0">
+                  <MusicIcon className="w-4 h-4 text-[var(--sage-600)]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                    {preset.name}
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)] truncate">
+                    {preset.description}
+                  </p>
+                </div>
+                {value === preset.url && (
+                  <CheckIcon className="w-4 h-4 text-[var(--sage-500)] flex-shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 유튜브 탭 */}
+      {activeTab === 'youtube' && (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="flex-1 px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+            />
+            <button
+              type="button"
+              onClick={handleYoutubeSubmit}
+              disabled={!youtubeUrl}
+              className="px-3 py-2 bg-[var(--sage-500)] text-white text-sm rounded-lg hover:bg-[var(--sage-600)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              적용
+            </button>
+          </div>
+          <p className="text-xs text-[var(--text-light)]">
+            유튜브 음악 URL을 입력하세요
+          </p>
+
+          {/* 현재 유튜브 URL 표시 */}
+          {isYoutubeUrl && value && (
+            <div className="flex items-center gap-2 p-2 bg-[var(--sage-50)] rounded-lg">
+              <YoutubeIcon className="w-4 h-4 text-red-500 flex-shrink-0" />
+              <p className="text-xs text-[var(--text-body)] truncate flex-1">
+                {value}
+              </p>
+              <button
+                type="button"
+                onClick={() => onChange('')}
+                className="p-1 text-[var(--text-light)] hover:text-red-500"
+              >
+                <XIcon className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 현재 선택 표시 */}
+      {selectedPreset && !isYoutubeUrl && (
+        <div className="flex items-center gap-2 p-2 bg-[var(--sage-50)] rounded-lg">
+          <MusicIcon className="w-4 h-4 text-[var(--sage-600)] flex-shrink-0" />
+          <p className="text-xs text-[var(--text-body)] flex-1">
+            {selectedPreset.name} - {selectedPreset.description}
+          </p>
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="p-1 text-[var(--text-light)] hover:text-red-500"
+          >
+            <XIcon className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================
 // Add Block Button
 // ============================================
 
@@ -1372,7 +1571,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list' | 'checkbox'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list' | 'checkbox' | 'bgm-selector'
   placeholder?: string
 }
 
@@ -1502,9 +1701,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'notice.items': { label: '공지 항목', type: 'notice-items' },
 
   // 음악
-  'music.url': { label: '음악 URL', type: 'text', placeholder: 'https://example.com/song.mp3' },
-  'music.title': { label: '음악 제목', type: 'text', placeholder: 'Canon in D' },
-  'music.artist': { label: '아티스트', type: 'text', placeholder: 'Pachelbel' },
+  'music.url': { label: '배경음악', type: 'bgm-selector' },
   'music.autoPlay': { label: '자동 재생', type: 'checkbox' },
 
   // RSVP
@@ -1620,6 +1817,30 @@ function DragIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24">
       <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+    </svg>
+  )
+}
+
+function MusicIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+    </svg>
+  )
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  )
+}
+
+function YoutubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
     </svg>
   )
 }
