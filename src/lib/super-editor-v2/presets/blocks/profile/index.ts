@@ -10,7 +10,6 @@ import type { BlockPreset } from '../types'
 import { PROFILE_CIRCLE_PORTRAIT } from './circle-portrait'
 import { PROFILE_DUAL_CARD } from './dual-card'
 import { PROFILE_DUAL_CARD_INTERVIEW } from './dual-card-interview'
-import { PROFILE_SPLIT_PHOTO } from './split-photo'
 
 // ============================================
 // Type Exports
@@ -20,7 +19,6 @@ export type ProfilePresetId =
   | 'profile-circle-portrait'
   | 'profile-dual-card'
   | 'profile-dual-card-interview'
-  | 'profile-split-photo'
 
 // ============================================
 // Preset Registry
@@ -30,7 +28,6 @@ export const PROFILE_PRESETS: Record<ProfilePresetId, BlockPreset> = {
   'profile-circle-portrait': PROFILE_CIRCLE_PORTRAIT,
   'profile-dual-card': PROFILE_DUAL_CARD,
   'profile-dual-card-interview': PROFILE_DUAL_CARD_INTERVIEW,
-  'profile-split-photo': PROFILE_SPLIT_PHOTO,
 }
 
 // ============================================
