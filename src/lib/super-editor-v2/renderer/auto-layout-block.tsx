@@ -10,13 +10,14 @@
  */
 
 import { useMemo, type CSSProperties } from 'react'
-import type { Block, BlockLayout, Element } from '../schema/types'
+import type { Block, BlockLayout, Element, ButtonProps } from '../schema/types'
 import { useBlockTokens } from '../context/block-context'
 import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
 import { AutoLayoutElement } from './auto-layout-element'
 import { resolveBlockHeightStyle } from '../utils/size-resolver'
 import { NoticeSwiper } from '../components/blocks/notice-swiper'
+import { resolveBinding } from '../utils/binding-resolver'
 
 // ============================================
 // Types
@@ -38,8 +39,24 @@ export function AutoLayoutBlock({
   onElementClick,
 }: AutoLayoutBlockProps) {
   const tokens = useBlockTokens()
-  const { viewport } = useDocument()
+  const { viewport, data } = useDocument()
   const layout = block.layout!
+
+  // 갤러리 이미지 수 확인 (gallery 블록에서 더보기 버튼 노출 조건용)
+  const galleryImageCount = useMemo(() => {
+    if (block.type !== 'gallery') return 0
+    const images = resolveBinding(data, 'photos.gallery')
+    return Array.isArray(images) ? images.length : 0
+  }, [block.type, data])
+
+  // 갤러리 컬럼 수 확인 (elements에서 gallery config 추출)
+  const galleryColumns = useMemo(() => {
+    if (block.type !== 'gallery') return 3
+    const galleryElement = block.elements?.find(el => el.binding === 'photos.gallery')
+    // @ts-expect-error - gallery는 확장 props
+    const columns = galleryElement?.props?.gallery?.columns as number | undefined
+    return columns ?? 3
+  }, [block.type, block.elements])
 
   // absolute 요소와 auto 요소 분리
   const { absoluteElements, autoElements } = useMemo(() => {
@@ -57,6 +74,30 @@ export function AutoLayoutBlock({
 
     return { absoluteElements: absolute, autoElements: auto }
   }, [block.elements])
+
+  // 더보기 버튼 노출 조건: 2단은 6개 초과, 3단은 12개 초과
+  const shouldShowMoreButton = useMemo(() => {
+    if (block.type !== 'gallery') return true
+    const threshold = galleryColumns === 2 ? 6 : 12
+    return galleryImageCount > threshold
+  }, [block.type, galleryColumns, galleryImageCount])
+
+  // 필터링된 auto 요소 (더보기 버튼 조건 적용)
+  const filteredAutoElements = useMemo(() => {
+    if (block.type !== 'gallery' || shouldShowMoreButton) {
+      return autoElements
+    }
+    // 더보기 버튼(action: 'show-block')을 숨김
+    return autoElements.filter(el => {
+      if (el.type === 'button' || el.props?.type === 'button') {
+        const buttonProps = el.props as ButtonProps | undefined
+        if (buttonProps?.action === 'show-block') {
+          return false
+        }
+      }
+      return true
+    })
+  }, [block.type, autoElements, shouldShowMoreButton])
 
   // 컨테이너 스타일 계산
   const containerStyle = useMemo<CSSProperties>(() => {
@@ -115,7 +156,7 @@ export function AutoLayoutBlock({
       ))}
 
       {/* Auto Layout 요소 (콘텐츠) */}
-      {autoElements.map(element => (
+      {filteredAutoElements.map(element => (
         <AutoLayoutElement
           key={element.id}
           element={element}

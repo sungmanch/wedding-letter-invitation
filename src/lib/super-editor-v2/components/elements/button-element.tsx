@@ -115,10 +115,9 @@ export function ButtonElement({
         ? style.text.fontSize
         : pxToRem(style.text.fontSize)
     }
-    if (style?.border) {
-      css.borderWidth = style.border.width
-      css.borderColor = style.border.color
-      css.borderStyle = style.border.style
+    // NOTE: border는 auto-layout-element.tsx의 resolveElementStyle()에서 wrapper에 적용됨
+    // 여기서 중복 적용하면 이중 border 문제 발생
+    if (style?.border?.radius) {
       css.borderRadius = style.border.radius
     }
 
