@@ -114,13 +114,13 @@ export function MusicPlayer({ mode = 'view' }: MusicPlayerProps) {
         className="se2-music-fab"
         style={{
           position: 'fixed',
-          top: 12,
-          right: 12,
+          top: '1rem',
+          right: '1rem',
           zIndex: 1000,
           width: 36,
           height: 36,
           borderRadius: '50%',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)',
           border: 'none',
           boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
           display: 'flex',
