@@ -43,6 +43,7 @@ const ELEMENTS: PresetElement[] = [
     },
   },
   // 3. Week Strip Calendar (5일 스트립) - border 없음, divider 사용
+  // 하트 마커가 divider 위로 오버레이되도록 relative 컨테이너 사용
   {
     type: 'group',
     zIndex: 1,
@@ -59,6 +60,18 @@ const ELEMENTS: PresetElement[] = [
       padding: { top: 0, bottom: 0, left: 16, right: 16 },
     },
     children: [
+      // 하트 마커 (absolute로 divider 위에 오버레이) - 전체 캘린더 그룹의 중앙에 배치
+      {
+        id: 'heart-marker-overlay',
+        type: 'icon',
+        layoutMode: 'absolute',
+        x: 50, // 가로 중앙 (%)
+        y: 50, // 세로 중앙 (%)
+        width: 100,
+        height: 100,
+        zIndex: 5, // divider(zIndex:1)보다 높게
+        props: { type: 'icon', icon: 'calendar1', size: 80, color: '#EF90CB' },
+      },
       // Divider 1 - 요일 위
       {
         id: 'divider-top',
@@ -203,52 +216,22 @@ const ELEMENTS: PresetElement[] = [
               text: { fontSize: 28, fontWeight: 400, color: 'var(--fg-default)', textAlign: 'center' },
             },
           },
-          // 중앙 - 하트 마커 오버레이 + 날짜
+          // 중앙 날짜 (하트 마커는 상위 그룹에 absolute로 배치됨)
           {
-            id: 'day-center',
-            type: 'group',
-            zIndex: 2,
-            sizing: { width: { type: 'fixed', value: 50, unit: 'px' }, height: { type: 'fixed', value: 48, unit: 'px' } },
-            props: {
-              type: 'group',
-              layout: {
-                direction: 'vertical',
-                gap: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
+            id: 'day-3',
+            type: 'text',
+            zIndex: 10, // 하트 마커(zIndex:5)보다 높게
+            sizing: { width: { type: 'fixed', value: 50, unit: 'px' }, height: { type: 'hug' } },
+            binding: 'wedding.day',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontSize: 28,
+                fontWeight: 600,
+                color: '#FFFFFF',
+                textAlign: 'center',
               },
             },
-            children: [
-              // 하트 마커 (absolute로 배경처럼 깔림) - calendar1.svg 사용
-              {
-                id: 'heart-marker',
-                type: 'icon',
-                layoutMode: 'absolute',
-                x: 50,
-                y: 50,
-                width: 100,
-                height: 100,
-                zIndex: 0,
-                props: { type: 'icon', icon: 'calendar1', size: 64, color: '#EF90CB' },
-              },
-              // 날짜 (하트 위에 표시) - 흰색 텍스트
-              {
-                id: 'day-3',
-                type: 'text',
-                zIndex: 2,
-                sizing: { width: { type: 'fill' }, height: { type: 'fill' } },
-                binding: 'wedding.day',
-                props: { type: 'text' },
-                style: {
-                  text: {
-                    fontSize: 28,
-                    fontWeight: 600,
-                    color: '#FFFFFF',
-                    textAlign: 'center',
-                  },
-                },
-              },
-            ],
           },
           {
             id: 'day-4',
