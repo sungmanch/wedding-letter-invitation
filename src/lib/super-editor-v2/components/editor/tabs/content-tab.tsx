@@ -1088,7 +1088,7 @@ function StringListField({ value, onChange, placeholder }: StringListFieldProps)
 interface NoticeItemData {
   title: string
   content: string
-  iconType?: 'birds-blue' | 'birds-orange' | 'birds-green'
+  iconType?: 'rings' | 'birds' | 'hearts'
   backgroundColor?: string
   borderColor?: string
 }
@@ -1098,9 +1098,9 @@ interface NoticeItemData {
 // ============================================
 
 const NOTICE_ICON_OPTIONS = [
-  { value: 'birds-blue', label: '파란새', src: '/assets/notice1.svg' },
-  { value: 'birds-orange', label: '주황새', src: '/assets/notice2.svg' },
-  { value: 'birds-green', label: '초록새', src: '/assets/notice3.svg' },
+  { value: 'rings', label: '반지', src: '/assets/notice1.svg' },
+  { value: 'birds', label: '새', src: '/assets/notice2.svg' },
+  { value: 'hearts', label: '하트', src: '/assets/notice3.svg' },
   { value: 'none', label: '없음', src: null },
 ] as const
 
@@ -1258,7 +1258,7 @@ function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
                   onClick={() => handleItemChange(index, 'iconType', option.value)}
                   className={`
                     p-1 rounded border-2 transition-all
-                    ${(item.iconType || 'birds-orange') === option.value
+                    ${(item.iconType || 'birds') === option.value
                       ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
                       : 'border-transparent hover:border-[var(--sand-200)]'
                     }

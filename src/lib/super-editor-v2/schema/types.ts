@@ -908,7 +908,7 @@ export interface Interaction {
 // ============================================
 
 // 공지 블록 상단 아이콘 타입
-export type NoticeIconType = 'birds-blue' | 'birds-orange' | 'birds-green' | 'none'
+export type NoticeIconType = 'rings' | 'birds' | 'hearts' | 'none'
 
 export interface NoticeItem {
   title: string
