@@ -358,7 +358,7 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       flexDirection = reverse ? 'column-reverse' : 'column'
     }
 
-    return {
+    const style: CSSProperties = {
       display: 'flex',
       flexDirection,
       flexWrap: layout?.wrap ? 'wrap' : undefined,
@@ -367,7 +367,19 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       justifyContent: layout?.justifyContent ?? 'start',
       width: '100%',
       height: '100%',
+      boxSizing: 'border-box',
     }
+
+    // padding 적용
+    if (layout?.padding) {
+      const p = layout.padding
+      if (p.top) style.paddingTop = `${p.top}px`
+      if (p.right) style.paddingRight = `${p.right}px`
+      if (p.bottom) style.paddingBottom = `${p.bottom}px`
+      if (p.left) style.paddingLeft = `${p.left}px`
+    }
+
+    return style
   }, [layout])
 
   // 이미지 클릭 핸들러
