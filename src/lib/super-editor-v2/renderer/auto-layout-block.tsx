@@ -9,7 +9,7 @@
  * - hug/fill 크기 모드 지원
  */
 
-import { useMemo, type CSSProperties } from 'react'
+import { useMemo, useState, useCallback, type CSSProperties } from 'react'
 import type { Block, BlockLayout, Element, ButtonProps } from '../schema/types'
 import { useBlockTokens } from '../context/block-context'
 import { useDocument } from '../context/document-context'
@@ -43,6 +43,14 @@ export function AutoLayoutBlock({
   const tokens = useBlockTokens()
   const { viewport, data } = useDocument()
   const layout = block.layout!
+
+  // 갤러리 확장 상태 (더보기 버튼 클릭 시 모든 이미지 표시)
+  const [galleryExpanded, setGalleryExpanded] = useState(false)
+
+  // 갤러리 확장 핸들러
+  const handleExpandGallery = useCallback(() => {
+    setGalleryExpanded(true)
+  }, [])
 
   // 갤러리 이미지 수 확인 (gallery 블록에서 더보기 버튼 노출 조건용)
   const galleryImageCount = useMemo(() => {
@@ -89,20 +97,23 @@ export function AutoLayoutBlock({
 
   // 필터링된 auto 요소 (더보기 버튼 조건 적용)
   const filteredAutoElements = useMemo(() => {
-    if (block.type !== 'gallery' || shouldShowMoreButton) {
+    if (block.type !== 'gallery') {
       return autoElements
     }
-    // 더보기 버튼(action: 'show-block')을 숨김
-    return autoElements.filter(el => {
-      if (el.type === 'button' || el.props?.type === 'button') {
-        const buttonProps = el.props as ButtonProps | undefined
-        if (buttonProps?.action === 'show-block') {
-          return false
+    // 갤러리가 확장되었거나 더보기 버튼이 필요 없으면 버튼 숨김
+    if (galleryExpanded || !shouldShowMoreButton) {
+      return autoElements.filter(el => {
+        if (el.type === 'button' || el.props?.type === 'button') {
+          const buttonProps = el.props as ButtonProps | undefined
+          if (buttonProps?.action === 'show-block') {
+            return false
+          }
         }
-      }
-      return true
-    })
-  }, [block.type, autoElements, shouldShowMoreButton])
+        return true
+      })
+    }
+    return autoElements
+  }, [block.type, autoElements, shouldShowMoreButton, galleryExpanded])
 
   // 컨테이너 스타일 계산
   const containerStyle = useMemo<CSSProperties>(() => {
@@ -167,6 +178,8 @@ export function AutoLayoutBlock({
           element={element}
           editable={editable}
           onClick={onElementClick}
+          galleryExpanded={block.type === 'gallery' ? galleryExpanded : undefined}
+          onExpandGallery={block.type === 'gallery' ? handleExpandGallery : undefined}
         />
       ))}
 

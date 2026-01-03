@@ -48,6 +48,10 @@ export interface AutoLayoutElementProps {
   element: Element
   editable?: boolean
   onClick?: (elementId: string) => void
+  /** 갤러리 확장 상태 (모든 이미지 표시) */
+  galleryExpanded?: boolean
+  /** 갤러리 확장 핸들러 */
+  onExpandGallery?: () => void
 }
 
 // ============================================
@@ -58,6 +62,8 @@ export function AutoLayoutElement({
   element,
   editable = false,
   onClick,
+  galleryExpanded,
+  onExpandGallery,
 }: AutoLayoutElementProps) {
   const { data } = useDocument()
 
@@ -131,6 +137,8 @@ export function AutoLayoutElement({
         element={element}
         value={formattedValue}
         editable={editable}
+        galleryExpanded={galleryExpanded}
+        onExpandGallery={onExpandGallery}
       />
     </div>
   )
@@ -144,6 +152,8 @@ interface ElementTypeRendererProps {
   element: Element
   value: unknown
   editable: boolean
+  galleryExpanded?: boolean
+  onExpandGallery?: () => void
 }
 
 /**
@@ -159,7 +169,7 @@ function isHugMode(element: Element): boolean {
   return widthIsHug || heightIsHug
 }
 
-function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
+function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpandGallery }: ElementTypeRendererProps) {
   const props = element.props
   const elementType = element.type || props?.type
   const hugMode = isHugMode(element)
@@ -179,6 +189,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         element={element}
         layout={undefined}
         editable={editable}
+        galleryExpanded={galleryExpanded}
       />
     )
   }
@@ -230,6 +241,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           value={value}
           style={element.style}
           editable={editable}
+          onExpandGallery={onExpandGallery}
         />
       )
 
@@ -278,6 +290,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           element={element}
           layout={(props as GroupProps).layout}
           editable={editable}
+          galleryExpanded={galleryExpanded}
         />
       )
 
