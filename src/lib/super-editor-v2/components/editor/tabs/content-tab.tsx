@@ -19,6 +19,7 @@ import type {
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
 import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 import { LocationSearchField } from '../fields/location-search-field'
+import { FamilyTableField } from '../fields/family-table-field'
 
 // ============================================
 // Computed Field Mapping
@@ -344,8 +345,34 @@ function BlockAccordion({
       {/* 펼침 콘텐츠 */}
       {expanded && (
         <div className="bg-[var(--ivory-50)] p-4 space-y-4">
-          {editableFields.length > 0 ? (
-            editableFields.map(field => (
+          {/* greeting-parents 블록: 혼주 정보 테이블 우선 표시 */}
+          {block.type === 'greeting-parents' && (
+            <FamilyTableField
+              data={data}
+              onFieldChange={onFieldChange}
+              visibleColumns={['name', 'phone', 'deceased', 'birthOrder', 'baptismalName']}
+            />
+          )}
+
+          {/* 일반 필드들 (혼주 관련 필드는 테이블에서 처리하므로 필터링) */}
+          {editableFields
+            .filter(field => {
+              // greeting-parents 블록에서 혼주 관련 필드는 테이블에서 처리
+              if (block.type === 'greeting-parents') {
+                const familyPaths = [
+                  'couple.groom.name', 'couple.groom.phone', 'couple.groom.baptismalName',
+                  'couple.bride.name', 'couple.bride.phone', 'couple.bride.baptismalName',
+                  'parents.groom.birthOrder', 'parents.bride.birthOrder',
+                  'parents.groom.father.name', 'parents.groom.father.phone', 'parents.groom.father.baptismalName',
+                  'parents.groom.mother.name', 'parents.groom.mother.phone', 'parents.groom.mother.baptismalName',
+                  'parents.bride.father.name', 'parents.bride.father.phone', 'parents.bride.father.baptismalName',
+                  'parents.bride.mother.name', 'parents.bride.mother.phone', 'parents.bride.mother.baptismalName',
+                ]
+                return !familyPaths.includes(field.binding)
+              }
+              return true
+            })
+            .map(field => (
               <VariableField
                 key={field.binding}
                 binding={field.binding}
@@ -356,7 +383,10 @@ function BlockAccordion({
                 data={data}
               />
             ))
-          ) : (
+          }
+
+          {/* 필드가 없고 테이블도 없는 경우 */}
+          {editableFields.length === 0 && block.type !== 'greeting-parents' && (
             <p className="text-sm text-[var(--text-light)]">
               편집 가능한 필드가 없습니다
             </p>
