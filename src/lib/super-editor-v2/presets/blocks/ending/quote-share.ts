@@ -93,6 +93,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           height: 100,
           zIndex: 0,
           binding: 'ending.photo',
+          value: 'https://picsum.photos/seed/ending/800/600',
           props: {
             type: 'image',
             objectFit: 'cover',
@@ -101,7 +102,24 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             background: '#D0D0D0',
           },
         },
-        // 2-2. 인용문 컨테이너 (auto layout)
+        // 2-2. 블랙 오버레이 20%
+        {
+          id: 'cover-overlay',
+          type: 'box',
+          layoutMode: 'absolute',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+          zIndex: 1,
+          props: {
+            type: 'box',
+          },
+          style: {
+            background: 'rgba(0, 0, 0, 0.2)',
+          },
+        },
+        // 2-3. 인용문 컨테이너 (auto layout)
         {
           id: 'quote-container',
           type: 'group',
@@ -110,17 +128,18 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             width: { type: 'fill' },
             height: { type: 'hug' },
           },
-          zIndex: 1,
+          zIndex: 2,
           props: {
             type: 'group',
             layout: {
               direction: 'vertical',
               gap: 16,
+              padding: { top: 40, right: 24, bottom: 24, left: 24 },
               alignItems: 'center',
             },
           },
           style: {
-            background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%)',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)',
           },
           children: [
             // 인용문 텍스트
