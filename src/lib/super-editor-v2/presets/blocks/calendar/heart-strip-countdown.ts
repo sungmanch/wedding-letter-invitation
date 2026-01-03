@@ -229,7 +229,7 @@ const ELEMENTS: PresetElement[] = [
                 width: 100,
                 height: 100,
                 zIndex: 0,
-                props: { type: 'icon', icon: 'calendar1', size: 44, color: '#EF90CB' },
+                props: { type: 'icon', icon: 'calendar1', size: 64, color: '#EF90CB' },
               },
               // 날짜 (하트 위에 표시) - 흰색 텍스트
               {
