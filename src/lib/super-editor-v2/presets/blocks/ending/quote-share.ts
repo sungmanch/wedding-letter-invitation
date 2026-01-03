@@ -79,7 +79,6 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           direction: 'vertical',
           alignItems: 'center',
           justifyContent: 'end',
-          padding: { bottom: 16 },
         },
       },
       children: [
@@ -152,7 +151,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             layout: {
               direction: 'vertical',
               gap: 16,
-              padding: { top: 40, right: 24, bottom: 24, left: 24 },
+              padding: { top: 40, right: 24, bottom: 16, left: 24 },
               alignItems: 'center',
             },
           },
