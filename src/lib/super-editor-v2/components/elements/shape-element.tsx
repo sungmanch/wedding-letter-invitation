@@ -98,19 +98,9 @@ function ShapeRenderer({
 
   switch (shape) {
     case 'rectangle':
-      return (
-        <svg viewBox="0 0 100 100" style={svgStyle} preserveAspectRatio="none">
-          <rect
-            x={strokeWidth / 2}
-            y={strokeWidth / 2}
-            width={100 - strokeWidth}
-            height={100 - strokeWidth}
-            fill={fill}
-            stroke={stroke}
-            strokeWidth={strokeWidth}
-          />
-        </svg>
-      )
+      // rectangle은 CSS만 사용 (투명도 등 정확한 적용)
+      // 컨테이너에서 이미 backgroundColor 적용됨
+      return null
 
     case 'circle':
       return (

@@ -18,6 +18,7 @@ export interface ImageElementProps {
   src?: string | string[] | null
   objectFit?: 'cover' | 'contain' | 'fill'
   overlay?: string
+  filter?: string  // CSS filter (예: 'grayscale(100%) brightness(0.9)')
   style?: ElementStyle
   editable?: boolean
   className?: string
@@ -31,6 +32,7 @@ export function ImageElement({
   src: srcProp,
   objectFit = 'cover',
   overlay,
+  filter,
   style,
   editable = false,
   className = '',
@@ -119,7 +121,7 @@ export function ImageElement({
         src={src}
         alt=""
         fill
-        style={{ objectFit }}
+        style={{ objectFit, filter }}
         onLoad={() => setIsLoading(false)}
         onError={() => setHasError(true)}
         sizes="100vw"

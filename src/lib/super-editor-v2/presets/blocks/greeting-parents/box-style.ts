@@ -145,7 +145,7 @@ const ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 7. 축하 연락하기 버튼
+  // 7. 축하 연락하기 버튼 (contact-modal)
   {
     type: 'button',
     x: 15,
@@ -156,8 +156,7 @@ const ELEMENTS: PresetElement[] = [
     props: {
       type: 'button',
       label: '📞  축하 연락하기',
-      action: 'show-block',
-      targetBlockType: 'contact',
+      action: 'contact-modal',
     },
     style: {
       background: 'var(--bg-section)',
@@ -215,7 +214,7 @@ export const GREETING_PARENTS_BOX_STYLE: BlockPreset = {
   ],
   defaultHeight: 100,
   defaultElements: ELEMENTS,
-  specialComponents: ['contact-block'],
+  specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
   recommendedThemes: ['minimal-light', 'classic-ivory', 'romantic-blush'],
   relatedPresets: ['contact-minimal'],

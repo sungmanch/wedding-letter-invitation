@@ -152,14 +152,15 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     name: '더채플앳청담',
     hall: '아이리스홀',
     address: '서울특별시 강남구 선릉로 158길 11',
+    tel: '02-518-2222',
+    lat: 37.5141,
+    lng: 127.0458,
   },
 
   // ═══ 사진 (실제 웨딩 이미지 사용) ═══
   photos: {
     main: '/examples/wedding_image.png',
-    gallery: [
-      '/examples/wedding_image.png',
-    ],
+    gallery: [],  // 빈 갤러리로 시작 (사용자가 직접 업로드)
   },
 
   // ═══ 인사말 ═══
@@ -218,6 +219,7 @@ export const DEFAULT_BLOCK_ORDER: Block['type'][] = [
   'hero',
   'greeting-parents',
   'profile',
+  'interview',
   'calendar',
   'gallery',
   'rsvp',
@@ -237,6 +239,7 @@ export const DEFAULT_BLOCK_HEIGHTS: Record<Block['type'], number> = {
   hero: 100,
   'greeting-parents': 80,
   profile: 80,
+  interview: 60,
   calendar: 80,
   gallery: 100,
   rsvp: 60,
@@ -262,6 +265,7 @@ export const BLOCK_TYPE_LABELS: Record<Block['type'], string> = {
   hero: '메인',
   'greeting-parents': '인사말/혼주',
   profile: '신랑신부 소개',
+  interview: '인터뷰',
   calendar: '예식일시',
   gallery: '갤러리',
   rsvp: '참석 여부',
@@ -407,43 +411,21 @@ export function createDefaultBlocks(): Block[] {
     DEFAULT_BLOCK_HEIGHTS.notice
   )
 
+  const heroBlock = createBlockFromPreset(
+    'hero-1',
+    'hero-fullscreen-overlay',
+    true,
+    DEFAULT_BLOCK_HEIGHTS.hero
+  )
+
   return [
-    // 메인 (Hero) - absolute 레이아웃 유지 (프리셋 없음)
-    {
+    // 메인 (Hero) - 프리셋 적용
+    heroBlock ?? {
       id: 'hero-1',
       type: 'hero',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.hero,
-      elements: [
-        {
-          id: 'hero-main-image',
-          type: 'image',
-          x: 0, y: 0, width: 100, height: 100, zIndex: 0,
-          binding: 'photos.main',
-          props: { type: 'image', objectFit: 'cover' },
-        },
-        {
-          id: 'hero-groom-name',
-          type: 'text',
-          x: 20, y: 40, width: 25, height: 10, zIndex: 1,
-          binding: 'couple.groom.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'hero-bride-name',
-          type: 'text',
-          x: 55, y: 40, width: 25, height: 10, zIndex: 1,
-          binding: 'couple.bride.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'hero-wedding-date',
-          type: 'text',
-          x: 25, y: 55, width: 50, height: 8, zIndex: 1,
-          binding: 'wedding.date',
-          props: { type: 'text' },
-        },
-      ],
+      elements: [],
     },
     // 인사말/혼주 - 프리셋 적용
     greetingBlock ?? {
@@ -463,6 +445,15 @@ export function createDefaultBlocks(): Block[] {
       enabled: false,
       height: DEFAULT_BLOCK_HEIGHTS.profile,
       presetId: 'profile-dual-card',
+      elements: [],
+    },
+    // 인터뷰 - 프리셋 적용 (선택 섹션 → 기본 비활성화)
+    {
+      id: 'interview-1',
+      type: 'interview',
+      enabled: false,
+      height: DEFAULT_BLOCK_HEIGHTS.interview,
+      presetId: 'interview-accordion',
       elements: [],
     },
     // 달력 - 프리셋 적용

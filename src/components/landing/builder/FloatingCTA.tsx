@@ -16,7 +16,6 @@ import { ArrowRight, Loader2, Eye } from 'lucide-react'
 import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
 import { createDocument } from '@/lib/super-editor-v2/actions/document'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
-import { buildBlocksFromTemplate } from '@/lib/super-editor-v2/services/template-block-builder'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import {
   SAMPLE_WEDDING_DATA,
@@ -97,26 +96,17 @@ export function FloatingCTA({ className = '' }: FloatingCTAProps) {
         throw new Error('템플릿을 찾을 수 없습니다')
       }
 
-      const templateBlocks = buildBlocksFromTemplate(
-        template,
-        SAMPLE_WEDDING_DATA
-      )
-      const heroBlock = templateBlocks.find((b) => b.type === 'hero')
-
-      const sectionBlocks: Block[] = []
+      // 모든 섹션을 프리셋에서 생성 (hero 포함)
+      const blocks: Block[] = []
       for (const sectionType of SECTION_ORDER) {
         const presetId = state.selectedPresets[sectionType]
         if (presetId) {
           const block = createBlockFromPresetData(presetId)
           if (block) {
-            sectionBlocks.push(block)
+            blocks.push(block)
           }
         }
       }
-
-      const blocks: Block[] = heroBlock
-        ? [heroBlock, ...sectionBlocks]
-        : sectionBlocks
 
       const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
 

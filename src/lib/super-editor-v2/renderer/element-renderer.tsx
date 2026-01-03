@@ -23,12 +23,13 @@ import type {
   CalendarProps,
   GroupProps,
   GradientValue,
+  SizeMode,
 } from '../schema/types'
 import { useDocument } from '../context/document-context'
 import { useBlock } from '../context/block-context'
 import { resolveBinding } from '../utils/binding-resolver'
 import { interpolate } from '../utils/interpolate'
-import { getElementPosition } from '../utils/size-resolver'
+import { getElementPosition, getAutoLayoutElementStyle } from '../utils/size-resolver'
 
 // Element Components
 import { TextElement } from '../components/elements/text-element'
@@ -66,11 +67,16 @@ export function ElementRenderer({
   // content 필드도 확인 (일부 요소는 value 대신 content 사용)
   const resolvedValue = useMemo(() => {
     if (element.binding) {
-      return resolveBinding(data, element.binding)
+      const value = resolveBinding(data, element.binding)
+      // 바인딩 값이 비어있으면 fallback 바인딩 사용
+      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
+        return resolveBinding(data, element.bindingFallback)
+      }
+      return value
     }
     // value가 없으면 content 필드 확인
     return element.value ?? (element as { content?: string }).content
-  }, [element.binding, element.value, data, element])
+  }, [element.binding, element.bindingFallback, element.value, data, element])
 
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
@@ -83,7 +89,27 @@ export function ElementRenderer({
   // 요소 스타일 계산 (블록 기준)
   const elementStyle = useMemo<CSSProperties>(() => {
     // 블록 높이를 px로 계산
-    const blockHeightPx = (blockHeight / 100) * viewport.height
+    let blockHeightPx: number
+    if (typeof blockHeight === 'number') {
+      // 숫자는 vh 단위로 해석
+      blockHeightPx = (blockHeight / 100) * viewport.height
+    } else if (blockHeight && typeof blockHeight === 'object') {
+      // SizeMode 처리
+      const sizeMode = blockHeight as SizeMode
+      if (sizeMode.type === 'fixed') {
+        if (sizeMode.unit === 'vh') {
+          blockHeightPx = (sizeMode.value / 100) * viewport.height
+        } else {
+          // px (기본값) - viewport 변환 없이 그대로 사용
+          blockHeightPx = sizeMode.value
+        }
+      } else {
+        // hug, fill 등은 기본값 사용
+        blockHeightPx = viewport.height * 0.5
+      }
+    } else {
+      blockHeightPx = viewport.height * 0.5
+    }
 
     // 요소 위치/크기 가져오기 (optional 필드 처리)
     const pos = getElementPosition(element)
@@ -174,13 +200,24 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     )
   }
 
+  // photos.gallery 바인딩은 타입과 무관하게 갤러리로 렌더링
+  if (element.binding === 'photos.gallery') {
+    return (
+      <GalleryElement
+        element={element}
+        editable={editable}
+      />
+    )
+  }
+
   switch (elementType) {
     case 'text':
       return (
         <TextElement
-          value={value as string}
+          value={value as string | string[]}
           style={element.style?.text}
           editable={editable}
+          listStyle={(props as TextProps).listStyle}
         />
       )
 
@@ -190,6 +227,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           src={value as string}
           objectFit={(props as ImageProps).objectFit}
           overlay={(props as ImageProps).overlay}
+          filter={(props as ImageProps).filter}
           style={element.style}
           editable={editable}
         />
@@ -213,6 +251,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         <ButtonElement
           label={(props as ButtonProps).label}
           action={(props as ButtonProps).action}
+          icon={(props as ButtonProps).icon}
           value={value}
           style={element.style}
           editable={editable}
@@ -330,6 +369,110 @@ function gradientToCSS(gradient: GradientValue): string {
 }
 
 // ============================================
+// Gallery Element Component (photos.gallery 바인딩 전용)
+// ============================================
+
+interface GalleryElementProps {
+  element: Element
+  editable: boolean
+}
+
+interface GalleryConfig {
+  columns: 2 | 3
+  aspectRatio: '1:1' | '3:4' | 'mixed'
+  gap: number
+  initialRows: number
+  showMoreButton: boolean
+}
+
+function GalleryElement({ element, editable }: GalleryElementProps) {
+  const { data } = useDocument()
+
+  // 갤러리 이미지 배열
+  const galleryImages = useMemo(() => {
+    const images = resolveBinding(data, 'photos.gallery')
+    if (Array.isArray(images)) {
+      return images as string[]
+    }
+    return []
+  }, [data])
+
+  // 갤러리 설정 (props에 없으면 기본값 사용)
+  const galleryConfig = useMemo((): GalleryConfig => {
+    // @ts-expect-error - gallery는 확장 props
+    const customConfig = element.props?.gallery as GalleryConfig | undefined
+    const defaultConfig: GalleryConfig = {
+      columns: 3,
+      aspectRatio: '1:1',
+      gap: 8,
+      initialRows: 3,
+      showMoreButton: true,
+    }
+    return customConfig ?? defaultConfig
+  }, [element.props])
+
+  const { columns, aspectRatio, gap, initialRows } = galleryConfig
+  const initialCount = columns * initialRows
+  const visibleImages = galleryImages.slice(0, initialCount)
+
+  // aspect ratio를 padding-bottom %로 변환
+  const aspectRatioPercent = aspectRatio === '1:1' ? 100
+    : aspectRatio === '3:4' ? 133.33
+    : 100
+
+  if (visibleImages.length === 0) {
+    return (
+      <div className="se2-gallery-empty" style={{ padding: '20px', textAlign: 'center', color: 'var(--fg-muted)' }}>
+        갤러리 사진을 추가해주세요
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="se2-gallery-grid"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gap: `${gap}px`,
+        width: '100%',
+      }}
+    >
+      {visibleImages.map((imageUrl, index) => (
+        <div
+          key={`gallery-${index}`}
+          className="se2-gallery-item"
+          style={{
+            position: 'relative',
+            width: '100%',
+            paddingBottom: `${aspectRatioPercent}%`,
+            overflow: 'hidden',
+            borderRadius: '4px',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          >
+            <ImageElement
+              src={imageUrl}
+              objectFit="cover"
+              style={{}}
+              editable={editable}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================
 // Group Element Component
 // ============================================
 
@@ -351,16 +494,44 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       flexDirection = reverse ? 'column-reverse' : 'column'
     }
 
-    return {
+    const style: CSSProperties = {
       display: 'flex',
       flexDirection,
+      flexWrap: layout?.wrap ? 'wrap' : undefined,
       gap: layout?.gap ? `${layout.gap}px` : undefined,
       alignItems: layout?.alignItems ?? 'stretch',
       justifyContent: layout?.justifyContent ?? 'start',
       width: '100%',
       height: '100%',
+      boxSizing: 'border-box',
     }
-  }, [layout])
+
+    // background 적용
+    if (element.style?.background) {
+      if (typeof element.style.background === 'string') {
+        style.backgroundColor = element.style.background
+      }
+    }
+
+    // padding 적용
+    if (element.style?.padding) {
+      const p = element.style.padding
+      style.paddingTop = p.top ?? 0
+      style.paddingRight = p.right ?? 0
+      style.paddingBottom = p.bottom ?? 0
+      style.paddingLeft = p.left ?? 0
+    }
+
+    // border 적용
+    if (element.style?.border) {
+      style.borderWidth = element.style.border.width
+      style.borderColor = element.style.border.color
+      style.borderStyle = element.style.border.style
+      style.borderRadius = element.style.border.radius
+    }
+
+    return style
+  }, [layout, element.style])
 
   const children = element.children ?? []
 
@@ -394,10 +565,15 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
   // 값 해석
   const resolvedValue = useMemo(() => {
     if (element.binding) {
-      return resolveBinding(data, element.binding)
+      const value = resolveBinding(data, element.binding)
+      // 바인딩 값이 비어있으면 fallback 바인딩 사용
+      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
+        return resolveBinding(data, element.bindingFallback)
+      }
+      return value
     }
     return element.value ?? (element as { content?: string }).content
-  }, [element.binding, element.value, data, element])
+  }, [element.binding, element.bindingFallback, element.value, data, element])
 
   const formattedValue = useMemo(() => {
     if (props?.type === 'text' && (props as TextProps).format) {
@@ -408,81 +584,124 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
 
   const value = formattedValue
 
-  switch (elementType) {
-    case 'text':
-      return (
-        <TextElement
-          value={value as string}
-          style={element.style?.text}
-          editable={editable}
-        />
-      )
+  // sizing과 style을 적용한 wrapper 스타일
+  const wrapperStyle = useMemo<CSSProperties>(() => {
+    const style: CSSProperties = {
+      ...getAutoLayoutElementStyle(element),
+    }
 
-    case 'image':
-      return (
-        <ImageElement
-          src={value as string}
-          objectFit={(props as ImageProps).objectFit}
-          overlay={(props as ImageProps).overlay}
-          style={element.style}
-          editable={editable}
-        />
-      )
+    // background, border 등 element.style 적용
+    if (element.style?.background) {
+      if (typeof element.style.background === 'string') {
+        style.backgroundColor = element.style.background
+      }
+    }
+    if (element.style?.border) {
+      style.borderWidth = element.style.border.width
+      style.borderColor = element.style.border.color
+      style.borderStyle = element.style.border.style
+      style.borderRadius = element.style.border.radius
+    }
 
-    case 'shape':
-      return (
-        <ShapeElement
-          shape={(props as ShapeProps).shape}
-          fill={(props as ShapeProps).fill}
-          stroke={(props as ShapeProps).stroke}
-          strokeWidth={(props as ShapeProps).strokeWidth}
-          svgPath={(props as ShapeProps).svgPath}
-          svgViewBox={(props as ShapeProps).svgViewBox}
-          style={element.style}
-        />
-      )
+    return style
+  }, [element])
 
-    case 'button':
-      return (
-        <ButtonElement
-          label={(props as ButtonProps).label}
-          action={(props as ButtonProps).action}
-          value={value}
-          style={element.style}
-          editable={editable}
-        />
-      )
+  // 실제 콘텐츠 렌더링
+  const renderContent = () => {
+    switch (elementType) {
+      case 'text':
+        return (
+          <TextElement
+            value={value as string | string[]}
+            style={element.style?.text}
+            editable={editable}
+            listStyle={(props as TextProps).listStyle}
+          />
+        )
 
-    case 'icon':
-      return (
-        <IconElement
-          icon={(props as IconProps).icon}
-          size={(props as IconProps).size}
-          color={(props as IconProps).color}
-        />
-      )
+      case 'image':
+        return (
+          <ImageElement
+            src={value as string}
+            objectFit={(props as ImageProps).objectFit}
+            overlay={(props as ImageProps).overlay}
+            filter={(props as ImageProps).filter}
+            style={element.style}
+            editable={editable}
+          />
+        )
 
-    case 'divider':
-      return (
-        <DividerElement
-          dividerStyle={(props as DividerProps).dividerStyle}
-          ornamentId={(props as DividerProps).ornamentId}
-          style={element.style}
-        />
-      )
+      case 'shape':
+        return (
+          <ShapeElement
+            shape={(props as ShapeProps).shape}
+            fill={(props as ShapeProps).fill}
+            stroke={(props as ShapeProps).stroke}
+            strokeWidth={(props as ShapeProps).strokeWidth}
+            svgPath={(props as ShapeProps).svgPath}
+            svgViewBox={(props as ShapeProps).svgViewBox}
+            style={element.style}
+          />
+        )
 
-    case 'group':
-      return (
-        <GroupElement
-          element={element}
-          layout={(props as GroupProps).layout}
-          editable={editable}
-        />
-      )
+      case 'button':
+        return (
+          <ButtonElement
+            label={(props as ButtonProps).label}
+            action={(props as ButtonProps).action}
+            icon={(props as ButtonProps).icon}
+            value={value}
+            style={element.style}
+            editable={editable}
+          />
+        )
 
-    default:
-      return null
+      case 'icon':
+        return (
+          <IconElement
+            icon={(props as IconProps).icon}
+            size={(props as IconProps).size}
+            color={(props as IconProps).color}
+          />
+        )
+
+      case 'divider':
+        return (
+          <DividerElement
+            dividerStyle={(props as DividerProps).dividerStyle}
+            ornamentId={(props as DividerProps).ornamentId}
+            style={element.style}
+          />
+        )
+
+      case 'group':
+        return (
+          <GroupElement
+            element={element}
+            layout={(props as GroupProps).layout}
+            editable={editable}
+          />
+        )
+
+      default:
+        return null
+    }
   }
+
+  // group 타입은 wrapper 없이 직접 반환 (GroupElement가 자체 스타일 처리)
+  if (elementType === 'group') {
+    return (
+      <div className="se2-group-child" style={wrapperStyle}>
+        {renderContent()}
+      </div>
+    )
+  }
+
+  return (
+    <div className="se2-group-child" style={wrapperStyle}>
+      {renderContent()}
+    </div>
+  )
 }
 
 // ============================================

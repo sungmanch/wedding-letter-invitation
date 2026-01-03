@@ -9,7 +9,7 @@
  * - alignSelf 지원
  */
 
-import { useMemo, useCallback, type CSSProperties } from 'react'
+import { useMemo, useCallback, useState, type CSSProperties } from 'react'
 import type {
   Element,
   ElementStyle,
@@ -38,6 +38,7 @@ import { IconElement } from '../components/elements/icon-element'
 import { DividerElement } from '../components/elements/divider-element'
 import { MapElement } from '../components/elements/map-element'
 import { CalendarElement } from '../components/elements/calendar-element'
+import { GalleryLightbox } from '../components/ui/gallery-lightbox'
 
 // ============================================
 // Types
@@ -47,6 +48,10 @@ export interface AutoLayoutElementProps {
   element: Element
   editable?: boolean
   onClick?: (elementId: string) => void
+  /** 갤러리 확장 상태 (모든 이미지 표시) */
+  galleryExpanded?: boolean
+  /** 갤러리 확장 핸들러 */
+  onExpandGallery?: () => void
 }
 
 // ============================================
@@ -57,6 +62,8 @@ export function AutoLayoutElement({
   element,
   editable = false,
   onClick,
+  galleryExpanded,
+  onExpandGallery,
 }: AutoLayoutElementProps) {
   const { data } = useDocument()
 
@@ -75,6 +82,17 @@ export function AutoLayoutElement({
     }
     return resolvedValue
   }, [element.props, resolvedValue, data])
+
+  // hideWhenEmpty 처리: 그룹이고 바인딩된 값이 빈 배열이면 숨김
+  const shouldHide = useMemo(() => {
+    const props = element.props as GroupProps | undefined
+    if (element.type === 'group' && props?.hideWhenEmpty) {
+      const isEmptyArray = Array.isArray(resolvedValue) && resolvedValue.length === 0
+      const isNullish = resolvedValue === null || resolvedValue === undefined
+      return isEmptyArray || isNullish
+    }
+    return false
+  }, [element.type, element.props, resolvedValue])
 
   // Auto Layout 요소 스타일 계산
   const elementStyle = useMemo<CSSProperties>(() => {
@@ -101,6 +119,11 @@ export function AutoLayoutElement({
     onClick?.(element.id)
   }, [element.id, onClick])
 
+  // hideWhenEmpty가 true이고 값이 비어있으면 렌더링 안함
+  if (shouldHide) {
+    return null
+  }
+
   return (
     <div
       className={`se2-element se2-element--${element.type} se2-element--auto`}
@@ -114,6 +137,8 @@ export function AutoLayoutElement({
         element={element}
         value={formattedValue}
         editable={editable}
+        galleryExpanded={galleryExpanded}
+        onExpandGallery={onExpandGallery}
       />
     </div>
   )
@@ -127,6 +152,8 @@ interface ElementTypeRendererProps {
   element: Element
   value: unknown
   editable: boolean
+  galleryExpanded?: boolean
+  onExpandGallery?: () => void
 }
 
 /**
@@ -142,7 +169,7 @@ function isHugMode(element: Element): boolean {
   return widthIsHug || heightIsHug
 }
 
-function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
+function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpandGallery }: ElementTypeRendererProps) {
   const props = element.props
   const elementType = element.type || props?.type
   const hugMode = isHugMode(element)
@@ -155,14 +182,27 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     )
   }
 
+  // photos.gallery 바인딩은 타입과 무관하게 갤러리로 렌더링
+  if (element.binding === 'photos.gallery') {
+    return (
+      <GroupElement
+        element={element}
+        layout={undefined}
+        editable={editable}
+        galleryExpanded={galleryExpanded}
+      />
+    )
+  }
+
   switch (elementType) {
     case 'text':
       return (
         <TextElement
-          value={value as string}
+          value={value as string | string[]}
           style={element.style?.text}
           editable={editable}
           hugMode={hugMode}
+          listStyle={(props as TextProps).listStyle}
         />
       )
 
@@ -196,9 +236,12 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           hugMode={hugMode}
           label={(props as ButtonProps).label}
           action={(props as ButtonProps).action}
+          icon={(props as ButtonProps).icon}
+          targetBlockType={(props as ButtonProps).targetBlockType}
           value={value}
           style={element.style}
           editable={editable}
+          onExpandGallery={onExpandGallery}
         />
       )
 
@@ -221,12 +264,6 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
       )
 
     case 'map':
-      console.log('[AutoLayoutElement] 🗺️ map element:', {
-        elementId: element.id,
-        binding: element.binding,
-        value,
-        valueType: typeof value,
-      })
       return (
         <MapElement
           value={value}
@@ -253,6 +290,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           element={element}
           layout={(props as GroupProps).layout}
           editable={editable}
+          galleryExpanded={galleryExpanded}
         />
       )
 
@@ -273,9 +311,53 @@ interface GroupElementProps {
   element: Element
   layout?: GroupProps['layout']
   editable: boolean
+  galleryExpanded?: boolean
 }
 
-function GroupElement({ element, layout, editable }: GroupElementProps) {
+// 갤러리 설정 타입
+interface GalleryConfig {
+  columns: 2 | 3
+  aspectRatio: '1:1' | '3:4' | 'mixed'
+  gap: number
+  initialRows: number
+  showMoreButton: boolean
+}
+
+function GroupElement({ element, layout, editable, galleryExpanded }: GroupElementProps) {
+  const { data } = useDocument()
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
+
+  // 갤러리 바인딩 처리
+  const galleryImages = useMemo(() => {
+    if (element.binding === 'photos.gallery') {
+      const images = resolveBinding(data, 'photos.gallery')
+      if (Array.isArray(images)) {
+        return images as string[]
+      }
+    }
+    return null
+  }, [element.binding, data])
+
+  // 갤러리 설정 (props에 없으면 기본값 사용)
+  const galleryConfig = useMemo((): GalleryConfig | null => {
+    // binding이 photos.gallery인 경우 항상 갤러리 설정 반환
+    if (element.binding === 'photos.gallery') {
+      // @ts-expect-error - gallery는 확장 props
+      const customConfig = element.props?.gallery as GalleryConfig | undefined
+      // 기본 갤러리 설정
+      const defaultConfig: GalleryConfig = {
+        columns: 3,
+        aspectRatio: '1:1',
+        gap: 8,
+        initialRows: 3,
+        showMoreButton: true,
+      }
+      return customConfig ?? defaultConfig
+    }
+    return null
+  }, [element.binding, element.props])
+
   const groupStyle = useMemo<CSSProperties>(() => {
     const direction = layout?.direction ?? 'vertical'
     const reverse = layout?.reverse ?? false
@@ -287,28 +369,228 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       flexDirection = reverse ? 'column-reverse' : 'column'
     }
 
-    return {
+    const style: CSSProperties = {
       display: 'flex',
       flexDirection,
+      flexWrap: layout?.wrap ? 'wrap' : undefined,
       gap: layout?.gap ? `${layout.gap}px` : undefined,
       alignItems: layout?.alignItems ?? 'stretch',
       justifyContent: layout?.justifyContent ?? 'start',
       width: '100%',
       height: '100%',
+      boxSizing: 'border-box',
     }
+
+    // padding 적용
+    if (layout?.padding) {
+      const p = layout.padding
+      if (p.top) style.paddingTop = `${p.top}px`
+      if (p.right) style.paddingRight = `${p.right}px`
+      if (p.bottom) style.paddingBottom = `${p.bottom}px`
+      if (p.left) style.paddingLeft = `${p.left}px`
+    }
+
+    return style
   }, [layout])
 
+  // 이미지 클릭 핸들러
+  const handleImageClick = useCallback((index: number) => {
+    if (!editable) {
+      setLightboxIndex(index)
+      setLightboxOpen(true)
+    }
+  }, [editable])
+
+  // 갤러리 모드: 이미지 배열을 그리드로 렌더링
+  if (galleryImages && galleryConfig) {
+    const { columns, aspectRatio, gap, initialRows } = galleryConfig
+    const initialCount = columns * initialRows
+    // 확장 상태면 모든 이미지, 아니면 초기 개수만 표시
+    const visibleImages = galleryExpanded
+      ? galleryImages
+      : galleryImages.slice(0, initialCount)
+
+    // aspect ratio를 padding-bottom %로 변환
+    const aspectRatioPercent = aspectRatio === '1:1' ? 100
+      : aspectRatio === '3:4' ? 133.33
+      : 100
+
+    return (
+      <>
+        <div
+          className="se2-gallery-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
+            gap: `${gap}px`,
+            width: '100%',
+          }}
+        >
+          {visibleImages.map((imageUrl, index) => (
+            <div
+              key={`gallery-${index}`}
+              className="se2-gallery-item"
+              style={{
+                position: 'relative',
+                width: '100%',
+                paddingBottom: `${aspectRatioPercent}%`,
+                overflow: 'hidden',
+                borderRadius: '4px',
+                cursor: editable ? 'default' : 'pointer',
+              }}
+              onClick={() => handleImageClick(index)}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                }}
+              >
+                <ImageElement
+                  src={imageUrl}
+                  objectFit="cover"
+                  style={{}}
+                  editable={editable}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Gallery Lightbox */}
+        <GalleryLightbox
+          images={galleryImages}
+          initialIndex={lightboxIndex}
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      </>
+    )
+  }
+
+  // 일반 그룹: children 렌더링
   const children = element.children ?? []
 
+  // absolute 자식이 있는지 확인
+  const hasAbsoluteChildren = children.some(child => child.layoutMode === 'absolute')
+
+  // absolute 자식이 있으면 position: relative 추가
+  const finalGroupStyle: CSSProperties = {
+    ...groupStyle,
+    ...(hasAbsoluteChildren && { position: 'relative' as const }),
+  }
+
   return (
-    <div className="se2-group" style={groupStyle}>
-      {children.map((child) => (
-        <AutoLayoutElement
-          key={child.id}
-          element={child}
-          editable={editable}
-        />
-      ))}
+    <div className="se2-group" style={finalGroupStyle}>
+      {children.map((child) => {
+        // absolute 자식은 별도 처리
+        if (child.layoutMode === 'absolute') {
+          return (
+            <AbsoluteChildElement
+              key={child.id}
+              element={child}
+              editable={editable}
+            />
+          )
+        }
+        return (
+          <AutoLayoutElement
+            key={child.id}
+            element={child}
+            editable={editable}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+// ============================================
+// Absolute Child Element (Group 내부 absolute 자식)
+// ============================================
+
+interface AbsoluteChildElementProps {
+  element: Element
+  editable: boolean
+}
+
+function AbsoluteChildElement({ element, editable }: AbsoluteChildElementProps) {
+  const { data } = useDocument()
+
+  // 요소 값 해석
+  const resolvedValue = useMemo(() => {
+    if (element.binding) {
+      return resolveBinding(data, element.binding)
+    }
+    return element.value ?? (element as { content?: string }).content
+  }, [element.binding, element.value, data, element])
+
+  // 포맷 문자열 처리
+  const formattedValue = useMemo(() => {
+    if (element.props?.type === 'text' && (element.props as TextProps).format) {
+      return interpolate((element.props as TextProps).format!, data)
+    }
+    return resolvedValue
+  }, [element.props, resolvedValue, data])
+
+  // absolute 스타일 계산 (% 단위로 중앙 정렬)
+  const absoluteStyle = useMemo<CSSProperties>(() => {
+    const style: CSSProperties = {
+      position: 'absolute',
+      zIndex: element.zIndex ?? 0,
+    }
+
+    // x, y가 50이면 중앙 정렬로 해석
+    if (element.x === 50 && element.y === 50) {
+      style.top = '50%'
+      style.left = '50%'
+      style.transform = 'translate(-50%, -50%)'
+    } else {
+      // 그 외에는 % 단위로 위치 지정
+      if (element.x !== undefined) {
+        style.left = `${element.x}%`
+      }
+      if (element.y !== undefined) {
+        style.top = `${element.y}%`
+      }
+    }
+
+    // width, height 설정 (% 단위)
+    if (element.width !== undefined) {
+      style.width = `${element.width}%`
+    }
+    if (element.height !== undefined) {
+      style.height = `${element.height}%`
+    }
+
+    // 배경 스타일 적용
+    if (element.style?.background) {
+      if (typeof element.style.background === 'string') {
+        style.backgroundColor = element.style.background
+      } else {
+        style.background = gradientToCSS(element.style.background)
+      }
+    }
+
+    return style
+  }, [element])
+
+  return (
+    <div
+      className={`se2-element se2-element--${element.type} se2-element--absolute-child`}
+      data-element-id={element.id}
+      data-element-type={element.type}
+      data-layout-mode="absolute"
+      style={absoluteStyle}
+    >
+      <ElementTypeRenderer
+        element={element}
+        value={formattedValue}
+        editable={editable}
+      />
     </div>
   )
 }
@@ -335,6 +617,18 @@ function resolveElementStyle(style: ElementStyle): CSSProperties {
     css.borderColor = style.border.color
     css.borderStyle = style.border.style
     css.borderRadius = style.border.radius
+  }
+
+  // 패딩
+  if (style.padding) {
+    if (typeof style.padding === 'number') {
+      css.padding = `${style.padding}px`
+    } else {
+      css.paddingTop = style.padding.top ? `${style.padding.top}px` : undefined
+      css.paddingRight = style.padding.right ? `${style.padding.right}px` : undefined
+      css.paddingBottom = style.padding.bottom ? `${style.padding.bottom}px` : undefined
+      css.paddingLeft = style.padding.left ? `${style.padding.left}px` : undefined
+    }
   }
 
   // 그림자

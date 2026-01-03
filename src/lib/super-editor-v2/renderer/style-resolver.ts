@@ -308,7 +308,10 @@ function applyQuickConfig(
   const result = { ...tokens }
 
   if (quick.dominantColor) {
-    result.bgSection = quick.dominantColor
+    // dominantColor가 밝은 색일 때만 배경색으로 사용 (어두운 색은 무시)
+    if (isLightColor(quick.dominantColor)) {
+      result.bgSection = quick.dominantColor
+    }
   }
   if (quick.accentColor) {
     result.accentDefault = quick.accentColor
@@ -442,6 +445,21 @@ function gradientToString(gradient: GradientValue): string {
   } else {
     return `conic-gradient(from ${gradient.angle ?? 0}deg, ${stops})`
   }
+}
+
+/**
+ * 색상이 밝은지 판단 (luminance > 0.5)
+ */
+function isLightColor(color: string): boolean {
+  if (!color.startsWith('#')) return true // 기본값은 밝은 색 취급
+  const hex = color.slice(1)
+  const num = parseInt(hex, 16)
+  const r = (num >> 16) & 0xff
+  const g = (num >> 8) & 0xff
+  const b = num & 0xff
+  // 상대 밝기 계산 (ITU-R BT.709)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.5
 }
 
 /**

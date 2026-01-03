@@ -79,13 +79,18 @@ export function getValueByPath(
     }
   }
 
-  // 배열인 경우 그대로 반환 (갤러리 등에서 사용)
+  // 배열인 경우 URL 배열로 정규화 (갤러리 등에서 사용)
   if (Array.isArray(current)) {
-    // 갤러리 배열: [{id, url, order}, ...] → url 배열로 변환
-    if (current.length > 0 && typeof current[0] === 'object' && 'url' in current[0]) {
-      return current.map((item: { url: string }) => item.url)
-    }
-    return current
+    // 혼합 형식 지원: 문자열과 {id, url, order} 객체가 섞여있을 수 있음
+    return current.map((item) => {
+      if (typeof item === 'string') {
+        return item
+      }
+      if (typeof item === 'object' && item !== null && 'url' in item) {
+        return (item as { url: string }).url
+      }
+      return null
+    }).filter((url): url is string => url !== null)
   }
 
   // 객체인 경우 적절한 문자열 변환
@@ -115,12 +120,24 @@ export function getValueByPath(
 const COMPUTED_FIELDS = [
   // 날짜/시간 표시
   'wedding.dateDisplay',
+  'wedding.dateDot',  // YYYY.MM.DD 형식
+  'wedding.dateMonthDay',  // MM.DD 형식
   'wedding.timeDisplay',
   'wedding.dday',
   // 날짜 분해 필드
+  'wedding.year',
   'wedding.month',
   'wedding.day',
   'wedding.weekday',  // dayOfWeek → weekday로 rename
+  // 날짜 오프셋 (±2일 범위)
+  'wedding.weekdayMinus2',
+  'wedding.weekdayMinus1',
+  'wedding.weekdayPlus1',
+  'wedding.weekdayPlus2',
+  'wedding.dayMinus2',
+  'wedding.dayMinus1',
+  'wedding.dayPlus1',
+  'wedding.dayPlus2',
   // 실시간 카운트다운
   'countdown.days',
   'countdown.hours',
@@ -129,6 +146,14 @@ const COMPUTED_FIELDS = [
   // Legacy 호환
   'wedding.dayOfWeek',
 ] as const
+
+// 공지 카드 아이콘 타입 → SVG 경로 매핑 (카드 렌더링에서 사용)
+export const NOTICE_ICON_PATHS: Record<string, string | null> = {
+  'birds-blue': '/assets/notice1.svg',
+  'birds-orange': '/assets/notice2.svg',
+  'birds-green': '/assets/notice3.svg',
+  'none': null,
+}
 
 type ComputedField = typeof COMPUTED_FIELDS[number]
 
@@ -141,17 +166,31 @@ function resolveComputedField(
   field: ComputedField,
   options: ResolveOptions
 ): BindingValue {
-  const dateStr = data.wedding.date
+  const dateStr = data.wedding?.date
+
+  // 날짜가 없으면 null 반환 (0이 아닌)
+  if (!dateStr && field.startsWith('countdown.')) {
+    return null
+  }
 
   switch (field) {
     case 'wedding.dateDisplay':
-      return formatWeddingDate(dateStr, options.dateFormat)
+      return formatWeddingDateWithTime(dateStr, data.wedding?.time, options.dateFormat)
+
+    case 'wedding.dateDot':
+      return formatDateDot(dateStr)  // YYYY.MM.DD 형식
+
+    case 'wedding.dateMonthDay':
+      return formatDateMonthDay(dateStr)  // MM.DD 형식
 
     case 'wedding.timeDisplay':
-      return formatTime(data.wedding.time)
+      return formatTime(data.wedding?.time)
 
     case 'wedding.dday':
       return calculateDday(dateStr)
+
+    case 'wedding.year':
+      return getYear(dateStr)
 
     case 'wedding.month':
       return getMonth(dateStr)
@@ -162,6 +201,32 @@ function resolveComputedField(
     case 'wedding.weekday':
     case 'wedding.dayOfWeek':  // Legacy 호환
       return getDayOfWeek(dateStr)
+
+    // 요일 오프셋 (-2, -1, +1, +2)
+    case 'wedding.weekdayMinus2':
+      return getDayOfWeekOffset(dateStr, -2)
+
+    case 'wedding.weekdayMinus1':
+      return getDayOfWeekOffset(dateStr, -1)
+
+    case 'wedding.weekdayPlus1':
+      return getDayOfWeekOffset(dateStr, 1)
+
+    case 'wedding.weekdayPlus2':
+      return getDayOfWeekOffset(dateStr, 2)
+
+    // 날짜 오프셋 (-2, -1, +1, +2)
+    case 'wedding.dayMinus2':
+      return getDayOffset(dateStr, -2)
+
+    case 'wedding.dayMinus1':
+      return getDayOffset(dateStr, -1)
+
+    case 'wedding.dayPlus1':
+      return getDayOffset(dateStr, 1)
+
+    case 'wedding.dayPlus2':
+      return getDayOffset(dateStr, 2)
 
     case 'countdown.days':
       return getStaticCountdown(dateStr).days
@@ -218,6 +283,45 @@ export function formatWeddingDate(
 }
 
 /**
+ * 결혼식 날짜 + 시간 포맷팅
+ * @param dateStr ISO 8601 형식 (2025-03-15)
+ * @param timeStr HH:mm 형식 (14:00)
+ * @param format 출력 형식
+ */
+export function formatWeddingDateWithTime(
+  dateStr: string,
+  timeStr?: string,
+  format: ResolveOptions['dateFormat'] = 'korean'
+): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const dayOfWeek = getDayOfWeek(dateStr)
+
+  // 시간이 없으면 날짜만 반환
+  if (!timeStr) {
+    return `${month}월 ${day}일 ${dayOfWeek}요일`
+  }
+
+  const timeDisplay = formatTime(timeStr)
+
+  switch (format) {
+    case 'iso':
+      return `${dateStr} ${timeStr}`
+
+    case 'short':
+      return `${month}월 ${day}일 ${timeDisplay}`
+
+    case 'full':
+    case 'korean':
+    default:
+      return `${month}월 ${day}일 ${dayOfWeek}요일 ${timeDisplay}`
+  }
+}
+
+/**
  * D-day 계산
  */
 export function calculateDday(dateStr: string): string {
@@ -246,12 +350,69 @@ export function getDayOfWeek(dateStr: string): string {
 }
 
 /**
+ * 오프셋 날짜의 요일 반환
+ * @param dateStr 기준 날짜
+ * @param offset 오프셋 (음수: 이전, 양수: 이후)
+ */
+export function getDayOfWeekOffset(dateStr: string, offset: number): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  date.setDate(date.getDate() + offset)
+  const days = ['일', '월', '화', '수', '목', '금', '토']
+  return days[date.getDay()]
+}
+
+/**
+ * 오프셋 날짜의 일(day) 반환
+ * @param dateStr 기준 날짜
+ * @param offset 오프셋 (음수: 이전, 양수: 이후)
+ */
+export function getDayOffset(dateStr: string, offset: number): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  date.setDate(date.getDate() + offset)
+  return String(date.getDate())
+}
+
+/**
+ * 년도 반환
+ */
+export function getYear(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  return String(date.getFullYear())
+}
+
+/**
  * 월 반환
  */
 export function getMonth(dateStr: string): string {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return ''
   return String(date.getMonth() + 1).padStart(2, '0')
+}
+
+/**
+ * YYYY.MM.DD 형식으로 날짜 포맷
+ */
+export function formatDateDot(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}.${month}.${day}`
+}
+
+/**
+ * MM.DD 형식으로 날짜 포맷
+ */
+export function formatDateMonthDay(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${month}.${day}`
 }
 
 /**
@@ -356,16 +517,18 @@ export function isValidVariablePath(path: string): path is VariablePath {
 
   const validPaths: string[] = [
     // ─── 공유 필드 (◆ 원본) ───
-    'couple.groom.name', 'couple.groom.phone', 'couple.groom.intro', 'couple.groom.baptismalName',
+    'couple.groom.name', 'couple.groom.nameEn', 'couple.groom.phone', 'couple.groom.intro', 'couple.groom.baptismalName',
     'couple.groom.photo', 'couple.groom.birthDate', 'couple.groom.mbti', 'couple.groom.tags',
-    'couple.bride.name', 'couple.bride.phone', 'couple.bride.intro', 'couple.bride.baptismalName',
+    'couple.bride.name', 'couple.bride.nameEn', 'couple.bride.phone', 'couple.bride.intro', 'couple.bride.baptismalName',
     'couple.bride.photo', 'couple.bride.birthDate', 'couple.bride.mbti', 'couple.bride.tags',
     'couple.photo', 'couple.photos',
     'wedding.date', 'wedding.time',
 
     // ─── 자동 계산 (__HIDDEN__) ───
-    'wedding.dateDisplay', 'wedding.timeDisplay', 'wedding.dday',
-    'wedding.month', 'wedding.day', 'wedding.weekday',
+    'wedding.dateDisplay', 'wedding.dateDot', 'wedding.timeDisplay', 'wedding.dday',
+    'wedding.year', 'wedding.month', 'wedding.day', 'wedding.weekday',
+    'wedding.weekdayMinus2', 'wedding.weekdayMinus1', 'wedding.weekdayPlus1', 'wedding.weekdayPlus2',
+    'wedding.dayMinus2', 'wedding.dayMinus1', 'wedding.dayPlus1', 'wedding.dayPlus2',
     'countdown.days', 'countdown.hours', 'countdown.minutes', 'countdown.seconds',
 
     // ─── 혼주 ───
@@ -393,7 +556,7 @@ export function isValidVariablePath(path: string): path is VariablePath {
     'gallery.effect',
     'accounts.groom', 'accounts.bride', 'accounts.kakaopay.groom', 'accounts.kakaopay.bride',
     'rsvp.title', 'rsvp.description', 'rsvp.deadline',
-    'notice.items',
+    'notice.sectionTitle', 'notice.title', 'notice.description', 'notice.items',
     'guestbook.title', 'guestbook.placeholder',
     'ending.message', 'ending.photo',
     'bgm.trackId', 'bgm.title', 'bgm.artist',

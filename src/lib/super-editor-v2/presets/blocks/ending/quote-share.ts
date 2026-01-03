@@ -18,7 +18,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
   nameKo: '인용문 공유',
   description: '영화 인용문과 카카오톡/링크 공유 버튼이 포함된 엔딩 블록',
 
-  tags: [...ENDING_COMMON_TAGS, 'quote', 'movie', 'kakao', 'link', '인용문', '영화', '카카오톡'],
+  tags: [...ENDING_COMMON_TAGS, 'quote', 'movie', 'kakao', 'link', '인용문', '영화', '카카오톡', 'auto-layout'],
   complexity: 'medium',
   bindings: [...ENDING_COMMON_BINDINGS, 'custom.quoteText', 'custom.quoteSource'],
 
@@ -93,6 +93,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           height: 100,
           zIndex: 0,
           binding: 'ending.photo',
+          value: 'https://picsum.photos/seed/ending/800/600',
           props: {
             type: 'image',
             objectFit: 'cover',
@@ -101,7 +102,39 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             background: '#D0D0D0',
           },
         },
-        // 2-2. 인용문 컨테이너 (auto layout)
+        // 2-2. 블랙 오버레이 30%
+        {
+          id: 'cover-overlay',
+          type: 'shape',
+          layoutMode: 'absolute',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+          zIndex: 1,
+          props: {
+            type: 'shape',
+            shape: 'rectangle',
+            fill: 'rgba(0, 0, 0, 0.3)',
+          },
+        },
+        // 2-3. 그라데이션 오버레이 (위 0% → 아래 100%)
+        {
+          id: 'gradient-overlay',
+          type: 'shape',
+          layoutMode: 'absolute',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+          zIndex: 2,
+          props: {
+            type: 'shape',
+            shape: 'rectangle',
+            fill: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%)',
+          },
+        },
+        // 2-4. 인용문 컨테이너 (auto layout)
         {
           id: 'quote-container',
           type: 'group',
@@ -110,17 +143,15 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             width: { type: 'fill' },
             height: { type: 'hug' },
           },
-          zIndex: 1,
+          zIndex: 3,
           props: {
             type: 'group',
             layout: {
               direction: 'vertical',
               gap: 16,
+              padding: { top: 40, right: 24, bottom: 16, left: 24 },
               alignItems: 'center',
             },
-          },
-          style: {
-            background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%)',
           },
           children: [
             // 인용문 텍스트
@@ -210,8 +241,9 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           zIndex: 1,
           props: {
             type: 'button',
-            label: '카카오톡으로 청첩장 공유하기',
+            label: '카카오로 공유하기',
             action: 'share',
+            icon: 'kakao-talk',
           },
           style: {
             text: {
@@ -221,7 +253,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
               color: '#1A1A1A',
               textAlign: 'center',
             },
-            background: '#FEE500',
+            background: '#FFEB3B',
             border: {
               width: 0,
               color: 'transparent',
@@ -230,9 +262,9 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             },
           },
         },
-        // 링크 복사 버튼
+        // 공유하기 버튼 (native share)
         {
-          id: 'copy-link-button',
+          id: 'native-share-button',
           type: 'button',
           layoutMode: 'auto',
           sizing: {
@@ -242,8 +274,8 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           zIndex: 1,
           props: {
             type: 'button',
-            label: '청첩장 링크 복사하기',
-            action: 'copy',
+            label: '공유하기',
+            action: 'share',
           },
           style: {
             text: {
@@ -265,29 +297,6 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
       ],
     },
 
-    // 4. 로고/크레딧
-    {
-      id: 'credit',
-      type: 'text',
-      layoutMode: 'auto',
-      sizing: {
-        width: { type: 'hug' },
-        height: { type: 'hug' },
-      },
-      zIndex: 1,
-      value: 'maison de letter',
-      props: { type: 'text' },
-      style: {
-        text: {
-          fontFamily: 'var(--font-display)',
-          fontSize: 14,
-          fontWeight: 400,
-          color: 'var(--fg-muted)',
-          textAlign: 'center',
-          letterSpacing: 1,
-        },
-      },
-    },
   ],
 
   // ─── AI Hints ───

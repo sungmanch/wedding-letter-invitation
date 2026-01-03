@@ -2,20 +2,194 @@
  * Greeting Parents Block - Baptismal Preset
  *
  * 이름과 세례명이 함께 표시되는 카톨릭형 소개
- * Absolute 레이아웃 (복잡한 2행 구조)
+ * Auto Layout (vertical + nested horizontal)
  */
 
 import type { BlockPreset, PresetElement } from '../types'
+import type { VariablePath } from '../../../schema/types'
+import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+
+// ═══════════════════════════════════════════════
+// 공통 스타일
+// ═══════════════════════════════════════════════
+const PARENT_NAME_STYLE = {
+  fontFamily: 'var(--font-body)',
+  fontSize: 14,
+  fontWeight: 400,
+  color: 'var(--fg-default)',
+  textAlign: 'center' as const,
+  lineHeight: 1.4,
+}
+
+const BAPTISMAL_NAME_STYLE = {
+  fontFamily: 'var(--font-body)',
+  fontSize: 11,
+  fontWeight: 400,
+  color: 'var(--fg-muted)',
+  textAlign: 'center' as const,
+  lineHeight: 1.2,
+}
+
+const COUPLE_NAME_STYLE = {
+  fontFamily: 'var(--font-heading)',
+  fontSize: 15,
+  fontWeight: 500,
+  color: 'var(--fg-emphasis)',
+  textAlign: 'center' as const,
+  lineHeight: 1.4,
+}
+
+// ═══════════════════════════════════════════════
+// 부모 + 세례명 컨테이너 (세로 배치: 이름 위, 세례명 아래)
+// ═══════════════════════════════════════════════
+const createParentWithBaptismal = (
+  nameBinding: VariablePath,
+  baptismalBinding: VariablePath
+): PresetElement => ({
+  type: 'group',
+  zIndex: 1,
+  sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+  props: {
+    type: 'group',
+    layout: {
+      direction: 'vertical',
+      gap: 2,
+      alignItems: 'center',
+    },
+  },
+  children: [
+    {
+      type: 'text',
+      zIndex: 1,
+      sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+      binding: nameBinding,
+      props: { type: 'text' },
+      style: { text: PARENT_NAME_STYLE },
+    },
+    {
+      type: 'text',
+      zIndex: 1,
+      sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+      binding: baptismalBinding,
+      props: { type: 'text' },
+      style: { text: BAPTISMAL_NAME_STYLE },
+    },
+  ],
+})
+
+// ═══════════════════════════════════════════════
+// 신랑/신부 + 세례명 컨테이너
+// ═══════════════════════════════════════════════
+const createCoupleWithBaptismal = (
+  nameBinding: VariablePath,
+  baptismalBinding: VariablePath
+): PresetElement => ({
+  type: 'group',
+  zIndex: 1,
+  sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+  props: {
+    type: 'group',
+    layout: {
+      direction: 'vertical',
+      gap: 2,
+      alignItems: 'center',
+    },
+  },
+  children: [
+    {
+      type: 'text',
+      zIndex: 1,
+      sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+      binding: nameBinding,
+      props: { type: 'text' },
+      style: { text: COUPLE_NAME_STYLE },
+    },
+    {
+      type: 'text',
+      zIndex: 1,
+      sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+      binding: baptismalBinding,
+      props: { type: 'text' },
+      style: { text: BAPTISMAL_NAME_STYLE },
+    },
+  ],
+})
+
+// ═══════════════════════════════════════════════
+// 구분점 요소
+// ═══════════════════════════════════════════════
+const SEPARATOR_DOT: PresetElement = {
+  type: 'text',
+  zIndex: 1,
+  sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+  value: '·',
+  props: { type: 'text' },
+  style: { text: PARENT_NAME_STYLE },
+}
+
+// ═══════════════════════════════════════════════
+// 혼주 한 줄 (부모1 · 부모2 의 서열 신랑/신부)
+// ═══════════════════════════════════════════════
+const createFamilyRow = (side: 'groom' | 'bride'): PresetElement => ({
+  type: 'group',
+  zIndex: 1,
+  sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+  props: {
+    type: 'group',
+    layout: {
+      direction: 'horizontal',
+      gap: 6,
+      alignItems: 'start',
+      justifyContent: 'center',
+    },
+  },
+  children: [
+    // 아버지 (이름 + 세례명)
+    createParentWithBaptismal(
+      `parents.${side}.father.name` as VariablePath,
+      `parents.${side}.father.baptismalName` as VariablePath
+    ),
+    // 구분점
+    SEPARATOR_DOT,
+    // 어머니 (이름 + 세례명)
+    createParentWithBaptismal(
+      `parents.${side}.mother.name` as VariablePath,
+      `parents.${side}.mother.baptismalName` as VariablePath
+    ),
+    // "의 서열"
+    {
+      type: 'text',
+      zIndex: 1,
+      sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+      props: {
+        type: 'text',
+        format: `의 {parents.${side}.birthOrder}`,
+      },
+      style: {
+        text: {
+          fontFamily: 'var(--font-body)',
+          fontSize: 14,
+          fontWeight: 400,
+          color: 'var(--fg-muted)',
+          textAlign: 'center',
+          lineHeight: 1.4,
+        },
+      },
+    },
+    // 신랑/신부 (이름 + 세례명)
+    createCoupleWithBaptismal(
+      `couple.${side}.name` as VariablePath,
+      `couple.${side}.baptismalName` as VariablePath
+    ),
+  ],
+})
 
 const ELEMENTS: PresetElement[] = [
-  // 2. 메인 제목
+  // 1. 메인 제목
   {
     type: 'text',
-    x: 10,
-    y: 9,
-    width: 80,
-    height: 6,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'greeting.title',
     props: { type: 'text' },
     style: {
@@ -30,14 +204,12 @@ const ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 3. 인사말 본문
+  // 2. 인사말 본문
   {
     type: 'text',
-    x: 10,
-    y: 18,
-    width: 80,
-    height: 20,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    constraints: { minHeight: 100 },
     binding: 'greeting.content',
     props: { type: 'text' },
     style: {
@@ -52,376 +224,28 @@ const ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 4. 구분선
+  // 3. 구분선
   {
     type: 'divider',
-    x: 10,
-    y: 42,
-    width: 80,
-    height: 0.3,
     zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 1, unit: 'px' } },
     props: { type: 'divider', dividerStyle: 'solid' },
     style: { background: 'var(--border-muted)' },
   },
-  // ═══════════════════════════════════════════════
-  // 신랑측 (이름 + 세례명 - 중앙 정렬)
-  // ═══════════════════════════════════════════════
-  // 5. 신랑 아버지 이름
-  {
-    type: 'text',
-    x: 10,
-    y: 47,
-    width: 16,
-    height: 5,
-    zIndex: 1,
-    binding: 'parents.groom.father.name',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 6. 신랑 아버지 세례명
-  {
-    type: 'text',
-    x: 10,
-    y: 52,
-    width: 16,
-    height: 3,
-    zIndex: 1,
-    binding: 'parents.groom.father.baptismalName',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.2,
-      },
-    },
-  },
-  // 7. 구분점 ·
-  {
-    type: 'text',
-    x: 26,
-    y: 47,
-    width: 4,
-    height: 5,
-    zIndex: 1,
-    value: '·',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 8. 신랑 어머니 이름
-  {
-    type: 'text',
-    x: 30,
-    y: 47,
-    width: 16,
-    height: 5,
-    zIndex: 1,
-    binding: 'parents.groom.mother.name',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 9. 신랑 어머니 세례명
-  {
-    type: 'text',
-    x: 30,
-    y: 52,
-    width: 16,
-    height: 3,
-    zIndex: 1,
-    binding: 'parents.groom.mother.baptismalName',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.2,
-      },
-    },
-  },
-  // 10. "의" + 서열
-  {
-    type: 'text',
-    x: 46,
-    y: 47,
-    width: 14,
-    height: 5,
-    zIndex: 1,
-    props: {
-      type: 'text',
-      format: '의 {parents.groom.birthOrder}',
-    },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 11. 신랑 이름
-  {
-    type: 'text',
-    x: 60,
-    y: 47,
-    width: 30,
-    height: 5,
-    zIndex: 1,
-    binding: 'couple.groom.name',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-heading)',
-        fontSize: 15,
-        fontWeight: 500,
-        color: 'var(--fg-emphasis)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 12. 신랑 세례명
-  {
-    type: 'text',
-    x: 60,
-    y: 52,
-    width: 30,
-    height: 3,
-    zIndex: 1,
-    binding: 'couple.groom.baptismalName',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.2,
-      },
-    },
-  },
-  // ═══════════════════════════════════════════════
-  // 신부측 (이름 + 세례명 - 중앙 정렬)
-  // ═══════════════════════════════════════════════
-  // 13. 신부 아버지 이름
-  {
-    type: 'text',
-    x: 10,
-    y: 60,
-    width: 16,
-    height: 5,
-    zIndex: 1,
-    binding: 'parents.bride.father.name',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 14. 신부 아버지 세례명
-  {
-    type: 'text',
-    x: 10,
-    y: 65,
-    width: 16,
-    height: 3,
-    zIndex: 1,
-    binding: 'parents.bride.father.baptismalName',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.2,
-      },
-    },
-  },
-  // 15. 구분점 ·
-  {
-    type: 'text',
-    x: 26,
-    y: 60,
-    width: 4,
-    height: 5,
-    zIndex: 1,
-    value: '·',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 16. 신부 어머니 이름
-  {
-    type: 'text',
-    x: 30,
-    y: 60,
-    width: 16,
-    height: 5,
-    zIndex: 1,
-    binding: 'parents.bride.mother.name',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-default)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 17. 신부 어머니 세례명
-  {
-    type: 'text',
-    x: 30,
-    y: 65,
-    width: 16,
-    height: 3,
-    zIndex: 1,
-    binding: 'parents.bride.mother.baptismalName',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.2,
-      },
-    },
-  },
-  // 18. "의" + 서열
-  {
-    type: 'text',
-    x: 46,
-    y: 60,
-    width: 14,
-    height: 5,
-    zIndex: 1,
-    props: {
-      type: 'text',
-      format: '의 {parents.bride.birthOrder}',
-    },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 19. 신부 이름
-  {
-    type: 'text',
-    x: 60,
-    y: 60,
-    width: 30,
-    height: 5,
-    zIndex: 1,
-    binding: 'couple.bride.name',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-heading)',
-        fontSize: 15,
-        fontWeight: 500,
-        color: 'var(--fg-emphasis)',
-        textAlign: 'center',
-        lineHeight: 1.4,
-      },
-    },
-  },
-  // 20. 신부 세례명
-  {
-    type: 'text',
-    x: 60,
-    y: 65,
-    width: 30,
-    height: 3,
-    zIndex: 1,
-    binding: 'couple.bride.baptismalName',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 400,
-        color: 'var(--fg-muted)',
-        textAlign: 'center',
-        lineHeight: 1.2,
-      },
-    },
-  },
-  // 9. 축하 연락하기 버튼
+  // 4. 신랑측 혼주 정보
+  createFamilyRow('groom'),
+  // 5. 신부측 혼주 정보
+  createFamilyRow('bride'),
+  // 6. 축하 연락하기 버튼 (contact-modal)
   {
     type: 'button',
-    x: 20,
-    y: 78,
-    width: 60,
-    height: 7,
     zIndex: 1,
+    sizing: { width: { type: 'fixed', value: 70, unit: '%' }, height: { type: 'hug' } },
+    alignSelf: 'center',
     props: {
       type: 'button',
-      label: '📞 축하 연락하기',
-      action: 'show-block',
-      targetBlockType: 'contact',
+      label: '축하 연락하기',
+      action: 'contact-modal',
     },
     style: {
       background: 'var(--bg-section)',
@@ -448,7 +272,7 @@ export const GREETING_PARENTS_BAPTISMAL: BlockPreset = {
   name: 'Baptismal',
   nameKo: '카톨릭',
   description: '이름과 세례명이 함께 표시되는 카톨릭형 소개',
-  tags: ['catholic', 'baptismal', 'religious', 'minimal', 'clean', 'centered', 'two-row-parents'],
+  tags: ['catholic', 'baptismal', 'religious', 'minimal', 'clean', 'centered', 'auto-layout'],
   complexity: 'medium',
   bindings: [
     'greeting.title',
@@ -470,15 +294,16 @@ export const GREETING_PARENTS_BAPTISMAL: BlockPreset = {
     'parents.bride.mother.name',
     'parents.bride.mother.baptismalName',
   ],
-  defaultHeight: 100,
+  defaultHeight: HUG_HEIGHT,
+  layout: AUTO_LAYOUT_VERTICAL,
   defaultElements: ELEMENTS,
-  specialComponents: ['contact-block'],
+  specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
   recommendedThemes: ['minimal-light', 'classic-ivory'],
   relatedPresets: ['contact-minimal'],
   aiHints: {
     mood: ['religious', 'traditional', 'reverent', 'elegant'],
-    style: ['centered', 'clean', 'formal', 'two-row'],
+    style: ['centered', 'clean', 'formal', 'auto-layout'],
     useCase: ['catholic-wedding', 'christian-wedding', 'religious-ceremony', 'baptismal-name'],
   },
 }

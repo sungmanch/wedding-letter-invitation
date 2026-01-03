@@ -105,6 +105,10 @@ export function PreviewPanel({
     } as CSSProperties
   }, [highlightedBlockId])
 
+  // 실제 콘텐츠 영역 크기 (프레임 패딩 제외)
+  const contentWidth = withFrame ? frameWidth - 24 : frameWidth
+  const contentHeight = withFrame ? frameHeight - 24 : frameHeight
+
   // Form 모드: 읽기 전용 프리뷰
   const formModeContent = (
     <div
@@ -117,6 +121,7 @@ export function PreviewPanel({
         mode="edit"
         onBlockClick={onBlockClick}
         onElementClick={onElementClick}
+        viewportOverride={{ width: contentWidth, height: contentHeight }}
       />
 
       {/* 하이라이트 오버레이 스타일 */}

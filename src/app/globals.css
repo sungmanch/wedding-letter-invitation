@@ -1,5 +1,5 @@
-@import 'tailwindcss';
 @import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
+@import 'tailwindcss';
 
 /* ==========================================
    Custom Fonts (@font-face)

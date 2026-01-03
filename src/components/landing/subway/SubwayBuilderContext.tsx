@@ -32,6 +32,7 @@ import { DEFAULT_STYLE_SYSTEM } from '@/lib/super-editor-v2/schema'
 
 /** 선택 가능한 섹션 타입 */
 export type SelectableSectionType =
+  | 'hero'
   | 'greeting-parents'
   | 'calendar'
   | 'gallery'
@@ -76,6 +77,7 @@ interface SubwayBuilderContextValue {
 
 /** 기본 프리셋 선택 */
 export const DEFAULT_PRESETS: SelectedPresets = {
+  hero: 'hero-classic-elegant',
   'greeting-parents': 'greeting-parents-minimal',
   calendar: 'calendar-korean-countdown-box',
   gallery: 'gallery-square-3col',
@@ -84,6 +86,7 @@ export const DEFAULT_PRESETS: SelectedPresets = {
 
 /** 섹션 순서 (표시 순서) */
 export const SECTION_ORDER: SelectableSectionType[] = [
+  'hero',
   'greeting-parents',
   'calendar',
   'gallery',
@@ -92,6 +95,7 @@ export const SECTION_ORDER: SelectableSectionType[] = [
 
 /** 섹션별 라벨 */
 export const SECTION_LABELS: Record<SelectableSectionType, string> = {
+  hero: '대표사진',
   'greeting-parents': '인사말',
   calendar: '예식일시',
   gallery: '갤러리',
