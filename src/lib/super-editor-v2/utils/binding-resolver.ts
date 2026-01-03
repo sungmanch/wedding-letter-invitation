@@ -159,10 +159,10 @@ function resolveComputedField(
 
   switch (field) {
     case 'wedding.dateDisplay':
-      return formatWeddingDate(dateStr, options.dateFormat)
+      return formatWeddingDateWithTime(dateStr, data.wedding?.time, options.dateFormat)
 
     case 'wedding.timeDisplay':
-      return formatTime(data.wedding.time)
+      return formatTime(data.wedding?.time)
 
     case 'wedding.dday':
       return calculateDday(dateStr)
@@ -254,6 +254,45 @@ export function formatWeddingDate(
     case 'korean':
     default:
       return `${year}년 ${month}월 ${day}일 ${dayOfWeek}요일`
+  }
+}
+
+/**
+ * 결혼식 날짜 + 시간 포맷팅
+ * @param dateStr ISO 8601 형식 (2025-03-15)
+ * @param timeStr HH:mm 형식 (14:00)
+ * @param format 출력 형식
+ */
+export function formatWeddingDateWithTime(
+  dateStr: string,
+  timeStr?: string,
+  format: ResolveOptions['dateFormat'] = 'korean'
+): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const dayOfWeek = getDayOfWeek(dateStr)
+
+  // 시간이 없으면 날짜만 반환
+  if (!timeStr) {
+    return `${month}월 ${day}일 ${dayOfWeek}요일`
+  }
+
+  const timeDisplay = formatTime(timeStr)
+
+  switch (format) {
+    case 'iso':
+      return `${dateStr} ${timeStr}`
+
+    case 'short':
+      return `${month}월 ${day}일 ${timeDisplay}`
+
+    case 'full':
+    case 'korean':
+    default:
+      return `${month}월 ${day}일 ${dayOfWeek}요일 ${timeDisplay}`
   }
 }
 
