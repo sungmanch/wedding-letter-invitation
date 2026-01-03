@@ -272,6 +272,7 @@ export interface GroupProps {
   layout?: {
     direction?: 'vertical' | 'horizontal'  // 기본: 'vertical'
     gap?: number                            // px
+    padding?: { top?: number; right?: number; bottom?: number; left?: number }  // px
     alignItems?: 'start' | 'center' | 'end' | 'stretch'
     justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
     reverse?: boolean                       // flex-direction: row-reverse / column-reverse

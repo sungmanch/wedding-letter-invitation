@@ -105,7 +105,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
         // 2-2. 블랙 오버레이 30%
         {
           id: 'cover-overlay',
-          type: 'box',
+          type: 'shape',
           layoutMode: 'absolute',
           x: 0,
           y: 0,
@@ -113,16 +113,15 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           height: 100,
           zIndex: 1,
           props: {
-            type: 'box',
-          },
-          style: {
-            background: 'rgba(0, 0, 0, 0.3)',
+            type: 'shape',
+            shape: 'rectangle',
+            fill: 'rgba(0, 0, 0, 0.3)',
           },
         },
         // 2-3. 그라데이션 오버레이 (위 0% → 아래 100%)
         {
           id: 'gradient-overlay',
-          type: 'box',
+          type: 'shape',
           layoutMode: 'absolute',
           x: 0,
           y: 0,
@@ -130,10 +129,9 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           height: 100,
           zIndex: 2,
           props: {
-            type: 'box',
-          },
-          style: {
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%)',
+            type: 'shape',
+            shape: 'rectangle',
+            fill: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%)',
           },
         },
         // 2-4. 인용문 컨테이너 (auto layout)
