@@ -123,7 +123,7 @@ const ELEMENTS: PresetElement[] = [
             type: 'text',
             layoutMode: 'absolute',
             x: 0,
-            y: 85,
+            y: 105,
             width: 100,
             height: 20,
             zIndex: 2,
@@ -132,7 +132,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 30,
+                fontSize: 24,
                 fontWeight: 600,
                 color: '#002BFF',
                 textAlign: 'center',
@@ -448,7 +448,7 @@ const ELEMENTS: PresetElement[] = [
             type: 'text',
             layoutMode: 'absolute',
             x: 0,
-            y: 85,
+            y: 105,
             width: 100,
             height: 20,
             zIndex: 2,
@@ -457,7 +457,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 30,
+                fontSize: 24,
                 fontWeight: 600,
                 color: '#002BFF',
                 textAlign: 'center',
