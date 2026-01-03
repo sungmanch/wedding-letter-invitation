@@ -51,13 +51,16 @@ export function AutoLayoutBlock({
     return Array.isArray(images) ? images.length : 0
   }, [block.type, data])
 
-  // 갤러리 컬럼 수 확인 (elements에서 gallery config 추출)
-  const galleryColumns = useMemo(() => {
-    if (block.type !== 'gallery') return 3
+  // 갤러리 설정 확인 (elements에서 gallery config 추출)
+  const galleryConfig = useMemo(() => {
+    if (block.type !== 'gallery') return { columns: 3, initialRows: 3 }
     const galleryElement = block.elements?.find(el => el.binding === 'photos.gallery')
     // @ts-expect-error - gallery는 확장 props
-    const columns = galleryElement?.props?.gallery?.columns as number | undefined
-    return columns ?? 3
+    const config = galleryElement?.props?.gallery as { columns?: number; initialRows?: number } | undefined
+    return {
+      columns: config?.columns ?? 3,
+      initialRows: config?.initialRows ?? 3,
+    }
   }, [block.type, block.elements])
 
   // absolute 요소와 auto 요소 분리
@@ -77,12 +80,12 @@ export function AutoLayoutBlock({
     return { absoluteElements: absolute, autoElements: auto }
   }, [block.elements])
 
-  // 더보기 버튼 노출 조건: 2단은 6개 초과, 3단은 12개 초과
+  // 더보기 버튼 노출 조건: 초기 표시 개수(columns * initialRows) 초과 시 표시
   const shouldShowMoreButton = useMemo(() => {
     if (block.type !== 'gallery') return true
-    const threshold = galleryColumns === 2 ? 6 : 12
-    return galleryImageCount > threshold
-  }, [block.type, galleryColumns, galleryImageCount])
+    const initialCount = galleryConfig.columns * galleryConfig.initialRows
+    return galleryImageCount > initialCount
+  }, [block.type, galleryConfig, galleryImageCount])
 
   // 필터링된 auto 요소 (더보기 버튼 조건 적용)
   const filteredAutoElements = useMemo(() => {
