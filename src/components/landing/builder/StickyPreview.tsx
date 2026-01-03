@@ -19,7 +19,6 @@ import {
 } from '@/lib/super-editor-v2/schema'
 import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
-import { buildBlocksFromTemplate } from '@/lib/super-editor-v2/services/template-block-builder'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import type { PresetElement } from '@/lib/super-editor-v2/presets/blocks/types'
 import type { Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
@@ -86,23 +85,18 @@ function StickyPreviewInner() {
 
     // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
     const sampleData = getSampleWeddingDataForTemplate(state.selectedTemplateId)
-    const templateBlocks = buildBlocksFromTemplate(template, sampleData)
-    const heroBlock = templateBlocks.find((b) => b.type === 'hero')
 
-    const sectionBlocks: Block[] = []
+    // 선택된 프리셋으로 블록 생성 (hero 포함)
+    const blocks: Block[] = []
     for (const sectionType of SECTION_ORDER) {
       const presetId = state.selectedPresets[sectionType]
       if (presetId) {
         const block = createBlockFromPresetData(presetId)
         if (block) {
-          sectionBlocks.push(block)
+          blocks.push(block)
         }
       }
     }
-
-    const blocks: Block[] = heroBlock
-      ? [heroBlock, ...sectionBlocks]
-      : sectionBlocks
 
     const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
 
@@ -137,7 +131,7 @@ function StickyPreviewInner() {
 
   const scale = frameWidth / ORIGINAL_WIDTH
 
-  // 문서의 총 높이 계산 (vh 기반 블록 높이를 px로 변환)
+  // 문서의 총 높이 계산
   const totalContentHeight = useMemo(() => {
     if (!document) return ORIGINAL_HEIGHT
 
@@ -148,8 +142,24 @@ function StickyPreviewInner() {
       if (typeof block.height === 'number') {
         // vh를 px로 변환
         total += (block.height / 100) * viewportHeight
+      } else if (block.height && typeof block.height === 'object') {
+        // SizeMode 처리
+        const sizeMode = block.height as SizeMode
+        if (sizeMode.type === 'fixed') {
+          // px 단위인 경우 그대로 사용, vh인 경우 변환
+          if (sizeMode.unit === 'vh') {
+            total += (sizeMode.value / 100) * viewportHeight
+          } else {
+            // px (기본값)
+            total += sizeMode.value
+          }
+        } else if (sizeMode.type === 'hug' || sizeMode.type === 'fill') {
+          // hug/fill은 뷰포트 높이의 50%로 추정
+          total += viewportHeight * 0.5
+        } else {
+          total += viewportHeight * 0.5
+        }
       } else {
-        // SizeMode의 경우 기본값 사용
         total += viewportHeight * 0.5
       }
     }
