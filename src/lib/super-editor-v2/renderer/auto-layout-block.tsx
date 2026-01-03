@@ -17,6 +17,8 @@ import { ElementRenderer } from './element-renderer'
 import { AutoLayoutElement } from './auto-layout-element'
 import { resolveBlockHeightStyle } from '../utils/size-resolver'
 import { NoticeSwiper } from '../components/blocks/notice-swiper'
+import { AccountTabView } from '../components/blocks/account-tab-view'
+import { InterviewAccordion } from '../components/blocks/interview-accordion'
 import { resolveBinding } from '../utils/binding-resolver'
 
 // ============================================
@@ -167,6 +169,12 @@ export function AutoLayoutBlock({
 
       {/* Notice Swiper (notice 블록의 card-icon 변형) */}
       {block.type === 'notice' && <NoticeSwiper />}
+
+      {/* Account Tab View (account 블록의 tab-card 변형) */}
+      {block.type === 'account' && <AccountTabView />}
+
+      {/* Interview Accordion (interview 블록) */}
+      {block.type === 'interview' && <InterviewAccordion />}
     </div>
   )
 }
