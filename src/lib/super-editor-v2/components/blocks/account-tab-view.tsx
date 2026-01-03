@@ -86,21 +86,21 @@ export function AccountTabView({ className }: AccountTabViewProps) {
   const currentAccounts = activeSide === 'groom' ? groomAccounts : brideAccounts
   const currentKakaopay = activeSide === 'groom' ? kakaopay?.groom : kakaopay?.bride
 
-  // 계좌번호 복사
-  const handleCopy = useCallback(async (account: AccountItem) => {
-    const text = `${account.bank} ${account.number} ${account.holder}`
+  // 계좌 정보 복사 (은행 계좌번호 예금주)
+  const handleCopy = useCallback(async (account: AccountItem, holder: string) => {
+    const text = `${account.bank} ${account.number} ${holder}`
     try {
-      await navigator.clipboard.writeText(account.number)
-      alert('계좌번호가 복사되었습니다.')
+      await navigator.clipboard.writeText(text)
+      alert('계좌 정보가 복사되었습니다.')
     } catch (err) {
       // Fallback for older browsers
       const textarea = window.document.createElement('textarea')
-      textarea.value = account.number
+      textarea.value = text
       window.document.body.appendChild(textarea)
       textarea.select()
       window.document.execCommand('copy')
       window.document.body.removeChild(textarea)
-      alert('계좌번호가 복사되었습니다.')
+      alert('계좌 정보가 복사되었습니다.')
     }
   }, [])
 
@@ -233,7 +233,7 @@ interface AccountCardProps {
   side: TabSide
   kakaopayUrl?: string
   tokens: ReturnType<typeof useBlockTokens>
-  onCopy: (account: AccountItem) => void
+  onCopy: (account: AccountItem, holder: string) => void
   onKakaopay: (url: string) => void
   /** holder가 비어있을 때 사용할 fallback 이름 */
   holderFallback?: string
@@ -364,8 +364,8 @@ function AccountCard({
       <div style={buttonsStyle}>
         <button
           style={copyButtonStyle}
-          onClick={() => onCopy(account)}
-          aria-label="계좌번호 복사"
+          onClick={() => onCopy(account, displayHolder)}
+          aria-label="계좌 정보 복사"
         >
           <CopyIcon />
           계좌 복사하기
