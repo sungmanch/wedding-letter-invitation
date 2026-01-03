@@ -60,6 +60,8 @@ export function AutoLayoutElement({
 }: AutoLayoutElementProps) {
   const { data } = useDocument()
 
+  console.log('[AutoLayoutElement] 🔵 Rendering element:', element.id, element.type, element.binding)
+
   // 요소 값 해석 (바인딩 또는 직접 값)
   const resolvedValue = useMemo(() => {
     if (element.binding) {
@@ -209,6 +211,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           hugMode={hugMode}
           label={(props as ButtonProps).label}
           action={(props as ButtonProps).action}
+          icon={(props as ButtonProps).icon}
           value={value}
           style={element.style}
           editable={editable}
@@ -300,10 +303,14 @@ interface GalleryConfig {
 function GroupElement({ element, layout, editable }: GroupElementProps) {
   const { data } = useDocument()
 
+  console.log('[GroupElement] 🟢 Rendering GroupElement:', element.id, element.binding)
+  console.log('[GroupElement] 🟢 Raw photos.gallery:', data.photos?.gallery)
+
   // 갤러리 바인딩 처리
   const galleryImages = useMemo(() => {
     if (element.binding === 'photos.gallery') {
       const images = resolveBinding(data, 'photos.gallery')
+      console.log('[GroupElement] 🟢 Resolved gallery images:', images)
       if (Array.isArray(images)) {
         return images as string[]
       }

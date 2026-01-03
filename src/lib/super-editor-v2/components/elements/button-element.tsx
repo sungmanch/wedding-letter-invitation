@@ -117,6 +117,7 @@ export function ButtonElement({
       fontSize: '14px',
       fontWeight: 500,
       transition: 'background-color 0.2s ease',
+      whiteSpace: 'nowrap',  // 텍스트 줄바꿈 방지
     }
 
     // 스타일 오버라이드
