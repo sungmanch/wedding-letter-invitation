@@ -133,6 +133,7 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
           type: 'button',
           label: '네이버',
           action: 'link',
+          icon: 'naver',
         },
         style: {
           text: {
@@ -159,6 +160,7 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
           type: 'button',
           label: '티맵',
           action: 'link',
+          icon: 'tmap',
         },
         style: {
           text: {
@@ -185,6 +187,7 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
           type: 'button',
           label: '카카오',
           action: 'link',
+          icon: 'kakao',
         },
         style: {
           text: {
