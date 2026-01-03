@@ -15,7 +15,7 @@ import type { ResolvedStyle } from '../../renderer/style-resolver'
 // Types
 // ============================================
 
-export type EditorTab = 'content' | 'design' | 'share'
+export type EditorTab = 'content' | 'data' | 'design' | 'share'
 
 export interface EditorLayoutProps {
   /** 문서 데이터 */
@@ -193,6 +193,7 @@ interface EditorTabsProps {
 function EditorTabs({ activeTab, onTabChange }: EditorTabsProps) {
   const tabs: { id: EditorTab; label: string }[] = [
     { id: 'content', label: '콘텐츠' },
+    { id: 'data', label: '데이터' },
     { id: 'design', label: '디자인' },
     { id: 'share', label: '공유' },
   ]
