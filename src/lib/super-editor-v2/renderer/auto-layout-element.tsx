@@ -275,7 +275,35 @@ interface GroupElementProps {
   editable: boolean
 }
 
+// 갤러리 설정 타입
+interface GalleryConfig {
+  columns: 2 | 3
+  aspectRatio: '1:1' | '3:4' | 'mixed'
+  gap: number
+  initialRows: number
+  showMoreButton: boolean
+}
+
 function GroupElement({ element, layout, editable }: GroupElementProps) {
+  const { data } = useDocument()
+
+  // 갤러리 바인딩 처리
+  const galleryImages = useMemo(() => {
+    if (element.binding === 'photos.gallery') {
+      const images = resolveBinding(data, 'photos.gallery')
+      if (Array.isArray(images)) {
+        return images as string[]
+      }
+    }
+    return null
+  }, [element.binding, data])
+
+  // 갤러리 설정
+  const galleryConfig = useMemo(() => {
+    // @ts-expect-error - gallery는 확장 props
+    return element.props?.gallery as GalleryConfig | undefined
+  }, [element.props])
+
   const groupStyle = useMemo<CSSProperties>(() => {
     const direction = layout?.direction ?? 'vertical'
     const reverse = layout?.reverse ?? false
@@ -290,6 +318,7 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
     return {
       display: 'flex',
       flexDirection,
+      flexWrap: layout?.wrap ? 'wrap' : undefined,
       gap: layout?.gap ? `${layout.gap}px` : undefined,
       alignItems: layout?.alignItems ?? 'stretch',
       justifyContent: layout?.justifyContent ?? 'start',
@@ -298,17 +327,164 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
     }
   }, [layout])
 
+  // 갤러리 모드: 이미지 배열을 그리드로 렌더링
+  if (galleryImages && galleryConfig) {
+    const { columns, aspectRatio, gap, initialRows } = galleryConfig
+    const initialCount = columns * initialRows
+    const visibleImages = galleryImages.slice(0, initialCount)
+
+    // aspect ratio를 padding-bottom %로 변환
+    const aspectRatioPercent = aspectRatio === '1:1' ? 100
+      : aspectRatio === '3:4' ? 133.33
+      : 100
+
+    return (
+      <div
+        className="se2-gallery-grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          gap: `${gap}px`,
+          width: '100%',
+        }}
+      >
+        {visibleImages.map((imageUrl, index) => (
+          <div
+            key={`gallery-${index}`}
+            className="se2-gallery-item"
+            style={{
+              position: 'relative',
+              width: '100%',
+              paddingBottom: `${aspectRatioPercent}%`,
+              overflow: 'hidden',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+            >
+              <ImageElement
+                src={imageUrl}
+                objectFit="cover"
+                style={{}}
+                editable={editable}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // 일반 그룹: children 렌더링
   const children = element.children ?? []
 
+  // absolute 자식이 있는지 확인
+  const hasAbsoluteChildren = children.some(child => child.layoutMode === 'absolute')
+
+  // absolute 자식이 있으면 position: relative 추가
+  const finalGroupStyle: CSSProperties = {
+    ...groupStyle,
+    ...(hasAbsoluteChildren && { position: 'relative' as const }),
+  }
+
   return (
-    <div className="se2-group" style={groupStyle}>
-      {children.map((child) => (
-        <AutoLayoutElement
-          key={child.id}
-          element={child}
-          editable={editable}
-        />
-      ))}
+    <div className="se2-group" style={finalGroupStyle}>
+      {children.map((child) => {
+        // absolute 자식은 별도 처리
+        if (child.layoutMode === 'absolute') {
+          return (
+            <AbsoluteChildElement
+              key={child.id}
+              element={child}
+              editable={editable}
+            />
+          )
+        }
+        return (
+          <AutoLayoutElement
+            key={child.id}
+            element={child}
+            editable={editable}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+// ============================================
+// Absolute Child Element (Group 내부 absolute 자식)
+// ============================================
+
+interface AbsoluteChildElementProps {
+  element: Element
+  editable: boolean
+}
+
+function AbsoluteChildElement({ element, editable }: AbsoluteChildElementProps) {
+  const { data } = useDocument()
+
+  // 요소 값 해석
+  const resolvedValue = useMemo(() => {
+    if (element.binding) {
+      return resolveBinding(data, element.binding)
+    }
+    return element.value ?? (element as { content?: string }).content
+  }, [element.binding, element.value, data, element])
+
+  // 포맷 문자열 처리
+  const formattedValue = useMemo(() => {
+    if (element.props?.type === 'text' && (element.props as TextProps).format) {
+      return interpolate((element.props as TextProps).format!, data)
+    }
+    return resolvedValue
+  }, [element.props, resolvedValue, data])
+
+  // absolute 스타일 계산 (% 단위로 중앙 정렬)
+  const absoluteStyle = useMemo<CSSProperties>(() => {
+    const style: CSSProperties = {
+      position: 'absolute',
+      zIndex: element.zIndex ?? 0,
+    }
+
+    // x, y가 50이면 중앙 정렬로 해석
+    if (element.x === 50 && element.y === 50) {
+      style.top = '50%'
+      style.left = '50%'
+      style.transform = 'translate(-50%, -50%)'
+    } else {
+      // 그 외에는 % 단위로 위치 지정
+      if (element.x !== undefined) {
+        style.left = `${element.x}%`
+      }
+      if (element.y !== undefined) {
+        style.top = `${element.y}%`
+      }
+    }
+
+    return style
+  }, [element])
+
+  return (
+    <div
+      className={`se2-element se2-element--${element.type} se2-element--absolute-child`}
+      data-element-id={element.id}
+      data-element-type={element.type}
+      data-layout-mode="absolute"
+      style={absoluteStyle}
+    >
+      <ElementTypeRenderer
+        element={element}
+        value={formattedValue}
+        editable={editable}
+      />
     </div>
   )
 }
@@ -335,6 +511,18 @@ function resolveElementStyle(style: ElementStyle): CSSProperties {
     css.borderColor = style.border.color
     css.borderStyle = style.border.style
     css.borderRadius = style.border.radius
+  }
+
+  // 패딩
+  if (style.padding) {
+    if (typeof style.padding === 'number') {
+      css.padding = `${style.padding}px`
+    } else {
+      css.paddingTop = style.padding.top ? `${style.padding.top}px` : undefined
+      css.paddingRight = style.padding.right ? `${style.padding.right}px` : undefined
+      css.paddingBottom = style.padding.bottom ? `${style.padding.bottom}px` : undefined
+      css.paddingLeft = style.padding.left ? `${style.padding.left}px` : undefined
+    }
   }
 
   // 그림자
