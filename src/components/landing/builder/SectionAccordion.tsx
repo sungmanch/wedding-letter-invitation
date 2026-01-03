@@ -20,6 +20,7 @@ import {
   type SelectableSectionType,
 } from '../subway/SubwayBuilderContext'
 import {
+  HERO_PRESETS,
   GREETING_PARENTS_PRESETS,
   CALENDAR_PRESETS,
   GALLERY_PRESETS,
@@ -33,6 +34,7 @@ import {
 
 /** 섹션별 프리셋 매핑 */
 const SECTION_PRESETS: Record<SelectableSectionType, Record<string, BlockPreset>> = {
+  hero: HERO_PRESETS,
   'greeting-parents': GREETING_PARENTS_PRESETS,
   calendar: CALENDAR_PRESETS,
   gallery: GALLERY_PRESETS,
@@ -44,6 +46,7 @@ const INITIAL_VISIBLE_COUNT = 3
 
 /** 섹션별 설명 */
 const SECTION_DESCRIPTIONS: Record<SelectableSectionType, string> = {
+  hero: '메인 사진과 신랑신부 이름, 결혼 날짜를 표시하는 대표 섹션',
   'greeting-parents': '신랑신부 인사말과 혼주 정보를 담는 섹션',
   calendar: '결혼식 일시와 D-day를 표시하는 섹션',
   gallery: '웨딩 사진을 보여주는 갤러리 섹션',
@@ -57,7 +60,7 @@ const SECTION_DESCRIPTIONS: Record<SelectableSectionType, string> = {
 export function SectionAccordion() {
   const { state, setPreset } = useSubwayBuilder()
   const [openSection, setOpenSection] = useState<SelectableSectionType | null>(
-    'greeting-parents'
+    'hero'
   )
   const [expandedSections, setExpandedSections] = useState<
     Set<SelectableSectionType>

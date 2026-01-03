@@ -15,7 +15,6 @@ import { Button } from '@/components/ui'
 import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
 import { createDocument } from '@/lib/super-editor-v2/actions/document'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
-import { buildBlocksFromTemplate } from '@/lib/super-editor-v2/services/template-block-builder'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import {
   SAMPLE_WEDDING_DATA,
@@ -89,39 +88,28 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
     setError(null)
 
     try {
-      // 1. 템플릿에서 Hero 블록 가져오기
+      // 1. 템플릿에서 스타일 정보 가져오기
       const template = getTemplateV2ById(state.selectedTemplateId)
       if (!template) {
         throw new Error('템플릿을 찾을 수 없습니다')
       }
 
-      const templateBlocks = buildBlocksFromTemplate(
-        template,
-        SAMPLE_WEDDING_DATA
-      )
-      const heroBlock = templateBlocks.find((b) => b.type === 'hero')
-
-      // 2. 선택된 프리셋으로 섹션 블록 생성
-      const sectionBlocks: Block[] = []
+      // 2. 모든 섹션을 프리셋에서 생성 (hero 포함)
+      const blocks: Block[] = []
       for (const sectionType of SECTION_ORDER) {
         const presetId = state.selectedPresets[sectionType]
         if (presetId) {
           const block = createBlockFromPresetData(presetId)
           if (block) {
-            sectionBlocks.push(block)
+            blocks.push(block)
           }
         }
       }
 
-      // 3. 전체 블록 조합
-      const blocks: Block[] = heroBlock
-        ? [heroBlock, ...sectionBlocks]
-        : sectionBlocks
-
-      // 4. 스타일 시스템 생성
+      // 3. 스타일 시스템 생성
       const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
 
-      // 5. 문서 생성
+      // 4. 문서 생성
       const doc = await createDocument({
         title: '새 청첩장',
         blocks,
@@ -129,7 +117,7 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
         weddingData: SAMPLE_WEDDING_DATA,
       })
 
-      // 6. 에디터 페이지로 이동
+      // 5. 에디터 페이지로 이동
       router.push(`/se2/${doc.id}/edit`)
     } catch (err) {
       console.error('Document creation failed:', err)
