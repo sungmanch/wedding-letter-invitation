@@ -246,6 +246,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         <ButtonElement
           label={(props as ButtonProps).label}
           action={(props as ButtonProps).action}
+          icon={(props as ButtonProps).icon}
           value={value}
           style={element.style}
           editable={editable}
@@ -616,6 +617,7 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
           <ButtonElement
             label={(props as ButtonProps).label}
             action={(props as ButtonProps).action}
+            icon={(props as ButtonProps).icon}
             value={value}
             style={element.style}
             editable={editable}

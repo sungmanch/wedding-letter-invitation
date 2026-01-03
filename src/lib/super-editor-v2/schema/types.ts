@@ -228,6 +228,8 @@ export interface ButtonProps {
   label: string
   action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
   targetBlockType?: BlockType  // action: 'show-block'일 때 표시할 블록 타입
+  /** 커스텀 아이콘 (SVG 경로 또는 프리셋 ID) */
+  icon?: 'naver' | 'kakao' | 'tmap' | 'none' | string
 }
 
 export interface IconProps {

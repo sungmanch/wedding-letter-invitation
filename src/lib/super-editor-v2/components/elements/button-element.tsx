@@ -8,7 +8,7 @@
  * - Auto Layout (hug) 모드: 콘텐츠에 맞게 크기 조정
  */
 
-import { useCallback, useMemo, useState, type CSSProperties } from 'react'
+import { useCallback, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import type { ElementStyle } from '../../schema/types'
 import { useDocument } from '../../context/document-context'
 import { ContactModal } from '../ui/contact-modal'
@@ -28,6 +28,55 @@ export interface ButtonElementProps {
   className?: string
   /** Auto Layout hug 모드 여부 */
   hugMode?: boolean
+  /** 커스텀 아이콘 (프리셋 ID 또는 'none') */
+  icon?: 'naver' | 'kakao' | 'tmap' | 'none' | string
+}
+
+// ============================================
+// Navigation Icons (Naver, Kakao, Tmap)
+// ============================================
+
+function NaverIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="30" height="30" rx="6" fill="#03C75A"/>
+      <path d="M17.5 8L17.5 15.2L12.5 8H8V22H12.5V14.8L17.5 22H22V8H17.5Z" fill="white"/>
+    </svg>
+  )
+}
+
+function KakaoIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="30" height="30" rx="6" fill="#FEE500"/>
+      <path fillRule="evenodd" clipRule="evenodd" d="M15 7C10.0294 7 6 10.1325 6 14.0147C6 16.4091 7.55882 18.5147 9.91176 19.75L8.91176 23.3971C8.82353 23.6912 9.17647 23.9265 9.44118 23.75L13.7647 20.8676C14.1765 20.9265 14.5882 20.9559 15 20.9559C19.9706 20.9559 24 17.8235 24 13.9412C24 10.0588 19.9706 7 15 7Z" fill="#3C1E1E"/>
+    </svg>
+  )
+}
+
+function TmapIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="30" height="30" rx="6" fill="#EF4135"/>
+      <path d="M8 10H22V13H17V22H13V13H8V10Z" fill="white"/>
+    </svg>
+  )
+}
+
+/** 아이콘 프리셋 ID로 아이콘 컴포넌트 반환 */
+function getPresetIcon(iconId: string, size = 20): ReactNode {
+  switch (iconId) {
+    case 'naver':
+      return <NaverIcon size={size} />
+    case 'kakao':
+      return <KakaoIcon size={size} />
+    case 'tmap':
+      return <TmapIcon size={size} />
+    case 'none':
+      return null
+    default:
+      return null
+  }
 }
 
 // ============================================
@@ -42,6 +91,7 @@ export function ButtonElement({
   editable = false,
   className = '',
   hugMode = false,
+  icon,
 }: ButtonElementProps) {
   const { document, data } = useDocument()
   const [contactModalOpen, setContactModalOpen] = useState(false)
@@ -165,6 +215,12 @@ export function ButtonElement({
 
   // 액션별 아이콘
   const ActionIcon = useMemo(() => {
+    // 커스텀 아이콘이 지정된 경우 우선 사용
+    if (icon) {
+      return getPresetIcon(icon, 20)
+    }
+
+    // 기본 액션별 아이콘
     switch (action) {
       case 'link':
         return (
@@ -227,7 +283,7 @@ export function ButtonElement({
       default:
         return null
     }
-  }, [action])
+  }, [action, icon])
 
   return (
     <>
