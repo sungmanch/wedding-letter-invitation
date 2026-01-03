@@ -79,7 +79,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           direction: 'vertical',
           alignItems: 'center',
           justifyContent: 'end',
-          padding: { bottom: 24 },
+          padding: { bottom: 16 },
         },
       },
       children: [
