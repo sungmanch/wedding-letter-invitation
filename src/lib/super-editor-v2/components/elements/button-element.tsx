@@ -20,6 +20,7 @@ import { pxToRem } from '../../utils'
 import IconNaver from '@/assets/Icon_naver.svg'
 import IconKakao from '@/assets/Icon_kakao.svg'
 import IconTmap from '@/assets/Icon_tmap.svg'
+import IconKakaoTalk from '@/assets/kakao-talk.png'
 
 // ============================================
 // Types
@@ -53,6 +54,8 @@ function getPresetIcon(iconId: string, size = 20): ReactNode {
       return <img src={IconNaver.src} alt="네이버 지도" style={iconStyle} />
     case 'kakao':
       return <img src={IconKakao.src} alt="카카오맵" style={iconStyle} />
+    case 'kakao-talk':
+      return <img src={IconKakaoTalk.src} alt="카카오톡" style={iconStyle} />
     case 'tmap':
       return <img src={IconTmap.src} alt="티맵" style={iconStyle} />
     case 'none':

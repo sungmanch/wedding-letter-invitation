@@ -210,8 +210,9 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           zIndex: 1,
           props: {
             type: 'button',
-            label: '카카오톡으로 청첩장 공유하기',
+            label: '카카오로 공유하기',
             action: 'share',
+            icon: 'kakao-talk',
           },
           style: {
             text: {
@@ -230,9 +231,9 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             },
           },
         },
-        // 링크 복사 버튼
+        // 공유하기 버튼 (native share)
         {
-          id: 'copy-link-button',
+          id: 'native-share-button',
           type: 'button',
           layoutMode: 'auto',
           sizing: {
@@ -242,8 +243,8 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           zIndex: 1,
           props: {
             type: 'button',
-            label: '청첩장 링크 복사하기',
-            action: 'copy',
+            label: '공유하기',
+            action: 'share',
           },
           style: {
             text: {
