@@ -151,7 +151,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             layout: {
               direction: 'vertical',
               gap: 16,
-              padding: { top: 40, right: 24, bottom: 24, left: 24 },
+              padding: { top: 40, right: 24, bottom: 48, left: 24 },
               alignItems: 'center',
             },
           },
