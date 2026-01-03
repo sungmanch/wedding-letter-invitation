@@ -64,6 +64,7 @@ export function TextElement({
       if (style.textAlign) css.textAlign = style.textAlign
       if (style.lineHeight) css.lineHeight = style.lineHeight
       if (style.letterSpacing) css.letterSpacing = style.letterSpacing
+      if (style.textShadow) css.textShadow = style.textShadow
     }
 
     return css

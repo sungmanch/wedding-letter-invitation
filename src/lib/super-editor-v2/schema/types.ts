@@ -251,7 +251,10 @@ export interface MapProps {
 export interface CalendarProps {
   type: 'calendar'
   showDday?: boolean
+  showHeader?: boolean  // 년월 헤더 표시 여부
+  showFooter?: boolean  // 하단 날짜 표시 여부
   highlightColor?: string
+  highlightTextColor?: string  // 하이라이트된 날짜의 텍스트 색상
   markerType?: 'circle' | 'heart'  // 날짜 선택 마커 타입
 }
 
@@ -264,6 +267,7 @@ export interface GroupProps {
     alignItems?: 'start' | 'center' | 'end' | 'stretch'
     justifyContent?: 'start' | 'center' | 'end' | 'space-between' | 'space-around'
     reverse?: boolean                       // flex-direction: row-reverse / column-reverse
+    wrap?: boolean                          // flex-wrap: wrap
   }
 }
 
@@ -575,6 +579,7 @@ export interface TextStyle {
   textAlign?: 'left' | 'center' | 'right'
   lineHeight?: number
   letterSpacing?: number
+  textShadow?: string
 }
 
 export interface BorderStyle {

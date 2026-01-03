@@ -407,43 +407,21 @@ export function createDefaultBlocks(): Block[] {
     DEFAULT_BLOCK_HEIGHTS.notice
   )
 
+  const heroBlock = createBlockFromPreset(
+    'hero-1',
+    'hero-fullscreen-overlay',
+    true,
+    DEFAULT_BLOCK_HEIGHTS.hero
+  )
+
   return [
-    // 메인 (Hero) - absolute 레이아웃 유지 (프리셋 없음)
-    {
+    // 메인 (Hero) - 프리셋 적용
+    heroBlock ?? {
       id: 'hero-1',
       type: 'hero',
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.hero,
-      elements: [
-        {
-          id: 'hero-main-image',
-          type: 'image',
-          x: 0, y: 0, width: 100, height: 100, zIndex: 0,
-          binding: 'photos.main',
-          props: { type: 'image', objectFit: 'cover' },
-        },
-        {
-          id: 'hero-groom-name',
-          type: 'text',
-          x: 20, y: 40, width: 25, height: 10, zIndex: 1,
-          binding: 'couple.groom.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'hero-bride-name',
-          type: 'text',
-          x: 55, y: 40, width: 25, height: 10, zIndex: 1,
-          binding: 'couple.bride.name',
-          props: { type: 'text' },
-        },
-        {
-          id: 'hero-wedding-date',
-          type: 'text',
-          x: 25, y: 55, width: 50, height: 8, zIndex: 1,
-          binding: 'wedding.date',
-          props: { type: 'text' },
-        },
-      ],
+      elements: [],
     },
     // 인사말/혼주 - 프리셋 적용
     greetingBlock ?? {
