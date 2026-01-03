@@ -267,28 +267,38 @@ export function FamilyTableField({
         {/* 상세 행 (펼쳐졌을 때만) */}
         {isExpanded && roles.map((role) => (
           <tr key={role} className="border-b border-[var(--sand-100)] last:border-b-0">
-            <td className="px-3 py-2 text-sm text-[var(--text-muted)] whitespace-nowrap bg-white">
+            <td className="px-3 py-2 text-sm text-[var(--text-muted)] whitespace-nowrap bg-white w-16 sticky left-0">
               {ROLE_LABELS[role]}
             </td>
-            {visibleColumns.map((col) => (
-              <td key={col} className="px-2 py-1 bg-white">
-                {renderCell(role, col)}
-              </td>
-            ))}
+            {visibleColumns.map((col) => {
+              const width = {
+                name: 'w-24',
+                nameEn: 'w-28',
+                phone: 'w-32',
+                deceased: 'w-14',
+                birthOrder: 'w-16',
+                baptismalName: 'w-20',
+              }[col] || ''
+              return (
+                <td key={col} className={`px-2 py-1 bg-white ${width}`}>
+                  {renderCell(role, col)}
+                </td>
+              )
+            })}
           </tr>
         ))}
       </>
     )
   }, [expandedSide, visibleColumns, getValue, renderCell])
 
-  // 컬럼 헤더 라벨
-  const columnLabels: Record<string, string> = {
-    name: '이름',
-    nameEn: '영문',
-    phone: '연락처',
-    deceased: '고인',
-    birthOrder: '서열',
-    baptismalName: '세례명',
+  // 컬럼 헤더 라벨 및 너비
+  const columnConfig: Record<string, { label: string; width: string }> = {
+    name: { label: '이름', width: 'w-24' },
+    nameEn: { label: '영문', width: 'w-28' },
+    phone: { label: '연락처', width: 'w-32' },
+    deceased: { label: '고인', width: 'w-14' },
+    birthOrder: { label: '서열', width: 'w-16' },
+    baptismalName: { label: '세례명', width: 'w-20' },
   }
 
   return (
@@ -297,19 +307,19 @@ export function FamilyTableField({
         혼주 정보
       </label>
 
-      <div className="border border-[var(--sand-200)] rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="border border-[var(--sand-200)] rounded-lg overflow-x-auto">
+        <table className="text-sm" style={{ minWidth: '600px' }}>
           <thead>
             <tr className="bg-[var(--sand-100)]">
-              <th className="px-3 py-2 text-left text-xs font-medium text-[var(--text-muted)] w-20">
+              <th className="px-3 py-2 text-left text-xs font-medium text-[var(--text-muted)] w-16 sticky left-0 bg-[var(--sand-100)]">
                 구분
               </th>
               {visibleColumns.map((col) => (
                 <th
                   key={col}
-                  className="px-2 py-2 text-left text-xs font-medium text-[var(--text-muted)]"
+                  className={`px-2 py-2 text-left text-xs font-medium text-[var(--text-muted)] ${columnConfig[col].width}`}
                 >
-                  {columnLabels[col]}
+                  {columnConfig[col].label}
                 </th>
               ))}
             </tr>
