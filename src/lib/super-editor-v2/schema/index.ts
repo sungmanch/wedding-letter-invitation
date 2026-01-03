@@ -152,14 +152,15 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     name: '더채플앳청담',
     hall: '아이리스홀',
     address: '서울특별시 강남구 선릉로 158길 11',
+    tel: '02-518-2222',
+    lat: 37.5141,
+    lng: 127.0458,
   },
 
   // ═══ 사진 (실제 웨딩 이미지 사용) ═══
   photos: {
     main: '/examples/wedding_image.png',
-    gallery: [
-      '/examples/wedding_image.png',
-    ],
+    gallery: [],  // 빈 갤러리로 시작 (사용자가 직접 업로드)
   },
 
   // ═══ 인사말 ═══
