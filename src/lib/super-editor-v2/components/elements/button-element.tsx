@@ -57,8 +57,21 @@ function KakaoIcon({ size = 20 }: { size?: number }) {
 function TmapIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="30" height="30" rx="6" fill="#EF4135"/>
-      <path d="M8 10H22V13H17V22H13V13H8V10Z" fill="white"/>
+      <defs>
+        <linearGradient id="tmap-grad-h" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#E91E8C"/>
+          <stop offset="50%" stopColor="#9B4DCA"/>
+          <stop offset="100%" stopColor="#2DD4A8"/>
+        </linearGradient>
+        <linearGradient id="tmap-grad-v" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#2DD4A8"/>
+          <stop offset="100%" stopColor="#3B82F6"/>
+        </linearGradient>
+      </defs>
+      {/* 가로 막대 */}
+      <rect x="5" y="5" width="20" height="6" rx="3" fill="url(#tmap-grad-h)"/>
+      {/* 세로 막대 (곡선 연결) */}
+      <path d="M15 8 C15 8, 15 8, 15 11 L15 25 C15 26.5 16 27 17 27 L17 27 C18.5 27 19 25.5 19 24 L19 14 C19 11 17 8 15 8 Z" fill="url(#tmap-grad-v)"/>
     </svg>
   )
 }
