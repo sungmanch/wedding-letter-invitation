@@ -64,14 +64,22 @@ export function DataTab({
     onDataChange(newData)
   }, [data, onDataChange])
 
+  // 계좌 정보 일괄 변경
+  const handleAccountsChange = useCallback((accounts: WeddingData['accounts']) => {
+    if (!onDataChange) return
+    const newData = { ...data, accounts }
+    onDataChange(newData)
+  }, [data, onDataChange])
+
   return (
     <div className={`flex flex-col p-4 space-y-6 ${className}`}>
-      {/* 섹션 1: 혼주 정보 */}
+      {/* 섹션 1: 혼주 정보 + 계좌 정보 */}
       <Section title="혼주 정보" icon="👨‍👩‍👧‍👦">
         <FamilyTableField
           data={data}
           onFieldChange={handleFieldChange}
-          visibleColumns={['name', 'nameEn', 'phone', 'deceased', 'birthOrder', 'baptismalName']}
+          onAccountsChange={handleAccountsChange}
+          visibleColumns={['name', 'nameEn', 'phone', 'deceased', 'birthOrder', 'bank', 'accountNumber', 'accountHolder']}
         />
       </Section>
 
