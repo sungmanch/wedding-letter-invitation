@@ -79,13 +79,18 @@ export function getValueByPath(
     }
   }
 
-  // 배열인 경우 그대로 반환 (갤러리 등에서 사용)
+  // 배열인 경우 URL 배열로 정규화 (갤러리 등에서 사용)
   if (Array.isArray(current)) {
-    // 갤러리 배열: [{id, url, order}, ...] → url 배열로 변환
-    if (current.length > 0 && typeof current[0] === 'object' && 'url' in current[0]) {
-      return current.map((item: { url: string }) => item.url)
-    }
-    return current
+    // 혼합 형식 지원: 문자열과 {id, url, order} 객체가 섞여있을 수 있음
+    return current.map((item) => {
+      if (typeof item === 'string') {
+        return item
+      }
+      if (typeof item === 'object' && item !== null && 'url' in item) {
+        return (item as { url: string }).url
+      }
+      return null
+    }).filter((url): url is string => url !== null)
   }
 
   // 객체인 경우 적절한 문자열 변환
@@ -460,9 +465,9 @@ export function isValidVariablePath(path: string): path is VariablePath {
 
   const validPaths: string[] = [
     // ─── 공유 필드 (◆ 원본) ───
-    'couple.groom.name', 'couple.groom.phone', 'couple.groom.intro', 'couple.groom.baptismalName',
+    'couple.groom.name', 'couple.groom.nameEn', 'couple.groom.phone', 'couple.groom.intro', 'couple.groom.baptismalName',
     'couple.groom.photo', 'couple.groom.birthDate', 'couple.groom.mbti', 'couple.groom.tags',
-    'couple.bride.name', 'couple.bride.phone', 'couple.bride.intro', 'couple.bride.baptismalName',
+    'couple.bride.name', 'couple.bride.nameEn', 'couple.bride.phone', 'couple.bride.intro', 'couple.bride.baptismalName',
     'couple.bride.photo', 'couple.bride.birthDate', 'couple.bride.mbti', 'couple.bride.tags',
     'couple.photo', 'couple.photos',
     'wedding.date', 'wedding.time',

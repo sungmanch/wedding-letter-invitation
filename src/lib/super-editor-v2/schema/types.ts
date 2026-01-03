@@ -280,9 +280,9 @@ export interface GroupProps {
 
 export type VariablePath =
   // ─── 공유 필드 (◆ 원본) ───
-  | 'couple.groom.name' | 'couple.groom.phone' | 'couple.groom.intro' | 'couple.groom.baptismalName'
+  | 'couple.groom.name' | 'couple.groom.nameEn' | 'couple.groom.phone' | 'couple.groom.intro' | 'couple.groom.baptismalName'
   | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags'
-  | 'couple.bride.name' | 'couple.bride.phone' | 'couple.bride.intro' | 'couple.bride.baptismalName'
+  | 'couple.bride.name' | 'couple.bride.nameEn' | 'couple.bride.phone' | 'couple.bride.intro' | 'couple.bride.baptismalName'
   | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags'
   | 'couple.photo' | 'couple.photos'
   | 'wedding.date' | 'wedding.time'

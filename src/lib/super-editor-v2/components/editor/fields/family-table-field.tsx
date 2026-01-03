@@ -48,7 +48,7 @@ const FAMILY_PATHS: Record<FamilyRole, {
 }> = {
   'groom': {
     name: 'couple.groom.name',
-    nameEn: 'couple.groom.nameEn' as VariablePath,
+    nameEn: 'couple.groom.nameEn',
     phone: 'couple.groom.phone',
     birthOrder: 'parents.groom.birthOrder',
     baptismalName: 'couple.groom.baptismalName',
@@ -56,18 +56,18 @@ const FAMILY_PATHS: Record<FamilyRole, {
   'groom-father': {
     name: 'parents.groom.father.name',
     phone: 'parents.groom.father.phone',
-    deceased: 'parents.groom.father.status' as VariablePath,
+    deceased: 'parents.groom.father.status',
     baptismalName: 'parents.groom.father.baptismalName',
   },
   'groom-mother': {
     name: 'parents.groom.mother.name',
     phone: 'parents.groom.mother.phone',
-    deceased: 'parents.groom.mother.status' as VariablePath,
+    deceased: 'parents.groom.mother.status',
     baptismalName: 'parents.groom.mother.baptismalName',
   },
   'bride': {
     name: 'couple.bride.name',
-    nameEn: 'couple.bride.nameEn' as VariablePath,
+    nameEn: 'couple.bride.nameEn',
     phone: 'couple.bride.phone',
     birthOrder: 'parents.bride.birthOrder',
     baptismalName: 'couple.bride.baptismalName',
@@ -75,13 +75,13 @@ const FAMILY_PATHS: Record<FamilyRole, {
   'bride-father': {
     name: 'parents.bride.father.name',
     phone: 'parents.bride.father.phone',
-    deceased: 'parents.bride.father.status' as VariablePath,
+    deceased: 'parents.bride.father.status',
     baptismalName: 'parents.bride.father.baptismalName',
   },
   'bride-mother': {
     name: 'parents.bride.mother.name',
     phone: 'parents.bride.mother.phone',
-    deceased: 'parents.bride.mother.status' as VariablePath,
+    deceased: 'parents.bride.mother.status',
     baptismalName: 'parents.bride.mother.baptismalName',
   },
 }

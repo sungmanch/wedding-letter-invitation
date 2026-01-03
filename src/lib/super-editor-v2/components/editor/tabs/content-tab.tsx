@@ -360,13 +360,13 @@ function BlockAccordion({
               // greeting-parents 블록에서 혼주 관련 필드는 테이블에서 처리
               if (block.type === 'greeting-parents') {
                 const familyPaths = [
-                  'couple.groom.name', 'couple.groom.phone', 'couple.groom.baptismalName',
-                  'couple.bride.name', 'couple.bride.phone', 'couple.bride.baptismalName',
+                  'couple.groom.name', 'couple.groom.nameEn', 'couple.groom.phone', 'couple.groom.baptismalName',
+                  'couple.bride.name', 'couple.bride.nameEn', 'couple.bride.phone', 'couple.bride.baptismalName',
                   'parents.groom.birthOrder', 'parents.bride.birthOrder',
-                  'parents.groom.father.name', 'parents.groom.father.phone', 'parents.groom.father.baptismalName',
-                  'parents.groom.mother.name', 'parents.groom.mother.phone', 'parents.groom.mother.baptismalName',
-                  'parents.bride.father.name', 'parents.bride.father.phone', 'parents.bride.father.baptismalName',
-                  'parents.bride.mother.name', 'parents.bride.mother.phone', 'parents.bride.mother.baptismalName',
+                  'parents.groom.father.name', 'parents.groom.father.phone', 'parents.groom.father.baptismalName', 'parents.groom.father.status',
+                  'parents.groom.mother.name', 'parents.groom.mother.phone', 'parents.groom.mother.baptismalName', 'parents.groom.mother.status',
+                  'parents.bride.father.name', 'parents.bride.father.phone', 'parents.bride.father.baptismalName', 'parents.bride.father.status',
+                  'parents.bride.mother.name', 'parents.bride.mother.phone', 'parents.bride.mother.baptismalName', 'parents.bride.mother.status',
                 ]
                 return !familyPaths.includes(field.binding)
               }
