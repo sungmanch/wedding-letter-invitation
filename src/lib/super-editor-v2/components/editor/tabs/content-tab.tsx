@@ -355,6 +355,16 @@ function BlockAccordion({
       }
     }
 
+    // 7. music 블록은 FAB로 렌더링되므로 필수 필드 강제 추가
+    if (block.type === 'music') {
+      const musicBindings: VariablePath[] = ['music.url', 'music.title', 'music.artist', 'music.autoPlay']
+      for (const binding of musicBindings) {
+        if (!seenBindings.has(binding)) {
+          addBinding(`music-${binding}`, binding, 'text')
+        }
+      }
+    }
+
     return fields
   }, [block.elements, block.presetId, data])
 
@@ -570,6 +580,20 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
           onChange={onChange}
           placeholder={placeholder}
         />
+      )}
+
+      {type === 'checkbox' && (
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={Boolean(value)}
+            onChange={(e) => onChange(e.target.checked)}
+            className="w-4 h-4 rounded border-[var(--sand-200)] text-[var(--sage-500)] focus:ring-[var(--sage-500)]"
+          />
+          <span className="text-sm text-[var(--text-muted)]">
+            {placeholder || '활성화'}
+          </span>
+        </label>
       )}
     </div>
   )
@@ -1348,7 +1372,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list' | 'checkbox'
   placeholder?: string
 }
 
@@ -1478,9 +1502,10 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'notice.items': { label: '공지 항목', type: 'notice-items' },
 
   // 음악
-  'music.url': { label: '음악 URL', type: 'text' },
-  'music.title': { label: '음악 제목', type: 'text' },
-  'music.artist': { label: '아티스트', type: 'text' },
+  'music.url': { label: '음악 URL', type: 'text', placeholder: 'https://example.com/song.mp3' },
+  'music.title': { label: '음악 제목', type: 'text', placeholder: 'Canon in D' },
+  'music.artist': { label: '아티스트', type: 'text', placeholder: 'Pachelbel' },
+  'music.autoPlay': { label: '자동 재생', type: 'checkbox' },
 
   // RSVP
   'rsvp.title': { label: 'RSVP 제목', type: 'text' },

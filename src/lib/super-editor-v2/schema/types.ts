@@ -344,7 +344,7 @@ export type VariablePath =
   | 'bride.fatherPhone' | 'bride.motherPhone' | 'bride.phone' | 'bride.account'
   | 'venue.floor' | 'venue.addressDetail' | 'venue.coordinates'
   | 'venue.phone' | 'venue.parkingInfo' | 'venue.transportInfo'
-  | 'music.url' | 'music.title' | 'music.artist'
+  | 'music.url' | 'music.title' | 'music.artist' | 'music.autoPlay'
 
   // ─── 커스텀 ───
   | `custom.${string}`
