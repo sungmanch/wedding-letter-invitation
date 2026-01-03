@@ -121,6 +121,15 @@ const COMPUTED_FIELDS = [
   'wedding.month',
   'wedding.day',
   'wedding.weekday',  // dayOfWeek → weekday로 rename
+  // 날짜 오프셋 (±2일 범위)
+  'wedding.weekdayMinus2',
+  'wedding.weekdayMinus1',
+  'wedding.weekdayPlus1',
+  'wedding.weekdayPlus2',
+  'wedding.dayMinus2',
+  'wedding.dayMinus1',
+  'wedding.dayPlus1',
+  'wedding.dayPlus2',
   // 실시간 카운트다운
   'countdown.days',
   'countdown.hours',
@@ -141,7 +150,12 @@ function resolveComputedField(
   field: ComputedField,
   options: ResolveOptions
 ): BindingValue {
-  const dateStr = data.wedding.date
+  const dateStr = data.wedding?.date
+
+  // 날짜가 없으면 null 반환 (0이 아닌)
+  if (!dateStr && field.startsWith('countdown.')) {
+    return null
+  }
 
   switch (field) {
     case 'wedding.dateDisplay':
@@ -162,6 +176,32 @@ function resolveComputedField(
     case 'wedding.weekday':
     case 'wedding.dayOfWeek':  // Legacy 호환
       return getDayOfWeek(dateStr)
+
+    // 요일 오프셋 (-2, -1, +1, +2)
+    case 'wedding.weekdayMinus2':
+      return getDayOfWeekOffset(dateStr, -2)
+
+    case 'wedding.weekdayMinus1':
+      return getDayOfWeekOffset(dateStr, -1)
+
+    case 'wedding.weekdayPlus1':
+      return getDayOfWeekOffset(dateStr, 1)
+
+    case 'wedding.weekdayPlus2':
+      return getDayOfWeekOffset(dateStr, 2)
+
+    // 날짜 오프셋 (-2, -1, +1, +2)
+    case 'wedding.dayMinus2':
+      return getDayOffset(dateStr, -2)
+
+    case 'wedding.dayMinus1':
+      return getDayOffset(dateStr, -1)
+
+    case 'wedding.dayPlus1':
+      return getDayOffset(dateStr, 1)
+
+    case 'wedding.dayPlus2':
+      return getDayOffset(dateStr, 2)
 
     case 'countdown.days':
       return getStaticCountdown(dateStr).days
@@ -243,6 +283,31 @@ export function getDayOfWeek(dateStr: string): string {
   const date = new Date(dateStr)
   const days = ['일', '월', '화', '수', '목', '금', '토']
   return days[date.getDay()]
+}
+
+/**
+ * 오프셋 날짜의 요일 반환
+ * @param dateStr 기준 날짜
+ * @param offset 오프셋 (음수: 이전, 양수: 이후)
+ */
+export function getDayOfWeekOffset(dateStr: string, offset: number): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  date.setDate(date.getDate() + offset)
+  const days = ['일', '월', '화', '수', '목', '금', '토']
+  return days[date.getDay()]
+}
+
+/**
+ * 오프셋 날짜의 일(day) 반환
+ * @param dateStr 기준 날짜
+ * @param offset 오프셋 (음수: 이전, 양수: 이후)
+ */
+export function getDayOffset(dateStr: string, offset: number): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  date.setDate(date.getDate() + offset)
+  return String(date.getDate())
 }
 
 /**
@@ -366,6 +431,8 @@ export function isValidVariablePath(path: string): path is VariablePath {
     // ─── 자동 계산 (__HIDDEN__) ───
     'wedding.dateDisplay', 'wedding.timeDisplay', 'wedding.dday',
     'wedding.month', 'wedding.day', 'wedding.weekday',
+    'wedding.weekdayMinus2', 'wedding.weekdayMinus1', 'wedding.weekdayPlus1', 'wedding.weekdayPlus2',
+    'wedding.dayMinus2', 'wedding.dayMinus1', 'wedding.dayPlus1', 'wedding.dayPlus2',
     'countdown.days', 'countdown.hours', 'countdown.minutes', 'countdown.seconds',
 
     // ─── 혼주 ───

@@ -288,6 +288,8 @@ export type VariablePath =
   // ─── 자동 계산 (__HIDDEN__) ───
   | 'wedding.dateDisplay' | 'wedding.timeDisplay' | 'wedding.dday'
   | 'wedding.month' | 'wedding.day' | 'wedding.weekday'
+  | 'wedding.weekdayMinus2' | 'wedding.weekdayMinus1' | 'wedding.weekdayPlus1' | 'wedding.weekdayPlus2'
+  | 'wedding.dayMinus2' | 'wedding.dayMinus1' | 'wedding.dayPlus1' | 'wedding.dayPlus2'
   | 'countdown.days' | 'countdown.hours' | 'countdown.minutes' | 'countdown.seconds'
 
   // ─── 혼주 ───
@@ -560,6 +562,13 @@ export interface ElementStyle {
   border?: BorderStyle
   shadow?: string
   opacity?: number
+  // padding (group, container 요소용)
+  padding?: {
+    top?: number
+    right?: number
+    bottom?: number
+    left?: number
+  }
   // 일부 요소에서 width/height를 style.size로 지정
   size?: {
     width?: number
