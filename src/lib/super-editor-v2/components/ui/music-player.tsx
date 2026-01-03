@@ -107,7 +107,7 @@ export function MusicPlayer({ mode = 'view' }: MusicPlayerProps) {
       {/* Hidden Audio Element */}
       <audio ref={audioRef} preload="auto" />
 
-      {/* FAB Button - 우상단 24x24 */}
+      {/* FAB Button - 우상단 36x36 */}
       <button
         onClick={togglePlay}
         disabled={mode === 'edit' ? false : !isLoaded}
@@ -117,12 +117,12 @@ export function MusicPlayer({ mode = 'view' }: MusicPlayerProps) {
           top: 12,
           right: 12,
           zIndex: 1000,
-          width: 24,
-          height: 24,
+          width: 36,
+          height: 36,
           borderRadius: '50%',
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
           border: 'none',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -133,9 +133,9 @@ export function MusicPlayer({ mode = 'view' }: MusicPlayerProps) {
         aria-label={isPlaying ? '음악 끄기' : '음악 켜기'}
       >
         {isPlaying ? (
-          <VolumeOnIcon size={14} />
+          <VolumeOnIcon size={20} />
         ) : (
-          <VolumeOffIcon size={14} />
+          <VolumeOffIcon size={20} />
         )}
       </button>
 
