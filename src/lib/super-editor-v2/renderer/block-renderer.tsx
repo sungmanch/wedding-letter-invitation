@@ -13,7 +13,7 @@ import { BlockProvider, useBlockTokens } from '../context/block-context'
 import { useDocument } from '../context/document-context'
 import { ElementRenderer } from './element-renderer'
 import { AutoLayoutBlock } from './auto-layout-block'
-import { resolveBlockHeightNumber, isAutoLayoutBlock } from '../utils/size-resolver'
+import { isAutoLayoutBlock } from '../utils/size-resolver'
 import { getBlockPreset } from '../presets/blocks'
 
 // ============================================
@@ -116,9 +116,29 @@ function BlockContainer({
 
   // 블록 스타일 계산 (viewport.height 기반으로 높이 계산)
   const blockStyle = useMemo<CSSProperties>(() => {
-    // vh 대신 viewport.height를 기준으로 계산
-    const heightVh = resolveBlockHeightNumber(block.height)
-    const heightInPx = (heightVh / 100) * viewport.height
+    // 블록 높이 계산
+    let heightInPx: number
+
+    if (typeof block.height === 'number') {
+      // 숫자는 vh 단위로 해석
+      heightInPx = (block.height / 100) * viewport.height
+    } else if (block.height && typeof block.height === 'object') {
+      // SizeMode 처리
+      const sizeMode = block.height
+      if (sizeMode.type === 'fixed') {
+        if (sizeMode.unit === 'vh') {
+          heightInPx = (sizeMode.value / 100) * viewport.height
+        } else {
+          // px (기본값) - viewport 변환 없이 그대로 사용
+          heightInPx = sizeMode.value
+        }
+      } else {
+        // hug, fill 등은 기본값 사용
+        heightInPx = viewport.height * 0.5
+      }
+    } else {
+      heightInPx = viewport.height * 0.5
+    }
 
     const style: CSSProperties = {
       position: 'relative',
