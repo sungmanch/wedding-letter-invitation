@@ -9,7 +9,7 @@
  * - alignSelf 지원
  */
 
-import { useMemo, useCallback, type CSSProperties } from 'react'
+import { useMemo, useCallback, useState, type CSSProperties } from 'react'
 import type {
   Element,
   ElementStyle,
@@ -38,6 +38,7 @@ import { IconElement } from '../components/elements/icon-element'
 import { DividerElement } from '../components/elements/divider-element'
 import { MapElement } from '../components/elements/map-element'
 import { CalendarElement } from '../components/elements/calendar-element'
+import { GalleryLightbox } from '../components/ui/gallery-lightbox'
 
 // ============================================
 // Types
@@ -60,8 +61,6 @@ export function AutoLayoutElement({
 }: AutoLayoutElementProps) {
   const { data } = useDocument()
 
-  console.log('[AutoLayoutElement] 🔵 Rendering element:', element.id, element.type, element.binding)
-
   // 요소 값 해석 (바인딩 또는 직접 값)
   const resolvedValue = useMemo(() => {
     if (element.binding) {
@@ -69,6 +68,16 @@ export function AutoLayoutElement({
     }
     return element.value ?? (element as { content?: string }).content
   }, [element.binding, element.value, data, element])
+
+  // hideWhenEmpty 처리: 그룹이고 바인딩된 값이 빈 배열이면 숨김
+  const props = element.props as GroupProps | undefined
+  if (element.type === 'group' && props?.hideWhenEmpty) {
+    const isEmptyArray = Array.isArray(resolvedValue) && resolvedValue.length === 0
+    const isNullish = resolvedValue === null || resolvedValue === undefined
+    if (isEmptyArray || isNullish) {
+      return null
+    }
+  }
 
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
@@ -158,9 +167,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
   }
 
   // photos.gallery 바인딩은 타입과 무관하게 갤러리로 렌더링
-  console.log('[AutoLayout ElementTypeRenderer] 🔍 element:', element.id, element.type, element.binding)
   if (element.binding === 'photos.gallery') {
-    console.log('[AutoLayout ElementTypeRenderer] 🖼️ Rendering GroupElement (gallery) for:', element.id)
     return (
       <GroupElement
         element={element}
@@ -174,10 +181,11 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
     case 'text':
       return (
         <TextElement
-          value={value as string}
+          value={value as string | string[]}
           style={element.style?.text}
           editable={editable}
           hugMode={hugMode}
+          listStyle={(props as TextProps).listStyle}
         />
       )
 
@@ -237,12 +245,6 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
       )
 
     case 'map':
-      console.log('[AutoLayoutElement] 🗺️ map element:', {
-        elementId: element.id,
-        binding: element.binding,
-        value,
-        valueType: typeof value,
-      })
       return (
         <MapElement
           value={value}
@@ -302,15 +304,13 @@ interface GalleryConfig {
 
 function GroupElement({ element, layout, editable }: GroupElementProps) {
   const { data } = useDocument()
-
-  console.log('[GroupElement] 🟢 Rendering GroupElement:', element.id, element.binding)
-  console.log('[GroupElement] 🟢 Raw photos.gallery:', data.photos?.gallery)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   // 갤러리 바인딩 처리
   const galleryImages = useMemo(() => {
     if (element.binding === 'photos.gallery') {
       const images = resolveBinding(data, 'photos.gallery')
-      console.log('[GroupElement] 🟢 Resolved gallery images:', images)
       if (Array.isArray(images)) {
         return images as string[]
       }
@@ -360,6 +360,14 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
     }
   }, [layout])
 
+  // 이미지 클릭 핸들러
+  const handleImageClick = useCallback((index: number) => {
+    if (!editable) {
+      setLightboxIndex(index)
+      setLightboxOpen(true)
+    }
+  }, [editable])
+
   // 갤러리 모드: 이미지 배열을 그리드로 렌더링
   if (galleryImages && galleryConfig) {
     const { columns, aspectRatio, gap, initialRows } = galleryConfig
@@ -372,46 +380,58 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
       : 100
 
     return (
-      <div
-        className="se2-gallery-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          gap: `${gap}px`,
-          width: '100%',
-        }}
-      >
-        {visibleImages.map((imageUrl, index) => (
-          <div
-            key={`gallery-${index}`}
-            className="se2-gallery-item"
-            style={{
-              position: 'relative',
-              width: '100%',
-              paddingBottom: `${aspectRatioPercent}%`,
-              overflow: 'hidden',
-              borderRadius: '4px',
-            }}
-          >
+      <>
+        <div
+          className="se2-gallery-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
+            gap: `${gap}px`,
+            width: '100%',
+          }}
+        >
+          {visibleImages.map((imageUrl, index) => (
             <div
+              key={`gallery-${index}`}
+              className="se2-gallery-item"
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
+                position: 'relative',
+                width: '100%',
+                paddingBottom: `${aspectRatioPercent}%`,
+                overflow: 'hidden',
+                borderRadius: '4px',
+                cursor: editable ? 'default' : 'pointer',
               }}
+              onClick={() => handleImageClick(index)}
             >
-              <ImageElement
-                src={imageUrl}
-                objectFit="cover"
-                style={{}}
-                editable={editable}
-              />
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                }}
+              >
+                <ImageElement
+                  src={imageUrl}
+                  objectFit="cover"
+                  style={{}}
+                  editable={editable}
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+
+        {/* Gallery Lightbox */}
+        <GalleryLightbox
+          images={galleryImages}
+          initialIndex={lightboxIndex}
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      </>
     )
   }
 

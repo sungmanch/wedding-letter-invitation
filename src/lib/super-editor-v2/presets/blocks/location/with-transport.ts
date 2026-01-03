@@ -204,32 +204,68 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
     ],
   },
   // ─── Transportation Sections ───
-  // Public Transport Section
+  // Subway Section
   {
     type: 'group',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'venue.transportation.subway',
     props: {
       type: 'group',
-      layout: { direction: 'vertical', gap: 8, alignItems: 'start' },
+      layout: { direction: 'vertical', gap: 12, alignItems: 'start' },
+      hideWhenEmpty: true,
     },
     children: [
       {
-        id: 'transport-subway-title',
-        type: 'text',
+        id: 'transport-subway-header',
+        type: 'group',
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-        value: '대중교통',
-        props: { type: 'text' },
-        style: {
-          text: {
-            fontFamily: 'var(--font-body)',
-            fontSize: 16,
-            fontWeight: 600,
-            color: 'var(--fg-default)',
-            textAlign: 'left',
-          },
+        props: {
+          type: 'group',
+          layout: { direction: 'horizontal', gap: 8, alignItems: 'center' },
         },
+        children: [
+          {
+            id: 'transport-subway-icon',
+            type: 'image',
+            zIndex: 1,
+            sizing: {
+              width: { type: 'fixed', value: 24, unit: 'px' },
+              height: { type: 'fixed', value: 24, unit: 'px' },
+            },
+            value: '/assets/icon_subway.svg',
+            props: {
+              type: 'image',
+              objectFit: 'contain',
+            },
+          },
+          {
+            id: 'transport-subway-title',
+            type: 'text',
+            zIndex: 1,
+            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+            value: '지하철',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-body)',
+                fontSize: 16,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'left',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'transport-subway-divider',
+        type: 'divider',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 1, unit: 'px' } },
+        props: { type: 'divider', dividerStyle: 'solid' },
+        style: { background: 'var(--border-default)' },
       },
       {
         id: 'transport-subway-content',
@@ -237,7 +273,90 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
         binding: 'venue.transportation.subway',
-        props: { type: 'text' },
+        props: { type: 'text', listStyle: 'bullet' },
+        style: {
+          text: {
+            fontFamily: 'var(--font-body)',
+            fontSize: 14,
+            fontWeight: 400,
+            color: 'var(--fg-default)',
+            textAlign: 'left',
+            lineHeight: 1.6,
+          },
+        },
+      },
+    ],
+  },
+  // Bus Section
+  {
+    type: 'group',
+    zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'venue.transportation.bus',
+    props: {
+      type: 'group',
+      layout: { direction: 'vertical', gap: 12, alignItems: 'start' },
+      hideWhenEmpty: true,
+    },
+    children: [
+      {
+        id: 'transport-bus-header',
+        type: 'group',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+        props: {
+          type: 'group',
+          layout: { direction: 'horizontal', gap: 8, alignItems: 'center' },
+        },
+        children: [
+          {
+            id: 'transport-bus-icon',
+            type: 'image',
+            zIndex: 1,
+            sizing: {
+              width: { type: 'fixed', value: 24, unit: 'px' },
+              height: { type: 'fixed', value: 24, unit: 'px' },
+            },
+            value: '/assets/icon_bus.svg',
+            props: {
+              type: 'image',
+              objectFit: 'contain',
+            },
+          },
+          {
+            id: 'transport-bus-title',
+            type: 'text',
+            zIndex: 1,
+            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+            value: '버스',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-body)',
+                fontSize: 16,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'left',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'transport-bus-divider',
+        type: 'divider',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 1, unit: 'px' } },
+        props: { type: 'divider', dividerStyle: 'solid' },
+        style: { background: 'var(--border-default)' },
+      },
+      {
+        id: 'transport-bus-content',
+        type: 'text',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+        binding: 'venue.transportation.bus',
+        props: { type: 'text', listStyle: 'bullet' },
         style: {
           text: {
             fontFamily: 'var(--font-body)',
@@ -256,27 +375,63 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
     type: 'group',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'venue.transportation.shuttle',
     props: {
       type: 'group',
-      layout: { direction: 'vertical', gap: 8, alignItems: 'start' },
+      layout: { direction: 'vertical', gap: 12, alignItems: 'start' },
+      hideWhenEmpty: true,
     },
     children: [
       {
-        id: 'transport-shuttle-title',
-        type: 'text',
+        id: 'transport-shuttle-header',
+        type: 'group',
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-        value: '셔틀버스',
-        props: { type: 'text' },
-        style: {
-          text: {
-            fontFamily: 'var(--font-body)',
-            fontSize: 16,
-            fontWeight: 600,
-            color: 'var(--fg-default)',
-            textAlign: 'left',
-          },
+        props: {
+          type: 'group',
+          layout: { direction: 'horizontal', gap: 8, alignItems: 'center' },
         },
+        children: [
+          {
+            id: 'transport-shuttle-icon',
+            type: 'image',
+            zIndex: 1,
+            sizing: {
+              width: { type: 'fixed', value: 24, unit: 'px' },
+              height: { type: 'fixed', value: 24, unit: 'px' },
+            },
+            value: '/assets/icon_bus.svg',
+            props: {
+              type: 'image',
+              objectFit: 'contain',
+            },
+          },
+          {
+            id: 'transport-shuttle-title',
+            type: 'text',
+            zIndex: 1,
+            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+            value: '셔틀버스',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-body)',
+                fontSize: 16,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'left',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'transport-shuttle-divider',
+        type: 'divider',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 1, unit: 'px' } },
+        props: { type: 'divider', dividerStyle: 'solid' },
+        style: { background: 'var(--border-default)' },
       },
       {
         id: 'transport-shuttle-content',
@@ -284,7 +439,7 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
         binding: 'venue.transportation.shuttle',
-        props: { type: 'text' },
+        props: { type: 'text', listStyle: 'bullet' },
         style: {
           text: {
             fontFamily: 'var(--font-body)',
@@ -303,27 +458,63 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
     type: 'group',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'venue.transportation.parking',
     props: {
       type: 'group',
-      layout: { direction: 'vertical', gap: 8, alignItems: 'start' },
+      layout: { direction: 'vertical', gap: 12, alignItems: 'start' },
+      hideWhenEmpty: true,
     },
     children: [
       {
-        id: 'transport-parking-title',
-        type: 'text',
+        id: 'transport-parking-header',
+        type: 'group',
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-        value: '주차',
-        props: { type: 'text' },
-        style: {
-          text: {
-            fontFamily: 'var(--font-body)',
-            fontSize: 16,
-            fontWeight: 600,
-            color: 'var(--fg-default)',
-            textAlign: 'left',
-          },
+        props: {
+          type: 'group',
+          layout: { direction: 'horizontal', gap: 8, alignItems: 'center' },
         },
+        children: [
+          {
+            id: 'transport-parking-icon',
+            type: 'image',
+            zIndex: 1,
+            sizing: {
+              width: { type: 'fixed', value: 24, unit: 'px' },
+              height: { type: 'fixed', value: 24, unit: 'px' },
+            },
+            value: '/assets/icon_car.svg',
+            props: {
+              type: 'image',
+              objectFit: 'contain',
+            },
+          },
+          {
+            id: 'transport-parking-title',
+            type: 'text',
+            zIndex: 1,
+            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+            value: '주차',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-body)',
+                fontSize: 16,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'left',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'transport-parking-divider',
+        type: 'divider',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 1, unit: 'px' } },
+        props: { type: 'divider', dividerStyle: 'solid' },
+        style: { background: 'var(--border-default)' },
       },
       {
         id: 'transport-parking-content',
@@ -331,7 +522,7 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
         binding: 'venue.transportation.parking',
-        props: { type: 'text' },
+        props: { type: 'text', listStyle: 'bullet' },
         style: {
           text: {
             fontFamily: 'var(--font-body)',
@@ -345,32 +536,68 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
       },
     ],
   },
-  // Charter Bus Section
+  // Charter Bus Section (전세버스)
   {
     type: 'group',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'venue.transportation.etc',
     props: {
       type: 'group',
-      layout: { direction: 'vertical', gap: 8, alignItems: 'start' },
+      layout: { direction: 'vertical', gap: 12, alignItems: 'start' },
+      hideWhenEmpty: true,
     },
     children: [
       {
-        id: 'transport-etc-title',
-        type: 'text',
+        id: 'transport-etc-header',
+        type: 'group',
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-        value: '전세 버스',
-        props: { type: 'text' },
-        style: {
-          text: {
-            fontFamily: 'var(--font-body)',
-            fontSize: 16,
-            fontWeight: 600,
-            color: 'var(--fg-default)',
-            textAlign: 'left',
-          },
+        props: {
+          type: 'group',
+          layout: { direction: 'horizontal', gap: 8, alignItems: 'center' },
         },
+        children: [
+          {
+            id: 'transport-etc-icon',
+            type: 'image',
+            zIndex: 1,
+            sizing: {
+              width: { type: 'fixed', value: 24, unit: 'px' },
+              height: { type: 'fixed', value: 24, unit: 'px' },
+            },
+            value: '/assets/icon_bus.svg',
+            props: {
+              type: 'image',
+              objectFit: 'contain',
+            },
+          },
+          {
+            id: 'transport-etc-title',
+            type: 'text',
+            zIndex: 1,
+            sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
+            value: '전세 버스',
+            props: { type: 'text' },
+            style: {
+              text: {
+                fontFamily: 'var(--font-body)',
+                fontSize: 16,
+                fontWeight: 600,
+                color: 'var(--fg-default)',
+                textAlign: 'left',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'transport-etc-divider',
+        type: 'divider',
+        zIndex: 1,
+        sizing: { width: { type: 'fill' }, height: { type: 'fixed', value: 1, unit: 'px' } },
+        props: { type: 'divider', dividerStyle: 'solid' },
+        style: { background: 'var(--border-default)' },
       },
       {
         id: 'transport-etc-content',
@@ -378,7 +605,7 @@ const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
         zIndex: 1,
         sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
         binding: 'venue.transportation.etc',
-        props: { type: 'text' },
+        props: { type: 'text', listStyle: 'bullet' },
         style: {
           text: {
             fontFamily: 'var(--font-body)',
@@ -417,6 +644,7 @@ export const LOCATION_WITH_TRANSPORT: BlockPreset = {
     'venue.tmapUrl',
     'venue.kakaoUrl',
     'venue.transportation.subway',
+    'venue.transportation.bus',
     'venue.transportation.shuttle',
     'venue.transportation.parking',
     'venue.transportation.etc',

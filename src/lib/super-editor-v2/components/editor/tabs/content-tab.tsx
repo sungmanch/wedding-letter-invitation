@@ -19,6 +19,7 @@ import type {
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
 import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 import { LocationSearchField } from '../fields/location-search-field'
+import { getBlockPreset } from '../../../presets/blocks'
 
 // ============================================
 // Computed Field Mapping
@@ -262,10 +263,22 @@ function BlockAccordion({
       if (seenBindings.has(finalBinding)) return
       seenBindings.add(finalBinding)
 
-      // gallery 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+      // gallery, notice.items, transportation 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
       if (finalBinding === 'photos.gallery') {
         value = data.photos?.gallery ?? []
+      } else if (finalBinding === 'notice.items') {
+        value = data.notice?.items ?? []
+      } else if (finalBinding === 'venue.transportation.subway') {
+        value = data.venue?.transportation?.subway ?? []
+      } else if (finalBinding === 'venue.transportation.bus') {
+        value = data.venue?.transportation?.bus ?? []
+      } else if (finalBinding === 'venue.transportation.shuttle') {
+        value = data.venue?.transportation?.shuttle ?? []
+      } else if (finalBinding === 'venue.transportation.parking') {
+        value = data.venue?.transportation?.parking ?? []
+      } else if (finalBinding === 'venue.transportation.etc') {
+        value = data.venue?.transportation?.etc ?? []
       } else if (isCustomVariablePath(finalBinding)) {
         const key = getCustomVariableKey(finalBinding)
         value = key ? data.custom?.[key] ?? '' : ''
@@ -322,8 +335,18 @@ function BlockAccordion({
       processElementTree(el)
     }
 
+    // 5. block.elements가 비어있고 presetId가 있으면 프리셋의 bindings 사용
+    if (fields.length === 0 && block.presetId) {
+      const preset = getBlockPreset(block.presetId)
+      if (preset?.bindings) {
+        for (const binding of preset.bindings) {
+          addBinding(`preset-${binding}`, binding as VariablePath, 'text')
+        }
+      }
+    }
+
     return fields
-  }, [block.elements, data])
+  }, [block.elements, block.presetId, data])
 
   return (
     <div className="rounded-lg overflow-hidden">
@@ -521,6 +544,28 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
               onLocationChange(address, lat, lng)
             }
           }}
+        />
+      )}
+
+      {type === 'notice-icon' && (
+        <NoticeIconField
+          value={String(value ?? 'birds-orange')}
+          onChange={onChange}
+        />
+      )}
+
+      {type === 'notice-items' && (
+        <NoticeItemsField
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+        />
+      )}
+
+      {type === 'string-list' && (
+        <StringListField
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+          placeholder={placeholder}
         />
       )}
     </div>
@@ -919,6 +964,324 @@ function ImageField({ value, onChange, onUploadImage }: ImageFieldProps) {
 }
 
 // ============================================
+// String List Field (단순 문자열 리스트)
+// ============================================
+
+interface StringListFieldProps {
+  value: string[]
+  onChange: (value: unknown) => void
+  placeholder?: string
+}
+
+function StringListField({ value, onChange, placeholder }: StringListFieldProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
+  // 아이템 추가
+  const handleAdd = useCallback(() => {
+    onChange([...value, ''])
+  }, [value, onChange])
+
+  // 아이템 삭제
+  const handleDelete = useCallback((index: number) => {
+    const updated = value.filter((_, i) => i !== index)
+    onChange(updated)
+  }, [value, onChange])
+
+  // 아이템 수정
+  const handleItemChange = useCallback((index: number, newValue: string) => {
+    const updated = value.map((item, i) =>
+      i === index ? newValue : item
+    )
+    onChange(updated)
+  }, [value, onChange])
+
+  // 드래그 시작
+  const handleDragStart = useCallback((index: number) => {
+    setDraggedIndex(index)
+  }, [])
+
+  // 드래그 오버 (순서 변경)
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const newValue = [...value]
+    const [dragged] = newValue.splice(draggedIndex, 1)
+    newValue.splice(index, 0, dragged)
+    onChange(newValue)
+    setDraggedIndex(index)
+  }, [draggedIndex, value, onChange])
+
+  // 드래그 종료
+  const handleDragEnd = useCallback(() => {
+    setDraggedIndex(null)
+  }, [])
+
+  return (
+    <div className="space-y-2">
+      {/* 아이템 목록 */}
+      {value.map((item, index) => (
+        <div
+          key={index}
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragEnd={handleDragEnd}
+          className={`
+            flex items-center gap-2
+            ${draggedIndex === index ? 'opacity-50' : ''}
+          `}
+        >
+          {/* 드래그 핸들 */}
+          <div className="cursor-move text-[var(--text-light)] hover:text-[var(--text-muted)]">
+            <DragIcon className="w-4 h-4" />
+          </div>
+
+          {/* 입력 필드 */}
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => handleItemChange(index, e.target.value)}
+            placeholder={placeholder}
+            className="flex-1 px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+          />
+
+          {/* 삭제 버튼 */}
+          <button
+            type="button"
+            onClick={() => handleDelete(index)}
+            className="p-1.5 text-[var(--text-light)] hover:text-red-500 transition-colors"
+            title="삭제"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        </div>
+      ))}
+
+      {/* 추가 버튼 */}
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--sand-200)] rounded-lg text-sm text-[var(--text-muted)] hover:border-[var(--sage-400)] hover:text-[var(--sage-600)] transition-colors"
+      >
+        <PlusIcon className="w-4 h-4" />
+        항목 추가
+      </button>
+
+      {/* 도움말 */}
+      {value.length === 0 && (
+        <p className="text-xs text-[var(--text-light)] text-center">
+          항목이 없습니다. 위 버튼을 눌러 추가하세요.
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ============================================
+// Notice Items Field (리스트 추가/삭제/순서변경)
+// ============================================
+
+interface NoticeItemData {
+  title: string
+  content: string
+  iconType?: 'rings' | 'birds' | 'hearts'
+  backgroundColor?: string
+  borderColor?: string
+}
+
+// ============================================
+// Notice Icon Field (3개 SVG 중 선택)
+// ============================================
+
+const NOTICE_ICON_OPTIONS = [
+  { value: 'birds-blue', label: '파란새', src: '/assets/notice1.svg' },
+  { value: 'birds-orange', label: '주황새', src: '/assets/notice2.svg' },
+  { value: 'birds-green', label: '초록새', src: '/assets/notice3.svg' },
+  { value: 'none', label: '없음', src: null },
+] as const
+
+interface NoticeIconFieldProps {
+  value: string
+  onChange: (value: unknown) => void
+}
+
+function NoticeIconField({ value, onChange }: NoticeIconFieldProps) {
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {NOTICE_ICON_OPTIONS.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`
+            relative p-2 rounded-lg border-2 transition-all
+            ${value === option.value
+              ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
+              : 'border-[var(--sand-100)] bg-white hover:border-[var(--sand-200)]'
+            }
+          `}
+        >
+          {option.src ? (
+            <img
+              src={option.src}
+              alt={option.label}
+              className="w-full h-10 object-contain"
+            />
+          ) : (
+            <div className="w-full h-10 flex items-center justify-center text-xs text-[var(--text-muted)]">
+              없음
+            </div>
+          )}
+          <span className="block mt-1 text-xs text-center text-[var(--text-body)]">
+            {option.label}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+interface NoticeItemsFieldProps {
+  value: NoticeItemData[]
+  onChange: (value: unknown) => void
+}
+
+function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
+  // 아이템 추가
+  const handleAdd = useCallback(() => {
+    const newItem: NoticeItemData = {
+      title: '',
+      content: '',
+      iconType: 'rings',
+    }
+    onChange([...value, newItem])
+  }, [value, onChange])
+
+  // 아이템 삭제
+  const handleDelete = useCallback((index: number) => {
+    const updated = value.filter((_, i) => i !== index)
+    onChange(updated)
+  }, [value, onChange])
+
+  // 아이템 수정
+  const handleItemChange = useCallback((index: number, field: keyof NoticeItemData, fieldValue: string) => {
+    const updated = value.map((item, i) =>
+      i === index ? { ...item, [field]: fieldValue } : item
+    )
+    onChange(updated)
+  }, [value, onChange])
+
+  // 드래그 시작
+  const handleDragStart = useCallback((index: number) => {
+    setDraggedIndex(index)
+  }, [])
+
+  // 드래그 오버 (순서 변경)
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const newValue = [...value]
+    const [dragged] = newValue.splice(draggedIndex, 1)
+    newValue.splice(index, 0, dragged)
+    onChange(newValue)
+    setDraggedIndex(index)
+  }, [draggedIndex, value, onChange])
+
+  // 드래그 종료
+  const handleDragEnd = useCallback(() => {
+    setDraggedIndex(null)
+  }, [])
+
+  return (
+    <div className="space-y-3">
+      {/* 아이템 목록 */}
+      {value.map((item, index) => (
+        <div
+          key={index}
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragEnd={handleDragEnd}
+          className={`
+            p-3 bg-white border border-[var(--sand-200)] rounded-lg
+            ${draggedIndex === index ? 'opacity-50 border-dashed' : ''}
+          `}
+        >
+          {/* 헤더 (드래그 핸들 + 삭제) */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 cursor-move text-[var(--text-light)]">
+              <DragIcon className="w-4 h-4" />
+              <span className="text-xs font-medium">공지 {index + 1}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleDelete(index)}
+              className="p-1 text-[var(--text-light)] hover:text-red-500 transition-colors"
+              title="삭제"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* 제목 */}
+          <input
+            type="text"
+            value={item.title}
+            onChange={(e) => handleItemChange(index, 'title', e.target.value)}
+            placeholder="공지 제목 (예: 피로연 안내)"
+            className="w-full px-3 py-2 mb-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+          />
+
+          {/* 내용 */}
+          <textarea
+            value={item.content}
+            onChange={(e) => handleItemChange(index, 'content', e.target.value)}
+            placeholder="공지 내용을 입력하세요"
+            rows={3}
+            className="w-full px-3 py-2 mb-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
+          />
+
+          {/* 아이콘 선택 */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[var(--text-light)]">아이콘:</span>
+            <select
+              value={item.iconType || 'rings'}
+              onChange={(e) => handleItemChange(index, 'iconType', e.target.value)}
+              className="px-2 py-1 text-xs bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+            >
+              <option value="rings">💍 반지</option>
+              <option value="birds">🕊️ 새</option>
+              <option value="hearts">💕 하트</option>
+            </select>
+          </div>
+        </div>
+      ))}
+
+      {/* 추가 버튼 */}
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--sand-200)] rounded-lg text-sm text-[var(--text-muted)] hover:border-[var(--sage-400)] hover:text-[var(--sage-600)] transition-colors"
+      >
+        <PlusIcon className="w-4 h-4" />
+        공지 추가
+      </button>
+
+      {/* 도움말 */}
+      {value.length === 0 && (
+        <p className="text-xs text-[var(--text-light)] text-center">
+          공지 항목이 없습니다. 위 버튼을 눌러 추가하세요.
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ============================================
 // Add Block Button
 // ============================================
 
@@ -968,7 +1331,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-icon' | 'notice-items' | 'string-list'
   placeholder?: string
 }
 
@@ -1062,6 +1425,13 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'venue.parkingInfo': { label: '주차 안내', type: 'textarea' },
   'venue.transportInfo': { label: '교통 안내', type: 'textarea' },
 
+  // 교통 정보 (리스트)
+  'venue.transportation.subway': { label: '지하철', type: 'string-list', placeholder: '2호선 삼성역 5번출구 10분 거리' },
+  'venue.transportation.bus': { label: '버스', type: 'string-list', placeholder: '삼성역 5번출구 앞 정류장' },
+  'venue.transportation.shuttle': { label: '셔틀버스', type: 'string-list', placeholder: '삼성역 5번출구 앞 (10시부터 20분 간격)' },
+  'venue.transportation.parking': { label: '주차', type: 'string-list', placeholder: '지하 1~3층 주차장 이용' },
+  'venue.transportation.etc': { label: '전세 버스', type: 'string-list', placeholder: '출발 일시: 3월 22일 오전 9시' },
+
   // 사진
   'photos.main': { label: '메인 사진', type: 'image' },
   'photos.gallery': { label: '갤러리 사진', type: 'gallery' },
@@ -1072,6 +1442,12 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // 인사말
   'greeting.title': { label: '인사말 제목', type: 'text' },
   'greeting.content': { label: '인사말 내용', type: 'textarea', placeholder: '저희 두 사람이...' },
+
+  // 공지사항
+  'notice.icon': { label: '상단 아이콘', type: 'notice-icon' },
+  'notice.title': { label: '공지 제목', type: 'text', placeholder: '포토부스 안내' },
+  'notice.description': { label: '공지 설명', type: 'textarea', placeholder: '저희 두 사람의 결혼식을\n기억하실 수 있도록...' },
+  'notice.items': { label: '공지 항목', type: 'notice-items' },
 
   // 음악
   'music.url': { label: '음악 URL', type: 'text' },
@@ -1178,6 +1554,14 @@ function XIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  )
+}
+
+function DragIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
     </svg>
   )
 }

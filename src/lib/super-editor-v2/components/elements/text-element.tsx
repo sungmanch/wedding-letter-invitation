@@ -19,12 +19,14 @@ import { pxToRem } from '../../utils'
 // ============================================
 
 export interface TextElementProps {
-  value?: string | number | null
+  value?: string | number | string[] | null
   style?: TextStyle
   editable?: boolean
   className?: string
   /** Auto Layout hug 모드 여부 */
   hugMode?: boolean
+  /** 배열 데이터를 리스트로 렌더링 */
+  listStyle?: 'bullet' | 'number' | 'none'
 }
 
 // ============================================
@@ -37,22 +39,30 @@ export function TextElement({
   editable = false,
   className = '',
   hugMode = false,
+  listStyle,
 }: TextElementProps) {
+  // 배열 데이터 여부 확인
+  const isArrayValue = Array.isArray(value)
+
   // 텍스트 스타일 계산
   const textStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
       // Hug 모드: 콘텐츠에 맞춤, Absolute 모드: 부모 채움
       width: hugMode ? 'auto' : '100%',
       height: hugMode ? 'auto' : '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: style?.textAlign === 'left'
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'keep-all',
+    }
+
+    // 리스트가 아닌 경우에만 flex 정렬 적용
+    if (!isArrayValue || !listStyle || listStyle === 'none') {
+      css.display = 'flex'
+      css.alignItems = 'center'
+      css.justifyContent = style?.textAlign === 'left'
         ? 'flex-start'
         : style?.textAlign === 'right'
           ? 'flex-end'
-          : 'center',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'keep-all',
+          : 'center'
     }
 
     if (style) {
@@ -72,17 +82,19 @@ export function TextElement({
     }
 
     return css
-  }, [style, hugMode])
+  }, [style, hugMode, isArrayValue, listStyle])
 
   // 줄바꿈 처리 및 숫자 → 문자열 변환
   const formattedValue = useMemo(() => {
     if (value === null || value === undefined) return ''
+    if (Array.isArray(value)) return value // 배열은 그대로 반환
     // 숫자는 문자열로 변환
     return String(value)
   }, [value])
 
-  // null, undefined, 빈 문자열만 empty 처리 (숫자 0은 허용)
-  const isEmpty = value === null || value === undefined || value === ''
+  // null, undefined, 빈 문자열/빈 배열만 empty 처리 (숫자 0은 허용)
+  const isEmpty = value === null || value === undefined || value === '' ||
+    (Array.isArray(value) && value.length === 0)
 
   if (isEmpty) {
     return (
@@ -96,6 +108,28 @@ export function TextElement({
           </span>
         )}
       </div>
+    )
+  }
+
+  // 배열 데이터를 리스트로 렌더링
+  if (isArrayValue && listStyle && listStyle !== 'none') {
+    const items = formattedValue as string[]
+    return (
+      <ul
+        className={`se2-text-element se2-text-element--list ${className}`}
+        style={{
+          ...textStyle,
+          listStyleType: listStyle === 'bullet' ? 'disc' : 'decimal',
+          paddingLeft: '1.25em',
+          margin: 0,
+        }}
+      >
+        {items.map((item, index) => (
+          <li key={index} style={{ marginBottom: index < items.length - 1 ? '0.25em' : 0 }}>
+            {item}
+          </li>
+        ))}
+      </ul>
     )
   }
 

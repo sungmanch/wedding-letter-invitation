@@ -204,6 +204,7 @@ export type ElementProps =
 export interface TextProps {
   type: 'text'
   format?: string  // 포맷팅 (e.g., '{groom.name} ♥ {bride.name}')
+  listStyle?: 'bullet' | 'number' | 'none'  // 배열 데이터를 리스트로 렌더링
 }
 
 export interface ImageProps {
@@ -272,6 +273,8 @@ export interface GroupProps {
     reverse?: boolean                       // flex-direction: row-reverse / column-reverse
     wrap?: boolean                          // flex-wrap: wrap
   }
+  // 바인딩된 값이 빈 배열이면 그룹 전체 숨김
+  hideWhenEmpty?: boolean
 }
 
 // ============================================
@@ -288,8 +291,8 @@ export type VariablePath =
   | 'wedding.date' | 'wedding.time'
 
   // ─── 자동 계산 (__HIDDEN__) ───
-  | 'wedding.dateDisplay' | 'wedding.timeDisplay' | 'wedding.dday'
-  | 'wedding.month' | 'wedding.day' | 'wedding.weekday'
+  | 'wedding.dateDisplay' | 'wedding.dateDot' | 'wedding.dateMonthDay' | 'wedding.timeDisplay' | 'wedding.dday'
+  | 'wedding.year' | 'wedding.month' | 'wedding.day' | 'wedding.weekday'
   | 'wedding.weekdayMinus2' | 'wedding.weekdayMinus1' | 'wedding.weekdayPlus1' | 'wedding.weekdayPlus2'
   | 'wedding.dayMinus2' | 'wedding.dayMinus1' | 'wedding.dayPlus1' | 'wedding.dayPlus2'
   | 'countdown.days' | 'countdown.hours' | 'countdown.minutes' | 'countdown.seconds'
@@ -320,7 +323,7 @@ export type VariablePath =
   | 'gallery.effect'
   | 'accounts.groom' | 'accounts.bride' | 'accounts.kakaopay.groom' | 'accounts.kakaopay.bride'
   | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline'
-  | 'notice.items'
+  | 'notice.icon' | 'notice.title' | 'notice.description' | 'notice.items'
   | 'guestbook.title' | 'guestbook.placeholder'
   | 'ending.message' | 'ending.photo'
   | 'bgm.trackId' | 'bgm.title' | 'bgm.artist'
@@ -900,6 +903,20 @@ export interface Interaction {
 // section-data.md v2.2 기준
 // ============================================
 
+// 공지 블록 상단 아이콘 타입
+export type NoticeIconType = 'birds-blue' | 'birds-orange' | 'birds-green' | 'none'
+
+export interface NoticeItem {
+  title: string
+  content: string
+  // SVG 아이콘 타입 (card-icon 프리셋용)
+  iconType?: 'rings' | 'birds' | 'hearts'
+  // 카드 배경색 (P-S-T 시스템의 S 변형)
+  backgroundColor?: string
+  // 카드 테두리 색상
+  borderColor?: string
+}
+
 export interface WeddingData {
   // ═══════════════════════════════════════════════
   // 공유 필드 (원본 정의)
@@ -947,7 +964,12 @@ export interface WeddingData {
   gallery?: { effect?: GalleryEffect }
   accounts?: AccountsConfig
   rsvp?: RsvpConfig
-  notice?: { items?: NoticeItem[] }
+  notice?: {
+    icon?: NoticeIconType  // 상단 아이콘 (새, 하트 등)
+    title?: string         // 블록 제목 ("포토부스 안내")
+    description?: string   // 설명 텍스트
+    items?: NoticeItem[]
+  }
   guestbook?: GuestbookConfig
   ending?: EndingConfig
   bgm?: { trackId?: string; title?: string; artist?: string }
@@ -1015,11 +1037,11 @@ export interface VenueInfo {
   kakaoUrl?: string
   tmapUrl?: string
   transportation?: {
-    bus?: string
-    subway?: string
-    shuttle?: string
-    parking?: string
-    etc?: string
+    bus?: string[]
+    subway?: string[]
+    shuttle?: string[]
+    parking?: string[]
+    etc?: string[]
   }
   // Legacy 호환
   floor?: string
@@ -1085,17 +1107,6 @@ export interface RsvpConfig {
   deadline?: string
   privacyPolicyUrl?: string
   privacyPolicyText?: string
-}
-
-export interface NoticeItem {
-  title: string
-  content: string
-  // SVG 아이콘 타입 (card-icon 프리셋용)
-  iconType?: 'rings' | 'birds' | 'hearts'
-  // 카드 배경색 (P-S-T 시스템의 S 변형)
-  backgroundColor?: string
-  // 카드 테두리 색상
-  borderColor?: string
 }
 
 export interface GuestbookConfig {
