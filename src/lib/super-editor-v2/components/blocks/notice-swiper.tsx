@@ -26,6 +26,13 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(useGSAP)
 }
 
+// 아이콘 타입 → 색상 매핑
+const ICON_TO_COLOR: Record<string, keyof typeof NOTICE_CARD_COLORS> = {
+  rings: 'blue',
+  birds: 'orange',
+  hearts: 'pink',
+}
+
 // ============================================
 // Types
 // ============================================
@@ -262,7 +269,7 @@ function NoticeCard({ item, index, tokens }: NoticeCardProps) {
     return defaultIcons[index % defaultIcons.length]
   }, [item.iconType, index])
 
-  // 카드 색상 결정
+  // 카드 색상 결정 (아이콘 타입 기반)
   const cardColors = useMemo(() => {
     if (item.backgroundColor && item.borderColor) {
       return {
@@ -270,13 +277,11 @@ function NoticeCard({ item, index, tokens }: NoticeCardProps) {
         border: item.borderColor,
       }
     }
-    // 기본 색상 (순환)
-    const colorKeys = Object.keys(NOTICE_CARD_COLORS) as Array<
-      keyof typeof NOTICE_CARD_COLORS
-    >
-    const colorKey = colorKeys[index % colorKeys.length]
+    // 아이콘 타입에 따른 색상 매칭
+    const iconType = item.iconType || Object.keys(NOTICE_ICON_MAP)[index % 3] as keyof typeof NOTICE_ICON_MAP
+    const colorKey = ICON_TO_COLOR[iconType] || 'blue'
     return NOTICE_CARD_COLORS[colorKey]
-  }, [item.backgroundColor, item.borderColor, index])
+  }, [item.backgroundColor, item.borderColor, item.iconType, index])
 
   const template = NOTICE_CARD_TEMPLATE
 
