@@ -14,6 +14,7 @@ import { AnimationProvider } from '../context/animation-context'
 import { resolveStyle, styleToCSSVariables, type ResolvedStyle } from './style-resolver'
 import { BlockRenderer } from './block-renderer'
 import { FloatingRenderer } from './floating-renderer'
+import { MusicPlayer } from '../components/ui/music-player'
 
 // ============================================
 // Types
@@ -123,6 +124,9 @@ export function DocumentRenderer({
         {floatingElements.length > 0 && (
           <FloatingRenderer elements={floatingElements} />
         )}
+
+        {/* BGM 플레이어 */}
+        <MusicPlayer mode={mode} />
 
         {/* 편집 모드 오버레이 */}
         {editable && mode === 'edit' && (
