@@ -79,7 +79,7 @@ export function DataTab({
           data={data}
           onFieldChange={handleFieldChange}
           onAccountsChange={handleAccountsChange}
-          visibleColumns={['name', 'nameEn', 'phone', 'deceased', 'birthOrder', 'bank', 'accountNumber', 'accountHolder']}
+          visibleColumns={['name', 'nameEn', 'phone', 'deceased', 'birthOrder', 'baptismalName', 'bank', 'accountNumber', 'accountHolder']}
         />
       </Section>
 
