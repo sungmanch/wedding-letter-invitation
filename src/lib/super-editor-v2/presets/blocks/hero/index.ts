@@ -2,27 +2,42 @@
  * Hero Block Presets Index
  *
  * 메인 히어로 섹션 프리셋 통합 export
+ * template-catalog-v2.ts의 unique1~6 기반 6개 프리셋
  */
 
 import type { BlockPreset } from '../types'
 
 // Individual Preset Imports
-import { HERO_FULLSCREEN_OVERLAY } from './fullscreen-overlay'
-import { HERO_CENTER_TEXT } from './center-text'
+import { HERO_CLASSIC_ELEGANT } from './classic-elegant'
+import { HERO_CASUAL_PLAYFUL } from './casual-playful'
+import { HERO_MINIMAL_OVERLAY } from './minimal-overlay'
+import { HERO_DARK_ROMANTIC } from './dark-romantic'
+import { HERO_BRIGHT_CASUAL } from './bright-casual'
+import { HERO_MONOCHROME_BOLD } from './monochrome-bold'
 
 // ============================================
 // Type Exports
 // ============================================
 
-export type HeroPresetId = 'hero-fullscreen-overlay' | 'hero-center-text'
+export type HeroPresetId =
+  | 'hero-classic-elegant'
+  | 'hero-casual-playful'
+  | 'hero-minimal-overlay'
+  | 'hero-dark-romantic'
+  | 'hero-bright-casual'
+  | 'hero-monochrome-bold'
 
 // ============================================
 // Preset Registry
 // ============================================
 
 export const HERO_PRESETS: Record<HeroPresetId, BlockPreset> = {
-  'hero-fullscreen-overlay': HERO_FULLSCREEN_OVERLAY,
-  'hero-center-text': HERO_CENTER_TEXT,
+  'hero-classic-elegant': HERO_CLASSIC_ELEGANT,
+  'hero-casual-playful': HERO_CASUAL_PLAYFUL,
+  'hero-minimal-overlay': HERO_MINIMAL_OVERLAY,
+  'hero-dark-romantic': HERO_DARK_ROMANTIC,
+  'hero-bright-casual': HERO_BRIGHT_CASUAL,
+  'hero-monochrome-bold': HERO_MONOCHROME_BOLD,
 }
 
 // ============================================

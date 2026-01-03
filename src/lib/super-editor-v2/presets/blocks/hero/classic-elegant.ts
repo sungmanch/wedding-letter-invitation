@@ -1,0 +1,176 @@
+/**
+ * Hero Block - Classic Elegant Preset (unique1 기반)
+ *
+ * 우아하고 고전적인 스타일
+ * - 상단: "Our Wedding Day" (스크립트 폰트)
+ * - 중앙: 세로로 긴 메인 사진
+ * - 하단: 신랑 · 신부 이름
+ */
+
+import type { BlockPreset, PresetElement } from '../types'
+import { HERO_HEIGHT } from './_shared'
+
+const ELEMENTS: PresetElement[] = [
+  // 배경색 (흰색)
+  {
+    id: 'background',
+    type: 'shape',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    zIndex: 0,
+    props: { type: 'shape', shape: 'rectangle' },
+    style: { background: '#FFFFFF' },
+  },
+  // "Our Wedding Day" 제목 (3줄)
+  {
+    id: 'title',
+    type: 'text',
+    x: 0,
+    y: 12,
+    width: 100,
+    height: 15,
+    zIndex: 2,
+    value: 'Our\nWedding\nDay',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: "'Great Vibes', cursive",
+        fontSize: 42,
+        fontWeight: 400,
+        color: '#1A1A1A',
+        textAlign: 'center',
+        lineHeight: 1.1,
+        textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      },
+    },
+  },
+  // 날짜 표시
+  {
+    id: 'wedding-date',
+    type: 'text',
+    x: 0,
+    y: 35,
+    width: 100,
+    height: 6,
+    zIndex: 2,
+    binding: 'wedding.date',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: "'Nanum Myeongjo', serif",
+        fontSize: 16,
+        fontWeight: 400,
+        color: '#1A1A1A',
+        textAlign: 'center',
+        letterSpacing: 1,
+      },
+    },
+  },
+  // 메인 사진 (세로로 긴 카드)
+  {
+    id: 'main-image',
+    type: 'image',
+    x: 10,
+    y: 43,
+    width: 80,
+    height: 55,
+    zIndex: 1,
+    binding: 'photos.main',
+    props: { type: 'image', objectFit: 'cover' },
+  },
+  // 신랑 이름
+  {
+    id: 'groom-name',
+    type: 'text',
+    x: 0,
+    y: 102,
+    width: 45,
+    height: 8,
+    zIndex: 2,
+    binding: 'couple.groom.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: "'Nanum Myeongjo', serif",
+        fontSize: 19,
+        fontWeight: 700,
+        color: '#1A1A1A',
+        textAlign: 'right',
+        letterSpacing: 1,
+      },
+    },
+  },
+  // 구분자
+  {
+    id: 'separator',
+    type: 'text',
+    x: 45,
+    y: 102,
+    width: 10,
+    height: 8,
+    zIndex: 2,
+    value: '•',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: "'Nanum Myeongjo', serif",
+        fontSize: 19,
+        fontWeight: 700,
+        color: '#1A1A1A',
+        textAlign: 'center',
+      },
+    },
+  },
+  // 신부 이름
+  {
+    id: 'bride-name',
+    type: 'text',
+    x: 55,
+    y: 102,
+    width: 45,
+    height: 8,
+    zIndex: 2,
+    binding: 'couple.bride.name',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: "'Nanum Myeongjo', serif",
+        fontSize: 19,
+        fontWeight: 700,
+        color: '#1A1A1A',
+        textAlign: 'left',
+        letterSpacing: 1,
+      },
+    },
+  },
+]
+
+export const HERO_CLASSIC_ELEGANT: BlockPreset = {
+  id: 'hero-classic-elegant',
+  blockType: 'hero',
+  variant: 'classic-elegant',
+  name: 'Classic Elegant',
+  nameKo: '클래식 엘레강스',
+  description: '우아하고 고전적인 스타일. 스크립트 폰트 제목과 세로 카드형 사진',
+  tags: ['classic', 'elegant', 'script-font', 'card-photo', 'absolute'],
+  complexity: 'medium',
+  bindings: [
+    'photos.main',
+    'couple.groom.name',
+    'couple.bride.name',
+    'wedding.date',
+  ],
+  defaultHeight: HERO_HEIGHT,
+  layout: undefined,
+  defaultElements: ELEMENTS,
+  specialComponents: ['script-title'],
+  recommendedAnimations: ['fade-in', 'slide-up'],
+  recommendedThemes: ['classic-ivory', 'romantic-blush'],
+  aiHints: {
+    mood: ['elegant', 'classic', 'timeless'],
+    style: ['card-photo', 'script-font', 'vertical-layout'],
+    useCase: ['전통적인 청첩장', '우아한 웨딩'],
+  },
+}

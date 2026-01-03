@@ -210,6 +210,7 @@ export interface ImageProps {
   type: 'image'
   objectFit: 'cover' | 'contain' | 'fill'
   overlay?: string  // 이미지 위 오버레이 색상
+  filter?: string   // CSS filter (예: 'grayscale(100%) brightness(0.9)')
 }
 
 export interface ShapeProps {

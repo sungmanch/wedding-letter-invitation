@@ -77,7 +77,7 @@ interface SubwayBuilderContextValue {
 
 /** 기본 프리셋 선택 */
 export const DEFAULT_PRESETS: SelectedPresets = {
-  hero: 'hero-fullscreen-overlay',
+  hero: 'hero-classic-elegant',
   'greeting-parents': 'greeting-parents-minimal',
   calendar: 'calendar-korean-countdown-box',
   gallery: 'gallery-square-3col',
