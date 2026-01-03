@@ -226,6 +226,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           label={(props as ButtonProps).label}
           action={(props as ButtonProps).action}
           icon={(props as ButtonProps).icon}
+          targetBlockType={(props as ButtonProps).targetBlockType}
           value={value}
           style={element.style}
           editable={editable}
