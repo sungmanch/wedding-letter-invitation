@@ -222,7 +222,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
               color: '#1A1A1A',
               textAlign: 'center',
             },
-            background: '#FEE500',
+            background: '#FFEB3B',
             border: {
               width: 0,
               color: 'transparent',
