@@ -102,7 +102,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             background: '#D0D0D0',
           },
         },
-        // 2-2. 블랙 오버레이 20%
+        // 2-2. 블랙 오버레이 30%
         {
           id: 'cover-overlay',
           type: 'box',
@@ -116,10 +116,27 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             type: 'box',
           },
           style: {
-            background: 'rgba(0, 0, 0, 0.2)',
+            background: 'rgba(0, 0, 0, 0.3)',
           },
         },
-        // 2-3. 인용문 컨테이너 (auto layout)
+        // 2-3. 그라데이션 오버레이 (위 0% → 아래 100%)
+        {
+          id: 'gradient-overlay',
+          type: 'box',
+          layoutMode: 'absolute',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+          zIndex: 2,
+          props: {
+            type: 'box',
+          },
+          style: {
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%)',
+          },
+        },
+        // 2-4. 인용문 컨테이너 (auto layout)
         {
           id: 'quote-container',
           type: 'group',
@@ -128,7 +145,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
             width: { type: 'fill' },
             height: { type: 'hug' },
           },
-          zIndex: 2,
+          zIndex: 3,
           props: {
             type: 'group',
             layout: {
@@ -137,9 +154,6 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
               padding: { top: 40, right: 24, bottom: 24, left: 24 },
               alignItems: 'center',
             },
-          },
-          style: {
-            background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)',
           },
           children: [
             // 인용문 텍스트
