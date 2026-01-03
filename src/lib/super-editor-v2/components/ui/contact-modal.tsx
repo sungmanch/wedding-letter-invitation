@@ -227,7 +227,7 @@ function ContactCard({ name, relation, phone, onCall, onSms }: ContactCardProps)
           </button>
         </div>
       ) : (
-        <div className="flex items-center justify-center py-2.5 text-gray-400 text-sm">
+        <div className="flex items-center justify-center py-2.5 text-gray-400 text-sm bg-white border border-gray-200 rounded-lg">
           전화번호가 등록되지 않았습니다
         </div>
       )}
