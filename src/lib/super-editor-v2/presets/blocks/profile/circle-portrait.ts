@@ -117,24 +117,24 @@ const ELEMENTS: PresetElement[] = [
               background: 'var(--bg-card)',
             },
           },
-          // MBTI (이미지 하단에 겹침)
+          // MBTI (이미지 중앙 하단에 겹침)
           {
             id: 'groom-mbti',
             type: 'text',
             layoutMode: 'absolute',
             x: 50,
-            y: 82,
+            y: 75,
             width: 100,
-            height: 15,
+            height: 20,
             zIndex: 2,
             binding: 'couple.groom.mbti',
             props: { type: 'text' },
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 14,
-                fontWeight: 500,
-                color: 'var(--fg-default)',
+                fontSize: 18,
+                fontWeight: 600,
+                color: 'var(--accent-default)',
                 textAlign: 'center',
               },
             },
@@ -442,24 +442,24 @@ const ELEMENTS: PresetElement[] = [
               background: 'var(--bg-card)',
             },
           },
-          // MBTI (이미지 하단에 겹침)
+          // MBTI (이미지 중앙 하단에 겹침)
           {
             id: 'bride-mbti',
             type: 'text',
             layoutMode: 'absolute',
             x: 50,
-            y: 82,
+            y: 75,
             width: 100,
-            height: 15,
+            height: 20,
             zIndex: 2,
             binding: 'couple.bride.mbti',
             props: { type: 'text' },
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 14,
-                fontWeight: 500,
-                color: 'var(--fg-default)',
+                fontSize: 18,
+                fontWeight: 600,
+                color: 'var(--accent-default)',
                 textAlign: 'center',
               },
             },

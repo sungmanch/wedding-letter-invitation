@@ -39,6 +39,8 @@ export interface ButtonElementProps {
   icon?: 'naver' | 'kakao' | 'tmap' | 'none' | string
   /** show-block 액션에서 표시할 블록 타입 */
   targetBlockType?: string
+  /** 갤러리 확장 핸들러 (show-block 액션에서 갤러리 더보기용) */
+  onExpandGallery?: () => void
 }
 
 // ============================================
@@ -79,6 +81,7 @@ export function ButtonElement({
   hugMode = false,
   icon,
   targetBlockType,
+  onExpandGallery,
 }: ButtonElementProps) {
   const { document, data } = useDocument()
   const [contactModalOpen, setContactModalOpen] = useState(false)
@@ -204,13 +207,16 @@ export function ButtonElement({
         break
 
       case 'show-block':
-        // targetBlockType에 따라 적절한 모달 열기
+        // targetBlockType에 따라 적절한 동작 실행
         if (targetBlockType === 'message') {
           setGuestbookModalOpen(true)
+        } else if (onExpandGallery) {
+          // targetBlockType이 없고 onExpandGallery 콜백이 있으면 갤러리 확장
+          onExpandGallery()
         }
         break
     }
-  }, [action, value, editable, targetBlockType])
+  }, [action, value, editable, targetBlockType, onExpandGallery])
 
   // 액션별 아이콘
   const ActionIcon = useMemo(() => {

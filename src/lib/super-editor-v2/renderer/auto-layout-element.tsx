@@ -315,6 +315,7 @@ interface GroupElementProps {
   element: Element
   layout?: GroupProps['layout']
   editable: boolean
+  galleryExpanded?: boolean
 }
 
 // 갤러리 설정 타입
@@ -326,7 +327,7 @@ interface GalleryConfig {
   showMoreButton: boolean
 }
 
-function GroupElement({ element, layout, editable }: GroupElementProps) {
+function GroupElement({ element, layout, editable, galleryExpanded }: GroupElementProps) {
   const { data } = useDocument()
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
@@ -408,7 +409,10 @@ function GroupElement({ element, layout, editable }: GroupElementProps) {
   if (galleryImages && galleryConfig) {
     const { columns, aspectRatio, gap, initialRows } = galleryConfig
     const initialCount = columns * initialRows
-    const visibleImages = galleryImages.slice(0, initialCount)
+    // 확장 상태면 모든 이미지, 아니면 초기 개수만 표시
+    const visibleImages = galleryExpanded
+      ? galleryImages
+      : galleryImages.slice(0, initialCount)
 
     // aspect ratio를 padding-bottom %로 변환
     const aspectRatioPercent = aspectRatio === '1:1' ? 100
