@@ -132,7 +132,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 18,
+                fontSize: 24,
                 fontWeight: 600,
                 color: 'var(--accent-default)',
                 textAlign: 'center',
@@ -457,7 +457,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 18,
+                fontSize: 24,
                 fontWeight: 600,
                 color: 'var(--accent-default)',
                 textAlign: 'center',
