@@ -46,7 +46,7 @@ export interface ButtonElementProps {
 // ============================================
 
 /** 아이콘 프리셋 ID로 이미지 컴포넌트 반환 */
-function getPresetIcon(iconId: string, size = 20): ReactNode {
+function getPresetIcon(iconId: string, size = 24): ReactNode {
   const iconStyle = { width: size, height: size }
 
   switch (iconId) {
