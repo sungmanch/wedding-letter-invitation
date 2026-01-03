@@ -7,8 +7,8 @@
 
 import type { SizeMode } from '../../../schema/types'
 
-// Hero는 고정 높이 (100vh 느낌의 풀스크린)
-export const HERO_HEIGHT: SizeMode = { type: 'fixed', value: 600, unit: 'px' }
+// Hero는 뷰포트 전체 높이 (100vh 풀스크린)
+export const HERO_HEIGHT: SizeMode = { type: 'fixed', value: 100, unit: 'vh' }
 
 // 텍스트 오버레이용 공통 스타일
 export const OVERLAY_TEXT_SHADOW = '0 2px 8px rgba(0, 0, 0, 0.3)'
