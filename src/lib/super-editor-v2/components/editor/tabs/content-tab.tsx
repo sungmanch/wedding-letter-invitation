@@ -345,6 +345,16 @@ function BlockAccordion({
       }
     }
 
+    // 6. notice 블록은 items가 별도 컴포넌트(swiper)에서 렌더링되므로 필수 필드 강제 추가
+    if (block.type === 'notice') {
+      const noticeBindings: VariablePath[] = ['notice.sectionTitle', 'notice.title', 'notice.description', 'notice.items']
+      for (const binding of noticeBindings) {
+        if (!seenBindings.has(binding)) {
+          addBinding(`notice-${binding}`, binding, 'text')
+        }
+      }
+    }
+
     return fields
   }, [block.elements, block.presetId, data])
 
@@ -544,13 +554,6 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
               onLocationChange(address, lat, lng)
             }
           }}
-        />
-      )}
-
-      {type === 'notice-icon' && (
-        <NoticeIconField
-          value={String(value ?? 'birds-orange')}
-          onChange={onChange}
         />
       )}
 
@@ -1085,7 +1088,7 @@ function StringListField({ value, onChange, placeholder }: StringListFieldProps)
 interface NoticeItemData {
   title: string
   content: string
-  iconType?: 'rings' | 'birds' | 'hearts'
+  iconType?: 'birds-blue' | 'birds-orange' | 'birds-green'
   backgroundColor?: string
   borderColor?: string
 }
@@ -1155,7 +1158,6 @@ function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
     const newItem: NoticeItemData = {
       title: '',
       content: '',
-      iconType: 'rings',
     }
     onChange([...value, newItem])
   }, [value, onChange])
@@ -1245,19 +1247,34 @@ function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
             className="w-full px-3 py-2 mb-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
           />
 
-          {/* 아이콘 선택 */}
+          {/* 스타일(아이콘+배경) 선택 */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--text-light)]">아이콘:</span>
-            <select
-              value={item.iconType || 'rings'}
-              onChange={(e) => handleItemChange(index, 'iconType', e.target.value)}
-              className="px-2 py-1 text-xs bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-            >
-              <option value="rings">💍 반지</option>
-              <option value="birds">🕊️ 새</option>
-              <option value="hearts">💕 하트</option>
-            </select>
+            <span className="text-xs text-[var(--text-light)]">스타일:</span>
+            <div className="flex gap-1">
+              {NOTICE_ICON_OPTIONS.filter(opt => opt.value !== 'none').map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleItemChange(index, 'iconType', option.value)}
+                  className={`
+                    p-1 rounded border-2 transition-all
+                    ${(item.iconType || 'birds-orange') === option.value
+                      ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
+                      : 'border-transparent hover:border-[var(--sand-200)]'
+                    }
+                  `}
+                  title={option.label}
+                >
+                  <img
+                    src={option.src!}
+                    alt={option.label}
+                    className="w-8 h-4 object-contain"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
+
         </div>
       ))}
 
@@ -1331,7 +1348,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-icon' | 'notice-items' | 'string-list'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list'
   placeholder?: string
 }
 
@@ -1344,6 +1361,11 @@ const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
   'wedding.month',
   'wedding.day',
   'wedding.weekday',
+  // 캘린더 파생 필드 (전후 요일)
+  'wedding.weekdayMinus2',
+  'wedding.weekdayMinus1',
+  'wedding.weekdayPlus1',
+  'wedding.weekdayPlus2',
   // 카운트다운 (실시간 계산)
   'countdown.days',
   'countdown.hours',
@@ -1361,6 +1383,12 @@ const DERIVED_TO_INPUT_MAP: Record<string, VariablePath> = {
   'wedding.month': 'wedding.date',
   'wedding.day': 'wedding.date',
   'wedding.weekday': 'wedding.date',
+  // 캘린더 전후 요일
+  'wedding.weekdayMinus2': 'wedding.date',
+  'wedding.weekdayMinus1': 'wedding.date',
+  'wedding.weekdayPlus1': 'wedding.date',
+  'wedding.weekdayPlus2': 'wedding.date',
+  // 카운트다운
   'countdown.days': 'wedding.date',
   'countdown.hours': 'wedding.date',
   'countdown.minutes': 'wedding.date',
@@ -1444,7 +1472,7 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'greeting.content': { label: '인사말 내용', type: 'textarea', placeholder: '저희 두 사람이...' },
 
   // 공지사항
-  'notice.icon': { label: '상단 아이콘', type: 'notice-icon' },
+  'notice.sectionTitle': { label: '섹션 제목', type: 'text', placeholder: 'NOTICE' },
   'notice.title': { label: '공지 제목', type: 'text', placeholder: '포토부스 안내' },
   'notice.description': { label: '공지 설명', type: 'textarea', placeholder: '저희 두 사람의 결혼식을\n기억하실 수 있도록...' },
   'notice.items': { label: '공지 항목', type: 'notice-items' },
@@ -1453,6 +1481,10 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   'music.url': { label: '음악 URL', type: 'text' },
   'music.title': { label: '음악 제목', type: 'text' },
   'music.artist': { label: '아티스트', type: 'text' },
+
+  // RSVP
+  'rsvp.title': { label: 'RSVP 제목', type: 'text' },
+  'rsvp.description': { label: 'RSVP 설명', type: 'textarea' },
 }
 
 // Block type icons (editor-panel.tsx와 동일)
@@ -1473,6 +1505,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   music: '🎵',
   loading: '⏳',
   custom: '🔧',
+  interview: '🎤',
 }
 
 // ============================================
