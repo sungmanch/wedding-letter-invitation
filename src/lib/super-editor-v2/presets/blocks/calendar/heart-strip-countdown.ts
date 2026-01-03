@@ -35,7 +35,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontSize: 'var(--text-xl)',
+        fontSize: 'var(--text-base)',
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'center',
