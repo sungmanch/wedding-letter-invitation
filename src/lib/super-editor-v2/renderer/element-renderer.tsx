@@ -306,6 +306,10 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         />
       )
 
+    case 'box':
+      // box는 스타일만 적용되는 빈 컨테이너 (오버레이 등에 사용)
+      return <div className="se2-box" style={{ width: '100%', height: '100%' }} />
+
     default:
       return (
         <div className="se2-element--unknown">
@@ -682,6 +686,10 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
             editable={editable}
           />
         )
+
+      case 'box':
+        // box는 스타일만 적용되는 빈 컨테이너 (오버레이 등에 사용)
+        return <div className="se2-box" style={{ width: '100%', height: '100%' }} />
 
       default:
         return null
