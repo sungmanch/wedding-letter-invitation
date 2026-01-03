@@ -57,9 +57,9 @@ const MINIMAL_MODAL: ModalPreset = {
       id: 'message',
       type: 'textarea',
       label: '방명록을 작성해 주세요.',
-      placeholder: '방명록 (최대 50자)',
+      placeholder: '방명록 (최대 200자)',
       required: true,
-      maxLength: 50,
+      maxLength: 200,
       style: {
         labelColor: 'var(--fg-default)',
         inputBorderColor: 'var(--border-default)',
