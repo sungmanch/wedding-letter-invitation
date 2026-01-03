@@ -69,16 +69,6 @@ export function AutoLayoutElement({
     return element.value ?? (element as { content?: string }).content
   }, [element.binding, element.value, data, element])
 
-  // hideWhenEmpty 처리: 그룹이고 바인딩된 값이 빈 배열이면 숨김
-  const props = element.props as GroupProps | undefined
-  if (element.type === 'group' && props?.hideWhenEmpty) {
-    const isEmptyArray = Array.isArray(resolvedValue) && resolvedValue.length === 0
-    const isNullish = resolvedValue === null || resolvedValue === undefined
-    if (isEmptyArray || isNullish) {
-      return null
-    }
-  }
-
   // 포맷 문자열 처리 (TextProps의 format)
   const formattedValue = useMemo(() => {
     if (element.props?.type === 'text' && (element.props as TextProps).format) {
@@ -86,6 +76,17 @@ export function AutoLayoutElement({
     }
     return resolvedValue
   }, [element.props, resolvedValue, data])
+
+  // hideWhenEmpty 처리: 그룹이고 바인딩된 값이 빈 배열이면 숨김
+  const shouldHide = useMemo(() => {
+    const props = element.props as GroupProps | undefined
+    if (element.type === 'group' && props?.hideWhenEmpty) {
+      const isEmptyArray = Array.isArray(resolvedValue) && resolvedValue.length === 0
+      const isNullish = resolvedValue === null || resolvedValue === undefined
+      return isEmptyArray || isNullish
+    }
+    return false
+  }, [element.type, element.props, resolvedValue])
 
   // Auto Layout 요소 스타일 계산
   const elementStyle = useMemo<CSSProperties>(() => {
@@ -111,6 +112,11 @@ export function AutoLayoutElement({
     e.stopPropagation()
     onClick?.(element.id)
   }, [element.id, onClick])
+
+  // hideWhenEmpty가 true이고 값이 비어있으면 렌더링 안함
+  if (shouldHide) {
+    return null
+  }
 
   return (
     <div
