@@ -4,31 +4,31 @@
  * Map Element - 지도 요소
  *
  * NaverMap 컴포넌트를 사용한 지도 렌더링
+ * binding: 'venue'로 VenueInfo 객체를 직접 받거나
+ * value로 "lat,lng" 문자열을 받을 수 있음
  */
 
 import { useMemo, type CSSProperties } from 'react'
-import type { ElementStyle } from '../../schema/types'
-import { NaverMap } from '@/lib/super-editor/primitives/content/NaverMap'
+import type { ElementStyle, VenueInfo } from '../../schema/types'
+import { NaverMap } from './naver-map'
 
 // ============================================
 // Types
 // ============================================
 
 export interface MapElementProps {
-  value?: unknown // 좌표 문자열 "lat,lng" 또는 주소
+  /** VenueInfo 객체 또는 좌표 문자열 "lat,lng" */
+  value?: VenueInfo | string | unknown
   zoom?: number
   showMarker?: boolean
   style?: ElementStyle
   className?: string
-  /** 장소명 (NaverMap의 마커 타이틀에 사용) */
-  name?: string
-  /** 주소 (NaverMap 하단에 표시) */
-  address?: string
 }
 
 interface Coordinates {
   lat: number
   lng: number
+  name: string
 }
 
 // ============================================
@@ -41,22 +41,41 @@ export function MapElement({
   showMarker = true,
   style,
   className = '',
-  name = '웨딩홀',
 }: MapElementProps) {
-  // 좌표 파싱
+  // 좌표 파싱 (VenueInfo 객체 또는 문자열)
   const coordinates = useMemo<Coordinates | null>(() => {
     if (!value) return null
 
-    const valueStr = String(value)
+    // VenueInfo 객체인 경우 (binding: 'venue')
+    if (typeof value === 'object' && value !== null) {
+      const venue = value as VenueInfo
+      if (venue.lat && venue.lng) {
+        return {
+          lat: venue.lat,
+          lng: venue.lng,
+          name: venue.name || '웨딩홀',
+        }
+      }
+      // coordinates 필드가 있는 경우 (Legacy)
+      if (venue.coordinates?.lat && venue.coordinates?.lng) {
+        return {
+          lat: venue.coordinates.lat,
+          lng: venue.coordinates.lng,
+          name: venue.name || '웨딩홀',
+        }
+      }
+      return null
+    }
 
-    // "lat,lng" 형식 체크
+    // 문자열인 경우 "lat,lng" 형식
+    const valueStr = String(value)
     if (valueStr.includes(',')) {
       const [latStr, lngStr] = valueStr.split(',')
       const lat = parseFloat(latStr.trim())
       const lng = parseFloat(lngStr.trim())
 
       if (!isNaN(lat) && !isNaN(lng)) {
-        return { lat, lng }
+        return { lat, lng, name: '웨딩홀' }
       }
     }
 
@@ -116,11 +135,9 @@ export function MapElement({
       <NaverMap
         lat={coordinates.lat}
         lng={coordinates.lng}
-        name={name}
+        name={coordinates.name}
         zoom={zoom}
         showMarker={showMarker}
-        height={280}
-        navigationButtons={['kakao', 'naver', 'tmap']}
       />
     </div>
   )
