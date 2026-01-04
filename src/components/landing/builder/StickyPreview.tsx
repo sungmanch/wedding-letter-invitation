@@ -11,6 +11,7 @@
 import { useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
+import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/renderer/style-resolver'
 import type { EditorDocument, Block, ThemePresetId, Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
 import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
 import {
@@ -141,6 +142,13 @@ function StickyPreviewInner() {
     }
   }, [state.selectedTemplateId, state.selectedPresets])
 
+  // 문서 style에서 직접 CSS 변수 생성 (EditClient와 동일한 방식)
+  const cssVariables = useMemo(() => {
+    if (!document) return {}
+    const resolved = resolveStyle(document.style)
+    return styleToCSSVariables(resolved)
+  }, [document])
+
   // 프레임 크기 (iPhone 14 비율: 390×844)
   const frameWidth = 320
   const frameHeight = 692 // 320 * (844/390) ≈ 692
@@ -251,7 +259,7 @@ function StickyPreviewInner() {
                   height: totalContentHeight,
                   transform: `scale(${scale})`,
                   transformOrigin: 'top left',
-                  ...state.cssVariables,
+                  ...cssVariables,
                 }}
               >
                 <DocumentRenderer
