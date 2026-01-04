@@ -7,6 +7,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Default Elements
@@ -35,7 +36,7 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-accent)',
-        fontSize: 12,
+        fontSize: FONT_SIZE.sm,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -55,7 +56,7 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 600,
         color: 'var(--accent-secondary)',
         textAlign: 'center',
@@ -75,7 +76,7 @@ const NOTICE_CLASSIC_LABEL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',

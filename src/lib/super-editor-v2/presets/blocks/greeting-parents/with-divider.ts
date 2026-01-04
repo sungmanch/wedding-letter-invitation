@@ -6,6 +6,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 const ELEMENTS: PresetElement[] = [
   // 1. 제목
@@ -18,7 +19,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 24,
+        fontSize: FONT_SIZE['3xl'],
         fontWeight: 400,
         color: 'var(--fg-emphasis)',
         textAlign: 'center',
@@ -52,7 +53,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 16,
+        fontSize: FONT_SIZE.md,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -74,7 +75,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -95,7 +96,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
