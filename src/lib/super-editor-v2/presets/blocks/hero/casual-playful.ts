@@ -335,7 +335,7 @@ export const HERO_CASUAL_PLAYFUL: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['script-title', 'save-the-date', 'watermark-background'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'romantic-blush'],
+  recommendedThemes: ['hero-casual-playful'],
   aiHints: {
     mood: ['romantic', 'playful', 'bright'],
     style: ['watermark', 'save-the-date', 'card-photo', 'script-font'],

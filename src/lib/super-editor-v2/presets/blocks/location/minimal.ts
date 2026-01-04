@@ -6,6 +6,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Default Elements
@@ -23,7 +24,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-accent)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -43,7 +44,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 22,
+        fontSize: FONT_SIZE['2xl'],
         fontWeight: 600,
         color: 'var(--fg-emphasis)',
         textAlign: 'center',
@@ -60,7 +61,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -96,7 +97,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -139,7 +140,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
         style: {
           text: {
             fontFamily: 'var(--font-body)',
-            fontSize: 14,
+            fontSize: FONT_SIZE.base,
             fontWeight: 500,
             color: 'var(--fg-default)',
             textAlign: 'center',
@@ -167,7 +168,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
         style: {
           text: {
             fontFamily: 'var(--font-body)',
-            fontSize: 14,
+            fontSize: FONT_SIZE.base,
             fontWeight: 500,
             color: 'var(--fg-default)',
             textAlign: 'center',
@@ -195,7 +196,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
         style: {
           text: {
             fontFamily: 'var(--font-body)',
-            fontSize: 14,
+            fontSize: FONT_SIZE.base,
             fontWeight: 500,
             color: 'var(--fg-default)',
             textAlign: 'center',
