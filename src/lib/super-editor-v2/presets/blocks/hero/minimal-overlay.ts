@@ -236,7 +236,7 @@ export const HERO_MINIMAL_OVERLAY: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['overlay-card', 'divider-line'],
   recommendedAnimations: ['fade-in', 'zoom-in'],
-  recommendedThemes: ['minimal-white', 'modern-clean'],
+  recommendedThemes: ['hero-minimal-overlay'],
   aiHints: {
     mood: ['minimal', 'modern', 'clean'],
     style: ['fullscreen-photo', 'overlay-card', 'serif-font'],

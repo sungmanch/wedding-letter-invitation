@@ -35,7 +35,207 @@ export interface ThemePreset {
   recommendedTypography?: string
 }
 
+// ============================================
+// Hero-specific 1컬러 프리셋 (6개)
+// ============================================
+
+const HERO_COLOR_PRESETS = {
+  // classic-elegant: 골드/아이보리 계열
+  gold: {
+    primary: '#C9A962',
+    secondary: '#FAF7F0',
+    tertiary: '#E8DFC8',
+  },
+  // casual-playful: 로맨틱 소프트
+  romantic: {
+    primary: '#B8A090',
+    secondary: '#FAF8F5',
+    tertiary: '#E5DED3',
+  },
+  // minimal-overlay: 미니멀 중립
+  neutral: {
+    primary: '#6B7280',
+    secondary: '#F9FAFB',
+    tertiary: '#E5E7EB',
+  },
+  // bright-casual: 코발트 블루
+  cobalt: {
+    primary: '#0047AB',
+    secondary: '#F0F4FF',
+    tertiary: '#B8CBFF',
+  },
+} as const
+
 export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
+  // ─── 히어로 전용 1컬러 (Hero-specific) ───
+  'hero-classic-elegant': {
+    id: 'hero-classic-elegant',
+    name: 'Classic Elegant',
+    nameKo: '클래식 엘레강스',
+    description: '우아한 골드/아이보리 테마 (hero-classic-elegant 전용)',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': HERO_COLOR_PRESETS.gold.secondary,
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': HERO_COLOR_PRESETS.gold.primary,
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': HERO_COLOR_PRESETS.gold.primary,
+      'accent-hover': HERO_COLOR_PRESETS.gold.tertiary,
+      'accent-active': HERO_COLOR_PRESETS.gold.primary,
+      'accent-secondary': HERO_COLOR_PRESETS.gold.tertiary,
+      'border-default': '#E5E7EB',
+      'border-emphasis': HERO_COLOR_PRESETS.gold.primary,
+      'border-muted': '#F3F4F6',
+    },
+    recommendedTypography: 'classic-elegant',
+  },
+
+  'hero-casual-playful': {
+    id: 'hero-casual-playful',
+    name: 'Casual Playful',
+    nameKo: '캐주얼 플레이풀',
+    description: '로맨틱하고 부드러운 테마 (hero-casual-playful 전용)',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': HERO_COLOR_PRESETS.romantic.secondary,
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': HERO_COLOR_PRESETS.romantic.primary,
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': HERO_COLOR_PRESETS.romantic.primary,
+      'accent-hover': HERO_COLOR_PRESETS.romantic.tertiary,
+      'accent-active': HERO_COLOR_PRESETS.romantic.primary,
+      'accent-secondary': HERO_COLOR_PRESETS.romantic.tertiary,
+      'border-default': '#E5E7EB',
+      'border-emphasis': HERO_COLOR_PRESETS.romantic.primary,
+      'border-muted': '#F3F4F6',
+    },
+    recommendedTypography: 'natural-warm',
+  },
+
+  'hero-minimal-overlay': {
+    id: 'hero-minimal-overlay',
+    name: 'Minimal Overlay',
+    nameKo: '미니멀 오버레이',
+    description: '깔끔하고 중립적인 테마 (hero-minimal-overlay 전용)',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': HERO_COLOR_PRESETS.neutral.secondary,
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': HERO_COLOR_PRESETS.neutral.primary,
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': HERO_COLOR_PRESETS.neutral.primary,
+      'accent-hover': HERO_COLOR_PRESETS.neutral.tertiary,
+      'accent-active': HERO_COLOR_PRESETS.neutral.primary,
+      'accent-secondary': HERO_COLOR_PRESETS.neutral.tertiary,
+      'border-default': '#E5E7EB',
+      'border-emphasis': HERO_COLOR_PRESETS.neutral.primary,
+      'border-muted': '#F3F4F6',
+    },
+    recommendedTypography: 'modern-minimal',
+  },
+
+  'hero-dark-romantic': {
+    id: 'hero-dark-romantic',
+    name: 'Dark Romantic',
+    nameKo: '다크 로맨틱',
+    description: '시크한 코랄 핑크 테마 (hero-dark-romantic 전용)',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.coral.secondary,
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.coral.primary,
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': SIMPLE_COLOR_PRESETS.coral.primary,
+      'accent-hover': SIMPLE_COLOR_PRESETS.coral.tertiary,
+      'accent-active': SIMPLE_COLOR_PRESETS.coral.primary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.coral.tertiary,
+      'border-default': '#E5E7EB',
+      'border-emphasis': SIMPLE_COLOR_PRESETS.coral.primary,
+      'border-muted': '#F3F4F6',
+    },
+    recommendedTypography: 'modern-minimal',
+  },
+
+  'hero-bright-casual': {
+    id: 'hero-bright-casual',
+    name: 'Bright Casual',
+    nameKo: '브라이트 캐주얼',
+    description: '화사한 코발트 블루 테마 (hero-bright-casual 전용)',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': HERO_COLOR_PRESETS.cobalt.secondary,
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': HERO_COLOR_PRESETS.cobalt.primary,
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': HERO_COLOR_PRESETS.cobalt.primary,
+      'accent-hover': HERO_COLOR_PRESETS.cobalt.tertiary,
+      'accent-active': HERO_COLOR_PRESETS.cobalt.primary,
+      'accent-secondary': HERO_COLOR_PRESETS.cobalt.tertiary,
+      'border-default': '#E5E7EB',
+      'border-emphasis': HERO_COLOR_PRESETS.cobalt.primary,
+      'border-muted': '#F3F4F6',
+    },
+    recommendedTypography: 'modern-minimal',
+  },
+
+  'hero-monochrome-bold': {
+    id: 'hero-monochrome-bold',
+    name: 'Monochrome Bold',
+    nameKo: '모노크롬 볼드',
+    description: '모던한 핫핑크 테마 (hero-monochrome-bold 전용)',
+    category: 'simple',
+    tokens: {
+      'bg-page': '#FFFFFF',
+      'bg-section': '#FFFFFF',
+      'bg-section-alt': '#FFFFFF',
+      'bg-card': SIMPLE_COLOR_PRESETS.pink.secondary,
+      'bg-overlay': 'rgba(0, 0, 0, 0.4)',
+      'fg-default': '#1A1A1A',
+      'fg-muted': '#6B7280',
+      'fg-emphasis': SIMPLE_COLOR_PRESETS.pink.primary,
+      'fg-inverse': '#FFFFFF',
+      'fg-on-accent': '#FFFFFF',
+      'accent-default': SIMPLE_COLOR_PRESETS.pink.primary,
+      'accent-hover': SIMPLE_COLOR_PRESETS.pink.tertiary,
+      'accent-active': SIMPLE_COLOR_PRESETS.pink.primary,
+      'accent-secondary': SIMPLE_COLOR_PRESETS.pink.tertiary,
+      'border-default': '#E5E7EB',
+      'border-emphasis': SIMPLE_COLOR_PRESETS.pink.primary,
+      'border-muted': '#F3F4F6',
+    },
+    recommendedTypography: 'high-contrast',
+  },
+
   // ─── 1컬러 시스템 (Simple) ───
   'simple-pink': {
     id: 'simple-pink',
@@ -67,7 +267,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       contrast: 'medium',
       saturation: 'normal',
     },
-    recommendedTypography: 'romantic-soft',
+    recommendedTypography: 'natural-warm',
   },
 
   'simple-coral': {
@@ -100,7 +300,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       contrast: 'medium',
       saturation: 'normal',
     },
-    recommendedTypography: 'romantic-soft',
+    recommendedTypography: 'natural-warm',
   },
 
   'simple-blue': {
@@ -133,15 +333,24 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       contrast: 'medium',
       saturation: 'normal',
     },
-    recommendedTypography: 'modern-clean',
+    recommendedTypography: 'modern-minimal',
   },
 
-  // ─── 기본 (Basic) ───
+  // ─── @deprecated (제거 예정) ───
+  // 아래 테마들은 hero-* 테마로 대체 예정
+  // - minimal-light → hero-minimal-overlay
+  // - classic-ivory, classic-gold → hero-classic-elegant
+  // - modern-mono → hero-monochrome-bold
+  // - romantic-blush → hero-dark-romantic
+  // - romantic-garden → hero-casual-playful
+  // - photo-adaptive → 미사용
+
+  /** @deprecated hero-minimal-overlay 사용 */
   'minimal-light': {
     id: 'minimal-light',
     name: 'Minimal Light',
     nameKo: '미니멀 라이트',
-    description: '깔끔하고 밝은 미니멀 디자인',
+    description: '@deprecated - 깔끔하고 밝은 미니멀 디자인',
     category: 'basic',
     tokens: {
       'bg-page': '#FFFFFF',
@@ -170,12 +379,12 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     recommendedTypography: 'modern-minimal',
   },
 
-  // ─── 클래식 (Classic) ───
+  /** @deprecated hero-classic-elegant 사용 */
   'classic-ivory': {
     id: 'classic-ivory',
     name: 'Classic Ivory',
     nameKo: '클래식 아이보리',
-    description: '따뜻하고 우아한 아이보리 톤',
+    description: '@deprecated - 따뜻하고 우아한 아이보리 톤',
     category: 'classic',
     tokens: {
       'bg-page': '#FAF8F5',
@@ -204,11 +413,12 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     recommendedTypography: 'classic-elegant',
   },
 
+  /** @deprecated hero-classic-elegant 사용 */
   'classic-gold': {
     id: 'classic-gold',
     name: 'Classic Gold',
     nameKo: '클래식 골드',
-    description: '고급스러운 골드 포인트',
+    description: '@deprecated - 고급스러운 골드 포인트',
     category: 'classic',
     tokens: {
       'bg-page': '#FFFDF8',
@@ -234,15 +444,15 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       contrast: 'medium',
       saturation: 'normal',
     },
-    recommendedTypography: 'classic-traditional',
+    recommendedTypography: 'classic-elegant',
   },
 
-  // ─── 모던 (Modern) ───
+  /** @deprecated hero-monochrome-bold 사용 */
   'modern-mono': {
     id: 'modern-mono',
     name: 'Modern Mono',
     nameKo: '모던 모노크롬',
-    description: '세련된 흑백 디자인',
+    description: '@deprecated - 세련된 흑백 디자인',
     category: 'modern',
     tokens: {
       'bg-page': '#FFFFFF',
@@ -268,15 +478,15 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       contrast: 'high',
       saturation: 'muted',
     },
-    recommendedTypography: 'modern-geometric',
+    recommendedTypography: 'high-contrast',
   },
 
-  // ─── 로맨틱 (Romantic) ───
+  /** @deprecated hero-dark-romantic 사용 */
   'romantic-blush': {
     id: 'romantic-blush',
     name: 'Romantic Blush',
     nameKo: '로맨틱 블러쉬',
-    description: '부드러운 블러쉬 핑크',
+    description: '@deprecated - 부드러운 블러쉬 핑크',
     category: 'romantic',
     tokens: {
       'bg-page': '#FFF9F9',
@@ -302,14 +512,15 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       contrast: 'low',
       saturation: 'muted',
     },
-    recommendedTypography: 'romantic-soft',
+    recommendedTypography: 'natural-warm',
   },
 
+  /** @deprecated hero-casual-playful 사용 */
   'romantic-garden': {
     id: 'romantic-garden',
     name: 'Romantic Garden',
     nameKo: '로맨틱 가든',
-    description: '자연스러운 가든 그린',
+    description: '@deprecated - 자연스러운 가든 그린',
     category: 'romantic',
     tokens: {
       'bg-page': '#F8FAF8',
@@ -338,12 +549,12 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     recommendedTypography: 'natural-warm',
   },
 
-  // ─── 특수 (Special) ───
+  /** @deprecated 미사용 */
   'photo-adaptive': {
     id: 'photo-adaptive',
     name: 'Photo Adaptive',
     nameKo: '사진 기반 자동',
-    description: '메인 사진에서 색상 자동 추출',
+    description: '@deprecated - 메인 사진에서 색상 자동 추출',
     category: 'special',
     tokens: {
       // 기본값 (사진 추출 전)
