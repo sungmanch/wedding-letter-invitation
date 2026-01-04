@@ -42,6 +42,15 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2026-01-04: SEO/AEO/GEO 최적화 기본 인프라
+- **이유**: 검색엔진 최적화 및 AI 검색 엔진(ChatGPT, Claude) 대응
+- **변경**:
+  - `sitemap.ts`: 동적 사이트맵 생성
+  - `robots.ts`: AI 크롤러(GPTBot, ClaudeBot) 허용
+  - `manifest.ts`: PWA 메타데이터
+  - `layout.tsx`: JSON-LD 구조화 데이터 (Organization, WebSite, FAQPage)
+- **TODO**: og-image.png, logo.png, /icons/ 아이콘 파일 추가 필요
+
 ### 2026-01-04: HEIC/HEIF 이미지 미리보기 지원
 - **이유**: 아이폰에서 촬영한 HEIC 파일이 Chrome/Firefox에서 미리보기 표시 안됨
 - **변경**: `heic2any` 라이브러리로 클라이언트에서 HEIC → JPEG 변환
