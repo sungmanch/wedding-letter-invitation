@@ -10,24 +10,10 @@
  * - 소셜 증거 / Trust badges
  */
 
-import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Palette, Smartphone, Clock, Shield, Star, Sparkles, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
-import { createDocument } from '@/lib/super-editor-v2/actions/document'
-import { createClient } from '@/lib/supabase/client'
-import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
-import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
-import {
-  SAMPLE_WEDDING_DATA,
-  DEFAULT_STYLE_SYSTEM,
-} from '@/lib/super-editor-v2/schema'
-import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
-import { nanoid } from 'nanoid'
-import type { Block, Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
-import type { PresetElement } from '@/lib/super-editor-v2/presets/blocks/types'
+import { useSubwayBuilder } from '../subway/SubwayBuilderContext'
 
 // ============================================
 // Constants
@@ -61,103 +47,11 @@ const TRUST_BADGES = [
 ]
 
 // ============================================
-// Helpers
-// ============================================
-
-function convertPresetElement(el: PresetElement): Element {
-  const element: Element = {
-    ...el,
-    id: el.id || nanoid(8),
-  } as Element
-
-  if (el.children && el.children.length > 0) {
-    element.children = el.children.map((child) =>
-      convertPresetElement(child as PresetElement)
-    )
-  }
-
-  return element
-}
-
-function createBlockFromPresetData(presetId: string): Block | null {
-  const preset = getBlockPreset(presetId)
-  if (!preset) return null
-
-  let height: number | SizeMode = 80
-  if (preset.defaultHeight) {
-    height =
-      typeof preset.defaultHeight === 'number'
-        ? preset.defaultHeight
-        : preset.defaultHeight
-  }
-
-  return {
-    id: nanoid(8),
-    type: preset.blockType,
-    enabled: true,
-    presetId: preset.id,
-    height,
-    layout: preset.layout,
-    elements: preset.defaultElements
-      ? preset.defaultElements.map(convertPresetElement)
-      : [],
-  }
-}
-
-// ============================================
 // Component
 // ============================================
 
 export function ValueProps() {
-  const router = useRouter()
-  const { state } = useSubwayBuilder()
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleCreateDocument = useCallback(async () => {
-    setIsLoading(true)
-
-    try {
-      // 인증 확인
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        // 비로그인 시 로그인 페이지로 리다이렉트
-        router.push('/login?redirect=/')
-        return
-      }
-
-      const template = getTemplateV2ById(state.selectedTemplateId)
-      if (!template) {
-        throw new Error('템플릿을 찾을 수 없습니다')
-      }
-
-      const blocks: Block[] = []
-      for (const sectionType of SECTION_ORDER) {
-        const presetId = state.selectedPresets[sectionType]
-        if (presetId) {
-          const block = createBlockFromPresetData(presetId)
-          if (block) {
-            blocks.push(block)
-          }
-        }
-      }
-
-      const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
-
-      const doc = await createDocument({
-        title: '새 청첩장',
-        blocks,
-        style,
-        weddingData: SAMPLE_WEDDING_DATA,
-      })
-
-      router.push(`/se2/${doc.id}/edit`)
-    } catch (err) {
-      console.error('Document creation failed:', err)
-      setIsLoading(false)
-    }
-  }, [state, router])
+  const { saveAndCreateDocument, isCreating } = useSubwayBuilder()
 
   return (
     <section className="py-20 bg-gradient-to-b from-white to-[var(--ivory-50)]">
@@ -258,11 +152,11 @@ export function ValueProps() {
           <Button
             variant="sage"
             size="lg"
-            onClick={handleCreateDocument}
-            disabled={isLoading}
+            onClick={saveAndCreateDocument}
+            disabled={isCreating}
             className="group px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            {isLoading ? (
+            {isCreating ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 생성 중...
