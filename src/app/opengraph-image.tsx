@@ -2,6 +2,9 @@ import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
+// 1주일 캐싱 (604800초)
+export const revalidate = 604800
+
 export const alt = 'Maison de Letter - 당신만의 이야기를 담은 청첩장'
 export const size = {
   width: 1200,
