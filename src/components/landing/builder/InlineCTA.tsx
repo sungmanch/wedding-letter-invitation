@@ -14,6 +14,7 @@ import { ArrowRight, Loader2, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
 import { createDocument } from '@/lib/super-editor-v2/actions/document'
+import { createClient } from '@/lib/supabase/client'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import {
@@ -88,6 +89,16 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
     setError(null)
 
     try {
+      // 인증 확인
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // 비로그인 시 로그인 페이지로 리다이렉트
+        router.push('/login?redirect=/')
+        return
+      }
+
       // 1. 템플릿에서 스타일 정보 가져오기
       const template = getTemplateV2ById(state.selectedTemplateId)
       if (!template) {

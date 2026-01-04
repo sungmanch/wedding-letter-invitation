@@ -17,6 +17,7 @@ import { Palette, Smartphone, Clock, Shield, Star, Sparkles, ArrowRight, Loader2
 import { Button } from '@/components/ui'
 import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
 import { createDocument } from '@/lib/super-editor-v2/actions/document'
+import { createClient } from '@/lib/supabase/client'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import {
@@ -116,6 +117,16 @@ export function ValueProps() {
     setIsLoading(true)
 
     try {
+      // 인증 확인
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // 비로그인 시 로그인 페이지로 리다이렉트
+        router.push('/login?redirect=/')
+        return
+      }
+
       const template = getTemplateV2ById(state.selectedTemplateId)
       if (!template) {
         throw new Error('템플릿을 찾을 수 없습니다')
