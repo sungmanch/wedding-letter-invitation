@@ -131,7 +131,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 12,
+          fontSize: FONT_SIZE.sm,
           fontWeight: 500,
           color: 'var(--fg-muted)',
           textAlign: 'center',
@@ -156,7 +156,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-heading)',
-          fontSize: 24,
+          fontSize: FONT_SIZE['3xl'],
           fontWeight: 600,
           color: 'var(--fg-default)',
           textAlign: 'center',
@@ -180,7 +180,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 15,
+          fontSize: FONT_SIZE.body,
           fontWeight: 400,
           color: 'var(--fg-muted)',
           textAlign: 'center',
@@ -208,7 +208,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 15,
+          fontSize: FONT_SIZE.body,
           fontWeight: 500,
           color: 'var(--fg-default)',
           textAlign: 'center',
