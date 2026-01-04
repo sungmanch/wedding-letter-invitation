@@ -89,9 +89,8 @@ export const DEFAULT_PRESETS: SelectedPresets = {
   location: 'location-minimal',
 }
 
-/** 섹션 순서 (표시 순서) */
+/** 섹션 순서 (표시 순서) - hero는 상위 스타일 선택에서 처리 */
 export const SECTION_ORDER: SelectableSectionType[] = [
-  'hero',
   'greeting-parents',
   'calendar',
   'gallery',
