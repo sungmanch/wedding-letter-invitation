@@ -9,8 +9,11 @@
 // Spacing Tokens
 // ============================================
 
-/** 블록 내 요소 간 기본 간격 (4rem = 64px) */
-export const BLOCK_GAP = 64
+/** 블록 내 요소 간 기본 간격 (2rem = 32px) */
+export const BLOCK_GAP = 32
+
+/** 넓은 간격이 필요한 블록용 (4rem = 64px) - greeting-parents 등 */
+export const BLOCK_GAP_WIDE = 64
 
 /** 블록 내부 패딩 */
 export const BLOCK_PADDING = {

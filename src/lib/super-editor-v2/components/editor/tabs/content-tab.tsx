@@ -269,12 +269,14 @@ function BlockAccordion({
       if (seenBindings.has(finalBinding)) return
       seenBindings.add(finalBinding)
 
-      // gallery, notice.items, transportation 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+      // gallery, notice.items, interview.items, transportation 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
       if (finalBinding === 'photos.gallery') {
         value = data.photos?.gallery ?? []
       } else if (finalBinding === 'notice.items') {
         value = data.notice?.items ?? []
+      } else if (finalBinding === 'interview.items') {
+        value = data.interview?.items ?? []
       } else if (finalBinding === 'venue.transportation.subway') {
         value = data.venue?.transportation?.subway ?? []
       } else if (finalBinding === 'venue.transportation.bus') {
@@ -367,6 +369,16 @@ function BlockAccordion({
       for (const binding of musicBindings) {
         if (!seenBindings.has(binding)) {
           addBinding(`music-${binding}`, binding, 'text')
+        }
+      }
+    }
+
+    // 8. interview 블록은 아코디언 컴포넌트로 렌더링되므로 필수 필드 강제 추가
+    if (block.type === 'interview') {
+      const interviewBindings: VariablePath[] = ['interview.title', 'interview.subtitle', 'interview.items']
+      for (const binding of interviewBindings) {
+        if (!seenBindings.has(binding)) {
+          addBinding(`interview-${binding}`, binding, 'text')
         }
       }
     }
@@ -576,6 +588,13 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
 
       {type === 'notice-items' && (
         <NoticeItemsField
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+        />
+      )}
+
+      {type === 'interview-items' && (
+        <InterviewItemsField
           value={Array.isArray(value) ? value : []}
           onChange={onChange}
         />
@@ -1131,6 +1150,12 @@ interface NoticeItemData {
   borderColor?: string
 }
 
+interface InterviewItemData {
+  question: string
+  groomAnswer: string
+  brideAnswer: string
+}
+
 // ============================================
 // Notice Icon Field (3개 SVG 중 선택)
 // ============================================
@@ -1330,6 +1355,153 @@ function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
       {value.length === 0 && (
         <p className="text-xs text-[var(--text-light)] text-center">
           공지 항목이 없습니다. 위 버튼을 눌러 추가하세요.
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ============================================
+// Interview Items Field (Q&A 리스트)
+// ============================================
+
+interface InterviewItemsFieldProps {
+  value: InterviewItemData[]
+  onChange: (value: unknown) => void
+}
+
+function InterviewItemsField({ value, onChange }: InterviewItemsFieldProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
+  // 아이템 추가
+  const handleAdd = useCallback(() => {
+    const newItem: InterviewItemData = {
+      question: '',
+      groomAnswer: '',
+      brideAnswer: '',
+    }
+    onChange([...value, newItem])
+  }, [value, onChange])
+
+  // 아이템 삭제
+  const handleDelete = useCallback((index: number) => {
+    const updated = value.filter((_, i) => i !== index)
+    onChange(updated)
+  }, [value, onChange])
+
+  // 아이템 수정
+  const handleItemChange = useCallback((index: number, field: keyof InterviewItemData, fieldValue: string) => {
+    const updated = value.map((item, i) =>
+      i === index ? { ...item, [field]: fieldValue } : item
+    )
+    onChange(updated)
+  }, [value, onChange])
+
+  // 드래그 시작
+  const handleDragStart = useCallback((index: number) => {
+    setDraggedIndex(index)
+  }, [])
+
+  // 드래그 오버 (순서 변경)
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const newValue = [...value]
+    const [dragged] = newValue.splice(draggedIndex, 1)
+    newValue.splice(index, 0, dragged)
+    onChange(newValue)
+    setDraggedIndex(index)
+  }, [draggedIndex, value, onChange])
+
+  // 드래그 종료
+  const handleDragEnd = useCallback(() => {
+    setDraggedIndex(null)
+  }, [])
+
+  return (
+    <div className="space-y-3">
+      {/* 아이템 목록 */}
+      {value.map((item, index) => (
+        <div
+          key={index}
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragEnd={handleDragEnd}
+          className={`
+            p-3 bg-white border border-[var(--sand-200)] rounded-lg
+            ${draggedIndex === index ? 'opacity-50 border-dashed' : ''}
+          `}
+        >
+          {/* 헤더 (드래그 핸들 + 삭제) */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 cursor-move text-[var(--text-light)]">
+              <DragIcon className="w-4 h-4" />
+              <span className="text-xs font-medium">Q{index + 1}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleDelete(index)}
+              className="p-1 text-[var(--text-light)] hover:text-red-500 transition-colors"
+              title="삭제"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* 질문 */}
+          <div className="mb-3">
+            <label className="block text-xs text-[var(--text-muted)] mb-1">질문</label>
+            <input
+              type="text"
+              value={item.question}
+              onChange={(e) => handleItemChange(index, 'question', e.target.value)}
+              placeholder="첫인상은 어땠나요?"
+              className="w-full px-3 py-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+            />
+          </div>
+
+          {/* 신랑 답변 */}
+          <div className="mb-3">
+            <label className="block text-xs text-[var(--text-muted)] mb-1">신랑 답변</label>
+            <textarea
+              value={item.groomAnswer}
+              onChange={(e) => handleItemChange(index, 'groomAnswer', e.target.value)}
+              placeholder="신랑의 답변을 입력하세요"
+              rows={2}
+              className="w-full px-3 py-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
+            />
+          </div>
+
+          {/* 신부 답변 */}
+          <div>
+            <label className="block text-xs text-[var(--text-muted)] mb-1">신부 답변</label>
+            <textarea
+              value={item.brideAnswer}
+              onChange={(e) => handleItemChange(index, 'brideAnswer', e.target.value)}
+              placeholder="신부의 답변을 입력하세요"
+              rows={2}
+              className="w-full px-3 py-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
+            />
+          </div>
+        </div>
+      ))}
+
+      {/* 추가 버튼 */}
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--sand-200)] rounded-lg text-sm text-[var(--text-muted)] hover:border-[var(--sage-400)] hover:text-[var(--sage-600)] transition-colors"
+      >
+        <PlusIcon className="w-4 h-4" />
+        질문 추가
+      </button>
+
+      {/* 도움말 */}
+      {value.length === 0 && (
+        <p className="text-xs text-[var(--text-light)] text-center">
+          인터뷰 항목이 없습니다. 위 버튼을 눌러 추가하세요.
         </p>
       )}
     </div>
@@ -1578,7 +1750,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
 interface FieldConfig {
   label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list' | 'checkbox' | 'bgm-selector'
+  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'interview-items' | 'string-list' | 'checkbox' | 'bgm-selector'
   placeholder?: string
 }
 
@@ -1724,6 +1896,11 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // RSVP
   'rsvp.title': { label: 'RSVP 제목', type: 'text' },
   'rsvp.description': { label: 'RSVP 설명', type: 'textarea' },
+
+  // 인터뷰
+  'interview.title': { label: '인터뷰 제목', type: 'text', placeholder: '우리 두 사람의 이야기' },
+  'interview.subtitle': { label: '인터뷰 설명', type: 'textarea', placeholder: '결혼을 앞두고 저희 두 사람의 인터뷰를 준비했습니다.' },
+  'interview.items': { label: '인터뷰 Q&A', type: 'interview-items' },
 }
 
 // Block type icons (editor-panel.tsx와 동일)
