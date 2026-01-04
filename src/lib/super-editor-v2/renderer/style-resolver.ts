@@ -68,18 +68,21 @@ export interface ResolvedTokens {
 }
 
 export interface ResolvedTypography {
-  fontFamilyDisplay: string  // 히어로/인트로용
+  fontFamilyDisplay: string  // 히어로/인트로용 (참조용)
   fontFamilyHeading: string  // 섹션 제목용
   fontFamilyBody: string     // 섹션 본문용
+  fontFamilyAccent: string   // 섹션 라벨/태그용
 
   fontWeightDisplay: number
   fontWeightHeading: number
   fontWeightBody: number
+  fontWeightAccent: number
 
   // 폰트 크기 보정 계수 (폰트별 시각적 크기 차이 보정)
   fontScaleDisplay: number
   fontScaleHeading: number
   fontScaleBody: number
+  fontScaleAccent: number
 
   scale: TypeScale
 }
@@ -127,17 +130,20 @@ const DEFAULT_TOKENS: ResolvedTokens = {
 }
 
 const DEFAULT_TYPOGRAPHY: ResolvedTypography = {
-  fontFamilyDisplay: '"Great Vibes", cursive',  // 히어로/인트로용
+  fontFamilyDisplay: '"Great Vibes", cursive',  // 히어로/인트로용 (참조용)
   fontFamilyHeading: '"Playfair Display", serif',  // 섹션 제목용
   fontFamilyBody: '"Noto Serif KR", serif',  // 섹션 본문용
+  fontFamilyAccent: '"Playfair Display", serif',  // 섹션 라벨/태그용
 
   fontWeightDisplay: 400,
   fontWeightHeading: 600,
   fontWeightBody: 400,
+  fontWeightAccent: 400,
 
   fontScaleDisplay: 1.25,  // Great Vibes 보정
   fontScaleHeading: 0.95,  // Playfair Display 보정
   fontScaleBody: 1.0,      // Noto Serif KR
+  fontScaleAccent: 0.95,   // Playfair Display 보정
 
   scale: {
     xs: '0.75rem',
@@ -365,15 +371,18 @@ function resolveTypography(config: StyleSystem['typography']): ResolvedTypograph
       result.fontFamilyDisplay = fontStackToCSS(preset.fontStacks.display)
       result.fontFamilyHeading = fontStackToCSS(preset.fontStacks.heading)
       result.fontFamilyBody = fontStackToCSS(preset.fontStacks.body)
+      result.fontFamilyAccent = fontStackToCSS(preset.fontStacks.accent)
 
       result.fontWeightDisplay = preset.weights.display
       result.fontWeightHeading = preset.weights.heading
       result.fontWeightBody = preset.weights.body
+      result.fontWeightAccent = preset.weights.accent
 
       // 폰트 크기 보정 계수 적용
       result.fontScaleDisplay = preset.fontStacks.display.sizeScale ?? 1.0
       result.fontScaleHeading = preset.fontStacks.heading.sizeScale ?? 1.0
       result.fontScaleBody = preset.fontStacks.body.sizeScale ?? 1.0
+      result.fontScaleAccent = preset.fontStacks.accent.sizeScale ?? 1.0
     }
   }
 
@@ -566,14 +575,17 @@ export function styleToCSSVariables(style: ResolvedStyle): Record<string, string
   vars['--font-display'] = style.typography.fontFamilyDisplay
   vars['--font-heading'] = style.typography.fontFamilyHeading
   vars['--font-body'] = style.typography.fontFamilyBody
+  vars['--font-accent'] = style.typography.fontFamilyAccent
   vars['--font-weight-display'] = String(style.typography.fontWeightDisplay)
   vars['--font-weight-heading'] = String(style.typography.fontWeightHeading)
   vars['--font-weight-body'] = String(style.typography.fontWeightBody)
+  vars['--font-weight-accent'] = String(style.typography.fontWeightAccent)
 
   // 폰트 크기 보정 계수
   vars['--font-scale-display'] = String(style.typography.fontScaleDisplay)
   vars['--font-scale-heading'] = String(style.typography.fontScaleHeading)
   vars['--font-scale-body'] = String(style.typography.fontScaleBody)
+  vars['--font-scale-accent'] = String(style.typography.fontScaleAccent)
 
   vars['--text-xs'] = style.typography.scale.xs
   vars['--text-sm'] = style.typography.scale.sm

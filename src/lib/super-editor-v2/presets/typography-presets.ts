@@ -26,14 +26,16 @@ export interface TypographyPreset {
   description: string
   category: 'sans-serif' | 'serif' | 'handwritten' | 'hybrid'
   fontStacks: {
-    display: FontStack  // 히어로/인트로용 (예술적)
+    display: FontStack  // 히어로/인트로용 (예술적) - 참조용, 실제 hero는 하드코딩
     heading: FontStack  // 섹션 제목용
     body: FontStack     // 섹션 본문용
+    accent: FontStack   // 섹션 라벨/태그용 (12-14px)
   }
   weights: {
     display: number
     heading: number
     body: number
+    accent: number
   }
   scale: TypeScale
   // 추천 사이즈 가이드 (px)
@@ -41,6 +43,7 @@ export interface TypographyPreset {
     display: { min: number; max: number }
     heading: { min: number; max: number }
     body: { min: number; max: number }
+    accent: { min: number; max: number }
   }
   // 추천 테마 프리셋
   recommendedThemes?: string[]
@@ -209,17 +212,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.montserrat,
       heading: FONT_STACKS.montserrat,
       body: FONT_STACKS.pretendard,
+      accent: FONT_STACKS.montserrat,
     },
     weights: {
       display: 300, // Light
       heading: 600, // Semi-bold
       body: 400,    // Regular
+      accent: 500,  // Medium
     },
     scale: DEFAULT_SCALE,
     recommendedSizes: {
       display: { min: 48, max: 64 },
       heading: { min: 20, max: 24 },
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['minimal-light', 'minimal-dark', 'modern-mono'],
   },
@@ -237,17 +243,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.greatVibes,
       heading: FONT_STACKS.playfair,
       body: FONT_STACKS.notoSerifKr,
+      accent: FONT_STACKS.playfair,
     },
     weights: {
       display: 400,
       heading: 600, // Semi-bold
       body: 400,
+      accent: 400,
     },
     scale: ELEGANT_SCALE,
     recommendedSizes: {
       display: { min: 60, max: 80 }, // Great Vibes는 작게 렌더링되므로 크게 설정
       heading: { min: 22, max: 26 },
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['classic-ivory', 'classic-gold', 'cinematic-dark'],
   },
@@ -265,17 +274,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.dancingScript,
       heading: FONT_STACKS.nanumSquare,
       body: FONT_STACKS.gowunDodum,
+      accent: FONT_STACKS.nanumSquare,
     },
     weights: {
       display: 500, // Medium
       heading: 700, // Bold
       body: 400,
+      accent: 400,
     },
     scale: DEFAULT_SCALE,
     recommendedSizes: {
       display: { min: 48, max: 56 },
       heading: { min: 18, max: 22 },
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['romantic-garden', 'classic-ivory'],
   },
@@ -293,17 +305,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.cormorant,
       heading: FONT_STACKS.cormorant,
       body: FONT_STACKS.pretendard,
+      accent: FONT_STACKS.pretendard,
     },
     weights: {
       display: 500, // Medium
       heading: 600, // Semi-bold
       body: 400,
+      accent: 500,
     },
     scale: ELEGANT_SCALE,
     recommendedSizes: {
       display: { min: 52, max: 64 },
       heading: { min: 22, max: 26 },
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['classic-ivory', 'minimal-light', 'cinematic-warm'],
   },
@@ -321,17 +336,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.nanumBrushScript,
       heading: FONT_STACKS.notoSerifKr,
       body: FONT_STACKS.gowunBatang,
+      accent: FONT_STACKS.notoSerifKr,
     },
     weights: {
       display: 400,
       heading: 600,
       body: 400,
+      accent: 400,
     },
     scale: ELEGANT_SCALE,
     recommendedSizes: {
       display: { min: 44, max: 56 }, // 붓글씨는 크기 주의
       heading: { min: 20, max: 24 },
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['classic-ivory', 'romantic-garden'],
   },
@@ -349,17 +367,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.alexBrush,
       heading: FONT_STACKS.nanumBrushScript,
       body: FONT_STACKS.notoSansKr,
+      accent: FONT_STACKS.notoSansKr,
     },
     weights: {
       display: 400,
       heading: 400,
       body: 400,
+      accent: 500,
     },
     scale: COMPACT_SCALE,
     recommendedSizes: {
       display: { min: 52, max: 68 }, // Alex Brush 작게 렌더링
       heading: { min: 22, max: 28 }, // 붓글씨 크게
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['romantic-blush', 'classic-ivory'],
   },
@@ -377,17 +398,20 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       display: FONT_STACKS.cinzel,
       heading: FONT_STACKS.inter,
       body: FONT_STACKS.inter,
+      accent: FONT_STACKS.inter,
     },
     weights: {
       display: 700, // Bold
       heading: 600, // Semi-bold
       body: 400,
+      accent: 500,
     },
     scale: DEFAULT_SCALE,
     recommendedSizes: {
       display: { min: 40, max: 52 }, // Cinzel 대문자만, 크게 렌더링
       heading: { min: 18, max: 22 },
       body: { min: 14, max: 16 },
+      accent: { min: 11, max: 13 },
     },
     recommendedThemes: ['modern-mono', 'minimal-dark', 'cinematic-dark'],
   },
@@ -447,6 +471,11 @@ export function getGoogleFontsUrl(presetId: TypographyPresetId): string {
   // body (섹션 본문용)
   if (preset.fontStacks.body.googleFonts?.length) {
     fonts.push(...preset.fontStacks.body.googleFonts)
+  }
+
+  // accent (섹션 라벨용)
+  if (preset.fontStacks.accent.googleFonts?.length) {
+    fonts.push(...preset.fontStacks.accent.googleFonts)
   }
 
   if (fonts.length === 0) return ''

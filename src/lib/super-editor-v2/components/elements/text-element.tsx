@@ -75,8 +75,8 @@ export function TextElement({
           ? style.fontSize
           : pxToRem(style.fontSize)
 
-        // fontFamily가 var(--font-display/heading/body)인 경우 scale 적용
-        const fontRole = style.fontFamily?.match(/var\(--font-(display|heading|body)\)/)?.[1]
+        // fontFamily가 var(--font-display/heading/body/accent)인 경우 scale 적용
+        const fontRole = style.fontFamily?.match(/var\(--font-(display|heading|body|accent)\)/)?.[1]
         if (fontRole) {
           css.fontSize = `calc(${baseFontSize} * var(--font-scale-${fontRole}))`
         } else {
