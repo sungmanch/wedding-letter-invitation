@@ -115,7 +115,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
     // 이미 결제 완료된 경우 바로 리다이렉트
     if (document.isPaid) {
-      redirect(`/se2/${documentId}/edit`)
+      redirect(`/share/${documentId}`)
     }
 
     // 결제 정보 저장
@@ -141,8 +141,8 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
       })
       .where(eq(editorDocumentsV2.id, documentId))
 
-    // 에디터로 리다이렉트
-    redirect(`/se2/${documentId}/edit`)
+    // 공유 페이지로 리다이렉트
+    redirect(`/share/${documentId}`)
   } catch (error) {
     console.error('Checkout verification error:', error)
 
