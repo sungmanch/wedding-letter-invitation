@@ -94,8 +94,19 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
         throw new Error('템플릿을 찾을 수 없습니다')
       }
 
-      // 2. 모든 섹션을 프리셋에서 생성 (hero 포함)
+      // 2. 블록 생성
       const blocks: Block[] = []
+
+      // 2-1. Hero 블록 먼저 추가 (TemplateGrid에서 선택한 스타일)
+      const heroPresetId = state.selectedPresets.hero
+      if (heroPresetId) {
+        const heroBlock = createBlockFromPresetData(heroPresetId)
+        if (heroBlock) {
+          blocks.push(heroBlock)
+        }
+      }
+
+      // 2-2. 나머지 섹션 추가 (SectionAccordion에서 선택한 프리셋)
       for (const sectionType of SECTION_ORDER) {
         const presetId = state.selectedPresets[sectionType]
         if (presetId) {
@@ -130,10 +141,12 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
     <div className={`text-center ${className}`}>
       {/* CTA 버튼 */}
       <Button
+        variant="sage"
+        size="lg"
         onClick={handleCreateDocument}
         disabled={isLoading}
         className="
-          editorial-cta-large group
+          group
           px-8 py-4 h-auto
           shadow-lg hover:shadow-xl
           transition-all duration-300

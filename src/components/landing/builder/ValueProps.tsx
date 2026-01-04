@@ -3,14 +3,30 @@
 /**
  * Value Props Section
  *
- * 핵심 가치 제안 + Trust Signals
+ * 핵심 가치 제안 + Trust Signals + CTA
  * - 3가지 핵심 가치 (아이콘 + 설명)
  * - 가격 정보
+ * - CTA 버튼 (문서 생성)
  * - 소셜 증거 / Trust badges
  */
 
+import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Palette, Smartphone, Clock, Shield, Star, Sparkles } from 'lucide-react'
+import { Palette, Smartphone, Clock, Shield, Star, Sparkles, ArrowRight, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui'
+import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
+import { createDocument } from '@/lib/super-editor-v2/actions/document'
+import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
+import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
+import {
+  SAMPLE_WEDDING_DATA,
+  DEFAULT_STYLE_SYSTEM,
+} from '@/lib/super-editor-v2/schema'
+import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
+import { nanoid } from 'nanoid'
+import type { Block, Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
+import type { PresetElement } from '@/lib/super-editor-v2/presets/blocks/types'
 
 // ============================================
 // Constants
@@ -44,10 +60,94 @@ const TRUST_BADGES = [
 ]
 
 // ============================================
+// Helpers
+// ============================================
+
+function convertPresetElement(el: PresetElement): Element {
+  const element: Element = {
+    ...el,
+    id: el.id || nanoid(8),
+  } as Element
+
+  if (el.children && el.children.length > 0) {
+    element.children = el.children.map((child) =>
+      convertPresetElement(child as PresetElement)
+    )
+  }
+
+  return element
+}
+
+function createBlockFromPresetData(presetId: string): Block | null {
+  const preset = getBlockPreset(presetId)
+  if (!preset) return null
+
+  let height: number | SizeMode = 80
+  if (preset.defaultHeight) {
+    height =
+      typeof preset.defaultHeight === 'number'
+        ? preset.defaultHeight
+        : preset.defaultHeight
+  }
+
+  return {
+    id: nanoid(8),
+    type: preset.blockType,
+    enabled: true,
+    presetId: preset.id,
+    height,
+    layout: preset.layout,
+    elements: preset.defaultElements
+      ? preset.defaultElements.map(convertPresetElement)
+      : [],
+  }
+}
+
+// ============================================
 // Component
 // ============================================
 
 export function ValueProps() {
+  const router = useRouter()
+  const { state } = useSubwayBuilder()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleCreateDocument = useCallback(async () => {
+    setIsLoading(true)
+
+    try {
+      const template = getTemplateV2ById(state.selectedTemplateId)
+      if (!template) {
+        throw new Error('템플릿을 찾을 수 없습니다')
+      }
+
+      const blocks: Block[] = []
+      for (const sectionType of SECTION_ORDER) {
+        const presetId = state.selectedPresets[sectionType]
+        if (presetId) {
+          const block = createBlockFromPresetData(presetId)
+          if (block) {
+            blocks.push(block)
+          }
+        }
+      }
+
+      const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
+
+      const doc = await createDocument({
+        title: '새 청첩장',
+        blocks,
+        style,
+        weddingData: SAMPLE_WEDDING_DATA,
+      })
+
+      router.push(`/se2/${doc.id}/edit`)
+    } catch (err) {
+      console.error('Document creation failed:', err)
+      setIsLoading(false)
+    }
+  }, [state, router])
+
   return (
     <section className="py-20 bg-gradient-to-b from-white to-[var(--ivory-50)]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -134,6 +234,39 @@ export function ValueProps() {
               </p>
             </div>
           </div>
+        </motion.div>
+
+        {/* CTA 버튼 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="text-center mb-12"
+        >
+          <Button
+            variant="sage"
+            size="lg"
+            onClick={handleCreateDocument}
+            disabled={isLoading}
+            className="group px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                생성 중...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5 mr-2" />
+                지금 시작하기
+                <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+              </>
+            )}
+          </Button>
+          <p className="text-sm text-[var(--text-light)] mt-3">
+            카드 등록 없이 무료 체험
+          </p>
         </motion.div>
 
         {/* Trust Badges */}
