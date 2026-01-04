@@ -53,6 +53,14 @@ AI 기반 개인화 청첩장 서비스입니다.
 - **수정**:
   - RSVP API를 SE2 스키마(`rsvpResponsesV2`)로 변경
   - `geocodeAddress` 함수를 SE2 actions로 이동
+### 2026-01-04: 프리셋 시스템 통합 - template-catalog-v2 경량화
+- **이유**: template-catalog-v2.ts와 presets/blocks/hero/ 간 코드 중복 제거
+- **변경**:
+  - `template-preset-map.ts` 신규: 템플릿 ID ↔ 프리셋 ID 매핑
+  - `template-catalog-v2.ts`: 2900줄 인라인 → 256줄 프리셋 참조
+  - `MiniHeroRenderer`: 프리셋 기반 렌더링으로 변경
+  - `buildBlocksFromTemplate`: 프리셋에서 블록 생성
+- **파일**: `config/template-preset-map.ts`, `config/template-catalog-v2.ts`, `services/template-block-builder.ts`
 
 ### 2026-01-03: 랜딩 페이지 레거시 코드 정리
 - **이유**: AI 채팅 → SubwayBuilder → BuilderLanding 전환 과정에서 발생한 레거시 코드 제거

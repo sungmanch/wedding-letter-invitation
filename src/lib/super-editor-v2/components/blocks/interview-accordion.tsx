@@ -9,7 +9,7 @@
  * - interview.items 데이터 기반 동적 렌더링
  */
 
-import { useState, type CSSProperties } from 'react'
+import { useState, useRef, useEffect, type CSSProperties } from 'react'
 import type { InterviewItem } from '../../schema/types'
 import { useDocument } from '../../context/document-context'
 import { useBlockTokens } from '../../context/block-context'
@@ -35,11 +35,20 @@ export function InterviewAccordion({
   const { document } = useDocument()
   const tokens = useBlockTokens()
   const [isOpen, setIsOpen] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [contentHeight, setContentHeight] = useState(0)
 
   // 인터뷰 데이터
   const interviewItems = document?.data?.interview?.items ?? []
   const groomName = document?.data?.couple?.groom?.name ?? '신랑'
   const brideName = document?.data?.couple?.bride?.name ?? '신부'
+
+  // 콘텐츠 높이 측정
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight)
+    }
+  }, [interviewItems, isOpen])
 
   // 빈 상태
   if (interviewItems.length === 0) {
@@ -69,7 +78,7 @@ export function InterviewAccordion({
           border: `1px solid ${tokens.borderDefault}`,
           borderRadius: isOpen ? '8px 8px 0 0' : '8px',
           cursor: 'pointer',
-          transition: 'all 0.2s ease',
+          transition: 'border-radius 0.3s ease',
         }}
         aria-expanded={isOpen}
       >
@@ -86,9 +95,17 @@ export function InterviewAccordion({
         <ChevronIcon isOpen={isOpen} color={tokens.fgMuted} />
       </button>
 
-      {/* Accordion Content */}
-      {isOpen && (
+      {/* Accordion Content Wrapper (애니메이션용) */}
+      <div
+        style={{
+          maxHeight: isOpen ? `${contentHeight}px` : '0px',
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease-out',
+        }}
+      >
+        {/* Accordion Content */}
         <div
+          ref={contentRef}
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -97,6 +114,8 @@ export function InterviewAccordion({
             borderTop: 'none',
             borderRadius: '0 0 8px 8px',
             padding: '24px 20px',
+            opacity: isOpen ? 1 : 0,
+            transition: 'opacity 0.2s ease-out',
           }}
         >
           {interviewItems.map((item, index) => (
@@ -111,7 +130,7 @@ export function InterviewAccordion({
             />
           ))}
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -205,7 +224,7 @@ function AnswerBlock({ label, answer, iconColor, tokens }: AnswerBlockProps) {
     fontSize: '13px',
     fontFamily: 'var(--font-body)',
     fontWeight: 500,
-    color: iconColor,
+    color: tokens.fgMuted,
   }
 
   const answerStyle: CSSProperties = {

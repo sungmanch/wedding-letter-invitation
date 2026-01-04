@@ -295,8 +295,8 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
   },
 
   // ═══ Legacy 호환 ═══
-  groom: { name: '김민준' },
-  bride: { name: '이서연' },
+  groom: { name: '김민준', nameEn: 'Minjun' },
+  bride: { name: '이서연', nameEn: 'Seoyeon' },
 }
 
 /**

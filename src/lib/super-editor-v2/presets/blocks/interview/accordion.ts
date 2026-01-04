@@ -5,6 +5,17 @@
  * - 섹션 제목 (우리 두 사람의 이야기)
  * - 섹션 설명
  * - 아코디언 컴포넌트 (InterviewAccordion)
+ *
+ * 데이터 구조:
+ * interview: {
+ *   title: string,           // "우리 두 사람의 이야기"
+ *   subtitle: string,        // 설명 텍스트
+ *   items: Array<{           // Q&A 배열 (최대 5개)
+ *     question: string,      // "첫인상은 어땠나요?"
+ *     groomAnswer: string,   // 신랑 답변
+ *     brideAnswer: string    // 신부 답변
+ *   }>
+ * }
  */
 
 import type { BlockPreset, PresetElement } from '../types'
