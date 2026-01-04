@@ -556,7 +556,7 @@ export const CONTACT_MINIMAL: BlockPreset = {
   defaultElements: MINIMAL_CONTACT_ELEMENTS,
   specialComponents: ['tab-toggle', 'phone-action', 'sms-action'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   relatedPresets: ['greeting-parents-minimal'],
   aiHints: {
     mood: ['minimal', 'clean', 'functional'],

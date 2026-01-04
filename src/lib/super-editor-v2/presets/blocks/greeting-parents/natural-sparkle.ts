@@ -245,7 +245,7 @@ export const GREETING_PARENTS_NATURAL_SPARKLE: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'stagger-fade'],
-  recommendedThemes: ['classic-ivory', 'romantic-garden'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-casual-playful'],
   aiHints: {
     mood: ['natural', 'warm', 'elegant', 'romantic'],
     style: ['organic', 'fresh', 'inviting', 'decorated'],

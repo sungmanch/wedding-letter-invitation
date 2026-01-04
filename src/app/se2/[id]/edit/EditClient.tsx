@@ -482,6 +482,23 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           >
             미리보기
           </Link>
+
+          {/* 결제 버튼 */}
+          {!dbDocument.isPaid && (
+            <a
+              href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
+              className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] transition-colors flex items-center gap-2"
+            >
+              <CreditCardIcon className="w-4 h-4" />
+              결제하기
+            </a>
+          )}
+          {dbDocument.isPaid && (
+            <span className="px-3 py-1.5 rounded-lg text-sm bg-green-50 text-green-600 flex items-center gap-2">
+              <CheckIcon className="w-4 h-4" />
+              결제 완료
+            </span>
+          )}
         </div>
       </header>
 
@@ -558,7 +575,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50">
             {/* 디바이스 선택 바 + 모드 토글 */}
             <div className="flex-shrink-0 h-12 border-b border-[var(--sand-100)] bg-white flex items-center justify-between px-4">
+              {/* TODO: 직접 편집 모드 비활성화 - 추후 재활성화 시 주석 해제
               <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
+              */}
+              <div /> {/* 레이아웃 유지용 빈 div */}
 
               <div className="relative" ref={deviceMenuRef}>
                 <button
@@ -785,6 +805,22 @@ function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  )
+}
+
+function CreditCardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+    </svg>
+  )
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   )
 }

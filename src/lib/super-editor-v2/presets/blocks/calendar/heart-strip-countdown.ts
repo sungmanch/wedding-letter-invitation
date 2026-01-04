@@ -696,7 +696,7 @@ export const CALENDAR_HEART_STRIP_COUNTDOWN: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['icon', 'countdown', 'group'],
   recommendedAnimations: ['fade-in', 'stagger-fade-up', 'number-flip'],
-  recommendedThemes: ['simple-pink', 'romantic-blush', 'classic-ivory'],
+  recommendedThemes: ['simple-pink', 'hero-dark-romantic', 'hero-classic-elegant'],
   aiHints: {
     mood: ['romantic', 'warm', 'elegant'],
     style: [

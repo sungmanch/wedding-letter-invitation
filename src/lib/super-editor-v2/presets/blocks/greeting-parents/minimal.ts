@@ -185,7 +185,7 @@ export const GREETING_PARENTS_MINIMAL: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   relatedPresets: ['contact-minimal'],
   aiHints: {
     mood: ['minimal', 'clean', 'modern', 'elegant'],

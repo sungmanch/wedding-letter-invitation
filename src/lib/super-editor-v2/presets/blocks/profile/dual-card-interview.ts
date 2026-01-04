@@ -369,7 +369,7 @@ export const PROFILE_DUAL_CARD_INTERVIEW: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['card', 'tag-list', 'group'],
   recommendedAnimations: ['fade-in', 'stagger-fade-up'],
-  recommendedThemes: ['simple-pink', 'simple-coral', 'minimal-light', 'romantic-blush'],
+  recommendedThemes: ['simple-pink', 'simple-coral', 'hero-minimal-overlay', 'hero-dark-romantic'],
   aiHints: {
     mood: ['modern', 'minimal', 'friendly'],
     style: ['dual-column', 'side-by-side', 'card', 'auto-layout'],

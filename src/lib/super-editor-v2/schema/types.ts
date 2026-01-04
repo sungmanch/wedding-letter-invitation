@@ -387,14 +387,6 @@ export type ThemePresetId =
   | 'simple-pink'
   | 'simple-coral'
   | 'simple-blue'
-  // ─── @deprecated (제거 예정) ───
-  | 'minimal-light'    // @deprecated - hero-minimal-overlay 사용
-  | 'classic-ivory'    // @deprecated - hero-classic-elegant 사용
-  | 'classic-gold'     // @deprecated - hero-classic-elegant 사용
-  | 'modern-mono'      // @deprecated - hero-monochrome-bold 사용
-  | 'romantic-blush'   // @deprecated - hero-dark-romantic 사용
-  | 'romantic-garden'  // @deprecated - hero-casual-playful 사용
-  | 'photo-adaptive'   // @deprecated - 미사용
 
 export interface QuickStyleConfig {
   // 색상 조정

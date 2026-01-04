@@ -504,7 +504,7 @@ export const PROFILE_CIRCLE_PORTRAIT: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['circle-photo', 'arrow-decoration', 'group'],
   recommendedAnimations: ['fade-in', 'slide-in-left', 'slide-in-right', 'stagger-fade-up'],
-  recommendedThemes: ['simple-blue', 'modern-mono', 'minimal-light'],
+  recommendedThemes: ['simple-blue', 'hero-monochrome-bold', 'hero-minimal-overlay'],
   aiHints: {
     mood: ['casual', 'playful', 'friendly', 'modern'],
     style: ['circle-photo', 'arrow-decoration', 'mbti-display', 'auto-layout'],

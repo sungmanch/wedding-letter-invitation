@@ -217,7 +217,7 @@ export const GREETING_PARENTS_BOX_STYLE: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory', 'romantic-blush'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant', 'hero-dark-romantic'],
   relatedPresets: ['contact-minimal'],
   aiHints: {
     mood: ['minimal', 'modern', 'clean', 'elegant'],

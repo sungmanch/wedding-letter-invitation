@@ -468,7 +468,7 @@ interface AdvancedLevelProps {
 function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
   // 토큰 변경
   const handleTokenChange = useCallback((tokenKey: keyof SemanticTokens, value: string) => {
-    const currentTokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'minimal-light'].tokens
+    const currentTokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'hero-minimal-overlay'].tokens
     const newStyle: StyleSystem = {
       ...style,
       advanced: {
@@ -483,7 +483,7 @@ function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
     onChange(newStyle)
   }, [style, onChange])
 
-  const tokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'minimal-light'].tokens
+  const tokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'hero-minimal-overlay'].tokens
 
   return (
     <div className="space-y-6">

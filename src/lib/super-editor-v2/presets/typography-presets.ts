@@ -227,7 +227,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['minimal-light', 'minimal-dark', 'modern-mono'],
+    recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold'],
   },
 
   // ─────────────────────────────────────────
@@ -258,7 +258,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['classic-ivory', 'classic-gold', 'cinematic-dark'],
+    recommendedThemes: ['hero-classic-elegant', 'hero-monochrome-bold'],
   },
 
   // ─────────────────────────────────────────
@@ -289,7 +289,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['romantic-garden', 'classic-ivory'],
+    recommendedThemes: ['hero-casual-playful', 'hero-classic-elegant'],
   },
 
   // ─────────────────────────────────────────
@@ -320,7 +320,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['classic-ivory', 'minimal-light', 'cinematic-warm'],
+    recommendedThemes: ['hero-classic-elegant', 'hero-minimal-overlay', 'hero-casual-playful'],
   },
 
   // ─────────────────────────────────────────
@@ -351,7 +351,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['classic-ivory', 'romantic-garden'],
+    recommendedThemes: ['hero-classic-elegant', 'hero-casual-playful'],
   },
 
   // ─────────────────────────────────────────
@@ -382,7 +382,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['romantic-blush', 'classic-ivory'],
+    recommendedThemes: ['hero-dark-romantic', 'hero-classic-elegant'],
   },
 
   // ─────────────────────────────────────────
@@ -413,7 +413,7 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: { min: 14, max: 16 },
       accent: { min: 11, max: 13 },
     },
-    recommendedThemes: ['modern-mono', 'minimal-dark', 'cinematic-dark'],
+    recommendedThemes: ['hero-monochrome-bold'],
   },
 }
 

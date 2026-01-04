@@ -93,7 +93,7 @@ export const WREATH_DECLINE: BlockPreset = {
   defaultElements: WREATH_DECLINE_ELEMENTS,
   specialComponents: [],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory', 'romantic-blush'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant', 'hero-dark-romantic'],
   aiHints: {
     mood: ['elegant', 'grateful', 'polite'],
     style: ['floral', 'centered', 'simple'],

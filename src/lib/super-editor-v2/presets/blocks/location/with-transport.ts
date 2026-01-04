@@ -659,7 +659,7 @@ export const LOCATION_WITH_TRANSPORT: BlockPreset = {
   defaultElements: LOCATION_WITH_TRANSPORT_ELEMENTS,
   specialComponents: ['kakao-map', 'naver-map'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'modern-mono', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold', 'hero-classic-elegant'],
   aiHints: {
     mood: ['detailed', 'informative', 'clean'],
     style: ['centered', 'map-with-buttons', 'transport-info'],
