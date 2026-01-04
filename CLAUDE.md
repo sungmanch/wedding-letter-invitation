@@ -18,6 +18,7 @@ AI 기반 개인화 청첩장 서비스입니다.
 - `/` - 랜딩 페이지 (BuilderLanding)
 - `/se2/[id]/edit` - 청첩장 편집기 (Super Editor v2) ⭐ 주력 에디터
 - `/share/[id]` - 청첩장 공유 페이지
+- `/checkout/success` - Polar 결제 완료 콜백 페이지
 
 ### 별도 서비스
 - `/party/*` - 청모장 서비스
@@ -40,6 +41,15 @@ AI 기반 개인화 청첩장 서비스입니다.
 - `src/lib/super-editor-v2/renderer/` - 렌더러
 
 ## 변경 이력
+
+### 2026-01-04: Polar 결제 시스템 연동
+- **이유**: SE2 에디터에서 결제 후 청첩장 발행 기능 필요
+- **변경**:
+  - `EditClient.tsx`: 결제 버튼 추가 (Polar 체크아웃 링크 연결)
+  - `/checkout/success`: 결제 완료 콜백 페이지 (DB 업데이트 및 리다이렉트)
+  - `/api/webhooks/polar`: 웹훅 라우트 (결제 완료 시 백업 DB 업데이트)
+  - `@polar-sh/sdk` 패키지 설치
+- **환경변수**: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`
 
 ### 2026-01-04: SE1 및 레거시 라우트 완전 제거
 - **이유**: SE2로 완전 전환, SE1 사용자 없음, 결제 시스템 불필요
