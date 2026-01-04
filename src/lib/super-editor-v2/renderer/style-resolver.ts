@@ -76,6 +76,11 @@ export interface ResolvedTypography {
   fontWeightHeading: number
   fontWeightBody: number
 
+  // 폰트 크기 보정 계수 (폰트별 시각적 크기 차이 보정)
+  fontScaleDisplay: number
+  fontScaleHeading: number
+  fontScaleBody: number
+
   scale: TypeScale
 }
 
@@ -129,6 +134,10 @@ const DEFAULT_TYPOGRAPHY: ResolvedTypography = {
   fontWeightDisplay: 400,
   fontWeightHeading: 600,
   fontWeightBody: 400,
+
+  fontScaleDisplay: 1.25,  // Great Vibes 보정
+  fontScaleHeading: 0.95,  // Playfair Display 보정
+  fontScaleBody: 1.0,      // Noto Serif KR
 
   scale: {
     xs: '0.75rem',
@@ -360,6 +369,11 @@ function resolveTypography(config: StyleSystem['typography']): ResolvedTypograph
       result.fontWeightDisplay = preset.weights.display
       result.fontWeightHeading = preset.weights.heading
       result.fontWeightBody = preset.weights.body
+
+      // 폰트 크기 보정 계수 적용
+      result.fontScaleDisplay = preset.fontStacks.display.sizeScale ?? 1.0
+      result.fontScaleHeading = preset.fontStacks.heading.sizeScale ?? 1.0
+      result.fontScaleBody = preset.fontStacks.body.sizeScale ?? 1.0
     }
   }
 
@@ -555,6 +569,11 @@ export function styleToCSSVariables(style: ResolvedStyle): Record<string, string
   vars['--font-weight-display'] = String(style.typography.fontWeightDisplay)
   vars['--font-weight-heading'] = String(style.typography.fontWeightHeading)
   vars['--font-weight-body'] = String(style.typography.fontWeightBody)
+
+  // 폰트 크기 보정 계수
+  vars['--font-scale-display'] = String(style.typography.fontScaleDisplay)
+  vars['--font-scale-heading'] = String(style.typography.fontScaleHeading)
+  vars['--font-scale-body'] = String(style.typography.fontScaleBody)
 
   vars['--text-xs'] = style.typography.scale.xs
   vars['--text-sm'] = style.typography.scale.sm

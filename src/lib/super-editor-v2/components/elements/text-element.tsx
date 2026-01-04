@@ -67,12 +67,23 @@ export function TextElement({
 
     if (style) {
       if (style.fontFamily) css.fontFamily = style.fontFamily
+
       // fontSize: 숫자면 rem 변환, 문자열(CSS 변수)이면 그대로 사용
+      // fontFamily가 CSS 변수인 경우, 해당 font-scale 적용
       if (style.fontSize) {
-        css.fontSize = typeof style.fontSize === 'string'
+        const baseFontSize = typeof style.fontSize === 'string'
           ? style.fontSize
           : pxToRem(style.fontSize)
+
+        // fontFamily가 var(--font-display/heading/body)인 경우 scale 적용
+        const fontRole = style.fontFamily?.match(/var\(--font-(display|heading|body)\)/)?.[1]
+        if (fontRole) {
+          css.fontSize = `calc(${baseFontSize} * var(--font-scale-${fontRole}))`
+        } else {
+          css.fontSize = baseFontSize
+        }
       }
+
       if (style.fontWeight) css.fontWeight = style.fontWeight
       if (style.color) css.color = style.color
       if (style.textAlign) css.textAlign = style.textAlign
