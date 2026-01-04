@@ -22,7 +22,7 @@ import { TEMPLATE_IDS } from '../subway/SubwayBuilderContext'
 
 // 멈춤 없이 계속 흐르는 무한 캐러셀
 
-// 5개 라인 데이터 정의 (슬롯머신 스타일)
+// 4개 라인 데이터 정의 (슬롯머신 스타일)
 const CAROUSEL_LINES: CarouselLineConfig[] = [
   {
     type: 'hero',
@@ -65,13 +65,6 @@ const CAROUSEL_LINES: CarouselLineConfig[] = [
     direction: 'left',
     label: '갤러리',
     speed: 38,
-  },
-  {
-    type: 'preset',
-    ids: ['location-minimal', 'location-with-transport'],
-    direction: 'right',
-    label: '오시는길',
-    speed: 35,
   },
 ]
 
