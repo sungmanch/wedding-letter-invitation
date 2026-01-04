@@ -269,12 +269,14 @@ function BlockAccordion({
       if (seenBindings.has(finalBinding)) return
       seenBindings.add(finalBinding)
 
-      // gallery, notice.items, transportation 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
+      // gallery, notice.items, interview.items, transportation 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
       let value: unknown
       if (finalBinding === 'photos.gallery') {
         value = data.photos?.gallery ?? []
       } else if (finalBinding === 'notice.items') {
         value = data.notice?.items ?? []
+      } else if (finalBinding === 'interview.items') {
+        value = data.interview?.items ?? []
       } else if (finalBinding === 'venue.transportation.subway') {
         value = data.venue?.transportation?.subway ?? []
       } else if (finalBinding === 'venue.transportation.bus') {
@@ -367,6 +369,16 @@ function BlockAccordion({
       for (const binding of musicBindings) {
         if (!seenBindings.has(binding)) {
           addBinding(`music-${binding}`, binding, 'text')
+        }
+      }
+    }
+
+    // 8. interview 블록은 아코디언 컴포넌트로 렌더링되므로 필수 필드 강제 추가
+    if (block.type === 'interview') {
+      const interviewBindings: VariablePath[] = ['interview.title', 'interview.subtitle', 'interview.items']
+      for (const binding of interviewBindings) {
+        if (!seenBindings.has(binding)) {
+          addBinding(`interview-${binding}`, binding, 'text')
         }
       }
     }
@@ -576,6 +588,13 @@ function VariableField({ binding, value, onChange, onUploadImage, onLocationChan
 
       {type === 'notice-items' && (
         <NoticeItemsField
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+        />
+      )}
+
+      {type === 'interview-items' && (
+        <InterviewItemsField
           value={Array.isArray(value) ? value : []}
           onChange={onChange}
         />
@@ -1877,6 +1896,11 @@ const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
   // RSVP
   'rsvp.title': { label: 'RSVP 제목', type: 'text' },
   'rsvp.description': { label: 'RSVP 설명', type: 'textarea' },
+
+  // 인터뷰
+  'interview.title': { label: '인터뷰 제목', type: 'text', placeholder: '우리 두 사람의 이야기' },
+  'interview.subtitle': { label: '인터뷰 설명', type: 'textarea', placeholder: '결혼을 앞두고 저희 두 사람의 인터뷰를 준비했습니다.' },
+  'interview.items': { label: '인터뷰 Q&A', type: 'interview-items' },
 }
 
 // Block type icons (editor-panel.tsx와 동일)
