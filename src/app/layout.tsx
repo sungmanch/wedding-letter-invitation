@@ -40,20 +40,11 @@ export const metadata: Metadata = {
     title: 'Maison de Letter - 당신만의 이야기를 담은 청첩장',
     description:
       '템플릿을 선택하고 섹션을 꾸며 나만의 청첩장을 완성하세요. 모바일 청첩장 제작부터 카카오톡 공유까지.',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Maison de Letter - 나만의 청첩장',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Maison de Letter - 당신만의 이야기를 담은 청첩장',
     description: '템플릿을 선택하고 섹션을 꾸며 나만의 청첩장을 완성하세요.',
-    images: ['/og-image.png'],
   },
   robots: {
     index: true,
