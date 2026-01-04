@@ -10,7 +10,7 @@
 
 import { useState, useCallback } from 'react'
 import { useDaumPostcodePopup } from 'react-daum-postcode'
-import { geocodeAddress } from '../../../../super-editor/actions'
+import { geocodeAddress } from '../../../actions'
 
 // ============================================
 // Types

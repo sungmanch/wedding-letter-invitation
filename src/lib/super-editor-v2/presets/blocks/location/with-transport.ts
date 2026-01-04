@@ -13,12 +13,30 @@ import { FONT_SIZE } from '../tokens'
 // ============================================
 
 const LOCATION_WITH_TRANSPORT_ELEMENTS: PresetElement[] = [
+  // Korean Title (오시는길)
+  {
+    type: 'text',
+    zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'location.title',
+    value: '오시는길',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 24,
+        fontWeight: 600,
+        color: 'var(--fg-emphasis)',
+        textAlign: 'center',
+      },
+    },
+  },
   // English Title (LOCATION)
   {
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.locationEngTitle',
+    binding: 'location.titleEn',
     value: 'LOCATION',
     props: { type: 'text' },
     style: {
@@ -632,7 +650,8 @@ export const LOCATION_WITH_TRANSPORT: BlockPreset = {
     'venue.transportation.shuttle',
     'venue.transportation.parking',
     'venue.transportation.etc',
-    'custom.locationEngTitle',
+    'location.title',
+    'location.titleEn',
     'custom.navGuide',
   ],
   defaultHeight: HUG_HEIGHT,

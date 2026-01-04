@@ -16,7 +16,6 @@ import {
 import { sql } from 'drizzle-orm'
 import { relations } from 'drizzle-orm'
 import { designTemplates } from './template-schema'
-import { superEditorInvitations } from './super-editor-schema'
 
 // ============================================
 // 청첩장 (Invitations)
@@ -65,8 +64,7 @@ export const invitations = pgTable('invitations', {
   templateId: uuid('template_id'), // design_templates 참조
   isTemplateReuse: boolean('is_template_reuse').default(false), // 이미지만 교체한 재사용 여부
 
-  // Super Editor 마이그레이션 관련
-  seInvitationId: uuid('se_invitation_id'), // super_editor_invitations 참조
+  // Editor type (legacy field, kept for backwards compatibility)
   editorType: varchar('editor_type', { length: 20 }).default('legacy'), // 'legacy' | 'super-editor'
 
   // 배포 URL (S3 정적 배포 시)
@@ -86,12 +84,6 @@ export const invitations = pgTable('invitations', {
   index('idx_invitations_user_id').on(table.userId),
   index('idx_invitations_status').on(table.status),
   index('idx_invitations_payment_id').on(table.paymentId),
-  index('idx_invitations_se_invitation_id').on(table.seInvitationId),
-  foreignKey({
-    columns: [table.seInvitationId],
-    foreignColumns: [superEditorInvitations.id],
-    name: 'invitations_se_invitation_id_fkey'
-  }).onDelete('set null'),
   pgPolicy('Anyone can view published invitations', { as: 'permissive', for: 'select', to: ['public'], using: sql`((status)::text = 'published'::text)` }),
   pgPolicy('Users can manage their own invitations', { as: 'permissive', for: 'all', to: ['public'] }),
 ]).enableRLS()
@@ -192,7 +184,7 @@ export const invitationMessages = pgTable('invitation_messages', {
 
 // ============================================
 // 결제 (Invitation Payments) - 범용 결제 테이블
-// invitations, superEditorInvitations 등에서 paymentId로 참조
+// invitations, editorDocumentsV2 등에서 paymentId로 참조
 // ============================================
 export const invitationPayments = pgTable('invitation_payments', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -235,10 +227,6 @@ export const invitationsRelations = relations(invitations, ({ many, one }) => ({
     fields: [invitations.templateId],
     references: [designTemplates.id],
   }),
-  seInvitation: one(superEditorInvitations, {
-    fields: [invitations.seInvitationId],
-    references: [superEditorInvitations.id],
-  }),
 }))
 
 export const invitationDesignsRelations = relations(invitationDesigns, ({ one }) => ({
@@ -263,7 +251,7 @@ export const invitationMessagesRelations = relations(invitationMessages, ({ one 
 }))
 
 // invitationPayments는 범용 테이블로 역방향 relation 없음
-// invitations, superEditorInvitations에서 paymentId로 참조
+// invitations, editorDocumentsV2에서 paymentId로 참조
 
 export const designTemplatesRelations = relations(designTemplates, ({ many }) => ({
   invitations: many(invitations),

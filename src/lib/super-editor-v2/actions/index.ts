@@ -28,3 +28,6 @@ export {
   type AIEditResponse,
   type JSONPatch,
 } from './ai-edit'
+
+// Geocode
+export { geocodeAddress, type GeocodeResult } from './geocode'
