@@ -13,6 +13,24 @@ import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
 // ============================================
 
 const LOCATION_WITH_TEL_ELEMENTS: PresetElement[] = [
+  // Korean Title (오시는길)
+  {
+    type: 'text',
+    zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'custom.locationTitle',
+    value: '오시는길',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 24,
+        fontWeight: 600,
+        color: 'var(--fg-emphasis)',
+        textAlign: 'center',
+      },
+    },
+  },
   // English Title (LOCATION)
   {
     type: 'text',
@@ -220,6 +238,7 @@ export const LOCATION_WITH_TEL: BlockPreset = {
     'venue.lng',
     'venue.naverUrl',
     'venue.kakaoUrl',
+    'custom.locationTitle',
     'custom.locationEngTitle',
     'custom.navGuide',
   ],

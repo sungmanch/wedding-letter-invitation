@@ -131,14 +131,30 @@ const SAMPLE_WEDDING_DATE = '2025-06-07'
 
 /**
  * 샘플 WeddingData (새 문서 생성 시 미리보기용)
- * - 신랑/신부 이름, 날짜, 장소, 사진, 인사말만 포함
- * - 혼주, 계좌 정보는 사용자가 직접 입력
+ * - 모든 블록이 ON 되었을 때 미리보기에서 샘플 데이터 표시
+ * - 사용자가 실제 데이터로 교체하면 됨
  */
 export const SAMPLE_WEDDING_DATA: WeddingData = {
-  // ═══ 커플 정보 ═══
+  // ═══ 커플 정보 (확장) ═══
   couple: {
-    groom: { name: '김민준' },
-    bride: { name: '이서연' },
+    groom: {
+      name: '김민준',
+      nameEn: 'Minjun Kim',
+      phone: '010-1234-5678',
+      intro: '웃음이 많고 따뜻한 사람',
+      photo: '/examples/images/groom.png',
+      mbti: 'ENFP',
+      tags: ['캠핑', '러닝', '커피'],
+    },
+    bride: {
+      name: '이서연',
+      nameEn: 'Seoyeon Lee',
+      phone: '010-9876-5432',
+      intro: '세심하고 배려심 깊은 사람',
+      photo: '/examples/images/bride.png',
+      mbti: 'INFJ',
+      tags: ['독서', '요리', '여행'],
+    },
   },
 
   // ═══ 결혼식 일시 ═══
@@ -157,10 +173,31 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     lng: 127.0458,
   },
 
-  // ═══ 사진 (실제 웨딩 이미지 사용) ═══
+  // ═══ 사진 (갤러리 포함) ═══
   photos: {
     main: '/examples/wedding_image.png',
-    gallery: [],  // 빈 갤러리로 시작 (사용자가 직접 업로드)
+    gallery: [
+      '/examples/wedding_images/1.png',
+      '/examples/wedding_images/2.png',
+      '/examples/wedding_images/3.png',
+      '/examples/wedding_images/4.png',
+      '/examples/wedding_images/5.png',
+      '/examples/wedding_images/6.png',
+    ],
+  },
+
+  // ═══ 혼주 정보 ═══
+  parents: {
+    groom: {
+      father: { name: '김철수' },
+      mother: { name: '박영희' },
+      birthOrder: '장남',
+    },
+    bride: {
+      father: { name: '이영수' },
+      mother: { name: '최미영' },
+      birthOrder: '차녀',
+    },
   },
 
   // ═══ 인사말 ═══
@@ -171,6 +208,77 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
 
 저희의 새로운 시작을 축복해 주시면
 더없는 기쁨으로 간직하겠습니다.`,
+  },
+
+  // ═══ 계좌 정보 ═══
+  accounts: {
+    groom: [
+      { relation: '신랑', bank: '신한은행', number: '110-123-456789', holder: '김민준' },
+      { relation: '아버지', bank: '국민은행', number: '123-45-6789012', holder: '김철수' },
+    ],
+    bride: [
+      { relation: '신부', bank: '우리은행', number: '1002-345-678901', holder: '이서연' },
+      { relation: '어머니', bank: '하나은행', number: '456-78-9012345', holder: '최미영' },
+    ],
+  },
+
+  // ═══ 공지사항 ═══
+  notice: {
+    sectionTitle: 'NOTICE',
+    items: [
+      {
+        title: '식사 안내',
+        content: '예식 후 1층 그랜드볼룸에서 식사가 준비되어 있습니다.',
+        iconType: 'hearts',
+      },
+      {
+        title: '주차 안내',
+        content: '건물 내 지하주차장 이용 가능합니다. (2시간 무료)',
+        iconType: 'rings',
+      },
+    ],
+  },
+
+  // ═══ RSVP ═══
+  rsvp: {
+    title: '참석 여부를 알려주세요',
+    description: '참석 여부를 미리 알려주시면 준비에 큰 도움이 됩니다.',
+  },
+
+  // ═══ 인터뷰 ═══
+  interview: {
+    title: '우리에게 물었습니다',
+    subtitle: '결혼을 앞둔 저희에게 물어봤어요',
+    items: [
+      {
+        question: '첫인상은 어땠나요?',
+        groomAnswer: '밝고 예쁜 미소가 인상적이었어요',
+        brideAnswer: '듬직하고 편안한 느낌이었어요',
+      },
+      {
+        question: '프로포즈는 어떻게 했나요?',
+        groomAnswer: '우리가 처음 만난 카페에서 했어요',
+        brideAnswer: '너무 감동받아서 울었어요',
+      },
+    ],
+  },
+
+  // ═══ 엔딩 ═══
+  ending: {
+    message: '함께해 주셔서 감사합니다',
+  },
+
+  // ═══ BGM ═══
+  bgm: {
+    trackId: 'romantic-piano-01',
+    title: 'Romantic Piano',
+    artist: 'Wedding Music',
+  },
+
+  // ═══ 커스텀 필드 ═══
+  custom: {
+    locationTitle: '오시는길',
+    locationEngTitle: 'LOCATION',
   },
 
   // ═══ Legacy 호환 ═══

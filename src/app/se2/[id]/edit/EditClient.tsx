@@ -480,12 +480,16 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 onBlocksChange={handleBlocksChange}
                 onDataChange={handleDataChange}
                 onUploadImage={handleUploadImage}
+                onTabChange={(tab) => setActiveTab(tab)}
               />
             )}
             {activeTab === 'data' && (
               <DataTab
-                data={editorDoc.data}
+                document={editorDoc}
                 onDataChange={handleDataChange}
+                onUploadImage={handleUploadImage}
+                expandedSection={expandedBlockId}
+                onExpandedSectionChange={setExpandedBlockId}
               />
             )}
             {activeTab === 'design' && (

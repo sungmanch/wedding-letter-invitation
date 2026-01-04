@@ -3,7 +3,6 @@ import postgres from 'postgres'
 import * as schema from './schema'
 import * as invitationSchema from './invitation-schema'
 import * as templateSchema from './template-schema'
-import * as superEditorSchema from './super-editor-schema'
 import * as superEditorV2Schema from '../super-editor-v2/schema/db-schema'
 
 // Create postgres connection
@@ -22,7 +21,6 @@ const allSchemas = {
   ...schema,
   ...invitationSchema,
   ...templateSchema,
-  ...superEditorSchema,
   ...superEditorV2Schema,
 }
 
@@ -33,5 +31,4 @@ export const db = drizzle(queryClient, { schema: allSchemas })
 export * from './schema'
 export * from './invitation-schema'
 export * from './template-schema'
-export * from './super-editor-schema'
 export * from '@/lib/super-editor-v2/schema'
