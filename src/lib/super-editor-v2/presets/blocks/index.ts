@@ -94,8 +94,54 @@ export {
   type LocationPresetId,
 } from './location'
 
+// Account Presets (축의금 계좌)
+export {
+  ACCOUNT_PRESETS,
+  getAccountPreset,
+  getAccountPresetIds,
+  getAccountPresetsByComplexity,
+  type AccountPresetId,
+} from './account'
+
+// Message Presets (방명록/축하 메시지)
+export {
+  MESSAGE_PRESETS,
+  getMessagePreset,
+  getMessagePresetIds,
+  getMessagePresetsByComplexity,
+  type MessagePresetId,
+} from './message'
+
+// Wreath Presets (화환 안내)
+export { WREATH_DECLINE } from './wreath'
+
+// Ending Presets (엔딩/공유)
+export {
+  ENDING_PRESETS,
+  getEndingPreset,
+  getEndingPresetIds,
+  getEndingPresetsByComplexity,
+  type EndingPresetId,
+} from './ending'
+
+// Hero Presets (메인 히어로)
+export {
+  HERO_PRESETS,
+  getHeroPreset,
+  getHeroPresetIds,
+  getHeroPresetsByComplexity,
+  type HeroPresetId,
+} from './hero'
+
+// Interview Presets (인터뷰 Q&A)
+export {
+  INTERVIEW_PRESETS,
+  getInterviewPreset,
+  getInterviewPresetIds,
+  type InterviewPresetId,
+} from './interview'
+
 // Future block presets will be added here:
-// export { HERO_PRESETS, ... } from './hero-presets'
 // export { GALLERY_PRESETS, ... } from './gallery-presets'
 // export { LOCATION_PRESETS, ... } from './location-presets'
 // export { ACCOUNT_PRESETS, ... } from './account-presets'
@@ -115,13 +161,24 @@ import { NOTICE_PRESETS, type NoticePresetId } from './notice'
 import { CONTACT_PRESETS, type ContactPresetId } from './contact'
 import { GALLERY_PRESETS, type GalleryPresetId } from './gallery'
 import { LOCATION_PRESETS, type LocationPresetId } from './location'
+import { ACCOUNT_PRESETS, type AccountPresetId } from './account'
+import { MESSAGE_PRESETS, type MessagePresetId } from './message'
+import { WREATH_DECLINE } from './wreath'
+import { ENDING_PRESETS, type EndingPresetId } from './ending'
+import { HERO_PRESETS, type HeroPresetId } from './hero'
+import { INTERVIEW_PRESETS, type InterviewPresetId } from './interview'
+
+// Wreath presets aggregation
+const WREATH_PRESETS: Record<string, BlockPreset> = {
+  'wreath-decline': WREATH_DECLINE,
+}
+export type WreathPresetId = 'wreath-decline'
 
 // ============================================
 // Combined Types
 // ============================================
 
-export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId | ContactPresetId | GalleryPresetId | LocationPresetId
-// Future: | HeroPresetId | AccountPresetId | ...
+export type BlockPresetId = CalendarPresetId | ProfilePresetId | GreetingParentsPresetId | RsvpPresetId | NoticePresetId | ContactPresetId | GalleryPresetId | LocationPresetId | AccountPresetId | MessagePresetId | WreathPresetId | EndingPresetId | HeroPresetId | InterviewPresetId
 
 // ============================================
 // Combined Registry
@@ -136,8 +193,12 @@ export const BLOCK_PRESETS: Record<string, BlockPreset> = {
   ...CONTACT_PRESETS,
   ...GALLERY_PRESETS,
   ...LOCATION_PRESETS,
-  // Future: ...HERO_PRESETS,
-  // Future: ...ACCOUNT_PRESETS,
+  ...ACCOUNT_PRESETS,
+  ...MESSAGE_PRESETS,
+  ...WREATH_PRESETS,
+  ...ENDING_PRESETS,
+  ...HERO_PRESETS,
+  ...INTERVIEW_PRESETS,
 }
 
 // ============================================

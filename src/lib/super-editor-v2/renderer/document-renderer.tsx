@@ -14,6 +14,7 @@ import { AnimationProvider } from '../context/animation-context'
 import { resolveStyle, styleToCSSVariables, type ResolvedStyle } from './style-resolver'
 import { BlockRenderer } from './block-renderer'
 import { FloatingRenderer } from './floating-renderer'
+import { MusicPlayer } from '../components/ui/music-player'
 
 // ============================================
 // Types
@@ -33,6 +34,8 @@ export interface DocumentRendererProps {
   className?: string
   // 외부 DocumentProvider 사용 시 true (내부 Provider 스킵)
   skipProvider?: boolean
+  // 가상 뷰포트 크기 (프리뷰/썸네일용)
+  viewportOverride?: { width: number; height: number }
 }
 
 // ============================================
@@ -47,6 +50,7 @@ export function DocumentRenderer({
   onElementClick,
   className = '',
   skipProvider = false,
+  viewportOverride,
 }: DocumentRendererProps) {
   // 스타일 해석
   const resolvedStyle = useMemo<ResolvedStyle>(
@@ -100,10 +104,29 @@ export function DocumentRenderer({
           ))}
         </div>
 
+        {/* Credit - 항상 맨 아래에 표시 */}
+        <div
+          className="se2-credit"
+          style={{
+            padding: '24px 0 40px',
+            textAlign: 'center',
+            fontFamily: 'var(--font-display)',
+            fontSize: '14px',
+            fontWeight: 400,
+            color: 'var(--fg-muted)',
+            letterSpacing: '1px',
+          }}
+        >
+          maison de letter
+        </div>
+
         {/* 플로팅 요소 렌더링 */}
         {floatingElements.length > 0 && (
           <FloatingRenderer elements={floatingElements} />
         )}
+
+        {/* BGM 플레이어 */}
+        <MusicPlayer mode={mode} />
 
         {/* 편집 모드 오버레이 */}
         {editable && mode === 'edit' && (
@@ -130,7 +153,11 @@ export function DocumentRenderer({
   }
 
   return (
-    <DocumentProvider document={document} style={resolvedStyle}>
+    <DocumentProvider
+      document={document}
+      style={resolvedStyle}
+      viewportOverride={viewportOverride}
+    >
       {content}
     </DocumentProvider>
   )
@@ -181,6 +208,22 @@ export function StaticDocumentRenderer({
           style={resolvedStyle}
         />
       ))}
+
+      {/* Credit - 항상 맨 아래에 표시 */}
+      <div
+        className="se2-credit"
+        style={{
+          padding: '24px 0 40px',
+          textAlign: 'center',
+          fontFamily: 'var(--font-display)',
+          fontSize: '14px',
+          fontWeight: 400,
+          color: 'var(--fg-muted)',
+          letterSpacing: '1px',
+        }}
+      >
+        maison de letter
+      </div>
     </div>
   )
 }

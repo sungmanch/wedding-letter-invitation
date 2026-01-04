@@ -13,13 +13,13 @@ import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
 // ============================================
 
 const RSVP_BASIC_ELEMENTS: PresetElement[] = [
-  // English Title (R.S.V.P.)
+  // English Title (RSVP)
   {
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'custom.rsvpEngTitle',
-    value: 'R.S.V.P.',
+    value: 'RSVP',
     props: { type: 'text' },
     style: {
       text: {
@@ -56,7 +56,7 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
     binding: 'rsvp.description',
-    value: '신랑, 신부에게 참석의사를\n미리 전달할 수 있어요.',
+    value: '모든 분들을 소중히 모실 수 있도록\n참석 의사를 미리 전달해 주세요.',
     props: { type: 'text' },
     style: {
       text: {

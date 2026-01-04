@@ -37,6 +37,8 @@ export interface EditorPanelProps {
   onStyleChange?: (style: ResolvedStyle) => void
   /** Content 탭 슬롯 */
   contentTab?: ReactNode
+  /** Data 탭 슬롯 */
+  dataTab?: ReactNode
   /** Design 탭 슬롯 */
   designTab?: ReactNode
   /** Share 탭 슬롯 */
@@ -60,6 +62,7 @@ export function EditorPanel({
   onBlocksChange,
   onStyleChange,
   contentTab,
+  dataTab,
   designTab,
   shareTab,
   className = '',
@@ -72,6 +75,7 @@ export function EditorPanel({
       {/* 탭 콘텐츠 */}
       <div className="flex-1 overflow-y-auto scrollbar-sage">
         {activeTab === 'content' && contentTab}
+        {activeTab === 'data' && dataTab}
         {activeTab === 'design' && designTab}
         {activeTab === 'share' && shareTab}
       </div>
@@ -94,6 +98,11 @@ function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
       id: 'content',
       label: '콘텐츠',
       icon: <ContentIcon className="w-4 h-4" />,
+    },
+    {
+      id: 'data',
+      label: '데이터',
+      icon: <DataIcon className="w-4 h-4" />,
     },
     {
       id: 'design',
@@ -305,6 +314,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   hero: '🖼️',
   'greeting-parents': '💌',
   profile: '👤',
+  interview: '💬',
   calendar: '📅',
   gallery: '🎨',
   rsvp: '✅',
@@ -312,6 +322,7 @@ const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
   notice: '📢',
   account: '💳',
   message: '💬',
+  wreath: '💐',
   ending: '🎬',
   contact: '📞',
   music: '🎵',
@@ -330,6 +341,14 @@ function ContentIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  )
+}
+
+function DataIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
     </svg>
   )
 }

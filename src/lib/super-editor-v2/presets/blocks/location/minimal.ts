@@ -75,6 +75,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
       width: { type: 'fill' },
       height: { type: 'fixed', value: 200, unit: 'px' },
     },
+    binding: 'venue',
     props: {
       type: 'map',
       zoom: 15,
@@ -133,6 +134,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
           type: 'button',
           label: '네이버',
           action: 'link',
+          icon: 'naver',
         },
         style: {
           text: {
@@ -160,6 +162,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
           type: 'button',
           label: '티맵',
           action: 'link',
+          icon: 'tmap',
         },
         style: {
           text: {
@@ -187,6 +190,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
           type: 'button',
           label: '카카오',
           action: 'link',
+          icon: 'kakao',
         },
         style: {
           text: {

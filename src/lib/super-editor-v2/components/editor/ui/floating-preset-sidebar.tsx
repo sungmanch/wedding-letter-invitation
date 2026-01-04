@@ -41,11 +41,13 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   notice: '공지사항',
   account: '축의금',
   message: '방명록',
+  wreath: '화환 안내',
   ending: '엔딩',
   contact: '연락처',
   music: '음악',
   loading: '로딩',
   custom: '커스텀',
+  interview: '인터뷰',
 }
 
 // ============================================

@@ -8,12 +8,19 @@
  * - Auto Layout (hug) 모드: 콘텐츠에 맞게 크기 조정
  */
 
-import { useCallback, useMemo, useState, type CSSProperties } from 'react'
+import { useCallback, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import type { ElementStyle } from '../../schema/types'
 import { useDocument } from '../../context/document-context'
 import { ContactModal } from '../ui/contact-modal'
 import { RsvpModal } from '../ui/rsvp-modal'
+import { GuestbookModal } from '../ui/guestbook-modal'
 import { pxToRem } from '../../utils'
+
+// Navigation Icons
+import IconNaver from '@/assets/Icon_naver.svg'
+import IconKakao from '@/assets/Icon_kakao.svg'
+import IconTmap from '@/assets/Icon_tmap.svg'
+import IconKakaoTalk from '@/assets/kakao-talk.png'
 
 // ============================================
 // Types
@@ -21,13 +28,43 @@ import { pxToRem } from '../../utils'
 
 export interface ButtonElementProps {
   label: string
-  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block'
+  action: 'link' | 'phone' | 'map' | 'copy' | 'share' | 'contact-modal' | 'rsvp-modal' | 'show-block' | 'guestbook-modal'
   value?: unknown
   style?: ElementStyle
   editable?: boolean
   className?: string
   /** Auto Layout hug 모드 여부 */
   hugMode?: boolean
+  /** 커스텀 아이콘 (프리셋 ID 또는 'none') */
+  icon?: 'naver' | 'kakao' | 'tmap' | 'none' | string
+  /** show-block 액션에서 표시할 블록 타입 */
+  targetBlockType?: string
+  /** 갤러리 확장 핸들러 (show-block 액션에서 갤러리 더보기용) */
+  onExpandGallery?: () => void
+}
+
+// ============================================
+// Navigation Icons (Naver, Kakao, Tmap)
+// ============================================
+
+/** 아이콘 프리셋 ID로 이미지 컴포넌트 반환 */
+function getPresetIcon(iconId: string, size = 30): ReactNode {
+  const iconStyle = { width: size, height: size }
+
+  switch (iconId) {
+    case 'naver':
+      return <img src={IconNaver.src} alt="네이버 지도" style={iconStyle} />
+    case 'kakao':
+      return <img src={IconKakao.src} alt="카카오맵" style={iconStyle} />
+    case 'kakao-talk':
+      return <img src={IconKakaoTalk.src} alt="카카오톡" style={iconStyle} />
+    case 'tmap':
+      return <img src={IconTmap.src} alt="티맵" style={iconStyle} />
+    case 'none':
+      return null
+    default:
+      return null
+  }
 }
 
 // ============================================
@@ -42,16 +79,21 @@ export function ButtonElement({
   editable = false,
   className = '',
   hugMode = false,
+  icon,
+  targetBlockType,
+  onExpandGallery,
 }: ButtonElementProps) {
   const { document, data } = useDocument()
   const [contactModalOpen, setContactModalOpen] = useState(false)
   const [rsvpModalOpen, setRsvpModalOpen] = useState(false)
+  const [guestbookModalOpen, setGuestbookModalOpen] = useState(false)
 
   // 버튼 스타일
   const buttonStyle = useMemo<CSSProperties>(() => {
     const css: CSSProperties = {
-      // Hug 모드: 콘텐츠에 맞춤, Absolute 모드: 부모 채움
-      width: hugMode ? 'auto' : '100%',
+      // Auto Layout에서는 부모 컨테이너가 크기를 제어하므로 항상 100% 채움
+      // height만 hug일 때는 auto로 설정
+      width: '100%',
       height: hugMode ? 'auto' : '100%',
       display: 'flex',
       alignItems: 'center',
@@ -66,6 +108,7 @@ export function ButtonElement({
       fontSize: '14px',
       fontWeight: 500,
       transition: 'background-color 0.2s ease',
+      whiteSpace: 'nowrap',  // 텍스트 줄바꿈 방지
     }
 
     // 스타일 오버라이드
@@ -77,14 +120,15 @@ export function ButtonElement({
     if (style?.text?.color) {
       css.color = style.text.color
     }
-    // 접근성: px → rem 변환
+    // fontSize: 숫자면 rem 변환, 문자열(CSS 변수)이면 그대로 사용
     if (style?.text?.fontSize) {
-      css.fontSize = pxToRem(style.text.fontSize)
+      css.fontSize = typeof style.text.fontSize === 'string'
+        ? style.text.fontSize
+        : pxToRem(style.text.fontSize)
     }
-    if (style?.border) {
-      css.borderWidth = style.border.width
-      css.borderColor = style.border.color
-      css.borderStyle = style.border.style
+    // NOTE: border는 auto-layout-element.tsx의 resolveElementStyle()에서 wrapper에 적용됨
+    // 여기서 중복 적용하면 이중 border 문제 발생
+    if (style?.border?.radius) {
       css.borderRadius = style.border.radius
     }
 
@@ -157,11 +201,31 @@ export function ButtonElement({
       case 'rsvp-modal':
         setRsvpModalOpen(true)
         break
+
+      case 'guestbook-modal':
+        setGuestbookModalOpen(true)
+        break
+
+      case 'show-block':
+        // targetBlockType에 따라 적절한 동작 실행
+        if (targetBlockType === 'message') {
+          setGuestbookModalOpen(true)
+        } else if (onExpandGallery) {
+          // targetBlockType이 없고 onExpandGallery 콜백이 있으면 갤러리 확장
+          onExpandGallery()
+        }
+        break
     }
-  }, [action, value, editable])
+  }, [action, value, editable, targetBlockType, onExpandGallery])
 
   // 액션별 아이콘
   const ActionIcon = useMemo(() => {
+    // 커스텀 아이콘이 지정된 경우 우선 사용
+    if (icon) {
+      return getPresetIcon(icon, 30)
+    }
+
+    // 기본 액션별 아이콘
     switch (action) {
       case 'link':
         return (
@@ -224,7 +288,7 @@ export function ButtonElement({
       default:
         return null
     }
-  }, [action])
+  }, [action, icon])
 
   return (
     <>
@@ -256,6 +320,16 @@ export function ButtonElement({
           invitationId={document.id}
           data={data}
           config={data.rsvp}
+        />
+      )}
+
+      {/* 방명록 모달 */}
+      {(action === 'guestbook-modal' || (action === 'show-block' && targetBlockType === 'message')) && (
+        <GuestbookModal
+          open={guestbookModalOpen}
+          onOpenChange={setGuestbookModalOpen}
+          invitationId={document.id}
+          config={data.guestbook}
         />
       )}
     </>

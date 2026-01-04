@@ -2,22 +2,19 @@
  * Greeting Parents Block - Balloon Heart Preset
  *
  * 하트 풍선 아이콘과 함께 중앙 정렬된 인사말 레이아웃
- * Auto Layout + Absolute 장식 요소 혼합
+ * 모든 요소가 Auto Layout으로 배치
  */
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
 
 const ELEMENTS: PresetElement[] = [
-  // ─── Absolute 장식 요소 (하트 풍선 아이콘) ───
+  // ─── Auto Layout 장식 요소 (하트 풍선 아이콘) ───
   {
     type: 'shape',
-    layoutMode: 'absolute',
-    x: 45,
-    y: 2,
-    width: 10,
-    height: 8,
     zIndex: 1,
+    sizing: { width: { type: 'fixed', value: 50, unit: 'px' }, height: { type: 'fixed', value: 40, unit: 'px' } },
+    alignSelf: 'center',
     props: {
       type: 'shape',
       shape: 'custom',
@@ -153,7 +150,7 @@ export const GREETING_PARENTS_BALLOON_HEART: BlockPreset = {
   name: 'Balloon Heart',
   nameKo: '하트 풍선1',
   description: '하트 풍선 아이콘과 함께 중앙 정렬된 인사말 레이아웃',
-  tags: ['minimal', 'centered', 'light', 'with-icon', 'with-contact', 'auto-layout', 'mixed'],
+  tags: ['minimal', 'centered', 'light', 'with-icon', 'with-contact', 'auto-layout'],
   complexity: 'low',
   bindings: [
     'greeting.title',

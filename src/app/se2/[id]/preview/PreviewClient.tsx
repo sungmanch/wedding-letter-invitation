@@ -45,6 +45,7 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
 
   // 클라이언트 마운트 상태
   const [isMounted, setIsMounted] = useState(false)
+  const [isBannerVisible, setIsBannerVisible] = useState(true)
 
   // 뷰포트 크기 계산 (모바일은 실제 크기, 그 외는 제한)
   // SSR 기본값: 모바일로 가정 (undefined)
@@ -90,25 +91,34 @@ export function PreviewClient({ document: dbDocument }: PreviewClientProps) {
   return (
     <div className={isMounted && isDesktopMode ? 'min-h-screen bg-gray-900 flex items-center justify-center py-8' : ''}>
       {/* 프리뷰 배너 - fixed로 콘텐츠와 완전 분리 */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-[#C9A962] text-[#1a1a1a] py-2 px-4">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <EyeIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">미리보기 모드</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/se2/${dbDocument.id}/edit`}
-              className="text-sm underline underline-offset-2"
-            >
-              편집하기
-            </Link>
-            <span className="text-xs px-2 py-0.5 bg-black/20 rounded">
-              {dbDocument.status === 'published' ? '공개됨' : '비공개'}
-            </span>
+      {isBannerVisible && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-[#C9A962] text-[#1a1a1a] py-2 px-4">
+          <div className="max-w-lg mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <EyeIcon className="w-4 h-4" />
+              <span className="text-sm font-medium">미리보기 모드</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                href={`/se2/${dbDocument.id}/edit`}
+                className="text-sm underline underline-offset-2"
+              >
+                편집하기
+              </Link>
+              <span className="text-xs px-2 py-0.5 bg-black/20 rounded">
+                {dbDocument.status === 'published' ? '공개됨' : '비공개'}
+              </span>
+              <button
+                onClick={() => setIsBannerVisible(false)}
+                className="p-1 hover:bg-black/10 rounded transition-colors"
+                aria-label="배너 닫기"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 컨텐츠 */}
       <div
@@ -142,6 +152,14 @@ function EyeIcon({ className }: { className?: string }) {
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+  )
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
     </svg>
   )
 }

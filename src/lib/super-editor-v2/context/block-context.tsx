@@ -12,11 +12,11 @@ import type {
   Element,
   BlockStyleOverride,
   BlockAnimationConfig,
+  SizeMode,
 } from '../schema/types'
 import type { ResolvedTokens } from '../renderer/style-resolver'
 import { useDocument } from './document-context'
 import { useBlockVisibility } from './animation-context'
-import { resolveBlockHeightNumber } from '../utils/size-resolver'
 
 // ============================================
 // Types
@@ -44,8 +44,8 @@ export interface BlockContextValue {
   // 블록 애니메이션 설정
   animation?: BlockAnimationConfig
 
-  // 블록 높이 (vh)
-  height: number
+  // 블록 높이 (원본 SizeMode 또는 숫자)
+  height: number | SizeMode
 
   // 편집 모드 콜백
   onSelectElement?: (elementId: string) => void
@@ -177,7 +177,7 @@ export function BlockProvider({
     getElement,
     tokens,
     animation: block.animation,
-    height: resolveBlockHeightNumber(block.height),
+    height: block.height,
     onSelectElement,
     onUpdateElement,
   }), [
@@ -234,6 +234,7 @@ export function getBlockTypeLabel(type: BlockType): string {
     hero: '메인 커버',
     'greeting-parents': '인사말/혼주',
     profile: '신랑신부 소개',
+    interview: '인터뷰',
     calendar: '예식일시',
     gallery: '갤러리',
     rsvp: '참석 여부',
@@ -241,6 +242,7 @@ export function getBlockTypeLabel(type: BlockType): string {
     notice: '공지사항',
     account: '축의금',
     message: '방명록',
+    wreath: '화환 안내',
     ending: '엔딩',
     contact: '연락처',
     music: '배경음악',

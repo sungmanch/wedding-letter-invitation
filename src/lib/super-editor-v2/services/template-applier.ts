@@ -141,7 +141,7 @@ function applyTemplateV2ToDocument(
 /**
  * 템플릿으로부터 전역 스타일 시스템 생성
  */
-function buildStyleSystemFromTemplate(
+export function buildStyleSystemFromTemplate(
   template: TemplateMetadata,
   currentStyle: StyleSystem
 ): StyleSystem {
@@ -151,9 +151,11 @@ function buildStyleSystemFromTemplate(
   const preset = mapToThemePresetId(designPattern.stylePreset) || inferStylePreset(template)
 
   // Quick 스타일 (Primary/Secondary/Tertiary 컬러 적용)
+  // - dominantColor: 배경색 (secondary - 밝은 색)
+  // - accentColor: 강조색 (tertiary)
   const quick = {
-    dominantColor: designPattern.colorPalette.primary[0],
-    accentColor: designPattern.colorPalette.primary[1] || designPattern.colorPalette.tertiary[0],
+    dominantColor: designPattern.colorPalette.secondary[0],
+    accentColor: designPattern.colorPalette.tertiary[0],
     mood: inferMoodFromTemplate(template),
   }
 
@@ -176,7 +178,7 @@ function mapToThemePresetId(
 
   const mapping: Record<string, ThemePresetId> = {
     'minimal-light': 'minimal-light',
-    'minimal-dark': 'minimal-dark',
+    'minimal-dark': 'modern-mono', // minimal-dark가 제거되어 modern-mono로 대체
     'classic-serif': 'classic-ivory',
     'modern-sans': 'modern-mono',
     'romantic-script': 'romantic-blush',
@@ -194,10 +196,10 @@ function inferStylePreset(
 ): NonNullable<StyleSystem['preset']> {
   const { mood, designPattern } = template
 
-  // Dark theme
+  // Dark theme (minimal-dark가 제거되어 modern-mono로 대체)
   if (designPattern.colorTheme === 'dark') {
     if (mood.includes('romantic')) return 'romantic-blush'
-    return 'minimal-dark'
+    return 'modern-mono'
   }
 
   // Light theme
@@ -214,7 +216,7 @@ function inferStylePreset(
   }
 
   if (mood.includes('nature') || mood.includes('warm')) {
-    return 'cinematic-warm'
+    return 'romantic-garden' // cinematic-warm이 제거되어 romantic-garden으로 대체
   }
 
   // Default

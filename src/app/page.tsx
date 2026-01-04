@@ -3,16 +3,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { User, LogIn } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { PromptHeroLanding } from '@/components/landing/PromptHeroLanding'
-import { TemplateGallery } from '@/components/landing/TemplateGallery'
+import { BuilderLanding } from '@/components/landing/BuilderLanding'
 
 export const metadata: Metadata = {
-  title: 'Maison de Letter - 원하는 느낌만 말하세요, AI가 바로 만들어드립니다',
-  description: '느낌만 말하면 AI가 청첩장을 만들어드립니다. 럭셔리하게, 심플하게, 따뜻하게 - 원하는 분위기만 말씀하세요.',
-  keywords: ['모바일 청첩장', '청첩장 만들기', 'AI 청첩장', '웨딩 초대장', '결혼 청첩장', '인터랙티브 청첩장', 'Maison de Letter'],
+  title: 'Maison de Letter - 당신만의 이야기를 담은 청첩장',
+  description: '6가지 프리미엄 템플릿과 섹션별 커스터마이징으로 세상에 하나뿐인 청첩장을 만들어보세요. 실시간 미리보기로 완벽한 결과물을 확인하세요.',
+  keywords: ['모바일 청첩장', '청첩장 만들기', 'AI 청첩장', '웨딩 초대장', '결혼 청첩장', '인터랙티브 청첩장', 'Maison de Letter', '프리미엄 청첩장'],
   openGraph: {
-    title: 'Maison de Letter - 원하는 느낌만 말하세요, AI가 바로 만들어드립니다',
-    description: '느낌만 말하면 AI가 청첩장을 만들어드립니다. 럭셔리하게, 심플하게, 따뜻하게 - 원하는 분위기만 말씀하세요.',
+    title: 'Maison de Letter - 당신만의 이야기를 담은 청첩장',
+    description: '6가지 프리미엄 템플릿과 섹션별 커스터마이징으로 세상에 하나뿐인 청첩장을 만들어보세요.',
     type: 'website',
     locale: 'ko_KR',
   },
@@ -55,8 +54,8 @@ export default async function WeddingLandingPage() {
         </div>
       </header>
 
-      {/* Prompt Hero Landing */}
-      <PromptHeroLanding user={user} />
+      {/* Builder Landing (New Design) */}
+      <BuilderLanding />
 
 
 
