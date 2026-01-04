@@ -137,8 +137,8 @@ const SAMPLE_WEDDING_DATE = '2025-06-07'
 export const SAMPLE_WEDDING_DATA: WeddingData = {
   // ═══ 커플 정보 ═══
   couple: {
-    groom: { name: '김민준' },
-    bride: { name: '이서연' },
+    groom: { name: '김민준', nameEn: 'Minjun' },
+    bride: { name: '이서연', nameEn: 'Seoyeon' },
   },
 
   // ═══ 결혼식 일시 ═══
@@ -174,8 +174,8 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
   },
 
   // ═══ Legacy 호환 ═══
-  groom: { name: '김민준' },
-  bride: { name: '이서연' },
+  groom: { name: '김민준', nameEn: 'Minjun' },
+  bride: { name: '이서연', nameEn: 'Seoyeon' },
 }
 
 /**
