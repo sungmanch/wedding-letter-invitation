@@ -131,7 +131,7 @@ export const HERO_BRIGHT_CASUAL: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['bold-date-numbers', 'brush-script'],
   recommendedAnimations: ['fade-in', 'bounce'],
-  recommendedThemes: ['alice-blue', 'bright-casual'],
+  recommendedThemes: ['hero-bright-casual'],
   aiHints: {
     mood: ['bright', 'casual', 'fun'],
     style: ['bold-typography', 'blue-accent', 'brush-script'],

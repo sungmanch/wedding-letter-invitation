@@ -2,4 +2,4 @@
  * Editor UI Components
  */
 
-export { FloatingPresetSidebar } from './floating-preset-sidebar'
+export { PresetSidebar } from './preset-sidebar'

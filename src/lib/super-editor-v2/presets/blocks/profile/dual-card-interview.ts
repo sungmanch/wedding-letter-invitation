@@ -6,6 +6,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import type { BlockLayout, SizeMode } from '../../../schema/types'
+import { FONT_SIZE } from '../tokens'
 
 // 이 프리셋 전용 레이아웃 (양옆 24px 여백)
 const LAYOUT_WITH_PADDING: BlockLayout = {
@@ -32,7 +33,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 12,
+        fontSize: FONT_SIZE.sm,
         fontWeight: 600,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -50,7 +51,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 24,
+        fontSize: FONT_SIZE['3xl'],
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -112,7 +113,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-heading)',
-                fontSize: 18,
+                fontSize: FONT_SIZE.lg,
                 fontWeight: 500,
                 color: 'var(--fg-default)',
                 textAlign: 'center',
@@ -129,7 +130,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 14,
+                fontSize: FONT_SIZE.base,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
                 textAlign: 'center',
@@ -146,7 +147,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 14,
+                fontSize: FONT_SIZE.base,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
                 textAlign: 'center',
@@ -178,7 +179,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-body)',
-                    fontSize: 12,
+                    fontSize: FONT_SIZE.sm,
                     fontWeight: 500,
                     color: 'var(--accent-default)',
                     textAlign: 'center',
@@ -195,7 +196,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-body)',
-                    fontSize: 12,
+                    fontSize: FONT_SIZE.sm,
                     fontWeight: 500,
                     color: 'var(--accent-default)',
                     textAlign: 'center',
@@ -242,7 +243,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-heading)',
-                fontSize: 18,
+                fontSize: FONT_SIZE.lg,
                 fontWeight: 500,
                 color: 'var(--fg-default)',
                 textAlign: 'center',
@@ -259,7 +260,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 14,
+                fontSize: FONT_SIZE.base,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
                 textAlign: 'center',
@@ -276,7 +277,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 14,
+                fontSize: FONT_SIZE.base,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
                 textAlign: 'center',
@@ -308,7 +309,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-body)',
-                    fontSize: 12,
+                    fontSize: FONT_SIZE.sm,
                     fontWeight: 500,
                     color: 'var(--accent-default)',
                     textAlign: 'center',
@@ -325,7 +326,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-body)',
-                    fontSize: 12,
+                    fontSize: FONT_SIZE.sm,
                     fontWeight: 500,
                     color: 'var(--accent-default)',
                     textAlign: 'center',

@@ -7,6 +7,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 const ELEMENTS: PresetElement[] = [
   // 1. Wedding Day Title
@@ -18,7 +19,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -101,7 +102,7 @@ const ELEMENTS: PresetElement[] = [
         binding: 'couple.groom.name',
         props: { type: 'text' },
         style: {
-          text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
+          text: { fontSize: FONT_SIZE.base, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
         },
       },
       // 하트 아이콘 (외곽선 스타일)
@@ -125,7 +126,7 @@ const ELEMENTS: PresetElement[] = [
         sizing: { width: { type: 'hug' }, height: { type: 'hug' } },
         props: { type: 'text', format: '{couple.bride.name}의 결혼식이 ' },
         style: {
-          text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
+          text: { fontSize: FONT_SIZE.base, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
         },
       },
       // D-day 숫자 (강조 색상)
@@ -137,7 +138,7 @@ const ELEMENTS: PresetElement[] = [
         binding: 'wedding.dday',
         props: { type: 'text' },
         style: {
-          text: { fontSize: 14, fontWeight: 600, color: '#EF90CB', lineHeight: 1.6 },
+          text: { fontSize: FONT_SIZE.base, fontWeight: 600, color: '#EF90CB', lineHeight: 1.6 },
         },
       },
       // "일 남았습니다."
@@ -149,7 +150,7 @@ const ELEMENTS: PresetElement[] = [
         value: '일 남았습니다.',
         props: { type: 'text' },
         style: {
-          text: { fontSize: 14, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
+          text: { fontSize: FONT_SIZE.base, fontWeight: 400, color: 'var(--fg-default)', lineHeight: 1.6 },
         },
       },
     ],
@@ -209,7 +210,7 @@ const ELEMENTS: PresetElement[] = [
                 value: 'DAYS',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE.xs, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
                 },
               },
               {
@@ -220,7 +221,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.days',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE['3xl'], fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],
@@ -267,7 +268,7 @@ const ELEMENTS: PresetElement[] = [
                 value: 'HOURS',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE.xs, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
                 },
               },
               {
@@ -278,7 +279,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.hours',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE['3xl'], fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],
@@ -325,7 +326,7 @@ const ELEMENTS: PresetElement[] = [
                 value: 'MINUTES',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE.xs, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
                 },
               },
               {
@@ -336,7 +337,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.minutes',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE['3xl'], fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],
@@ -383,7 +384,7 @@ const ELEMENTS: PresetElement[] = [
                 value: 'SECONDS',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 10, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE.xs, fontWeight: 500, color: 'var(--fg-muted)', textAlign: 'center' },
                 },
               },
               {
@@ -394,7 +395,7 @@ const ELEMENTS: PresetElement[] = [
                 binding: 'countdown.seconds',
                 props: { type: 'text' },
                 style: {
-                  text: { fontSize: 24, fontWeight: 600, color: '#333333', textAlign: 'center' },
+                  text: { fontSize: FONT_SIZE['3xl'], fontWeight: 600, color: '#333333', textAlign: 'center' },
                 },
               },
             ],

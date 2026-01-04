@@ -7,6 +7,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Default Elements
@@ -40,7 +41,7 @@ const WREATH_DECLINE_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 600,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -59,7 +60,7 @@ const WREATH_DECLINE_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 600,
         color: 'var(--fg-default)',
         textAlign: 'center',

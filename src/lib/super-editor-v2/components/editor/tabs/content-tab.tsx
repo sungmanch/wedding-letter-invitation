@@ -30,6 +30,8 @@ export interface ContentTabProps {
   document: EditorDocument
   /** 펼쳐진 블록 ID */
   expandedBlockId: string | null
+  /** 현재 화면에 보이는 블록 ID */
+  visibleBlockId?: string | null
   /** 펼침 상태 변경 콜백 */
   onExpandedBlockChange: (blockId: string | null) => void
   /** 블록 업데이트 콜백 */
@@ -53,6 +55,7 @@ export interface ContentTabProps {
 export function ContentTab({
   document,
   expandedBlockId,
+  visibleBlockId,
   onExpandedBlockChange,
   onBlocksChange,
   onDataChange,
@@ -129,6 +132,7 @@ export function ContentTab({
               block={block}
               data={document.data}
               expanded={isExpanded}
+              isVisible={visibleBlockId === block.id}
               onExpand={() => handleExpand(block.id)}
               onToggle={() => handleBlockToggle(block.id)}
               onMoveUp={() => handleBlockMove(block.id, 'up')}
@@ -158,6 +162,7 @@ interface BlockAccordionProps {
   block: Block
   data: WeddingData
   expanded: boolean
+  isVisible?: boolean
   onExpand: () => void
   onToggle: () => void
   onMoveUp: () => void
@@ -173,6 +178,7 @@ function BlockAccordion({
   block,
   data,
   expanded,
+  isVisible = false,
   onExpand,
   onToggle,
   onMoveUp,
@@ -196,6 +202,7 @@ function BlockAccordion({
         label={BLOCK_TYPE_LABELS[block.type] || block.type}
         enabled={block.enabled}
         expanded={expanded}
+        isVisible={isVisible}
         onToggle={onToggle}
         onExpand={onExpand}
         canMoveUp={canMoveUp}

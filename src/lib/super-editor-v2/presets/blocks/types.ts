@@ -36,13 +36,13 @@ export interface ModalPreset {
     style: {
       text: {
         fontFamily: string
-        fontSize: string
+        fontSize: string | number
         fontWeight: number
         color: string
       }
       subtitleText?: {
         fontFamily: string
-        fontSize: string
+        fontSize: string | number
         fontWeight: number
         color: string
       }
@@ -59,7 +59,7 @@ export interface ModalPreset {
       background: string
       color: string
       fontFamily: string
-      fontSize: string
+      fontSize: string | number
       fontWeight: number
       borderRadius: number
       padding: string

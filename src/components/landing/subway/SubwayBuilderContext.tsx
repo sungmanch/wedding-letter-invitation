@@ -17,7 +17,7 @@ import {
   useMemo,
   type ReactNode,
 } from 'react'
-import type { BlockType } from '@/lib/super-editor-v2/schema/types'
+import type { BlockType, ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import {
@@ -25,6 +25,11 @@ import {
   styleToCSSVariables,
 } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DEFAULT_STYLE_SYSTEM } from '@/lib/super-editor-v2/schema'
+import {
+  isHeroPresetId,
+  getThemeForHeroPreset,
+  type HeroPresetId,
+} from '@/lib/super-editor-v2/presets/blocks/hero'
 
 // ============================================
 // Types
@@ -195,14 +200,34 @@ export function SubwayBuilderProvider({
   }, [])
 
   // 섹션 프리셋 선택
+  // 히어로 프리셋 변경 시 테마도 자동 적용
   const setPreset = useCallback(
     (sectionType: SelectableSectionType, presetId: string) => {
       dispatch({
         type: 'SET_PRESET',
         payload: { sectionType, presetId },
       })
+
+      // 히어로 프리셋 변경 시 테마 자동 적용
+      if (sectionType === 'hero' && isHeroPresetId(presetId)) {
+        const themePresetId = getThemeForHeroPreset(presetId)
+        if (themePresetId) {
+          // 테마 프리셋으로 CSS 변수 재생성
+          const style = {
+            ...DEFAULT_STYLE_SYSTEM,
+            preset: themePresetId as ThemePresetId,
+          }
+          const resolved = resolveStyle(style)
+          const cssVariables = styleToCSSVariables(resolved)
+
+          dispatch({
+            type: 'SET_TEMPLATE',
+            payload: { templateId: state.selectedTemplateId, cssVariables },
+          })
+        }
+      }
     },
-    []
+    [state.selectedTemplateId]
   )
 
   // 초기화

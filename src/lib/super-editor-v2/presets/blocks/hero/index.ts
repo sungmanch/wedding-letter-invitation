@@ -57,3 +57,19 @@ export function getHeroPresetsByComplexity(
 ): BlockPreset[] {
   return Object.values(HERO_PRESETS).filter((p) => p.complexity === complexity)
 }
+
+/**
+ * 히어로 프리셋 ID인지 확인
+ */
+export function isHeroPresetId(id: string): id is HeroPresetId {
+  return id in HERO_PRESETS
+}
+
+/**
+ * 히어로 프리셋 ID → 추천 테마 프리셋 ID
+ * 히어로 선택 시 다른 블록들에 적용할 테마 반환
+ */
+export function getThemeForHeroPreset(heroPresetId: HeroPresetId): string | undefined {
+  const preset = HERO_PRESETS[heroPresetId]
+  return preset?.recommendedThemes?.[0]
+}

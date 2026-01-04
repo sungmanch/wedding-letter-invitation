@@ -177,7 +177,7 @@ export const HERO_DARK_ROMANTIC: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['dark-overlay', 'left-aligned-title'],
   recommendedAnimations: ['fade-in', 'slide-left'],
-  recommendedThemes: ['dark-romantic', 'lavender-blush'],
+  recommendedThemes: ['hero-dark-romantic'],
   aiHints: {
     mood: ['dark', 'romantic', 'chic'],
     style: ['left-aligned', 'pink-accent', 'bold-typography'],

@@ -161,7 +161,7 @@ export const HERO_MONOCHROME_BOLD: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['grayscale-filter', 'bold-typography'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['monochrome-pink', 'urban-chic'],
+  recommendedThemes: ['hero-monochrome-bold'],
   aiHints: {
     mood: ['modern', 'urban', 'bold'],
     style: ['grayscale', 'hot-pink-accent', 'bold-sans-serif'],

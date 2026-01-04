@@ -9,6 +9,7 @@
 
 import type { BlockPreset } from '../types'
 import { ENDING_COMMON_BINDINGS, ENDING_COMMON_TAGS } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 export const ENDING_QUOTE_SHARE: BlockPreset = {
   id: 'ending-quote-share',
@@ -54,7 +55,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 16,
+          fontSize: FONT_SIZE.md,
           fontWeight: 400,
           color: 'var(--fg-default)',
           textAlign: 'center',
@@ -170,7 +171,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
               style: {
                 text: {
                   fontFamily: 'var(--font-body)',
-                  fontSize: 15,
+                  fontSize: FONT_SIZE.body,
                   fontWeight: 400,
                   color: 'rgba(255,255,255,0.9)',
                   textAlign: 'center',
@@ -194,7 +195,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
               style: {
                 text: {
                   fontFamily: 'var(--font-body)',
-                  fontSize: 14,
+                  fontSize: FONT_SIZE.base,
                   fontWeight: 500,
                   color: '#FFFFFF',
                   textAlign: 'center',
@@ -248,7 +249,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           style: {
             text: {
               fontFamily: 'var(--font-body)',
-              fontSize: 15,
+              fontSize: FONT_SIZE.body,
               fontWeight: 500,
               color: '#1A1A1A',
               textAlign: 'center',
