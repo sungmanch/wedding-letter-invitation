@@ -157,21 +157,27 @@ function MiniBlockRendererInner({
     return { block, document }
   }, [preset, cssVariables])
 
-  // Scale factor 계산 (375px viewport 기준)
-  const scale = width / 375
+  // 원본 뷰포트 크기 (모바일 기준)
+  const ORIGINAL_WIDTH = 375
+  const ORIGINAL_HEIGHT = 667
 
   // 블록 높이에 따른 내부 높이 계산
   const blockHeight = useMemo(() => {
-    if (!block) return 667 // 기본 전체 높이
+    if (!block) return ORIGINAL_HEIGHT
 
     if (typeof block.height === 'number') {
       // vh를 px로 변환 (667px viewport 기준)
-      return (block.height / 100) * 667
+      return (block.height / 100) * ORIGINAL_HEIGHT
     }
 
-    // SizeMode의 경우 기본값 사용
+    // SizeMode(hug 등)의 경우 기본값 사용
     return 300
   }, [block])
+
+  // Scale factor 계산 - 너비와 높이 모두 고려하여 fit 되도록
+  const scaleX = width / ORIGINAL_WIDTH
+  const scaleY = height / blockHeight
+  const scale = Math.min(scaleX, scaleY) // 둘 중 작은 값으로 fit
 
   if (!preset || !document) {
     return (
@@ -183,6 +189,14 @@ function MiniBlockRendererInner({
       </div>
     )
   }
+
+  // 스케일된 후의 실제 크기
+  const scaledWidth = ORIGINAL_WIDTH * scale
+  const scaledHeight = blockHeight * scale
+
+  // 중앙 정렬을 위한 오프셋
+  const offsetX = (width - scaledWidth) / 2
+  const offsetY = (height - scaledHeight) / 2
 
   return (
     <div
@@ -196,7 +210,10 @@ function MiniBlockRendererInner({
       {/* 스케일된 렌더러 컨테이너 */}
       <div
         style={{
-          width: 375,
+          position: 'absolute',
+          left: offsetX,
+          top: offsetY,
+          width: ORIGINAL_WIDTH,
           height: blockHeight,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
@@ -206,7 +223,7 @@ function MiniBlockRendererInner({
         <DocumentRenderer
           document={document}
           mode="preview"
-          viewportOverride={{ width: 375, height: blockHeight }}
+          viewportOverride={{ width: ORIGINAL_WIDTH, height: blockHeight }}
         />
       </div>
     </div>
