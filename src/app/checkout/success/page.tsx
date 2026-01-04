@@ -115,7 +115,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
     // 이미 결제 완료된 경우 바로 리다이렉트
     if (document.isPaid) {
-      redirect(`/share/${documentId}`)
+      redirect('/my/invitations')
     }
 
     // 결제 정보 저장
@@ -142,8 +142,8 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
       })
       .where(eq(editorDocumentsV2.id, documentId))
 
-    // 공유 페이지로 리다이렉트
-    redirect(`/share/${documentId}`)
+    // 내 청첩장 페이지로 리다이렉트
+    redirect('/my/invitations')
   } catch (error) {
     console.error('Checkout verification error:', error)
 
