@@ -11,17 +11,19 @@
 import { useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
-import type { EditorDocument, Block } from '@/lib/super-editor-v2/schema/types'
+import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/renderer/style-resolver'
+import type { EditorDocument, Block, ThemePresetId, Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
 import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
 import {
   DEFAULT_STYLE_SYSTEM,
   getSampleWeddingDataForTemplate,
 } from '@/lib/super-editor-v2/schema'
 import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
-import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
-import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
+import {
+  getThemeForHeroPreset,
+  isHeroPresetId,
+} from '@/lib/super-editor-v2/presets/blocks/hero'
 import type { PresetElement } from '@/lib/super-editor-v2/presets/blocks/types'
-import type { Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
 import { PhoneFrame } from '@/components/phone-frame'
 
 // 고정된 타임스탬프 (hydration 불일치 방지)
@@ -80,14 +82,22 @@ function StickyPreviewInner() {
 
   // 프리뷰 문서 생성
   const document = useMemo<EditorDocument | null>(() => {
-    const template = getTemplateV2ById(state.selectedTemplateId)
-    if (!template) return null
-
     // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
     const sampleData = getSampleWeddingDataForTemplate(state.selectedTemplateId)
 
-    // 선택된 프리셋으로 블록 생성 (hero 포함)
+    // 선택된 프리셋으로 블록 생성
     const blocks: Block[] = []
+
+    // hero는 항상 먼저 추가 (SECTION_ORDER에서 제외되어 있어도 프리뷰에는 표시)
+    const heroPreset = state.selectedPresets.hero
+    if (heroPreset) {
+      const heroBlock = createBlockFromPresetData(heroPreset)
+      if (heroBlock) {
+        blocks.push(heroBlock)
+      }
+    }
+
+    // 나머지 섹션 추가
     for (const sectionType of SECTION_ORDER) {
       const presetId = state.selectedPresets[sectionType]
       if (presetId) {
@@ -98,7 +108,18 @@ function StickyPreviewInner() {
       }
     }
 
-    const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
+    // 히어로 프리셋에서 테마 프리셋 ID 가져오기
+    const heroPresetId = state.selectedPresets.hero
+    let themePresetId: ThemePresetId | undefined
+    if (heroPresetId && isHeroPresetId(heroPresetId)) {
+      themePresetId = getThemeForHeroPreset(heroPresetId) as ThemePresetId | undefined
+    }
+
+    // 테마 프리셋 기반 스타일 시스템 (quick 없이 프리셋만 사용)
+    const style = {
+      ...DEFAULT_STYLE_SYSTEM,
+      ...(themePresetId && { preset: themePresetId }),
+    }
 
     return {
       id: 'preview',
@@ -120,6 +141,13 @@ function StickyPreviewInner() {
       },
     }
   }, [state.selectedTemplateId, state.selectedPresets])
+
+  // 문서 style에서 직접 CSS 변수 생성 (EditClient와 동일한 방식)
+  const cssVariables = useMemo(() => {
+    if (!document) return {}
+    const resolved = resolveStyle(document.style)
+    return styleToCSSVariables(resolved)
+  }, [document])
 
   // 프레임 크기 (iPhone 14 비율: 390×844)
   const frameWidth = 320
@@ -231,7 +259,7 @@ function StickyPreviewInner() {
                   height: totalContentHeight,
                   transform: `scale(${scale})`,
                   transformOrigin: 'top left',
-                  ...state.cssVariables,
+                  ...cssVariables,
                 }}
               >
                 <DocumentRenderer
