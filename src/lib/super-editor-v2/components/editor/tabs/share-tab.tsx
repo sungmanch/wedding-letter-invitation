@@ -60,31 +60,37 @@ export function ShareTab({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 텍스트 필드 변경
-  const handleTextChange = useCallback((field: 'title' | 'description', value: string) => {
-    onOgChange({
-      ...og,
-      [field]: value,
-    })
-  }, [og, onOgChange])
-
-  // 이미지 업로드
-  const handleImageUpload = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !onImageUpload) return
-
-    setUploading(true)
-    try {
-      const url = await onImageUpload(file)
+  const handleTextChange = useCallback(
+    (field: 'title' | 'description', value: string) => {
       onOgChange({
         ...og,
-        imageUrl: url,
+        [field]: value,
       })
-    } catch (error) {
-      console.error('Failed to upload image:', error)
-    } finally {
-      setUploading(false)
-    }
-  }, [og, onOgChange, onImageUpload])
+    },
+    [og, onOgChange]
+  )
+
+  // 이미지 업로드
+  const handleImageUpload = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file || !onImageUpload) return
+
+      setUploading(true)
+      try {
+        const url = await onImageUpload(file)
+        onOgChange({
+          ...og,
+          imageUrl: url,
+        })
+      } catch (error) {
+        console.error('Failed to upload image:', error)
+      } finally {
+        setUploading(false)
+      }
+    },
+    [og, onOgChange, onImageUpload]
+  )
 
   // 이미지 제거
   const handleImageRemove = useCallback(() => {
@@ -112,9 +118,7 @@ export function ShareTab({
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* OG 메타데이터 편집 */}
         <section>
-          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">
-            공유 시 표시 정보
-          </h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">공유 시 표시 정보</h3>
           <p className="text-xs text-[var(--text-muted)] mb-4">
             카카오톡, 문자 등으로 공유할 때 표시되는 정보입니다.
           </p>
@@ -122,9 +126,7 @@ export function ShareTab({
           <div className="space-y-4">
             {/* 제목 */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--text-secondary)]">
-                제목
-              </label>
+              <label className="block text-sm font-medium text-[var(--text-secondary)]">제목</label>
               <input
                 type="text"
                 value={og.title || defaultOg.title}
@@ -136,9 +138,7 @@ export function ShareTab({
 
             {/* 설명 */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--text-secondary)]">
-                설명
-              </label>
+              <label className="block text-sm font-medium text-[var(--text-secondary)]">설명</label>
               <textarea
                 value={og.description || defaultOg.description}
                 onChange={(e) => handleTextChange('description', e.target.value)}
@@ -159,11 +159,7 @@ export function ShareTab({
 
               {og.imageUrl ? (
                 <div className="relative aspect-[1.91/1] bg-[var(--sand-100)] rounded-lg overflow-hidden border border-[var(--sand-200)]">
-                  <img
-                    src={og.imageUrl}
-                    alt="OG Preview"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={og.imageUrl} alt="OG Preview" className="w-full h-full object-cover" />
                   <button
                     onClick={handleImageRemove}
                     className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
@@ -204,9 +200,7 @@ export function ShareTab({
 
         {/* OG 미리보기 */}
         <section>
-          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
-            미리보기
-          </h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">미리보기</h3>
 
           <OgPreviewCard
             title={og.title || defaultOg.title}
@@ -217,9 +211,7 @@ export function ShareTab({
 
         {/* 공유 링크 */}
         <section>
-          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
-            공유 링크
-          </h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">공유 링크</h3>
 
           {shareUrl ? (
             <div className="space-y-2">
@@ -237,9 +229,7 @@ export function ShareTab({
                   {copySuccess ? '복사됨!' : '복사'}
                 </button>
               </div>
-              <p className="text-xs text-[var(--text-light)]">
-                이 링크는 1시간 동안 유효합니다.
-              </p>
+              <p className="text-xs text-[var(--text-light)]">이 링크는 1시간 동안 유효합니다.</p>
             </div>
           ) : (
             <button
@@ -254,31 +244,25 @@ export function ShareTab({
         {/* 공유 버튼들 */}
         {shareUrl && (
           <section>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
-              공유하기
-            </h3>
+            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">공유하기</h3>
 
             <div className="grid grid-cols-2 gap-2">
+              {/* 카카오톡 공유 비활성화
               <ShareButton
                 icon={<KakaoIcon />}
                 label="카카오톡"
                 onClick={() => shareToKakao(shareUrl)}
                 variant="kakao"
               />
-              <ShareButton
-                icon={<SmsIcon />}
-                label="문자"
-                onClick={() => shareToSms(shareUrl)}
-              />
-              <ShareButton
-                icon={<LinkIcon />}
-                label="링크 복사"
-                onClick={handleCopyUrl}
-              />
+              */}
+              <ShareButton icon={<SmsIcon />} label="문자" onClick={() => shareToSms(shareUrl)} />
+              <ShareButton icon={<LinkIcon />} label="링크 복사" onClick={handleCopyUrl} />
               <ShareButton
                 icon={<QrIcon />}
                 label="QR 코드"
-                onClick={() => {/* TODO: QR 모달 */}}
+                onClick={() => {
+                  /* TODO: QR 모달 */
+                }}
               />
             </div>
           </section>
@@ -304,11 +288,7 @@ function OgPreviewCard({ title, description, imageUrl }: OgPreviewCardProps) {
       {/* 이미지 영역 */}
       {imageUrl ? (
         <div className="aspect-[1.91/1] bg-[var(--sand-100)]">
-          <img
-            src={imageUrl}
-            alt="Preview"
-            className="w-full h-full object-cover"
-          />
+          <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
         </div>
       ) : (
         <div className="aspect-[1.91/1] bg-[var(--sand-100)] flex items-center justify-center">
@@ -318,15 +298,9 @@ function OgPreviewCard({ title, description, imageUrl }: OgPreviewCardProps) {
 
       {/* 텍스트 영역 */}
       <div className="p-3">
-        <p className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">
-          {title}
-        </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">
-          {description}
-        </p>
-        <p className="text-xs text-[var(--text-light)] mt-2">
-          maisondeletter.com
-        </p>
+        <p className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">{title}</p>
+        <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{description}</p>
+        <p className="text-xs text-[var(--text-light)] mt-2">maisondeletter.com</p>
       </div>
     </div>
   )
@@ -344,10 +318,12 @@ interface ShareButtonProps {
 }
 
 function ShareButton({ icon, label, onClick, variant = 'default' }: ShareButtonProps) {
-  const baseClass = "flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors"
-  const variantClass = variant === 'kakao'
-    ? "bg-[#FEE500] text-[#3C1E1E] hover:bg-[#F5DC00]"
-    : "bg-[var(--ivory-50)] border border-[var(--sand-200)] text-[var(--text-primary)] hover:bg-[var(--sand-100)]"
+  const baseClass =
+    'flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors'
+  const variantClass =
+    variant === 'kakao'
+      ? 'bg-[#FEE500] text-[#3C1E1E] hover:bg-[#F5DC00]'
+      : 'bg-[var(--ivory-50)] border border-[var(--sand-200)] text-[var(--text-primary)] hover:bg-[var(--sand-100)]'
 
   return (
     <button onClick={onClick} className={`${baseClass} ${variantClass}`}>
@@ -361,10 +337,17 @@ function ShareButton({ icon, label, onClick, variant = 'default' }: ShareButtonP
 // Share Functions
 // ============================================
 
+/*
 function shareToKakao(url: string) {
   // Kakao SDK가 로드되어 있다고 가정
-  if (typeof window !== 'undefined' && (window as unknown as { Kakao?: { Share?: { sendDefault: (config: unknown) => void } } }).Kakao?.Share) {
-    (window as unknown as { Kakao: { Share: { sendDefault: (config: unknown) => void } } }).Kakao.Share.sendDefault({
+  if (
+    typeof window !== 'undefined' &&
+    (window as unknown as { Kakao?: { Share?: { sendDefault: (config: unknown) => void } } }).Kakao
+      ?.Share
+  ) {
+    ;(
+      window as unknown as { Kakao: { Share: { sendDefault: (config: unknown) => void } } }
+    ).Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
         title: '청첩장이 도착했습니다',
@@ -378,9 +361,13 @@ function shareToKakao(url: string) {
     })
   } else {
     // 카카오 SDK 없으면 링크로 대체
-    window.open(`https://accounts.kakao.com/login?continue=https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}`, '_blank')
+    window.open(
+      `https://accounts.kakao.com/login?continue=https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}`,
+      '_blank'
+    )
   }
 }
+*/
 
 function shareToSms(url: string) {
   const message = `청첩장이 도착했습니다. ${url}`
@@ -413,11 +400,16 @@ function LoadingSpinner({ className }: { className?: string }) {
   return (
     <svg className={`animate-spin ${className}`} fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
     </svg>
   )
 }
 
+/*
 function KakaoIcon() {
   return (
     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -425,11 +417,17 @@ function KakaoIcon() {
     </svg>
   )
 }
+*/
 
 function SmsIcon() {
   return (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+      />
     </svg>
   )
 }
@@ -437,7 +435,12 @@ function SmsIcon() {
 function LinkIcon() {
   return (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+      />
     </svg>
   )
 }
@@ -445,7 +448,12 @@ function LinkIcon() {
 function QrIcon() {
   return (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+      />
     </svg>
   )
 }
