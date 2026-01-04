@@ -7,6 +7,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Default Elements
@@ -18,13 +19,13 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.rsvpEngTitle',
+    binding: 'rsvp.titleEn',
     value: 'RSVP',
     props: { type: 'text' },
     style: {
       text: {
         fontFamily: 'var(--font-accent)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -43,7 +44,7 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 24,
+        fontSize: FONT_SIZE['3xl'],
         fontWeight: 600,
         color: 'var(--fg-emphasis)',
         textAlign: 'center',
@@ -61,7 +62,7 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 16,
+        fontSize: FONT_SIZE.md,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -83,7 +84,7 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 16,
+        fontSize: FONT_SIZE.md,
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -107,13 +108,13 @@ export const RSVP_BASIC: BlockPreset = {
   description: '심플한 중앙 정렬 RSVP 섹션으로 팝업 모달을 트리거합니다',
   tags: ['minimal', 'centered', 'light', 'simple', 'auto-layout'],
   complexity: 'low',
-  bindings: ['rsvp.title', 'rsvp.description', 'custom.rsvpEngTitle'],
+  bindings: ['rsvp.title', 'rsvp.titleEn', 'rsvp.description'],
   defaultHeight: HUG_HEIGHT,
   layout: AUTO_LAYOUT_VERTICAL,
   defaultElements: RSVP_BASIC_ELEMENTS,
   specialComponents: ['rsvp-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   aiHints: {
     mood: ['minimal', 'clean', 'simple'],
     style: ['centered', 'card-button', 'light-background'],

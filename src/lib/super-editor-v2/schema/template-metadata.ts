@@ -57,7 +57,7 @@ export interface TemplateMetadata {
     /** 컬러 테마 */
     colorTheme: 'light' | 'dark' | 'overlay' | 'warm'
 
-    /** 스타일 프리셋 매핑 (optional) */
+    /** 스타일 프리셋 매핑 (optional, 레거시용 - template-applier에서 hero-* 테마로 매핑) */
     stylePreset?:
       | 'minimal-light'
       | 'minimal-dark'

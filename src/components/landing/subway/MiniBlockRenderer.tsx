@@ -14,7 +14,6 @@ import type {
   EditorDocument,
   Block,
   Element,
-  BlockType,
   SizeMode,
 } from '@/lib/super-editor-v2/schema/types'
 import {
@@ -28,6 +27,7 @@ import {
   DEFAULT_BLOCK_HEIGHTS,
   getSampleWeddingDataForTemplate,
 } from '@/lib/super-editor-v2/schema'
+import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 
 // ============================================
 // Constants for Hydration Safety
@@ -107,15 +107,20 @@ function createBlockFromPreset(preset: BlockPreset): Block {
 /** 단일 블록용 미니 문서 생성 */
 function createMiniDocument(
   block: Block,
+  preset: BlockPreset,
   cssVariables?: Record<string, string>
 ): EditorDocument {
+  // 프리셋의 recommendedThemes에서 테마 프리셋 ID 추출
+  const themePresetId = preset.recommendedThemes?.[0] as ThemePresetId | undefined
+
   return {
     id: `mini-${block.id}`,
     version: 2,
     blocks: [block],
     style: {
       ...DEFAULT_STYLE_SYSTEM,
-      // CSS 변수가 있으면 advanced tokens으로 적용
+      // 프리셋에 추천 테마가 있으면 적용
+      ...(themePresetId && { preset: themePresetId }),
     },
     data: SAMPLE_WEDDING_DATA,
     animation: {
@@ -153,26 +158,32 @@ function MiniBlockRendererInner({
     }
 
     const block = createBlockFromPreset(preset)
-    const document = createMiniDocument(block, cssVariables)
+    const document = createMiniDocument(block, preset, cssVariables)
 
     return { block, document }
   }, [preset, cssVariables])
 
-  // Scale factor 계산 (375px viewport 기준)
-  const scale = width / 375
+  // 원본 뷰포트 크기 (모바일 기준)
+  const ORIGINAL_WIDTH = 375
+  const ORIGINAL_HEIGHT = 667
 
   // 블록 높이에 따른 내부 높이 계산
   const blockHeight = useMemo(() => {
-    if (!block) return 667 // 기본 전체 높이
+    if (!block) return ORIGINAL_HEIGHT
 
     if (typeof block.height === 'number') {
       // vh를 px로 변환 (667px viewport 기준)
-      return (block.height / 100) * 667
+      return (block.height / 100) * ORIGINAL_HEIGHT
     }
 
-    // SizeMode의 경우 기본값 사용
+    // SizeMode(hug 등)의 경우 기본값 사용
     return 300
   }, [block])
+
+  // Scale factor 계산 - 너비와 높이 모두 고려하여 fit 되도록
+  const scaleX = width / ORIGINAL_WIDTH
+  const scaleY = height / blockHeight
+  const scale = Math.min(scaleX, scaleY) // 둘 중 작은 값으로 fit
 
   if (!preset || !document) {
     return (
@@ -184,6 +195,14 @@ function MiniBlockRendererInner({
       </div>
     )
   }
+
+  // 스케일된 후의 실제 크기
+  const scaledWidth = ORIGINAL_WIDTH * scale
+  const scaledHeight = blockHeight * scale
+
+  // 중앙 정렬을 위한 오프셋
+  const offsetX = (width - scaledWidth) / 2
+  const offsetY = (height - scaledHeight) / 2
 
   return (
     <div
@@ -197,7 +216,10 @@ function MiniBlockRendererInner({
       {/* 스케일된 렌더러 컨테이너 */}
       <div
         style={{
-          width: 375,
+          position: 'absolute',
+          left: offsetX,
+          top: offsetY,
+          width: ORIGINAL_WIDTH,
           height: blockHeight,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
@@ -207,7 +229,7 @@ function MiniBlockRendererInner({
         <DocumentRenderer
           document={document}
           mode="preview"
-          viewportOverride={{ width: 375, height: blockHeight }}
+          viewportOverride={{ width: ORIGINAL_WIDTH, height: blockHeight }}
         />
       </div>
     </div>
@@ -235,7 +257,7 @@ interface MiniHeroRendererProps {
 
 /**
  * Hero 템플릿 전용 미니 렌더러
- * template-catalog-v2에서 가져온 hero 블록을 렌더링
+ * 프리셋 시스템을 사용하여 hero 블록을 렌더링
  */
 export function MiniHeroRenderer({
   templateId,
@@ -244,31 +266,36 @@ export function MiniHeroRenderer({
   height = 200,
   className = '',
 }: MiniHeroRendererProps) {
-  // 동적 import로 순환 의존성 방지
+  // 프리셋 기반으로 문서 생성
   const document = useMemo(() => {
-    // Lazy import
-    const {
-      getTemplateV2ById,
-    } = require('@/lib/super-editor-v2/config/template-catalog-v2')
-    const {
-      buildBlocksFromTemplate,
-    } = require('@/lib/super-editor-v2/services/template-block-builder')
+    // 템플릿 ID → Hero 프리셋 ID 매핑
+    const { getHeroPresetIdForTemplate } = require('@/lib/super-editor-v2/config/template-preset-map')
 
-    const template = getTemplateV2ById(templateId)
-    if (!template) return null
+    const heroPresetId = getHeroPresetIdForTemplate(templateId)
+    if (!heroPresetId) return null
+
+    const preset = getBlockPreset(heroPresetId)
+    if (!preset) return null
+
+    // 프리셋에서 블록 생성
+    const block = createBlockFromPreset(preset)
+    if (!block) return null
 
     // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
     const sampleData = getSampleWeddingDataForTemplate(templateId)
-    const blocks = buildBlocksFromTemplate(template, sampleData)
-    const heroBlock = blocks.find((b: Block) => b.type === 'hero')
 
-    if (!heroBlock) return null
+    // 프리셋의 recommendedThemes에서 테마 프리셋 ID 추출
+    const themePresetId = preset.recommendedThemes?.[0] as ThemePresetId | undefined
 
     return {
       id: `hero-${templateId}`,
       version: 2 as const,
-      blocks: [heroBlock],
-      style: DEFAULT_STYLE_SYSTEM,
+      blocks: [block],
+      style: {
+        ...DEFAULT_STYLE_SYSTEM,
+        // 프리셋에 추천 테마가 있으면 적용
+        ...(themePresetId && { preset: themePresetId }),
+      },
       data: sampleData,
       animation: { mood: 'minimal' as const, speed: 1, floatingElements: [] },
       meta: {

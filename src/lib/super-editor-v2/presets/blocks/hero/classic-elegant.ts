@@ -210,7 +210,7 @@ export const HERO_CLASSIC_ELEGANT: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['script-title'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['classic-ivory', 'romantic-blush'],
+  recommendedThemes: ['hero-classic-elegant'],
   aiHints: {
     mood: ['elegant', 'classic', 'timeless'],
     style: ['card-photo', 'script-font', 'vertical-layout'],

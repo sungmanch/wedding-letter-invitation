@@ -201,6 +201,8 @@ export interface SectionHeaderProps {
   enabled: boolean
   /** 펼침 여부 */
   expanded: boolean
+  /** 현재 화면에 보이는 블록 여부 */
+  isVisible?: boolean
   /** 토글 콜백 */
   onToggle: () => void
   /** 펼침 콜백 */
@@ -223,6 +225,7 @@ export function SectionHeader({
   label,
   enabled,
   expanded,
+  isVisible = false,
   onToggle,
   onExpand,
   canMoveUp,
@@ -236,7 +239,11 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-center gap-2 px-4 py-3 bg-[var(--sand-100)] rounded-lg cursor-pointer hover:bg-[var(--sage-100)] transition-colors ${className}`}
+      className={`flex items-center gap-2 px-4 py-3 rounded-lg cursor-pointer transition-colors ${
+        isVisible
+          ? 'bg-[var(--sage-100)] ring-2 ring-[var(--sage-400)]'
+          : 'bg-[var(--sand-100)] hover:bg-[var(--sage-100)]'
+      } ${className}`}
       onClick={onExpand}
     >
       {/* 아이콘 */}
@@ -246,6 +253,13 @@ export function SectionHeader({
       <span className={`flex-1 text-sm font-medium ${enabled ? 'text-[var(--text-primary)]' : 'text-[var(--text-light)]'}`}>
         {label}
       </span>
+
+      {/* 현재화면 뱃지 */}
+      {isVisible && (
+        <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[var(--sage-500)] text-white">
+          현재화면
+        </span>
+      )}
 
       {/* 순서 변경 버튼 */}
       {!fixed && (

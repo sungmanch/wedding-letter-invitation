@@ -6,6 +6,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // 화살표 SVG 경로
@@ -37,7 +38,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-display)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'left',
@@ -57,7 +58,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 18,
+        fontSize: FONT_SIZE.lg,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -132,7 +133,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 20,
+                fontSize: FONT_SIZE.xl,
                 fontWeight: 600,
                 color: '#002BFF',
                 textAlign: 'center',
@@ -199,7 +200,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-body)',
-                    fontSize: 14,
+                    fontSize: FONT_SIZE.base,
                     fontWeight: 500,
                     color: 'var(--accent-default)',
                     textAlign: 'left',
@@ -216,7 +217,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-heading)',
-                    fontSize: 16,
+                    fontSize: FONT_SIZE.md,
                     fontWeight: 500,
                     color: 'var(--fg-default)',
                     textAlign: 'left',
@@ -236,7 +237,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 13,
+                fontSize: FONT_SIZE.caption,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
                 textAlign: 'left',
@@ -249,13 +250,13 @@ const ELEMENTS: PresetElement[] = [
             type: 'text',
             zIndex: 1,
             sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'custom.groomJob',
+            binding: 'couple.groom.job',
             value: '직업',
             props: { type: 'text' },
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 13,
+                fontSize: FONT_SIZE.caption,
                 fontWeight: 400,
                 color: 'var(--fg-default)',
                 textAlign: 'left',
@@ -328,7 +329,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-body)',
-                    fontSize: 14,
+                    fontSize: FONT_SIZE.base,
                     fontWeight: 500,
                     color: 'var(--accent-default)',
                     textAlign: 'left',
@@ -345,7 +346,7 @@ const ELEMENTS: PresetElement[] = [
                 style: {
                   text: {
                     fontFamily: 'var(--font-heading)',
-                    fontSize: 16,
+                    fontSize: FONT_SIZE.md,
                     fontWeight: 500,
                     color: 'var(--fg-default)',
                     textAlign: 'left',
@@ -365,7 +366,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 13,
+                fontSize: FONT_SIZE.caption,
                 fontWeight: 400,
                 color: 'var(--fg-muted)',
                 textAlign: 'left',
@@ -378,13 +379,13 @@ const ELEMENTS: PresetElement[] = [
             type: 'text',
             zIndex: 1,
             sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'custom.brideJob',
+            binding: 'couple.bride.job',
             value: '직업',
             props: { type: 'text' },
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 13,
+                fontSize: FONT_SIZE.caption,
                 fontWeight: 400,
                 color: 'var(--fg-default)',
                 textAlign: 'left',
@@ -457,7 +458,7 @@ const ELEMENTS: PresetElement[] = [
             style: {
               text: {
                 fontFamily: 'var(--font-body)',
-                fontSize: 20,
+                fontSize: FONT_SIZE.xl,
                 fontWeight: 600,
                 color: '#002BFF',
                 textAlign: 'center',
@@ -491,8 +492,8 @@ export const PROFILE_CIRCLE_PORTRAIT: BlockPreset = {
     'couple.bride.photo',
     'couple.bride.birthDate',
     'couple.bride.mbti',
-    'custom.groomJob',
-    'custom.brideJob',
+    'couple.groom.job',
+    'couple.bride.job',
   ],
   defaultHeight: HUG_HEIGHT,
   layout: {
@@ -503,7 +504,7 @@ export const PROFILE_CIRCLE_PORTRAIT: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['circle-photo', 'arrow-decoration', 'group'],
   recommendedAnimations: ['fade-in', 'slide-in-left', 'slide-in-right', 'stagger-fade-up'],
-  recommendedThemes: ['simple-blue', 'modern-mono', 'minimal-light'],
+  recommendedThemes: ['simple-blue', 'hero-monochrome-bold', 'hero-minimal-overlay'],
   aiHints: {
     mood: ['casual', 'playful', 'friendly', 'modern'],
     style: ['circle-photo', 'arrow-decoration', 'mbti-display', 'auto-layout'],

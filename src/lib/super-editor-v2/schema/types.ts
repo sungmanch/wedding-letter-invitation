@@ -289,9 +289,9 @@ export interface GroupProps {
 export type VariablePath =
   // ─── 공유 필드 (◆ 원본) ───
   | 'couple.groom.name' | 'couple.groom.nameEn' | 'couple.groom.phone' | 'couple.groom.intro' | 'couple.groom.baptismalName'
-  | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags'
+  | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags' | 'couple.groom.job'
   | 'couple.bride.name' | 'couple.bride.nameEn' | 'couple.bride.phone' | 'couple.bride.intro' | 'couple.bride.baptismalName'
-  | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags'
+  | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags' | 'couple.bride.job'
   | 'couple.photo' | 'couple.photos'
   | 'wedding.date' | 'wedding.time'
 
@@ -318,6 +318,9 @@ export type VariablePath =
   | 'venue.transportation.bus' | 'venue.transportation.subway'
   | 'venue.transportation.shuttle' | 'venue.transportation.parking' | 'venue.transportation.etc'
 
+  // ─── 오시는길 섹션 ───
+  | 'location.title' | 'location.titleEn'
+
   // ─── 사진 ───
   | 'photos.main' | 'photos.gallery'
 
@@ -327,7 +330,8 @@ export type VariablePath =
   | 'contact.showParents'
   | 'gallery.effect'
   | 'accounts.groom' | 'accounts.bride' | 'accounts.kakaopay.groom' | 'accounts.kakaopay.bride'
-  | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline'
+  | 'accounts.title' | 'accounts.titleEn' | 'accounts.description'
+  | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline' | 'rsvp.titleEn'
   | 'notice.sectionTitle' | 'notice.title' | 'notice.description' | 'notice.items'
   | 'guestbook.title' | 'guestbook.placeholder'
   | 'ending.message' | 'ending.photo'
@@ -372,22 +376,17 @@ export interface StyleSystem {
 }
 
 export type ThemePresetId =
-  // 1컬러 시스템 (디자이너 컬러셋)
+  // ─── 히어로 전용 1컬러 (Hero-specific) ───
+  | 'hero-classic-elegant'
+  | 'hero-casual-playful'
+  | 'hero-minimal-overlay'
+  | 'hero-dark-romantic'
+  | 'hero-bright-casual'
+  | 'hero-monochrome-bold'
+  // ─── 1컬러 시스템 (Simple) ───
   | 'simple-pink'
   | 'simple-coral'
   | 'simple-blue'
-  // 기본
-  | 'minimal-light'
-  // 클래식
-  | 'classic-ivory'
-  | 'classic-gold'
-  // 모던
-  | 'modern-mono'
-  // 로맨틱
-  | 'romantic-blush'
-  | 'romantic-garden'
-  // 특수
-  | 'photo-adaptive'
 
 export interface QuickStyleConfig {
   // 색상 조정
@@ -510,23 +509,15 @@ export interface TypographyConfig {
 }
 
 export type TypographyPresetId =
-  // 클래식/우아
-  | 'classic-elegant'
-  | 'classic-traditional'
-  | 'classic-romantic'
-  // 모던/미니멀
-  | 'modern-minimal'
-  | 'modern-clean'
-  | 'modern-geometric'
-  // 로맨틱/감성
-  | 'romantic-script'
-  | 'romantic-italian'
-  | 'romantic-soft'
-  // 내추럴/손글씨
-  | 'natural-handwritten'
-  | 'natural-brush'
-  | 'natural-warm'
-  | 'natural-witty'
+  // 핵심 4종
+  | 'modern-minimal'      // 1. Sans-serif (모던 미니멀)
+  | 'classic-elegant'     // 2. Serif (클래식 엘레강스)
+  | 'natural-warm'        // 3. Handwritten (내추럴 웜)
+  | 'classic-modern'      // 4. Hybrid - Serif 제목 + Sans 본문
+  // 옵션 3종
+  | 'korean-brush'        // 5. 한글 중심 (한글 손글씨 강조)
+  | 'dual-script'         // 6. 듀얼 스크립트 (영문+한글 손글씨)
+  | 'high-contrast'       // 7. 하이 콘트라스트 (강한 대비)
 
 export interface TypeScale {
   xs: string
@@ -960,6 +951,15 @@ export interface WeddingData {
   }
 
   // ═══════════════════════════════════════════════
+  // 오시는길 섹션
+  // ═══════════════════════════════════════════════
+
+  location?: {
+    title?: string     // 한글 제목 (예: '오시는길')
+    titleEn?: string   // 영문 제목 (예: 'LOCATION')
+  }
+
+  // ═══════════════════════════════════════════════
   // 섹션별 설정
   // ═══════════════════════════════════════════════
 
@@ -1018,6 +1018,7 @@ export interface PersonInfo {
   birthDate?: string    // "1990-12-10"
   mbti?: string         // "ISTP"
   tags?: string[]       // ["캠핑", "러닝"]
+  job?: string          // 직업
   // Legacy 호환
   nameEn?: string
   fatherName?: string
@@ -1089,6 +1090,9 @@ export interface ParentInfo {
 }
 
 export interface AccountsConfig {
+  title?: string         // 섹션 제목 (예: '마음 전하실 곳')
+  titleEn?: string       // 영문 제목 (예: 'GIFT')
+  description?: string   // 안내 문구
   groom?: AccountItem[]  // max 3
   bride?: AccountItem[]  // max 3
   kakaopay?: { groom?: string; bride?: string }
@@ -1103,6 +1107,7 @@ export interface AccountItem {
 
 export interface RsvpConfig {
   title?: string
+  titleEn?: string       // 영문 제목 (예: 'RSVP')
   description?: string
   showGuestCount?: boolean  // 기본: true
   showMeal?: boolean        // 기본: false

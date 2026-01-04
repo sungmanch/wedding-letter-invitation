@@ -17,7 +17,7 @@ import {
   useMemo,
   type ReactNode,
 } from 'react'
-import type { BlockType } from '@/lib/super-editor-v2/schema/types'
+import type { BlockType, ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
 import {
@@ -25,6 +25,12 @@ import {
   styleToCSSVariables,
 } from '@/lib/super-editor-v2/renderer/style-resolver'
 import { DEFAULT_STYLE_SYSTEM } from '@/lib/super-editor-v2/schema'
+import {
+  isHeroPresetId,
+  getThemeForHeroPreset,
+  type HeroPresetId,
+} from '@/lib/super-editor-v2/presets/blocks/hero'
+import { getHeroPresetIdForTemplate } from '@/lib/super-editor-v2/config/template-preset-map'
 
 // ============================================
 // Types
@@ -55,7 +61,7 @@ export interface SubwayBuilderState {
 type SubwayBuilderAction =
   | {
       type: 'SET_TEMPLATE'
-      payload: { templateId: string; cssVariables: Record<string, string> }
+      payload: { templateId: string; heroPresetId: string; cssVariables: Record<string, string> }
     }
   | {
       type: 'SET_PRESET'
@@ -84,9 +90,8 @@ export const DEFAULT_PRESETS: SelectedPresets = {
   location: 'location-minimal',
 }
 
-/** 섹션 순서 (표시 순서) */
+/** 섹션 순서 (표시 순서) - hero는 상위 스타일 선택에서 처리 */
 export const SECTION_ORDER: SelectableSectionType[] = [
-  'hero',
   'greeting-parents',
   'calendar',
   'gallery',
@@ -132,6 +137,10 @@ function subwayBuilderReducer(
       return {
         ...state,
         selectedTemplateId: action.payload.templateId,
+        selectedPresets: {
+          ...state.selectedPresets,
+          hero: action.payload.heroPresetId,
+        },
         cssVariables: action.payload.cssVariables,
       }
 
@@ -176,7 +185,7 @@ export function SubwayBuilderProvider({
 }: SubwayBuilderProviderProps) {
   const [state, dispatch] = useReducer(subwayBuilderReducer, INITIAL_STATE)
 
-  // Hero 템플릿 선택 시 색상 전파
+  // Hero 템플릿 선택 시 색상 전파 + hero 프리셋 연동
   const setTemplate = useCallback((templateId: string) => {
     const template = getTemplateV2ById(templateId)
     if (!template) {
@@ -184,25 +193,48 @@ export function SubwayBuilderProvider({
       return
     }
 
+    // 템플릿에 맞는 hero 프리셋 조회
+    const heroPresetId = getHeroPresetIdForTemplate(templateId) || DEFAULT_PRESETS.hero
+
     const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
     const resolved = resolveStyle(style)
     const cssVariables = styleToCSSVariables(resolved)
 
     dispatch({
       type: 'SET_TEMPLATE',
-      payload: { templateId, cssVariables },
+      payload: { templateId, heroPresetId, cssVariables },
     })
   }, [])
 
   // 섹션 프리셋 선택
+  // 히어로 프리셋 변경 시 테마도 자동 적용
   const setPreset = useCallback(
     (sectionType: SelectableSectionType, presetId: string) => {
       dispatch({
         type: 'SET_PRESET',
         payload: { sectionType, presetId },
       })
+
+      // 히어로 프리셋 변경 시 테마 자동 적용
+      if (sectionType === 'hero' && isHeroPresetId(presetId)) {
+        const themePresetId = getThemeForHeroPreset(presetId)
+        if (themePresetId) {
+          // 테마 프리셋으로 CSS 변수 재생성
+          const style = {
+            ...DEFAULT_STYLE_SYSTEM,
+            preset: themePresetId as ThemePresetId,
+          }
+          const resolved = resolveStyle(style)
+          const cssVariables = styleToCSSVariables(resolved)
+
+          dispatch({
+            type: 'SET_TEMPLATE',
+            payload: { templateId: state.selectedTemplateId, heroPresetId: presetId, cssVariables },
+          })
+        }
+      }
     },
-    []
+    [state.selectedTemplateId]
   )
 
   // 초기화

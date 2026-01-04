@@ -12,6 +12,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Icon Type Mapping
@@ -60,7 +61,7 @@ const NOTICE_CARD_ICON_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-accent)',
-        fontSize: 12,
+        fontSize: FONT_SIZE.sm,
         fontWeight: 500,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -80,7 +81,7 @@ const NOTICE_CARD_ICON_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 24,
+        fontSize: FONT_SIZE['3xl'],
         fontWeight: 600,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -100,7 +101,7 @@ const NOTICE_CARD_ICON_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -148,7 +149,7 @@ export const NOTICE_CARD_TEMPLATE = {
   title: {
     style: {
       fontFamily: 'var(--font-heading)',
-      fontSize: 18,
+      fontSize: FONT_SIZE.lg,
       fontWeight: 600,
       color: 'var(--fg-emphasis)',
       textAlign: 'center' as const,
@@ -158,7 +159,7 @@ export const NOTICE_CARD_TEMPLATE = {
   content: {
     style: {
       fontFamily: 'var(--font-body)',
-      fontSize: 15,
+      fontSize: FONT_SIZE.body,
       fontWeight: 400,
       color: 'var(--fg-default)',
       textAlign: 'center' as const,
@@ -217,7 +218,7 @@ export const NOTICE_CARD_ICON: BlockPreset = {
   defaultElements: NOTICE_CARD_ICON_ELEMENTS,
   specialComponents: ['notice-swiper'], // Swiper 렌더러 사용
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['classic-ivory', 'minimal-light', 'romantic-blush', 'simple-blue'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-minimal-overlay', 'hero-dark-romantic', 'simple-blue'],
   aiHints: {
     mood: ['elegant', 'soft', 'informative'],
     style: ['card', 'icon-header', 'dashed-border', 'centered', 'swipeable'],

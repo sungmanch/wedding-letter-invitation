@@ -7,6 +7,7 @@
  */
 
 import type { BlockPreset, PresetElement } from '../types'
+import { FONT_SIZE } from '../tokens'
 
 const ELEMENTS: PresetElement[] = [
   // 1. 영문 레이블 "INVITATION" (핑크 강조)
@@ -22,7 +23,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-accent)',
-        fontSize: 12,
+        fontSize: FONT_SIZE.sm,
         fontWeight: 400,
         color: 'var(--accent-default)',
         textAlign: 'center',
@@ -44,7 +45,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 22,
+        fontSize: FONT_SIZE['2xl'],
         fontWeight: 400,
         color: 'var(--fg-emphasis)',
         textAlign: 'center',
@@ -66,7 +67,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -113,7 +114,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 16,
+        fontSize: FONT_SIZE.md,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -137,7 +138,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 16,
+        fontSize: FONT_SIZE.md,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -168,7 +169,7 @@ const ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -216,7 +217,7 @@ export const GREETING_PARENTS_BOX_STYLE: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory', 'romantic-blush'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant', 'hero-dark-romantic'],
   relatedPresets: ['contact-minimal'],
   aiHints: {
     mood: ['minimal', 'modern', 'clean', 'elegant'],

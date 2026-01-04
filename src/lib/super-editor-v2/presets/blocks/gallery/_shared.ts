@@ -8,6 +8,7 @@
 
 import type { VariablePath } from '../../../schema/types'
 import type { PresetElement } from '../types'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Common Bindings
@@ -24,7 +25,7 @@ export const GALLERY_COMMON_BINDINGS: readonly VariablePath[] = [
 export const GALLERY_TEXT_STYLES = {
   label: {
     fontFamily: 'var(--font-body)',
-    fontSize: 12,
+    fontSize: FONT_SIZE.sm,
     fontWeight: 500,
     color: 'var(--fg-muted)',
     textAlign: 'center' as const,
@@ -32,21 +33,21 @@ export const GALLERY_TEXT_STYLES = {
   },
   title: {
     fontFamily: 'var(--font-heading)',
-    fontSize: 24,
+    fontSize: FONT_SIZE['3xl'],
     fontWeight: 600,
     color: 'var(--fg-default)',
     textAlign: 'center' as const,
   },
   description: {
     fontFamily: 'var(--font-body)',
-    fontSize: 14,
+    fontSize: FONT_SIZE.base,
     fontWeight: 400,
     color: 'var(--fg-muted)',
     textAlign: 'center' as const,
   },
   moreButton: {
     fontFamily: 'var(--font-body)',
-    fontSize: 14,
+    fontSize: FONT_SIZE.base,
     fontWeight: 500,
     color: 'var(--fg-default)',
     textAlign: 'center' as const,
@@ -230,7 +231,7 @@ export const GALLERY_SPECIAL_COMPONENTS = [
 // ============================================
 
 export const GALLERY_RECOMMENDED_THEMES = [
-  'minimal-light',
-  'classic-ivory',
-  'modern-mono',
+  'hero-minimal-overlay',
+  'hero-classic-elegant',
+  'hero-monochrome-bold',
 ] as const

@@ -6,6 +6,7 @@
  */
 
 import type { BlockPreset, PresetElement } from '../types'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Default Elements
@@ -30,7 +31,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       background: 'transparent',
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 300,
         color: 'var(--fg-muted)',
       },
@@ -49,7 +50,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 22,
+        fontSize: FONT_SIZE['2xl'],
         fontWeight: 600,
         color: 'var(--fg-emphasis)',
         textAlign: 'left',
@@ -70,7 +71,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'left',
@@ -125,7 +126,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -149,7 +150,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       background: 'transparent',
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 500,
         color: 'var(--fg-muted)',
       },
@@ -190,7 +191,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'left',
@@ -210,7 +211,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'right',
@@ -241,7 +242,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -271,7 +272,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -312,7 +313,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'left',
@@ -332,7 +333,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'right',
@@ -363,7 +364,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -393,7 +394,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -434,7 +435,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'left',
@@ -454,7 +455,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'right',
@@ -485,7 +486,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -515,7 +516,7 @@ const MINIMAL_CONTACT_ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: FONT_SIZE.caption,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -555,7 +556,7 @@ export const CONTACT_MINIMAL: BlockPreset = {
   defaultElements: MINIMAL_CONTACT_ELEMENTS,
   specialComponents: ['tab-toggle', 'phone-action', 'sms-action'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   relatedPresets: ['greeting-parents-minimal'],
   aiHints: {
     mood: ['minimal', 'clean', 'functional'],

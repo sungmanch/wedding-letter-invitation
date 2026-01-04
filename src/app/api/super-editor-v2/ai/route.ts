@@ -258,7 +258,7 @@ ${referenceAnalysis ? `
 - 스타일 요약: ${referenceAnalysis.summary}
 
 위 분석 결과를 반영하여:
-1. style.preset을 적절히 선택하거나 (minimal-light, minimal-dark, classic-serif 등)
+1. style.preset을 적절히 선택하거나 (hero-minimal-overlay, hero-classic-elegant, hero-monochrome-bold, hero-dark-romantic, hero-casual-playful, hero-bright-casual, simple-pink, simple-coral, simple-blue 등)
 2. 블록의 style.background.color로 배경색을 지정하고
 3. 텍스트 요소의 style.text.color로 글자색을 지정하세요
 ` : ''}

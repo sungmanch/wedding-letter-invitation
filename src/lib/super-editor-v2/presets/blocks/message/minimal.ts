@@ -8,6 +8,7 @@
 
 import type { BlockPreset, ModalPreset } from '../types'
 import { MESSAGE_COMMON_BINDINGS, MESSAGE_COMMON_TAGS } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Modal Configuration
@@ -27,13 +28,13 @@ const MINIMAL_MODAL: ModalPreset = {
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: '20px',
+        fontSize: FONT_SIZE.xl,
         fontWeight: 600,
         color: 'var(--fg-default)',
       },
       subtitleText: {
         fontFamily: 'var(--font-body)',
-        fontSize: '14px',
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
       },
@@ -74,7 +75,7 @@ const MINIMAL_MODAL: ModalPreset = {
       background: 'var(--fg-default)',
       color: '#FFFFFF',
       fontFamily: 'var(--font-body)',
-      fontSize: '16px',
+      fontSize: FONT_SIZE.md,
       fontWeight: 500,
       borderRadius: 8,
       padding: '16px 24px',
@@ -130,7 +131,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 12,
+          fontSize: FONT_SIZE.sm,
           fontWeight: 500,
           color: 'var(--fg-muted)',
           textAlign: 'center',
@@ -155,7 +156,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-heading)',
-          fontSize: 24,
+          fontSize: FONT_SIZE['3xl'],
           fontWeight: 600,
           color: 'var(--fg-default)',
           textAlign: 'center',
@@ -179,7 +180,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 15,
+          fontSize: FONT_SIZE.body,
           fontWeight: 400,
           color: 'var(--fg-muted)',
           textAlign: 'center',
@@ -207,7 +208,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
       style: {
         text: {
           fontFamily: 'var(--font-body)',
-          fontSize: 15,
+          fontSize: FONT_SIZE.body,
           fontWeight: 500,
           color: 'var(--fg-default)',
           textAlign: 'center',
@@ -236,7 +237,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
     useCase: ['guestbook', 'message', 'comment'],
   },
 
-  recommendedThemes: ['minimal-light', 'modern-mono'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold'],
   recommendedAnimations: ['fade-in', 'slide-up'],
 
   // ─── Modal ───

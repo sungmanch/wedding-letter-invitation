@@ -102,7 +102,7 @@ function applyTemplateV2ToDocument(
 
   console.log(`[Template Applier] 🎨 Applying template v2 "${template.name}" (${templateId})`)
   console.log('[Template Applier] Template v2 details:', {
-    blockCount: template.blockStructure.length,
+    presets: Object.keys(template.defaultPresets).length,
     editableFields: Object.keys(template.editableFields).length,
     colorTheme: template.designPattern.colorTheme,
     stylePreset: template.designPattern.stylePreset,
@@ -177,12 +177,12 @@ function mapToThemePresetId(
   if (!stylePreset) return undefined
 
   const mapping: Record<string, ThemePresetId> = {
-    'minimal-light': 'minimal-light',
-    'minimal-dark': 'modern-mono', // minimal-dark가 제거되어 modern-mono로 대체
-    'classic-serif': 'classic-ivory',
-    'modern-sans': 'modern-mono',
-    'romantic-script': 'romantic-blush',
-    'nature-organic': 'romantic-garden',
+    'minimal-light': 'hero-minimal-overlay',
+    'minimal-dark': 'hero-monochrome-bold',
+    'classic-serif': 'hero-classic-elegant',
+    'modern-sans': 'hero-monochrome-bold',
+    'romantic-script': 'hero-dark-romantic',
+    'nature-organic': 'hero-casual-playful',
   }
 
   return mapping[stylePreset]
@@ -196,31 +196,31 @@ function inferStylePreset(
 ): NonNullable<StyleSystem['preset']> {
   const { mood, designPattern } = template
 
-  // Dark theme (minimal-dark가 제거되어 modern-mono로 대체)
+  // Dark theme
   if (designPattern.colorTheme === 'dark') {
-    if (mood.includes('romantic')) return 'romantic-blush'
-    return 'modern-mono'
+    if (mood.includes('romantic')) return 'hero-dark-romantic'
+    return 'hero-monochrome-bold'
   }
 
   // Light theme
   if (mood.includes('minimal') || mood.includes('modern')) {
-    return 'minimal-light'
+    return 'hero-minimal-overlay'
   }
 
   if (mood.includes('elegant') || mood.includes('classic')) {
-    return 'classic-ivory'
+    return 'hero-classic-elegant'
   }
 
   if (mood.includes('romantic')) {
-    return 'romantic-blush'
+    return 'hero-dark-romantic'
   }
 
   if (mood.includes('nature') || mood.includes('warm')) {
-    return 'romantic-garden' // cinematic-warm이 제거되어 romantic-garden으로 대체
+    return 'hero-casual-playful'
   }
 
   // Default
-  return 'minimal-light'
+  return 'hero-minimal-overlay'
 }
 
 /**

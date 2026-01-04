@@ -6,24 +6,43 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Default Elements
 // ============================================
 
 const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
+  // Korean Title (오시는길)
+  {
+    type: 'text',
+    zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'location.title',
+    value: '오시는길',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: 24,
+        fontWeight: 600,
+        color: 'var(--fg-emphasis)',
+        textAlign: 'center',
+      },
+    },
+  },
   // English Title (LOCATION)
   {
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.locationEngTitle',
+    binding: 'location.titleEn',
     value: 'LOCATION',
     props: { type: 'text' },
     style: {
       text: {
         fontFamily: 'var(--font-accent)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -43,7 +62,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 22,
+        fontSize: FONT_SIZE['2xl'],
         fontWeight: 600,
         color: 'var(--fg-emphasis)',
         textAlign: 'center',
@@ -60,7 +79,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -96,7 +115,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -139,7 +158,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
         style: {
           text: {
             fontFamily: 'var(--font-body)',
-            fontSize: 14,
+            fontSize: FONT_SIZE.base,
             fontWeight: 500,
             color: 'var(--fg-default)',
             textAlign: 'center',
@@ -167,7 +186,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
         style: {
           text: {
             fontFamily: 'var(--font-body)',
-            fontSize: 14,
+            fontSize: FONT_SIZE.base,
             fontWeight: 500,
             color: 'var(--fg-default)',
             textAlign: 'center',
@@ -195,7 +214,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
         style: {
           text: {
             fontFamily: 'var(--font-body)',
-            fontSize: 14,
+            fontSize: FONT_SIZE.base,
             fontWeight: 500,
             color: 'var(--fg-default)',
             textAlign: 'center',
@@ -230,7 +249,8 @@ export const LOCATION_MINIMAL: BlockPreset = {
     'venue.naverUrl',
     'venue.tmapUrl',
     'venue.kakaoUrl',
-    'custom.locationEngTitle',
+    'location.title',
+    'location.titleEn',
     'custom.navGuide',
   ],
   defaultHeight: HUG_HEIGHT,
@@ -238,7 +258,7 @@ export const LOCATION_MINIMAL: BlockPreset = {
   defaultElements: LOCATION_MINIMAL_ELEMENTS,
   specialComponents: ['kakao-map', 'naver-map'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'modern-mono', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold', 'hero-classic-elegant'],
   aiHints: {
     mood: ['minimal', 'clean', 'simple'],
     style: ['centered', 'map-with-buttons', 'light-background'],

@@ -27,8 +27,14 @@ import { useLocalStorage } from '@/lib/super-editor-v2/hooks/useLocalStorage'
 import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/editor/direct/edit-mode-toggle'
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
-import { FloatingPresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/floating-preset-sidebar'
+import { PresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/preset-sidebar'
+import { useVisibleBlock } from '@/lib/super-editor-v2/hooks/useVisibleBlock'
 import { getBlockPreset, type PresetElement } from '@/lib/super-editor-v2/presets/blocks'
+import {
+  isHeroPresetId,
+  getThemeForHeroPreset,
+} from '@/lib/super-editor-v2/presets/blocks/hero'
+import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
@@ -101,11 +107,27 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [editMode, setEditMode] = useState<EditMode>('form')
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
-  const [showPresetSidebar, setShowPresetSidebar] = useState(false)
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const scrollPositionRef = useRef<number>(0)
+
+  // 활성화된 블록 ID 목록
+  const enabledBlockIds = useMemo(
+    () => editorDoc.blocks.filter(b => b.enabled).map(b => b.id),
+    [editorDoc.blocks]
+  )
+
+  // 스크롤 위치에 따른 현재 보이는 블록 감지
+  const { visibleBlockId } = useVisibleBlock({
+    containerRef: scrollContainerRef,
+    blockIds: enabledBlockIds,
+  })
+
+  // 프리셋 사이드바용: 현재 보이는 블록 (에디터 패널에 영향 없음)
+  const visibleBlock = useMemo(() => {
+    return editorDoc.blocks.find(b => b.id === visibleBlockId)
+  }, [editorDoc.blocks, visibleBlockId])
 
   // 디바이스 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -261,9 +283,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       return newEl
     }
 
-    updateDocument(prev => ({
-      ...prev,
-      blocks: prev.blocks.map(block => {
+    updateDocument(prev => {
+      // 블록 업데이트
+      const newBlocks = prev.blocks.map(block => {
         if (block.id !== blockId) return block
 
         // 프리셋의 기본 요소가 있으면 적용 (재귀적 ID 재생성)
@@ -278,8 +300,26 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           layout: preset.layout,
           elements: newElements,
         }
-      }),
-    }))
+      })
+
+      // 히어로 프리셋이면 테마도 자동 적용
+      let newStyle = prev.style
+      if (isHeroPresetId(presetId)) {
+        const themePresetId = getThemeForHeroPreset(presetId)
+        if (themePresetId) {
+          newStyle = {
+            ...prev.style,
+            preset: themePresetId as ThemePresetId,
+          }
+        }
+      }
+
+      return {
+        ...prev,
+        blocks: newBlocks,
+        style: newStyle,
+      }
+    })
   }, [updateDocument])
 
   // 이미지 업로드 (즉시 서버 업로드)
@@ -424,7 +464,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             저장
           </button>
 
-          {/* AI 버튼 */}
+          {/* TODO: AI 편집 기능 비활성화 - 추후 재활성화 시 주석 해제
           <button
             onClick={() => setShowAIPrompt(true)}
             className="px-3 py-1.5 rounded-lg text-sm bg-[var(--sage-100)] text-[var(--sage-700)] hover:bg-[var(--sage-200)] transition-colors flex items-center gap-2"
@@ -432,6 +472,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             <SparklesIcon className="w-4 h-4" />
             AI 편집
           </button>
+          */}
 
           {/* 미리보기 링크 */}
           <Link
@@ -441,6 +482,23 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           >
             미리보기
           </Link>
+
+          {/* 결제 버튼 */}
+          {!dbDocument.isPaid && (
+            <a
+              href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
+              className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] transition-colors flex items-center gap-2"
+            >
+              <CreditCardIcon className="w-4 h-4" />
+              결제하기
+            </a>
+          )}
+          {dbDocument.isPaid && (
+            <span className="px-3 py-1.5 rounded-lg text-sm bg-green-50 text-green-600 flex items-center gap-2">
+              <CheckIcon className="w-4 h-4" />
+              결제 완료
+            </span>
+          )}
         </div>
       </header>
 
@@ -476,16 +534,21 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               <ContentTab
                 document={editorDoc}
                 expandedBlockId={expandedBlockId}
+                visibleBlockId={visibleBlockId}
                 onExpandedBlockChange={setExpandedBlockId}
                 onBlocksChange={handleBlocksChange}
                 onDataChange={handleDataChange}
                 onUploadImage={handleUploadImage}
+                onTabChange={(tab) => setActiveTab(tab)}
               />
             )}
             {activeTab === 'data' && (
               <DataTab
-                data={editorDoc.data}
+                document={editorDoc}
                 onDataChange={handleDataChange}
+                onUploadImage={handleUploadImage}
+                expandedSection={expandedBlockId}
+                onExpandedSectionChange={setExpandedBlockId}
               />
             )}
             {activeTab === 'design' && (
@@ -506,137 +569,141 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           </div>
         </div>
 
-        {/* 프리뷰 패널 */}
-        <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50 relative">
-          {/* 디바이스 선택 바 + 모드 토글 */}
-          <div className="flex-shrink-0 h-12 border-b border-[var(--sand-100)] bg-white flex items-center justify-between px-4">
-            <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
+        {/* 프리뷰 + 프리셋 영역 */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* 프리뷰 패널 */}
+          <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50">
+            {/* 디바이스 선택 바 + 모드 토글 */}
+            <div className="flex-shrink-0 h-12 border-b border-[var(--sand-100)] bg-white flex items-center justify-between px-4">
+              {/* TODO: 직접 편집 모드 비활성화 - 추후 재활성화 시 주석 해제
+              <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
+              */}
+              <div /> {/* 레이아웃 유지용 빈 div */}
 
-            <div className="relative" ref={deviceMenuRef}>
-              <button
-                onClick={() => setShowDeviceMenu(!showDeviceMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--ivory-50)] hover:bg-[var(--sand-100)] transition-colors text-sm text-[var(--text-primary)]"
-              >
-                <DevicePhoneIcon className="w-4 h-4" />
-                <span>{selectedDevice.name}</span>
-                <span className="text-[var(--text-light)] text-xs">
-                  {selectedDevice.width}×{selectedDevice.height}
-                </span>
-                {previewScale < 1 && (
-                  <span className="text-[var(--sage-600)] text-xs">
-                    {Math.round(previewScale * 100)}%
+              <div className="relative" ref={deviceMenuRef}>
+                <button
+                  onClick={() => setShowDeviceMenu(!showDeviceMenu)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--ivory-50)] hover:bg-[var(--sand-100)] transition-colors text-sm text-[var(--text-primary)]"
+                >
+                  <DevicePhoneIcon className="w-4 h-4" />
+                  <span>{selectedDevice.name}</span>
+                  <span className="text-[var(--text-light)] text-xs">
+                    {selectedDevice.width}×{selectedDevice.height}
                   </span>
+                  {previewScale < 1 && (
+                    <span className="text-[var(--sage-600)] text-xs">
+                      {Math.round(previewScale * 100)}%
+                    </span>
+                  )}
+                  <ChevronDownIcon className="w-4 h-4 text-[var(--text-light)]" />
+                </button>
+
+                {showDeviceMenu && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-[var(--sand-100)] rounded-lg shadow-xl py-1 min-w-[200px] z-50">
+                    {DEVICE_PRESETS.map((device) => (
+                      <button
+                        key={device.id}
+                        onClick={() => {
+                          setSelectedDevice(device)
+                          setShowDeviceMenu(false)
+                        }}
+                        className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-[var(--ivory-50)] transition-colors ${selectedDevice.id === device.id ? 'text-[var(--sage-600)]' : 'text-[var(--text-primary)]'}`}
+                      >
+                        <span>{device.name}</span>
+                        <span className="text-[var(--text-light)] text-xs">
+                          {device.width}×{device.height}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 )}
-                <ChevronDownIcon className="w-4 h-4 text-[var(--text-light)]" />
-              </button>
-
-              {showDeviceMenu && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-[var(--sand-100)] rounded-lg shadow-xl py-1 min-w-[200px] z-50">
-                  {DEVICE_PRESETS.map((device) => (
-                    <button
-                      key={device.id}
-                      onClick={() => {
-                        setSelectedDevice(device)
-                        setShowDeviceMenu(false)
-                      }}
-                      className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-[var(--ivory-50)] transition-colors ${selectedDevice.id === device.id ? 'text-[var(--sage-600)]' : 'text-[var(--text-primary)]'}`}
-                    >
-                      <span>{device.name}</span>
-                      <span className="text-[var(--text-light)] text-xs">
-                        {device.width}×{device.height}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              </div>
             </div>
-          </div>
 
-          {/* 프리뷰 영역 */}
-          <div
-            ref={previewContainerRef}
-            className="flex-1 flex items-center justify-center p-6 overflow-hidden"
-          >
+            {/* 프리뷰 영역 */}
             <div
-              className="relative transition-all duration-300 ease-out"
-              style={{
-                width: `${selectedDevice.width}px`,
-                height: `${selectedDevice.height}px`,
-                transform: `scale(${previewScale})`,
-                transformOrigin: 'center center',
-              }}
+              ref={previewContainerRef}
+              className="flex-1 flex items-center justify-center p-6 overflow-hidden"
             >
               <div
-                className="absolute inset-0 bg-black shadow-2xl"
+                className="relative transition-all duration-300 ease-out"
                 style={{
-                  borderRadius: selectedDevice.notch ? '3rem' : '2rem',
-                  padding: '12px',
+                  width: `${selectedDevice.width}px`,
+                  height: `${selectedDevice.height}px`,
+                  transform: `scale(${previewScale})`,
+                  transformOrigin: 'center center',
                 }}
               >
                 <div
-                  ref={scrollContainerRef}
-                  className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide"
+                  className="absolute inset-0 bg-black shadow-2xl"
                   style={{
-                    borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
-                    ...cssVariables,
-                    backgroundColor: 'var(--bg-page)',
-                    fontFamily: 'var(--font-body)',
-                    color: 'var(--fg-default)',
+                    borderRadius: selectedDevice.notch ? '3rem' : '2rem',
+                    padding: '12px',
                   }}
                 >
-                  <DocumentProvider
-                    document={editorDoc}
-                    style={resolvedStyle}
-                    viewportOverride={{
-                      width: selectedDevice.width - 24,
-                      height: selectedDevice.height - 24,
+                  <div
+                    ref={scrollContainerRef}
+                    className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide"
+                    style={{
+                      borderRadius: selectedDevice.notch ? '2.5rem' : '1.5rem',
+                      ...cssVariables,
+                      backgroundColor: 'var(--bg-page)',
+                      fontFamily: 'var(--font-body)',
+                      color: 'var(--fg-default)',
                     }}
                   >
-                    {editMode === 'form' && (
-                      <DocumentRenderer
-                        document={editorDoc}
-                        mode="edit"
-                        onBlockClick={handleBlockSelect}
-                        skipProvider
-                      />
-                    )}
+                    <DocumentProvider
+                      document={editorDoc}
+                      style={resolvedStyle}
+                      viewportOverride={{
+                        width: selectedDevice.width - 24,
+                        height: selectedDevice.height - 24,
+                      }}
+                    >
+                      {editMode === 'form' && (
+                        <DocumentRenderer
+                          document={editorDoc}
+                          mode="edit"
+                          onBlockClick={handleBlockSelect}
+                          skipProvider
+                        />
+                      )}
 
-                    {editMode === 'direct' && (
-                      <EditableCanvas
-                        document={editorDoc}
-                        selectedBlockId={expandedBlockId}
-                        selectedElementId={selectedElementId}
-                        onElementSelect={handleElementSelect}
-                        onElementUpdate={handleElementUpdate}
-                        onBlockHeightChange={handleBlockHeightChange}
-                        canvasWidth={selectedDevice.width - 24}
-                        canvasHeight={selectedDevice.height - 24}
-                        showIdBadge
-                        disableScroll
-                        renderElement={(element, block) => (
-                          <StyledElementRenderer element={element} block={block} />
-                        )}
-                      />
-                    )}
-                  </DocumentProvider>
+                      {editMode === 'direct' && (
+                        <EditableCanvas
+                          document={editorDoc}
+                          selectedBlockId={expandedBlockId}
+                          selectedElementId={selectedElementId}
+                          onElementSelect={handleElementSelect}
+                          onElementUpdate={handleElementUpdate}
+                          onBlockHeightChange={handleBlockHeightChange}
+                          canvasWidth={selectedDevice.width - 24}
+                          canvasHeight={selectedDevice.height - 24}
+                          showIdBadge
+                          disableScroll
+                          renderElement={(element, block) => (
+                            <StyledElementRenderer element={element} block={block} />
+                          )}
+                        />
+                      )}
+                    </DocumentProvider>
+                  </div>
                 </div>
-              </div>
 
-              {selectedDevice.notch && (
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full z-10" />
-              )}
-              {!selectedDevice.notch && selectedDevice.id.includes('galaxy') && (
-                <div className="absolute top-5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black rounded-full z-10" />
-              )}
+                {selectedDevice.notch && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full z-10" />
+                )}
+                {!selectedDevice.notch && selectedDevice.id.includes('galaxy') && (
+                  <div className="absolute top-5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black rounded-full z-10" />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* 프리셋 사이드바 */}
-          <FloatingPresetSidebar
-            selectedBlock={selectedBlock ?? null}
+          {/* 프리셋 사이드바 (항상 표시) */}
+          <PresetSidebar
+            visibleBlock={visibleBlock ?? null}
             onPresetChange={handlePresetChange}
-            isOpen={showPresetSidebar}
-            onOpenChange={setShowPresetSidebar}
           />
         </div>
       </div>
@@ -738,6 +805,22 @@ function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  )
+}
+
+function CreditCardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+    </svg>
+  )
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   )
 }

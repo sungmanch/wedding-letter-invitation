@@ -7,6 +7,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 const ELEMENTS: PresetElement[] = [
   // ─── Auto Layout 콘텐츠 ───
@@ -20,7 +21,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 500,
         color: 'var(--accent-secondary)',
         textAlign: 'center',
@@ -40,7 +41,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -62,7 +63,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -83,7 +84,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -112,7 +113,7 @@ const ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -244,7 +245,7 @@ export const GREETING_PARENTS_NATURAL_SPARKLE: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'stagger-fade'],
-  recommendedThemes: ['classic-ivory', 'romantic-garden'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-casual-playful'],
   aiHints: {
     mood: ['natural', 'warm', 'elegant', 'romantic'],
     style: ['organic', 'fresh', 'inviting', 'decorated'],

@@ -16,7 +16,6 @@ import {
 import { sql } from 'drizzle-orm'
 import { relations } from 'drizzle-orm'
 import { designTemplates } from './template-schema'
-import { superEditorInvitations } from './super-editor-schema'
 
 // ============================================
 // 청첩장 (Invitations)
@@ -65,8 +64,7 @@ export const invitations = pgTable('invitations', {
   templateId: uuid('template_id'), // design_templates 참조
   isTemplateReuse: boolean('is_template_reuse').default(false), // 이미지만 교체한 재사용 여부
 
-  // Super Editor 마이그레이션 관련
-  seInvitationId: uuid('se_invitation_id'), // super_editor_invitations 참조
+  // Editor type (legacy field, kept for backwards compatibility)
   editorType: varchar('editor_type', { length: 20 }).default('legacy'), // 'legacy' | 'super-editor'
 
   // 배포 URL (S3 정적 배포 시)
@@ -86,12 +84,6 @@ export const invitations = pgTable('invitations', {
   index('idx_invitations_user_id').on(table.userId),
   index('idx_invitations_status').on(table.status),
   index('idx_invitations_payment_id').on(table.paymentId),
-  index('idx_invitations_se_invitation_id').on(table.seInvitationId),
-  foreignKey({
-    columns: [table.seInvitationId],
-    foreignColumns: [superEditorInvitations.id],
-    name: 'invitations_se_invitation_id_fkey'
-  }).onDelete('set null'),
   pgPolicy('Anyone can view published invitations', { as: 'permissive', for: 'select', to: ['public'], using: sql`((status)::text = 'published'::text)` }),
   pgPolicy('Users can manage their own invitations', { as: 'permissive', for: 'all', to: ['public'] }),
 ]).enableRLS()
@@ -192,7 +184,7 @@ export const invitationMessages = pgTable('invitation_messages', {
 
 // ============================================
 // 결제 (Invitation Payments) - 범용 결제 테이블
-// invitations, superEditorInvitations 등에서 paymentId로 참조
+// invitations, editorDocumentsV2 등에서 paymentId로 참조
 // ============================================
 export const invitationPayments = pgTable('invitation_payments', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -235,10 +227,6 @@ export const invitationsRelations = relations(invitations, ({ many, one }) => ({
     fields: [invitations.templateId],
     references: [designTemplates.id],
   }),
-  seInvitation: one(superEditorInvitations, {
-    fields: [invitations.seInvitationId],
-    references: [superEditorInvitations.id],
-  }),
 }))
 
 export const invitationDesignsRelations = relations(invitationDesigns, ({ one }) => ({
@@ -263,7 +251,7 @@ export const invitationMessagesRelations = relations(invitationMessages, ({ one 
 }))
 
 // invitationPayments는 범용 테이블로 역방향 relation 없음
-// invitations, superEditorInvitations에서 paymentId로 참조
+// invitations, editorDocumentsV2에서 paymentId로 참조
 
 export const designTemplatesRelations = relations(designTemplates, ({ many }) => ({
   invitations: many(invitations),
@@ -286,3 +274,97 @@ export type NewInvitationMessage = typeof invitationMessages.$inferInsert
 
 export type InvitationPayment = typeof invitationPayments.$inferSelect
 export type NewInvitationPayment = typeof invitationPayments.$inferInsert
+
+// ============================================
+// 종이 청첩장 신청 (Paper Invitation Requests)
+// 종이 청첩장과 똑같이 만들어드리는 서비스 요청
+// ============================================
+export const paperInvitationRequests = pgTable('paper_invitation_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id'), // auth.users 참조 (비로그인도 허용)
+
+  // 연락처 정보
+  phone: varchar('phone', { length: 20 }).notNull(),
+  email: varchar('email', { length: 255 }),
+
+  // 요청 상태
+  // pending: 신청 완료, 대기 중
+  // in_progress: 제작 중
+  // completed: 완료
+  // cancelled: 취소됨
+  status: varchar('status', { length: 20 }).default('pending').notNull(),
+
+  // 메인 사진 (대표 이미지로 사용할 사진의 storage path)
+  mainPhotoPath: varchar('main_photo_path', { length: 500 }),
+
+  // 메모/요청사항
+  notes: text('notes'),
+
+  // 예상 완료일 (최소 4일 소요)
+  estimatedCompletionDate: timestamp('estimated_completion_date'),
+
+  // 완료된 청첩장 문서 ID (완료 시 연결)
+  completedDocumentId: uuid('completed_document_id'),
+
+  // 메타
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_paper_invitation_requests_user_id').on(table.userId),
+  index('idx_paper_invitation_requests_status').on(table.status),
+  index('idx_paper_invitation_requests_email').on(table.email),
+  pgPolicy('Users can manage their own paper invitation requests', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public']
+  }),
+]).enableRLS()
+
+// ============================================
+// 종이 청첩장 신청 사진 (Paper Invitation Photos)
+// 신청 시 업로드된 참조 사진들 (최대 10장)
+// ============================================
+export const paperInvitationPhotos = pgTable('paper_invitation_photos', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  requestId: uuid('request_id').notNull(),
+
+  storagePath: varchar('storage_path', { length: 500 }).notNull(),
+  url: varchar('url', { length: 500 }).notNull(),
+  displayOrder: integer('display_order').notNull(),
+  isMain: boolean('is_main').default(false).notNull(), // 메인 사진 여부
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_paper_invitation_photos_request_id').on(table.requestId),
+  foreignKey({
+    columns: [table.requestId],
+    foreignColumns: [paperInvitationRequests.id],
+    name: 'paper_invitation_photos_request_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Users can manage photos of their paper invitation requests', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public']
+  }),
+]).enableRLS()
+
+// ============================================
+// Relations for Paper Invitation
+// ============================================
+export const paperInvitationRequestsRelations = relations(paperInvitationRequests, ({ many }) => ({
+  photos: many(paperInvitationPhotos),
+}))
+
+export const paperInvitationPhotosRelations = relations(paperInvitationPhotos, ({ one }) => ({
+  request: one(paperInvitationRequests, {
+    fields: [paperInvitationPhotos.requestId],
+    references: [paperInvitationRequests.id],
+  }),
+}))
+
+// Type exports for Paper Invitation
+export type PaperInvitationRequest = typeof paperInvitationRequests.$inferSelect
+export type NewPaperInvitationRequest = typeof paperInvitationRequests.$inferInsert
+
+export type PaperInvitationPhoto = typeof paperInvitationPhotos.$inferSelect
+export type NewPaperInvitationPhoto = typeof paperInvitationPhotos.$inferInsert

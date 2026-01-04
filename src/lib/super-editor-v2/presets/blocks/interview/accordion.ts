@@ -5,10 +5,22 @@
  * - 섹션 제목 (우리 두 사람의 이야기)
  * - 섹션 설명
  * - 아코디언 컴포넌트 (InterviewAccordion)
+ *
+ * 데이터 구조:
+ * interview: {
+ *   title: string,           // "우리 두 사람의 이야기"
+ *   subtitle: string,        // 설명 텍스트
+ *   items: Array<{           // Q&A 배열 (최대 5개)
+ *     question: string,      // "첫인상은 어땠나요?"
+ *     groomAnswer: string,   // 신랑 답변
+ *     brideAnswer: string    // 신부 답변
+ *   }>
+ * }
  */
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 const ELEMENTS: PresetElement[] = [
   // 섹션 제목
@@ -23,7 +35,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 500,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -42,7 +54,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
@@ -50,25 +62,7 @@ const ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // 아코디언 플레이스홀더 (렌더러에서 InterviewAccordion으로 대체)
-  {
-    id: 'interview-accordion',
-    type: 'group',
-    zIndex: 1,
-    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'interview.items',
-    props: {
-      type: 'group',
-      layout: {
-        direction: 'vertical',
-        gap: 0,
-      },
-      hideWhenEmpty: true,
-    },
-    // 렌더러에서 이 요소를 InterviewAccordion 컴포넌트로 대체
-    // data-component="interview-accordion" 속성으로 식별
-    children: [],
-  },
+  // InterviewAccordion 컴포넌트는 auto-layout-block.tsx에서 직접 렌더링
 ]
 
 export const INTERVIEW_ACCORDION: BlockPreset = {
@@ -90,7 +84,7 @@ export const INTERVIEW_ACCORDION: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['interview-accordion'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['simple-pink', 'simple-coral', 'minimal-light'],
+  recommendedThemes: ['simple-pink', 'simple-coral', 'hero-minimal-overlay'],
   aiHints: {
     mood: ['warm', 'personal', 'storytelling'],
     style: ['accordion', 'collapsible', 'qa-format'],

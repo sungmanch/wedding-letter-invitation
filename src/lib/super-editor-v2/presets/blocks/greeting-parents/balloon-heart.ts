@@ -7,6 +7,7 @@
 
 import type { BlockPreset, PresetElement } from '../types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 const ELEMENTS: PresetElement[] = [
   // ─── Auto Layout 장식 요소 (하트 풍선 아이콘) ───
@@ -35,7 +36,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: 20,
+        fontSize: FONT_SIZE.xl,
         fontWeight: 400,
         color: 'var(--fg-emphasis)',
         textAlign: 'center',
@@ -55,7 +56,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 15,
+        fontSize: FONT_SIZE.body,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -85,7 +86,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -106,7 +107,7 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-default)',
         textAlign: 'center',
@@ -135,7 +136,7 @@ const ELEMENTS: PresetElement[] = [
       },
       text: {
         fontFamily: 'var(--font-body)',
-        fontSize: 14,
+        fontSize: FONT_SIZE.base,
         fontWeight: 500,
         color: 'var(--fg-default)',
       },
@@ -175,7 +176,7 @@ export const GREETING_PARENTS_BALLOON_HEART: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   aiHints: {
     mood: ['minimal', 'clean', 'simple'],
     style: ['centered', 'text-focused', 'icon-header'],

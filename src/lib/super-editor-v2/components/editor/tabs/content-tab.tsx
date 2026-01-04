@@ -4,42 +4,22 @@
  * Super Editor v2 - Content Tab
  *
  * Section-First 패턴 구현
- * 블록(섹션) 아코디언 + 변수 필드 편집
+ * 블록(섹션) 아코디언 + on/off 토글 + 순서 변경
+ *
+ * 데이터 입력은 DataTab에서 처리
  */
 
-import { useState, useCallback, useMemo, useRef, type ReactNode, type ChangeEvent } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type {
   EditorDocument,
   Block,
   BlockType,
   WeddingData,
-  Element,
   VariablePath,
 } from '../../../schema/types'
 import { SectionHeader, BLOCK_TYPE_LABELS } from '../editor-panel'
-import { resolveBinding, isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
-import { LocationSearchField } from '../fields/location-search-field'
-import { getBlockPreset } from '../../../presets/blocks'
-
-// ============================================
-// Computed Field Mapping
-// ============================================
-
-/**
- * Computed field → Source field 매핑
- * 자동 계산 필드를 편집하면 실제로 소스 필드를 수정해야 함
- */
-const COMPUTED_TO_SOURCE: Record<string, VariablePath> = {
-  'wedding.timeDisplay': 'wedding.time',
-  'wedding.dateDisplay': 'wedding.date',
-}
-
-/**
- * 바인딩 경로가 computed field면 source field로 변환
- */
-function getEditableBinding(binding: VariablePath): VariablePath {
-  return (COMPUTED_TO_SOURCE[binding] as VariablePath) || binding
-}
+import { extractEditableFields, hasEditableFields } from '../../../utils/field-extractor'
+import { isSharedField, BLOCK_TYPE_ICONS } from '../../../config/variable-field-config'
 
 // ============================================
 // Types
@@ -50,6 +30,8 @@ export interface ContentTabProps {
   document: EditorDocument
   /** 펼쳐진 블록 ID */
   expandedBlockId: string | null
+  /** 현재 화면에 보이는 블록 ID */
+  visibleBlockId?: string | null
   /** 펼침 상태 변경 콜백 */
   onExpandedBlockChange: (blockId: string | null) => void
   /** 블록 업데이트 콜백 */
@@ -60,6 +42,8 @@ export interface ContentTabProps {
   onAddBlock?: (blockType: BlockType) => void
   /** 이미지 업로드 핸들러 */
   onUploadImage?: (file: File) => Promise<string>
+  /** 탭 전환 콜백 */
+  onTabChange?: (tab: 'data') => void
   /** 추가 className */
   className?: string
 }
@@ -71,90 +55,66 @@ export interface ContentTabProps {
 export function ContentTab({
   document,
   expandedBlockId,
+  visibleBlockId,
   onExpandedBlockChange,
   onBlocksChange,
   onDataChange,
   onAddBlock,
-  onUploadImage,
+  onTabChange,
   className = '',
 }: ContentTabProps) {
   // 블록 토글
-  const handleBlockToggle = useCallback((blockId: string) => {
-    if (!onBlocksChange) return
+  const handleBlockToggle = useCallback(
+    (blockId: string) => {
+      if (!onBlocksChange) return
 
-    const newBlocks = document.blocks.map(block =>
-      block.id === blockId
-        ? { ...block, enabled: !block.enabled }
-        : block
-    )
-    onBlocksChange(newBlocks)
-  }, [document.blocks, onBlocksChange])
+      const newBlocks = document.blocks.map((block) =>
+        block.id === blockId ? { ...block, enabled: !block.enabled } : block
+      )
+      onBlocksChange(newBlocks)
+    },
+    [document.blocks, onBlocksChange]
+  )
 
   // 블록 순서 변경
-  const handleBlockMove = useCallback((blockId: string, direction: 'up' | 'down') => {
-    if (!onBlocksChange) return
+  const handleBlockMove = useCallback(
+    (blockId: string, direction: 'up' | 'down') => {
+      if (!onBlocksChange) return
 
-    const currentIndex = document.blocks.findIndex(b => b.id === blockId)
-    if (currentIndex === -1) return
+      const currentIndex = document.blocks.findIndex((b) => b.id === blockId)
+      if (currentIndex === -1) return
 
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    if (newIndex < 0 || newIndex >= document.blocks.length) return
+      const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+      if (newIndex < 0 || newIndex >= document.blocks.length) return
 
-    const newBlocks = [...document.blocks]
-    const [moved] = newBlocks.splice(currentIndex, 1)
-    newBlocks.splice(newIndex, 0, moved)
-    onBlocksChange(newBlocks)
-  }, [document.blocks, onBlocksChange])
+      const newBlocks = [...document.blocks]
+      const [moved] = newBlocks.splice(currentIndex, 1)
+      newBlocks.splice(newIndex, 0, moved)
+      onBlocksChange(newBlocks)
+    },
+    [document.blocks, onBlocksChange]
+  )
 
   // 블록 펼치기/접기
-  const handleExpand = useCallback((blockId: string) => {
-    if (expandedBlockId === blockId) {
-      onExpandedBlockChange(null)
-    } else {
-      onExpandedBlockChange(blockId)
-    }
-  }, [expandedBlockId, onExpandedBlockChange])
-
-  // 데이터 필드 변경
-  const handleFieldChange = useCallback((path: VariablePath, value: unknown) => {
-    if (!onDataChange) return
-
-    const newData = setNestedValue(document.data, path, value)
-    onDataChange(newData)
-  }, [document.data, onDataChange])
-
-  // 위치 정보 일괄 변경 (address, lat, lng를 한 번에 업데이트하여 stale closure 방지)
-  // 좌표 기반으로 네이버맵/카카오맵/티맵 URL도 자동 생성
-  const handleLocationChange = useCallback((address: string, lat: number, lng: number) => {
-    if (!onDataChange) return
-
-    // 지도 URL 자동 생성
-    const naverUrl = `https://map.naver.com/v5/?c=${lng},${lat},15,0,0,0,dh`
-    const kakaoUrl = `https://map.kakao.com/link/map/${lat},${lng}`
-    const tmapUrl = `https://apis.openapi.sk.com/tmap/app/routes?goalx=${lng}&goaly=${lat}`
-
-    // 한 번에 모든 venue 필드 업데이트
-    const newVenue = {
-      ...document.data.venue,
-      address,
-      lat,
-      lng,
-      naverUrl,
-      kakaoUrl,
-      tmapUrl,
-    }
-    const newData = { ...document.data, venue: newVenue }
-    onDataChange(newData)
-  }, [document.data, onDataChange])
+  const handleExpand = useCallback(
+    (blockId: string) => {
+      if (expandedBlockId === blockId) {
+        onExpandedBlockChange(null)
+      } else {
+        onExpandedBlockChange(blockId)
+      }
+    },
+    [expandedBlockId, onExpandedBlockChange]
+  )
 
   // 고정 블록 (hero, loading 등 순서 변경 불가)
   const fixedBlockTypes: BlockType[] = ['hero', 'loading']
 
   // 사용 가능한 블록 타입 (추가 가능)
   const availableBlockTypes = useMemo(() => {
-    const usedTypes = new Set(document.blocks.map(b => b.type))
+    const usedTypes = new Set(document.blocks.map((b) => b.type))
     return Object.keys(BLOCK_TYPE_LABELS).filter(
-      type => !usedTypes.has(type as BlockType)
+      (type) => !usedTypes.has(type as BlockType)
     ) as BlockType[]
   }, [document.blocks])
 
@@ -172,6 +132,7 @@ export function ContentTab({
               block={block}
               data={document.data}
               expanded={isExpanded}
+              isVisible={visibleBlockId === block.id}
               onExpand={() => handleExpand(block.id)}
               onToggle={() => handleBlockToggle(block.id)}
               onMoveUp={() => handleBlockMove(block.id, 'up')}
@@ -179,19 +140,14 @@ export function ContentTab({
               canMoveUp={!isFixed && index > 0}
               canMoveDown={!isFixed && index < document.blocks.length - 1}
               fixed={isFixed}
-              onFieldChange={handleFieldChange}
-              onLocationChange={handleLocationChange}
-              onUploadImage={onUploadImage}
+              onGoToData={() => onTabChange?.('data')}
             />
           )
         })}
 
         {/* 블록 추가 버튼 */}
         {onAddBlock && availableBlockTypes.length > 0 && (
-          <AddBlockButton
-            availableTypes={availableBlockTypes}
-            onAdd={onAddBlock}
-          />
+          <AddBlockButton availableTypes={availableBlockTypes} onAdd={onAddBlock} />
         )}
       </div>
     </div>
@@ -206,6 +162,7 @@ interface BlockAccordionProps {
   block: Block
   data: WeddingData
   expanded: boolean
+  isVisible?: boolean
   onExpand: () => void
   onToggle: () => void
   onMoveUp: () => void
@@ -213,15 +170,15 @@ interface BlockAccordionProps {
   canMoveUp: boolean
   canMoveDown: boolean
   fixed: boolean
-  onFieldChange: (path: VariablePath, value: unknown) => void
-  onLocationChange: (address: string, lat: number, lng: number) => void
-  onUploadImage?: (file: File) => Promise<string>
+  /** 데이터 탭으로 이동 */
+  onGoToData?: () => void
 }
 
 function BlockAccordion({
   block,
   data,
   expanded,
+  isVisible = false,
   onExpand,
   onToggle,
   onMoveUp,
@@ -229,144 +186,14 @@ function BlockAccordion({
   canMoveUp,
   canMoveDown,
   fixed,
-  onFieldChange,
-  onLocationChange,
-  onUploadImage,
+  onGoToData,
 }: BlockAccordionProps) {
-  // 블록 내 바인딩된 요소에서 편집 가능한 필드 추출 (바인딩 기준 dedupe)
-  const editableFields = useMemo(() => {
-    const seenBindings = new Set<string>()
-    const fields: Array<{
-      elementId: string
-      binding: VariablePath
-      type: string
-      value: unknown
-    }> = []
-
-    // 바인딩 추가 헬퍼 함수
-    const addBinding = (elementId: string, binding: VariablePath, type: string) => {
-      // 자동 계산 필드는 대응 입력 필드로 변환
-      let finalBinding: VariablePath = binding
-      if (HIDDEN_VARIABLE_PATHS.has(binding)) {
-        const inputBinding = DERIVED_TO_INPUT_MAP[binding]
-        if (inputBinding) {
-          finalBinding = inputBinding
-        } else {
-          return // 매핑 없으면 숨김
-        }
-      }
-
-      // Computed field는 source field로 변환 (wedding.timeDisplay → wedding.time)
-      finalBinding = getEditableBinding(finalBinding)
-
-      // 같은 바인딩은 한 번만 표시
-      if (seenBindings.has(finalBinding)) return
-      seenBindings.add(finalBinding)
-
-      // gallery, notice.items, transportation 바인딩은 배열을 그대로 가져와야 함 (resolveBinding은 문자열로 변환함)
-      let value: unknown
-      if (finalBinding === 'photos.gallery') {
-        value = data.photos?.gallery ?? []
-      } else if (finalBinding === 'notice.items') {
-        value = data.notice?.items ?? []
-      } else if (finalBinding === 'venue.transportation.subway') {
-        value = data.venue?.transportation?.subway ?? []
-      } else if (finalBinding === 'venue.transportation.bus') {
-        value = data.venue?.transportation?.bus ?? []
-      } else if (finalBinding === 'venue.transportation.shuttle') {
-        value = data.venue?.transportation?.shuttle ?? []
-      } else if (finalBinding === 'venue.transportation.parking') {
-        value = data.venue?.transportation?.parking ?? []
-      } else if (finalBinding === 'venue.transportation.etc') {
-        value = data.venue?.transportation?.etc ?? []
-      } else if (isCustomVariablePath(finalBinding)) {
-        const key = getCustomVariableKey(finalBinding)
-        value = key ? data.custom?.[key] ?? '' : ''
-      } else {
-        value = resolveBinding(data, finalBinding)
-      }
-
-      fields.push({
-        elementId,
-        binding: finalBinding,
-        type,
-        value,
-      })
-    }
-
-    // 요소 트리 재귀 순회 함수 (Group children 포함)
-    const processElementTree = (el: Element) => {
-      // 1. 직접 바인딩된 요소
-      if (el.binding) {
-        addBinding(el.id, el.binding, el.type)
-      }
-
-      // 2. format 속성에서 변수 추출 (예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}')
-      const props = el.props as { format?: string; action?: string }
-      if (props.format) {
-        const formatVars = extractFormatVariables(props.format)
-        for (const varPath of formatVars) {
-          addBinding(el.id, varPath as VariablePath, el.type)
-        }
-      }
-
-      // 3. contact-modal 버튼이 있으면 전화번호 필드들 자동 추가
-      if (el.type === 'button' && props.action === 'contact-modal') {
-        // 신랑측 전화번호
-        addBinding(el.id, 'couple.groom.phone', 'phone')
-        addBinding(el.id, 'parents.groom.father.phone', 'phone')
-        addBinding(el.id, 'parents.groom.mother.phone', 'phone')
-        // 신부측 전화번호
-        addBinding(el.id, 'couple.bride.phone', 'phone')
-        addBinding(el.id, 'parents.bride.father.phone', 'phone')
-        addBinding(el.id, 'parents.bride.mother.phone', 'phone')
-      }
-
-      // 4. Group children 재귀 처리
-      if (el.children && el.children.length > 0) {
-        for (const child of el.children) {
-          processElementTree(child)
-        }
-      }
-    }
-
-    // 최상위 요소들 순회
-    for (const el of block.elements ?? []) {
-      processElementTree(el)
-    }
-
-    // 5. block.elements가 비어있고 presetId가 있으면 프리셋의 bindings 사용
-    if (fields.length === 0 && block.presetId) {
-      const preset = getBlockPreset(block.presetId)
-      if (preset?.bindings) {
-        for (const binding of preset.bindings) {
-          addBinding(`preset-${binding}`, binding as VariablePath, 'text')
-        }
-      }
-    }
-
-    // 6. notice 블록은 items가 별도 컴포넌트(swiper)에서 렌더링되므로 필수 필드 강제 추가
-    if (block.type === 'notice') {
-      const noticeBindings: VariablePath[] = ['notice.sectionTitle', 'notice.title', 'notice.description', 'notice.items']
-      for (const binding of noticeBindings) {
-        if (!seenBindings.has(binding)) {
-          addBinding(`notice-${binding}`, binding, 'text')
-        }
-      }
-    }
-
-    // 7. music 블록은 FAB로 렌더링되므로 필수 필드 강제 추가
-    if (block.type === 'music') {
-      const musicBindings: VariablePath[] = ['music.url', 'music.autoPlay']
-      for (const binding of musicBindings) {
-        if (!seenBindings.has(binding)) {
-          addBinding(`music-${binding}`, binding, 'text')
-        }
-      }
-    }
-
-    return fields
-  }, [block.elements, block.presetId, data])
+  // 편집 가능한 필드 수 계산 (공유 필드 제외)
+  const editableFieldCount = useMemo(() => {
+    const allFields = extractEditableFields(block, data)
+    const nonSharedFields = allFields.filter((field) => !isSharedField(field.binding))
+    return nonSharedFields.length
+  }, [block, data])
 
   return (
     <div className="rounded-lg overflow-hidden">
@@ -375,6 +202,7 @@ function BlockAccordion({
         label={BLOCK_TYPE_LABELS[block.type] || block.type}
         enabled={block.enabled}
         expanded={expanded}
+        isVisible={isVisible}
         onToggle={onToggle}
         onExpand={onExpand}
         canMoveUp={canMoveUp}
@@ -386,1135 +214,27 @@ function BlockAccordion({
 
       {/* 펼침 콘텐츠 */}
       {expanded && (
-        <div className="bg-[var(--ivory-50)] p-4 space-y-4">
-          {/* 혼주 관련 필드는 데이터 탭에서 관리하므로 필터링 */}
-          {editableFields
-            .filter(field => {
-              // 혼주 관련 필드는 데이터 탭에서 처리
-              const familyPaths = [
-                'couple.groom.name', 'couple.groom.nameEn', 'couple.groom.phone', 'couple.groom.baptismalName',
-                'couple.bride.name', 'couple.bride.nameEn', 'couple.bride.phone', 'couple.bride.baptismalName',
-                'parents.groom.birthOrder', 'parents.bride.birthOrder',
-                'parents.groom.father.name', 'parents.groom.father.phone', 'parents.groom.father.baptismalName', 'parents.groom.father.status',
-                'parents.groom.mother.name', 'parents.groom.mother.phone', 'parents.groom.mother.baptismalName', 'parents.groom.mother.status',
-                'parents.bride.father.name', 'parents.bride.father.phone', 'parents.bride.father.baptismalName', 'parents.bride.father.status',
-                'parents.bride.mother.name', 'parents.bride.mother.phone', 'parents.bride.mother.baptismalName', 'parents.bride.mother.status',
-              ]
-              // 예식/예식장 정보도 데이터 탭에서 처리
-              const dataPaths = [
-                'wedding.date', 'wedding.time',
-                'venue.name', 'venue.hall', 'venue.address', 'venue.tel',
-              ]
-              return !familyPaths.includes(field.binding) && !dataPaths.includes(field.binding)
-            })
-            .map(field => (
-              <VariableField
-                key={field.binding}
-                binding={field.binding}
-                value={field.value}
-                onChange={(value) => onFieldChange(field.binding, value)}
-                onUploadImage={onUploadImage}
-                onLocationChange={onLocationChange}
-                data={data}
-              />
-            ))
-          }
-
-          {/* 모든 필드가 데이터 탭으로 이동한 경우 안내 */}
-          {editableFields.filter(field => {
-            const familyPaths = [
-              'couple.groom.name', 'couple.groom.nameEn', 'couple.groom.phone', 'couple.groom.baptismalName',
-              'couple.bride.name', 'couple.bride.nameEn', 'couple.bride.phone', 'couple.bride.baptismalName',
-              'parents.groom.birthOrder', 'parents.bride.birthOrder',
-              'parents.groom.father.name', 'parents.groom.father.phone', 'parents.groom.father.baptismalName', 'parents.groom.father.status',
-              'parents.groom.mother.name', 'parents.groom.mother.phone', 'parents.groom.mother.baptismalName', 'parents.groom.mother.status',
-              'parents.bride.father.name', 'parents.bride.father.phone', 'parents.bride.father.baptismalName', 'parents.bride.father.status',
-              'parents.bride.mother.name', 'parents.bride.mother.phone', 'parents.bride.mother.baptismalName', 'parents.bride.mother.status',
-            ]
-            const dataPaths = [
-              'wedding.date', 'wedding.time',
-              'venue.name', 'venue.hall', 'venue.address', 'venue.tel',
-            ]
-            return !familyPaths.includes(field.binding) && !dataPaths.includes(field.binding)
-          }).length === 0 && (
-            <p className="text-sm text-[var(--text-light)]">
-              이 섹션의 데이터는 <span className="font-medium text-[var(--sage-600)]">데이터</span> 탭에서 편집하세요
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ============================================
-// Variable Field (바인딩된 필드 편집)
-// ============================================
-
-interface VariableFieldProps {
-  binding: VariablePath
-  value: unknown
-  onChange: (value: unknown) => void
-  onUploadImage?: (file: File) => Promise<string>
-  /** 위치 정보 한 번에 변경 (address, lat, lng) */
-  onLocationChange?: (address: string, lat: number, lng: number) => void
-  /** WeddingData (location 타입에서 좌표 읽기용) */
-  data?: WeddingData
-}
-
-function VariableField({ binding, value, onChange, onUploadImage, onLocationChange, data }: VariableFieldProps) {
-  const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
-
-  // 커스텀 변수의 경우 키를 레이블로 사용
-  let label: string
-  if (isCustomVariablePath(binding)) {
-    const key = getCustomVariableKey(binding) || binding
-    // camelCase/snake_case를 읽기 좋게 변환 (예: weddingTitle → Wedding Title)
-    label = key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/_/g, ' ')
-      .replace(/^\s/, '')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-  } else {
-    label = fieldConfig?.label ?? binding
-  }
-
-  const type = fieldConfig?.type ?? 'text'
-  const placeholder = fieldConfig?.placeholder
-
-  return (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-[var(--text-body)]">
-        {label}
-      </label>
-
-      {type === 'text' && (
-        <input
-          type="text"
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-        />
-      )}
-
-      {type === 'textarea' && (
-        <textarea
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
-        />
-      )}
-
-      {type === 'date' && (
-        <input
-          type="date"
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-        />
-      )}
-
-      {type === 'time' && (
-        <input
-          type="time"
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-        />
-      )}
-
-      {type === 'phone' && (
-        <input
-          type="tel"
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder ?? '010-0000-0000'}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-        />
-      )}
-
-      {type === 'image' && (
-        <ImageField
-          value={String(value ?? '')}
-          onChange={onChange}
-          onUploadImage={onUploadImage}
-        />
-      )}
-
-      {type === 'gallery' && (
-        <GalleryFieldLocal
-          value={Array.isArray(value) ? value : []}
-          onChange={onChange}
-          onUploadImage={onUploadImage}
-        />
-      )}
-
-      {type === 'location' && (
-        <LocationSearchField
-          value={String(value ?? '')}
-          lat={data?.venue?.lat}
-          lng={data?.venue?.lng}
-          onLocationChange={(address, lat, lng) => {
-            if (onLocationChange) {
-              onLocationChange(address, lat, lng)
-            }
-          }}
-        />
-      )}
-
-      {type === 'notice-items' && (
-        <NoticeItemsField
-          value={Array.isArray(value) ? value : []}
-          onChange={onChange}
-        />
-      )}
-
-      {type === 'string-list' && (
-        <StringListField
-          value={Array.isArray(value) ? value : []}
-          onChange={onChange}
-          placeholder={placeholder}
-        />
-      )}
-
-      {type === 'checkbox' && (
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={Boolean(value)}
-            onChange={(e) => onChange(e.target.checked)}
-            className="w-4 h-4 rounded border-[var(--sand-200)] text-[var(--sage-500)] focus:ring-[var(--sage-500)]"
-          />
-          <span className="text-sm text-[var(--text-muted)]">
-            {placeholder || '활성화'}
-          </span>
-        </label>
-      )}
-
-      {type === 'bgm-selector' && (
-        <BgmSelectorField
-          value={String(value ?? '')}
-          onChange={onChange}
-        />
-      )}
-    </div>
-  )
-}
-
-// ============================================
-// Gallery Field (Local implementation)
-// ============================================
-
-interface GalleryImage {
-  id: string
-  url: string
-  order: number
-}
-
-interface GalleryFieldLocalProps {
-  value: GalleryImage[]
-  onChange: (value: unknown) => void
-  onUploadImage?: (file: File) => Promise<string>
-  maxImages?: number
-}
-
-function GalleryFieldLocal({
-  value,
-  onChange,
-  onUploadImage,
-  maxImages = 60,
-}: GalleryFieldLocalProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-
-  const canAddMore = value.length < maxImages
-
-  const handleClick = useCallback(() => {
-    if (!isLoading && canAddMore) {
-      inputRef.current?.click()
-    }
-  }, [isLoading, canAddMore])
-
-  const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
-
-    setError(null)
-    setIsLoading(true)
-
-    try {
-      const newImages: GalleryImage[] = []
-      const remainingSlots = maxImages - value.length
-
-      for (const file of files.slice(0, remainingSlots)) {
-        // 파일 타입 검증
-        if (!file.type.startsWith('image/')) {
-          continue
-        }
-        // 파일 크기 검증 (10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          continue
-        }
-
-        let url: string
-        if (onUploadImage) {
-          url = await onUploadImage(file)
-        } else {
-          // fallback: base64 로컬 프리뷰
-          url = await new Promise<string>((resolve) => {
-            const reader = new FileReader()
-            reader.onload = (event) => {
-              resolve(event.target?.result as string)
-            }
-            reader.readAsDataURL(file)
-          })
-        }
-
-        newImages.push({
-          id: `gallery-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          url,
-          order: value.length + newImages.length,
-        })
-      }
-
-      if (newImages.length > 0) {
-        onChange([...value, ...newImages])
-      }
-    } catch (err) {
-      setError('이미지 업로드에 실패했습니다')
-      console.error('Gallery upload failed:', err)
-    } finally {
-      setIsLoading(false)
-    }
-
-    e.target.value = ''
-  }, [onUploadImage, onChange, value, maxImages])
-
-  // 드래그 앤 드롭 (파일)
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    if (!isLoading && canAddMore) {
-      setIsDragging(true)
-    }
-  }, [isLoading, canAddMore])
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }, [])
-
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-
-    if (isLoading || !canAddMore) return
-
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
-    if (files.length === 0) return
-
-    setIsLoading(true)
-    try {
-      const newImages: GalleryImage[] = []
-      const remainingSlots = maxImages - value.length
-
-      for (const file of files.slice(0, remainingSlots)) {
-        if (file.size > 10 * 1024 * 1024) continue
-
-        let url: string
-        if (onUploadImage) {
-          url = await onUploadImage(file)
-        } else {
-          url = await new Promise<string>((resolve) => {
-            const reader = new FileReader()
-            reader.onload = (event) => {
-              resolve(event.target?.result as string)
-            }
-            reader.readAsDataURL(file)
-          })
-        }
-
-        newImages.push({
-          id: `gallery-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          url,
-          order: value.length + newImages.length,
-        })
-      }
-
-      if (newImages.length > 0) {
-        onChange([...value, ...newImages])
-      }
-    } catch (err) {
-      setError('이미지 업로드에 실패했습니다')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [isLoading, canAddMore, onUploadImage, onChange, value, maxImages])
-
-  // 이미지 삭제
-  const handleDelete = useCallback((imageId: string) => {
-    if (isLoading) return
-    const updated = value.filter(img => img.id !== imageId)
-    const reordered = updated.map((img, idx) => ({ ...img, order: idx }))
-    onChange(reordered)
-  }, [isLoading, value, onChange])
-
-  // 순서 변경 - 드래그 시작
-  const handleImageDragStart = useCallback((index: number) => {
-    setDraggedIndex(index)
-  }, [])
-
-  // 순서 변경 - 드래그 오버
-  const handleImageDragOver = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    if (draggedIndex === null || draggedIndex === index) return
-
-    const newValue = [...value]
-    const [dragged] = newValue.splice(draggedIndex, 1)
-    newValue.splice(index, 0, dragged)
-
-    const reordered = newValue.map((img, idx) => ({ ...img, order: idx }))
-    onChange(reordered)
-    setDraggedIndex(index)
-  }, [draggedIndex, value, onChange])
-
-  // 순서 변경 - 드래그 끝
-  const handleImageDragEnd = useCallback(() => {
-    setDraggedIndex(null)
-  }, [])
-
-  return (
-    <div className="space-y-2">
-      {/* 갤러리 그리드 */}
-      <div className="grid grid-cols-3 gap-2">
-        {/* 기존 이미지들 */}
-        {value.map((image, index) => (
-          <div
-            key={image.id}
-            draggable
-            onDragStart={() => handleImageDragStart(index)}
-            onDragOver={(e) => handleImageDragOver(e, index)}
-            onDragEnd={handleImageDragEnd}
-            className={`
-              relative aspect-square rounded-lg overflow-hidden cursor-move bg-[var(--sand-100)]
-              ${draggedIndex === index ? 'opacity-50' : ''}
-            `}
-          >
-            <img
-              src={image.url}
-              alt={`Gallery ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-            {/* 순서 표시 */}
-            <div className="absolute top-1 left-1 px-1.5 py-0.5 text-xs bg-black/50 text-white rounded">
-              {index + 1}
-            </div>
-            {/* 삭제 버튼 */}
-            <button
-              type="button"
-              onClick={() => handleDelete(image.id)}
-              className="
-                absolute top-1 right-1 p-1 rounded-full
-                bg-black/50 text-white hover:bg-red-500/80
-                transition-colors
-              "
-              title="삭제"
-            >
-              <XIcon className="w-3 h-3" />
-            </button>
-          </div>
-        ))}
-
-        {/* 추가 버튼 */}
-        {canAddMore && (
-          <div
-            onClick={handleClick}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`
-              aspect-square rounded-lg border-2 border-dashed
-              flex flex-col items-center justify-center cursor-pointer
-              transition-colors bg-white
-              ${isDragging
-                ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
-                : 'border-[var(--sand-200)] hover:border-[var(--sage-400)]'
-              }
-            `}
-          >
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            {isLoading ? (
-              <div className="w-6 h-6 border-2 border-[var(--sage-500)] border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <PlusIcon className="w-6 h-6 text-[var(--text-light)]" />
-                <span className="text-xs text-[var(--text-light)] mt-1">추가</span>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 카운터 */}
-      <p className="text-xs text-[var(--text-light)]">
-        {value.length}/{maxImages}장
-      </p>
-
-      {/* 에러 메시지 */}
-      {error && (
-        <p className="text-xs text-red-400">{error}</p>
-      )}
-    </div>
-  )
-}
-
-// ============================================
-// Image Field
-// ============================================
-
-interface ImageFieldProps {
-  value: string
-  onChange: (value: unknown) => void
-  onUploadImage?: (file: File) => Promise<string>
-}
-
-function ImageField({ value, onChange, onUploadImage }: ImageFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleClick = useCallback(() => {
-    if (!isLoading) {
-      inputRef.current?.click()
-    }
-  }, [isLoading])
-
-  const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // 파일 타입 검증
-    if (!file.type.startsWith('image/')) {
-      setError('이미지 파일만 업로드할 수 있습니다')
-      return
-    }
-
-    // 파일 크기 검증 (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError('파일 크기는 10MB 이하여야 합니다')
-      return
-    }
-
-    setError(null)
-    setIsLoading(true)
-
-    try {
-      if (onUploadImage) {
-        const url = await onUploadImage(file)
-        onChange(url)
-      } else {
-        // fallback: base64 로컬 프리뷰
-        const reader = new FileReader()
-        reader.onload = (event) => {
-          onChange(event.target?.result as string)
-        }
-        reader.readAsDataURL(file)
-      }
-    } catch (err) {
-      setError('이미지 업로드에 실패했습니다')
-      console.error('Image upload failed:', err)
-    } finally {
-      setIsLoading(false)
-    }
-
-    // Reset input
-    e.target.value = ''
-  }, [onUploadImage, onChange])
-
-  return (
-    <div className="space-y-2">
-      {/* 히든 input */}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-
-      {value && (
-        <div className="relative aspect-video bg-[var(--sand-100)] rounded-lg overflow-hidden">
-          <img
-            src={value}
-            alt="Preview"
-            className="w-full h-full object-cover"
-          />
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={isLoading}
-        className="w-full px-3 py-2 bg-white border border-dashed border-[var(--sand-200)] rounded-lg text-[var(--text-muted)] text-sm hover:bg-[var(--sage-50)] hover:border-[var(--sage-400)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {isLoading ? (
-          <>
-            <div className="w-4 h-4 border-2 border-[var(--sage-500)] border-t-transparent rounded-full animate-spin" />
-            업로드 중...
-          </>
-        ) : (
-          value ? '이미지 변경' : '이미지 업로드'
-        )}
-      </button>
-
-      {error && (
-        <p className="text-xs text-red-400">{error}</p>
-      )}
-    </div>
-  )
-}
-
-// ============================================
-// String List Field (단순 문자열 리스트)
-// ============================================
-
-interface StringListFieldProps {
-  value: string[]
-  onChange: (value: unknown) => void
-  placeholder?: string
-}
-
-function StringListField({ value, onChange, placeholder }: StringListFieldProps) {
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-
-  // 아이템 추가
-  const handleAdd = useCallback(() => {
-    onChange([...value, ''])
-  }, [value, onChange])
-
-  // 아이템 삭제
-  const handleDelete = useCallback((index: number) => {
-    const updated = value.filter((_, i) => i !== index)
-    onChange(updated)
-  }, [value, onChange])
-
-  // 아이템 수정
-  const handleItemChange = useCallback((index: number, newValue: string) => {
-    const updated = value.map((item, i) =>
-      i === index ? newValue : item
-    )
-    onChange(updated)
-  }, [value, onChange])
-
-  // 드래그 시작
-  const handleDragStart = useCallback((index: number) => {
-    setDraggedIndex(index)
-  }, [])
-
-  // 드래그 오버 (순서 변경)
-  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    if (draggedIndex === null || draggedIndex === index) return
-
-    const newValue = [...value]
-    const [dragged] = newValue.splice(draggedIndex, 1)
-    newValue.splice(index, 0, dragged)
-    onChange(newValue)
-    setDraggedIndex(index)
-  }, [draggedIndex, value, onChange])
-
-  // 드래그 종료
-  const handleDragEnd = useCallback(() => {
-    setDraggedIndex(null)
-  }, [])
-
-  return (
-    <div className="space-y-2">
-      {/* 아이템 목록 */}
-      {value.map((item, index) => (
-        <div
-          key={index}
-          draggable
-          onDragStart={() => handleDragStart(index)}
-          onDragOver={(e) => handleDragOver(e, index)}
-          onDragEnd={handleDragEnd}
-          className={`
-            flex items-center gap-2
-            ${draggedIndex === index ? 'opacity-50' : ''}
-          `}
-        >
-          {/* 드래그 핸들 */}
-          <div className="cursor-move text-[var(--text-light)] hover:text-[var(--text-muted)]">
-            <DragIcon className="w-4 h-4" />
-          </div>
-
-          {/* 입력 필드 */}
-          <input
-            type="text"
-            value={item}
-            onChange={(e) => handleItemChange(index, e.target.value)}
-            placeholder={placeholder}
-            className="flex-1 px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-          />
-
-          {/* 삭제 버튼 */}
-          <button
-            type="button"
-            onClick={() => handleDelete(index)}
-            className="p-1.5 text-[var(--text-light)] hover:text-red-500 transition-colors"
-            title="삭제"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
-        </div>
-      ))}
-
-      {/* 추가 버튼 */}
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--sand-200)] rounded-lg text-sm text-[var(--text-muted)] hover:border-[var(--sage-400)] hover:text-[var(--sage-600)] transition-colors"
-      >
-        <PlusIcon className="w-4 h-4" />
-        항목 추가
-      </button>
-
-      {/* 도움말 */}
-      {value.length === 0 && (
-        <p className="text-xs text-[var(--text-light)] text-center">
-          항목이 없습니다. 위 버튼을 눌러 추가하세요.
-        </p>
-      )}
-    </div>
-  )
-}
-
-// ============================================
-// Notice Items Field (리스트 추가/삭제/순서변경)
-// ============================================
-
-interface NoticeItemData {
-  title: string
-  content: string
-  iconType?: 'rings' | 'birds' | 'hearts'
-  backgroundColor?: string
-  borderColor?: string
-}
-
-// ============================================
-// Notice Icon Field (3개 SVG 중 선택)
-// ============================================
-
-const NOTICE_ICON_OPTIONS = [
-  { value: 'rings', label: '반지', src: '/assets/notice1.svg' },
-  { value: 'birds', label: '새', src: '/assets/notice2.svg' },
-  { value: 'hearts', label: '하트', src: '/assets/notice3.svg' },
-  { value: 'none', label: '없음', src: null },
-] as const
-
-interface NoticeIconFieldProps {
-  value: string
-  onChange: (value: unknown) => void
-}
-
-function NoticeIconField({ value, onChange }: NoticeIconFieldProps) {
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {NOTICE_ICON_OPTIONS.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={`
-            relative p-2 rounded-lg border-2 transition-all
-            ${value === option.value
-              ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
-              : 'border-[var(--sand-100)] bg-white hover:border-[var(--sand-200)]'
-            }
-          `}
-        >
-          {option.src ? (
-            <img
-              src={option.src}
-              alt={option.label}
-              className="w-full h-10 object-contain"
-            />
-          ) : (
-            <div className="w-full h-10 flex items-center justify-center text-xs text-[var(--text-muted)]">
-              없음
-            </div>
-          )}
-          <span className="block mt-1 text-xs text-center text-[var(--text-body)]">
-            {option.label}
-          </span>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-interface NoticeItemsFieldProps {
-  value: NoticeItemData[]
-  onChange: (value: unknown) => void
-}
-
-function NoticeItemsField({ value, onChange }: NoticeItemsFieldProps) {
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-
-  // 아이템 추가
-  const handleAdd = useCallback(() => {
-    const newItem: NoticeItemData = {
-      title: '',
-      content: '',
-    }
-    onChange([...value, newItem])
-  }, [value, onChange])
-
-  // 아이템 삭제
-  const handleDelete = useCallback((index: number) => {
-    const updated = value.filter((_, i) => i !== index)
-    onChange(updated)
-  }, [value, onChange])
-
-  // 아이템 수정
-  const handleItemChange = useCallback((index: number, field: keyof NoticeItemData, fieldValue: string) => {
-    const updated = value.map((item, i) =>
-      i === index ? { ...item, [field]: fieldValue } : item
-    )
-    onChange(updated)
-  }, [value, onChange])
-
-  // 드래그 시작
-  const handleDragStart = useCallback((index: number) => {
-    setDraggedIndex(index)
-  }, [])
-
-  // 드래그 오버 (순서 변경)
-  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    if (draggedIndex === null || draggedIndex === index) return
-
-    const newValue = [...value]
-    const [dragged] = newValue.splice(draggedIndex, 1)
-    newValue.splice(index, 0, dragged)
-    onChange(newValue)
-    setDraggedIndex(index)
-  }, [draggedIndex, value, onChange])
-
-  // 드래그 종료
-  const handleDragEnd = useCallback(() => {
-    setDraggedIndex(null)
-  }, [])
-
-  return (
-    <div className="space-y-3">
-      {/* 아이템 목록 */}
-      {value.map((item, index) => (
-        <div
-          key={index}
-          draggable
-          onDragStart={() => handleDragStart(index)}
-          onDragOver={(e) => handleDragOver(e, index)}
-          onDragEnd={handleDragEnd}
-          className={`
-            p-3 bg-white border border-[var(--sand-200)] rounded-lg
-            ${draggedIndex === index ? 'opacity-50 border-dashed' : ''}
-          `}
-        >
-          {/* 헤더 (드래그 핸들 + 삭제) */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 cursor-move text-[var(--text-light)]">
-              <DragIcon className="w-4 h-4" />
-              <span className="text-xs font-medium">공지 {index + 1}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleDelete(index)}
-              className="p-1 text-[var(--text-light)] hover:text-red-500 transition-colors"
-              title="삭제"
-            >
-              <XIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* 제목 */}
-          <input
-            type="text"
-            value={item.title}
-            onChange={(e) => handleItemChange(index, 'title', e.target.value)}
-            placeholder="공지 제목 (예: 피로연 안내)"
-            className="w-full px-3 py-2 mb-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-          />
-
-          {/* 내용 */}
-          <textarea
-            value={item.content}
-            onChange={(e) => handleItemChange(index, 'content', e.target.value)}
-            placeholder="공지 내용을 입력하세요"
-            rows={3}
-            className="w-full px-3 py-2 mb-2 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
-          />
-
-          {/* 스타일(아이콘+배경) 선택 */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--text-light)]">스타일:</span>
-            <div className="flex gap-1">
-              {NOTICE_ICON_OPTIONS.filter(opt => opt.value !== 'none').map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleItemChange(index, 'iconType', option.value)}
-                  className={`
-                    p-1 rounded border-2 transition-all
-                    ${(item.iconType || 'birds') === option.value
-                      ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
-                      : 'border-transparent hover:border-[var(--sand-200)]'
-                    }
-                  `}
-                  title={option.label}
-                >
-                  <img
-                    src={option.src!}
-                    alt={option.label}
-                    className="w-8 h-4 object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      ))}
-
-      {/* 추가 버튼 */}
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--sand-200)] rounded-lg text-sm text-[var(--text-muted)] hover:border-[var(--sage-400)] hover:text-[var(--sage-600)] transition-colors"
-      >
-        <PlusIcon className="w-4 h-4" />
-        공지 추가
-      </button>
-
-      {/* 도움말 */}
-      {value.length === 0 && (
-        <p className="text-xs text-[var(--text-light)] text-center">
-          공지 항목이 없습니다. 위 버튼을 눌러 추가하세요.
-        </p>
-      )}
-    </div>
-  )
-}
-
-// ============================================
-// BGM Selector Field (프리셋 + 유튜브 URL)
-// ============================================
-
-import { bgmPresets, getBgmCategories, type BgmPreset, type BgmCategory } from '../../../audio/bgm-presets'
-
-interface BgmSelectorFieldProps {
-  value: string
-  onChange: (value: unknown) => void
-}
-
-function BgmSelectorField({ value, onChange }: BgmSelectorFieldProps) {
-  const [activeTab, setActiveTab] = useState<'preset' | 'youtube'>('preset')
-  const [selectedCategory, setSelectedCategory] = useState<BgmCategory>('romantic')
-  const [youtubeUrl, setYoutubeUrl] = useState('')
-
-  const categories = getBgmCategories()
-  const filteredPresets = bgmPresets.filter(p => p.category === selectedCategory)
-
-  // 현재 선택된 프리셋 찾기
-  const selectedPreset = bgmPresets.find(p => p.url === value)
-
-  // 유튜브 URL인지 확인
-  const isYoutubeUrl = value?.includes('youtube.com') || value?.includes('youtu.be')
-
-  // 유튜브 URL에서 비디오 ID 추출
-  const extractYoutubeId = (url: string): string | null => {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    ]
-    for (const pattern of patterns) {
-      const match = url.match(pattern)
-      if (match) return match[1]
-    }
-    return null
-  }
-
-  // 유튜브 URL을 오디오 스트림 URL로 변환 (실제로는 백엔드 처리 필요)
-  const handleYoutubeSubmit = useCallback(() => {
-    if (!youtubeUrl) return
-    const videoId = extractYoutubeId(youtubeUrl)
-    if (videoId) {
-      // 유튜브 URL 그대로 저장 (재생은 별도 처리)
-      onChange(youtubeUrl)
-    }
-  }, [youtubeUrl, onChange])
-
-  return (
-    <div className="space-y-3">
-      {/* 탭 */}
-      <div className="flex gap-1 p-1 bg-[var(--sand-50)] rounded-lg">
-        <button
-          type="button"
-          onClick={() => setActiveTab('preset')}
-          className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            activeTab === 'preset'
-              ? 'bg-white text-[var(--text-primary)] shadow-sm'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
-          }`}
-        >
-          프리셋
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('youtube')}
-          className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            activeTab === 'youtube'
-              ? 'bg-white text-[var(--text-primary)] shadow-sm'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
-          }`}
-        >
-          유튜브
-        </button>
-      </div>
-
-      {/* 프리셋 탭 */}
-      {activeTab === 'preset' && (
-        <div className="space-y-3">
-          {/* 카테고리 선택 */}
-          <div className="flex flex-wrap gap-1">
-            {categories.map(cat => (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setSelectedCategory(cat.value)}
-                className={`px-2.5 py-1 text-xs rounded-full transition-colors ${
-                  selectedCategory === cat.value
-                    ? 'bg-[var(--sage-500)] text-white'
-                    : 'bg-[var(--sand-100)] text-[var(--text-muted)] hover:bg-[var(--sand-200)]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* 프리셋 목록 */}
-          <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
-            {filteredPresets.map(preset => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => onChange(preset.url)}
-                className={`flex items-center gap-3 p-2 rounded-lg border-2 transition-all text-left ${
-                  value === preset.url
-                    ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
-                    : 'border-[var(--sand-100)] hover:border-[var(--sand-200)]'
-                }`}
-              >
-                <div className="w-8 h-8 rounded-full bg-[var(--sage-100)] flex items-center justify-center flex-shrink-0">
-                  <MusicIcon className="w-4 h-4 text-[var(--sage-600)]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                    {preset.name}
-                  </p>
-                  <p className="text-xs text-[var(--text-muted)] truncate">
-                    {preset.description}
-                  </p>
-                </div>
-                {value === preset.url && (
-                  <CheckIcon className="w-4 h-4 text-[var(--sage-500)] flex-shrink-0" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 유튜브 탭 */}
-      {activeTab === 'youtube' && (
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-              className="flex-1 px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
-            />
-            <button
-              type="button"
-              onClick={handleYoutubeSubmit}
-              disabled={!youtubeUrl}
-              className="px-3 py-2 bg-[var(--sage-500)] text-white text-sm rounded-lg hover:bg-[var(--sage-600)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              적용
-            </button>
-          </div>
-          <p className="text-xs text-[var(--text-light)]">
-            유튜브 음악 URL을 입력하세요
-          </p>
-
-          {/* 현재 유튜브 URL 표시 */}
-          {isYoutubeUrl && value && (
-            <div className="flex items-center gap-2 p-2 bg-[var(--sage-50)] rounded-lg">
-              <YoutubeIcon className="w-4 h-4 text-red-500 flex-shrink-0" />
-              <p className="text-xs text-[var(--text-body)] truncate flex-1">
-                {value}
+        <div className="bg-[var(--ivory-50)] p-4">
+          {editableFieldCount > 0 ? (
+            <div className="space-y-3">
+              <p className="text-sm text-[var(--text-muted)]">
+                이 섹션에는 <span className="font-medium text-[var(--sage-600)]">{editableFieldCount}개</span>의
+                편집 가능한 항목이 있습니다.
               </p>
               <button
                 type="button"
-                onClick={() => onChange('')}
-                className="p-1 text-[var(--text-light)] hover:text-red-500"
+                onClick={onGoToData}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-[var(--sage-500)] text-white text-sm font-medium rounded-lg hover:bg-[var(--sage-600)] transition-colors"
               >
-                <XIcon className="w-3 h-3" />
+                <EditIcon className="w-4 h-4" />
+                데이터 편집하기
               </button>
             </div>
+          ) : (
+            <p className="text-sm text-[var(--text-light)]">
+              이 섹션에는 편집 가능한 항목이 없습니다.
+            </p>
           )}
-        </div>
-      )}
-
-      {/* 현재 선택 표시 */}
-      {selectedPreset && !isYoutubeUrl && (
-        <div className="flex items-center gap-2 p-2 bg-[var(--sage-50)] rounded-lg">
-          <MusicIcon className="w-4 h-4 text-[var(--sage-600)] flex-shrink-0" />
-          <p className="text-xs text-[var(--text-body)] flex-1">
-            {selectedPreset.name} - {selectedPreset.description}
-          </p>
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="p-1 text-[var(--text-light)] hover:text-red-500"
-          >
-            <XIcon className="w-3 h-3" />
-          </button>
         </div>
       )}
     </div>
@@ -1546,7 +266,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
 
       {isOpen && (
         <div className="absolute left-0 right-0 mt-2 bg-white border border-[var(--sand-100)] rounded-lg shadow-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
-          {availableTypes.map(type => (
+          {availableTypes.map((type) => (
             <button
               key={type}
               onClick={() => {
@@ -1563,236 +283,6 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
       )}
     </div>
   )
-}
-
-// ============================================
-// Variable Field Config
-// ============================================
-
-interface FieldConfig {
-  label: string
-  type: 'text' | 'textarea' | 'date' | 'time' | 'phone' | 'image' | 'gallery' | 'location' | 'notice-items' | 'string-list' | 'checkbox' | 'bgm-selector'
-  placeholder?: string
-}
-
-// 자동 계산되는 필드 (편집기에서 숨김)
-const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
-  // 날짜/시간 파생 필드
-  'wedding.dateDisplay',
-  'wedding.timeDisplay',
-  'wedding.dday',
-  'wedding.month',
-  'wedding.day',
-  'wedding.weekday',
-  // 캘린더 파생 필드 (전후 요일)
-  'wedding.weekdayMinus2',
-  'wedding.weekdayMinus1',
-  'wedding.weekdayPlus1',
-  'wedding.weekdayPlus2',
-  // 카운트다운 (실시간 계산)
-  'countdown.days',
-  'countdown.hours',
-  'countdown.minutes',
-  'countdown.seconds',
-  // 복합 객체 필드 (JSON 형태로 표시되므로 숨김)
-  'venue',
-])
-
-// 자동 계산 필드 → 입력 필드 매핑 (표시용 바인딩 대신 입력용 바인딩 표시)
-const DERIVED_TO_INPUT_MAP: Record<string, VariablePath> = {
-  'wedding.dateDisplay': 'wedding.date',
-  'wedding.timeDisplay': 'wedding.time',
-  'wedding.dday': 'wedding.date',
-  'wedding.month': 'wedding.date',
-  'wedding.day': 'wedding.date',
-  'wedding.weekday': 'wedding.date',
-  // 캘린더 전후 요일
-  'wedding.weekdayMinus2': 'wedding.date',
-  'wedding.weekdayMinus1': 'wedding.date',
-  'wedding.weekdayPlus1': 'wedding.date',
-  'wedding.weekdayPlus2': 'wedding.date',
-  // 카운트다운
-  'countdown.days': 'wedding.date',
-  'countdown.hours': 'wedding.date',
-  'countdown.minutes': 'wedding.date',
-  'countdown.seconds': 'wedding.date',
-}
-
-const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> = {
-  // 커플 정보 (신규)
-  'couple.groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
-  'couple.groom.phone': { label: '신랑 연락처', type: 'phone' },
-  'couple.groom.baptismalName': { label: '신랑 세례명', type: 'text', placeholder: '미카엘' },
-  'couple.groom.photo': { label: '신랑 사진', type: 'image' },
-  'couple.groom.birthDate': { label: '신랑 생일', type: 'date' },
-  'couple.groom.intro': { label: '신랑 직업', type: 'text', placeholder: '소프트웨어 엔지니어' },
-  'couple.groom.mbti': { label: '신랑 MBTI', type: 'text', placeholder: 'ISTP' },
-  'couple.groom.tags': { label: '신랑 태그', type: 'string-list', placeholder: '캠핑' },
-  'couple.bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
-  'couple.bride.phone': { label: '신부 연락처', type: 'phone' },
-  'couple.bride.baptismalName': { label: '신부 세례명', type: 'text', placeholder: '마리아' },
-  'couple.bride.photo': { label: '신부 사진', type: 'image' },
-  'couple.bride.birthDate': { label: '신부 생일', type: 'date' },
-  'couple.bride.intro': { label: '신부 직업', type: 'text', placeholder: '그래픽 디자이너' },
-  'couple.bride.mbti': { label: '신부 MBTI', type: 'text', placeholder: 'ENFP' },
-  'couple.bride.tags': { label: '신부 태그', type: 'string-list', placeholder: '러닝' },
-
-  // 혼주 정보 (신규)
-  'parents.groom.birthOrder': { label: '신랑 서열', type: 'text', placeholder: '장남' },
-  'parents.groom.father.name': { label: '신랑 아버지 성함', type: 'text' },
-  'parents.groom.father.phone': { label: '신랑 아버지 연락처', type: 'phone' },
-  'parents.groom.father.baptismalName': { label: '신랑 아버지 세례명', type: 'text' },
-  'parents.groom.mother.name': { label: '신랑 어머니 성함', type: 'text' },
-  'parents.groom.mother.phone': { label: '신랑 어머니 연락처', type: 'phone' },
-  'parents.groom.mother.baptismalName': { label: '신랑 어머니 세례명', type: 'text' },
-  'parents.bride.birthOrder': { label: '신부 서열', type: 'text', placeholder: '차녀' },
-  'parents.bride.father.name': { label: '신부 아버지 성함', type: 'text' },
-  'parents.bride.father.phone': { label: '신부 아버지 연락처', type: 'phone' },
-  'parents.bride.father.baptismalName': { label: '신부 아버지 세례명', type: 'text' },
-  'parents.bride.mother.name': { label: '신부 어머니 성함', type: 'text' },
-  'parents.bride.mother.phone': { label: '신부 어머니 연락처', type: 'phone' },
-  'parents.bride.mother.baptismalName': { label: '신부 어머니 세례명', type: 'text' },
-
-  // 신랑 정보 (레거시)
-  'groom.name': { label: '신랑 이름', type: 'text', placeholder: '홍길동' },
-  'groom.nameEn': { label: '신랑 영문 이름', type: 'text', placeholder: 'Gildong' },
-  'groom.phone': { label: '신랑 연락처', type: 'phone' },
-  'groom.fatherName': { label: '신랑 아버지 성함', type: 'text' },
-  'groom.motherName': { label: '신랑 어머니 성함', type: 'text' },
-  'groom.fatherPhone': { label: '신랑 아버지 연락처', type: 'phone' },
-  'groom.motherPhone': { label: '신랑 어머니 연락처', type: 'phone' },
-
-  // 신부 정보 (레거시)
-  'bride.name': { label: '신부 이름', type: 'text', placeholder: '김영희' },
-  'bride.nameEn': { label: '신부 영문 이름', type: 'text', placeholder: 'Younghee' },
-  'bride.phone': { label: '신부 연락처', type: 'phone' },
-  'bride.fatherName': { label: '신부 아버지 성함', type: 'text' },
-  'bride.motherName': { label: '신부 어머니 성함', type: 'text' },
-  'bride.fatherPhone': { label: '신부 아버지 연락처', type: 'phone' },
-  'bride.motherPhone': { label: '신부 어머니 연락처', type: 'phone' },
-
-  // 예식 정보
-  'wedding.date': { label: '예식 날짜', type: 'date' },
-  'wedding.time': { label: '예식 시간', type: 'time' },
-  'wedding.timeDisplay': { label: '예식 시간', type: 'time' },
-
-  // 예식장 정보
-  'venue.name': { label: '예식장 이름', type: 'text', placeholder: '○○웨딩홀' },
-  'venue.hall': { label: '홀 이름', type: 'text', placeholder: '그랜드홀' },
-  'venue.floor': { label: '층', type: 'text', placeholder: '5층' },
-  'venue.address': { label: '주소', type: 'location' },
-  'venue.addressDetail': { label: '상세 주소', type: 'text' },
-  'venue.phone': { label: '예식장 연락처', type: 'phone' },
-  'venue.parkingInfo': { label: '주차 안내', type: 'textarea' },
-  'venue.transportInfo': { label: '교통 안내', type: 'textarea' },
-
-  // 교통 정보 (리스트)
-  'venue.transportation.subway': { label: '지하철', type: 'string-list', placeholder: '2호선 삼성역 5번출구 10분 거리' },
-  'venue.transportation.bus': { label: '버스', type: 'string-list', placeholder: '삼성역 5번출구 앞 정류장' },
-  'venue.transportation.shuttle': { label: '셔틀버스', type: 'string-list', placeholder: '삼성역 5번출구 앞 (10시부터 20분 간격)' },
-  'venue.transportation.parking': { label: '주차', type: 'string-list', placeholder: '지하 1~3층 주차장 이용' },
-  'venue.transportation.etc': { label: '전세 버스', type: 'string-list', placeholder: '출발 일시: 3월 22일 오전 9시' },
-
-  // 사진
-  'photos.main': { label: '메인 사진', type: 'image' },
-  'photos.gallery': { label: '갤러리 사진', type: 'gallery' },
-
-  // 엔딩
-  'ending.photo': { label: '엔딩 사진', type: 'image' },
-
-  // 인사말
-  'greeting.title': { label: '인사말 제목', type: 'text' },
-  'greeting.content': { label: '인사말 내용', type: 'textarea', placeholder: '저희 두 사람이...' },
-
-  // 공지사항
-  'notice.sectionTitle': { label: '섹션 제목', type: 'text', placeholder: 'NOTICE' },
-  'notice.title': { label: '공지 제목', type: 'text', placeholder: '포토부스 안내' },
-  'notice.description': { label: '공지 설명', type: 'textarea', placeholder: '저희 두 사람의 결혼식을\n기억하실 수 있도록...' },
-  'notice.items': { label: '공지 항목', type: 'notice-items' },
-
-  // 음악
-  'music.url': { label: '배경음악', type: 'bgm-selector' },
-  'music.autoPlay': { label: '자동 재생', type: 'checkbox' },
-
-  // RSVP
-  'rsvp.title': { label: 'RSVP 제목', type: 'text' },
-  'rsvp.description': { label: 'RSVP 설명', type: 'textarea' },
-}
-
-// Block type icons (editor-panel.tsx와 동일)
-const BLOCK_TYPE_ICONS: Record<BlockType, string> = {
-  hero: '🖼️',
-  'greeting-parents': '💌',
-  profile: '👤',
-  calendar: '📅',
-  gallery: '🎨',
-  rsvp: '✅',
-  location: '📍',
-  notice: '📢',
-  account: '💳',
-  message: '💬',
-  wreath: '💐',
-  ending: '🎬',
-  contact: '📞',
-  music: '🎵',
-  loading: '⏳',
-  custom: '🔧',
-  interview: '🎤',
-}
-
-// ============================================
-// Utility Functions
-// ============================================
-
-/**
- * format 문자열에서 변수 경로 추출
- * 예: '{parents.groom.father.name}·{parents.groom.mother.name}의 장남 {couple.groom.name}'
- *     → ['parents.groom.father.name', 'parents.groom.mother.name', 'couple.groom.name']
- */
-function extractFormatVariables(format: string): string[] {
-  const regex = /\{([^}]+)\}/g
-  const matches: string[] = []
-  let match: RegExpExecArray | null
-
-  while ((match = regex.exec(format)) !== null) {
-    matches.push(match[1])
-  }
-
-  return matches
-}
-
-/**
- * 중첩된 객체에 값 설정 (immutable)
- */
-function setNestedValue<T extends object>(
-  obj: T,
-  path: string,
-  value: unknown
-): T {
-  const keys = path.split('.')
-
-  // 재귀적으로 깊은 복사하면서 값 설정
-  function setAt(current: Record<string, unknown>, keyIndex: number): Record<string, unknown> {
-    const key = keys[keyIndex]
-
-    if (keyIndex === keys.length - 1) {
-      // 마지막 키: 값 설정
-      return { ...current, [key]: value }
-    }
-
-    // 중간 키: 재귀적으로 처리
-    const nextValue = current[key]
-    const nextObj = (typeof nextValue === 'object' && nextValue !== null)
-      ? nextValue as Record<string, unknown>
-      : {}
-
-    return {
-      ...current,
-      [key]: setAt(nextObj, keyIndex + 1),
-    }
-  }
-
-  return setAt(obj as Record<string, unknown>, 0) as T
 }
 
 // ============================================
@@ -1815,42 +305,10 @@ function ChevronIcon({ className }: { className?: string }) {
   )
 }
 
-function XIcon({ className }: { className?: string }) {
+function EditIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  )
-}
-
-function DragIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
-    </svg>
-  )
-}
-
-function MusicIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-    </svg>
-  )
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-    </svg>
-  )
-}
-
-function YoutubeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
     </svg>
   )
 }

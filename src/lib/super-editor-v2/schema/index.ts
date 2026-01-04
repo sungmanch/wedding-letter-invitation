@@ -22,38 +22,35 @@ import type {
   SizeMode,
 } from './types'
 import { nanoid } from 'nanoid'
-import {
-  getBlockPreset,
-  type PresetElement,
-} from '../presets/blocks'
+import { getBlockPreset, type PresetElement } from '../presets/blocks'
 
 /**
- * 기본 시맨틱 토큰 (minimal-light 프리셋 기반)
+ * 기본 시맨틱 토큰 (hero-minimal-overlay 프리셋 기반)
  */
 export const DEFAULT_SEMANTIC_TOKENS: SemanticTokens = {
   // 배경
   'bg-page': '#FFFFFF',
-  'bg-section': '#FAFAFA',
-  'bg-section-alt': '#F5F5F5',
-  'bg-card': '#FFFFFF',
-  'bg-overlay': 'rgba(0, 0, 0, 0.3)',
+  'bg-section': '#FFFFFF',
+  'bg-section-alt': '#FFFFFF',
+  'bg-card': '#F9FAFB',
+  'bg-overlay': 'rgba(0, 0, 0, 0.4)',
 
   // 전경
   'fg-default': '#1A1A1A',
   'fg-muted': '#6B7280',
-  'fg-emphasis': '#000000',
+  'fg-emphasis': '#6B7280',
   'fg-inverse': '#FFFFFF',
   'fg-on-accent': '#FFFFFF',
 
   // 강조/액션
-  'accent-default': '#C9A962',
-  'accent-hover': '#B8983F',
-  'accent-active': '#A68A2D',
-  'accent-secondary': '#8B7355',
+  'accent-default': '#6B7280',
+  'accent-hover': '#E5E7EB',
+  'accent-active': '#6B7280',
+  'accent-secondary': '#E5E7EB',
 
   // 보더
   'border-default': '#E5E7EB',
-  'border-emphasis': '#D1D5DB',
+  'border-emphasis': '#6B7280',
   'border-muted': '#F3F4F6',
 }
 
@@ -62,7 +59,7 @@ export const DEFAULT_SEMANTIC_TOKENS: SemanticTokens = {
  */
 export const DEFAULT_STYLE_SYSTEM: StyleSystem = {
   version: 2,
-  preset: 'minimal-light',
+  preset: 'hero-minimal-overlay',
   typography: {
     preset: 'classic-elegant',
   },
@@ -131,14 +128,32 @@ const SAMPLE_WEDDING_DATE = '2025-06-07'
 
 /**
  * 샘플 WeddingData (새 문서 생성 시 미리보기용)
- * - 신랑/신부 이름, 날짜, 장소, 사진, 인사말만 포함
- * - 혼주, 계좌 정보는 사용자가 직접 입력
+ * - 모든 블록이 ON 되었을 때 미리보기에서 샘플 데이터 표시
+ * - 사용자가 실제 데이터로 교체하면 됨
  */
 export const SAMPLE_WEDDING_DATA: WeddingData = {
-  // ═══ 커플 정보 ═══
+  // ═══ 커플 정보 (확장) ═══
   couple: {
-    groom: { name: '김민준' },
-    bride: { name: '이서연' },
+    groom: {
+      name: '김민준',
+      nameEn: 'Minjun',
+      phone: '010-1234-5678',
+      intro: '웃음이 많고 따뜻한 사람',
+      photo: '/examples/images/groom.png',
+      mbti: 'ENFP',
+      tags: ['캠핑', '러닝', '커피'],
+      job: '소프트웨어 엔지니어',
+    },
+    bride: {
+      name: '이서연',
+      nameEn: 'Seoyeon',
+      phone: '010-9876-5432',
+      intro: '세심하고 배려심 깊은 사람',
+      photo: '/examples/images/bride.png',
+      mbti: 'INFJ',
+      tags: ['독서', '요리', '여행'],
+      job: 'UX 디자이너',
+    },
   },
 
   // ═══ 결혼식 일시 ═══
@@ -157,10 +172,37 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     lng: 127.0458,
   },
 
-  // ═══ 사진 (실제 웨딩 이미지 사용) ═══
+  // ═══ 오시는길 섹션 ═══
+  location: {
+    title: '오시는길',
+    titleEn: 'LOCATION',
+  },
+
+  // ═══ 사진 (갤러리 포함) ═══
   photos: {
     main: '/examples/wedding_image.png',
-    gallery: [],  // 빈 갤러리로 시작 (사용자가 직접 업로드)
+    gallery: [
+      '/examples/wedding_images/1.png',
+      '/examples/wedding_images/2.png',
+      '/examples/wedding_images/3.png',
+      '/examples/wedding_images/4.png',
+      '/examples/wedding_images/5.png',
+      '/examples/wedding_images/6.png',
+    ],
+  },
+
+  // ═══ 혼주 정보 ═══
+  parents: {
+    groom: {
+      father: { name: '김철수' },
+      mother: { name: '박영희' },
+      birthOrder: '장남',
+    },
+    bride: {
+      father: { name: '이영수' },
+      mother: { name: '최미영' },
+      birthOrder: '차녀',
+    },
   },
 
   // ═══ 인사말 ═══
@@ -173,9 +215,85 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
 더없는 기쁨으로 간직하겠습니다.`,
   },
 
+  // ═══ 계좌 정보 ═══
+  accounts: {
+    title: '마음 전하실 곳',
+    titleEn: 'GIFT',
+    description: '축하의 마음을 전해 주시면 감사히 받겠습니다.',
+    groom: [
+      { relation: '신랑', bank: '신한은행', number: '110-123-456789', holder: '김민준' },
+      { relation: '아버지', bank: '국민은행', number: '123-45-6789012', holder: '김철수' },
+    ],
+    bride: [
+      { relation: '신부', bank: '우리은행', number: '1002-345-678901', holder: '이서연' },
+      { relation: '어머니', bank: '하나은행', number: '456-78-9012345', holder: '최미영' },
+    ],
+  },
+
+  // ═══ 공지사항 ═══
+  notice: {
+    sectionTitle: 'NOTICE',
+    items: [
+      {
+        title: '식사 안내',
+        content: '예식 후 1층 그랜드볼룸에서 식사가 준비되어 있습니다.',
+        iconType: 'hearts',
+      },
+      {
+        title: '주차 안내',
+        content: '건물 내 지하주차장 이용 가능합니다. (2시간 무료)',
+        iconType: 'rings',
+      },
+    ],
+  },
+
+  // ═══ RSVP ═══
+  rsvp: {
+    title: '참석 여부를 알려주세요',
+    titleEn: 'RSVP',
+    description: '참석 여부를 미리 알려주시면 준비에 큰 도움이 됩니다.',
+  },
+
+  // ═══ 인터뷰 ═══
+  interview: {
+    title: '우리에게 물었습니다',
+    subtitle: '결혼을 앞둔 저희에게 물어봤어요',
+    items: [
+      {
+        question: '첫인상은 어땠나요?',
+        groomAnswer: '밝고 예쁜 미소가 인상적이었어요',
+        brideAnswer: '듬직하고 편안한 느낌이었어요',
+      },
+      {
+        question: '프로포즈는 어떻게 했나요?',
+        groomAnswer: '우리가 처음 만난 카페에서 했어요',
+        brideAnswer: '너무 감동받아서 울었어요',
+      },
+    ],
+  },
+
+  // ═══ 엔딩 ═══
+  ending: {
+    message: '함께해 주셔서 감사합니다',
+    photo: '/examples/images/quote.jpg',
+  },
+
+  // ═══ BGM ═══
+  bgm: {
+    trackId: 'romantic-piano-01',
+    title: 'Romantic Piano',
+    artist: 'Wedding Music',
+  },
+
+  // ═══ 커스텀 필드 (프리셋 특화) ═══
+  custom: {
+    quoteText: '"우리는 매일 시간을 여행한다..."',
+    quoteSource: '- 영화 「어바웃 타임」 중',
+  },
+
   // ═══ Legacy 호환 ═══
-  groom: { name: '김민준' },
-  bride: { name: '이서연' },
+  groom: { name: '김민준', nameEn: 'Minjun' },
+  bride: { name: '이서연', nameEn: 'Seoyeon' },
 }
 
 /**
@@ -294,7 +412,7 @@ function regenerateElementIds(el: PresetElement): Element {
 
   // Group children 재귀 처리
   if (el.children && el.children.length > 0) {
-    newEl.children = el.children.map(child => regenerateElementIds(child as PresetElement))
+    newEl.children = el.children.map((child) => regenerateElementIds(child as PresetElement))
   }
 
   return newEl
@@ -330,7 +448,7 @@ function createBlockFromPreset(
     height,
     layout: preset.layout,
     elements: preset.defaultElements
-      ? preset.defaultElements.map(el => regenerateElementIds(el))
+      ? preset.defaultElements.map((el) => regenerateElementIds(el))
       : [],
   }
 }
@@ -434,8 +552,28 @@ export function createDefaultBlocks(): Block[] {
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS['greeting-parents'],
       elements: [
-        { id: 'greeting-title', type: 'text', x: 10, y: 5, width: 80, height: 10, zIndex: 1, binding: 'greeting.title', props: { type: 'text' } },
-        { id: 'greeting-content', type: 'text', x: 10, y: 18, width: 80, height: 30, zIndex: 1, binding: 'greeting.content', props: { type: 'text' } },
+        {
+          id: 'greeting-title',
+          type: 'text',
+          x: 10,
+          y: 5,
+          width: 80,
+          height: 10,
+          zIndex: 1,
+          binding: 'greeting.title',
+          props: { type: 'text' },
+        },
+        {
+          id: 'greeting-content',
+          type: 'text',
+          x: 10,
+          y: 18,
+          width: 80,
+          height: 30,
+          zIndex: 1,
+          binding: 'greeting.content',
+          props: { type: 'text' },
+        },
       ],
     },
     // 신랑신부 소개 - 프리셋 적용
@@ -463,8 +601,28 @@ export function createDefaultBlocks(): Block[] {
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.calendar,
       elements: [
-        { id: 'calendar-date', type: 'calendar', x: 10, y: 10, width: 80, height: 60, zIndex: 1, binding: 'wedding.date', props: { type: 'calendar' } },
-        { id: 'calendar-time', type: 'text', x: 25, y: 75, width: 50, height: 10, zIndex: 1, binding: 'wedding.time', props: { type: 'text' } },
+        {
+          id: 'calendar-date',
+          type: 'calendar',
+          x: 10,
+          y: 10,
+          width: 80,
+          height: 60,
+          zIndex: 1,
+          binding: 'wedding.date',
+          props: { type: 'calendar' },
+        },
+        {
+          id: 'calendar-time',
+          type: 'text',
+          x: 25,
+          y: 75,
+          width: 50,
+          height: 10,
+          zIndex: 1,
+          binding: 'wedding.time',
+          props: { type: 'text' },
+        },
       ],
     },
     // 5. 갤러리 - 프리셋 적용
@@ -474,7 +632,17 @@ export function createDefaultBlocks(): Block[] {
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.gallery,
       elements: [
-        { id: 'gallery-photos', type: 'image', x: 0, y: 0, width: 100, height: 100, zIndex: 0, binding: 'photos.gallery', props: { type: 'image', objectFit: 'cover' } },
+        {
+          id: 'gallery-photos',
+          type: 'image',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+          zIndex: 0,
+          binding: 'photos.gallery',
+          props: { type: 'image', objectFit: 'cover' },
+        },
       ],
     },
     // 6. RSVP - 프리셋 적용 (선택 섹션 → 기본 비활성화)
@@ -492,9 +660,39 @@ export function createDefaultBlocks(): Block[] {
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.location,
       elements: [
-        { id: 'location-name', type: 'text', x: 10, y: 10, width: 80, height: 10, zIndex: 1, binding: 'venue.name', props: { type: 'text' } },
-        { id: 'location-address', type: 'text', x: 10, y: 22, width: 80, height: 8, zIndex: 1, binding: 'venue.address', props: { type: 'text' } },
-        { id: 'location-map', type: 'map', x: 5, y: 35, width: 90, height: 55, zIndex: 1, binding: 'venue.address', props: { type: 'map' } },
+        {
+          id: 'location-name',
+          type: 'text',
+          x: 10,
+          y: 10,
+          width: 80,
+          height: 10,
+          zIndex: 1,
+          binding: 'venue.name',
+          props: { type: 'text' },
+        },
+        {
+          id: 'location-address',
+          type: 'text',
+          x: 10,
+          y: 22,
+          width: 80,
+          height: 8,
+          zIndex: 1,
+          binding: 'venue.address',
+          props: { type: 'text' },
+        },
+        {
+          id: 'location-map',
+          type: 'map',
+          x: 5,
+          y: 35,
+          width: 90,
+          height: 55,
+          zIndex: 1,
+          binding: 'venue.address',
+          props: { type: 'map' },
+        },
       ],
     },
     // 8. 공지사항 - 프리셋 적용 (선택 섹션 → 기본 비활성화)
@@ -512,8 +710,28 @@ export function createDefaultBlocks(): Block[] {
       enabled: true,
       height: DEFAULT_BLOCK_HEIGHTS.account,
       elements: [
-        { id: 'account-groom', type: 'text', x: 10, y: 20, width: 80, height: 30, zIndex: 1, binding: 'accounts.groom', props: { type: 'text' } },
-        { id: 'account-bride', type: 'text', x: 10, y: 55, width: 80, height: 30, zIndex: 1, binding: 'accounts.bride', props: { type: 'text' } },
+        {
+          id: 'account-groom',
+          type: 'text',
+          x: 10,
+          y: 20,
+          width: 80,
+          height: 30,
+          zIndex: 1,
+          binding: 'accounts.groom',
+          props: { type: 'text' },
+        },
+        {
+          id: 'account-bride',
+          type: 'text',
+          x: 10,
+          y: 55,
+          width: 80,
+          height: 30,
+          zIndex: 1,
+          binding: 'accounts.bride',
+          props: { type: 'text' },
+        },
       ],
     },
     // 10. 방명록 - 프리셋 적용 (선택 섹션 → 기본 비활성화)

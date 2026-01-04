@@ -193,10 +193,10 @@ function PresetLevel({
   ] as const
 
   const typographyCategories = [
-    { id: 'classic', label: '클래식' },
-    { id: 'modern', label: '모던' },
-    { id: 'romantic', label: '로맨틱' },
-    { id: 'natural', label: '내추럴' },
+    { id: 'sans-serif', label: '산세리프' },
+    { id: 'serif', label: '세리프' },
+    { id: 'handwritten', label: '손글씨' },
+    { id: 'hybrid', label: '하이브리드' },
   ] as const
 
   return (
@@ -468,7 +468,7 @@ interface AdvancedLevelProps {
 function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
   // 토큰 변경
   const handleTokenChange = useCallback((tokenKey: keyof SemanticTokens, value: string) => {
-    const currentTokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'minimal-light'].tokens
+    const currentTokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'hero-minimal-overlay'].tokens
     const newStyle: StyleSystem = {
       ...style,
       advanced: {
@@ -483,7 +483,7 @@ function AdvancedLevel({ style, onChange }: AdvancedLevelProps) {
     onChange(newStyle)
   }, [style, onChange])
 
-  const tokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'minimal-light'].tokens
+  const tokens = style.advanced?.tokens ?? THEME_PRESETS[style.preset ?? 'hero-minimal-overlay'].tokens
 
   return (
     <div className="space-y-6">

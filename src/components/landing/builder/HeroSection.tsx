@@ -11,9 +11,11 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, forwardRef } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Sparkles } from 'lucide-react'
+import { Button, Badge } from '@/components/ui'
 import { MiniHeroRenderer, MiniBlockRenderer } from '../subway/MiniBlockRenderer'
 import { TEMPLATE_IDS } from '../subway/SubwayBuilderContext'
+import { PaperInvitationModal } from './PaperInvitationModal'
 
 // ============================================
 // Constants
@@ -47,19 +49,23 @@ const CAROUSEL_LINES: CarouselLineConfig[] = [
     type: 'preset',
     ids: [
       'calendar-korean-countdown-box',
-      'calendar-week-strip',
-      'calendar-handwritten-countdown',
+      'calendar-heart-strip-countdown',
     ],
     direction: 'right',
-    label: '캘린더',
+    label: '예식일시',
     speed: 45,
   },
   {
     type: 'preset',
-    ids: ['location-minimal', 'location-with-transport'],
+    ids: [
+      'gallery-square-3col',
+      'gallery-square-2col',
+      'gallery-rect-3col',
+      'gallery-mixed',
+    ],
     direction: 'left',
-    label: '위치',
-    speed: 35,
+    label: '갤러리',
+    speed: 38,
   },
 ]
 
@@ -80,6 +86,8 @@ interface CarouselLineConfig {
 // ============================================
 
 export function HeroSection() {
+  const [isPaperModalOpen, setIsPaperModalOpen] = useState(false)
+
   // 스크롤 유도 버튼
   const handleScrollDown = useCallback(() => {
     const builderSection = document.getElementById('builder-section')
@@ -142,19 +150,43 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center gap-4"
+            className="flex flex-col items-center lg:items-start gap-4"
           >
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <Button
+                variant="sage"
+                size="lg"
+                onClick={handleScrollDown}
+                className="group"
+              >
+                지금 시작하기
+                <ChevronDown className="w-5 h-5 ml-2 transition-transform group-hover:translate-y-1" />
+              </Button>
+              <span className="text-sm text-[var(--text-light)]">
+                카드 등록 없이 무료 체험
+              </span>
+            </div>
+
+            {/* 종이 청첩장과 똑같이 만들기 버튼 */}
             <button
-              onClick={handleScrollDown}
-              className="editorial-cta-large group"
+              onClick={() => setIsPaperModalOpen(true)}
+              className="group flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--sand-200)] bg-white/80 hover:bg-white hover:border-[var(--sage-300)] transition-all"
             >
-              지금 시작하기
-              <ChevronDown className="w-5 h-5 ml-2 transition-transform group-hover:translate-y-1" />
+              <Sparkles className="w-4 h-4 text-[var(--sage-500)]" />
+              <span className="text-sm text-[var(--text-body)] group-hover:text-[var(--sage-600)]">
+                종이 청첩장과 똑같이 만들기
+              </span>
+              <Badge className="bg-[var(--sage-100)] text-[var(--sage-700)] border-[var(--sage-200)] text-[10px] px-1.5 py-0.5">
+                Beta
+              </Badge>
             </button>
-            <span className="text-sm text-[var(--text-light)]">
-              카드 등록 없이 무료 체험
-            </span>
           </motion.div>
+
+          {/* Paper Invitation Modal */}
+          <PaperInvitationModal
+            open={isPaperModalOpen}
+            onOpenChange={setIsPaperModalOpen}
+          />
         </div>
 
         {/* 오른쪽: Multi-Line Card Carousel (60%) */}
