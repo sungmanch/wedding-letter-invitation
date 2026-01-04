@@ -464,7 +464,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             저장
           </button>
 
-          {/* AI 버튼 */}
+          {/* TODO: AI 편집 기능 비활성화 - 추후 재활성화 시 주석 해제
           <button
             onClick={() => setShowAIPrompt(true)}
             className="px-3 py-1.5 rounded-lg text-sm bg-[var(--sage-100)] text-[var(--sage-700)] hover:bg-[var(--sage-200)] transition-colors flex items-center gap-2"
@@ -472,6 +472,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             <SparklesIcon className="w-4 h-4" />
             AI 편집
           </button>
+          */}
 
           {/* 미리보기 링크 */}
           <Link
