@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/server'
 
 const BUCKET_NAME = 'paper-invitation-photos'
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp']
-const MAX_PHOTOS = 10
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_PAPER_PHOTOS = 10
 const MIN_DAYS_FOR_COMPLETION = 4
 
 /**
@@ -28,23 +28,27 @@ export async function submitPaperInvitationRequest(
     const { data: { user } } = await supabase.auth.getUser()
 
     // 폼 데이터 추출
-    const email = formData.get('email') as string
-    const phone = formData.get('phone') as string | null
+    const phone = formData.get('phone') as string
+    const email = formData.get('email') as string | null
     const notes = formData.get('notes') as string | null
-    const mainImageIndex = parseInt(formData.get('mainImageIndex') as string, 10)
-    const files = formData.getAll('files') as File[]
+    const paperFiles = formData.getAll('paperFiles') as File[]
+    const mainFile = formData.get('mainFile') as File | null
 
     // 유효성 검사
-    if (!email || !email.includes('@')) {
-      return { success: false, error: '유효한 이메일 주소를 입력해주세요' }
+    if (!phone) {
+      return { success: false, error: '연락처를 입력해주세요' }
     }
 
-    if (files.length === 0) {
-      return { success: false, error: '최소 1장의 사진을 업로드해주세요' }
+    if (paperFiles.length === 0) {
+      return { success: false, error: '종이 청첩장 사진을 최소 1장 이상 업로드해주세요' }
     }
 
-    if (files.length > MAX_PHOTOS) {
-      return { success: false, error: `최대 ${MAX_PHOTOS}장까지 업로드할 수 있습니다` }
+    if (paperFiles.length > MAX_PAPER_PHOTOS) {
+      return { success: false, error: `종이 청첩장 사진은 최대 ${MAX_PAPER_PHOTOS}장까지 업로드할 수 있습니다` }
+    }
+
+    if (!mainFile) {
+      return { success: false, error: '메인 이미지를 업로드해주세요' }
     }
 
     // 예상 완료일 계산 (최소 4일 후)
@@ -54,20 +58,17 @@ export async function submitPaperInvitationRequest(
     // 신청 레코드 생성
     const [request] = await db.insert(paperInvitationRequests).values({
       userId: user?.id ?? null,
-      email,
-      phone: phone || null,
+      email: email || null,
+      phone,
       notes: notes || null,
       status: 'pending',
       estimatedCompletionDate,
     }).returning()
 
-    // 사진 업로드
+    // 종이 청첩장 사진 업로드
     let displayOrder = 0
-    let mainPhotoPath: string | null = null
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-
+    for (const file of paperFiles) {
       // 타입 검증
       if (!ALLOWED_TYPES.includes(file.type)) {
         console.warn(`Skipping file with unsupported type: ${file.type}`)
@@ -82,7 +83,7 @@ export async function submitPaperInvitationRequest(
 
       // 파일명 생성
       const ext = file.name.split('.').pop() || 'jpg'
-      const filename = `${request.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const filename = `${request.id}/paper-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
       // Supabase Storage에 업로드
       const { error: uploadError } = await supabase.storage
@@ -102,22 +103,48 @@ export async function submitPaperInvitationRequest(
         .from(BUCKET_NAME)
         .getPublicUrl(filename)
 
-      const isMain = i === mainImageIndex
-
-      // DB에 사진 정보 저장
+      // DB에 사진 정보 저장 (종이 청첩장 사진은 isMain: false)
       await db.insert(paperInvitationPhotos).values({
         requestId: request.id,
         storagePath: filename,
         url: urlData.publicUrl,
         displayOrder,
-        isMain,
+        isMain: false,
       })
 
-      if (isMain) {
+      displayOrder++
+    }
+
+    // 메인 이미지 업로드
+    let mainPhotoPath: string | null = null
+
+    if (ALLOWED_TYPES.includes(mainFile.type) && mainFile.size <= MAX_FILE_SIZE) {
+      const ext = mainFile.name.split('.').pop() || 'jpg'
+      const filename = `${request.id}/main-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filename, mainFile, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from(BUCKET_NAME)
+          .getPublicUrl(filename)
+
+        // DB에 메인 사진 정보 저장
+        await db.insert(paperInvitationPhotos).values({
+          requestId: request.id,
+          storagePath: filename,
+          url: urlData.publicUrl,
+          displayOrder: 999, // 메인 이미지는 별도 순서
+          isMain: true,
+        })
+
         mainPhotoPath = filename
       }
-
-      displayOrder++
     }
 
     // 메인 사진 경로 업데이트

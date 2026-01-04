@@ -284,8 +284,8 @@ export const paperInvitationRequests = pgTable('paper_invitation_requests', {
   userId: uuid('user_id'), // auth.users 참조 (비로그인도 허용)
 
   // 연락처 정보
-  email: varchar('email', { length: 255 }).notNull(),
-  phone: varchar('phone', { length: 20 }),
+  phone: varchar('phone', { length: 20 }).notNull(),
+  email: varchar('email', { length: 255 }),
 
   // 요청 상태
   // pending: 신청 완료, 대기 중

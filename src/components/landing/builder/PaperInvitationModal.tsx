@@ -13,9 +13,7 @@
 import { useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import heic2any from 'heic2any'
 import {
-  Upload,
   X,
   Check,
   ImagePlus,
@@ -57,44 +55,22 @@ interface PaperInvitationModalProps {
 // Constants
 // ============================================
 
-const MAX_IMAGES = 10
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp']
+const MAX_PAPER_IMAGES = 10
+const MAX_MAIN_IMAGES = 1
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
 /**
- * HEIC/HEIF 파일을 JPEG로 변환
- * Chrome/Firefox는 HEIC를 네이티브로 표시할 수 없으므로 변환 필요
+ * HEIC/HEIF 파일인지 확인
  */
-async function convertHeicToJpeg(file: File): Promise<File> {
-  const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+function isHeicFile(file: File): boolean {
+  return file.type === 'image/heic' || file.type === 'image/heif' ||
     file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
-
-  if (!isHeic) {
-    return file
-  }
-
-  try {
-    const convertedBlob = await heic2any({
-      blob: file,
-      toType: 'image/jpeg',
-      quality: 0.9,
-    })
-
-    // heic2any can return Blob or Blob[]
-    const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob
-
-    // Create new File with converted blob
-    const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg')
-    return new File([blob], newFileName, { type: 'image/jpeg' })
-  } catch (error) {
-    console.error('HEIC conversion failed:', error)
-    throw new Error('HEIC 파일 변환에 실패했습니다')
-  }
 }
 
 const STEPS = [
-  { id: 1, title: '사진 업로드', description: '청첩장에 사용할 사진을 업로드해주세요' },
-  { id: 2, title: '메인 사진 선택', description: '대표 이미지로 사용할 사진을 선택해주세요' },
+  { id: 1, title: '종이 청첩장 사진', description: '종이 청첩장 사진을 업로드해주세요' },
+  { id: 2, title: '메인 사진 업로드', description: '메인 이미지로 사용할 사진을 업로드해주세요' },
   { id: 3, title: '신청 완료', description: '연락처를 입력하고 신청을 완료해주세요' },
 ]
 
@@ -104,8 +80,8 @@ const STEPS = [
 
 export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModalProps) {
   const [currentStep, setCurrentStep] = useState(1)
-  const [images, setImages] = useState<UploadedImage[]>([])
-  const [mainImageId, setMainImageId] = useState<string | null>(null)
+  const [paperImages, setPaperImages] = useState<UploadedImage[]>([]) // 종이 청첩장 사진 (최대 10장)
+  const [mainImages, setMainImages] = useState<UploadedImage[]>([]) // 메인 이미지 사진 (1장)
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
@@ -114,20 +90,27 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
   const [isSuccess, setIsSuccess] = useState(false)
   const [isProcessingFiles, setIsProcessingFiles] = useState(false)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const paperFileInputRef = useRef<HTMLInputElement>(null)
+  const mainFileInputRef = useRef<HTMLInputElement>(null)
 
-  // 파일 업로드 핸들러
-  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 종이 청첩장 사진 업로드 핸들러
+  const handlePaperFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
     setIsProcessingFiles(true)
     const newImages: UploadedImage[] = []
+    const rejectedHeicFiles: string[] = []
 
     for (const file of Array.from(files)) {
-      // 타입 검증 (HEIC는 파일 확장자로도 체크)
-      const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
-      if (!ALLOWED_TYPES.includes(file.type) && !isHeic) {
+      // HEIC/HEIF 파일 반려
+      if (isHeicFile(file)) {
+        rejectedHeicFiles.push(file.name)
+        continue
+      }
+
+      // 타입 검증
+      if (!ALLOWED_TYPES.includes(file.type)) {
         continue
       }
 
@@ -137,56 +120,98 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
       }
 
       // 최대 개수 검증
-      if (images.length + newImages.length >= MAX_IMAGES) {
+      if (paperImages.length + newImages.length >= MAX_PAPER_IMAGES) {
         break
       }
 
-      try {
-        // HEIC/HEIF 파일은 JPEG로 변환 (브라우저 미리보기 호환성)
-        const processedFile = await convertHeicToJpeg(file)
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+      const previewUrl = URL.createObjectURL(file)
 
-        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
-        const previewUrl = URL.createObjectURL(processedFile)
-
-        newImages.push({ id, file: processedFile, previewUrl })
-      } catch (error) {
-        console.error('File processing failed:', error)
-        // 변환 실패 시 건너뛰기
-        continue
-      }
+      newImages.push({ id, file, previewUrl })
     }
 
-    setImages((prev) => [...prev, ...newImages])
-
-    // 첫 번째 이미지를 자동으로 메인으로 설정
-    if (!mainImageId && (images.length === 0) && newImages.length > 0) {
-      setMainImageId(newImages[0].id)
+    // HEIC 파일이 있었으면 alert 표시
+    if (rejectedHeicFiles.length > 0) {
+      alert(`HEIC/HEIF 형식은 지원하지 않습니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.\n\n반려된 파일: ${rejectedHeicFiles.join(', ')}`)
     }
+
+    setPaperImages((prev) => [...prev, ...newImages])
 
     // input 초기화
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    if (paperFileInputRef.current) {
+      paperFileInputRef.current.value = ''
     }
 
     setIsProcessingFiles(false)
-  }, [images.length, mainImageId])
+  }, [paperImages.length])
 
-  // 이미지 삭제
-  const handleRemoveImage = useCallback((id: string) => {
-    setImages((prev) => {
-      const filtered = prev.filter((img) => img.id !== id)
-      // 삭제된 이미지가 메인이었다면 첫 번째 이미지를 메인으로
-      if (mainImageId === id && filtered.length > 0) {
-        setMainImageId(filtered[0].id)
-      } else if (filtered.length === 0) {
-        setMainImageId(null)
+  // 메인 이미지 사진 업로드 핸들러
+  const handleMainFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setIsProcessingFiles(true)
+    const file = files[0]
+
+    // HEIC/HEIF 파일 반려
+    if (isHeicFile(file)) {
+      alert(`HEIC/HEIF 형식은 지원하지 않습니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.`)
+      setIsProcessingFiles(false)
+      if (mainFileInputRef.current) {
+        mainFileInputRef.current.value = ''
       }
-      return filtered
-    })
-  }, [mainImageId])
+      return
+    }
 
-  // 드래그 앤 드롭
-  const handleDrop = useCallback((e: React.DragEvent) => {
+    // 타입 검증
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      alert('지원하지 않는 파일 형식입니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.')
+      setIsProcessingFiles(false)
+      if (mainFileInputRef.current) {
+        mainFileInputRef.current.value = ''
+      }
+      return
+    }
+
+    // 크기 검증
+    if (file.size > MAX_FILE_SIZE) {
+      alert('파일 크기가 너무 큽니다. 10MB 이하의 파일만 업로드해주세요.')
+      setIsProcessingFiles(false)
+      if (mainFileInputRef.current) {
+        mainFileInputRef.current.value = ''
+      }
+      return
+    }
+
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const previewUrl = URL.createObjectURL(file)
+
+    // 기존 메인 이미지의 previewUrl 해제
+    mainImages.forEach(img => URL.revokeObjectURL(img.previewUrl))
+
+    setMainImages([{ id, file, previewUrl }])
+
+    // input 초기화
+    if (mainFileInputRef.current) {
+      mainFileInputRef.current.value = ''
+    }
+
+    setIsProcessingFiles(false)
+  }, [mainImages])
+
+  // 종이 청첩장 이미지 삭제
+  const handleRemovePaperImage = useCallback((id: string) => {
+    setPaperImages((prev) => prev.filter((img) => img.id !== id))
+  }, [])
+
+  // 메인 이미지 삭제
+  const handleRemoveMainImage = useCallback(() => {
+    mainImages.forEach(img => URL.revokeObjectURL(img.previewUrl))
+    setMainImages([])
+  }, [mainImages])
+
+  // 종이 청첩장 드래그 앤 드롭
+  const handlePaperDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     const files = e.dataTransfer.files
     if (!files) return
@@ -195,8 +220,21 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
       target: { files },
     } as unknown as React.ChangeEvent<HTMLInputElement>
 
-    handleFileSelect(fakeEvent)
-  }, [handleFileSelect])
+    handlePaperFileSelect(fakeEvent)
+  }, [handlePaperFileSelect])
+
+  // 메인 이미지 드래그 앤 드롭
+  const handleMainDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    const files = e.dataTransfer.files
+    if (!files) return
+
+    const fakeEvent = {
+      target: { files },
+    } as unknown as React.ChangeEvent<HTMLInputElement>
+
+    handleMainFileSelect(fakeEvent)
+  }, [handleMainFileSelect])
 
   // 다음 단계로
   const handleNext = useCallback(() => {
@@ -214,7 +252,7 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
 
   // 제출
   const handleSubmit = useCallback(async () => {
-    if (!email || images.length === 0 || !mainImageId) return
+    if (!phone || paperImages.length === 0 || mainImages.length === 0) return
 
     setIsSubmitting(true)
     setSubmitError(null)
@@ -222,18 +260,19 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
     try {
       // FormData 생성
       const formData = new FormData()
-      formData.append('email', email)
-      if (phone) formData.append('phone', phone)
+      formData.append('phone', phone)
+      if (email) formData.append('email', email)
       if (notes) formData.append('notes', notes)
-      formData.append('mainImageId', mainImageId)
 
-      // 이미지 파일들 추가
-      images.forEach((img, index) => {
-        formData.append('files', img.file)
-        if (img.id === mainImageId) {
-          formData.append('mainImageIndex', index.toString())
-        }
+      // 종이 청첩장 이미지 파일들 추가
+      paperImages.forEach((img) => {
+        formData.append('paperFiles', img.file)
       })
+
+      // 메인 이미지 파일 추가
+      if (mainImages[0]) {
+        formData.append('mainFile', mainImages[0].file)
+      }
 
       const result = await submitPaperInvitationRequest(formData)
 
@@ -247,7 +286,7 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
     } finally {
       setIsSubmitting(false)
     }
-  }, [email, phone, notes, images, mainImageId])
+  }, [email, phone, notes, paperImages, mainImages])
 
   // 모달 닫기 시 초기화
   const handleClose = useCallback(() => {
@@ -255,8 +294,8 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
     // 약간의 딜레이 후 상태 초기화 (애니메이션 완료 후)
     setTimeout(() => {
       setCurrentStep(1)
-      setImages([])
-      setMainImageId(null)
+      setPaperImages([])
+      setMainImages([])
       setEmail('')
       setPhone('')
       setNotes('')
@@ -268,10 +307,10 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
 
   // 단계별 유효성 검사
   const canProceed = currentStep === 1
-    ? images.length > 0
+    ? paperImages.length > 0
     : currentStep === 2
-      ? mainImageId !== null
-      : email.length > 0
+      ? mainImages.length > 0
+      : phone.length > 0
 
   return (
     <Modal open={open} onOpenChange={handleClose}>
@@ -326,21 +365,24 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
                 transition={{ duration: 0.2 }}
               >
                 {currentStep === 1 && (
-                  <Step1Upload
-                    images={images}
-                    onFileSelect={handleFileSelect}
-                    onRemoveImage={handleRemoveImage}
-                    onDrop={handleDrop}
-                    fileInputRef={fileInputRef}
+                  <Step1PaperUpload
+                    images={paperImages}
+                    onFileSelect={handlePaperFileSelect}
+                    onRemoveImage={handleRemovePaperImage}
+                    onDrop={handlePaperDrop}
+                    fileInputRef={paperFileInputRef}
                     isProcessing={isProcessingFiles}
                   />
                 )}
 
                 {currentStep === 2 && (
-                  <Step2SelectMain
-                    images={images}
-                    mainImageId={mainImageId}
-                    onSelectMain={setMainImageId}
+                  <Step2MainUpload
+                    mainImage={mainImages[0] ?? null}
+                    onFileSelect={handleMainFileSelect}
+                    onRemoveImage={handleRemoveMainImage}
+                    onDrop={handleMainDrop}
+                    fileInputRef={mainFileInputRef}
+                    isProcessing={isProcessingFiles}
                   />
                 )}
 
@@ -416,7 +458,7 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
 // Step Components
 // ============================================
 
-interface Step1Props {
+interface Step1PaperProps {
   images: UploadedImage[]
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemoveImage: (id: string) => void
@@ -425,13 +467,13 @@ interface Step1Props {
   isProcessing: boolean
 }
 
-function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef, isProcessing }: Step1Props) {
+function Step1PaperUpload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef, isProcessing }: Step1PaperProps) {
   const [isDragging, setIsDragging] = useState(false)
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-[var(--text-muted)]">
-        종이 청첩장 사진을 업로드해주세요. 최대 {MAX_IMAGES}장까지 가능합니다.
+        종이 청첩장 사진을 업로드해주세요. 최대 {MAX_PAPER_IMAGES}장까지 가능합니다.
       </p>
 
       {/* 드래그 앤 드롭 영역 */}
@@ -454,7 +496,7 @@ function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef
             ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
             : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
           }
-          ${images.length >= MAX_IMAGES || isProcessing ? 'opacity-50 pointer-events-none' : ''}
+          ${images.length >= MAX_PAPER_IMAGES || isProcessing ? 'opacity-50 pointer-events-none' : ''}
         `}
       >
         {isProcessing ? (
@@ -474,7 +516,7 @@ function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef
                 사진을 드래그하거나 클릭하여 업로드
               </p>
               <p className="text-xs text-[var(--text-muted)] mt-1">
-                JPG, PNG, HEIC, WebP · 최대 10MB
+                JPG, PNG, WebP · 최대 10MB
               </p>
             </div>
           </>
@@ -516,55 +558,106 @@ function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef
       )}
 
       <p className="text-xs text-[var(--text-light)] text-center">
-        {images.length} / {MAX_IMAGES}장 업로드됨
+        {images.length} / {MAX_PAPER_IMAGES}장 업로드됨
       </p>
     </div>
   )
 }
 
-interface Step2Props {
-  images: UploadedImage[]
-  mainImageId: string | null
-  onSelectMain: (id: string) => void
+interface Step2MainProps {
+  mainImage: UploadedImage | null
+  onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onRemoveImage: () => void
+  onDrop: (e: React.DragEvent) => void
+  fileInputRef: React.RefObject<HTMLInputElement | null>
+  isProcessing: boolean
 }
 
-function Step2SelectMain({ images, mainImageId, onSelectMain }: Step2Props) {
+function Step2MainUpload({ mainImage, onFileSelect, onRemoveImage, onDrop, fileInputRef, isProcessing }: Step2MainProps) {
+  const [isDragging, setIsDragging] = useState(false)
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-[var(--text-muted)]">
-        대표 이미지로 사용할 사진을 선택해주세요. 이 사진이 청첩장 메인 화면에 들어갑니다.
+        메인 화면에 들어갈 대표 이미지를 업로드해주세요. 1장만 업로드 가능합니다.
       </p>
 
-      <div className="grid grid-cols-3 gap-3">
-        {images.map((img) => (
+      {mainImage ? (
+        // 이미 업로드된 메인 이미지 표시
+        <div className="relative aspect-[3/4] max-w-[200px] mx-auto rounded-lg overflow-hidden ring-2 ring-[var(--sage-500)] ring-offset-2">
+          <Image
+            src={mainImage.previewUrl}
+            alt="메인 이미지"
+            fill
+            className="object-cover"
+          />
           <button
-            key={img.id}
-            onClick={() => onSelectMain(img.id)}
-            className={`
-              relative aspect-[3/4] rounded-lg overflow-hidden
-              ring-2 transition-all
-              ${mainImageId === img.id
-                ? 'ring-[var(--sage-500)] ring-offset-2'
-                : 'ring-transparent hover:ring-[var(--sage-200)]'
-              }
-            `}
+            onClick={onRemoveImage}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
           >
-            <Image
-              src={img.previewUrl}
-              alt="업로드된 사진"
-              fill
-              className="object-cover"
-            />
-            {mainImageId === img.id && (
-              <div className="absolute inset-0 bg-[var(--sage-500)]/20 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full bg-[var(--sage-500)] flex items-center justify-center">
-                  <Star className="w-4 h-4 text-white fill-white" />
-                </div>
-              </div>
-            )}
+            <X className="w-4 h-4 text-white" />
           </button>
-        ))}
-      </div>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--sage-500)] text-white text-xs font-medium">
+            메인 이미지
+          </div>
+        </div>
+      ) : (
+        // 드래그 앤 드롭 영역
+        <div
+          onDragOver={(e) => {
+            e.preventDefault()
+            if (!isProcessing) setIsDragging(true)
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            setIsDragging(false)
+            if (!isProcessing) onDrop(e)
+          }}
+          onClick={() => !isProcessing && fileInputRef.current?.click()}
+          className={`
+            relative border-2 border-dashed rounded-xl p-8
+            flex flex-col items-center justify-center gap-3
+            cursor-pointer transition-all
+            ${isDragging
+              ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
+              : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
+            }
+            ${isProcessing ? 'opacity-50 pointer-events-none' : ''}
+          `}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="w-8 h-8 text-[var(--sage-600)] animate-spin" />
+              <p className="text-sm text-[var(--text-muted)]">
+                사진 처리 중...
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-[var(--sage-100)] flex items-center justify-center">
+                <Star className="w-6 h-6 text-[var(--sage-600)]" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-[var(--text-body)]">
+                  메인 이미지를 드래그하거나 클릭하여 업로드
+                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  JPG, PNG, WebP · 최대 10MB
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ALLOWED_TYPES.join(',')}
+        onChange={onFileSelect}
+        className="hidden"
+        disabled={isProcessing}
+      />
     </div>
   )
 }
@@ -599,7 +692,7 @@ function Step3Contact({
           </p>
           <p className="text-xs text-[var(--sage-600)] mt-1">
             신청 후 <strong>최소 4일</strong>이 소요됩니다.
-            제작이 완료되면 입력하신 이메일로 안내드립니다.
+            제작이 완료되면 입력하신 연락처로 안내드립니다.
           </p>
         </div>
       </div>
@@ -608,20 +701,20 @@ function Step3Contact({
       <div className="space-y-3">
         <Input
           variant="light"
-          label="이메일 (필수)"
-          type="email"
-          placeholder="email@example.com"
-          value={email}
-          onChange={(e) => onEmailChange(e.target.value)}
-        />
-
-        <Input
-          variant="light"
-          label="연락처 (선택)"
+          label="연락처 (필수)"
           type="tel"
           placeholder="010-0000-0000"
           value={phone}
           onChange={(e) => onPhoneChange(e.target.value)}
+        />
+
+        <Input
+          variant="light"
+          label="이메일 (선택)"
+          type="email"
+          placeholder="email@example.com"
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
         />
 
         <div>
