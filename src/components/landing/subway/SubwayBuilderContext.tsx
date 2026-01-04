@@ -30,6 +30,7 @@ import {
   getThemeForHeroPreset,
   type HeroPresetId,
 } from '@/lib/super-editor-v2/presets/blocks/hero'
+import { getHeroPresetIdForTemplate } from '@/lib/super-editor-v2/config/template-preset-map'
 
 // ============================================
 // Types
@@ -60,7 +61,7 @@ export interface SubwayBuilderState {
 type SubwayBuilderAction =
   | {
       type: 'SET_TEMPLATE'
-      payload: { templateId: string; cssVariables: Record<string, string> }
+      payload: { templateId: string; heroPresetId: string; cssVariables: Record<string, string> }
     }
   | {
       type: 'SET_PRESET'
@@ -136,6 +137,10 @@ function subwayBuilderReducer(
       return {
         ...state,
         selectedTemplateId: action.payload.templateId,
+        selectedPresets: {
+          ...state.selectedPresets,
+          hero: action.payload.heroPresetId,
+        },
         cssVariables: action.payload.cssVariables,
       }
 
@@ -180,7 +185,7 @@ export function SubwayBuilderProvider({
 }: SubwayBuilderProviderProps) {
   const [state, dispatch] = useReducer(subwayBuilderReducer, INITIAL_STATE)
 
-  // Hero 템플릿 선택 시 색상 전파
+  // Hero 템플릿 선택 시 색상 전파 + hero 프리셋 연동
   const setTemplate = useCallback((templateId: string) => {
     const template = getTemplateV2ById(templateId)
     if (!template) {
@@ -188,13 +193,16 @@ export function SubwayBuilderProvider({
       return
     }
 
+    // 템플릿에 맞는 hero 프리셋 조회
+    const heroPresetId = getHeroPresetIdForTemplate(templateId) || DEFAULT_PRESETS.hero
+
     const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
     const resolved = resolveStyle(style)
     const cssVariables = styleToCSSVariables(resolved)
 
     dispatch({
       type: 'SET_TEMPLATE',
-      payload: { templateId, cssVariables },
+      payload: { templateId, heroPresetId, cssVariables },
     })
   }, [])
 
@@ -221,7 +229,7 @@ export function SubwayBuilderProvider({
 
           dispatch({
             type: 'SET_TEMPLATE',
-            payload: { templateId: state.selectedTemplateId, cssVariables },
+            payload: { templateId: state.selectedTemplateId, heroPresetId: presetId, cssVariables },
           })
         }
       }
