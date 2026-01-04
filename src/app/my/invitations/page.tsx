@@ -7,10 +7,49 @@ import { listDocuments } from '@/lib/super-editor-v2/actions'
 import { InvitationCard } from './InvitationCard'
 import type {
   Block,
+  Element,
   StyleSystem,
   WeddingData,
   GlobalAnimation,
 } from '@/lib/super-editor-v2/schema/types'
+import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
+
+/** 요소가 유효한 SE2 요소인지 확인 */
+function isValidElement(el: Element): boolean {
+  if (!el || typeof el !== 'object') return false
+  if (typeof el.id !== 'string' || typeof el.type !== 'string') return false
+  // props가 있어야 하고 props.type이 있어야 함
+  if (!el.props || typeof el.props !== 'object' || typeof el.props.type !== 'string') return false
+  // children이 있으면 재귀 검증
+  if (el.children && Array.isArray(el.children)) {
+    return el.children.every(isValidElement)
+  }
+  return true
+}
+
+/** SE2 문서인지 확인 (레거시 문서 필터링) */
+function isValidSE2Document(doc: EditorDocumentV2): boolean {
+  // blocks가 배열이고 최소 1개 이상의 블록이 있어야 함
+  if (!Array.isArray(doc.blocks) || doc.blocks.length === 0) return false
+
+  // 각 블록에 type, id가 있고 elements의 모든 요소가 유효해야 함
+  const blocks = doc.blocks as Block[]
+  const hasValidBlocks = blocks.every((block) => {
+    if (!block || typeof block.type !== 'string' || typeof block.id !== 'string') return false
+    // elements가 있으면 모든 요소 검증
+    if (block.elements && Array.isArray(block.elements)) {
+      return block.elements.every(isValidElement)
+    }
+    return true
+  })
+  if (!hasValidBlocks) return false
+
+  // data에 wedding 관련 필드가 있어야 함
+  const data = doc.data as WeddingData | null
+  if (!data || typeof data !== 'object') return false
+
+  return true
+}
 
 export const metadata: Metadata = {
   title: '내 청첩장 - Maison de Letter',
@@ -25,7 +64,10 @@ export default async function MyInvitationsPage() {
     redirect('/login?redirect=/my/invitations')
   }
 
-  const documents = await listDocuments()
+  const allDocuments = await listDocuments()
+
+  // 레거시 문서 필터링
+  const documents = allDocuments.filter(isValidSE2Document)
 
   return (
     <main className="min-h-screen bg-[var(--ivory-100)]">
