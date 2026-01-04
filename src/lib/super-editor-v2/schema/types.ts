@@ -372,22 +372,25 @@ export interface StyleSystem {
 }
 
 export type ThemePresetId =
-  // 1컬러 시스템 (디자이너 컬러셋)
+  // ─── 히어로 전용 1컬러 (Hero-specific) ───
+  | 'hero-classic-elegant'
+  | 'hero-casual-playful'
+  | 'hero-minimal-overlay'
+  | 'hero-dark-romantic'
+  | 'hero-bright-casual'
+  | 'hero-monochrome-bold'
+  // ─── 1컬러 시스템 (Simple) ───
   | 'simple-pink'
   | 'simple-coral'
   | 'simple-blue'
-  // 기본
-  | 'minimal-light'
-  // 클래식
-  | 'classic-ivory'
-  | 'classic-gold'
-  // 모던
-  | 'modern-mono'
-  // 로맨틱
-  | 'romantic-blush'
-  | 'romantic-garden'
-  // 특수
-  | 'photo-adaptive'
+  // ─── @deprecated (제거 예정) ───
+  | 'minimal-light'    // @deprecated - hero-minimal-overlay 사용
+  | 'classic-ivory'    // @deprecated - hero-classic-elegant 사용
+  | 'classic-gold'     // @deprecated - hero-classic-elegant 사용
+  | 'modern-mono'      // @deprecated - hero-monochrome-bold 사용
+  | 'romantic-blush'   // @deprecated - hero-dark-romantic 사용
+  | 'romantic-garden'  // @deprecated - hero-casual-playful 사용
+  | 'photo-adaptive'   // @deprecated - 미사용
 
 export interface QuickStyleConfig {
   // 색상 조정
@@ -510,23 +513,15 @@ export interface TypographyConfig {
 }
 
 export type TypographyPresetId =
-  // 클래식/우아
-  | 'classic-elegant'
-  | 'classic-traditional'
-  | 'classic-romantic'
-  // 모던/미니멀
-  | 'modern-minimal'
-  | 'modern-clean'
-  | 'modern-geometric'
-  // 로맨틱/감성
-  | 'romantic-script'
-  | 'romantic-italian'
-  | 'romantic-soft'
-  // 내추럴/손글씨
-  | 'natural-handwritten'
-  | 'natural-brush'
-  | 'natural-warm'
-  | 'natural-witty'
+  // 핵심 4종
+  | 'modern-minimal'      // 1. Sans-serif (모던 미니멀)
+  | 'classic-elegant'     // 2. Serif (클래식 엘레강스)
+  | 'natural-warm'        // 3. Handwritten (내추럴 웜)
+  | 'classic-modern'      // 4. Hybrid - Serif 제목 + Sans 본문
+  // 옵션 3종
+  | 'korean-brush'        // 5. 한글 중심 (한글 손글씨 강조)
+  | 'dual-script'         // 6. 듀얼 스크립트 (영문+한글 손글씨)
+  | 'high-contrast'       // 7. 하이 콘트라스트 (강한 대비)
 
 export interface TypeScale {
   xs: string

@@ -1,8 +1,9 @@
 /**
  * Super Editor v2 - Typography Presets
  *
- * 12개 타이포그래피 프리셋 정의
- * Level 1 타이포그래피 설정용
+ * 7개 최적화 타이포그래피 프리셋
+ * - 핵심 4종: modern-minimal, classic-elegant, natural-warm, classic-modern
+ * - 옵션 3종: korean-brush, dual-script, high-contrast
  */
 
 import type { TypographyPresetId, TypeScale } from '../schema/types'
@@ -15,6 +16,7 @@ export interface FontStack {
   readonly family: readonly string[]
   readonly fallback: string
   readonly googleFonts?: readonly string[] // Google Fonts 로드용 이름
+  readonly sizeScale?: number // 폰트 크기 보정 계수 (기본 1.0)
 }
 
 export interface TypographyPreset {
@@ -22,7 +24,7 @@ export interface TypographyPreset {
   name: string
   nameKo: string
   description: string
-  category: 'classic' | 'modern' | 'romantic' | 'natural'
+  category: 'sans-serif' | 'serif' | 'handwritten' | 'hybrid'
   fontStacks: {
     display: FontStack  // 히어로/인트로용 (예술적)
     heading: FontStack  // 섹션 제목용
@@ -34,217 +36,126 @@ export interface TypographyPreset {
     body: number
   }
   scale: TypeScale
+  // 추천 사이즈 가이드 (px)
+  recommendedSizes: {
+    display: { min: number; max: number }
+    heading: { min: number; max: number }
+    body: { min: number; max: number }
+  }
   // 추천 테마 프리셋
   recommendedThemes?: string[]
 }
 
 // ============================================
-// Font Stacks
+// Font Stacks (크기 보정 계수 포함)
 // ============================================
 
 const FONT_STACKS = {
-  // 영문 세리프
+  // ─── 영문 세리프 ───
   playfair: {
     family: ['Playfair Display', 'Georgia', 'serif'],
     fallback: 'serif',
     googleFonts: ['Playfair Display:400,500,600,700'],
+    sizeScale: 0.95, // 약간 크게 렌더링됨
   },
   cormorant: {
     family: ['Cormorant Garamond', 'Garamond', 'serif'],
     fallback: 'serif',
     googleFonts: ['Cormorant Garamond:400,500,600,700'],
+    sizeScale: 1.05,
   },
   cinzel: {
     family: ['Cinzel', 'Times New Roman', 'serif'],
     fallback: 'serif',
     googleFonts: ['Cinzel:400,500,600,700'],
+    sizeScale: 0.90, // 대문자만, 크게 렌더링됨
   },
 
-  // 영문 산세리프
+  // ─── 영문 산세리프 ───
   montserrat: {
     family: ['Montserrat', 'Helvetica Neue', 'sans-serif'],
     fallback: 'sans-serif',
-    googleFonts: ['Montserrat:400,500,600,700'],
+    googleFonts: ['Montserrat:300,400,500,600,700'],
+    sizeScale: 1.0,
   },
   inter: {
     family: ['Inter', 'system-ui', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: ['Inter:400,500,600,700'],
-  },
-  poppins: {
-    family: ['Poppins', 'Helvetica Neue', 'sans-serif'],
-    fallback: 'sans-serif',
-    googleFonts: ['Poppins:400,500,600,700'],
+    sizeScale: 1.0,
   },
 
-  // 영문 스크립트
+  // ─── 영문 스크립트 ───
   greatVibes: {
     family: ['Great Vibes', 'cursive'],
     fallback: 'cursive',
     googleFonts: ['Great Vibes:400'],
-  },
-  italianno: {
-    family: ['Italianno', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: ['Italianno:400'],
-  },
-  pinyonScript: {
-    family: ['Pinyon Script', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: ['Pinyon Script:400'],
+    sizeScale: 1.25, // 작게 렌더링됨 → 크게 설정
   },
   dancingScript: {
     family: ['Dancing Script', 'cursive'],
     fallback: 'cursive',
     googleFonts: ['Dancing Script:400,500,600,700'],
+    sizeScale: 1.0,
   },
   alexBrush: {
     family: ['Alex Brush', 'cursive'],
     fallback: 'cursive',
     googleFonts: ['Alex Brush:400'],
-  },
-  highSummit: {
-    family: ['High Summit', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: [], // 로컬 폰트
+    sizeScale: 1.15,
   },
 
-  // 한글 명조
+  // ─── 한글 명조 ───
   notoSerifKr: {
     family: ['Noto Serif KR', 'Batang', 'serif'],
     fallback: 'serif',
     googleFonts: ['Noto Serif KR:400,500,600,700'],
-  },
-  nanumMyeongjo: {
-    family: ['Nanum Myeongjo', 'Batang', 'serif'],
-    fallback: 'serif',
-    googleFonts: ['Nanum Myeongjo:400,700,800'],
+    sizeScale: 1.0,
   },
   gowunBatang: {
     family: ['Gowun Batang', 'Batang', 'serif'],
     fallback: 'serif',
     googleFonts: ['Gowun Batang:400,700'],
-  },
-  hahmlet: {
-    family: ['Hahmlet', 'Batang', 'serif'],
-    fallback: 'serif',
-    googleFonts: ['Hahmlet:400,500,600,700'],
+    sizeScale: 1.0,
   },
 
-  // 한글 고딕
+  // ─── 한글 고딕 ───
   pretendard: {
     family: ['Pretendard', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // CDN 별도 로드
+    sizeScale: 1.0,
   },
   notoSansKr: {
     family: ['Noto Sans KR', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: ['Noto Sans KR:400,500,600,700'],
+    sizeScale: 1.0,
   },
   gowunDodum: {
     family: ['Gowun Dodum', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: ['Gowun Dodum:400'],
+    sizeScale: 1.0,
   },
 
-  // 한글 손글씨
-  mapoGoldNaru: {
-    family: ['MapoGoldenPier', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: [], // 로컬 폰트
-  },
-  nanumPen: {
-    family: ['Nanum Pen Script', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: ['Nanum Pen Script:400'],
-  },
-  bujangnimNunchi: {
-    family: ['BujangnimNunchi', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: [], // CDN @font-face
-  },
-
-  // 기쁨밝음체
-  joyBrightness: {
-    family: ['JoyBrightness', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: [], // CDN @font-face
-  },
-
-  // 나눔스퀘어
+  // ─── 한글 손글씨/붓글씨 ───
   nanumSquare: {
     family: ['NanumSquare', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // CDN @import
+    sizeScale: 0.95, // 약간 크게
   },
-
-  // 아빠의 연애편지
-  dadsLoveLetter: {
-    family: ['DadSLoveLetter', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: [], // CDN @font-face
-  },
-
-  // 손편지체
-  sonpyeonji: {
-    family: ['Sonpyeonji', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: [], // CDN @font-face
-  },
-
-  // 나눔 붓글씨
   nanumBrushScript: {
     family: ['Nanum Brush Script', 'cursive'],
     fallback: 'cursive',
     googleFonts: ['Nanum Brush Script:400'],
-  },
-
-  // Calistoga (영문 세리프)
-  calistoga: {
-    family: ['Calistoga', 'serif'],
-    fallback: 'serif',
-    googleFonts: ['Calistoga:400'],
-  },
-
-  // The Nautigal (영문 스크립트)
-  theNautigal: {
-    family: ['The Nautigal', 'cursive'],
-    fallback: 'cursive',
-    googleFonts: ['The Nautigal:400,700'],
-  },
-
-  // Inknut Antiqua (영문 세리프)
-  inknutAntiqua: {
-    family: ['Inknut Antiqua', 'serif'],
-    fallback: 'serif',
-    googleFonts: ['Inknut Antiqua:300,400,500,600,700,800,900'],
-  },
-
-  // Kodchasan (태국/영문 산세리프)
-  kodchasan: {
-    family: ['Kodchasan', 'sans-serif'],
-    fallback: 'sans-serif',
-    googleFonts: ['Kodchasan:200,300,400,500,600,700'],
-  },
-
-  // Bangers (영문 디스플레이)
-  bangers: {
-    family: ['Bangers', 'system-ui'],
-    fallback: 'system-ui',
-    googleFonts: ['Bangers:400'],
-  },
-
-  // Alata (영문 산세리프)
-  alata: {
-    family: ['Alata', 'sans-serif'],
-    fallback: 'sans-serif',
-    googleFonts: ['Alata:400'],
+    sizeScale: 1.1,
   },
 } as const
 
 // ============================================
-// Default Type Scale
+// Type Scales
 // ============================================
 
 const DEFAULT_SCALE: TypeScale = {
@@ -281,183 +192,135 @@ const COMPACT_SCALE: TypeScale = {
 }
 
 // ============================================
-// Typography Presets
+// 7개 Typography Presets
 // ============================================
 
 export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = {
-  // ─── 클래식/우아 (Classic/Elegant) ───
-  'classic-elegant': {
-    id: 'classic-elegant',
-    name: 'Classic Elegant',
-    nameKo: '클래식 엘레강스',
-    description: 'Playfair Display와 Noto Serif KR의 우아한 조합',
-    category: 'classic',
-    fontStacks: {
-      display: FONT_STACKS.greatVibes,
-      heading: FONT_STACKS.playfair,
-      body: FONT_STACKS.notoSerifKr,
-    },
-    weights: {
-      display: 400,
-      heading: 600,
-      body: 400,
-    },
-    scale: ELEGANT_SCALE,
-    recommendedThemes: ['classic-ivory', 'classic-gold', 'cinematic-dark'],
-  },
-
-  'classic-traditional': {
-    id: 'classic-traditional',
-    name: 'Classic Traditional',
-    nameKo: '클래식 전통',
-    description: 'Cinzel과 나눔명조의 격조 있는 조합',
-    category: 'classic',
-    fontStacks: {
-      display: FONT_STACKS.theNautigal,
-      heading: FONT_STACKS.cinzel,
-      body: FONT_STACKS.nanumMyeongjo,
-    },
-    weights: {
-      display: 400,
-      heading: 500,
-      body: 400,
-    },
-    scale: ELEGANT_SCALE,
-    recommendedThemes: ['classic-gold', 'classic-ivory'],
-  },
-
-  'classic-romantic': {
-    id: 'classic-romantic',
-    name: 'Classic Romantic',
-    nameKo: '클래식 로맨틱',
-    description: 'Cormorant와 고운바탕의 로맨틱한 조합',
-    category: 'classic',
-    fontStacks: {
-      display: FONT_STACKS.italianno,
-      heading: FONT_STACKS.cormorant,
-      body: FONT_STACKS.gowunBatang,
-    },
-    weights: {
-      display: 400,
-      heading: 500,
-      body: 400,
-    },
-    scale: ELEGANT_SCALE,
-    recommendedThemes: ['romantic-blush', 'classic-ivory'],
-  },
-
-  // ─── 모던/미니멀 (Modern/Minimal) ───
+  // ─────────────────────────────────────────
+  // 1. Sans-serif (모던 미니멀)
+  // ─────────────────────────────────────────
   'modern-minimal': {
     id: 'modern-minimal',
     name: 'Modern Minimal',
     nameKo: '모던 미니멀',
-    description: 'Montserrat과 Pretendard의 깔끔한 조합',
-    category: 'modern',
+    description: 'Montserrat과 Pretendard의 깔끔한 조합. 심플하고 현대적, 가독성 최고.',
+    category: 'sans-serif',
     fontStacks: {
-      display: FONT_STACKS.alata,
+      display: FONT_STACKS.montserrat,
       heading: FONT_STACKS.montserrat,
       body: FONT_STACKS.pretendard,
     },
     weights: {
-      display: 400,
-      heading: 600,
-      body: 400,
+      display: 300, // Light
+      heading: 600, // Semi-bold
+      body: 400,    // Regular
     },
     scale: DEFAULT_SCALE,
+    recommendedSizes: {
+      display: { min: 48, max: 64 },
+      heading: { min: 20, max: 24 },
+      body: { min: 14, max: 16 },
+    },
     recommendedThemes: ['minimal-light', 'minimal-dark', 'modern-mono'],
   },
 
-  'modern-clean': {
-    id: 'modern-clean',
-    name: 'Modern Clean',
-    nameKo: '모던 클린',
-    description: 'Inter와 Noto Sans KR의 가독성 좋은 조합',
-    category: 'modern',
-    fontStacks: {
-      display: FONT_STACKS.kodchasan,
-      heading: FONT_STACKS.inter,
-      body: FONT_STACKS.notoSansKr,
-    },
-    weights: {
-      display: 300,
-      heading: 600,
-      body: 400,
-    },
-    scale: DEFAULT_SCALE,
-    recommendedThemes: ['minimal-light', 'modern-contrast', 'gradient-hero'],
-  },
-
-  'modern-geometric': {
-    id: 'modern-geometric',
-    name: 'Modern Geometric',
-    nameKo: '모던 지오메트릭',
-    description: 'Poppins과 Pretendard의 기하학적 조합',
-    category: 'modern',
-    fontStacks: {
-      display: FONT_STACKS.calistoga,
-      heading: FONT_STACKS.poppins,
-      body: FONT_STACKS.pretendard,
-    },
-    weights: {
-      display: 400,
-      heading: 600,
-      body: 400,
-    },
-    scale: DEFAULT_SCALE,
-    recommendedThemes: ['modern-mono', 'duotone'],
-  },
-
-  // ─── 로맨틱/감성 (Romantic/Emotional) ───
-  'romantic-script': {
-    id: 'romantic-script',
-    name: 'Romantic Script',
-    nameKo: '로맨틱 스크립트',
-    description: 'Great Vibes와 고운바탕의 감성적 조합',
-    category: 'romantic',
+  // ─────────────────────────────────────────
+  // 2. Serif (클래식 엘레강스)
+  // ─────────────────────────────────────────
+  'classic-elegant': {
+    id: 'classic-elegant',
+    name: 'Classic Elegant',
+    nameKo: '클래식 엘레강스',
+    description: 'Great Vibes와 Playfair Display, Noto Serif KR의 우아한 조합. 격조 있고 전통적.',
+    category: 'serif',
     fontStacks: {
       display: FONT_STACKS.greatVibes,
       heading: FONT_STACKS.playfair,
-      body: FONT_STACKS.gowunBatang,
-    },
-    weights: {
-      display: 400,
-      heading: 500,
-      body: 400,
-    },
-    scale: ELEGANT_SCALE,
-    recommendedThemes: ['romantic-blush', 'romantic-garden'],
-  },
-
-  'romantic-italian': {
-    id: 'romantic-italian',
-    name: 'Romantic Italian',
-    nameKo: '로맨틱 이탈리안',
-    description: 'Italianno와 Noto Serif KR의 화려한 조합',
-    category: 'romantic',
-    fontStacks: {
-      display: FONT_STACKS.italianno,
-      heading: FONT_STACKS.cormorant,
       body: FONT_STACKS.notoSerifKr,
     },
     weights: {
       display: 400,
-      heading: 500,
+      heading: 600, // Semi-bold
       body: 400,
     },
     scale: ELEGANT_SCALE,
-    recommendedThemes: ['cinematic-warm', 'classic-gold'],
+    recommendedSizes: {
+      display: { min: 60, max: 80 }, // Great Vibes는 작게 렌더링되므로 크게 설정
+      heading: { min: 22, max: 26 },
+      body: { min: 14, max: 16 },
+    },
+    recommendedThemes: ['classic-ivory', 'classic-gold', 'cinematic-dark'],
   },
 
-  'romantic-soft': {
-    id: 'romantic-soft',
-    name: 'Romantic Soft',
-    nameKo: '로맨틱 소프트',
-    description: 'Pinyon Script와 함렛의 부드러운 조합',
-    category: 'romantic',
+  // ─────────────────────────────────────────
+  // 3. Handwritten (내추럴 웜)
+  // ─────────────────────────────────────────
+  'natural-warm': {
+    id: 'natural-warm',
+    name: 'Natural Warm',
+    nameKo: '내추럴 웜',
+    description: 'Dancing Script와 Nanum Square, Gowun Dodum의 따뜻한 조합. 손글씨 감성 + 가독성.',
+    category: 'handwritten',
     fontStacks: {
-      display: FONT_STACKS.pinyonScript,
-      heading: FONT_STACKS.hahmlet,
-      body: FONT_STACKS.hahmlet,
+      display: FONT_STACKS.dancingScript,
+      heading: FONT_STACKS.nanumSquare,
+      body: FONT_STACKS.gowunDodum,
+    },
+    weights: {
+      display: 500, // Medium
+      heading: 700, // Bold
+      body: 400,
+    },
+    scale: DEFAULT_SCALE,
+    recommendedSizes: {
+      display: { min: 48, max: 56 },
+      heading: { min: 18, max: 22 },
+      body: { min: 14, max: 16 },
+    },
+    recommendedThemes: ['romantic-garden', 'classic-ivory'],
+  },
+
+  // ─────────────────────────────────────────
+  // 4. Hybrid - Serif 제목 + Sans 본문 (클래식 모던)
+  // ─────────────────────────────────────────
+  'classic-modern': {
+    id: 'classic-modern',
+    name: 'Classic Modern',
+    nameKo: '클래식 모던',
+    description: 'Cormorant Garamond와 Pretendard의 하이브리드. 제목의 우아함 + 본문의 현대적 가독성.',
+    category: 'hybrid',
+    fontStacks: {
+      display: FONT_STACKS.cormorant,
+      heading: FONT_STACKS.cormorant,
+      body: FONT_STACKS.pretendard,
+    },
+    weights: {
+      display: 500, // Medium
+      heading: 600, // Semi-bold
+      body: 400,
+    },
+    scale: ELEGANT_SCALE,
+    recommendedSizes: {
+      display: { min: 52, max: 64 },
+      heading: { min: 22, max: 26 },
+      body: { min: 14, max: 16 },
+    },
+    recommendedThemes: ['classic-ivory', 'minimal-light', 'cinematic-warm'],
+  },
+
+  // ─────────────────────────────────────────
+  // 5. 한글 중심 (한글 손글씨 강조)
+  // ─────────────────────────────────────────
+  'korean-brush': {
+    id: 'korean-brush',
+    name: 'Korean Brush',
+    nameKo: '한글 붓글씨',
+    description: '나눔 붓글씨와 Noto Serif KR, Gowun Batang의 한국적 조합. 전통 감성 극대화.',
+    category: 'handwritten',
+    fontStacks: {
+      display: FONT_STACKS.nanumBrushScript,
+      heading: FONT_STACKS.notoSerifKr,
+      body: FONT_STACKS.gowunBatang,
     },
     weights: {
       display: 400,
@@ -465,20 +328,27 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: 400,
     },
     scale: ELEGANT_SCALE,
-    recommendedThemes: ['romantic-blush', 'classic-ivory'],
+    recommendedSizes: {
+      display: { min: 44, max: 56 }, // 붓글씨는 크기 주의
+      heading: { min: 20, max: 24 },
+      body: { min: 14, max: 16 },
+    },
+    recommendedThemes: ['classic-ivory', 'romantic-garden'],
   },
 
-  // ─── 내추럴/손글씨 (Natural/Handwritten) ───
-  'natural-handwritten': {
-    id: 'natural-handwritten',
-    name: 'Natural Handwritten',
-    nameKo: '내추럴 손글씨',
-    description: 'High Summit과 마포금빛나루의 자연스러운 조합',
-    category: 'natural',
+  // ─────────────────────────────────────────
+  // 6. 듀얼 스크립트 (영문+한글 손글씨)
+  // ─────────────────────────────────────────
+  'dual-script': {
+    id: 'dual-script',
+    name: 'Dual Script',
+    nameKo: '듀얼 스크립트',
+    description: 'Alex Brush와 나눔 붓글씨, Noto Sans KR의 이중언어 조합. 영문+한글 손글씨.',
+    category: 'handwritten',
     fontStacks: {
-      display: FONT_STACKS.highSummit,
-      heading: FONT_STACKS.gowunDodum,
-      body: FONT_STACKS.mapoGoldNaru,
+      display: FONT_STACKS.alexBrush,
+      heading: FONT_STACKS.nanumBrushScript,
+      body: FONT_STACKS.notoSansKr,
     },
     weights: {
       display: 400,
@@ -486,67 +356,40 @@ export const TYPOGRAPHY_PRESETS: Record<TypographyPresetId, TypographyPreset> = 
       body: 400,
     },
     scale: COMPACT_SCALE,
-    recommendedThemes: ['romantic-garden', 'classic-ivory'],
+    recommendedSizes: {
+      display: { min: 52, max: 68 }, // Alex Brush 작게 렌더링
+      heading: { min: 22, max: 28 }, // 붓글씨 크게
+      body: { min: 14, max: 16 },
+    },
+    recommendedThemes: ['romantic-blush', 'classic-ivory'],
   },
 
-  'natural-brush': {
-    id: 'natural-brush',
-    name: 'Natural Brush',
-    nameKo: '내추럴 브러쉬',
-    description: 'Alex Brush와 나눔펜스크립트의 붓글씨 조합',
-    category: 'natural',
+  // ─────────────────────────────────────────
+  // 7. 하이 콘트라스트 (강한 대비)
+  // ─────────────────────────────────────────
+  'high-contrast': {
+    id: 'high-contrast',
+    name: 'High Contrast',
+    nameKo: '하이 콘트라스트',
+    description: 'Cinzel과 Inter의 강한 대비. 시각적 계층이 명확, 포멀한 분위기.',
+    category: 'hybrid',
     fontStacks: {
-      display: FONT_STACKS.alexBrush,
-      heading: FONT_STACKS.nanumSquare,
-      body: FONT_STACKS.nanumPen,
+      display: FONT_STACKS.cinzel,
+      heading: FONT_STACKS.inter,
+      body: FONT_STACKS.inter,
     },
     weights: {
-      display: 400,
-      heading: 700,
-      body: 400,
-    },
-    scale: COMPACT_SCALE,
-    recommendedThemes: ['romantic-garden', 'romantic-blush'],
-  },
-
-  'natural-warm': {
-    id: 'natural-warm',
-    name: 'Natural Warm',
-    nameKo: '내추럴 웜',
-    description: 'Dancing Script와 고운돋움의 따뜻한 조합',
-    category: 'natural',
-    fontStacks: {
-      display: FONT_STACKS.dancingScript,
-      heading: FONT_STACKS.nanumSquare,
-      body: FONT_STACKS.gowunDodum,
-    },
-    weights: {
-      display: 500,
-      heading: 700,
+      display: 700, // Bold
+      heading: 600, // Semi-bold
       body: 400,
     },
     scale: DEFAULT_SCALE,
-    recommendedThemes: ['romantic-garden', 'classic-ivory'],
-  },
-
-  'natural-witty': {
-    id: 'natural-witty',
-    name: 'Natural Witty',
-    nameKo: '내추럴 위티',
-    description: '부장님눈치체의 재치있고 캐주얼한 손글씨 스타일',
-    category: 'natural',
-    fontStacks: {
-      display: FONT_STACKS.bujangnimNunchi,
-      heading: FONT_STACKS.nanumSquare,
-      body: FONT_STACKS.bujangnimNunchi,
+    recommendedSizes: {
+      display: { min: 40, max: 52 }, // Cinzel 대문자만, 크게 렌더링
+      heading: { min: 18, max: 22 },
+      body: { min: 14, max: 16 },
     },
-    weights: {
-      display: 400,
-      heading: 700,
-      body: 400,
-    },
-    scale: COMPACT_SCALE,
-    recommendedThemes: ['romantic-garden', 'minimal-light'],
+    recommendedThemes: ['modern-mono', 'minimal-dark', 'cinematic-dark'],
   },
 }
 
@@ -575,10 +418,10 @@ export function getTypographyPresetsByCategory(
  */
 export function getAllTypographyPresets(): TypographyPreset[] {
   const categoryOrder: TypographyPreset['category'][] = [
-    'classic',
-    'modern',
-    'romantic',
-    'natural',
+    'sans-serif',
+    'serif',
+    'handwritten',
+    'hybrid',
   ]
 
   return categoryOrder.flatMap(category => getTypographyPresetsByCategory(category))
@@ -608,7 +451,9 @@ export function getGoogleFontsUrl(presetId: TypographyPresetId): string {
 
   if (fonts.length === 0) return ''
 
-  const families = fonts.map(f => f.replace(/ /g, '+')).join('&family=')
+  // 중복 제거
+  const uniqueFonts = [...new Set(fonts)]
+  const families = uniqueFonts.map(f => f.replace(/ /g, '+')).join('&family=')
   return `https://fonts.googleapis.com/css2?family=${families}&display=swap`
 }
 
@@ -619,4 +464,45 @@ export function getFontFamilyString(fontStack: FontStack): string {
   return [...fontStack.family, fontStack.fallback]
     .map(f => (f.includes(' ') ? `"${f}"` : f))
     .join(', ')
+}
+
+/**
+ * 폰트 크기 보정 적용
+ * @param baseSizePx 기본 폰트 크기 (px)
+ * @param fontStack 폰트 스택
+ * @returns 보정된 폰트 크기 (px)
+ */
+export function getAdjustedFontSize(baseSizePx: number, fontStack: FontStack): number {
+  const scale = fontStack.sizeScale ?? 1.0
+  return Math.round(baseSizePx * scale)
+}
+
+/**
+ * 폰트 크기 보정 계수 조회표
+ */
+export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
+  // 영문 스크립트 (작게 렌더링)
+  'Great Vibes': 1.25,
+  'Italianno': 1.30,
+  'Pinyon Script': 1.25,
+  'Alex Brush': 1.15,
+  'The Nautigal': 1.20,
+  // 영문 표준
+  'Dancing Script': 1.0,
+  'Montserrat': 1.0,
+  'Inter': 1.0,
+  // 영문 크게 렌더링
+  'Playfair Display': 0.95,
+  'Poppins': 0.95,
+  'Cinzel': 0.90,
+  'Cormorant Garamond': 1.05,
+  // 한글 표준
+  'Pretendard': 1.0,
+  'Noto Serif KR': 1.0,
+  'Noto Sans KR': 1.0,
+  'Gowun Batang': 1.0,
+  'Gowun Dodum': 1.0,
+  // 한글 약간 크게
+  'NanumSquare': 0.95,
+  'Nanum Brush Script': 1.1,
 }

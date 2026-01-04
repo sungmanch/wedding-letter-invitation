@@ -193,10 +193,10 @@ function PresetLevel({
   ] as const
 
   const typographyCategories = [
-    { id: 'classic', label: '클래식' },
-    { id: 'modern', label: '모던' },
-    { id: 'romantic', label: '로맨틱' },
-    { id: 'natural', label: '내추럴' },
+    { id: 'sans-serif', label: '산세리프' },
+    { id: 'serif', label: '세리프' },
+    { id: 'handwritten', label: '손글씨' },
+    { id: 'hybrid', label: '하이브리드' },
   ] as const
 
   return (
