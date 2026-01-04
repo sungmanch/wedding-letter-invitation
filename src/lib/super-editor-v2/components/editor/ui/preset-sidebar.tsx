@@ -1,13 +1,13 @@
 /**
- * Floating Preset Sidebar
+ * Preset Sidebar
  *
- * 프리뷰 우측에 표시되는 플로팅 사이드바
- * 선택된 블록의 프리셋을 변경할 수 있음
+ * 프리뷰 우측에 항상 표시되는 프리셋 선택 패널
+ * 스크롤 위치에 따라 현재 보이는 블록의 프리셋 목록을 자동 표시
  */
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { Block, BlockType } from '@/lib/super-editor-v2/schema/types'
 import {
   getBlockPresetsByType,
@@ -18,15 +18,11 @@ import {
 // Types
 // ============================================
 
-interface FloatingPresetSidebarProps {
+interface PresetSidebarProps {
   /** 선택된 블록 */
   selectedBlock: Block | null
   /** 프리셋 변경 콜백 */
   onPresetChange: (blockId: string, presetId: string) => void
-  /** 사이드바 열림 상태 */
-  isOpen: boolean
-  /** 열림 상태 변경 콜백 */
-  onOpenChange: (open: boolean) => void
 }
 
 // 블록 타입별 한글 이름
@@ -54,12 +50,10 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
 // Component
 // ============================================
 
-export function FloatingPresetSidebar({
+export function PresetSidebar({
   selectedBlock,
   onPresetChange,
-  isOpen,
-  onOpenChange,
-}: FloatingPresetSidebarProps) {
+}: PresetSidebarProps) {
   // 선택된 블록 타입의 프리셋 목록
   const presets = useMemo(() => {
     if (!selectedBlock) return []
@@ -71,80 +65,51 @@ export function FloatingPresetSidebar({
     : ''
 
   return (
-    <>
-      {/* 토글 버튼 (항상 표시) */}
-      {!isOpen && (
-        <button
-          onClick={() => onOpenChange(true)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-[#2a2a2a] border border-white/10 rounded-l-lg p-2 hover:bg-[#3a3a3a] transition-colors shadow-lg"
-          title="프리셋 변경"
-        >
-          <LayoutIcon className="w-5 h-5 text-[#C9A962]" />
-        </button>
-      )}
+    <div className="w-[280px] flex-shrink-0 bg-[#1a1a1a] border-l border-white/10 flex flex-col h-full">
+      {/* 헤더 */}
+      <div className="flex-shrink-0 p-4 border-b border-white/10">
+        <h3 className="text-sm font-medium text-[#F5E6D3]">프리셋 선택</h3>
+        <p className="text-xs text-[#F5E6D3]/60 mt-0.5">
+          {selectedBlock ? `${blockTypeLabel} 블록` : '스크롤하여 블록 선택'}
+        </p>
+      </div>
 
-      {/* 사이드바 패널 */}
-      <div
-        className={`
-          absolute right-0 top-0 bottom-0 z-20
-          bg-[#1a1a1a]/95 backdrop-blur-sm border-l border-white/10
-          transition-transform duration-300 ease-out
-          ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}
-        style={{ width: '280px' }}
-      >
-        {/* 헤더 */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <div>
-            <h3 className="text-sm font-medium text-[#F5E6D3]">프리셋 변경</h3>
-            <p className="text-xs text-[#F5E6D3]/60 mt-0.5">
-              {selectedBlock ? `${blockTypeLabel} 블록` : '블록을 선택하세요'}
+      {/* 프리셋 목록 */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {!selectedBlock ? (
+          <div className="text-center py-8">
+            <LayoutIcon className="w-12 h-12 text-[#F5E6D3]/20 mx-auto mb-3" />
+            <p className="text-[#F5E6D3]/40 text-sm">
+              프리뷰를 스크롤하면<br />
+              해당 블록의 프리셋이<br />
+              여기에 표시됩니다.
             </p>
           </div>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-          >
-            <CloseIcon className="w-4 h-4 text-[#F5E6D3]/60" />
-          </button>
-        </div>
-
-        {/* 프리셋 목록 */}
-        <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100% - 60px)' }}>
-          {!selectedBlock ? (
-            <div className="text-center py-8">
-              <LayoutIcon className="w-12 h-12 text-[#F5E6D3]/20 mx-auto mb-3" />
-              <p className="text-[#F5E6D3]/40 text-sm">
-                왼쪽 패널에서 블록을 선택하면<br />
-                프리셋을 변경할 수 있습니다.
-              </p>
-            </div>
-          ) : presets.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-[#F5E6D3]/40 text-sm">
-                {blockTypeLabel} 블록에는<br />
-                아직 프리셋이 없습니다.
-              </p>
-              <p className="text-[#F5E6D3]/30 text-xs mt-2">
-                calendar, profile 블록에서<br />
-                프리셋을 사용할 수 있습니다.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {presets.map((preset) => (
-                <PresetCard
-                  key={preset.id}
-                  preset={preset}
-                  isSelected={selectedBlock.presetId === preset.id}
-                  onClick={() => onPresetChange(selectedBlock.id, preset.id)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        ) : presets.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-[#F5E6D3]/40 text-sm">
+              {blockTypeLabel} 블록에는<br />
+              아직 프리셋이 없습니다.
+            </p>
+            <p className="text-[#F5E6D3]/30 text-xs mt-2">
+              calendar, profile 블록에서<br />
+              프리셋을 사용할 수 있습니다.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {presets.map((preset) => (
+              <PresetCard
+                key={preset.id}
+                preset={preset}
+                isSelected={selectedBlock.presetId === preset.id}
+                onClick={() => onPresetChange(selectedBlock.id, preset.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   )
 }
 
@@ -240,19 +205,6 @@ function LayoutIcon({ className }: { className?: string }) {
         strokeLinejoin="round"
         strokeWidth={2}
         d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-      />
-    </svg>
-  )
-}
-
-function CloseIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M6 18L18 6M6 6l12 12"
       />
     </svg>
   )
