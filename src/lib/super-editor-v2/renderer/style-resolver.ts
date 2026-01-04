@@ -337,15 +337,6 @@ function applyQuickConfig(
     result.accentSecondary = quick.secondaryColor
   }
 
-  // 무드에 따른 조정
-  if (quick.mood === 'warm') {
-    result.bgPage = warmify(result.bgPage)
-    result.bgSection = warmify(result.bgSection)
-  } else if (quick.mood === 'cool') {
-    result.bgPage = coolify(result.bgPage)
-    result.bgSection = coolify(result.bgSection)
-  }
-
   return result
 }
 
@@ -496,38 +487,6 @@ function adjustColor(color: string, amount: number): string {
     const r = Math.max(0, Math.min(255, ((num >> 16) & 0xff) + amount))
     const g = Math.max(0, Math.min(255, ((num >> 8) & 0xff) + amount))
     const b = Math.max(0, Math.min(255, (num & 0xff) + amount))
-    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
-  }
-  return color
-}
-
-/**
- * 색상을 따뜻하게 조정
- */
-function warmify(color: string): string {
-  // 간단한 구현: 빨간색 계열 증가
-  if (color.startsWith('#')) {
-    const hex = color.slice(1)
-    const num = parseInt(hex, 16)
-    const r = Math.min(255, ((num >> 16) & 0xff) + 10)
-    const g = (num >> 8) & 0xff
-    const b = Math.max(0, (num & 0xff) - 5)
-    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
-  }
-  return color
-}
-
-/**
- * 색상을 차갑게 조정
- */
-function coolify(color: string): string {
-  // 간단한 구현: 파란색 계열 증가
-  if (color.startsWith('#')) {
-    const hex = color.slice(1)
-    const num = parseInt(hex, 16)
-    const r = Math.max(0, ((num >> 16) & 0xff) - 5)
-    const g = (num >> 8) & 0xff
-    const b = Math.min(255, (num & 0xff) + 10)
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
   }
   return color

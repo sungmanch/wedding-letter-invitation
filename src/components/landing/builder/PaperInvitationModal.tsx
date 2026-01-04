@@ -64,8 +64,12 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
  * HEIC/HEIF 파일인지 확인
  */
 function isHeicFile(file: File): boolean {
-  return file.type === 'image/heic' || file.type === 'image/heif' ||
-    file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
+  return (
+    file.type === 'image/heic' ||
+    file.type === 'image/heif' ||
+    file.name.toLowerCase().endsWith('.heic') ||
+    file.name.toLowerCase().endsWith('.heif')
+  )
 }
 
 const STEPS = [
@@ -94,110 +98,120 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
   const mainFileInputRef = useRef<HTMLInputElement>(null)
 
   // 종이 청첩장 사진 업로드 핸들러
-  const handlePaperFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
+  const handlePaperFileSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files
+      if (!files) return
 
-    setIsProcessingFiles(true)
-    const newImages: UploadedImage[] = []
-    const rejectedHeicFiles: string[] = []
+      setIsProcessingFiles(true)
+      const newImages: UploadedImage[] = []
+      const rejectedHeicFiles: string[] = []
 
-    for (const file of Array.from(files)) {
+      for (const file of Array.from(files)) {
+        // HEIC/HEIF 파일 반려
+        if (isHeicFile(file)) {
+          rejectedHeicFiles.push(file.name)
+          continue
+        }
+
+        // 타입 검증
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          continue
+        }
+
+        // 크기 검증
+        if (file.size > MAX_FILE_SIZE) {
+          continue
+        }
+
+        // 최대 개수 검증
+        if (paperImages.length + newImages.length >= MAX_PAPER_IMAGES) {
+          break
+        }
+
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+        const previewUrl = URL.createObjectURL(file)
+
+        newImages.push({ id, file, previewUrl })
+      }
+
+      // HEIC 파일이 있었으면 alert 표시
+      if (rejectedHeicFiles.length > 0) {
+        alert(
+          `HEIC/HEIF 형식은 지원하지 않습니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.\n\n반려된 파일: ${rejectedHeicFiles.join(', ')}`
+        )
+      }
+
+      setPaperImages((prev) => [...prev, ...newImages])
+
+      // input 초기화
+      if (paperFileInputRef.current) {
+        paperFileInputRef.current.value = ''
+      }
+
+      setIsProcessingFiles(false)
+    },
+    [paperImages.length]
+  )
+
+  // 메인 이미지 사진 업로드 핸들러
+  const handleMainFileSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files
+      if (!files || files.length === 0) return
+
+      setIsProcessingFiles(true)
+      const file = files[0]
+
       // HEIC/HEIF 파일 반려
       if (isHeicFile(file)) {
-        rejectedHeicFiles.push(file.name)
-        continue
+        alert(
+          `HEIC/HEIF 형식은 지원하지 않습니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.`
+        )
+        setIsProcessingFiles(false)
+        if (mainFileInputRef.current) {
+          mainFileInputRef.current.value = ''
+        }
+        return
       }
 
       // 타입 검증
       if (!ALLOWED_TYPES.includes(file.type)) {
-        continue
+        alert('지원하지 않는 파일 형식입니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.')
+        setIsProcessingFiles(false)
+        if (mainFileInputRef.current) {
+          mainFileInputRef.current.value = ''
+        }
+        return
       }
 
       // 크기 검증
       if (file.size > MAX_FILE_SIZE) {
-        continue
-      }
-
-      // 최대 개수 검증
-      if (paperImages.length + newImages.length >= MAX_PAPER_IMAGES) {
-        break
+        alert('파일 크기가 너무 큽니다. 10MB 이하의 파일만 업로드해주세요.')
+        setIsProcessingFiles(false)
+        if (mainFileInputRef.current) {
+          mainFileInputRef.current.value = ''
+        }
+        return
       }
 
       const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
       const previewUrl = URL.createObjectURL(file)
 
-      newImages.push({ id, file, previewUrl })
-    }
+      // 기존 메인 이미지의 previewUrl 해제
+      mainImages.forEach((img) => URL.revokeObjectURL(img.previewUrl))
 
-    // HEIC 파일이 있었으면 alert 표시
-    if (rejectedHeicFiles.length > 0) {
-      alert(`HEIC/HEIF 형식은 지원하지 않습니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.\n\n반려된 파일: ${rejectedHeicFiles.join(', ')}`)
-    }
+      setMainImages([{ id, file, previewUrl }])
 
-    setPaperImages((prev) => [...prev, ...newImages])
-
-    // input 초기화
-    if (paperFileInputRef.current) {
-      paperFileInputRef.current.value = ''
-    }
-
-    setIsProcessingFiles(false)
-  }, [paperImages.length])
-
-  // 메인 이미지 사진 업로드 핸들러
-  const handleMainFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    setIsProcessingFiles(true)
-    const file = files[0]
-
-    // HEIC/HEIF 파일 반려
-    if (isHeicFile(file)) {
-      alert(`HEIC/HEIF 형식은 지원하지 않습니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.`)
-      setIsProcessingFiles(false)
+      // input 초기화
       if (mainFileInputRef.current) {
         mainFileInputRef.current.value = ''
       }
-      return
-    }
 
-    // 타입 검증
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      alert('지원하지 않는 파일 형식입니다.\nJPEG, PNG, WebP 형식의 이미지만 업로드해주세요.')
       setIsProcessingFiles(false)
-      if (mainFileInputRef.current) {
-        mainFileInputRef.current.value = ''
-      }
-      return
-    }
-
-    // 크기 검증
-    if (file.size > MAX_FILE_SIZE) {
-      alert('파일 크기가 너무 큽니다. 10MB 이하의 파일만 업로드해주세요.')
-      setIsProcessingFiles(false)
-      if (mainFileInputRef.current) {
-        mainFileInputRef.current.value = ''
-      }
-      return
-    }
-
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    const previewUrl = URL.createObjectURL(file)
-
-    // 기존 메인 이미지의 previewUrl 해제
-    mainImages.forEach(img => URL.revokeObjectURL(img.previewUrl))
-
-    setMainImages([{ id, file, previewUrl }])
-
-    // input 초기화
-    if (mainFileInputRef.current) {
-      mainFileInputRef.current.value = ''
-    }
-
-    setIsProcessingFiles(false)
-  }, [mainImages])
+    },
+    [mainImages]
+  )
 
   // 종이 청첩장 이미지 삭제
   const handleRemovePaperImage = useCallback((id: string) => {
@@ -206,35 +220,41 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
 
   // 메인 이미지 삭제
   const handleRemoveMainImage = useCallback(() => {
-    mainImages.forEach(img => URL.revokeObjectURL(img.previewUrl))
+    mainImages.forEach((img) => URL.revokeObjectURL(img.previewUrl))
     setMainImages([])
   }, [mainImages])
 
   // 종이 청첩장 드래그 앤 드롭
-  const handlePaperDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    const files = e.dataTransfer.files
-    if (!files) return
+  const handlePaperDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const files = e.dataTransfer.files
+      if (!files) return
 
-    const fakeEvent = {
-      target: { files },
-    } as unknown as React.ChangeEvent<HTMLInputElement>
+      const fakeEvent = {
+        target: { files },
+      } as unknown as React.ChangeEvent<HTMLInputElement>
 
-    handlePaperFileSelect(fakeEvent)
-  }, [handlePaperFileSelect])
+      handlePaperFileSelect(fakeEvent)
+    },
+    [handlePaperFileSelect]
+  )
 
   // 메인 이미지 드래그 앤 드롭
-  const handleMainDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    const files = e.dataTransfer.files
-    if (!files) return
+  const handleMainDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const files = e.dataTransfer.files
+      if (!files) return
 
-    const fakeEvent = {
-      target: { files },
-    } as unknown as React.ChangeEvent<HTMLInputElement>
+      const fakeEvent = {
+        target: { files },
+      } as unknown as React.ChangeEvent<HTMLInputElement>
 
-    handleMainFileSelect(fakeEvent)
-  }, [handleMainFileSelect])
+      handleMainFileSelect(fakeEvent)
+    },
+    [handleMainFileSelect]
+  )
 
   // 다음 단계로
   const handleNext = useCallback(() => {
@@ -306,11 +326,12 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
   }, [onOpenChange])
 
   // 단계별 유효성 검사
-  const canProceed = currentStep === 1
-    ? paperImages.length > 0
-    : currentStep === 2
-      ? mainImages.length > 0
-      : phone.length > 0
+  const canProceed =
+    currentStep === 1
+      ? paperImages.length > 0
+      : currentStep === 2
+        ? mainImages.length > 0
+        : phone.length > 0
 
   return (
     <Modal open={open} onOpenChange={handleClose}>
@@ -322,17 +343,12 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
               Beta
             </span>
           </ModalTitle>
-          <ModalDescription>
-            사진을 보내주시면 종이 청첩장과 똑같이 제작해드립니다
-          </ModalDescription>
+          <ModalDescription>사진을 보내주시면 종이 청첩장과 똑같이 제작해드립니다</ModalDescription>
         </ModalHeader>
 
         {/* 진행 상태 */}
         <div className="px-6 py-4 border-b border-[var(--sand-100)] flex-shrink-0">
-          <ProgressBar
-            value={(currentStep / 3) * 100}
-            className="h-1.5"
-          />
+          <ProgressBar value={(currentStep / 3) * 100} className="h-1.5" />
           <div className="flex justify-between mt-2">
             {STEPS.map((step) => (
               <div
@@ -437,12 +453,7 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
                 )}
               </Button>
             ) : (
-              <Button
-                variant="sage"
-                size="sm"
-                onClick={handleNext}
-                disabled={!canProceed}
-              >
+              <Button variant="sage" size="sm" onClick={handleNext} disabled={!canProceed}>
                 다음
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
@@ -467,7 +478,14 @@ interface Step1PaperProps {
   isProcessing: boolean
 }
 
-function Step1PaperUpload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef, isProcessing }: Step1PaperProps) {
+function Step1PaperUpload({
+  images,
+  onFileSelect,
+  onRemoveImage,
+  onDrop,
+  fileInputRef,
+  isProcessing,
+}: Step1PaperProps) {
   const [isDragging, setIsDragging] = useState(false)
 
   return (
@@ -492,9 +510,10 @@ function Step1PaperUpload({ images, onFileSelect, onRemoveImage, onDrop, fileInp
           relative border-2 border-dashed rounded-xl p-8
           flex flex-col items-center justify-center gap-3
           cursor-pointer transition-all
-          ${isDragging
-            ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
-            : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
+          ${
+            isDragging
+              ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
+              : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
           }
           ${images.length >= MAX_PAPER_IMAGES || isProcessing ? 'opacity-50 pointer-events-none' : ''}
         `}
@@ -502,9 +521,7 @@ function Step1PaperUpload({ images, onFileSelect, onRemoveImage, onDrop, fileInp
         {isProcessing ? (
           <>
             <Loader2 className="w-8 h-8 text-[var(--sage-600)] animate-spin" />
-            <p className="text-sm text-[var(--text-muted)]">
-              사진 처리 중...
-            </p>
+            <p className="text-sm text-[var(--text-muted)]">사진 처리 중...</p>
           </>
         ) : (
           <>
@@ -515,9 +532,7 @@ function Step1PaperUpload({ images, onFileSelect, onRemoveImage, onDrop, fileInp
               <p className="text-sm font-medium text-[var(--text-body)]">
                 사진을 드래그하거나 클릭하여 업로드
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
-                JPG, PNG, WebP · 최대 10MB
-              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">JPG, PNG, WebP · 최대 10MB</p>
             </div>
           </>
         )}
@@ -537,12 +552,7 @@ function Step1PaperUpload({ images, onFileSelect, onRemoveImage, onDrop, fileInp
         <div className="grid grid-cols-4 gap-2">
           {images.map((img) => (
             <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden group">
-              <Image
-                src={img.previewUrl}
-                alt="업로드된 사진"
-                fill
-                className="object-cover"
-              />
+              <Image src={img.previewUrl} alt="업로드된 사진" fill className="object-cover" />
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -573,7 +583,14 @@ interface Step2MainProps {
   isProcessing: boolean
 }
 
-function Step2MainUpload({ mainImage, onFileSelect, onRemoveImage, onDrop, fileInputRef, isProcessing }: Step2MainProps) {
+function Step2MainUpload({
+  mainImage,
+  onFileSelect,
+  onRemoveImage,
+  onDrop,
+  fileInputRef,
+  isProcessing,
+}: Step2MainProps) {
   const [isDragging, setIsDragging] = useState(false)
 
   return (
@@ -585,12 +602,7 @@ function Step2MainUpload({ mainImage, onFileSelect, onRemoveImage, onDrop, fileI
       {mainImage ? (
         // 이미 업로드된 메인 이미지 표시
         <div className="relative aspect-[3/4] max-w-[200px] mx-auto rounded-lg overflow-hidden ring-2 ring-[var(--sage-500)] ring-offset-2">
-          <Image
-            src={mainImage.previewUrl}
-            alt="메인 이미지"
-            fill
-            className="object-cover"
-          />
+          <Image src={mainImage.previewUrl} alt="메인 이미지" fill className="object-cover" />
           <button
             onClick={onRemoveImage}
             className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
@@ -618,9 +630,10 @@ function Step2MainUpload({ mainImage, onFileSelect, onRemoveImage, onDrop, fileI
             relative border-2 border-dashed rounded-xl p-8
             flex flex-col items-center justify-center gap-3
             cursor-pointer transition-all
-            ${isDragging
-              ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
-              : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
+            ${
+              isDragging
+                ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
+                : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
             }
             ${isProcessing ? 'opacity-50 pointer-events-none' : ''}
           `}
@@ -628,9 +641,7 @@ function Step2MainUpload({ mainImage, onFileSelect, onRemoveImage, onDrop, fileI
           {isProcessing ? (
             <>
               <Loader2 className="w-8 h-8 text-[var(--sage-600)] animate-spin" />
-              <p className="text-sm text-[var(--text-muted)]">
-                사진 처리 중...
-              </p>
+              <p className="text-sm text-[var(--text-muted)]">사진 처리 중...</p>
             </>
           ) : (
             <>
@@ -641,9 +652,7 @@ function Step2MainUpload({ mainImage, onFileSelect, onRemoveImage, onDrop, fileI
                 <p className="text-sm font-medium text-[var(--text-body)]">
                   메인 이미지를 드래그하거나 클릭하여 업로드
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
-                  JPG, PNG, WebP · 최대 10MB
-                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">JPG, PNG, WebP · 최대 10MB</p>
               </div>
             </>
           )}
@@ -687,12 +696,10 @@ function Step3Contact({
       <div className="flex items-start gap-3 p-4 rounded-lg bg-[var(--sage-50)] border border-[var(--sage-100)]">
         <Clock className="w-5 h-5 text-[var(--sage-600)] flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-medium text-[var(--sage-700)]">
-            제작 소요 시간 안내
-          </p>
+          <p className="text-sm font-medium text-[var(--sage-700)]">제작 소요 시간 안내</p>
           <p className="text-xs text-[var(--sage-600)] mt-1">
-            신청 후 <strong>최소 4일</strong>이 소요됩니다.
-            제작이 완료되면 입력하신 연락처로 안내드립니다.
+            신청 후 <strong>최소 4일</strong>이 소요됩니다. 제작이 완료되면 입력하신 연락처로
+            안내드립니다.
           </p>
         </div>
       </div>
@@ -758,7 +765,7 @@ function SuccessView({ onClose }: { onClose: () => void }) {
         신청이 완료되었습니다!
       </h3>
       <p className="text-sm text-[var(--text-muted)] mb-6">
-        제작이 완료되면 입력하신 이메일로 안내드립니다.
+        제작이 진행되면 입력하신 연락처로 안내드립니다.
         <br />
         최소 4일 정도 소요됩니다.
       </p>
