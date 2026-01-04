@@ -19,8 +19,8 @@ import {
 // ============================================
 
 interface PresetSidebarProps {
-  /** 선택된 블록 */
-  selectedBlock: Block | null
+  /** 현재 화면에 보이는 블록 */
+  visibleBlock: Block | null
   /** 프리셋 변경 콜백 */
   onPresetChange: (blockId: string, presetId: string) => void
 }
@@ -51,32 +51,39 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
 // ============================================
 
 export function PresetSidebar({
-  selectedBlock,
+  visibleBlock,
   onPresetChange,
 }: PresetSidebarProps) {
-  // 선택된 블록 타입의 프리셋 목록
+  // 현재 보이는 블록 타입의 프리셋 목록
   const presets = useMemo(() => {
-    if (!selectedBlock) return []
-    return getBlockPresetsByType(selectedBlock.type)
-  }, [selectedBlock])
+    if (!visibleBlock) return []
+    return getBlockPresetsByType(visibleBlock.type)
+  }, [visibleBlock])
 
-  const blockTypeLabel = selectedBlock
-    ? (BLOCK_TYPE_LABELS[selectedBlock.type] || selectedBlock.type)
+  const blockTypeLabel = visibleBlock
+    ? (BLOCK_TYPE_LABELS[visibleBlock.type] || visibleBlock.type)
     : ''
 
   return (
     <div className="w-[280px] flex-shrink-0 bg-[#1a1a1a] border-l border-white/10 flex flex-col h-full">
       {/* 헤더 */}
       <div className="flex-shrink-0 p-4 border-b border-white/10">
-        <h3 className="text-sm font-medium text-[#F5E6D3]">프리셋 선택</h3>
-        <p className="text-xs text-[#F5E6D3]/60 mt-0.5">
-          {selectedBlock ? `${blockTypeLabel} 블록` : '스크롤하여 블록 선택'}
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-[#F5E6D3]">프리셋 선택</h3>
+          {visibleBlock && (
+            <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[#C9A962]/20 text-[#C9A962] border border-[#C9A962]/30">
+              현재화면
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-[#F5E6D3]/60 mt-1">
+          {visibleBlock ? `${blockTypeLabel} 블록` : '스크롤하여 블록 선택'}
         </p>
       </div>
 
       {/* 프리셋 목록 */}
       <div className="flex-1 p-4 overflow-y-auto">
-        {!selectedBlock ? (
+        {!visibleBlock ? (
           <div className="text-center py-8">
             <LayoutIcon className="w-12 h-12 text-[#F5E6D3]/20 mx-auto mb-3" />
             <p className="text-[#F5E6D3]/40 text-sm">
@@ -102,8 +109,8 @@ export function PresetSidebar({
               <PresetCard
                 key={preset.id}
                 preset={preset}
-                isSelected={selectedBlock.presetId === preset.id}
-                onClick={() => onPresetChange(selectedBlock.id, preset.id)}
+                isSelected={visibleBlock.presetId === preset.id}
+                onClick={() => onPresetChange(visibleBlock.id, preset.id)}
               />
             ))}
           </div>

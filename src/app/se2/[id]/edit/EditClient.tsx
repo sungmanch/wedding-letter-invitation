@@ -119,12 +119,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     blockIds: enabledBlockIds,
   })
 
-  // 스크롤로 감지된 블록을 선택된 블록으로 설정
-  useEffect(() => {
-    if (visibleBlockId && visibleBlockId !== expandedBlockId) {
-      setExpandedBlockId(visibleBlockId)
-    }
-  }, [visibleBlockId, expandedBlockId])
+  // 프리셋 사이드바용: 현재 보이는 블록 (에디터 패널에 영향 없음)
+  const visibleBlock = useMemo(() => {
+    return editorDoc.blocks.find(b => b.id === visibleBlockId)
+  }, [editorDoc.blocks, visibleBlockId])
 
   // 디바이스 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -655,7 +653,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
 
           {/* 프리셋 사이드바 (항상 표시) */}
           <PresetSidebar
-            selectedBlock={selectedBlock ?? null}
+            visibleBlock={visibleBlock ?? null}
             onPresetChange={handlePresetChange}
           />
         </div>
