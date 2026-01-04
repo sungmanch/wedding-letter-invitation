@@ -145,6 +145,7 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
       photo: '/examples/images/groom.png',
       mbti: 'ENFP',
       tags: ['캠핑', '러닝', '커피'],
+      job: '소프트웨어 엔지니어',
     },
     bride: {
       name: '이서연',
@@ -154,6 +155,7 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
       photo: '/examples/images/bride.png',
       mbti: 'INFJ',
       tags: ['독서', '요리', '여행'],
+      job: 'UX 디자이너',
     },
   },
 
@@ -171,6 +173,12 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     tel: '02-518-2222',
     lat: 37.5141,
     lng: 127.0458,
+  },
+
+  // ═══ 오시는길 섹션 ═══
+  location: {
+    title: '오시는길',
+    titleEn: 'LOCATION',
   },
 
   // ═══ 사진 (갤러리 포함) ═══
@@ -212,6 +220,9 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
 
   // ═══ 계좌 정보 ═══
   accounts: {
+    title: '마음 전하실 곳',
+    titleEn: 'GIFT',
+    description: '축하의 마음을 전해 주시면 감사히 받겠습니다.',
     groom: [
       { relation: '신랑', bank: '신한은행', number: '110-123-456789', holder: '김민준' },
       { relation: '아버지', bank: '국민은행', number: '123-45-6789012', holder: '김철수' },
@@ -242,6 +253,7 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
   // ═══ RSVP ═══
   rsvp: {
     title: '참석 여부를 알려주세요',
+    titleEn: 'RSVP',
     description: '참석 여부를 미리 알려주시면 준비에 큰 도움이 됩니다.',
   },
 
@@ -266,6 +278,7 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
   // ═══ 엔딩 ═══
   ending: {
     message: '함께해 주셔서 감사합니다',
+    photo: '/examples/images/quote.jpg',
   },
 
   // ═══ BGM ═══
@@ -275,10 +288,10 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
     artist: 'Wedding Music',
   },
 
-  // ═══ 커스텀 필드 ═══
+  // ═══ 커스텀 필드 (프리셋 특화) ═══
   custom: {
-    locationTitle: '오시는길',
-    locationEngTitle: 'LOCATION',
+    // 표준화된 필드: location.title, location.titleEn, rsvp.titleEn, accounts.* 로 이동됨
+    // 프리셋 특화 필드만 여기에 남김
   },
 
   // ═══ Legacy 호환 ═══

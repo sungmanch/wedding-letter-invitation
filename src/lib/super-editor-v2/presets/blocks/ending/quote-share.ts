@@ -94,7 +94,7 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
           height: 100,
           zIndex: 0,
           binding: 'ending.photo',
-          value: 'https://picsum.photos/seed/ending/800/600',
+          value: '/examples/images/quote.jpg',
           props: {
             type: 'image',
             objectFit: 'cover',
