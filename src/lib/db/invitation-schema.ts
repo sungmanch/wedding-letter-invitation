@@ -274,3 +274,97 @@ export type NewInvitationMessage = typeof invitationMessages.$inferInsert
 
 export type InvitationPayment = typeof invitationPayments.$inferSelect
 export type NewInvitationPayment = typeof invitationPayments.$inferInsert
+
+// ============================================
+// 종이 청첩장 신청 (Paper Invitation Requests)
+// 종이 청첩장과 똑같이 만들어드리는 서비스 요청
+// ============================================
+export const paperInvitationRequests = pgTable('paper_invitation_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id'), // auth.users 참조 (비로그인도 허용)
+
+  // 연락처 정보
+  email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 20 }),
+
+  // 요청 상태
+  // pending: 신청 완료, 대기 중
+  // in_progress: 제작 중
+  // completed: 완료
+  // cancelled: 취소됨
+  status: varchar('status', { length: 20 }).default('pending').notNull(),
+
+  // 메인 사진 (대표 이미지로 사용할 사진의 storage path)
+  mainPhotoPath: varchar('main_photo_path', { length: 500 }),
+
+  // 메모/요청사항
+  notes: text('notes'),
+
+  // 예상 완료일 (최소 4일 소요)
+  estimatedCompletionDate: timestamp('estimated_completion_date'),
+
+  // 완료된 청첩장 문서 ID (완료 시 연결)
+  completedDocumentId: uuid('completed_document_id'),
+
+  // 메타
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_paper_invitation_requests_user_id').on(table.userId),
+  index('idx_paper_invitation_requests_status').on(table.status),
+  index('idx_paper_invitation_requests_email').on(table.email),
+  pgPolicy('Users can manage their own paper invitation requests', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public']
+  }),
+]).enableRLS()
+
+// ============================================
+// 종이 청첩장 신청 사진 (Paper Invitation Photos)
+// 신청 시 업로드된 참조 사진들 (최대 10장)
+// ============================================
+export const paperInvitationPhotos = pgTable('paper_invitation_photos', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  requestId: uuid('request_id').notNull(),
+
+  storagePath: varchar('storage_path', { length: 500 }).notNull(),
+  url: varchar('url', { length: 500 }).notNull(),
+  displayOrder: integer('display_order').notNull(),
+  isMain: boolean('is_main').default(false).notNull(), // 메인 사진 여부
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_paper_invitation_photos_request_id').on(table.requestId),
+  foreignKey({
+    columns: [table.requestId],
+    foreignColumns: [paperInvitationRequests.id],
+    name: 'paper_invitation_photos_request_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Users can manage photos of their paper invitation requests', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public']
+  }),
+]).enableRLS()
+
+// ============================================
+// Relations for Paper Invitation
+// ============================================
+export const paperInvitationRequestsRelations = relations(paperInvitationRequests, ({ many }) => ({
+  photos: many(paperInvitationPhotos),
+}))
+
+export const paperInvitationPhotosRelations = relations(paperInvitationPhotos, ({ one }) => ({
+  request: one(paperInvitationRequests, {
+    fields: [paperInvitationPhotos.requestId],
+    references: [paperInvitationRequests.id],
+  }),
+}))
+
+// Type exports for Paper Invitation
+export type PaperInvitationRequest = typeof paperInvitationRequests.$inferSelect
+export type NewPaperInvitationRequest = typeof paperInvitationRequests.$inferInsert
+
+export type PaperInvitationPhoto = typeof paperInvitationPhotos.$inferSelect
+export type NewPaperInvitationPhoto = typeof paperInvitationPhotos.$inferInsert
