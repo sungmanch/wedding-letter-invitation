@@ -8,6 +8,7 @@
 
 import type { BlockPreset, ModalPreset } from '../types'
 import { MESSAGE_COMMON_BINDINGS, MESSAGE_COMMON_TAGS } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ============================================
 // Modal Configuration
@@ -27,13 +28,13 @@ const MINIMAL_MODAL: ModalPreset = {
     style: {
       text: {
         fontFamily: 'var(--font-heading)',
-        fontSize: '20px',
+        fontSize: FONT_SIZE.xl,
         fontWeight: 600,
         color: 'var(--fg-default)',
       },
       subtitleText: {
         fontFamily: 'var(--font-body)',
-        fontSize: '14px',
+        fontSize: FONT_SIZE.base,
         fontWeight: 400,
         color: 'var(--fg-muted)',
       },
@@ -74,7 +75,7 @@ const MINIMAL_MODAL: ModalPreset = {
       background: 'var(--fg-default)',
       color: '#FFFFFF',
       fontFamily: 'var(--font-body)',
-      fontSize: '16px',
+      fontSize: FONT_SIZE.md,
       fontWeight: 500,
       borderRadius: 8,
       padding: '16px 24px',

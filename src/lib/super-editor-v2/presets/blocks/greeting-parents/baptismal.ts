@@ -8,6 +8,7 @@
 import type { BlockPreset, PresetElement } from '../types'
 import type { VariablePath } from '../../../schema/types'
 import { AUTO_LAYOUT_VERTICAL, HUG_HEIGHT } from './_shared'
+import { FONT_SIZE } from '../tokens'
 
 // ═══════════════════════════════════════════════
 // 공통 스타일
@@ -23,7 +24,7 @@ const PARENT_NAME_STYLE = {
 
 const BAPTISMAL_NAME_STYLE = {
   fontFamily: 'var(--font-body)',
-  fontSize: 11,
+  fontSize: FONT_SIZE.xs,
   fontWeight: 400,
   color: 'var(--fg-muted)',
   textAlign: 'center' as const,
