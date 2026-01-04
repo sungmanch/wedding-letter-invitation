@@ -366,7 +366,7 @@ export const PROFILE_DUAL_CARD: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['card', 'tag-list', 'group'],
   recommendedAnimations: ['fade-in', 'stagger-fade-up'],
-  recommendedThemes: ['simple-pink', 'minimal-light', 'romantic-blush'],
+  recommendedThemes: ['simple-pink', 'hero-minimal-overlay', 'hero-dark-romantic'],
   aiHints: {
     mood: ['modern', 'minimal', 'friendly'],
     style: ['dual-column', 'side-by-side', 'card', 'auto-layout'],

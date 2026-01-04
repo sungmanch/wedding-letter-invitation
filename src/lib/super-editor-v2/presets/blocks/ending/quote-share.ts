@@ -307,6 +307,6 @@ export const ENDING_QUOTE_SHARE: BlockPreset = {
     useCase: ['ending', 'share', 'outro', 'closing'],
   },
 
-  recommendedThemes: ['minimal-light', 'modern-mono'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold'],
   recommendedAnimations: ['fade-in', 'slide-up'],
 }

@@ -237,7 +237,7 @@ export const MESSAGE_MINIMAL: BlockPreset = {
     useCase: ['guestbook', 'message', 'comment'],
   },
 
-  recommendedThemes: ['minimal-light', 'modern-mono'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold'],
   recommendedAnimations: ['fade-in', 'slide-up'],
 
   // ─── Modal ───

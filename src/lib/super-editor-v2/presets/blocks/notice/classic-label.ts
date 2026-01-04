@@ -115,7 +115,7 @@ export const NOTICE_CLASSIC_LABEL: BlockPreset = {
   defaultElements: NOTICE_CLASSIC_LABEL_ELEMENTS,
   specialComponents: ['notice-item-renderer'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['classic-ivory', 'minimal-light', 'romantic-blush'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-minimal-overlay', 'hero-dark-romantic'],
   aiHints: {
     mood: ['elegant', 'classic', 'refined'],
     style: ['centered', 'label-title', 'vertical-stack'],

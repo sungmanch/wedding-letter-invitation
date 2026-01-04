@@ -114,7 +114,7 @@ export const RSVP_BASIC: BlockPreset = {
   defaultElements: RSVP_BASIC_ELEMENTS,
   specialComponents: ['rsvp-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   aiHints: {
     mood: ['minimal', 'clean', 'simple'],
     style: ['centered', 'card-button', 'light-background'],

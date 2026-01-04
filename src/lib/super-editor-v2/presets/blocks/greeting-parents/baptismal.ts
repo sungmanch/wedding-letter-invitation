@@ -300,7 +300,7 @@ export const GREETING_PARENTS_BAPTISMAL: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-classic-elegant'],
   relatedPresets: ['contact-minimal'],
   aiHints: {
     mood: ['religious', 'traditional', 'reverent', 'elegant'],

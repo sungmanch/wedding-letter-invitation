@@ -432,7 +432,7 @@ export const CALENDAR_KOREAN_COUNTDOWN_BOX: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['calendar', 'countdown', 'group'],
   recommendedAnimations: ['fade-in', 'stagger-fade-up', 'number-flip'],
-  recommendedThemes: ['classic-ivory', 'romantic-blush', 'cinematic-warm'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-dark-romantic', 'hero-casual-playful'],
   aiHints: {
     mood: ['warm', 'romantic', 'elegant'],
     style: ['korean-style', 'box-countdown', 'full-date', 'auto-layout'],

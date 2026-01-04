@@ -99,7 +99,7 @@ export const ACCOUNT_TAB_CARD: BlockPreset = {
   defaultElements: ACCOUNT_TAB_CARD_ELEMENTS,
   specialComponents: ['account-tab-view'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'modern-mono'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold'],
   aiHints: {
     mood: ['minimal', 'clean', 'professional'],
     style: ['tab-navigation', 'card-list', 'rounded-buttons'],

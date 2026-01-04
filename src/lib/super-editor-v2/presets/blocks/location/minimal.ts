@@ -258,7 +258,7 @@ export const LOCATION_MINIMAL: BlockPreset = {
   defaultElements: LOCATION_MINIMAL_ELEMENTS,
   specialComponents: ['kakao-map', 'naver-map'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['minimal-light', 'modern-mono', 'classic-ivory'],
+  recommendedThemes: ['hero-minimal-overlay', 'hero-monochrome-bold', 'hero-classic-elegant'],
   aiHints: {
     mood: ['minimal', 'clean', 'simple'],
     style: ['centered', 'map-with-buttons', 'light-background'],

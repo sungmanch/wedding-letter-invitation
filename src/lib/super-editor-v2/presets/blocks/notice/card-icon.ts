@@ -218,7 +218,7 @@ export const NOTICE_CARD_ICON: BlockPreset = {
   defaultElements: NOTICE_CARD_ICON_ELEMENTS,
   specialComponents: ['notice-swiper'], // Swiper 렌더러 사용
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['classic-ivory', 'minimal-light', 'romantic-blush', 'simple-blue'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-minimal-overlay', 'hero-dark-romantic', 'simple-blue'],
   aiHints: {
     mood: ['elegant', 'soft', 'informative'],
     style: ['card', 'icon-header', 'dashed-border', 'centered', 'swipeable'],

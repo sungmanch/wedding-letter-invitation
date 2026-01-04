@@ -131,7 +131,7 @@ export const GREETING_PARENTS_WITH_DIVIDER: BlockPreset = {
   layout: AUTO_LAYOUT_VERTICAL,
   defaultElements: ELEMENTS,
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['classic-ivory', 'minimal-light'],
+  recommendedThemes: ['hero-classic-elegant', 'hero-minimal-overlay'],
   aiHints: {
     mood: ['elegant', 'traditional', 'formal'],
     style: ['clean', 'simple', 'timeless'],

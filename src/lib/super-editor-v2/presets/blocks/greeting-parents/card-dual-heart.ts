@@ -392,7 +392,7 @@ export const GREETING_PARENTS_CARD_DUAL_HEART: BlockPreset = {
   defaultElements: ELEMENTS,
   specialComponents: ['contact-modal'],
   recommendedAnimations: ['fade-in', 'slide-up'],
-  recommendedThemes: ['simple-blue', 'minimal-light', 'modern-mono'],
+  recommendedThemes: ['simple-blue', 'hero-minimal-overlay', 'hero-monochrome-bold'],
   aiHints: {
     mood: ['clean', 'modern', 'balanced'],
     style: ['card-layout', 'dual-column', 'with-decoration'],

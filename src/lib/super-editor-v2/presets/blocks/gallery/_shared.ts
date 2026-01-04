@@ -231,7 +231,7 @@ export const GALLERY_SPECIAL_COMPONENTS = [
 // ============================================
 
 export const GALLERY_RECOMMENDED_THEMES = [
-  'minimal-light',
-  'classic-ivory',
-  'modern-mono',
+  'hero-minimal-overlay',
+  'hero-classic-elegant',
+  'hero-monochrome-bold',
 ] as const
