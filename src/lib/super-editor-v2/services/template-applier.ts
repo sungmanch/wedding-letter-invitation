@@ -102,7 +102,7 @@ function applyTemplateV2ToDocument(
 
   console.log(`[Template Applier] 🎨 Applying template v2 "${template.name}" (${templateId})`)
   console.log('[Template Applier] Template v2 details:', {
-    blockCount: template.blockStructure.length,
+    presets: Object.keys(template.defaultPresets).length,
     editableFields: Object.keys(template.editableFields).length,
     colorTheme: template.designPattern.colorTheme,
     stylePreset: template.designPattern.stylePreset,

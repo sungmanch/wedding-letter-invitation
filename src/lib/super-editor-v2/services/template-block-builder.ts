@@ -1,189 +1,151 @@
 /**
  * Template Block Builder Service
  *
- * 템플릿의 BlockTemplate을 실제 Block 인스턴스로 변환하는 서비스
+ * 템플릿의 프리셋 조합을 실제 Block 인스턴스로 변환하는 서비스
+ * - 프리셋 기반 블록 생성
  * - WeddingData를 바인딩하여 실제 값 주입
- * - 템플릿 색상 팔레트 적용
  * - 결정론적 ID 생성 (SSR hydration 안정성)
  */
 
-import type { Block, Element, WeddingData } from '../schema/types'
-import type { TemplateV2, BlockTemplate, ElementTemplate } from '../config/template-catalog-v2'
+import type { Block, Element, WeddingData, SizeMode } from '../schema/types'
+import type { TemplateV2 } from '../config/template-catalog-v2'
+import { getBlockPreset, type BlockPreset, type PresetElement } from '../presets/blocks'
+import { DEFAULT_BLOCK_HEIGHTS } from '../schema'
+
+// ============================================
+// Section Order (블록 생성 순서)
+// ============================================
+
+const SECTION_ORDER = [
+  'hero',
+  'greeting-parents',
+  'calendar',
+  'gallery',
+  'location',
+] as const
+
+// ============================================
+// Main Functions
+// ============================================
 
 /**
- * 템플릿으로부터 Block 배열 생성
+ * 템플릿으로부터 Block 배열 생성 (프리셋 기반)
  *
  * @param template - TemplateV2 객체
  * @param weddingData - 사용자 웨딩 데이터
  * @returns 실제 Block 배열 (편집 가능)
  */
-export function buildBlocksFromTemplate(template: TemplateV2, weddingData: WeddingData): Block[] {
-  return template.blockStructure.map((blockTemplate, blockIndex) =>
-    buildBlockFromTemplate(blockTemplate, template, weddingData, blockIndex)
-  )
+export function buildBlocksFromTemplate(
+  template: TemplateV2,
+  weddingData: WeddingData
+): Block[] {
+  const blocks: Block[] = []
+
+  for (const sectionType of SECTION_ORDER) {
+    const presetId = template.defaultPresets[sectionType]
+    if (!presetId) continue
+
+    const preset = getBlockPreset(presetId)
+    if (!preset) {
+      console.warn(`Preset not found: ${presetId}`)
+      continue
+    }
+
+    const block = createBlockFromPreset(preset, template.id, blocks.length)
+    blocks.push(block)
+  }
+
+  return blocks
 }
 
 /**
- * 단일 BlockTemplate을 Block으로 변환 (결정론적 ID 사용)
+ * 프리셋 ID 배열로부터 Block 배열 생성
+ *
+ * @param presetIds - 프리셋 ID 배열
+ * @param templateId - 템플릿 ID (ID 생성용)
+ * @returns Block 배열
  */
-function buildBlockFromTemplate(
-  blockTemplate: BlockTemplate,
-  template: TemplateV2,
-  weddingData: WeddingData,
+export function buildBlocksFromPresets(
+  presetIds: string[],
+  templateId: string = 'custom'
+): Block[] {
+  const blocks: Block[] = []
+
+  for (const presetId of presetIds) {
+    const preset = getBlockPreset(presetId)
+    if (!preset) {
+      console.warn(`Preset not found: ${presetId}`)
+      continue
+    }
+
+    const block = createBlockFromPreset(preset, templateId, blocks.length)
+    blocks.push(block)
+  }
+
+  return blocks
+}
+
+// ============================================
+// Block Creation
+// ============================================
+
+/**
+ * 프리셋 → Block 변환 (결정론적 ID 사용)
+ */
+function createBlockFromPreset(
+  preset: BlockPreset,
+  templateId: string,
   blockIndex: number
 ): Block {
-  const blockId = `${template.id}-b${blockIndex}`
+  const blockId = `${templateId}-b${blockIndex}`
+
+  let height: number | SizeMode = DEFAULT_BLOCK_HEIGHTS[preset.blockType] || 80
+
+  if (preset.defaultHeight) {
+    height = preset.defaultHeight
+  }
+
   return {
     id: blockId,
-    type: blockTemplate.type,
-    enabled: blockTemplate.enabled,
-    height: blockTemplate.height,
-    layout: blockTemplate.layout,
-    elements: blockTemplate.elements.map((elementTemplate, elementIndex) =>
-      buildElementFromTemplate(elementTemplate, template, weddingData, blockId, elementIndex)
-    ),
+    type: preset.blockType,
+    enabled: true,
+    presetId: preset.id,
+    height,
+    layout: preset.layout,
+    elements: preset.defaultElements
+      ? preset.defaultElements.map((el, index) =>
+          convertPresetElement(el, blockId, index)
+        )
+      : [],
   }
 }
 
 /**
- * 단일 ElementTemplate을 Element로 변환 (결정론적 ID 사용)
+ * PresetElement → Element 변환 (결정론적 ID 사용)
  */
-function buildElementFromTemplate(
-  elementTemplate: ElementTemplate,
-  template: TemplateV2,
-  weddingData: WeddingData,
+function convertPresetElement(
+  el: PresetElement,
   blockId: string,
   elementIndex: number
 ): Element {
   const element: Element = {
-    id: `${blockId}-e${elementIndex}`,
-    type: elementTemplate.type,
-    x: elementTemplate.x,
-    y: elementTemplate.y,
-    width: elementTemplate.width,
-    height: elementTemplate.height,
-    zIndex: elementTemplate.zIndex,
-    props: elementTemplate.props,
-  }
+    ...el,
+    id: el.id || `${blockId}-e${elementIndex}`,
+  } as Element
 
-  // 바인딩이 있으면 추가
-  if (elementTemplate.binding) {
-    element.binding = elementTemplate.binding
-  }
-
-  // 값이 있으면 추가
-  if (elementTemplate.value !== undefined) {
-    element.value = elementTemplate.value
-  }
-
-  // 스타일 적용 (템플릿 색상 팔레트 반영)
-  if (elementTemplate.style) {
-    element.style = applyTemplateColorsToElementStyle(
-      elementTemplate.style,
-      template,
-      elementTemplate.type
+  // Group children 재귀 처리
+  if (el.children && el.children.length > 0) {
+    element.children = el.children.map((child, childIndex) =>
+      convertPresetElement(child as PresetElement, blockId, elementIndex * 100 + childIndex)
     )
   }
 
   return element
 }
 
-/**
- * Element 스타일에 템플릿 색상 팔레트 적용
- *
- * 템플릿에서 flat 형식으로 정의된 스타일을 ElementStyle 중첩 구조로 변환
- * (템플릿 정의의 편의성을 위해 flat 형식 허용, 런타임에 변환)
- */
-function applyTemplateColorsToElementStyle(
-  style: any,
-  template: TemplateV2,
-  elementType: string
-): any {
-  // ✅ 이미 중첩 구조라면 그대로 반환
-  if (style.text || style.background || style.border || style.shadow) {
-    return style
-  }
-
-  // ✅ flat 구조를 ElementStyle 중첩 구조로 변환
-  const elementStyle: any = {}
-
-  // 텍스트 스타일 추출
-  const textStyle: any = {}
-  if (style.fontFamily) textStyle.fontFamily = style.fontFamily
-  if (style.fontSize) {
-    // rem/px 문자열을 px 문자열로 변환
-    if (typeof style.fontSize === 'string') {
-      const match = style.fontSize.match(/([\d.]+)(rem|px)?/)
-      if (match) {
-        const value = parseFloat(match[1])
-        const unit = match[2]
-        textStyle.fontSize = unit === 'rem' ? `${value * 16}px` : `${value}px`
-      }
-    } else {
-      textStyle.fontSize = `${style.fontSize}px`
-    }
-  }
-  if (style.fontWeight) textStyle.fontWeight = style.fontWeight
-  if (style.color) textStyle.color = style.color
-  if (style.textAlign) textStyle.textAlign = style.textAlign
-  if (style.lineHeight) textStyle.lineHeight = style.lineHeight
-  if (style.letterSpacing) {
-    // em 문자열 유지 (CSS에서 em 단위 필요)
-    if (typeof style.letterSpacing === 'string') {
-      const match = style.letterSpacing.match(/([\d.]+)em/)
-      if (match) {
-        textStyle.letterSpacing = `${parseFloat(match[1])}em`
-      }
-    } else {
-      textStyle.letterSpacing = `${style.letterSpacing}em`
-    }
-  }
-
-  if (Object.keys(textStyle).length > 0) {
-    elementStyle.text = textStyle
-  }
-
-  // 배경 스타일
-  if (style.backgroundColor) {
-    elementStyle.background = style.backgroundColor
-  } else if (style.background) {
-    elementStyle.background = style.background
-  }
-
-  // 보더 스타일
-  if (style.borderRadius || style.borderWidth || style.borderColor) {
-    elementStyle.border = {
-      width: style.borderWidth || 0,
-      color: style.borderColor || 'transparent',
-      style: style.borderStyle || 'solid',
-      radius: typeof style.borderRadius === 'string'
-        ? parseInt(style.borderRadius)
-        : (style.borderRadius || 0),
-    }
-  }
-
-  // 그림자
-  if (style.boxShadow) {
-    elementStyle.shadow = style.boxShadow
-  }
-
-  // 투명도
-  if (style.opacity !== undefined) {
-    elementStyle.opacity = style.opacity
-  }
-
-  // 필터 (grayscale, blur 등)
-  if (style.filter) {
-    elementStyle.filter = style.filter
-  }
-
-  // 텍스트 공백 처리
-  if (style.whiteSpace) {
-    elementStyle.whiteSpace = style.whiteSpace
-  }
-
-  return elementStyle
-}
+// ============================================
+// Color Utilities
+// ============================================
 
 /**
  * 템플릿 색상 팔레트로부터 색상 추론

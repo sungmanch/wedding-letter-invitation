@@ -14,7 +14,6 @@ import type {
   EditorDocument,
   Block,
   Element,
-  BlockType,
   SizeMode,
 } from '@/lib/super-editor-v2/schema/types'
 import {
@@ -235,7 +234,7 @@ interface MiniHeroRendererProps {
 
 /**
  * Hero 템플릿 전용 미니 렌더러
- * template-catalog-v2에서 가져온 hero 블록을 렌더링
+ * 프리셋 시스템을 사용하여 hero 블록을 렌더링
  */
 export function MiniHeroRenderer({
   templateId,
@@ -244,30 +243,28 @@ export function MiniHeroRenderer({
   height = 200,
   className = '',
 }: MiniHeroRendererProps) {
-  // 동적 import로 순환 의존성 방지
+  // 프리셋 기반으로 문서 생성
   const document = useMemo(() => {
-    // Lazy import
-    const {
-      getTemplateV2ById,
-    } = require('@/lib/super-editor-v2/config/template-catalog-v2')
-    const {
-      buildBlocksFromTemplate,
-    } = require('@/lib/super-editor-v2/services/template-block-builder')
+    // 템플릿 ID → Hero 프리셋 ID 매핑
+    const { getHeroPresetIdForTemplate } = require('@/lib/super-editor-v2/config/template-preset-map')
 
-    const template = getTemplateV2ById(templateId)
-    if (!template) return null
+    const heroPresetId = getHeroPresetIdForTemplate(templateId)
+    if (!heroPresetId) return null
+
+    const preset = getBlockPreset(heroPresetId)
+    if (!preset) return null
+
+    // 프리셋에서 블록 생성
+    const block = createBlockFromPreset(preset)
+    if (!block) return null
 
     // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
     const sampleData = getSampleWeddingDataForTemplate(templateId)
-    const blocks = buildBlocksFromTemplate(template, sampleData)
-    const heroBlock = blocks.find((b: Block) => b.type === 'hero')
-
-    if (!heroBlock) return null
 
     return {
       id: `hero-${templateId}`,
       version: 2 as const,
-      blocks: [heroBlock],
+      blocks: [block],
       style: DEFAULT_STYLE_SYSTEM,
       data: sampleData,
       animation: { mood: 'minimal' as const, speed: 1, floatingElements: [] },
