@@ -15,8 +15,12 @@ import {
   useReducer,
   useCallback,
   useMemo,
+  useEffect,
+  useState,
   type ReactNode,
 } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import type { BlockType, ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { getTemplateV2ById } from '@/lib/super-editor-v2/config/template-catalog-v2'
 import { buildStyleSystemFromTemplate } from '@/lib/super-editor-v2/services/template-applier'
@@ -31,6 +35,12 @@ import {
   type HeroPresetId,
 } from '@/lib/super-editor-v2/presets/blocks/hero'
 import { getHeroPresetIdForTemplate } from '@/lib/super-editor-v2/config/template-preset-map'
+import { createDocument } from '@/lib/super-editor-v2/actions/document'
+import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
+import { SAMPLE_WEDDING_DATA } from '@/lib/super-editor-v2/schema'
+import { nanoid } from 'nanoid'
+import type { Block, Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
+import type { PresetElement } from '@/lib/super-editor-v2/presets/blocks/types'
 
 // ============================================
 // Types
@@ -75,6 +85,10 @@ interface SubwayBuilderContextValue {
   setTemplate: (templateId: string) => void
   setPreset: (sectionType: SelectableSectionType, presetId: string) => void
   reset: () => void
+  /** 현재 선택 상태를 저장하고 문서 생성 시도 (비로그인 시 로그인 페이지로 이동) */
+  saveAndCreateDocument: () => Promise<void>
+  /** 문서 생성 중 상태 */
+  isCreating: boolean
 }
 
 // ============================================
@@ -122,6 +136,97 @@ const INITIAL_STATE: SubwayBuilderState = {
   selectedTemplateId: 'unique1',
   selectedPresets: DEFAULT_PRESETS,
   cssVariables: getInitialCssVariables(),
+}
+
+// ============================================
+// LocalStorage Helpers
+// ============================================
+
+const STORAGE_KEY = 'subway-builder-pending-selection'
+
+interface PendingSelection {
+  templateId: string
+  presets: SelectedPresets
+  timestamp: number
+}
+
+/** 선택 상태를 localStorage에 저장 */
+function savePendingSelection(state: SubwayBuilderState): void {
+  if (typeof window === 'undefined') return
+  const data: PendingSelection = {
+    templateId: state.selectedTemplateId,
+    presets: state.selectedPresets,
+    timestamp: Date.now(),
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+/** localStorage에서 pending 선택 상태 로드 (1시간 이내만 유효) */
+function loadPendingSelection(): PendingSelection | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (!stored) return null
+    const data = JSON.parse(stored) as PendingSelection
+    // 1시간 이내만 유효
+    if (Date.now() - data.timestamp > 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
+    return data
+  } catch {
+    return null
+  }
+}
+
+/** pending 선택 상태 삭제 */
+function clearPendingSelection(): void {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+// ============================================
+// Block Creation Helpers
+// ============================================
+
+function convertPresetElement(el: PresetElement): Element {
+  const element: Element = {
+    ...el,
+    id: el.id || nanoid(8),
+  } as Element
+
+  if (el.children && el.children.length > 0) {
+    element.children = el.children.map((child) =>
+      convertPresetElement(child as PresetElement)
+    )
+  }
+
+  return element
+}
+
+function createBlockFromPresetData(presetId: string): Block | null {
+  const preset = getBlockPreset(presetId)
+  if (!preset) return null
+
+  let height: number | SizeMode = 80
+  if (preset.defaultHeight) {
+    height =
+      typeof preset.defaultHeight === 'number'
+        ? preset.defaultHeight
+        : preset.defaultHeight
+  }
+
+  return {
+    id: nanoid(8),
+    type: preset.blockType,
+    enabled: true,
+    presetId: preset.id,
+    height,
+    layout: preset.layout,
+    elements: preset.defaultElements
+      ? preset.defaultElements.map(convertPresetElement)
+      : [],
+  }
 }
 
 // ============================================
@@ -183,7 +288,80 @@ interface SubwayBuilderProviderProps {
 export function SubwayBuilderProvider({
   children,
 }: SubwayBuilderProviderProps) {
+  const router = useRouter()
   const [state, dispatch] = useReducer(subwayBuilderReducer, INITIAL_STATE)
+  const [isCreating, setIsCreating] = useState(false)
+
+  // 문서 생성 헬퍼 함수
+  const createDocumentFromSelection = useCallback(
+    async (templateId: string, presets: SelectedPresets) => {
+      const template = getTemplateV2ById(templateId)
+      if (!template) {
+        throw new Error('템플릿을 찾을 수 없습니다')
+      }
+
+      // 블록 생성
+      const blocks: Block[] = []
+
+      // Hero 블록 추가
+      const heroPresetId = presets.hero
+      if (heroPresetId) {
+        const heroBlock = createBlockFromPresetData(heroPresetId)
+        if (heroBlock) {
+          blocks.push(heroBlock)
+        }
+      }
+
+      // 나머지 섹션 추가
+      for (const sectionType of SECTION_ORDER) {
+        const presetId = presets[sectionType]
+        if (presetId) {
+          const block = createBlockFromPresetData(presetId)
+          if (block) {
+            blocks.push(block)
+          }
+        }
+      }
+
+      const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
+
+      const doc = await createDocument({
+        title: '새 청첩장',
+        blocks,
+        style,
+        weddingData: SAMPLE_WEDDING_DATA,
+      })
+
+      return doc
+    },
+    []
+  )
+
+  // 로그인 후 pending 선택이 있으면 자동으로 문서 생성
+  useEffect(() => {
+    const checkAndCreatePendingDocument = async () => {
+      const pending = loadPendingSelection()
+      if (!pending) return
+
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // pending 선택이 있고 로그인 상태면 자동 생성
+      setIsCreating(true)
+      try {
+        const doc = await createDocumentFromSelection(pending.templateId, pending.presets)
+        clearPendingSelection()
+        router.push(`/se2/${doc.id}/edit`)
+      } catch (err) {
+        console.error('Auto document creation failed:', err)
+        clearPendingSelection()
+        setIsCreating(false)
+      }
+    }
+
+    checkAndCreatePendingDocument()
+  }, [createDocumentFromSelection, router])
 
   // Hero 템플릿 선택 시 색상 전파 + hero 프리셋 연동
   const setTemplate = useCallback((templateId: string) => {
@@ -242,14 +420,44 @@ export function SubwayBuilderProvider({
     dispatch({ type: 'RESET' })
   }, [])
 
+  // 선택 상태를 저장하고 문서 생성 시도
+  const saveAndCreateDocument = useCallback(async () => {
+    setIsCreating(true)
+
+    try {
+      // 인증 확인
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // 비로그인: 선택 상태 저장 후 로그인 페이지로 이동
+        savePendingSelection(state)
+        router.push('/login?redirect=/')
+        return
+      }
+
+      // 로그인 상태: 바로 문서 생성
+      const doc = await createDocumentFromSelection(
+        state.selectedTemplateId,
+        state.selectedPresets
+      )
+      router.push(`/se2/${doc.id}/edit`)
+    } catch (err) {
+      console.error('Document creation failed:', err)
+      setIsCreating(false)
+    }
+  }, [state, createDocumentFromSelection, router])
+
   const contextValue = useMemo<SubwayBuilderContextValue>(
     () => ({
       state,
       setTemplate,
       setPreset,
       reset,
+      saveAndCreateDocument,
+      isCreating,
     }),
-    [state, setTemplate, setPreset, reset]
+    [state, setTemplate, setPreset, reset, saveAndCreateDocument, isCreating]
   )
 
   return (
