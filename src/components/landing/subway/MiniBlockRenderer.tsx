@@ -27,6 +27,7 @@ import {
   DEFAULT_BLOCK_HEIGHTS,
   getSampleWeddingDataForTemplate,
 } from '@/lib/super-editor-v2/schema'
+import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 
 // ============================================
 // Constants for Hydration Safety
@@ -106,15 +107,20 @@ function createBlockFromPreset(preset: BlockPreset): Block {
 /** 단일 블록용 미니 문서 생성 */
 function createMiniDocument(
   block: Block,
+  preset: BlockPreset,
   cssVariables?: Record<string, string>
 ): EditorDocument {
+  // 프리셋의 recommendedThemes에서 테마 프리셋 ID 추출
+  const themePresetId = preset.recommendedThemes?.[0] as ThemePresetId | undefined
+
   return {
     id: `mini-${block.id}`,
     version: 2,
     blocks: [block],
     style: {
       ...DEFAULT_STYLE_SYSTEM,
-      // CSS 변수가 있으면 advanced tokens으로 적용
+      // 프리셋에 추천 테마가 있으면 적용
+      ...(themePresetId && { preset: themePresetId }),
     },
     data: SAMPLE_WEDDING_DATA,
     animation: {
@@ -152,7 +158,7 @@ function MiniBlockRendererInner({
     }
 
     const block = createBlockFromPreset(preset)
-    const document = createMiniDocument(block, cssVariables)
+    const document = createMiniDocument(block, preset, cssVariables)
 
     return { block, document }
   }, [preset, cssVariables])
@@ -278,11 +284,18 @@ export function MiniHeroRenderer({
     // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
     const sampleData = getSampleWeddingDataForTemplate(templateId)
 
+    // 프리셋의 recommendedThemes에서 테마 프리셋 ID 추출
+    const themePresetId = preset.recommendedThemes?.[0] as ThemePresetId | undefined
+
     return {
       id: `hero-${templateId}`,
       version: 2 as const,
       blocks: [block],
-      style: DEFAULT_STYLE_SYSTEM,
+      style: {
+        ...DEFAULT_STYLE_SYSTEM,
+        // 프리셋에 추천 테마가 있으면 적용
+        ...(themePresetId && { preset: themePresetId }),
+      },
       data: sampleData,
       animation: { mood: 'minimal' as const, speed: 1, floatingElements: [] },
       meta: {
