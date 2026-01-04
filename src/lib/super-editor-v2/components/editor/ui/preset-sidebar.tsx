@@ -65,18 +65,18 @@ export function PresetSidebar({
     : ''
 
   return (
-    <div className="w-[280px] flex-shrink-0 bg-[#1a1a1a] border-l border-white/10 flex flex-col h-full">
+    <div className="w-[280px] flex-shrink-0 bg-white border-l border-[var(--sand-100)] flex flex-col h-full">
       {/* 헤더 */}
-      <div className="flex-shrink-0 p-4 border-b border-white/10">
+      <div className="flex-shrink-0 p-4 border-b border-[var(--sand-100)]">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-[#F5E6D3]">프리셋 선택</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">프리셋 선택</h3>
           {visibleBlock && (
-            <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[#C9A962]/20 text-[#C9A962] border border-[#C9A962]/30">
+            <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[var(--sage-100)] text-[var(--sage-700)] border border-[var(--sage-200)]">
               현재화면
             </span>
           )}
         </div>
-        <p className="text-xs text-[#F5E6D3]/60 mt-1">
+        <p className="text-xs text-[var(--text-muted)] mt-1">
           {visibleBlock ? `${blockTypeLabel} 블록` : '스크롤하여 블록 선택'}
         </p>
       </div>
@@ -85,8 +85,8 @@ export function PresetSidebar({
       <div className="flex-1 p-4 overflow-y-auto">
         {!visibleBlock ? (
           <div className="text-center py-8">
-            <LayoutIcon className="w-12 h-12 text-[#F5E6D3]/20 mx-auto mb-3" />
-            <p className="text-[#F5E6D3]/40 text-sm">
+            <LayoutIcon className="w-12 h-12 text-[var(--sand-200)] mx-auto mb-3" />
+            <p className="text-[var(--text-muted)] text-sm">
               프리뷰를 스크롤하면<br />
               해당 블록의 프리셋이<br />
               여기에 표시됩니다.
@@ -94,11 +94,11 @@ export function PresetSidebar({
           </div>
         ) : presets.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-[#F5E6D3]/40 text-sm">
+            <p className="text-[var(--text-muted)] text-sm">
               {blockTypeLabel} 블록에는<br />
               아직 프리셋이 없습니다.
             </p>
-            <p className="text-[#F5E6D3]/30 text-xs mt-2">
+            <p className="text-[var(--text-muted)]/70 text-xs mt-2">
               calendar, profile 블록에서<br />
               프리셋을 사용할 수 있습니다.
             </p>
@@ -137,28 +137,28 @@ function PresetCard({ preset, isSelected, onClick }: PresetCardProps) {
       className={`
         w-full text-left p-3 rounded-lg border transition-all
         ${isSelected
-          ? 'border-[#C9A962] bg-[#C9A962]/10'
-          : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
+          ? 'border-[var(--sage-500)] bg-[var(--sage-50)]'
+          : 'border-[var(--sand-100)] bg-[var(--ivory-50)] hover:bg-[var(--ivory-100)] hover:border-[var(--sand-200)]'
         }
       `}
     >
       {/* 헤더 */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h4 className={`text-sm font-medium ${isSelected ? 'text-[#C9A962]' : 'text-[#F5E6D3]'}`}>
+          <h4 className={`text-sm font-medium ${isSelected ? 'text-[var(--sage-700)]' : 'text-[var(--text-primary)]'}`}>
             {preset.nameKo}
           </h4>
-          <p className="text-xs text-[#F5E6D3]/50 mt-0.5">{preset.name}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{preset.name}</p>
         </div>
         {isSelected && (
-          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#C9A962] flex items-center justify-center">
-            <CheckIcon className="w-3 h-3 text-[#0A0806]" />
+          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--sage-500)] flex items-center justify-center">
+            <CheckIcon className="w-3 h-3 text-white" />
           </span>
         )}
       </div>
 
       {/* 설명 */}
-      <p className="text-xs text-[#F5E6D3]/60 mt-2 line-clamp-2">
+      <p className="text-xs text-[var(--text-muted)] mt-2 line-clamp-2">
         {preset.description}
       </p>
 
@@ -167,7 +167,7 @@ function PresetCard({ preset, isSelected, onClick }: PresetCardProps) {
         {preset.tags.slice(0, 4).map((tag) => (
           <span
             key={tag}
-            className="px-1.5 py-0.5 text-[10px] rounded bg-white/10 text-[#F5E6D3]/60"
+            className="px-1.5 py-0.5 text-[10px] rounded bg-[var(--sand-100)] text-[var(--text-muted)]"
           >
             {tag}
           </span>
@@ -176,7 +176,7 @@ function PresetCard({ preset, isSelected, onClick }: PresetCardProps) {
 
       {/* 복잡도 */}
       <div className="flex items-center gap-2 mt-2">
-        <span className="text-[10px] text-[#F5E6D3]/40">복잡도:</span>
+        <span className="text-[10px] text-[var(--text-muted)]">복잡도:</span>
         <ComplexityIndicator level={preset.complexity} />
       </div>
     </button>
@@ -192,7 +192,7 @@ function ComplexityIndicator({ level }: { level: 'low' | 'medium' | 'high' }) {
         <div
           key={i}
           className={`w-1.5 h-1.5 rounded-full ${
-            i <= dots ? 'bg-[#C9A962]' : 'bg-white/20'
+            i <= dots ? 'bg-[var(--sage-500)]' : 'bg-[var(--sand-200)]'
           }`}
         />
       ))}

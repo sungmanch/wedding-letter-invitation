@@ -30,6 +30,11 @@ import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/d
 import { PresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/preset-sidebar'
 import { useVisibleBlock } from '@/lib/super-editor-v2/hooks/useVisibleBlock'
 import { getBlockPreset, type PresetElement } from '@/lib/super-editor-v2/presets/blocks'
+import {
+  isHeroPresetId,
+  getThemeForHeroPreset,
+} from '@/lib/super-editor-v2/presets/blocks/hero'
+import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
 
@@ -278,9 +283,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       return newEl
     }
 
-    updateDocument(prev => ({
-      ...prev,
-      blocks: prev.blocks.map(block => {
+    updateDocument(prev => {
+      // 블록 업데이트
+      const newBlocks = prev.blocks.map(block => {
         if (block.id !== blockId) return block
 
         // 프리셋의 기본 요소가 있으면 적용 (재귀적 ID 재생성)
@@ -295,8 +300,26 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           layout: preset.layout,
           elements: newElements,
         }
-      }),
-    }))
+      })
+
+      // 히어로 프리셋이면 테마도 자동 적용
+      let newStyle = prev.style
+      if (isHeroPresetId(presetId)) {
+        const themePresetId = getThemeForHeroPreset(presetId)
+        if (themePresetId) {
+          newStyle = {
+            ...prev.style,
+            preset: themePresetId as ThemePresetId,
+          }
+        }
+      }
+
+      return {
+        ...prev,
+        blocks: newBlocks,
+        style: newStyle,
+      }
+    })
   }, [updateDocument])
 
   // 이미지 업로드 (즉시 서버 업로드)
