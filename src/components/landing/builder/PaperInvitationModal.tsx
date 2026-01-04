@@ -13,6 +13,7 @@
 import { useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import heic2any from 'heic2any'
 import {
   Upload,
   X,
@@ -60,6 +61,37 @@ const MAX_IMAGES = 10
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp']
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
+/**
+ * HEIC/HEIF 파일을 JPEG로 변환
+ * Chrome/Firefox는 HEIC를 네이티브로 표시할 수 없으므로 변환 필요
+ */
+async function convertHeicToJpeg(file: File): Promise<File> {
+  const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+    file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
+
+  if (!isHeic) {
+    return file
+  }
+
+  try {
+    const convertedBlob = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.9,
+    })
+
+    // heic2any can return Blob or Blob[]
+    const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob
+
+    // Create new File with converted blob
+    const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg')
+    return new File([blob], newFileName, { type: 'image/jpeg' })
+  } catch (error) {
+    console.error('HEIC conversion failed:', error)
+    throw new Error('HEIC 파일 변환에 실패했습니다')
+  }
+}
+
 const STEPS = [
   { id: 1, title: '사진 업로드', description: '청첩장에 사용할 사진을 업로드해주세요' },
   { id: 2, title: '메인 사진 선택', description: '대표 이미지로 사용할 사진을 선택해주세요' },
@@ -80,37 +112,49 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 파일 업로드 핸들러
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
+    setIsProcessingFiles(true)
     const newImages: UploadedImage[] = []
 
-    Array.from(files).forEach((file) => {
-      // 타입 검증
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        return
+    for (const file of Array.from(files)) {
+      // 타입 검증 (HEIC는 파일 확장자로도 체크)
+      const isHeic = file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
+      if (!ALLOWED_TYPES.includes(file.type) && !isHeic) {
+        continue
       }
 
       // 크기 검증
       if (file.size > MAX_FILE_SIZE) {
-        return
+        continue
       }
 
       // 최대 개수 검증
       if (images.length + newImages.length >= MAX_IMAGES) {
-        return
+        break
       }
 
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
-      const previewUrl = URL.createObjectURL(file)
+      try {
+        // HEIC/HEIF 파일은 JPEG로 변환 (브라우저 미리보기 호환성)
+        const processedFile = await convertHeicToJpeg(file)
 
-      newImages.push({ id, file, previewUrl })
-    })
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+        const previewUrl = URL.createObjectURL(processedFile)
+
+        newImages.push({ id, file: processedFile, previewUrl })
+      } catch (error) {
+        console.error('File processing failed:', error)
+        // 변환 실패 시 건너뛰기
+        continue
+      }
+    }
 
     setImages((prev) => [...prev, ...newImages])
 
@@ -123,6 +167,8 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+
+    setIsProcessingFiles(false)
   }, [images.length, mainImageId])
 
   // 이미지 삭제
@@ -286,6 +332,7 @@ export function PaperInvitationModal({ open, onOpenChange }: PaperInvitationModa
                     onRemoveImage={handleRemoveImage}
                     onDrop={handleDrop}
                     fileInputRef={fileInputRef}
+                    isProcessing={isProcessingFiles}
                   />
                 )}
 
@@ -375,9 +422,10 @@ interface Step1Props {
   onRemoveImage: (id: string) => void
   onDrop: (e: React.DragEvent) => void
   fileInputRef: React.RefObject<HTMLInputElement | null>
+  isProcessing: boolean
 }
 
-function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef }: Step1Props) {
+function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef, isProcessing }: Step1Props) {
   const [isDragging, setIsDragging] = useState(false)
 
   return (
@@ -390,14 +438,14 @@ function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef
       <div
         onDragOver={(e) => {
           e.preventDefault()
-          setIsDragging(true)
+          if (!isProcessing) setIsDragging(true)
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={(e) => {
           setIsDragging(false)
-          onDrop(e)
+          if (!isProcessing) onDrop(e)
         }}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => !isProcessing && fileInputRef.current?.click()}
         className={`
           relative border-2 border-dashed rounded-xl p-8
           flex flex-col items-center justify-center gap-3
@@ -406,20 +454,31 @@ function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef
             ? 'border-[var(--sage-400)] bg-[var(--sage-50)]'
             : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:bg-[var(--sage-50)]'
           }
-          ${images.length >= MAX_IMAGES ? 'opacity-50 pointer-events-none' : ''}
+          ${images.length >= MAX_IMAGES || isProcessing ? 'opacity-50 pointer-events-none' : ''}
         `}
       >
-        <div className="w-12 h-12 rounded-full bg-[var(--sage-100)] flex items-center justify-center">
-          <ImagePlus className="w-6 h-6 text-[var(--sage-600)]" />
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-medium text-[var(--text-body)]">
-            사진을 드래그하거나 클릭하여 업로드
-          </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            JPG, PNG, HEIC, WebP · 최대 10MB
-          </p>
-        </div>
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-8 h-8 text-[var(--sage-600)] animate-spin" />
+            <p className="text-sm text-[var(--text-muted)]">
+              사진 처리 중...
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="w-12 h-12 rounded-full bg-[var(--sage-100)] flex items-center justify-center">
+              <ImagePlus className="w-6 h-6 text-[var(--sage-600)]" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-[var(--text-body)]">
+                사진을 드래그하거나 클릭하여 업로드
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                JPG, PNG, HEIC, WebP · 최대 10MB
+              </p>
+            </div>
+          </>
+        )}
         <input
           ref={fileInputRef}
           type="file"
@@ -427,6 +486,7 @@ function Step1Upload({ images, onFileSelect, onRemoveImage, onDrop, fileInputRef
           multiple
           onChange={onFileSelect}
           className="hidden"
+          disabled={isProcessing}
         />
       </div>
 
