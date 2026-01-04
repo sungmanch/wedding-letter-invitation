@@ -289,9 +289,9 @@ export interface GroupProps {
 export type VariablePath =
   // ─── 공유 필드 (◆ 원본) ───
   | 'couple.groom.name' | 'couple.groom.nameEn' | 'couple.groom.phone' | 'couple.groom.intro' | 'couple.groom.baptismalName'
-  | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags'
+  | 'couple.groom.photo' | 'couple.groom.birthDate' | 'couple.groom.mbti' | 'couple.groom.tags' | 'couple.groom.job'
   | 'couple.bride.name' | 'couple.bride.nameEn' | 'couple.bride.phone' | 'couple.bride.intro' | 'couple.bride.baptismalName'
-  | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags'
+  | 'couple.bride.photo' | 'couple.bride.birthDate' | 'couple.bride.mbti' | 'couple.bride.tags' | 'couple.bride.job'
   | 'couple.photo' | 'couple.photos'
   | 'wedding.date' | 'wedding.time'
 
@@ -318,6 +318,9 @@ export type VariablePath =
   | 'venue.transportation.bus' | 'venue.transportation.subway'
   | 'venue.transportation.shuttle' | 'venue.transportation.parking' | 'venue.transportation.etc'
 
+  // ─── 오시는길 섹션 ───
+  | 'location.title' | 'location.titleEn'
+
   // ─── 사진 ───
   | 'photos.main' | 'photos.gallery'
 
@@ -327,7 +330,8 @@ export type VariablePath =
   | 'contact.showParents'
   | 'gallery.effect'
   | 'accounts.groom' | 'accounts.bride' | 'accounts.kakaopay.groom' | 'accounts.kakaopay.bride'
-  | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline'
+  | 'accounts.title' | 'accounts.titleEn' | 'accounts.description'
+  | 'rsvp.title' | 'rsvp.description' | 'rsvp.deadline' | 'rsvp.titleEn'
   | 'notice.sectionTitle' | 'notice.title' | 'notice.description' | 'notice.items'
   | 'guestbook.title' | 'guestbook.placeholder'
   | 'ending.message' | 'ending.photo'
@@ -955,6 +959,15 @@ export interface WeddingData {
   }
 
   // ═══════════════════════════════════════════════
+  // 오시는길 섹션
+  // ═══════════════════════════════════════════════
+
+  location?: {
+    title?: string     // 한글 제목 (예: '오시는길')
+    titleEn?: string   // 영문 제목 (예: 'LOCATION')
+  }
+
+  // ═══════════════════════════════════════════════
   // 섹션별 설정
   // ═══════════════════════════════════════════════
 
@@ -1013,6 +1026,7 @@ export interface PersonInfo {
   birthDate?: string    // "1990-12-10"
   mbti?: string         // "ISTP"
   tags?: string[]       // ["캠핑", "러닝"]
+  job?: string          // 직업
   // Legacy 호환
   nameEn?: string
   fatherName?: string
@@ -1084,6 +1098,9 @@ export interface ParentInfo {
 }
 
 export interface AccountsConfig {
+  title?: string         // 섹션 제목 (예: '마음 전하실 곳')
+  titleEn?: string       // 영문 제목 (예: 'GIFT')
+  description?: string   // 안내 문구
   groom?: AccountItem[]  // max 3
   bride?: AccountItem[]  // max 3
   kakaopay?: { groom?: string; bride?: string }
@@ -1098,6 +1115,7 @@ export interface AccountItem {
 
 export interface RsvpConfig {
   title?: string
+  titleEn?: string       // 영문 제목 (예: 'RSVP')
   description?: string
   showGuestCount?: boolean  // 기본: true
   showMeal?: boolean        // 기본: false

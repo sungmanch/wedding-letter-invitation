@@ -250,7 +250,7 @@ const ELEMENTS: PresetElement[] = [
             type: 'text',
             zIndex: 1,
             sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'custom.groomJob',
+            binding: 'couple.groom.job',
             value: '직업',
             props: { type: 'text' },
             style: {
@@ -379,7 +379,7 @@ const ELEMENTS: PresetElement[] = [
             type: 'text',
             zIndex: 1,
             sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-            binding: 'custom.brideJob',
+            binding: 'couple.bride.job',
             value: '직업',
             props: { type: 'text' },
             style: {
@@ -492,8 +492,8 @@ export const PROFILE_CIRCLE_PORTRAIT: BlockPreset = {
     'couple.bride.photo',
     'couple.bride.birthDate',
     'couple.bride.mbti',
-    'custom.groomJob',
-    'custom.brideJob',
+    'couple.groom.job',
+    'couple.bride.job',
   ],
   defaultHeight: HUG_HEIGHT,
   layout: {

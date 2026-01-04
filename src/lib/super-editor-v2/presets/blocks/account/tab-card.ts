@@ -14,12 +14,30 @@ import { FONT_SIZE } from '../tokens'
 // ============================================
 
 const ACCOUNT_TAB_CARD_ELEMENTS: PresetElement[] = [
-  // English Section Label
+  // Korean Title (한글 제목 먼저)
   {
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.accountEngTitle',
+    binding: 'accounts.title',
+    value: '마음 전하는 곳',
+    props: { type: 'text' },
+    style: {
+      text: {
+        fontFamily: 'var(--font-heading)',
+        fontSize: FONT_SIZE['3xl'],
+        fontWeight: 600,
+        color: 'var(--fg-emphasis)',
+        textAlign: 'center',
+      },
+    },
+  },
+  // English Section Label (영문 제목)
+  {
+    type: 'text',
+    zIndex: 1,
+    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
+    binding: 'accounts.titleEn',
     value: 'ACCOUNT',
     props: { type: 'text' },
     style: {
@@ -33,30 +51,12 @@ const ACCOUNT_TAB_CARD_ELEMENTS: PresetElement[] = [
       },
     },
   },
-  // Korean Title
-  {
-    type: 'text',
-    zIndex: 1,
-    sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.accountTitle',
-    value: '마음 전하는 곳',
-    props: { type: 'text' },
-    style: {
-      text: {
-        fontFamily: 'var(--font-heading)',
-        fontSize: FONT_SIZE['3xl'],
-        fontWeight: 600,
-        color: 'var(--fg-emphasis)',
-        textAlign: 'center',
-      },
-    },
-  },
   // Description
   {
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.accountDescription',
+    binding: 'accounts.description',
     value: '참석이 어려운 분들을 위해 안내드립니다.\n너그러운 마음으로 양해 부탁드립니다.',
     props: { type: 'text' },
     style: {
@@ -86,13 +86,13 @@ export const ACCOUNT_TAB_CARD: BlockPreset = {
   tags: ['minimal', 'tab', 'card', 'modern', 'auto-layout'],
   complexity: 'medium',
   bindings: [
+    'accounts.title',        // 한글 제목
+    'accounts.titleEn',      // 영문 제목
+    'accounts.description',  // 안내 문구
     'accounts.groom',
     'accounts.bride',
     'accounts.kakaopay.groom',
     'accounts.kakaopay.bride',
-    'custom.accountEngTitle',
-    'custom.accountTitle',
-    'custom.accountDescription',
   ],
   defaultHeight: HUG_HEIGHT,
   layout: AUTO_LAYOUT_VERTICAL,

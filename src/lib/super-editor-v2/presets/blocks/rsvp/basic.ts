@@ -19,7 +19,7 @@ const RSVP_BASIC_ELEMENTS: PresetElement[] = [
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.rsvpEngTitle',
+    binding: 'rsvp.titleEn',
     value: 'RSVP',
     props: { type: 'text' },
     style: {
@@ -108,7 +108,7 @@ export const RSVP_BASIC: BlockPreset = {
   description: '심플한 중앙 정렬 RSVP 섹션으로 팝업 모달을 트리거합니다',
   tags: ['minimal', 'centered', 'light', 'simple', 'auto-layout'],
   complexity: 'low',
-  bindings: ['rsvp.title', 'rsvp.description', 'custom.rsvpEngTitle'],
+  bindings: ['rsvp.title', 'rsvp.titleEn', 'rsvp.description'],
   defaultHeight: HUG_HEIGHT,
   layout: AUTO_LAYOUT_VERTICAL,
   defaultElements: RSVP_BASIC_ELEMENTS,

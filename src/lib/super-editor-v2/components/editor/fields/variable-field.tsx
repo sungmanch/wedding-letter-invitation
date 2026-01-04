@@ -48,11 +48,14 @@ export function VariableField({
 }: VariableFieldProps) {
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
 
-  // 커스텀 변수의 경우 키를 레이블로 사용
+  // 라벨 결정: VARIABLE_FIELD_CONFIG 우선, 없으면 camelCase 변환 (custom 필드) 또는 binding 경로
   let label: string
-  if (isCustomVariablePath(binding)) {
+  if (fieldConfig?.label) {
+    // VARIABLE_FIELD_CONFIG에 라벨이 정의되어 있으면 우선 사용
+    label = fieldConfig.label
+  } else if (isCustomVariablePath(binding)) {
+    // 커스텀 변수의 경우 키를 레이블로 변환 (예: weddingTitle → Wedding Title)
     const key = getCustomVariableKey(binding) || binding
-    // camelCase/snake_case를 읽기 좋게 변환 (예: weddingTitle → Wedding Title)
     label = key
       .replace(/([A-Z])/g, ' $1')
       .replace(/_/g, ' ')
@@ -61,7 +64,7 @@ export function VariableField({
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
   } else {
-    label = fieldConfig?.label ?? binding
+    label = binding
   }
 
   const type = fieldConfig?.type ?? 'text'
@@ -125,7 +128,15 @@ export function VariableField({
 
       {type === 'gallery' && (
         <GalleryFieldLocal
-          value={Array.isArray(value) ? value : []}
+          value={
+            Array.isArray(value)
+              ? value.map((item, index) =>
+                  typeof item === 'string'
+                    ? { id: `gallery-${index}`, url: item, order: index }
+                    : item
+                )
+              : []
+          }
           onChange={onChange}
           onUploadImage={onUploadImage}
         />

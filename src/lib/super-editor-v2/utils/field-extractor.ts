@@ -146,8 +146,6 @@ export function extractEditableFields(block: Block, data: WeddingData): Editable
   if (block.type === 'notice') {
     const noticeBindings: VariablePath[] = [
       'notice.sectionTitle',
-      'notice.title',
-      'notice.description',
       'notice.items',
     ]
     for (const binding of noticeBindings) {

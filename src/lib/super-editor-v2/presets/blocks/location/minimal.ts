@@ -18,7 +18,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.locationTitle',
+    binding: 'location.title',
     value: '오시는길',
     props: { type: 'text' },
     style: {
@@ -36,7 +36,7 @@ const LOCATION_MINIMAL_ELEMENTS: PresetElement[] = [
     type: 'text',
     zIndex: 1,
     sizing: { width: { type: 'fill' }, height: { type: 'hug' } },
-    binding: 'custom.locationEngTitle',
+    binding: 'location.titleEn',
     value: 'LOCATION',
     props: { type: 'text' },
     style: {
@@ -249,8 +249,8 @@ export const LOCATION_MINIMAL: BlockPreset = {
     'venue.naverUrl',
     'venue.tmapUrl',
     'venue.kakaoUrl',
-    'custom.locationTitle',
-    'custom.locationEngTitle',
+    'location.title',
+    'location.titleEn',
     'custom.navGuide',
   ],
   defaultHeight: HUG_HEIGHT,
