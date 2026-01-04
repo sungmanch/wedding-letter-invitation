@@ -290,8 +290,8 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
 
   // ═══ 커스텀 필드 (프리셋 특화) ═══
   custom: {
-    // 표준화된 필드: location.title, location.titleEn, rsvp.titleEn, accounts.* 로 이동됨
-    // 프리셋 특화 필드만 여기에 남김
+    quoteText: '"우리는 매일 시간을 여행한다..."',
+    quoteSource: '- 영화 「어바웃 타임」 중',
   },
 
   // ═══ Legacy 호환 ═══
