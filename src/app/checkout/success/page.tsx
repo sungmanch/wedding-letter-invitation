@@ -131,12 +131,13 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
       })
       .returning()
 
-    // 문서 결제 상태 업데이트
+    // 문서 결제 상태 업데이트 및 공개 처리
     await db
       .update(editorDocumentsV2)
       .set({
         isPaid: true,
         paymentId: payment.id,
+        status: 'published',
         updatedAt: new Date(),
       })
       .where(eq(editorDocumentsV2.id, documentId))
