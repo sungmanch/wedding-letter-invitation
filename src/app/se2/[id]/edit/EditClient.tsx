@@ -493,6 +493,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               <ContentTab
                 document={editorDoc}
                 expandedBlockId={expandedBlockId}
+                visibleBlockId={visibleBlockId}
                 onExpandedBlockChange={setExpandedBlockId}
                 onBlocksChange={handleBlocksChange}
                 onDataChange={handleDataChange}
