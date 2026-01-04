@@ -130,10 +130,12 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
     <div className={`text-center ${className}`}>
       {/* CTA 버튼 */}
       <Button
+        variant="sage"
+        size="lg"
         onClick={handleCreateDocument}
         disabled={isLoading}
         className="
-          editorial-cta-large group
+          group
           px-8 py-4 h-auto
           shadow-lg hover:shadow-xl
           transition-all duration-300
