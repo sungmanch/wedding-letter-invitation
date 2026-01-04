@@ -224,7 +224,7 @@ function AnswerBlock({ label, answer, iconColor, tokens }: AnswerBlockProps) {
     fontSize: '13px',
     fontFamily: 'var(--font-body)',
     fontWeight: 500,
-    color: iconColor,
+    color: tokens.fgMuted,
   }
 
   const answerStyle: CSSProperties = {
