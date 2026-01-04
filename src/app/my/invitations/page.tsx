@@ -1,11 +1,16 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Plus, FileText, Calendar, Eye } from 'lucide-react'
+import { Plus, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { listDocuments } from '@/lib/super-editor-v2/actions'
-import { formatDistanceToNow } from 'date-fns'
-import { ko } from 'date-fns/locale'
+import { InvitationCard } from './InvitationCard'
+import type {
+  Block,
+  StyleSystem,
+  WeddingData,
+  GlobalAnimation,
+} from '@/lib/super-editor-v2/schema/types'
 
 export const metadata: Metadata = {
   title: '내 청첩장 - Maison de Letter',
@@ -67,53 +72,19 @@ export default async function MyInvitationsPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {documents.map((doc) => (
-              <Link
+              <InvitationCard
                 key={doc.id}
-                href={`/se2/${doc.id}/edit`}
-                className="group block bg-white rounded-xl border border-[var(--sand-100)] p-5 hover:border-[var(--sage-300)] hover:shadow-md transition-all"
-              >
-                {/* Status Badge */}
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                      doc.status === 'published'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-[var(--sand-50)] text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {doc.status === 'published' ? '발행됨' : '작성 중'}
-                  </span>
-                  {doc.status === 'published' && (
-                    <Link
-                      href={`/share/${doc.id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-[var(--text-muted)] hover:text-[var(--sage-600)] transition-colors"
-                      title="미리보기"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  )}
-                </div>
-
-                {/* Title */}
-                <h3 className="font-medium text-[var(--text-heading)] group-hover:text-[var(--sage-700)] transition-colors line-clamp-1">
-                  {doc.title || '제목 없음'}
-                </h3>
-
-                {/* Date Info */}
-                <div className="mt-3 flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                  <Calendar className="h-3 w-3" />
-                  <span>
-                    {formatDistanceToNow(new Date(doc.updatedAt), {
-                      addSuffix: true,
-                      locale: ko,
-                    })}
-                    에 수정됨
-                  </span>
-                </div>
-              </Link>
+                id={doc.id}
+                title={doc.title}
+                status={doc.status}
+                blocks={doc.blocks as Block[]}
+                style={doc.style as StyleSystem}
+                data={doc.data as WeddingData}
+                animation={doc.animation as GlobalAnimation | null}
+                updatedAt={new Date(doc.updatedAt)}
+              />
             ))}
           </div>
         )}
