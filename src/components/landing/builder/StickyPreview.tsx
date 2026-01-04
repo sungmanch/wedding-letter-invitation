@@ -84,8 +84,19 @@ function StickyPreviewInner() {
     // 템플릿별 샘플 이미지 사용 (unique1 → 1.png, unique2 → 2.png, ...)
     const sampleData = getSampleWeddingDataForTemplate(state.selectedTemplateId)
 
-    // 선택된 프리셋으로 블록 생성 (hero 포함)
+    // 선택된 프리셋으로 블록 생성
     const blocks: Block[] = []
+
+    // hero는 항상 먼저 추가 (SECTION_ORDER에서 제외되어 있어도 프리뷰에는 표시)
+    const heroPreset = state.selectedPresets.hero
+    if (heroPreset) {
+      const heroBlock = createBlockFromPresetData(heroPreset)
+      if (heroBlock) {
+        blocks.push(heroBlock)
+      }
+    }
+
+    // 나머지 섹션 추가
     for (const sectionType of SECTION_ORDER) {
       const presetId = state.selectedPresets[sectionType]
       if (presetId) {
