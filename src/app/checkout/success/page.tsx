@@ -115,7 +115,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
     // 이미 결제 완료된 경우 바로 리다이렉트
     if (document.isPaid) {
-      redirect(`/se2/${documentId}/edit`)
+      redirect('/my/invitations')
     }
 
     // 결제 정보 저장
@@ -131,18 +131,19 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
       })
       .returning()
 
-    // 문서 결제 상태 업데이트
+    // 문서 결제 상태 업데이트 및 공개 처리
     await db
       .update(editorDocumentsV2)
       .set({
         isPaid: true,
         paymentId: payment.id,
+        status: 'published',
         updatedAt: new Date(),
       })
       .where(eq(editorDocumentsV2.id, documentId))
 
-    // 에디터로 리다이렉트
-    redirect(`/se2/${documentId}/edit`)
+    // 내 청첩장 페이지로 리다이렉트
+    redirect('/my/invitations')
   } catch (error) {
     console.error('Checkout verification error:', error)
 
