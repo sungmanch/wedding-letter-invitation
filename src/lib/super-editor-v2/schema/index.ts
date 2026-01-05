@@ -325,7 +325,14 @@ export function getSampleWeddingDataForTemplate(templateId: string): WeddingData
     ...SAMPLE_WEDDING_DATA,
     photos: {
       main: imagePath,
-      gallery: [imagePath],
+      gallery: [
+        '/examples/wedding_images/1.png',
+        '/examples/wedding_images/2.png',
+        '/examples/wedding_images/3.png',
+        '/examples/wedding_images/4.png',
+        '/examples/wedding_images/5.png',
+        '/examples/wedding_images/6.png',
+      ],
     },
   }
 }
@@ -490,7 +497,7 @@ export function createDefaultBlocks(): Block[] {
   const locationBlock = createBlockFromPreset(
     'location-1',
     'location-minimal',
-    true,
+    false,
     DEFAULT_BLOCK_HEIGHTS.location
   )
 
