@@ -359,25 +359,13 @@ const CardLine = forwardRef<HTMLDivElement, CardLineProps>(
     const isHero = type === 'hero'
 
     return (
-      <div className="relative flex items-center">
-        {/* 라벨 - 왼쪽 고정, 세로 중앙 정렬 */}
-        <div
-          className="flex-shrink-0 z-20 flex items-center justify-center"
-          style={{
-            width: isHero ? 80 : 64, // Hero 라벨이 더 길어서 공간 확보 필요
-            height: cardMetrics.height, // 카드 높이에 맞춤
-          }}
-        >
+      <div className="relative flex flex-col gap-2">
+        {/* 라벨 - 상단 배치 */}
+        <div className="px-1">
           <span
             className={`
-              inline-flex items-center justify-center
-              whitespace-nowrap
-              border border-[var(--sage-200)]
-              shadow-sm
-              ${isHero
-                ? 'text-xs lg:text-sm font-medium text-[var(--sage-700)] bg-[var(--sage-50)] px-3 py-1.5 rounded-md'
-                : 'text-[10px] lg:text-xs text-[var(--text-muted)] bg-white/95 px-2.5 py-1 rounded-full'
-              }
+              text-xs lg:text-sm font-medium tracking-wide
+              ${isHero ? 'text-[var(--sage-600)]' : 'text-[var(--text-muted)]'}
             `}
           >
             {label}
@@ -385,7 +373,7 @@ const CardLine = forwardRef<HTMLDivElement, CardLineProps>(
         </div>
 
         {/* 스크롤 컨테이너 */}
-        <div className="overflow-hidden flex-1">
+        <div className="relative overflow-hidden">
           <div
             ref={ref}
             className="flex will-change-transform"
@@ -419,10 +407,10 @@ const CardLine = forwardRef<HTMLDivElement, CardLineProps>(
               </div>
             ))}
           </div>
-        </div>
 
-        {/* 페이드 마스크 (우측) */}
-        <div className="absolute right-0 top-0 bottom-0 w-12 lg:w-20 bg-gradient-to-l from-[var(--ivory-100)] to-transparent pointer-events-none z-10" />
+          {/* 페이드 마스크 (우측) */}
+          <div className="absolute right-0 top-0 bottom-0 w-12 lg:w-20 bg-gradient-to-l from-[var(--ivory-100)] to-transparent pointer-events-none z-10" />
+        </div>
       </div>
     )
   }
