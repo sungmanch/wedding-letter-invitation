@@ -55,18 +55,6 @@ const CAROUSEL_LINES: CarouselLineConfig[] = [
     label: '예식일시',
     speed: 45,
   },
-  {
-    type: 'preset',
-    ids: [
-      'gallery-square-3col',
-      'gallery-square-2col',
-      'gallery-rect-3col',
-      'gallery-mixed',
-    ],
-    direction: 'left',
-    label: '갤러리',
-    speed: 38,
-  },
 ]
 
 // ============================================
@@ -159,12 +147,9 @@ export function HeroSection() {
                 onClick={handleScrollDown}
                 className="group"
               >
-                지금 시작하기
+                지금 바로 시작하기
                 <ChevronDown className="w-5 h-5 ml-2 transition-transform group-hover:translate-y-1" />
               </Button>
-              <span className="text-sm text-[var(--text-light)]">
-                카드 등록 없이 무료 체험
-              </span>
             </div>
 
             {/* 종이 청첩장과 똑같이 만들기 버튼 */}
@@ -377,9 +362,9 @@ const CardLine = forwardRef<HTMLDivElement, CardLineProps>(
       <div className="relative flex items-center">
         {/* 라벨 - 왼쪽 고정, 세로 중앙 정렬 */}
         <div
-          className="flex-shrink-0 z-20 flex items-center justify-end pr-4"
+          className="flex-shrink-0 z-20 flex items-center justify-center"
           style={{
-            width: 64,
+            width: isHero ? 80 : 64, // Hero 라벨이 더 길어서 공간 확보 필요
             height: cardMetrics.height, // 카드 높이에 맞춤
           }}
         >

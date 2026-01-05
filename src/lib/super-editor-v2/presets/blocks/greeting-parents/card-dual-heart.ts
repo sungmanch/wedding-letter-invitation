@@ -37,10 +37,12 @@ const ELEMENTS: PresetElement[] = [
         fontWeight: 400,
         color: 'var(--fg-muted)',
         textAlign: 'center',
-        letterSpacing: 0.3,
+        letterSpacing: 3,
+        // 세로 쓰기 적용
+        writingMode: 'vertical-rl',
+        textOrientation: 'sideways',
       },
     },
-    // CSS writing-mode: vertical-rl 적용 필요
   },
 
   // ─── Auto Layout 콘텐츠 ───

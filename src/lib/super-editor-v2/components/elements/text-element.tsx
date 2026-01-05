@@ -90,6 +90,8 @@ export function TextElement({
       if (style.lineHeight) css.lineHeight = style.lineHeight
       if (style.letterSpacing) css.letterSpacing = style.letterSpacing
       if (style.textShadow) css.textShadow = style.textShadow
+      if (style.writingMode) css.writingMode = style.writingMode
+      if (style.textOrientation) css.textOrientation = style.textOrientation
     }
 
     return css
