@@ -42,7 +42,7 @@ const SECTION_PRESETS: Record<SelectableSectionType, Record<string, BlockPreset>
 }
 
 /** 섹션별 초기 표시 개수 (더보기 전) */
-const INITIAL_VISIBLE_COUNT = 3
+const INITIAL_VISIBLE_COUNT = 4
 
 /** 섹션별 설명 */
 const SECTION_DESCRIPTIONS: Record<SelectableSectionType, string> = {
@@ -236,7 +236,7 @@ function AccordionItem({
               </p>
 
               {/* 프리셋 그리드 */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {visiblePresets.map((preset) => (
                   <PresetThumbnail
                     key={preset.id}

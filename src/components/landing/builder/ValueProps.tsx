@@ -122,10 +122,10 @@ export function ValueProps() {
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-[var(--sage-600)]">
-                  19,900원
+                  $15
                 </span>
                 <span className="text-sm text-[var(--text-light)] line-through">
-                  39,900원
+                  $30
                 </span>
               </div>
             </div>

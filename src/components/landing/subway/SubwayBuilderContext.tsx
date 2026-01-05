@@ -104,12 +104,11 @@ export const DEFAULT_PRESETS: SelectedPresets = {
   location: 'location-minimal',
 }
 
-/** 섹션 순서 (표시 순서) - hero는 상위 스타일 선택에서 처리 */
+/** 섹션 순서 (표시 순서) - hero는 상위 스타일 선택에서 처리, location은 기본 프리셋 자동 적용 */
 export const SECTION_ORDER: SelectableSectionType[] = [
   'greeting-parents',
   'calendar',
   'gallery',
-  'location',
 ]
 
 /** 섹션별 라벨 */

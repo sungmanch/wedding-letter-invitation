@@ -591,6 +591,9 @@ export interface TextStyle {
   lineHeight?: number
   letterSpacing?: number
   textShadow?: string
+  // 세로 쓰기용 (vertical-rl)
+  writingMode?: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr'
+  textOrientation?: 'mixed' | 'upright' | 'sideways'
 }
 
 export interface BorderStyle {
