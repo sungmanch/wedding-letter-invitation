@@ -705,7 +705,6 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     defaultOg={defaultOg}
                     og={og}
                     onOgChange={handleOgChange}
-                    shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
                     ogImageStyle={ogImageStyle}
                     onOgImageStyleChange={handleOgImageStyleChange}
                     isGeneratingOgImage={isGeneratingOgImage}
@@ -807,7 +806,6 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 defaultOg={defaultOg}
                 og={og}
                 onOgChange={handleOgChange}
-                shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
                 ogImageStyle={ogImageStyle}
                 onOgImageStyleChange={handleOgImageStyleChange}
                 isGeneratingOgImage={isGeneratingOgImage}
