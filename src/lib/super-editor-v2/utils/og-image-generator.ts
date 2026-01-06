@@ -215,9 +215,9 @@ export function generateDefaultOgImage(data: WeddingData): string {
 }
 
 /**
- * 축하 OG 이미지 생성 (빵빠레/컨페티 포함)
+ * 축하 OG 이미지 생성 (컨페티 포함)
  *
- * 크림색 배경에 컨페티와 "신랑이름 ❤️ 신부이름" 텍스트
+ * 크림색 배경에 다양한 종이 장식과 "신랑이름 ❤️ 신부이름" 텍스트
  */
 export function generateCelebrationOgImage(data: WeddingData): string {
   const canvas = document.createElement('canvas')
@@ -233,59 +233,79 @@ export function generateCelebrationOgImage(data: WeddingData): string {
   ctx.fillStyle = '#FFF9F0'
   ctx.fillRect(0, 0, OG_WIDTH, OG_HEIGHT)
 
-  // 컨페티 색상 팔레트 (웨딩 테마)
+  // 컨페티 색상 팔레트 (축제 느낌)
   const confettiColors = [
-    '#FFB6C1', // 연분홍
-    '#FFD700', // 골드
-    '#98D8C8', // 민트
-    '#F7DC6F', // 연노랑
-    '#DDA0DD', // 연보라
-    '#87CEEB', // 하늘색
-    '#FFDAB9', // 피치
+    '#FF6B6B', // 빨강
+    '#FFD93D', // 노랑
+    '#6BCB77', // 초록
+    '#4D96FF', // 파랑
+    '#FF6BD6', // 핑크
+    '#9B59B6', // 보라
+    '#FF9F43', // 주황
+    '#00D2D3', // 청록
   ]
 
-  // 컨페티 그리기 (랜덤 시드 고정을 위해 결정적 위치 사용)
-  const confettiPositions = [
+  // 다양한 종이 장식 그리기
+  const confettiItems: Array<{
+    x: number
+    y: number
+    rotation: number
+    type: 'rect' | 'circle' | 'triangle' | 'star' | 'streamer'
+    size: number
+  }> = [
     // 좌상단 영역
-    { x: 80, y: 60, rotation: 15 },
-    { x: 150, y: 120, rotation: -30 },
-    { x: 60, y: 180, rotation: 45 },
-    { x: 200, y: 80, rotation: -15 },
-    { x: 120, y: 250, rotation: 60 },
-    { x: 250, y: 150, rotation: -45 },
-    { x: 180, y: 220, rotation: 30 },
+    { x: 50, y: 40, rotation: 25, type: 'rect', size: 1 },
+    { x: 120, y: 80, rotation: -15, type: 'circle', size: 0.8 },
+    { x: 80, y: 140, rotation: 45, type: 'triangle', size: 1.2 },
+    { x: 180, y: 60, rotation: -35, type: 'star', size: 1 },
+    { x: 40, y: 200, rotation: 60, type: 'streamer', size: 1 },
+    { x: 150, y: 180, rotation: -20, type: 'rect', size: 0.7 },
+    { x: 220, y: 120, rotation: 30, type: 'circle', size: 1.1 },
+    { x: 100, y: 250, rotation: -50, type: 'triangle', size: 0.9 },
+    { x: 260, y: 80, rotation: 15, type: 'star', size: 0.8 },
+    { x: 200, y: 220, rotation: -40, type: 'rect', size: 1 },
+    { x: 300, y: 160, rotation: 55, type: 'circle', size: 0.6 },
+    { x: 70, y: 300, rotation: -25, type: 'streamer', size: 0.9 },
     // 우상단 영역
-    { x: 1000, y: 70, rotation: -20 },
-    { x: 1100, y: 130, rotation: 35 },
-    { x: 1050, y: 200, rotation: -50 },
-    { x: 950, y: 160, rotation: 25 },
-    { x: 1120, y: 250, rotation: -35 },
-    { x: 1020, y: 100, rotation: 40 },
-    { x: 1080, y: 180, rotation: -25 },
+    { x: 950, y: 50, rotation: -30, type: 'rect', size: 1.1 },
+    { x: 1020, y: 100, rotation: 20, type: 'circle', size: 0.9 },
+    { x: 1100, y: 60, rotation: -45, type: 'triangle', size: 1 },
+    { x: 980, y: 160, rotation: 35, type: 'star', size: 1.2 },
+    { x: 1140, y: 130, rotation: -15, type: 'streamer', size: 1 },
+    { x: 1050, y: 200, rotation: 50, type: 'rect', size: 0.8 },
+    { x: 920, y: 220, rotation: -55, type: 'circle', size: 1 },
+    { x: 1120, y: 240, rotation: 25, type: 'triangle', size: 0.7 },
+    { x: 1000, y: 280, rotation: -35, type: 'star', size: 0.9 },
+    { x: 880, y: 120, rotation: 40, type: 'rect', size: 0.6 },
+    { x: 1160, y: 80, rotation: -20, type: 'circle', size: 1.1 },
     // 좌하단 영역
-    { x: 100, y: 450, rotation: 20 },
-    { x: 180, y: 520, rotation: -40 },
-    { x: 60, y: 550, rotation: 55 },
-    { x: 220, y: 480, rotation: -15 },
-    { x: 140, y: 580, rotation: 35 },
-    { x: 280, y: 530, rotation: -55 },
+    { x: 60, y: 400, rotation: 30, type: 'rect', size: 0.9 },
+    { x: 130, y: 480, rotation: -40, type: 'circle', size: 1 },
+    { x: 90, y: 540, rotation: 55, type: 'triangle', size: 1.1 },
+    { x: 200, y: 420, rotation: -20, type: 'star', size: 0.8 },
+    { x: 50, y: 580, rotation: 45, type: 'streamer', size: 1.2 },
+    { x: 170, y: 560, rotation: -35, type: 'rect', size: 0.7 },
+    { x: 240, y: 500, rotation: 25, type: 'circle', size: 0.9 },
+    { x: 110, y: 450, rotation: -50, type: 'triangle', size: 1 },
+    { x: 280, y: 550, rotation: 15, type: 'star', size: 1.1 },
+    { x: 320, y: 480, rotation: -30, type: 'rect', size: 0.6 },
     // 우하단 영역
-    { x: 1020, y: 440, rotation: -25 },
-    { x: 1100, y: 500, rotation: 30 },
-    { x: 980, y: 560, rotation: -45 },
-    { x: 1060, y: 480, rotation: 50 },
-    { x: 1130, y: 570, rotation: -30 },
-    { x: 1000, y: 520, rotation: 40 },
+    { x: 940, y: 420, rotation: -25, type: 'rect', size: 1 },
+    { x: 1010, y: 480, rotation: 35, type: 'circle', size: 0.8 },
+    { x: 1090, y: 440, rotation: -50, type: 'triangle', size: 1.2 },
+    { x: 970, y: 550, rotation: 20, type: 'star', size: 0.9 },
+    { x: 1130, y: 520, rotation: -40, type: 'streamer', size: 1 },
+    { x: 1050, y: 580, rotation: 45, type: 'rect', size: 0.7 },
+    { x: 900, y: 500, rotation: -15, type: 'circle', size: 1.1 },
+    { x: 1160, y: 450, rotation: 30, type: 'triangle', size: 0.8 },
+    { x: 880, y: 580, rotation: -55, type: 'star', size: 1 },
+    { x: 1020, y: 400, rotation: 50, type: 'rect', size: 0.9 },
   ]
 
-  confettiPositions.forEach((pos, index) => {
+  confettiItems.forEach((item, index) => {
     const color = confettiColors[index % confettiColors.length]
-    drawConfetti(ctx, pos.x, pos.y, color, pos.rotation)
+    drawConfettiShape(ctx, item.x, item.y, color, item.rotation, item.type, item.size)
   })
-
-  // 빵빠레 (파티 포퍼) 그리기 - 양쪽에 배치
-  drawPartyPopper(ctx, 80, OG_HEIGHT / 2 - 50, false) // 왼쪽
-  drawPartyPopper(ctx, OG_WIDTH - 80, OG_HEIGHT / 2 - 50, true) // 오른쪽 (반전)
 
   // 이름 가져오기
   const groomName = data.couple?.groom?.name || data.groom?.name || '신랑'
@@ -326,76 +346,99 @@ export function generateCelebrationOgImage(data: WeddingData): string {
 }
 
 /**
- * 컨페티 (종이 조각) 그리기
+ * 다양한 모양의 컨페티 그리기
  */
-function drawConfetti(
+function drawConfettiShape(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   color: string,
-  rotation: number
+  rotation: number,
+  type: 'rect' | 'circle' | 'triangle' | 'star' | 'streamer',
+  size: number
 ) {
   ctx.save()
   ctx.translate(x, y)
   ctx.rotate((rotation * Math.PI) / 180)
-
-  // 직사각형 컨페티
+  ctx.scale(size, size)
   ctx.fillStyle = color
-  ctx.fillRect(-8, -16, 16, 32)
+
+  switch (type) {
+    case 'rect':
+      // 직사각형 종이
+      ctx.fillRect(-6, -12, 12, 24)
+      break
+
+    case 'circle':
+      // 원형 종이
+      ctx.beginPath()
+      ctx.arc(0, 0, 10, 0, Math.PI * 2)
+      ctx.fill()
+      break
+
+    case 'triangle':
+      // 삼각형 종이
+      ctx.beginPath()
+      ctx.moveTo(0, -12)
+      ctx.lineTo(-10, 10)
+      ctx.lineTo(10, 10)
+      ctx.closePath()
+      ctx.fill()
+      break
+
+    case 'star':
+      // 별 모양
+      drawStar(ctx, 0, 0, 5, 12, 6)
+      break
+
+    case 'streamer':
+      // 구불구불한 리본
+      ctx.strokeStyle = color
+      ctx.lineWidth = 4
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      ctx.moveTo(0, -20)
+      ctx.quadraticCurveTo(15, -5, 0, 10)
+      ctx.quadraticCurveTo(-15, 25, 0, 40)
+      ctx.stroke()
+      break
+  }
 
   ctx.restore()
 }
 
 /**
- * 빵빠레 (파티 포퍼) 그리기
+ * 별 모양 그리기
  */
-function drawPartyPopper(
+function drawStar(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  mirror: boolean
+  cx: number,
+  cy: number,
+  spikes: number,
+  outerRadius: number,
+  innerRadius: number
 ) {
-  ctx.save()
-  ctx.translate(x, y)
-  if (mirror) {
-    ctx.scale(-1, 1)
+  let rot = (Math.PI / 2) * 3
+  let x = cx
+  let y = cy
+  const step = Math.PI / spikes
+
+  ctx.beginPath()
+  ctx.moveTo(cx, cy - outerRadius)
+
+  for (let i = 0; i < spikes; i++) {
+    x = cx + Math.cos(rot) * outerRadius
+    y = cy + Math.sin(rot) * outerRadius
+    ctx.lineTo(x, y)
+    rot += step
+
+    x = cx + Math.cos(rot) * innerRadius
+    y = cy + Math.sin(rot) * innerRadius
+    ctx.lineTo(x, y)
+    rot += step
   }
 
-  // 포퍼 몸통 (원뿔)
-  ctx.fillStyle = '#FFD700'
-  ctx.beginPath()
-  ctx.moveTo(0, 60)
-  ctx.lineTo(-25, 100)
-  ctx.lineTo(25, 100)
+  ctx.lineTo(cx, cy - outerRadius)
   ctx.closePath()
   ctx.fill()
-
-  // 포퍼 테두리
-  ctx.strokeStyle = '#DAA520'
-  ctx.lineWidth = 3
-  ctx.stroke()
-
-  // 포퍼 손잡이
-  ctx.fillStyle = '#8B4513'
-  ctx.fillRect(-8, 100, 16, 40)
-
-  // 터지는 효과 (리본/스트리머)
-  const streamColors = ['#FF69B4', '#98D8C8', '#FFD700', '#DDA0DD', '#87CEEB']
-  streamColors.forEach((color, i) => {
-    ctx.strokeStyle = color
-    ctx.lineWidth = 4
-    ctx.beginPath()
-    const angle = -60 + i * 30
-    const rad = (angle * Math.PI) / 180
-    ctx.moveTo(0, 60)
-    ctx.quadraticCurveTo(
-      Math.cos(rad) * 60,
-      60 + Math.sin(rad) * 30,
-      Math.cos(rad) * 120,
-      60 + Math.sin(rad) * 80
-    )
-    ctx.stroke()
-  })
-
-  ctx.restore()
 }

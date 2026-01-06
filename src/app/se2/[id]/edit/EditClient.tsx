@@ -961,7 +961,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <MobileBottomNav
           activeView={mobileView}
           onViewChange={setMobileView}
-          isDirty={isDirty}
+          isDirty={hasChanges}
         />
       )}
 
