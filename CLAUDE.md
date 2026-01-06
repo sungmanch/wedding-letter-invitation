@@ -42,6 +42,14 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2026-01-06: 문서 브랜치 시스템 추가
+- **이유**: 같은 결혼 정보(data)로 여러 디자인 버전 공유 (신랑측/신부측/친구용 등)
+- **변경**:
+  - `editor_document_branches_v2` 테이블 추가
+  - 원본 문서의 data를 상속하고 blocks/style/animation만 개별 저장
+  - 별도 결제 상품으로 저렴하게 제공 예정
+- **파일**: `src/lib/super-editor-v2/schema/db-schema.ts`
+
 ### 2026-01-04: SEO/AEO/GEO 최적화 기본 인프라
 - **이유**: 검색엔진 최적화 및 AI 검색 엔진(ChatGPT, Claude) 대응
 - **변경**:
