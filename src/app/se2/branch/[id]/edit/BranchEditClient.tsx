@@ -466,6 +466,7 @@ export function BranchEditClient({ branch }: BranchEditClientProps) {
                 og={og}
                 onOgChange={handleOgChange}
                 shareUrl={branch.status === 'published' ? `/share/branch/${branch.id}` : null}
+                isBranch
               />
             )}
           </div>

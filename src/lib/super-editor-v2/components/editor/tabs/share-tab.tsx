@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback, useRef, type ChangeEvent } from 'react'
+import { BranchManager } from '../ui/branch-manager'
 
 // ============================================
 // Types
@@ -37,6 +38,8 @@ export interface ShareTabProps {
   onGenerateShareUrl?: () => void
   /** 이미지 업로드 콜백 */
   onImageUpload?: (file: File) => Promise<string>
+  /** 브랜치 여부 (true면 BranchManager 숨김) */
+  isBranch?: boolean
   /** 추가 className */
   className?: string
 }
@@ -53,6 +56,7 @@ export function ShareTab({
   shareUrl,
   onGenerateShareUrl,
   onImageUpload,
+  isBranch = false,
   className = '',
 }: ShareTabProps) {
   const [copySuccess, setCopySuccess] = useState(false)
@@ -208,6 +212,13 @@ export function ShareTab({
             imageUrl={og.imageUrl || defaultOg.imageUrl}
           />
         </section>
+
+        {/* 브랜치 관리 (원본 문서에서만 표시) */}
+        {!isBranch && (
+          <section className="border-t border-[var(--sand-100)] pt-6">
+            <BranchManager documentId={documentId} />
+          </section>
+        )}
 
         {/* 공유 링크 */}
         <section>
