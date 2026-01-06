@@ -11,7 +11,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
-import type { EditorDocument, Block, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
+import type { EditorDocument, Block, BlockType, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
 import { updateDocument as saveToServer, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
 import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/renderer/style-resolver'
@@ -28,6 +28,7 @@ import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
 import { PresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/preset-sidebar'
+import { RequestPresetModal } from '@/components/landing/builder/RequestPresetModal'
 import { useVisibleBlock } from '@/lib/super-editor-v2/hooks/useVisibleBlock'
 import { getBlockPreset, type PresetElement } from '@/lib/super-editor-v2/presets/blocks'
 import {
@@ -107,6 +108,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [editMode, setEditMode] = useState<EditMode>('form')
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+
+  // 프리셋 요청 모달 상태
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
+  const [requestBlockType, setRequestBlockType] = useState<BlockType | null>(null)
+
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -322,6 +328,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     })
   }, [updateDocument])
 
+  // 프리셋 요청 모달 열기
+  const handleRequestPreset = useCallback((blockType: BlockType) => {
+    setRequestBlockType(blockType)
+    setIsRequestModalOpen(true)
+  }, [])
+
   // 이미지 업로드 (즉시 서버 업로드)
   const handleUploadImage = useCallback(async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -483,20 +495,20 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             미리보기
           </Link>
 
-          {/* 결제 버튼 */}
+          {/* 발행 버튼 */}
           {!dbDocument.isPaid && (
             <a
               href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
               className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] transition-colors flex items-center gap-2"
             >
               <CreditCardIcon className="w-4 h-4" />
-              결제하기
+              발행하기
             </a>
           )}
           {dbDocument.isPaid && (
             <span className="px-3 py-1.5 rounded-lg text-sm bg-green-50 text-green-600 flex items-center gap-2">
               <CheckIcon className="w-4 h-4" />
-              결제 완료
+              발행 완료
             </span>
           )}
         </div>
@@ -704,6 +716,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           <PresetSidebar
             visibleBlock={visibleBlock ?? null}
             onPresetChange={handlePresetChange}
+            onRequestPreset={handleRequestPreset}
           />
         </div>
       </div>
@@ -742,6 +755,13 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           </div>
         </div>
       )}
+
+      {/* 프리셋 요청 모달 */}
+      <RequestPresetModal
+        open={isRequestModalOpen}
+        onOpenChange={setIsRequestModalOpen}
+        sectionType={requestBlockType}
+      />
     </div>
   )
 }

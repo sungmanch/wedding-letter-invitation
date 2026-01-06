@@ -23,6 +23,8 @@ interface PresetSidebarProps {
   visibleBlock: Block | null
   /** 프리셋 변경 콜백 */
   onPresetChange: (blockId: string, presetId: string) => void
+  /** 프리셋 요청 콜백 */
+  onRequestPreset: (blockType: BlockType) => void
 }
 
 // 블록 타입별 한글 이름
@@ -53,6 +55,7 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
 export function PresetSidebar({
   visibleBlock,
   onPresetChange,
+  onRequestPreset,
 }: PresetSidebarProps) {
   // 현재 보이는 블록 타입의 프리셋 목록
   const presets = useMemo(() => {
@@ -105,6 +108,12 @@ export function PresetSidebar({
           </div>
         ) : (
           <div className="space-y-3">
+            {/* 프리셋 요청 카드 - 항상 최상단 */}
+            <RequestPresetSidebarCard
+              onClick={() => onRequestPreset(visibleBlock.type)}
+            />
+
+            {/* 기존 프리셋 목록 */}
             {presets.map((preset) => (
               <PresetCard
                 key={preset.id}
@@ -200,6 +209,37 @@ function ComplexityIndicator({ level }: { level: 'low' | 'medium' | 'high' }) {
   )
 }
 
+/** 프리셋 요청 카드 - PresetCard와 유사한 스타일 */
+function RequestPresetSidebarCard({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="
+        w-full text-left p-3 rounded-lg transition-all
+        border-2 border-dashed border-[var(--sand-300)]
+        hover:border-[var(--sage-400)] hover:bg-[var(--sage-50)]
+      "
+    >
+      <div className="flex items-center gap-3">
+        {/* 아이콘 */}
+        <div className="w-8 h-8 rounded-full bg-[var(--sand-100)] flex items-center justify-center flex-shrink-0">
+          <PlusIcon className="w-4 h-4 text-[var(--text-muted)]" />
+        </div>
+
+        {/* 텍스트 */}
+        <div>
+          <h4 className="text-sm font-medium text-[var(--text-primary)]">
+            원하는 디자인 요청
+          </h4>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            2~3일 안에 제작해 드려요
+          </p>
+        </div>
+      </div>
+    </button>
+  )
+}
+
 // ============================================
 // Icons
 // ============================================
@@ -225,6 +265,19 @@ function CheckIcon({ className }: { className?: string }) {
         strokeLinejoin="round"
         strokeWidth={3}
         d="M5 13l4 4L19 7"
+      />
+    </svg>
+  )
+}
+
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 4v16m8-8H4"
       />
     </svg>
   )

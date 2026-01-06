@@ -31,10 +31,6 @@ import {
 } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
 import { submitPresetRequest } from '@/lib/actions/preset-request'
-import {
-  SECTION_LABELS,
-  type SelectableSectionType,
-} from '../subway/SubwayBuilderContext'
 
 // ============================================
 // Types
@@ -49,7 +45,29 @@ interface UploadedImage {
 interface RequestPresetModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  sectionType: SelectableSectionType | null
+  /** 섹션/블록 타입 (SelectableSectionType 또는 BlockType 모두 지원) */
+  sectionType: string | null
+}
+
+// 모든 블록 타입 한글 레이블 (SE2 BlockType + 랜딩 SelectableSectionType 통합)
+const BLOCK_TYPE_LABELS: Record<string, string> = {
+  hero: '대표사진',
+  'greeting-parents': '인사말/혼주',
+  profile: '프로필',
+  calendar: '예식일시',
+  gallery: '갤러리',
+  rsvp: '참석 여부',
+  location: '오시는길',
+  notice: '공지사항',
+  account: '축의금',
+  message: '방명록',
+  wreath: '화환 안내',
+  ending: '엔딩',
+  contact: '연락처',
+  music: '음악',
+  loading: '로딩',
+  custom: '커스텀',
+  interview: '인터뷰',
 }
 
 // ============================================
@@ -292,7 +310,7 @@ export function RequestPresetModal({
               <div className="flex items-center gap-2 px-3 py-2 bg-[var(--sand-50)] rounded-lg">
                 <span className="text-xs text-[var(--text-muted)]">섹션:</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
-                  {SECTION_LABELS[sectionType]}
+                  {BLOCK_TYPE_LABELS[sectionType] || sectionType}
                 </span>
               </div>
 
