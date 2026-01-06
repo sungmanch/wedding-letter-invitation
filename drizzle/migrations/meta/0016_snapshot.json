@@ -1,6 +1,6 @@
 {
-  "id": "3f256a19-7983-4b12-9f70-b8731ad75821",
-  "prevId": "40e594c7-2e89-409b-8cbc-142a66f420f5",
+  "id": "21027d9c-3239-4ffa-bc1a-5c0489cc19fd",
+  "prevId": "3f256a19-7983-4b12-9f70-b8731ad75821",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -117,7 +117,9 @@
         "events_survey_url_unique": {
           "name": "events_survey_url_unique",
           "nullsNotDistinct": false,
-          "columns": ["survey_url"]
+          "columns": [
+            "survey_url"
+          ]
         }
       },
       "policies": {},
@@ -186,8 +188,12 @@
           "name": "letters_event_id_events_id_fk",
           "tableFrom": "letters",
           "tableTo": "events",
-          "columnsFrom": ["event_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -195,8 +201,12 @@
           "name": "letters_survey_response_id_survey_responses_id_fk",
           "tableFrom": "letters",
           "tableTo": "survey_responses",
-          "columnsFrom": ["survey_response_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "survey_response_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -364,8 +374,12 @@
           "name": "restaurant_recommendations_event_id_events_id_fk",
           "tableFrom": "restaurant_recommendations",
           "tableTo": "events",
-          "columnsFrom": ["event_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -449,8 +463,12 @@
           "name": "survey_responses_event_id_events_id_fk",
           "tableFrom": "survey_responses",
           "tableTo": "events",
-          "columnsFrom": ["event_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -534,8 +552,12 @@
           "name": "invitation_designs_invitation_id_fkey",
           "tableFrom": "invitation_designs",
           "tableTo": "invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "invitation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -547,14 +569,18 @@
           "name": "Anyone can view designs of published invitations",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["public"],
+          "to": [
+            "public"
+          ],
           "using": "(invitation_id IN ( SELECT invitations.id FROM invitations WHERE ((invitations.status)::text = 'published'::text)))"
         },
         "Users can manage designs of their invitations": {
           "name": "Users can manage designs of their invitations",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -626,8 +652,12 @@
           "name": "invitation_messages_invitation_id_fkey",
           "tableFrom": "invitation_messages",
           "tableTo": "invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "invitation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -639,20 +669,26 @@
           "name": "Anyone can create messages",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["public"],
+          "to": [
+            "public"
+          ],
           "withCheck": "true"
         },
         "Owners can view messages": {
           "name": "Owners can view messages",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         },
         "Owners can update messages": {
           "name": "Owners can update messages",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -739,7 +775,9 @@
           "name": "Users can manage their own payments",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"],
+          "to": [
+            "public"
+          ],
           "using": "(auth.uid() = user_id)",
           "withCheck": "(auth.uid() = user_id)"
         }
@@ -812,8 +850,12 @@
           "name": "invitation_photos_invitation_id_fkey",
           "tableFrom": "invitation_photos",
           "tableTo": "invitations",
-          "columnsFrom": ["invitation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "invitation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -825,14 +867,18 @@
           "name": "Anyone can view photos of published invitations",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["public"],
+          "to": [
+            "public"
+          ],
           "using": "(invitation_id IN ( SELECT invitations.id FROM invitations WHERE ((invitations.status)::text = 'published'::text)))"
         },
         "Users can manage photos of their invitations": {
           "name": "Users can manage photos of their invitations",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -1127,14 +1173,18 @@
           "name": "Anyone can view published invitations",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["public"],
+          "to": [
+            "public"
+          ],
           "using": "((status)::text = 'published'::text)"
         },
         "Users can manage their own invitations": {
           "name": "Users can manage their own invitations",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -1212,8 +1262,12 @@
           "name": "paper_invitation_photos_request_id_fkey",
           "tableFrom": "paper_invitation_photos",
           "tableTo": "paper_invitation_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1225,7 +1279,9 @@
           "name": "Users can manage photos of their paper invitation requests",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -1361,7 +1417,9 @@
           "name": "Users can manage their own paper invitation requests",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -1432,8 +1490,12 @@
           "name": "preset_request_images_request_id_fkey",
           "tableFrom": "preset_request_images",
           "tableTo": "preset_requests",
-          "columnsFrom": ["request_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1445,7 +1507,9 @@
           "name": "Users can manage images of their preset requests",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -1584,7 +1648,9 @@
           "name": "Users can manage their own preset requests",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": ["public"]
+          "to": [
+            "public"
+          ]
         }
       },
       "checkConstraints": {},
@@ -1878,8 +1944,12 @@
           "name": "ai_edit_logs_v2_document_id_editor_documents_v2_id_fk",
           "tableFrom": "ai_edit_logs_v2",
           "tableTo": "editor_documents_v2",
-          "columnsFrom": ["document_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1887,8 +1957,12 @@
           "name": "ai_edit_logs_v2_snapshot_id_editor_snapshots_v2_id_fk",
           "tableFrom": "ai_edit_logs_v2",
           "tableTo": "editor_snapshots_v2",
-          "columnsFrom": ["snapshot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "snapshot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2016,8 +2090,261 @@
           "name": "editor_assets_v2_document_id_editor_documents_v2_id_fk",
           "tableFrom": "editor_assets_v2",
           "tableTo": "editor_documents_v2",
-          "columnsFrom": ["document_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.editor_document_branches_v2": {
+      "name": "editor_document_branches_v2",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "parent_document_id": {
+          "name": "parent_document_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'새 브랜치'"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "blocks": {
+          "name": "blocks",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "style": {
+          "name": "style",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "animation": {
+          "name": "animation",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::jsonb"
+        },
+        "build_result": {
+          "name": "build_result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_url": {
+          "name": "published_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "og_title": {
+          "name": "og_title",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "og_description": {
+          "name": "og_description",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "og_image_url": {
+          "name": "og_image_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_paid": {
+          "name": "is_paid",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "payment_id": {
+          "name": "payment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_public": {
+          "name": "is_public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "view_count": {
+          "name": "view_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "document_version": {
+          "name": "document_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_editor_branches_v2_parent": {
+          "name": "idx_editor_branches_v2_parent",
+          "columns": [
+            {
+              "expression": "parent_document_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_editor_branches_v2_user": {
+          "name": "idx_editor_branches_v2_user",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_editor_branches_v2_status": {
+          "name": "idx_editor_branches_v2_status",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_editor_branches_v2_slug": {
+          "name": "idx_editor_branches_v2_slug",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "editor_document_branches_v2_parent_document_id_editor_documents_v2_id_fk": {
+          "name": "editor_document_branches_v2_parent_document_id_editor_documents_v2_id_fk",
+          "tableFrom": "editor_document_branches_v2",
+          "tableTo": "editor_documents_v2",
+          "columnsFrom": [
+            "parent_document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2361,8 +2688,12 @@
           "name": "editor_snapshots_v2_document_id_editor_documents_v2_id_fk",
           "tableFrom": "editor_snapshots_v2",
           "tableTo": "editor_documents_v2",
-          "columnsFrom": ["document_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2453,8 +2784,12 @@
           "name": "guestbook_messages_v2_document_id_editor_documents_v2_id_fk",
           "tableFrom": "guestbook_messages_v2",
           "tableTo": "editor_documents_v2",
-          "columnsFrom": ["document_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2568,8 +2903,12 @@
           "name": "rsvp_responses_v2_document_id_editor_documents_v2_id_fk",
           "tableFrom": "rsvp_responses_v2",
           "tableTo": "editor_documents_v2",
-          "columnsFrom": ["document_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

@@ -52,6 +52,23 @@ AI 기반 개인화 청첩장 서비스입니다.
   - `SectionAccordion`에 프리셋 요청 카드 통합
 - **파일**: `preset-request.ts`, `RequestPresetCard.tsx`, `RequestPresetModal.tsx`
 - **TODO**: Supabase Storage `preset-request-images` 버킷 수동 생성 필요
+### 2026-01-06: OG 이미지 저장 시 자동 생성
+- **이유**: 카카오톡 공유 시 OG 이미지를 수동 설정하지 않아도 Hero 이미지 기반으로 자동 생성
+- **변경**:
+  - ShareTab에 '저장 시 자동 생성' 토글 추가 (기본값: ON)
+  - Canvas API로 Hero 이미지를 1200x630 비율 크롭
+  - 저장 버튼 클릭 시 자동으로 OG 이미지 업로드 및 메타데이터 업데이트
+- **파일**: `utils/og-image-generator.ts`, `share-tab.tsx`, `EditClient.tsx`
+
+### 2026-01-06: 문서 브랜치 시스템 추가
+- **이유**: 같은 결혼 정보(data)로 여러 디자인 버전 공유 (신랑측/신부측/친구용 등)
+- **변경**:
+  - `editor_document_branches_v2` 테이블 추가
+  - 브랜치 CRUD 서버 액션 (`actions/branch.ts`)
+  - 브랜치 편집 라우트 (`/se2/branch/[id]/edit`)
+  - BranchEditClient: data 읽기 전용, blocks/style만 편집 가능
+  - BranchManager: ShareTab에서 브랜치 목록/생성/삭제 관리
+- **파일**: `schema/db-schema.ts`, `actions/branch.ts`, `app/se2/branch/`, `components/editor/ui/branch-manager.tsx`
 
 ### 2026-01-04: SEO/AEO/GEO 최적화 기본 인프라
 - **이유**: 검색엔진 최적화 및 AI 검색 엔진(ChatGPT, Claude) 대응

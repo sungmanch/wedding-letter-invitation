@@ -330,3 +330,87 @@ export const aiEditLogsV2 = pgTable('ai_edit_logs_v2', {
 
 export type AiEditLogV2 = typeof aiEditLogsV2.$inferSelect
 export type NewAiEditLogV2 = typeof aiEditLogsV2.$inferInsert
+
+// ============================================
+// Document Branches v2
+// 원본 문서의 data를 공유하면서 다른 레이아웃을 가진 브랜치
+// 사용 케이스: 신랑측/신부측/친구용 등 다른 디자인 버전 공유
+// ============================================
+
+export const editorDocumentBranchesV2 = pgTable('editor_document_branches_v2', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // 원본 문서 참조 (data는 여기서 상속)
+  parentDocumentId: uuid('parent_document_id')
+    .references(() => editorDocumentsV2.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // 소유자 (원본 문서 소유자와 동일해야 함)
+  userId: uuid('user_id').notNull(),
+
+  // 브랜치 메타
+  title: varchar('title', { length: 200 }).notNull().default('새 브랜치'),
+  description: varchar('description', { length: 500 }), // "신랑측용", "신부측용" 등
+
+  // 레이아웃 데이터 (data는 parent에서 상속, 여기엔 저장 안 함)
+  blocks: jsonb('blocks').$type<Block[]>().notNull().default([]),
+  style: jsonb('style').$type<StyleSystem>().notNull(),
+  animation: jsonb('animation').$type<GlobalAnimation>().default({}),
+
+  // 빌드 결과
+  buildResult: jsonb('build_result').$type<{
+    html: string
+    css?: string
+    js?: string
+    assets?: {
+      type: string
+      originalUrl: string
+      optimizedUrl: string
+      size: number
+    }[]
+    buildTime: number
+    version: string
+    hash: string
+  }>(),
+
+  // 배포 URL
+  publishedUrl: varchar('published_url', { length: 500 }),
+
+  // Open Graph 메타데이터 (브랜치별로 다를 수 있음)
+  ogTitle: varchar('og_title', { length: 100 }),
+  ogDescription: varchar('og_description', { length: 200 }),
+  ogImageUrl: varchar('og_image_url', { length: 500 }),
+
+  // 상태
+  status: varchar('status', { length: 20 }).default('draft').notNull(),
+  // 'draft' | 'building' | 'published' | 'error'
+  errorMessage: text('error_message'),
+
+  // 결제 (별도 상품으로 저렴하게)
+  isPaid: boolean('is_paid').default(false).notNull(),
+  paymentId: uuid('payment_id'),
+
+  // 접근 설정
+  slug: varchar('slug', { length: 100 }),
+  isPublic: boolean('is_public').default(true).notNull(),
+  password: varchar('password', { length: 100 }),
+
+  // 통계
+  viewCount: integer('view_count').default(0).notNull(),
+
+  // 버전 (낙관적 잠금용)
+  documentVersion: integer('document_version').default(1).notNull(),
+
+  // 메타
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  publishedAt: timestamp('published_at'),
+}, (table) => [
+  index('idx_editor_branches_v2_parent').on(table.parentDocumentId),
+  index('idx_editor_branches_v2_user').on(table.userId),
+  index('idx_editor_branches_v2_status').on(table.status),
+  index('idx_editor_branches_v2_slug').on(table.slug),
+]).enableRLS()
+
+export type EditorDocumentBranchV2 = typeof editorDocumentBranchesV2.$inferSelect
+export type NewEditorDocumentBranchV2 = typeof editorDocumentBranchesV2.$inferInsert

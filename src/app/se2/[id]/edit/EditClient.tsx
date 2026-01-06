@@ -41,6 +41,7 @@ import {
 import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
+import { generateOgImageFromHero } from '@/lib/super-editor-v2/utils/og-image-generator'
 
 // ============================================
 // Types
@@ -100,6 +101,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     description: dbDocument.ogDescription || '',
     imageUrl: dbDocument.ogImageUrl || null,
   }))
+
+  // OG 이미지 자동 생성 활성화 (기본값: true)
+  const [autoGenerateOgImage, setAutoGenerateOgImage] = useState(true)
 
   // UI 상태
   const [activeTab, setActiveTab] = useState<TabType>('content')
@@ -416,12 +420,40 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 저장 핸들러
   const handleSave = useCallback(async () => {
     try {
+      // OG 이미지 자동 생성
+      if (autoGenerateOgImage) {
+        try {
+          const ogBase64 = await generateOgImageFromHero(editorDoc.blocks)
+          if (ogBase64) {
+            // 업로드
+            const result = await uploadImage(dbDocument.id, {
+              data: ogBase64,
+              filename: 'og-image.jpg',
+              mimeType: 'image/jpeg',
+            })
+            if (result.success && result.url) {
+              // OG 메타데이터 업데이트
+              const newOg = { ...og, imageUrl: result.url }
+              setOg(newOg)
+              await updateOgMetadata(dbDocument.id, {
+                ogTitle: newOg.title || undefined,
+                ogDescription: newOg.description || undefined,
+                ogImageUrl: result.url,
+              })
+            }
+          }
+        } catch (ogError) {
+          console.warn('OG 이미지 자동 생성 실패:', ogError)
+          // OG 생성 실패해도 저장은 계속 진행
+        }
+      }
+
       await save()
     } catch (error) {
       console.error('Failed to save:', error)
       alert('저장에 실패했습니다. 다시 시도해주세요.')
     }
-  }, [save])
+  }, [save, autoGenerateOgImage, editorDoc.blocks, dbDocument.id, og])
 
   // 변경사항 취소
   const handleDiscard = useCallback(() => {
@@ -744,6 +776,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 og={og}
                 onOgChange={handleOgChange}
                 shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
+                autoGenerateOgImage={autoGenerateOgImage}
+                onAutoGenerateOgImageChange={setAutoGenerateOgImage}
               />
             )}
           </div>
