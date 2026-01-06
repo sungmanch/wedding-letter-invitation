@@ -570,7 +570,10 @@ export async function restoreSnapshot(
       updatedAt: new Date(),
       documentVersion: sql`document_version + 1`,
     })
-    .where(eq(editorDocumentsV2.id, documentId))
+    .where(and(
+      eq(editorDocumentsV2.id, documentId),
+      eq(editorDocumentsV2.userId, user.id)
+    ))
     .returning()
 
   return updated ?? null

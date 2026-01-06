@@ -13,6 +13,7 @@ import {
   getBlockPresetsByType,
   type BlockPreset,
 } from '@/lib/super-editor-v2/presets/blocks'
+import { BLOCK_TYPE_LABELS } from '@/lib/super-editor-v2/config/block-labels'
 
 // ============================================
 // Types
@@ -27,27 +28,6 @@ interface PresetSidebarProps {
   onRequestPreset: (blockType: BlockType) => void
   /** 모바일 버전 (전체 너비) */
   variant?: 'sidebar' | 'mobile'
-}
-
-// 블록 타입별 한글 이름
-const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
-  hero: '히어로',
-  'greeting-parents': '인사말/혼주',
-  profile: '프로필',
-  calendar: '예식일시',
-  gallery: '갤러리',
-  rsvp: '참석 여부',
-  location: '오시는길',
-  notice: '공지사항',
-  account: '축의금',
-  message: '방명록',
-  wreath: '화환 안내',
-  ending: '엔딩',
-  contact: '연락처',
-  music: '음악',
-  loading: '로딩',
-  custom: '커스텀',
-  interview: '인터뷰',
 }
 
 // ============================================

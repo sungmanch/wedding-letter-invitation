@@ -72,13 +72,11 @@ export async function submitPaperInvitationRequest(
     for (const file of paperFiles) {
       // 타입 검증
       if (!ALLOWED_TYPES.includes(file.type)) {
-        console.warn(`Skipping file with unsupported type: ${file.type}`)
         continue
       }
 
       // 크기 검증
       if (file.size > MAX_FILE_SIZE) {
-        console.warn(`Skipping file exceeding size limit: ${file.size}`)
         continue
       }
 
@@ -95,7 +93,6 @@ export async function submitPaperInvitationRequest(
         })
 
       if (uploadError) {
-        console.error('Failed to upload file:', uploadError)
         continue
       }
 
@@ -163,22 +160,26 @@ export async function submitPaperInvitationRequest(
       paperFiles.length,
       estimatedCompletionDate,
       !!notes
-    ).catch(console.error)
+    ).catch(() => {})
 
     return { success: true, data: request }
-  } catch (error) {
-    console.error('Failed to submit paper invitation request:', error)
+  } catch {
     return { success: false, error: '신청에 실패했습니다. 다시 시도해주세요.' }
   }
 }
 
 /**
  * 종이 청첩장 신청 상태 조회
+ * - 로그인 사용자: 본인 신청만 조회 가능
+ * - 비로그인 사용자 (userId가 null인 신청): 직접 접근만 허용
  */
 export async function getPaperInvitationRequest(
   requestId: string
 ): Promise<{ success: boolean; data?: PaperInvitationRequest; error?: string }> {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
     const request = await db.query.paperInvitationRequests.findFirst({
       where: eq(paperInvitationRequests.id, requestId),
       with: {
@@ -190,9 +191,13 @@ export async function getPaperInvitationRequest(
       return { success: false, error: '신청 정보를 찾을 수 없습니다' }
     }
 
+    // 권한 검증: 로그인한 사용자가 있고, 신청에 userId가 있으면 소유자 확인
+    if (request.userId && (!user || request.userId !== user.id)) {
+      return { success: false, error: '이 신청 정보를 조회할 권한이 없습니다' }
+    }
+
     return { success: true, data: request }
-  } catch (error) {
-    console.error('Failed to get paper invitation request:', error)
+  } catch {
     return { success: false, error: '조회에 실패했습니다' }
   }
 }

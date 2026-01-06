@@ -45,7 +45,8 @@ export async function submitPresetRequest(
       return { success: false, error: '설명을 10자 이상 입력해주세요' }
     }
 
-    if (!email || !email.includes('@')) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !emailRegex.test(email)) {
       return { success: false, error: '유효한 이메일을 입력해주세요' }
     }
 
@@ -69,13 +70,11 @@ export async function submitPresetRequest(
 
       // 타입 검증
       if (!ALLOWED_TYPES.includes(file.type)) {
-        console.warn(`Skipping file with unsupported type: ${file.type}`)
         continue
       }
 
       // 크기 검증
       if (file.size > MAX_FILE_SIZE) {
-        console.warn(`Skipping file exceeding size limit: ${file.size}`)
         continue
       }
 
@@ -92,7 +91,6 @@ export async function submitPresetRequest(
         })
 
       if (uploadError) {
-        console.error('Failed to upload file:', uploadError)
         continue
       }
 
@@ -120,11 +118,10 @@ export async function submitPresetRequest(
         description: request.description,
       },
       uploadedCount
-    ).catch(console.error)
+    ).catch(() => {})
 
     return { success: true, data: request }
-  } catch (error) {
-    console.error('Failed to submit preset request:', error)
+  } catch {
     return { success: false, error: '요청에 실패했습니다. 다시 시도해주세요.' }
   }
 }

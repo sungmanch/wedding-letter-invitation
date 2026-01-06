@@ -8,10 +8,16 @@ import { Button, Input, Card } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
 import { signUpWithEmail } from '@/lib/actions/auth'
 
+// Open Redirect 방지: 상대 경로만 허용
+function isValidRedirect(url: string): boolean {
+  return url.startsWith('/') && !url.startsWith('//') && !url.includes('://')
+}
+
 function SignupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') || '/my'
+  const rawRedirect = searchParams.get('redirect')
+  const redirectTo = rawRedirect && isValidRedirect(rawRedirect) ? rawRedirect : '/my'
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')

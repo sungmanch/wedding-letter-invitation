@@ -21,6 +21,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 문서 존재 및 발행 여부 확인 (발행된 문서에만 방명록 작성 가능)
+    const [doc] = await db
+      .select({ userId: editorDocumentsV2.userId, isPaid: editorDocumentsV2.isPaid })
+      .from(editorDocumentsV2)
+      .where(eq(editorDocumentsV2.id, documentId))
+      .limit(1)
+
+    if (!doc) {
+      return NextResponse.json(
+        { error: '문서를 찾을 수 없습니다.' },
+        { status: 404 }
+      )
+    }
+
+    if (!doc.isPaid) {
+      return NextResponse.json(
+        { error: '발행된 청첩장에만 방명록을 남길 수 있습니다.' },
+        { status: 403 }
+      )
+    }
+
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { error: '성함을 입력해주세요.' },
@@ -42,6 +63,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (message.length > 1000) {
+      return NextResponse.json(
+        { error: '메시지는 1000자 이내로 입력해주세요.' },
+        { status: 400 }
+      )
+    }
+
     // 새 메시지 저장
     const [newMessage] = await db
       .insert(guestbookMessagesV2)
@@ -57,8 +85,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: newMessage,
     })
-  } catch (error) {
-    console.error('Guestbook POST Error:', error)
+  } catch {
     return NextResponse.json(
       { error: '방명록 저장 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -143,8 +170,7 @@ export async function GET(request: NextRequest) {
         hasMore: messages.length === limit,
       },
     })
-  } catch (error) {
-    console.error('Guestbook GET Error:', error)
+  } catch {
     return NextResponse.json(
       { error: '방명록 조회 중 오류가 발생했습니다.' },
       { status: 500 }

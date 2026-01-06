@@ -31,6 +31,7 @@ import {
 } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
 import { submitPresetRequest } from '@/lib/actions/preset-request'
+import { getBlockTypeLabel } from '@/lib/super-editor-v2/config/block-labels'
 
 // ============================================
 // Types
@@ -47,27 +48,6 @@ interface RequestPresetModalProps {
   onOpenChange: (open: boolean) => void
   /** 섹션/블록 타입 (SelectableSectionType 또는 BlockType 모두 지원) */
   sectionType: string | null
-}
-
-// 모든 블록 타입 한글 레이블 (SE2 BlockType + 랜딩 SelectableSectionType 통합)
-const BLOCK_TYPE_LABELS: Record<string, string> = {
-  hero: '대표사진',
-  'greeting-parents': '인사말/혼주',
-  profile: '프로필',
-  calendar: '예식일시',
-  gallery: '갤러리',
-  rsvp: '참석 여부',
-  location: '오시는길',
-  notice: '공지사항',
-  account: '축의금',
-  message: '방명록',
-  wreath: '화환 안내',
-  ending: '엔딩',
-  contact: '연락처',
-  music: '음악',
-  loading: '로딩',
-  custom: '커스텀',
-  interview: '인터뷰',
 }
 
 // ============================================
@@ -116,11 +96,13 @@ export function RequestPresetModal({
     }
   }, [open])
 
-  // 모달 닫힐 때 초기화
+  // 모달 닫힐 때 초기화 및 Object URL 정리
   useEffect(() => {
     if (!open) {
       // 약간의 지연 후 초기화 (애니메이션 완료 후)
       const timer = setTimeout(() => {
+        // Object URL 메모리 해제
+        images.forEach(img => URL.revokeObjectURL(img.previewUrl))
         setDescription('')
         setImages([])
         setError(null)
@@ -128,7 +110,7 @@ export function RequestPresetModal({
       }, 300)
       return () => clearTimeout(timer)
     }
-  }, [open])
+  }, [open, images])
 
   // 이미지 업로드 핸들러
   const handleFileSelect = useCallback(
@@ -191,7 +173,8 @@ export function RequestPresetModal({
       return
     }
 
-    if (!email || !email.includes('@')) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !emailRegex.test(email)) {
       setError('유효한 이메일을 입력해주세요')
       return
     }
@@ -217,8 +200,7 @@ export function RequestPresetModal({
       } else {
         setError(result.error || '요청에 실패했습니다')
       }
-    } catch (err) {
-      console.error('Submit error:', err)
+    } catch {
       setError('요청에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setIsSubmitting(false)
@@ -310,7 +292,7 @@ export function RequestPresetModal({
               <div className="flex items-center gap-2 px-3 py-2 bg-[var(--sand-50)] rounded-lg">
                 <span className="text-xs text-[var(--text-muted)]">섹션:</span>
                 <span className="text-sm font-medium text-[var(--text-primary)]">
-                  {BLOCK_TYPE_LABELS[sectionType] || sectionType}
+                  {getBlockTypeLabel(sectionType)}
                 </span>
               </div>
 
