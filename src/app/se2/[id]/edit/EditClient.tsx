@@ -41,7 +41,7 @@ import {
 import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
-import { generateOgImageFromHero, generateDefaultOgImage } from '@/lib/super-editor-v2/utils/og-image-generator'
+import { generateOgImageFromHero, generateDefaultOgImage, generateCelebrationOgImage } from '@/lib/super-editor-v2/utils/og-image-generator'
 
 // ============================================
 // Types
@@ -95,12 +95,18 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     },
   })
 
-  // OG 상태 (별도 관리 - 즉시 저장)
+  // OG 상태 (저장 버튼과 통합)
   const [og, setOg] = useState<OgMetadata>(() => ({
     title: dbDocument.ogTitle || '',
     description: dbDocument.ogDescription || '',
     imageUrl: dbDocument.ogImageUrl || null,
   }))
+  const [ogDirty, setOgDirty] = useState(false)
+  const initialOgRef = useRef<OgMetadata>({
+    title: dbDocument.ogTitle || '',
+    description: dbDocument.ogDescription || '',
+    imageUrl: dbDocument.ogImageUrl || null,
+  })
 
   // OG 이미지 스타일 (auto: Hero 크롭, default: 텍스트, custom: 직접 업로드)
   const [ogImageStyle, setOgImageStyle] = useState<OgImageStyle>('auto')
@@ -429,6 +435,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
       } else if (style === 'default') {
         ogBase64 = generateDefaultOgImage(editorDoc.data)
+      } else if (style === 'celebration') {
+        ogBase64 = generateCelebrationOgImage(editorDoc.data)
       }
 
       if (ogBase64) {
@@ -466,7 +474,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const handleSave = useCallback(async () => {
     try {
       // OG 이미지 스타일에 따라 이미지 생성
-      if (ogImageStyle === 'auto' || ogImageStyle === 'default') {
+      if (ogImageStyle === 'auto' || ogImageStyle === 'default' || ogImageStyle === 'celebration') {
         try {
           let ogBase64: string | null = null
 
@@ -476,6 +484,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           } else if (ogImageStyle === 'default') {
             // 텍스트 기반 기본 이미지
             ogBase64 = generateDefaultOgImage(editorDoc.data)
+          } else if (ogImageStyle === 'celebration') {
+            // 축하 빵빠레 이미지
+            ogBase64 = generateCelebrationOgImage(editorDoc.data)
           }
 
           if (ogBase64) {

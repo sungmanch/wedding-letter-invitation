@@ -38,7 +38,9 @@ export interface RsvpFormData {
   side: 'groom' | 'bride'
   name: string
   phone: string
+  guestCount: number
   busOption: 'yes' | 'no' | null
+  mealOption: 'yes' | 'no' | null
   attendance: 'yes' | 'no'
   privacyAgreed: boolean
 }
@@ -61,14 +63,23 @@ export function RsvpModal({
   const [activeTab, setActiveTab] = useState<TabType>('groom')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [guestCount, setGuestCount] = useState(1)
   const [busOption, setBusOption] = useState<'yes' | 'no' | null>(null)
+  const [mealOption, setMealOption] = useState<'yes' | 'no' | null>(null)
   const [attendance, setAttendance] = useState<'yes' | 'no' | null>(null)
   const [privacyAgreed, setPrivacyAgreed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // 버스 옵션 표시 여부
+  // 옵션 표시 여부 (기본값 설정)
+  const showSide = config?.showSide ?? true
+  const showPhone = config?.showPhone ?? true
+  const showGuestCount = config?.showGuestCount ?? false
   const showBusOption = config?.showBusOption ?? false
+  const showMeal = config?.showMeal ?? false
+
+  // 참석 가능할 때만 추가 옵션 표시
+  const isAttending = attendance === 'yes'
 
   // 폼 유효성 검사
   const isFormValid =
@@ -81,7 +92,9 @@ export function RsvpModal({
     setActiveTab('groom')
     setName('')
     setPhone('')
+    setGuestCount(1)
     setBusOption(null)
+    setMealOption(null)
     setAttendance(null)
     setPrivacyAgreed(false)
     setError(null)
@@ -102,10 +115,12 @@ export function RsvpModal({
 
     try {
       const formData: RsvpFormData = {
-        side: activeTab,
+        side: showSide ? activeTab : 'groom',
         name: name.trim(),
-        phone: phone.trim(),
-        busOption: showBusOption ? busOption : null,
+        phone: showPhone ? phone.trim() : '',
+        guestCount: (showGuestCount && isAttending) ? guestCount : 1,
+        busOption: (showBusOption && isAttending) ? busOption : null,
+        mealOption: (showMeal && isAttending) ? mealOption : null,
         attendance,
         privacyAgreed,
       }
@@ -119,12 +134,15 @@ export function RsvpModal({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            invitationId,
+            documentId: invitationId,
             side: formData.side,
             name: formData.name,
-            phone: formData.phone,
-            busOption: formData.busOption,
-            attendance: formData.attendance,
+            phone: formData.phone || null,
+            guestCount: formData.guestCount,
+            busRequired: formData.busOption === 'yes' ? true : formData.busOption === 'no' ? false : null,
+            mealOption: formData.mealOption === 'yes' ? '식사함' : formData.mealOption === 'no' ? '식사안함' : null,
+            attendance: formData.attendance === 'yes',
+            privacyAgreed: formData.privacyAgreed,
           }),
         })
 
@@ -142,7 +160,7 @@ export function RsvpModal({
     } finally {
       setIsSubmitting(false)
     }
-  }, [isFormValid, activeTab, name, phone, busOption, attendance, privacyAgreed, showBusOption, invitationId, onSubmit, handleClose])
+  }, [isFormValid, activeTab, name, phone, guestCount, busOption, mealOption, attendance, privacyAgreed, showSide, showPhone, showGuestCount, showBusOption, showMeal, isAttending, invitationId, onSubmit, handleClose])
 
   // 개인정보 처리 텍스트
   const privacyText = config?.privacyPolicyText ||
@@ -159,7 +177,7 @@ export function RsvpModal({
 
         <div className="p-4 space-y-6">
           {/* 신랑측/신부측 탭 */}
-          {(config?.showSide !== false) && (
+          {showSide && (
             <div className="flex rounded-full bg-gray-100 p-1">
               <button
                 type="button"
@@ -183,71 +201,6 @@ export function RsvpModal({
               >
                 신부측
               </button>
-            </div>
-          )}
-
-          {/* 성함 입력 */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-900">
-              성함을 입력해 주세요.
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="성함"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
-            />
-          </div>
-
-          {/* 핸드폰 번호 뒤 4자리 */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-900">
-              핸드폰 번호 뒤 4자리를 입력해 주세요.
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4)
-                setPhone(value)
-              }}
-              placeholder="핸드폰 번호 뒤 4자리"
-              maxLength={4}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
-            />
-          </div>
-
-          {/* 버스 탑승 여부 */}
-          {showBusOption && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-900">
-                버스 탑승 여부를 선택해 주세요.
-              </label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setBusOption('yes')}
-                  className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
-                    busOption === 'yes'
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
-                  }`}
-                >
-                  탑승함
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBusOption('no')}
-                  className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
-                    busOption === 'no'
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
-                  }`}
-                >
-                  탑승안함
-                </button>
-              </div>
             </div>
           )}
 
@@ -281,6 +234,130 @@ export function RsvpModal({
               </button>
             </div>
           </div>
+
+          {/* 성함 입력 */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-900">
+              성함을 입력해 주세요.<span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="성함"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
+            />
+          </div>
+
+          {/* 연락처 입력 */}
+          {showPhone && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">
+                연락처를 입력해 주세요.<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '')
+                  setPhone(value)
+                }}
+                placeholder="연락처"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
+              />
+            </div>
+          )}
+
+          {/* 참석 가능일 때만 추가 옵션 표시 */}
+          {isAttending && (
+            <>
+              {/* 동반 인원수 */}
+              {showGuestCount && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-900">
+                    동반 인원수를 입력해 주세요.
+                  </label>
+                  <input
+                    type="number"
+                    value={guestCount}
+                    onChange={(e) => {
+                      const value = Math.max(1, parseInt(e.target.value) || 1)
+                      setGuestCount(value)
+                    }}
+                    min={1}
+                    placeholder="숫자"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
+                  />
+                </div>
+              )}
+
+              {/* 버스 탑승 여부 */}
+              {showBusOption && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-900">
+                    버스 탑승 여부를 선택해 주세요.
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setBusOption('yes')}
+                      className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                        busOption === 'yes'
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      탑승함
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBusOption('no')}
+                      className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                        busOption === 'no'
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      탑승안함
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 식사 여부 */}
+              {showMeal && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-900">
+                    식사 여부를 선택해 주세요.
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setMealOption('yes')}
+                      className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                        mealOption === 'yes'
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      식사함
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMealOption('no')}
+                      className={`flex-1 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                        mealOption === 'no'
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      식사안함
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           {/* 개인정보 동의 */}
           <div className="bg-gray-50 rounded-lg p-4">

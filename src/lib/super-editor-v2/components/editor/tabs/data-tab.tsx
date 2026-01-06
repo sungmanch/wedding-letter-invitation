@@ -9,7 +9,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react'
-import type { EditorDocument, Block, WeddingData, VariablePath } from '../../../schema/types'
+import type { EditorDocument, Block, WeddingData, VariablePath, RsvpConfig } from '../../../schema/types'
 import { FamilyTableField } from '../fields/family-table-field'
 import { LocationSearchField } from '../fields/location-search-field'
 import { VariableField } from '../fields/variable-field'

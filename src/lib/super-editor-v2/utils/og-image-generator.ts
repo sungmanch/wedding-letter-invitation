@@ -213,3 +213,189 @@ export function generateDefaultOgImage(data: WeddingData): string {
 
   return canvas.toDataURL('image/jpeg', 0.9)
 }
+
+/**
+ * 축하 OG 이미지 생성 (빵빠레/컨페티 포함)
+ *
+ * 크림색 배경에 컨페티와 "신랑이름 ❤️ 신부이름" 텍스트
+ */
+export function generateCelebrationOgImage(data: WeddingData): string {
+  const canvas = document.createElement('canvas')
+  canvas.width = OG_WIDTH
+  canvas.height = OG_HEIGHT
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) {
+    throw new Error('Canvas context를 생성할 수 없습니다')
+  }
+
+  // 크림색 배경
+  ctx.fillStyle = '#FFF9F0'
+  ctx.fillRect(0, 0, OG_WIDTH, OG_HEIGHT)
+
+  // 컨페티 색상 팔레트 (웨딩 테마)
+  const confettiColors = [
+    '#FFB6C1', // 연분홍
+    '#FFD700', // 골드
+    '#98D8C8', // 민트
+    '#F7DC6F', // 연노랑
+    '#DDA0DD', // 연보라
+    '#87CEEB', // 하늘색
+    '#FFDAB9', // 피치
+  ]
+
+  // 컨페티 그리기 (랜덤 시드 고정을 위해 결정적 위치 사용)
+  const confettiPositions = [
+    // 좌상단 영역
+    { x: 80, y: 60, rotation: 15 },
+    { x: 150, y: 120, rotation: -30 },
+    { x: 60, y: 180, rotation: 45 },
+    { x: 200, y: 80, rotation: -15 },
+    { x: 120, y: 250, rotation: 60 },
+    { x: 250, y: 150, rotation: -45 },
+    { x: 180, y: 220, rotation: 30 },
+    // 우상단 영역
+    { x: 1000, y: 70, rotation: -20 },
+    { x: 1100, y: 130, rotation: 35 },
+    { x: 1050, y: 200, rotation: -50 },
+    { x: 950, y: 160, rotation: 25 },
+    { x: 1120, y: 250, rotation: -35 },
+    { x: 1020, y: 100, rotation: 40 },
+    { x: 1080, y: 180, rotation: -25 },
+    // 좌하단 영역
+    { x: 100, y: 450, rotation: 20 },
+    { x: 180, y: 520, rotation: -40 },
+    { x: 60, y: 550, rotation: 55 },
+    { x: 220, y: 480, rotation: -15 },
+    { x: 140, y: 580, rotation: 35 },
+    { x: 280, y: 530, rotation: -55 },
+    // 우하단 영역
+    { x: 1020, y: 440, rotation: -25 },
+    { x: 1100, y: 500, rotation: 30 },
+    { x: 980, y: 560, rotation: -45 },
+    { x: 1060, y: 480, rotation: 50 },
+    { x: 1130, y: 570, rotation: -30 },
+    { x: 1000, y: 520, rotation: 40 },
+  ]
+
+  confettiPositions.forEach((pos, index) => {
+    const color = confettiColors[index % confettiColors.length]
+    drawConfetti(ctx, pos.x, pos.y, color, pos.rotation)
+  })
+
+  // 빵빠레 (파티 포퍼) 그리기 - 양쪽에 배치
+  drawPartyPopper(ctx, 80, OG_HEIGHT / 2 - 50, false) // 왼쪽
+  drawPartyPopper(ctx, OG_WIDTH - 80, OG_HEIGHT / 2 - 50, true) // 오른쪽 (반전)
+
+  // 이름 가져오기
+  const groomName = data.couple?.groom?.name || data.groom?.name || '신랑'
+  const brideName = data.couple?.bride?.name || data.bride?.name || '신부'
+
+  // 텍스트 설정
+  const text = `${groomName} ❤️ ${brideName}`
+
+  // 텍스트 그림자 효과
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)'
+  ctx.shadowBlur = 10
+  ctx.shadowOffsetX = 2
+  ctx.shadowOffsetY = 2
+
+  // 폰트 설정
+  ctx.font = 'bold 86px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+
+  // 텍스트 색상
+  ctx.fillStyle = '#4A4A4A'
+
+  // 가운데 배치
+  ctx.fillText(text, OG_WIDTH / 2, OG_HEIGHT / 2)
+
+  // 그림자 리셋
+  ctx.shadowColor = 'transparent'
+  ctx.shadowBlur = 0
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = 0
+
+  // 하단에 작은 문구 추가
+  ctx.font = '34px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
+  ctx.fillStyle = '#9CA3AF'
+  ctx.fillText('결혼합니다', OG_WIDTH / 2, OG_HEIGHT / 2 + 96)
+
+  return canvas.toDataURL('image/jpeg', 0.9)
+}
+
+/**
+ * 컨페티 (종이 조각) 그리기
+ */
+function drawConfetti(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  color: string,
+  rotation: number
+) {
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.rotate((rotation * Math.PI) / 180)
+
+  // 직사각형 컨페티
+  ctx.fillStyle = color
+  ctx.fillRect(-8, -16, 16, 32)
+
+  ctx.restore()
+}
+
+/**
+ * 빵빠레 (파티 포퍼) 그리기
+ */
+function drawPartyPopper(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  mirror: boolean
+) {
+  ctx.save()
+  ctx.translate(x, y)
+  if (mirror) {
+    ctx.scale(-1, 1)
+  }
+
+  // 포퍼 몸통 (원뿔)
+  ctx.fillStyle = '#FFD700'
+  ctx.beginPath()
+  ctx.moveTo(0, 60)
+  ctx.lineTo(-25, 100)
+  ctx.lineTo(25, 100)
+  ctx.closePath()
+  ctx.fill()
+
+  // 포퍼 테두리
+  ctx.strokeStyle = '#DAA520'
+  ctx.lineWidth = 3
+  ctx.stroke()
+
+  // 포퍼 손잡이
+  ctx.fillStyle = '#8B4513'
+  ctx.fillRect(-8, 100, 16, 40)
+
+  // 터지는 효과 (리본/스트리머)
+  const streamColors = ['#FF69B4', '#98D8C8', '#FFD700', '#DDA0DD', '#87CEEB']
+  streamColors.forEach((color, i) => {
+    ctx.strokeStyle = color
+    ctx.lineWidth = 4
+    ctx.beginPath()
+    const angle = -60 + i * 30
+    const rad = (angle * Math.PI) / 180
+    ctx.moveTo(0, 60)
+    ctx.quadraticCurveTo(
+      Math.cos(rad) * 60,
+      60 + Math.sin(rad) * 30,
+      Math.cos(rad) * 120,
+      60 + Math.sin(rad) * 80
+    )
+    ctx.stroke()
+  })
+
+  ctx.restore()
+}
