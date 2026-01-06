@@ -411,6 +411,51 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     }
   }, [editorDoc.data])
 
+  // OG 이미지 스타일 변경 핸들러 (즉시 이미지 생성 및 미리보기 반영)
+  const [isGeneratingOgImage, setIsGeneratingOgImage] = useState(false)
+  const handleOgImageStyleChange = useCallback(async (style: OgImageStyle) => {
+    setOgImageStyle(style)
+
+    // custom 모드는 이미지 생성 안함
+    if (style === 'custom') {
+      return
+    }
+
+    setIsGeneratingOgImage(true)
+    try {
+      let ogBase64: string | null = null
+
+      if (style === 'auto') {
+        ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
+      } else if (style === 'default') {
+        ogBase64 = generateDefaultOgImage(editorDoc.data)
+      }
+
+      if (ogBase64) {
+        // 업로드
+        const result = await uploadImage(dbDocument.id, {
+          data: ogBase64,
+          filename: 'og-image.jpg',
+          mimeType: 'image/jpeg',
+        })
+        if (result.success && result.url) {
+          // OG 메타데이터 업데이트 (서버에도 즉시 저장)
+          const newOg = { ...og, imageUrl: result.url }
+          setOg(newOg)
+          await updateOgMetadata(dbDocument.id, {
+            ogTitle: newOg.title || undefined,
+            ogDescription: newOg.description || undefined,
+            ogImageUrl: result.url,
+          })
+        }
+      }
+    } catch (error) {
+      console.warn('OG 이미지 생성 실패:', error)
+    } finally {
+      setIsGeneratingOgImage(false)
+    }
+  }, [editorDoc.blocks, editorDoc.data, dbDocument.id, og])
+
   // AI 프롬프트 제출
   const handleAISubmit = useCallback(async (prompt: string) => {
     await aiEdit.edit(prompt, expandedBlockId ?? undefined)
@@ -488,7 +533,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   return (
     <div className="h-screen flex flex-col bg-[var(--bg-warm)] text-[var(--text-primary)]">
       {/* 헤더 */}
-      <header className="flex-shrink-0 h-12 md:h-14 border-b border-[var(--warm-100)] bg-[var(--bg-warm)]/95 backdrop-blur-sm">
+      <header className="flex-shrink-0 h-12 md:h-14 border-b border-[var(--warm-100)] bg-[var(--bg-warm)]/95 backdrop-blur-sm relative z-40">
         {/* 모바일 헤더 */}
         <div className="flex md:hidden items-center justify-between px-3 h-full">
           <Link
@@ -501,22 +546,22 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {editorDoc.meta.title}
           </h1>
           <div className="flex items-center gap-1">
-            {/* 저장 버튼 (아이콘만) */}
+            {/* 저장 버튼 */}
             <button
               onClick={handleSave}
               disabled={!isDirty || isSaving}
               className={`
-                p-2 rounded-lg transition-colors
+                px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
                 ${isDirty && !isSaving
-                  ? 'text-[var(--blush-500)]'
+                  ? 'bg-[var(--blush-400)] text-white'
                   : 'text-[var(--text-light)]'
                 }
               `}
             >
               {isSaving ? (
-                <LoadingSpinner className="w-5 h-5" />
+                <LoadingSpinner className="w-4 h-4" />
               ) : (
-                <SaveIcon className="w-5 h-5" />
+                '저장'
               )}
             </button>
             {/* 더보기 메뉴 */}
@@ -687,6 +732,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     og={og}
                     onOgChange={handleOgChange}
                     shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
+                    ogImageStyle={ogImageStyle}
+                    onOgImageStyleChange={handleOgImageStyleChange}
+                    isGeneratingOgImage={isGeneratingOgImage}
                   />
                 )}
               </div>
@@ -787,7 +835,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 onOgChange={handleOgChange}
                 shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
                 ogImageStyle={ogImageStyle}
-                onOgImageStyleChange={setOgImageStyle}
+                onOgImageStyleChange={handleOgImageStyleChange}
+                isGeneratingOgImage={isGeneratingOgImage}
               />
             )}
           </div>

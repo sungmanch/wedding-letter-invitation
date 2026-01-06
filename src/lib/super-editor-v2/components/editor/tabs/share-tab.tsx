@@ -47,6 +47,8 @@ export interface ShareTabProps {
   ogImageStyle?: OgImageStyle
   /** OG 이미지 스타일 변경 콜백 */
   onOgImageStyleChange?: (style: OgImageStyle) => void
+  /** OG 이미지 생성 중 여부 */
+  isGeneratingOgImage?: boolean
   /** 추가 className */
   className?: string
 }
@@ -66,6 +68,7 @@ export function ShareTab({
   isBranch = false,
   ogImageStyle = 'auto',
   onOgImageStyleChange,
+  isGeneratingOgImage = false,
   className = '',
 }: ShareTabProps) {
   const [copySuccess, setCopySuccess] = useState(false)
@@ -171,7 +174,8 @@ export function ShareTab({
               <select
                 value={ogImageStyle}
                 onChange={(e) => onOgImageStyleChange?.(e.target.value as OgImageStyle)}
-                className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent"
+                disabled={isGeneratingOgImage}
+                className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="auto">자동 생성 (Hero 이미지)</option>
                 <option value="default">기본 이미지 (이름 텍스트)</option>
@@ -180,9 +184,10 @@ export function ShareTab({
 
               {/* 스타일별 설명 */}
               <p className="text-xs text-[var(--text-light)]">
-                {ogImageStyle === 'auto' && '저장 시 Hero 이미지를 1200×630 비율로 자동 크롭합니다.'}
-                {ogImageStyle === 'default' && '저장 시 신랑❤️신부 텍스트가 있는 기본 이미지를 생성합니다.'}
-                {ogImageStyle === 'custom' && '직접 이미지를 업로드하세요. 권장: 1200×630px'}
+                {isGeneratingOgImage && '이미지를 생성하고 있습니다...'}
+                {!isGeneratingOgImage && ogImageStyle === 'auto' && '선택 즉시 Hero 이미지를 1200×630 비율로 자동 크롭합니다.'}
+                {!isGeneratingOgImage && ogImageStyle === 'default' && '선택 즉시 신랑❤️신부 텍스트가 있는 기본 이미지를 생성합니다.'}
+                {!isGeneratingOgImage && ogImageStyle === 'custom' && '직접 이미지를 업로드하세요. 권장: 1200×630px'}
               </p>
 
               {/* 커스텀 모드일 때만 업로드 영역 표시 */}
@@ -239,6 +244,7 @@ export function ShareTab({
             title={og.title || defaultOg.title}
             description={og.description || defaultOg.description}
             imageUrl={og.imageUrl || defaultOg.imageUrl}
+            isLoading={isGeneratingOgImage}
           />
         </section>
 
@@ -320,13 +326,19 @@ interface OgPreviewCardProps {
   title: string
   description: string
   imageUrl?: string | null
+  isLoading?: boolean
 }
 
-function OgPreviewCard({ title, description, imageUrl }: OgPreviewCardProps) {
+function OgPreviewCard({ title, description, imageUrl, isLoading = false }: OgPreviewCardProps) {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-md border border-[var(--sand-200)]">
       {/* 이미지 영역 */}
-      {imageUrl ? (
+      {isLoading ? (
+        <div className="aspect-[1.91/1] bg-[var(--sand-100)] flex flex-col items-center justify-center gap-2">
+          <LoadingSpinner className="w-8 h-8 text-[var(--blush-400)]" />
+          <span className="text-sm text-[var(--text-muted)]">이미지 생성 중...</span>
+        </div>
+      ) : imageUrl ? (
         <div className="aspect-[1.91/1] bg-[var(--sand-100)]">
           <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
         </div>
