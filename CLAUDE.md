@@ -42,6 +42,17 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2026-01-06: 프리셋 요청 기능 추가
+- **이유**: 오픈 베타 준비, 사용자가 원하는 프리셋 디자인 요청 기능
+- **변경**:
+  - DB 테이블: `preset_requests`, `preset_request_images` 추가
+  - 서버 액션: `submitPresetRequest()` (로그인 필수)
+  - 슬랙 알림: `notifyPresetRequest()` 추가
+  - UI: `RequestPresetCard`, `RequestPresetModal` 컴포넌트
+  - `SectionAccordion`에 프리셋 요청 카드 통합
+- **파일**: `preset-request.ts`, `RequestPresetCard.tsx`, `RequestPresetModal.tsx`
+- **TODO**: Supabase Storage `preset-request-images` 버킷 수동 생성 필요
+
 ### 2026-01-04: SEO/AEO/GEO 최적화 기본 인프라
 - **이유**: 검색엔진 최적화 및 AI 검색 엔진(ChatGPT, Claude) 대응
 - **변경**:

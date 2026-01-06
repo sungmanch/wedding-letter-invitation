@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { Plus, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { listDocuments } from '@/lib/super-editor-v2/actions'
-import { InvitationCard } from './InvitationCard'
+import { InvitationTabs } from './InvitationTabs'
 import type {
   Block,
   Element,
@@ -69,6 +69,33 @@ export default async function MyInvitationsPage() {
   // 레거시 문서 필터링
   const documents = allDocuments.filter(isValidSE2Document)
 
+  // 상태별로 분류 (draft, building = 작성 중 / published = 발행됨)
+  const publishedDocs = documents
+    .filter((doc) => doc.status === 'published')
+    .map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      status: doc.status,
+      blocks: doc.blocks as Block[],
+      style: doc.style as StyleSystem,
+      data: doc.data as WeddingData,
+      animation: doc.animation as GlobalAnimation | null,
+      updatedAt: new Date(doc.updatedAt),
+    }))
+
+  const draftDocs = documents
+    .filter((doc) => doc.status === 'draft' || doc.status === 'building')
+    .map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      status: doc.status,
+      blocks: doc.blocks as Block[],
+      style: doc.style as StyleSystem,
+      data: doc.data as WeddingData,
+      animation: doc.animation as GlobalAnimation | null,
+      updatedAt: new Date(doc.updatedAt),
+    }))
+
   return (
     <main className="min-h-screen bg-[var(--ivory-100)]">
       {/* Header */}
@@ -114,21 +141,10 @@ export default async function MyInvitationsPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {documents.map((doc) => (
-              <InvitationCard
-                key={doc.id}
-                id={doc.id}
-                title={doc.title}
-                status={doc.status}
-                blocks={doc.blocks as Block[]}
-                style={doc.style as StyleSystem}
-                data={doc.data as WeddingData}
-                animation={doc.animation as GlobalAnimation | null}
-                updatedAt={new Date(doc.updatedAt)}
-              />
-            ))}
-          </div>
+          <InvitationTabs
+            publishedDocs={publishedDocs}
+            draftDocs={draftDocs}
+          />
         )}
       </div>
     </main>

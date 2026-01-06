@@ -38,7 +38,7 @@ export function FloatingCTA({ className = '' }: FloatingCTAProps) {
         className={`
           fixed bottom-0 left-0 right-0 z-50 lg:hidden
           bg-white/95 backdrop-blur-sm
-          border-t border-[var(--sand-100)]
+          border-t border-[var(--warm-100)]
           shadow-[0_-4px_20px_rgba(0,0,0,0.08)]
           ${className}
         `}
@@ -50,7 +50,7 @@ export function FloatingCTA({ className = '' }: FloatingCTAProps) {
             onClick={() => setShowPreviewModal(true)}
             className="relative flex-shrink-0 group"
           >
-            <div className="w-12 h-16 rounded-lg overflow-hidden border border-[var(--sand-200)] shadow-sm">
+            <div className="w-12 h-16 rounded-lg overflow-hidden border border-[var(--warm-200)] shadow-sm">
               <MiniHeroRenderer
                 templateId={state.selectedTemplateId}
                 cssVariables={state.cssVariables}
@@ -69,7 +69,7 @@ export function FloatingCTA({ className = '' }: FloatingCTAProps) {
             disabled={isCreating}
             className="
               flex-1 h-12
-              bg-[var(--sage-500)] hover:bg-[var(--sage-600)]
+              bg-[var(--blush-400)] hover:bg-[var(--blush-500)]
               text-white font-medium text-sm
               rounded-full shadow-md
               flex items-center justify-center gap-2

@@ -86,11 +86,11 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-[100svh] flex flex-col items-center justify-center overflow-hidden">
-      {/* 배경 그라데이션 */}
+      {/* 배경 그라데이션 - Clean Modern (2025 Redesign) */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--ivory-50)] via-[var(--ivory-100)] to-[var(--sage-50)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--sage-100)_0%,transparent_50%)] opacity-60" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,var(--sand-100)_0%,transparent_50%)] opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-pure)] via-[var(--bg-warm)] to-[var(--blush-50)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--blush-100)_0%,transparent_50%)] opacity-40" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,var(--warm-100)_0%,transparent_50%)] opacity-30" />
       </div>
 
       {/* 콘텐츠 */}
@@ -102,10 +102,10 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--sage-100)] text-[var(--sage-700)] text-sm font-medium mb-6"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--blush-100)] text-[var(--blush-600)] text-sm font-medium mb-6"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--sage-500)]" />
-            프리미엄 청첩장 서비스
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--blush-400)]" />
+            셀프 모바일 청첩장
           </motion.div>
 
           {/* 헤드라인 */}
@@ -113,12 +113,12 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.15] tracking-tight mb-6"
-            style={{ fontFamily: 'var(--font-heading, Noto Serif KR), serif' }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-[1.2] tracking-tight mb-6"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            <span className="text-[var(--text-primary)]">당신만의 이야기를</span>
+            <span className="text-[var(--text-primary)]">클릭만으로 완성하는</span>
             <br />
-            <span className="text-[var(--sage-600)]">담은 청첩장</span>
+            <span className="text-[var(--blush-500)]">모바일 청첩장</span>
           </motion.h1>
 
           {/* 서브헤드 */}
@@ -126,11 +126,11 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-lg sm:text-xl text-[var(--text-muted)] leading-relaxed mb-8"
+            className="text-base sm:text-lg text-[var(--text-muted)] leading-relaxed mb-8"
           >
-            섹션별로 골라 담는
+            원하는 섹션만 골라 담고, 실시간으로 확인하세요.
             <br className="hidden sm:block" />
-            나만의 청첩장을 만들어보세요
+            5분이면 충분합니다.
           </motion.p>
 
           {/* CTA 버튼 */}
@@ -142,12 +142,12 @@ export function HeroSection() {
           >
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <Button
-                variant="sage"
+                variant="rose"
                 size="lg"
                 onClick={handleScrollDown}
                 className="group"
               >
-                지금 바로 시작하기
+                무료로 시작하기
                 <ChevronDown className="w-5 h-5 ml-2 transition-transform group-hover:translate-y-1" />
               </Button>
             </div>
@@ -155,13 +155,13 @@ export function HeroSection() {
             {/* 종이 청첩장과 똑같이 만들기 버튼 */}
             <button
               onClick={() => setIsPaperModalOpen(true)}
-              className="group flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--sand-200)] bg-white/80 hover:bg-white hover:border-[var(--sage-300)] transition-all"
+              className="group flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--warm-200)] bg-white/80 hover:bg-white hover:border-[var(--blush-300)] transition-all"
             >
-              <Sparkles className="w-4 h-4 text-[var(--sage-500)]" />
-              <span className="text-sm text-[var(--text-body)] group-hover:text-[var(--sage-600)]">
+              <Sparkles className="w-4 h-4 text-[var(--blush-400)]" />
+              <span className="text-sm text-[var(--text-body)] group-hover:text-[var(--blush-500)]">
                 종이 청첩장과 똑같이 만들기
               </span>
-              <Badge className="bg-[var(--sage-100)] text-[var(--sage-700)] border-[var(--sage-200)] text-[10px] px-1.5 py-0.5">
+              <Badge className="bg-[var(--blush-100)] text-[var(--blush-600)] border-[var(--blush-200)] text-[10px] px-1.5 py-0.5">
                 Beta
               </Badge>
             </button>
@@ -194,7 +194,7 @@ export function HeroSection() {
       >
         <button
           onClick={handleScrollDown}
-          className="flex flex-col items-center gap-2 text-[var(--text-light)] hover:text-[var(--sage-600)] transition-colors"
+          className="flex flex-col items-center gap-2 text-[var(--text-light)] hover:text-[var(--blush-500)] transition-colors"
         >
           <span className="text-xs tracking-widest uppercase">Scroll</span>
           <motion.div
@@ -365,7 +365,7 @@ const CardLine = forwardRef<HTMLDivElement, CardLineProps>(
           <span
             className={`
               text-xs lg:text-sm font-medium tracking-wide
-              ${isHero ? 'text-[var(--sage-600)]' : 'text-[var(--text-muted)]'}
+              ${isHero ? 'text-[var(--blush-500)]' : 'text-[var(--text-muted)]'}
             `}
           >
             {label}
@@ -409,7 +409,7 @@ const CardLine = forwardRef<HTMLDivElement, CardLineProps>(
           </div>
 
           {/* 페이드 마스크 (우측) */}
-          <div className="absolute right-0 top-0 bottom-0 w-12 lg:w-20 bg-gradient-to-l from-[var(--ivory-100)] to-transparent pointer-events-none z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 lg:w-20 bg-gradient-to-l from-[var(--bg-warm)] to-transparent pointer-events-none z-10" />
         </div>
       </div>
     )

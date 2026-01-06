@@ -35,7 +35,13 @@ import {
   type HeroPresetId,
 } from '@/lib/super-editor-v2/presets/blocks/hero'
 import { getHeroPresetIdForTemplate } from '@/lib/super-editor-v2/config/template-preset-map'
-import { createDocument } from '@/lib/super-editor-v2/actions/document'
+import {
+  createDocument,
+  getUserDraft,
+  replaceDraftWithTemplate,
+} from '@/lib/super-editor-v2/actions/document'
+import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
+import { DraftExistsModal } from '@/components/landing/builder/DraftExistsModal'
 import { getBlockPreset } from '@/lib/super-editor-v2/presets/blocks'
 import { SAMPLE_WEDDING_DATA } from '@/lib/super-editor-v2/schema'
 import { nanoid } from 'nanoid'
@@ -291,6 +297,10 @@ export function SubwayBuilderProvider({
   const [state, dispatch] = useReducer(subwayBuilderReducer, INITIAL_STATE)
   const [isCreating, setIsCreating] = useState(false)
 
+  // Draft 모달 관련 상태
+  const [showDraftModal, setShowDraftModal] = useState(false)
+  const [existingDraft, setExistingDraft] = useState<EditorDocumentV2 | null>(null)
+
   // 문서 생성 헬퍼 함수
   const createDocumentFromSelection = useCallback(
     async (templateId: string, presets: SelectedPresets) => {
@@ -435,7 +445,18 @@ export function SubwayBuilderProvider({
         return
       }
 
-      // 로그인 상태: 바로 문서 생성
+      // 기존 draft 확인
+      const draft = await getUserDraft()
+
+      if (draft) {
+        // draft가 있으면 모달 표시
+        setExistingDraft(draft)
+        setShowDraftModal(true)
+        setIsCreating(false)
+        return
+      }
+
+      // draft 없으면 새로 생성
       const doc = await createDocumentFromSelection(
         state.selectedTemplateId,
         state.selectedPresets
@@ -446,6 +467,76 @@ export function SubwayBuilderProvider({
       setIsCreating(false)
     }
   }, [state, createDocumentFromSelection, router])
+
+  // 이어서 편집: 기존 draft로 이동
+  const handleContinueDraft = useCallback(() => {
+    if (!existingDraft) return
+    setShowDraftModal(false)
+    router.push(`/se2/${existingDraft.id}/edit`)
+  }, [existingDraft, router])
+
+  // 새로 시작: 기존 draft 덮어쓰기
+  const handleStartNew = useCallback(async () => {
+    if (!existingDraft) return
+
+    setIsCreating(true)
+    setShowDraftModal(false)
+
+    try {
+      const template = getTemplateV2ById(state.selectedTemplateId)
+      if (!template) {
+        throw new Error('템플릿을 찾을 수 없습니다')
+      }
+
+      // 블록 생성
+      const blocks: Block[] = []
+
+      // Hero 블록 추가
+      const heroPresetId = state.selectedPresets.hero
+      if (heroPresetId) {
+        const heroBlock = createBlockFromPresetData(heroPresetId)
+        if (heroBlock) {
+          blocks.push(heroBlock)
+        }
+      }
+
+      // 나머지 섹션 추가
+      for (const sectionType of SECTION_ORDER) {
+        const presetId = state.selectedPresets[sectionType]
+        if (presetId) {
+          const block = createBlockFromPresetData(presetId)
+          if (block) {
+            blocks.push(block)
+          }
+        }
+      }
+
+      const style = buildStyleSystemFromTemplate(template, DEFAULT_STYLE_SYSTEM)
+
+      // 기존 draft 덮어쓰기
+      const updated = await replaceDraftWithTemplate(existingDraft.id, {
+        title: '새 청첩장',
+        blocks,
+        style,
+        animation: { mood: 'minimal', speed: 1, floatingElements: [] },
+        weddingData: SAMPLE_WEDDING_DATA,
+      })
+
+      if (updated) {
+        router.push(`/se2/${updated.id}/edit`)
+      } else {
+        // 덮어쓰기 실패 시 새로 생성
+        const doc = await createDocumentFromSelection(
+          state.selectedTemplateId,
+          state.selectedPresets
+        )
+        router.push(`/se2/${doc.id}/edit`)
+      }
+    } catch (err) {
+      console.error('Draft replacement failed:', err)
+      setIsCreating(false)
+    }
+  }, [existingDraft, state, createDocumentFromSelection, router])
 
   const contextValue = useMemo<SubwayBuilderContextValue>(
     () => ({
@@ -459,9 +550,31 @@ export function SubwayBuilderProvider({
     [state, setTemplate, setPreset, reset, saveAndCreateDocument, isCreating]
   )
 
+  // DraftExistsModal에 전달할 draft 데이터 변환
+  const draftForModal = useMemo(() => {
+    if (!existingDraft) return null
+    return {
+      id: existingDraft.id,
+      title: existingDraft.title,
+      blocks: existingDraft.blocks as Block[],
+      style: existingDraft.style as import('@/lib/super-editor-v2/schema/types').StyleSystem,
+      data: existingDraft.data as import('@/lib/super-editor-v2/schema/types').WeddingData,
+      animation: existingDraft.animation as import('@/lib/super-editor-v2/schema/types').GlobalAnimation | null,
+      updatedAt: existingDraft.updatedAt,
+    }
+  }, [existingDraft])
+
   return (
     <SubwayBuilderContext.Provider value={contextValue}>
       {children}
+      <DraftExistsModal
+        open={showDraftModal}
+        onOpenChange={setShowDraftModal}
+        draft={draftForModal}
+        onContinue={handleContinueDraft}
+        onStartNew={handleStartNew}
+        isLoading={isCreating}
+      />
     </SubwayBuilderContext.Provider>
   )
 }

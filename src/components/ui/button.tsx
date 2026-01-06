@@ -7,25 +7,44 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // Primary CTA - Blush Pink (새 브랜드 컬러)
         default:
-          'bg-accent-pink text-white hover:opacity-90 focus-visible:ring-accent-pink',
+          'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)] active:bg-[var(--blush-600)] focus-visible:ring-[var(--blush-300)]',
+        // Secondary - Purple (레거시 유지)
         secondary:
           'bg-primary-purple text-white hover:opacity-90 focus-visible:ring-primary-purple',
+        // Outline - Blush
         outline:
-          'border border-accent-pink text-accent-pink bg-transparent hover:bg-pink-50 focus-visible:ring-accent-pink',
+          'border border-[var(--blush-300)] text-[var(--blush-500)] bg-transparent hover:bg-[var(--blush-50)] focus-visible:ring-[var(--blush-300)]',
+        // Ghost - 투명 배경
         ghost:
-          'text-charcoal hover:bg-pink-50 focus-visible:ring-accent-pink',
-        link: 'text-accent-pink underline-offset-4 hover:underline',
+          'text-[var(--text-body)] hover:bg-[var(--warm-100)] focus-visible:ring-[var(--blush-300)]',
+        // Link
+        link: 'text-[var(--blush-500)] underline-offset-4 hover:underline',
+        // Destructive
         destructive:
           'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500',
+        // Gold (레거시)
         gold:
           'bg-[#C9A962] text-[#0A0806] hover:bg-[#B8A052] focus-visible:ring-[#C9A962]',
+        // Ghost Dark (레거시)
         'ghost-dark':
           'text-[#F5E6D3]/60 hover:text-[#F5E6D3] hover:bg-white/5 focus-visible:ring-[#C9A962]',
+        // Sage → Blush로 매핑 (하위 호환)
         sage:
-          'bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] focus-visible:ring-[var(--sage-400)]',
+          'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)] active:bg-[var(--blush-600)] focus-visible:ring-[var(--blush-300)]',
+        // Rose → Blush로 매핑 (하위 호환)
+        rose:
+          'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)] active:bg-[var(--blush-600)] focus-visible:ring-[var(--blush-300)]',
+        // Ghost Light - 연한 배경
         'ghost-light':
-          'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)] focus-visible:ring-[var(--sage-400)]',
+          'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--blush-50)] focus-visible:ring-[var(--blush-300)]',
+        // NEW: Soft - 연한 배경 + 진한 텍스트 (배지 스타일)
+        soft:
+          'bg-[var(--blush-100)] text-[var(--blush-600)] hover:bg-[var(--blush-200)] focus-visible:ring-[var(--blush-300)]',
+        // NEW: Outline Warm - 따뜻한 베이지 아웃라인
+        'outline-warm':
+          'border border-[var(--warm-300)] text-[var(--text-body)] bg-transparent hover:bg-[var(--warm-50)] focus-visible:ring-[var(--warm-400)]',
       },
       size: {
         default: 'h-14 px-6 py-3',

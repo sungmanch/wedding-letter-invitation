@@ -1,4 +1,16 @@
+/* ==========================================
+   Font Imports
+   ========================================== */
+
+/* SUIT - 본문용 현대적 한글 산세리프 */
+@import url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+
+/* Google Fonts - 제목 및 강조용 */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap');
+
+/* Legacy - NanumSquare (하위 호환) */
 @import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
+
 @import 'tailwindcss';
 
 /* ==========================================
@@ -30,46 +42,139 @@
 }
 
 :root {
-  /* Wedding Theme Colors - Purple/Lavender Palette */
-  --primary-purple: #8b5cf6;
-  --accent-pink: #ec4899;
-  --lavender-bg: #fdf4ff;
-  --lavender-light: #f3e8ff;
-  --charcoal: #36454f;
+  /* ==========================================
+     NEW: Clean Modern Palette (2025 Redesign)
+     ========================================== */
 
-  /* Blush Pink (alias for accent-pink) */
-  --blush-pink: #ec4899;
-  --blush-pink-50: #fdf2f8;
-  --blush-pink-100: #fce7f3;
-  --blush-pink-200: #fbcfe8;
+  /* Primary Backgrounds (클린 화이트) */
+  --bg-pure: #FFFFFF;
+  --bg-subtle: #FAFAFA;
+  --bg-muted: #F5F5F5;
+  --bg-warm: #FBF9F7;
+
+  /* Text Colors (차콜 계열) */
+  --text-primary: #1A1A1A;
+  --text-body: #333333;
+  --text-muted: #666666;
+  --text-light: #999999;
+
+  /* Accent: Soft Blush Pink */
+  --blush-50: #FDF7F8;
+  --blush-100: #FAEEF0;
+  --blush-200: #F5DCE0;
+  --blush-300: #EBBFC7;
+  --blush-400: #DFA0AC;
+  --blush-500: #D18594;
+  --blush-600: #BE6B7C;
+
+  /* Secondary: Warm Neutral */
+  --warm-50: #FDFCFB;
+  --warm-100: #FAF8F6;
+  --warm-200: #F3EFE9;
+  --warm-300: #E8E1D8;
+  --warm-400: #D4C9BC;
+  --warm-500: #B8A898;
+
+  /* Border & Line */
+  --border-default: #E5E5E5;
+  --border-subtle: #EFEFEF;
+  --border-emphasis: #CCCCCC;
+
+  /* ==========================================
+     Editor Panel Variables (Clean Neutral)
+     - No glassmorphism/backdrop-filter
+     - Opaque backgrounds for performance
+     ========================================== */
+
+  /* Panel Backgrounds */
+  --editor-bg: #FCFCFC;
+  --editor-surface: #FFFFFF;
+  --editor-surface-hover: #F8F8F8;
+
+  /* Panel Borders */
+  --editor-border: rgba(0, 0, 0, 0.06);
+  --editor-border-emphasis: rgba(0, 0, 0, 0.12);
+
+  /* Active/Selected State (Subtle Glow) */
+  --editor-active-bg: rgba(223, 160, 172, 0.08);
+  --editor-active-border: var(--blush-400);
+  --editor-active-glow: 0 0 0 3px rgba(223, 160, 172, 0.15);
+
+  /* Toggle Switch */
+  --toggle-off-bg: #E0E0E0;
+  --toggle-on-bg: var(--blush-400);
+
+  /* ==========================================
+     Legacy Mappings (하위 호환)
+     ========================================== */
+
+  /* Wedding Theme Colors - Legacy */
+  --primary-purple: #8b5cf6;
+  --accent-pink: var(--blush-400);
+  --lavender-bg: var(--bg-warm);
+  --lavender-light: var(--blush-50);
+  --charcoal: var(--text-primary);
+
+  /* Blush Pink (alias) */
+  --blush-pink: var(--blush-400);
+  --blush-pink-50: var(--blush-50);
+  --blush-pink-100: var(--blush-100);
+  --blush-pink-200: var(--blush-200);
 
   /* Cream/Beige Tones */
-  --cream: #fef3f7;
+  --cream: var(--warm-100);
 
   /* Badge Colors */
   --badge-required-bg: #fee2e2;
   --badge-required-text: #dc2626;
-  --badge-optional-bg: #f3f4f6;
-  --badge-optional-text: #6b7280;
+  --badge-optional-bg: var(--warm-100);
+  --badge-optional-text: var(--text-muted);
 
   /* Base Colors */
-  --background: var(--lavender-bg);
-  --foreground: var(--charcoal);
+  --background: var(--bg-warm);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
-  /* Colors */
+  /* ==========================================
+     Theme Colors (Tailwind 통합)
+     ========================================== */
+
+  /* Base */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Wedding Theme - Purple/Lavender */
+  /* New Palette - Primary */
+  --color-bg-pure: var(--bg-pure);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-warm: var(--bg-warm);
+
+  /* New Palette - Blush */
+  --color-blush-50: var(--blush-50);
+  --color-blush-100: var(--blush-100);
+  --color-blush-200: var(--blush-200);
+  --color-blush-300: var(--blush-300);
+  --color-blush-400: var(--blush-400);
+  --color-blush-500: var(--blush-500);
+  --color-blush-600: var(--blush-600);
+
+  /* New Palette - Warm Neutral */
+  --color-warm-50: var(--warm-50);
+  --color-warm-100: var(--warm-100);
+  --color-warm-200: var(--warm-200);
+  --color-warm-300: var(--warm-300);
+  --color-warm-400: var(--warm-400);
+  --color-warm-500: var(--warm-500);
+
+  /* Legacy - Wedding Theme */
   --color-primary-purple: var(--primary-purple);
   --color-accent-pink: var(--accent-pink);
   --color-lavender-bg: var(--lavender-bg);
   --color-lavender-light: var(--lavender-light);
   --color-charcoal: var(--charcoal);
 
-  /* Blush Pink */
+  /* Legacy - Blush Pink */
   --color-blush-pink: var(--blush-pink);
   --color-blush-pink-50: var(--blush-pink-50);
   --color-blush-pink-100: var(--blush-pink-100);
@@ -100,11 +205,29 @@
   --color-pink-400: #f472b6;
   --color-pink-500: #ec4899;
 
-  /* Fonts */
+  /* ==========================================
+     Typography System (2025 Redesign)
+     ========================================== */
+
+  /* 본문: SUIT (현대적 한글 산세리프) */
   --font-sans:
-    'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
+    'SUIT', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
     'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+
+  /* 제목: Cormorant Garamond (영문) + Noto Sans KR (한글) */
+  --font-heading:
+    'Cormorant Garamond', 'Noto Sans KR', Georgia, serif;
+
+  /* 강조/브랜드: Playfair Display */
+  --font-display:
+    'Playfair Display', 'Noto Serif KR', Georgia, serif;
+
+  /* 숫자/데이터: DM Sans */
+  --font-numeric:
+    'DM Sans', 'SUIT', -apple-system, sans-serif;
+
+  /* Mono */
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
@@ -312,31 +435,36 @@ body {
   --bg-exhibition: #2d2d2d;
 
   /* ==========================================
-     Fresh Natural Theme - Ivory/Sage Palette
+     Fresh Natural Theme → Blush Modern (Remapped)
+     기존 sage/rose 변수를 새 blush 팔레트로 매핑
      ========================================== */
 
-  /* Primary - Ivory/Sand */
-  --ivory-50: #fffcf5;
-  --ivory-100: #faf6ee;
-  --ivory-200: #f5efe3;
-  --sand-100: #e8dfd0;
-  --sand-200: #d4c9b8;
+  /* Primary - Ivory/Sand → Warm Neutral */
+  --ivory-50: var(--bg-pure);
+  --ivory-100: var(--bg-warm);
+  --ivory-200: var(--warm-100);
+  --sand-100: var(--warm-200);
+  --sand-200: var(--warm-300);
+  --sand-300: var(--warm-400);
 
-  /* Accent - Sage Green */
-  --sage-50: #f1f5f1;
-  --sage-100: #dce8dc;
-  --sage-200: #c5d9c5;
-  --sage-300: #a8c5a8;
-  --sage-400: #8fad8f;
-  --sage-500: #6b9b6b;
-  --sage-600: #5a8a5a;
-  --sage-700: #4a7a4a;
+  /* Accent - Sage Green → Blush Pink (컬러 통일) */
+  --sage-50: var(--blush-50);
+  --sage-100: var(--blush-100);
+  --sage-200: var(--blush-200);
+  --sage-300: var(--blush-300);
+  --sage-400: var(--blush-400);
+  --sage-500: var(--blush-400);
+  --sage-600: var(--blush-500);
+  --sage-700: var(--blush-600);
 
-  /* Text Colors - Fresh Natural (darker for better readability) */
-  --text-primary: #2a3a2a;
-  --text-body: #3a3a3a;
-  --text-muted: #5a5a5a;
-  --text-light: #7a7a7a;
+  /* Dusty Rose → Blush (통합) */
+  --rose-50: var(--blush-50);
+  --rose-100: var(--blush-100);
+  --rose-200: var(--blush-200);
+  --rose-300: var(--blush-300);
+  --rose-400: var(--blush-400);
+  --rose-500: var(--blush-500);
+  --rose-600: var(--blush-600);
 }
 
 /* Fade up animation */

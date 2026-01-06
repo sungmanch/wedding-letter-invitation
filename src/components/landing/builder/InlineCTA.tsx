@@ -26,7 +26,7 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
     <div className={`text-center ${className}`}>
       {/* CTA 버튼 */}
       <Button
-        variant="sage"
+        variant="rose"
         size="lg"
         onClick={saveAndCreateDocument}
         disabled={isCreating}
@@ -54,11 +54,11 @@ export function InlineCTA({ className = '' }: InlineCTAProps) {
       {/* Trust badges */}
       <div className="mt-6 flex flex-wrap items-center gap-4 justify-center text-sm text-[var(--text-light)]">
         <span className="flex items-center gap-1.5">
-          <CheckIcon className="w-4 h-4 text-[var(--sage-500)]" />
+          <CheckIcon className="w-4 h-4 text-[var(--blush-400)]" />
           카드 등록 없이 무료 체험
         </span>
         <span className="flex items-center gap-1.5">
-          <CheckIcon className="w-4 h-4 text-[var(--sage-500)]" />
+          <CheckIcon className="w-4 h-4 text-[var(--blush-400)]" />
           언제든 수정 가능
         </span>
       </div>

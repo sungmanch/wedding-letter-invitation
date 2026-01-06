@@ -160,7 +160,7 @@ export function DataTab({
               type="date"
               value={data.wedding?.date ?? ''}
               onChange={(e) => handleFieldChange('wedding.date', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+              className="w-full px-3 py-2 bg-white border border-[var(--warm-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--blush-400)]"
             />
           </FieldRow>
 
@@ -169,7 +169,7 @@ export function DataTab({
               type="time"
               value={data.wedding?.time ?? ''}
               onChange={(e) => handleFieldChange('wedding.time', e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+              className="w-full px-3 py-2 bg-white border border-[var(--warm-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--blush-400)]"
             />
           </FieldRow>
         </div>
@@ -190,7 +190,7 @@ export function DataTab({
               value={data.venue?.name ?? ''}
               onChange={(e) => handleFieldChange('venue.name', e.target.value)}
               placeholder="○○웨딩홀"
-              className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+              className="w-full px-3 py-2 bg-white border border-[var(--warm-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--blush-400)]"
             />
           </FieldRow>
 
@@ -200,7 +200,7 @@ export function DataTab({
               value={data.venue?.hall ?? ''}
               onChange={(e) => handleFieldChange('venue.hall', e.target.value)}
               placeholder="그랜드홀 5층"
-              className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+              className="w-full px-3 py-2 bg-white border border-[var(--warm-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--blush-400)]"
             />
           </FieldRow>
 
@@ -219,7 +219,7 @@ export function DataTab({
               value={data.venue?.tel ?? ''}
               onChange={(e) => handleFieldChange('venue.tel', e.target.value)}
               placeholder="02-1234-5678"
-              className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)]"
+              className="w-full px-3 py-2 bg-white border border-[var(--warm-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--blush-400)]"
             />
           </FieldRow>
         </div>
@@ -231,9 +231,9 @@ export function DataTab({
       {enabledBlocks.length > 0 && (
         <div className="pt-2">
           <div className="flex items-center gap-2">
-            <div className="flex-1 border-t border-[var(--sand-200)]" />
+            <div className="flex-1 border-t border-[var(--warm-200)]" />
             <span className="text-xs text-[var(--text-light)] px-2">섹션별 데이터</span>
-            <div className="flex-1 border-t border-[var(--sand-200)]" />
+            <div className="flex-1 border-t border-[var(--warm-200)]" />
           </div>
         </div>
       )}
@@ -296,12 +296,12 @@ function BlockDataSection({
   const label = BLOCK_TYPE_LABELS[block.type] || block.type
 
   return (
-    <div className="border border-[var(--sand-200)] rounded-lg overflow-hidden">
+    <div className="border border-[var(--editor-border)] rounded-lg overflow-hidden">
       {/* 헤더 */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-[var(--ivory-50)] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--editor-surface)] hover:bg-[var(--editor-surface-hover)] transition-colors"
       >
         <span className="text-lg">{icon}</span>
         <span className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]">{label}</span>
@@ -311,7 +311,7 @@ function BlockDataSection({
 
       {/* 콘텐츠 */}
       {expanded && (
-        <div className="px-4 py-4 bg-[var(--ivory-50)] border-t border-[var(--sand-100)] space-y-4">
+        <div className="px-4 py-4 bg-[var(--editor-bg)] border-t border-[var(--editor-border)] space-y-4">
           {editableFields.map((field) => (
             <VariableField
               key={field.binding}
@@ -344,12 +344,12 @@ interface SharedSectionProps {
 
 function SharedSection({ id, title, icon, expanded, onToggle, children }: SharedSectionProps) {
   return (
-    <div className="border border-[var(--sand-200)] rounded-lg overflow-hidden">
+    <div className="border border-[var(--editor-border)] rounded-lg overflow-hidden">
       {/* 헤더 */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--sage-50)] hover:bg-[var(--sage-100)] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--editor-surface)] hover:bg-[var(--editor-surface-hover)] transition-colors"
       >
         {icon && <span className="text-lg">{icon}</span>}
         <span className="flex-1 text-left text-sm font-semibold text-[var(--text-primary)]">{title}</span>
@@ -358,7 +358,7 @@ function SharedSection({ id, title, icon, expanded, onToggle, children }: Shared
 
       {/* 콘텐츠 */}
       {expanded && (
-        <div className="px-4 py-4 bg-white border-t border-[var(--sand-100)]">
+        <div className="px-4 py-4 bg-[var(--editor-bg)] border-t border-[var(--editor-border)]">
           {children}
         </div>
       )}

@@ -368,3 +368,94 @@ export type NewPaperInvitationRequest = typeof paperInvitationRequests.$inferIns
 
 export type PaperInvitationPhoto = typeof paperInvitationPhotos.$inferSelect
 export type NewPaperInvitationPhoto = typeof paperInvitationPhotos.$inferInsert
+
+// ============================================
+// 프리셋 요청 (Preset Requests)
+// 사용자가 원하는 프리셋 디자인 요청
+// ============================================
+export const presetRequests = pgTable('preset_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull(), // auth.users 참조 (로그인 필수)
+
+  // 섹션 정보
+  // 'hero' | 'greeting-parents' | 'calendar' | 'gallery' | 'location'
+  sectionType: varchar('section_type', { length: 50 }).notNull(),
+
+  // 요청 내용
+  description: text('description').notNull(),
+
+  // 연락처 (결과 알림용)
+  email: varchar('email', { length: 255 }).notNull(),
+
+  // 요청 상태
+  // pending: 신청 완료, 대기 중
+  // in_progress: 제작 중
+  // completed: 완료 (프리셋 추가됨)
+  // rejected: 반려
+  status: varchar('status', { length: 20 }).default('pending').notNull(),
+
+  // 완료 시 추가된 프리셋 ID (선택)
+  completedPresetId: varchar('completed_preset_id', { length: 100 }),
+
+  // 메타
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_preset_requests_user_id').on(table.userId),
+  index('idx_preset_requests_section_type').on(table.sectionType),
+  index('idx_preset_requests_status').on(table.status),
+  index('idx_preset_requests_email').on(table.email),
+  pgPolicy('Users can manage their own preset requests', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public']
+  }),
+]).enableRLS()
+
+// ============================================
+// 프리셋 요청 이미지 (Preset Request Images)
+// 요청 시 업로드된 참고 이미지 (최대 3장)
+// ============================================
+export const presetRequestImages = pgTable('preset_request_images', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  requestId: uuid('request_id').notNull(),
+
+  storagePath: varchar('storage_path', { length: 500 }).notNull(),
+  url: varchar('url', { length: 500 }).notNull(),
+  displayOrder: integer('display_order').notNull(),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_preset_request_images_request_id').on(table.requestId),
+  foreignKey({
+    columns: [table.requestId],
+    foreignColumns: [presetRequests.id],
+    name: 'preset_request_images_request_id_fkey'
+  }).onDelete('cascade'),
+  pgPolicy('Users can manage images of their preset requests', {
+    as: 'permissive',
+    for: 'all',
+    to: ['public']
+  }),
+]).enableRLS()
+
+// ============================================
+// Relations for Preset Request
+// ============================================
+export const presetRequestsRelations = relations(presetRequests, ({ many }) => ({
+  images: many(presetRequestImages),
+}))
+
+export const presetRequestImagesRelations = relations(presetRequestImages, ({ one }) => ({
+  request: one(presetRequests, {
+    fields: [presetRequestImages.requestId],
+    references: [presetRequests.id],
+  }),
+}))
+
+// Type exports for Preset Request
+export type PresetRequest = typeof presetRequests.$inferSelect
+export type NewPresetRequest = typeof presetRequests.$inferInsert
+
+export type PresetRequestImage = typeof presetRequestImages.$inferSelect
+export type NewPresetRequestImage = typeof presetRequestImages.$inferInsert

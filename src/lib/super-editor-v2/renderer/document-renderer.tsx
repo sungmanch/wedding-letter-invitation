@@ -15,6 +15,7 @@ import { resolveStyle, styleToCSSVariables, type ResolvedStyle } from './style-r
 import { BlockRenderer } from './block-renderer'
 import { FloatingRenderer } from './floating-renderer'
 import { MusicPlayer } from '../components/ui/music-player'
+import { BlockDivider } from '../components/elements/block-divider'
 
 // ============================================
 // Types
@@ -92,16 +93,31 @@ export function DocumentRenderer({
       >
         {/* 블록 렌더링 */}
         <div className="se2-blocks">
-          {enabledBlocks.map((block, index) => (
-            <BlockRenderer
-              key={block.id}
-              block={block}
-              blockIndex={index}
-              editable={editable}
-              onBlockClick={onBlockClick}
-              onElementClick={onElementClick}
-            />
-          ))}
+          {enabledBlocks.map((block, index) => {
+            // hero 블록 다음에는 divider 표시하지 않음
+            // 마지막 블록 다음에도 표시하지 않음
+            const showDivider =
+              block.type !== 'hero' &&
+              index < enabledBlocks.length - 1
+
+            return (
+              <div key={block.id}>
+                <BlockRenderer
+                  block={block}
+                  blockIndex={index}
+                  editable={editable}
+                  onBlockClick={onBlockClick}
+                  onElementClick={onElementClick}
+                />
+                {showDivider && (
+                  <BlockDivider
+                    variant="ornament"
+                    ornamentId="heart-center"
+                  />
+                )}
+              </div>
+            )
+          })}
         </div>
 
         {/* Credit - 항상 맨 아래에 표시 */}

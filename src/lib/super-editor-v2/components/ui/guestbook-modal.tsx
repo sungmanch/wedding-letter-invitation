@@ -91,11 +91,11 @@ export function GuestbookModal({
         await onSubmit(formData)
       } else {
         // 기본 동작: API 호출
-        const response = await fetch('/api/super-editor/guestbook', {
+        const response = await fetch('/api/super-editor-v2/guestbook', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            invitationId,
+            documentId: invitationId,
             name: formData.name,
             message: formData.message,
           }),
