@@ -24,8 +24,8 @@ interface PresetSidebarProps {
   visibleBlock: Block | null
   /** 프리셋 변경 콜백 */
   onPresetChange: (blockId: string, presetId: string) => void
-  /** 프리셋 요청 콜백 */
-  onRequestPreset: (blockType: BlockType) => void
+  /** 프리셋 요청 콜백 (optional) */
+  onRequestPreset?: (blockType: BlockType) => void
   /** 모바일 버전 (전체 너비) */
   variant?: 'sidebar' | 'mobile'
 }
@@ -97,9 +97,11 @@ export function PresetSidebar({
         ) : (
           <div className="space-y-3">
             {/* 프리셋 요청 카드 - 항상 최상단 */}
-            <RequestPresetSidebarCard
-              onClick={() => onRequestPreset(visibleBlock.type)}
-            />
+            {onRequestPreset && (
+              <RequestPresetSidebarCard
+                onClick={() => onRequestPreset(visibleBlock.type)}
+              />
+            )}
 
             {/* 기존 프리셋 목록 */}
             {presets.map((preset) => (

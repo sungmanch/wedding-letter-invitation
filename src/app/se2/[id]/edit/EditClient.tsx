@@ -423,7 +423,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       // OG 이미지 자동 생성
       if (autoGenerateOgImage) {
         try {
-          const ogBase64 = await generateOgImageFromHero(editorDoc.blocks)
+          const ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
           if (ogBase64) {
             // 업로드
             const result = await uploadImage(dbDocument.id, {
