@@ -123,8 +123,8 @@ function TemplateCard({
           border-2 transition-all duration-300
           ${
             isSelected
-              ? 'border-[var(--sage-500)] shadow-lg shadow-[var(--sage-500)]/20'
-              : 'border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:shadow-md'
+              ? 'border-[var(--blush-400)] shadow-lg shadow-[var(--blush-400)]/20'
+              : 'border-[var(--warm-200)] hover:border-[var(--blush-300)] hover:shadow-md'
           }
         `}
         style={{ aspectRatio: '9/16' }}
@@ -139,7 +139,7 @@ function TemplateCard({
 
         {/* 선택 체크 */}
         {isSelected && (
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[var(--sage-500)] flex items-center justify-center shadow-md z-10">
+          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[var(--blush-400)] flex items-center justify-center shadow-md z-10">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
         )}
@@ -158,7 +158,7 @@ function TemplateCard({
         <p
           className={`
             text-sm font-medium transition-colors
-            ${isSelected ? 'text-[var(--sage-600)]' : 'text-[var(--text-primary)]'}
+            ${isSelected ? 'text-[var(--blush-500)]' : 'text-[var(--text-primary)]'}
           `}
         >
           {TEMPLATE_LABELS[templateId]}

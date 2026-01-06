@@ -196,8 +196,8 @@ function AccordionItem({
         rounded-xl border transition-all duration-300
         ${
           isOpen
-            ? 'border-[var(--sage-300)] bg-white shadow-sm'
-            : 'border-[var(--sand-200)] bg-[var(--ivory-50)] hover:border-[var(--sage-200)]'
+            ? 'border-[var(--blush-300)] bg-white shadow-sm'
+            : 'border-[var(--warm-200)] bg-[var(--bg-pure)] hover:border-[var(--blush-200)]'
         }
       `}
     >
@@ -213,8 +213,8 @@ function AccordionItem({
               w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
               ${
                 selectedPresetId
-                  ? 'bg-[var(--sage-500)] text-white'
-                  : 'bg-[var(--sand-200)]'
+                  ? 'bg-[var(--blush-400)] text-white'
+                  : 'bg-[var(--warm-200)]'
               }
             `}
           >
@@ -285,7 +285,7 @@ function AccordionItem({
               {hasMore && (
                 <button
                   onClick={onToggleExpand}
-                  className="mt-4 w-full py-2 text-xs text-[var(--sage-600)] hover:text-[var(--sage-700)] font-medium transition-colors"
+                  className="mt-4 w-full py-2 text-xs text-[var(--blush-500)] hover:text-[var(--blush-600)] font-medium transition-colors"
                 >
                   {isExpanded
                     ? '접기'

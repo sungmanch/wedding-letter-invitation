@@ -97,8 +97,8 @@ function PresetThumbnailInner({
           relative overflow-hidden transition-all duration-300
           ${
             isSelected
-              ? 'rounded-xl border-2 border-[var(--sage-500)] shadow-lg shadow-[var(--sage-500)]/20'
-              : 'rounded-lg border border-[var(--sand-200)] hover:border-[var(--sage-300)] hover:shadow-md'
+              ? 'rounded-xl border-2 border-[var(--blush-400)] shadow-lg shadow-[var(--blush-400)]/20'
+              : 'rounded-lg border border-[var(--warm-200)] hover:border-[var(--blush-300)] hover:shadow-md'
           }
         `}
         style={{ width, height }}
@@ -114,7 +114,7 @@ function PresetThumbnailInner({
         ) : (
           // Placeholder
           <div
-            className="w-full h-full bg-[var(--sand-50)] animate-pulse"
+            className="w-full h-full bg-[var(--warm-50)] animate-pulse"
             style={{ width, height }}
           />
         )}
@@ -124,7 +124,7 @@ function PresetThumbnailInner({
           <div
             className="
               absolute top-2 right-2 w-6 h-6 rounded-full
-              bg-[var(--sage-500)] flex items-center justify-center
+              bg-[var(--blush-400)] flex items-center justify-center
               shadow-md ring-2 ring-white
             "
           >
@@ -146,7 +146,7 @@ function PresetThumbnailInner({
         className={`
           mt-2 text-[11px] text-center truncate leading-tight
           transition-colors duration-200
-          ${isSelected ? 'text-[var(--sage-700)] font-semibold' : 'text-[var(--text-muted)] font-medium'}
+          ${isSelected ? 'text-[var(--blush-600)] font-semibold' : 'text-[var(--text-muted)] font-medium'}
         `}
         style={{ width }}
       >

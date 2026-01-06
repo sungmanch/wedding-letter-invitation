@@ -24,11 +24,11 @@ export function BuilderSection() {
   return (
     <section
       id="builder-section"
-      className="relative py-20 lg:py-32 bg-[var(--ivory-100)]"
+      className="relative py-20 lg:py-32 bg-[var(--bg-warm)]"
     >
       {/* 배경 */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,var(--sage-50)_0%,transparent_50%)] opacity-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,var(--blush-50)_0%,transparent_50%)] opacity-40" />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,7 +42,7 @@ export function BuilderSection() {
         >
           <h2
             className="text-3xl sm:text-4xl font-medium text-[var(--text-primary)] mb-4"
-            style={{ fontFamily: 'var(--font-heading, Noto Serif KR), serif' }}
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
             나만의 청첩장 만들기
           </h2>
@@ -122,12 +122,12 @@ interface StepHeaderProps {
 function StepHeader({ step, title }: StepHeaderProps) {
   return (
     <div className="flex items-center gap-3 mb-6">
-      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--sage-500)] text-white text-sm font-semibold">
+      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--blush-400)] text-white text-sm font-semibold">
         {step}
       </span>
       <h3
         className="text-xl font-medium text-[var(--text-primary)]"
-        style={{ fontFamily: 'var(--font-heading, Noto Serif KR), serif' }}
+        style={{ fontFamily: 'var(--font-heading), serif' }}
       >
         {title}
       </h3>

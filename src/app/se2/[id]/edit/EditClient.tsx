@@ -417,9 +417,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   }, [isDirty, isSaving, handleSave])
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--ivory-100)] text-[var(--text-primary)]">
+    <div className="h-screen flex flex-col bg-[var(--bg-warm)] text-[var(--text-primary)]">
       {/* 헤더 */}
-      <header className="flex-shrink-0 h-14 border-b border-[var(--sand-100)] bg-[var(--ivory-100)]/95 backdrop-blur-sm flex items-center justify-between px-4">
+      <header className="flex-shrink-0 h-14 border-b border-[var(--warm-100)] bg-[var(--bg-warm)]/95 backdrop-blur-sm flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Link
             href="/"
@@ -432,7 +432,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           {/* 저장 상태 표시 */}
           <div className="flex items-center gap-2 text-xs">
             {isSaving && (
-              <span className="text-[var(--sage-600)] flex items-center gap-1">
+              <span className="text-[var(--blush-500)] flex items-center gap-1">
                 <LoadingSpinner className="w-3 h-3" />
                 저장 중...
               </span>
@@ -441,7 +441,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               <span className="text-[var(--text-light)]">저장되지 않은 변경사항</span>
             )}
             {!isSaving && !isDirty && lastSaved && (
-              <span className="text-[var(--sage-500)]">
+              <span className="text-[var(--blush-400)]">
                 저장됨 {formatTime(lastSaved)}
               </span>
             )}
@@ -453,7 +453,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           {isDirty && (
             <button
               onClick={() => setShowDiscardDialog(true)}
-              className="px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sand-100)] transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--warm-100)] transition-colors"
             >
               취소
             </button>
@@ -467,8 +467,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
               flex items-center gap-2
               ${isDirty && !isSaving
-                ? 'bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)]'
-                : 'bg-[var(--sand-100)] text-[var(--text-light)] cursor-not-allowed'
+                ? 'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)]'
+                : 'bg-[var(--warm-100)] text-[var(--text-light)] cursor-not-allowed'
               }
             `}
           >
@@ -479,7 +479,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           {/* TODO: AI 편집 기능 비활성화 - 추후 재활성화 시 주석 해제
           <button
             onClick={() => setShowAIPrompt(true)}
-            className="px-3 py-1.5 rounded-lg text-sm bg-[var(--sage-100)] text-[var(--sage-700)] hover:bg-[var(--sage-200)] transition-colors flex items-center gap-2"
+            className="px-3 py-1.5 rounded-lg text-sm bg-[var(--blush-100)] text-[var(--blush-600)] hover:bg-[var(--blush-200)] transition-colors flex items-center gap-2"
           >
             <SparklesIcon className="w-4 h-4" />
             AI 편집
@@ -490,7 +490,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           <Link
             href={`/se2/${dbDocument.id}/preview`}
             target="_blank"
-            className="px-3 py-1.5 rounded-lg text-sm bg-white border border-[var(--sand-100)] text-[var(--text-primary)] hover:bg-[var(--ivory-50)] transition-colors"
+            className="px-3 py-1.5 rounded-lg text-sm bg-white border border-[var(--warm-100)] text-[var(--text-primary)] hover:bg-[var(--warm-50)] transition-colors"
           >
             미리보기
           </Link>
@@ -499,7 +499,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           {!dbDocument.isPaid && (
             <a
               href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
-              className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] transition-colors flex items-center gap-2"
+              className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)] transition-colors flex items-center gap-2"
             >
               <CreditCardIcon className="w-4 h-4" />
               발행하기
@@ -517,9 +517,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       {/* 메인 영역 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 에디터 패널 */}
-        <div className="w-[400px] flex-shrink-0 border-r border-[var(--sand-100)] bg-white flex flex-col">
+        <div className="w-[400px] flex-shrink-0 border-r border-[var(--warm-100)] bg-white flex flex-col">
           {/* 탭 네비게이션 */}
-          <div className="flex border-b border-[var(--sand-100)]">
+          <div className="flex border-b border-[var(--warm-100)]">
             {(['content', 'data', 'design', 'share'] as const).map((tab) => (
               <button
                 key={tab}
@@ -527,7 +527,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 className={`
                   flex-1 py-3 text-sm font-medium transition-colors
                   ${activeTab === tab
-                    ? 'text-[var(--sage-600)] border-b-2 border-[var(--sage-500)]'
+                    ? 'text-[var(--blush-500)] border-b-2 border-[var(--blush-400)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   }
                 `}
@@ -584,9 +584,9 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         {/* 프리뷰 + 프리셋 영역 */}
         <div className="flex-1 flex overflow-hidden">
           {/* 프리뷰 패널 */}
-          <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50">
+          <div className="flex-1 flex flex-col bg-[var(--warm-100)]/50">
             {/* 디바이스 선택 바 + 모드 토글 */}
-            <div className="flex-shrink-0 h-12 border-b border-[var(--sand-100)] bg-white flex items-center justify-between px-4">
+            <div className="flex-shrink-0 h-12 border-b border-[var(--warm-100)] bg-white flex items-center justify-between px-4">
               {/* TODO: 직접 편집 모드 비활성화 - 추후 재활성화 시 주석 해제
               <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
               */}
@@ -595,7 +595,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               <div className="relative" ref={deviceMenuRef}>
                 <button
                   onClick={() => setShowDeviceMenu(!showDeviceMenu)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--ivory-50)] hover:bg-[var(--sand-100)] transition-colors text-sm text-[var(--text-primary)]"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--warm-50)] hover:bg-[var(--warm-100)] transition-colors text-sm text-[var(--text-primary)]"
                 >
                   <DevicePhoneIcon className="w-4 h-4" />
                   <span>{selectedDevice.name}</span>
@@ -603,7 +603,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     {selectedDevice.width}×{selectedDevice.height}
                   </span>
                   {previewScale < 1 && (
-                    <span className="text-[var(--sage-600)] text-xs">
+                    <span className="text-[var(--blush-500)] text-xs">
                       {Math.round(previewScale * 100)}%
                     </span>
                   )}
@@ -611,7 +611,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 </button>
 
                 {showDeviceMenu && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-[var(--sand-100)] rounded-lg shadow-xl py-1 min-w-[200px] z-50">
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-[var(--warm-100)] rounded-lg shadow-xl py-1 min-w-[200px] z-50">
                     {DEVICE_PRESETS.map((device) => (
                       <button
                         key={device.id}
@@ -619,7 +619,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                           setSelectedDevice(device)
                           setShowDeviceMenu(false)
                         }}
-                        className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-[var(--ivory-50)] transition-colors ${selectedDevice.id === device.id ? 'text-[var(--sage-600)]' : 'text-[var(--text-primary)]'}`}
+                        className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-[var(--warm-50)] transition-colors ${selectedDevice.id === device.id ? 'text-[var(--blush-500)]' : 'text-[var(--text-primary)]'}`}
                       >
                         <span>{device.name}</span>
                         <span className="text-[var(--text-light)] text-xs">
@@ -733,7 +733,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       {/* 변경사항 취소 확인 다이얼로그 */}
       {showDiscardDialog && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white border border-[var(--sand-100)] rounded-xl p-6 max-w-sm mx-4 shadow-xl">
+          <div className="bg-white border border-[var(--warm-100)] rounded-xl p-6 max-w-sm mx-4 shadow-xl">
             <h3 className="text-lg font-medium mb-2 text-[var(--text-primary)]">변경사항을 취소하시겠습니까?</h3>
             <p className="text-[var(--text-muted)] text-sm mb-6">
               저장하지 않은 모든 변경사항이 삭제됩니다.
@@ -741,7 +741,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDiscardDialog(false)}
-                className="px-4 py-2 rounded-lg text-sm bg-[var(--sand-100)] hover:bg-[var(--sand-200)] text-[var(--text-primary)] transition-colors"
+                className="px-4 py-2 rounded-lg text-sm bg-[var(--warm-100)] hover:bg-[var(--warm-200)] text-[var(--text-primary)] transition-colors"
               >
                 계속 편집
               </button>
