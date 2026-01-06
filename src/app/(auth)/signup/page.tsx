@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 import { Button, Input, Card } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
+import { signUpWithEmail } from '@/lib/actions/auth'
 
 function SignupForm() {
   const router = useRouter()
@@ -38,29 +39,15 @@ function SignupForm() {
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-          },
-        },
-      })
+      // Use server action for signup (enables Slack notification)
+      const result = await signUpWithEmail(email, password, name)
 
-      if (signUpError) {
-        setError(signUpError.message)
+      if (!result.success) {
+        setError(result.error || '회원가입에 실패했습니다.')
         return
       }
 
-      if (data.user) {
-        if (data.user.identities && data.user.identities.length === 0) {
-          setError('이미 가입된 이메일입니다.')
-          return
-        }
-        router.push(redirectTo)
-      }
+      router.push(redirectTo)
     } catch {
       setError('회원가입에 실패했습니다. 다시 시도해주세요.')
     } finally {

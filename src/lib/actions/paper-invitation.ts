@@ -8,6 +8,7 @@ import {
   type PaperInvitationRequest,
 } from '@/lib/db/invitation-schema'
 import { createClient } from '@/lib/supabase/server'
+import { notifyPaperInvitationRequest } from '@/lib/slack'
 
 const BUCKET_NAME = 'paper-invitation-photos'
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -153,6 +154,16 @@ export async function submitPaperInvitationRequest(
         .set({ mainPhotoPath })
         .where(eq(paperInvitationRequests.id, request.id))
     }
+
+    // Slack 알림 발송 (비동기, 실패해도 신청 성공에 영향 없음)
+    notifyPaperInvitationRequest(
+      request.id,
+      phone,
+      email,
+      paperFiles.length,
+      estimatedCompletionDate,
+      !!notes
+    ).catch(console.error)
 
     return { success: true, data: request }
   } catch (error) {

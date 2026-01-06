@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { notifyRecommendationRequest } from '@/lib/slack'
 import { sendRecommendationCompleteEmail } from '@/lib/email-notification'
 import type { ApiResponse } from '@/types'
 import type { RestaurantData } from '@/types/database'
@@ -72,9 +71,6 @@ export async function requestRecommendation(eventId: string): Promise<ApiRespons
         error: { message: '추천 요청에 실패했습니다.' },
       }
     }
-
-    // Send Slack notification (quietly, user doesn't know)
-    await notifyRecommendationRequest(eventId, event.group_name, responseCount)
 
     return {
       data: true,

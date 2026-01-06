@@ -98,14 +98,13 @@ export async function notifyNewKakaoSignup(
   return await sendSlackNotification(message)
 }
 
-export async function notifyRecommendationRequest(
-  eventId: string,
-  groupName: string,
-  responseCount: number
+export async function notifyNewEmailSignup(
+  userId: string,
+  userEmail: string,
+  userName: string,
+  createdAt: string
 ): Promise<boolean> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  const adminUrl = `${baseUrl}/admin/${eventId}`
-  const now = new Date().toLocaleString('ko-KR', {
+  const now = new Date(createdAt).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
@@ -115,13 +114,13 @@ export async function notifyRecommendationRequest(
   })
 
   const message: SlackMessage = {
-    text: `🍽️ 새로운 식당 추천 요청`,
+    text: `📧 새로운 이메일 회원가입`,
     blocks: [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '🍽️ 새로운 식당 추천 요청',
+          text: '📧 새로운 이메일 회원가입',
         },
       },
       {
@@ -129,28 +128,101 @@ export async function notifyRecommendationRequest(
         fields: [
           {
             type: 'mrkdwn',
-            text: `*📋 그룹명:*\n${groupName}`,
+            text: `*👤 사용자 ID:*\n\`${userId}\``,
           },
           {
             type: 'mrkdwn',
-            text: `*👥 응답 수:*\n${responseCount}명`,
+            text: `*📧 이메일:*\n${userEmail}`,
           },
           {
             type: 'mrkdwn',
-            text: `*🆔 이벤트 ID:*\n\`${eventId}\``,
+            text: `*👋 이름:*\n${userName}`,
           },
           {
             type: 'mrkdwn',
-            text: `*⏰ 요청 시간:*\n${now}`,
+            text: `*⏰ 가입 시간:*\n${now}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*🔐 Provider:*\nEmail`,
           },
         ],
       },
       {
-        type: 'section',
+        type: 'divider',
+      },
+    ],
+  }
+
+  return await sendSlackNotification(message)
+}
+
+export async function notifyPaperInvitationRequest(
+  requestId: string,
+  phone: string,
+  email: string | null,
+  photoCount: number,
+  estimatedDate: Date,
+  hasNotes: boolean
+): Promise<boolean> {
+  const now = new Date().toLocaleString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  const estimatedDateStr = estimatedDate.toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+
+  const message: SlackMessage = {
+    text: `📜 새로운 종이 청첩장 신청`,
+    blocks: [
+      {
+        type: 'header',
         text: {
-          type: 'mrkdwn',
-          text: `<${adminUrl}|🔗 어드민 페이지에서 확인하기>`,
+          type: 'plain_text',
+          text: '📜 새로운 종이 청첩장 신청',
         },
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: `*🆔 신청 ID:*\n\`${requestId}\``,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📞 연락처:*\n${phone}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📧 이메일:*\n${email || '미입력'}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📸 첨부 사진:*\n${photoCount}장`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📅 예상 완료일:*\n${estimatedDateStr}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📝 특이사항:*\n${hasNotes ? '있음' : '없음'}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*⏰ 신청 시간:*\n${now}`,
+          },
+        ],
       },
       {
         type: 'divider',
