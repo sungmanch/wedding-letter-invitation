@@ -81,6 +81,30 @@
   --border-emphasis: #CCCCCC;
 
   /* ==========================================
+     Editor Panel Variables (Clean Neutral)
+     - No glassmorphism/backdrop-filter
+     - Opaque backgrounds for performance
+     ========================================== */
+
+  /* Panel Backgrounds */
+  --editor-bg: #FCFCFC;
+  --editor-surface: #FFFFFF;
+  --editor-surface-hover: #F8F8F8;
+
+  /* Panel Borders */
+  --editor-border: rgba(0, 0, 0, 0.06);
+  --editor-border-emphasis: rgba(0, 0, 0, 0.12);
+
+  /* Active/Selected State (Subtle Glow) */
+  --editor-active-bg: rgba(223, 160, 172, 0.08);
+  --editor-active-border: var(--blush-400);
+  --editor-active-glow: 0 0 0 3px rgba(223, 160, 172, 0.15);
+
+  /* Toggle Switch */
+  --toggle-off-bg: #E0E0E0;
+  --toggle-on-bg: var(--blush-400);
+
+  /* ==========================================
      Legacy Mappings (하위 호환)
      ========================================== */
 

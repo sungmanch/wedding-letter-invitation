@@ -16,7 +16,9 @@ import { useState, useCallback, useRef, type ChangeEvent } from 'react'
 import type { VariablePath, WeddingData } from '../../../schema/types'
 import { isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 import { VARIABLE_FIELD_CONFIG } from '../../../config/variable-field-config'
+import { SUGGESTIBLE_FIELDS } from '../../../config/greeting-suggestions'
 import { LocationSearchField } from './location-search-field'
+import { SuggestionPanel } from './suggestion-panel'
 import { bgmPresets, getBgmCategories, type BgmCategory } from '../../../audio/bgm-presets'
 
 // ============================================
@@ -46,6 +48,7 @@ export function VariableField({
   onLocationChange,
   data,
 }: VariableFieldProps) {
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
 
   // 라벨 결정: VARIABLE_FIELD_CONFIG 우선, 없으면 camelCase 변환 (custom 필드) 또는 binding 경로
@@ -85,13 +88,42 @@ export function VariableField({
       )}
 
       {type === 'textarea' && (
-        <textarea
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
-        />
+        <div className="relative">
+          {/* 추천 버튼 (추천 가능 필드만) */}
+          {SUGGESTIBLE_FIELDS.has(binding) && (
+            <button
+              type="button"
+              onClick={() => setShowSuggestions(true)}
+              className="absolute top-2 right-2 z-10 px-2 py-1 text-xs font-medium rounded-md
+                bg-[var(--blush-100)] text-[var(--blush-600)]
+                hover:bg-[var(--blush-200)] transition-colors"
+            >
+              추천 ✨
+            </button>
+          )}
+
+          <textarea
+            value={String(value ?? '')}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={4}
+            className={`w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none ${
+              SUGGESTIBLE_FIELDS.has(binding) ? 'pr-16' : ''
+            }`}
+          />
+
+          {/* 추천 패널 */}
+          {showSuggestions && (
+            <SuggestionPanel
+              binding={binding}
+              onSelect={(text) => {
+                onChange(text)
+                setShowSuggestions(false)
+              }}
+              onClose={() => setShowSuggestions(false)}
+            />
+          )}
+        </div>
       )}
 
       {type === 'date' && (

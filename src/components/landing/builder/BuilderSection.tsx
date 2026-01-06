@@ -44,7 +44,7 @@ export function BuilderSection() {
             className="text-3xl sm:text-4xl font-medium text-[var(--text-primary)] mb-4"
             style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            나만의 청첩장 만들기
+            나만의 모바일 청첩장 만들기
           </h2>
           <p className="text-lg text-[var(--text-muted)]">
             템플릿을 선택하고, 섹션별로 스타일을 커스터마이즈하세요

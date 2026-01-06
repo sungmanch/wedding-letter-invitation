@@ -68,7 +68,7 @@ export function EditorPanel({
   className = '',
 }: EditorPanelProps) {
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex flex-col h-full bg-[var(--editor-bg)] ${className}`}>
       {/* 탭 네비게이션 */}
       <TabNavigation activeTab={activeTab} onTabChange={onTabChange} />
 
@@ -117,15 +117,15 @@ function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   ]
 
   return (
-    <div className="flex border-b border-[var(--sand-100)] shrink-0">
+    <div className="flex border-b border-[var(--editor-border)] shrink-0 bg-[var(--editor-surface)]">
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors ${
             activeTab === tab.id
-              ? 'text-[var(--sage-600)] border-b-2 border-[var(--sage-500)] bg-[var(--sage-50)]'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sage-50)]'
+              ? 'text-[var(--blush-600)] border-b-2 border-[var(--blush-400)] bg-[var(--editor-active-bg)]'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--editor-surface-hover)]'
           }`}
         >
           {tab.icon}
@@ -159,14 +159,14 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   return (
     <div
-      className={`flex items-center justify-between px-4 py-2 border-b border-[var(--sand-100)] bg-white ${className}`}
+      className={`flex items-center justify-between px-4 py-2 border-b border-[var(--editor-border)] bg-[var(--editor-surface)] ${className}`}
     >
       {/* 왼쪽: Undo/Redo */}
       <div className="flex items-center gap-1">
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className="p-2 rounded-lg text-[var(--text-primary)] hover:bg-[var(--sage-50)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg text-[var(--text-primary)] hover:bg-[var(--editor-surface-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
           title="실행 취소"
         >
           <UndoIcon className="w-5 h-5" />
@@ -174,14 +174,14 @@ export function EditorToolbar({
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className="p-2 rounded-lg text-[var(--text-primary)] hover:bg-[var(--sage-50)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg text-[var(--text-primary)] hover:bg-[var(--editor-surface-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
           title="다시 실행"
         >
           <RedoIcon className="w-5 h-5" />
         </button>
 
         {dirty && (
-          <span className="ml-2 text-xs text-[var(--sage-600)]">저장되지 않음</span>
+          <span className="ml-2 text-xs text-[var(--blush-500)]">저장되지 않음</span>
         )}
       </div>
     </div>
@@ -239,10 +239,10 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-center gap-2 px-4 py-3 rounded-lg cursor-pointer transition-colors ${
+      className={`flex items-center gap-2 px-4 py-3 rounded-lg cursor-pointer transition-all border ${
         isVisible
-          ? 'bg-[var(--sage-100)] ring-2 ring-[var(--sage-400)]'
-          : 'bg-[var(--sand-100)] hover:bg-[var(--sage-100)]'
+          ? 'bg-[var(--editor-active-bg)] border-[var(--editor-active-border)] shadow-[var(--editor-active-glow)]'
+          : 'bg-[var(--editor-surface)] border-[var(--editor-border)] hover:bg-[var(--editor-surface-hover)] hover:border-[var(--editor-border-emphasis)]'
       } ${className}`}
       onClick={onExpand}
     >
@@ -256,7 +256,7 @@ export function SectionHeader({
 
       {/* 현재화면 뱃지 */}
       {isVisible && (
-        <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[var(--sage-500)] text-white">
+        <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[var(--blush-400)] text-white">
           현재화면
         </span>
       )}
@@ -308,11 +308,11 @@ function ToggleSwitch({ enabled, onChange }: ToggleSwitchProps) {
     <button
       onClick={onChange}
       className={`relative w-10 h-5 rounded-full transition-colors ${
-        enabled ? 'bg-[var(--sage-500)]' : 'bg-[var(--sand-200)]'
+        enabled ? 'bg-[var(--toggle-on-bg)]' : 'bg-[var(--toggle-off-bg)]'
       }`}
     >
       <span
-        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
           enabled ? 'left-5' : 'left-0.5'
         }`}
       />

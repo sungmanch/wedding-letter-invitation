@@ -296,12 +296,12 @@ function BlockDataSection({
   const label = BLOCK_TYPE_LABELS[block.type] || block.type
 
   return (
-    <div className="border border-[var(--warm-200)] rounded-lg overflow-hidden">
+    <div className="border border-[var(--editor-border)] rounded-lg overflow-hidden">
       {/* 헤더 */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-[var(--warm-50)] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--editor-surface)] hover:bg-[var(--editor-surface-hover)] transition-colors"
       >
         <span className="text-lg">{icon}</span>
         <span className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]">{label}</span>
@@ -311,7 +311,7 @@ function BlockDataSection({
 
       {/* 콘텐츠 */}
       {expanded && (
-        <div className="px-4 py-4 bg-[var(--warm-50)] border-t border-[var(--warm-100)] space-y-4">
+        <div className="px-4 py-4 bg-[var(--editor-bg)] border-t border-[var(--editor-border)] space-y-4">
           {editableFields.map((field) => (
             <VariableField
               key={field.binding}
@@ -344,12 +344,12 @@ interface SharedSectionProps {
 
 function SharedSection({ id, title, icon, expanded, onToggle, children }: SharedSectionProps) {
   return (
-    <div className="border border-[var(--warm-200)] rounded-lg overflow-hidden">
+    <div className="border border-[var(--editor-border)] rounded-lg overflow-hidden">
       {/* 헤더 */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--blush-50)] hover:bg-[var(--blush-100)] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--editor-surface)] hover:bg-[var(--editor-surface-hover)] transition-colors"
       >
         {icon && <span className="text-lg">{icon}</span>}
         <span className="flex-1 text-left text-sm font-semibold text-[var(--text-primary)]">{title}</span>
@@ -358,7 +358,7 @@ function SharedSection({ id, title, icon, expanded, onToggle, children }: Shared
 
       {/* 콘텐츠 */}
       {expanded && (
-        <div className="px-4 py-4 bg-white border-t border-[var(--warm-100)]">
+        <div className="px-4 py-4 bg-[var(--editor-bg)] border-t border-[var(--editor-border)]">
           {children}
         </div>
       )}

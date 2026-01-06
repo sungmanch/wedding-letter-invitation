@@ -196,7 +196,7 @@ function BlockAccordion({
   }, [block, data])
 
   return (
-    <div className="rounded-lg overflow-hidden">
+    <div className="rounded-lg overflow-hidden" data-accordion-block-id={block.id}>
       <SectionHeader
         blockType={block.type}
         label={BLOCK_TYPE_LABELS[block.type] || block.type}
@@ -214,7 +214,7 @@ function BlockAccordion({
 
       {/* 펼침 콘텐츠 */}
       {expanded && (
-        <div className="bg-[var(--warm-50)] p-4">
+        <div className="bg-[var(--editor-bg)] p-4 border-t border-[var(--editor-border)]">
           {editableFieldCount > 0 ? (
             <div className="space-y-3">
               <p className="text-sm text-[var(--text-muted)]">
@@ -254,10 +254,10 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="relative pt-4 border-t border-[var(--warm-100)] mt-4">
+    <div className="relative pt-4 border-t border-[var(--editor-border)] mt-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm text-[var(--blush-500)] bg-[var(--blush-50)] hover:bg-[var(--blush-100)] rounded-lg transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm text-[var(--blush-500)] bg-[var(--editor-surface)] border border-[var(--editor-border)] hover:bg-[var(--editor-surface-hover)] hover:border-[var(--editor-border-emphasis)] rounded-lg transition-all"
       >
         <PlusIcon className="w-4 h-4" />
         섹션 추가
@@ -265,7 +265,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-2 bg-white border border-[var(--warm-100)] rounded-lg shadow-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
+        <div className="absolute left-0 right-0 mt-2 bg-[var(--editor-surface)] border border-[var(--editor-border-emphasis)] rounded-lg shadow-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
           {availableTypes.map((type) => (
             <button
               key={type}
@@ -273,7 +273,7 @@ function AddBlockButton({ availableTypes, onAdd }: AddBlockButtonProps) {
                 onAdd(type)
                 setIsOpen(false)
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--blush-50)] transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--editor-surface-hover)] transition-colors"
             >
               <span className="text-lg">{BLOCK_TYPE_ICONS[type]}</span>
               <span className="text-sm text-[var(--text-primary)]">{BLOCK_TYPE_LABELS[type]}</span>
