@@ -35,6 +35,30 @@ export const BLOCK_PADDING_COMPACT = {
 } as const
 
 // ============================================
+// Block Divider Tokens
+// ============================================
+
+/** 블록 간 Divider 상하 여백 (px) */
+export const BLOCK_DIVIDER_SPACING = 48
+
+/** 기본 Divider ornament ID */
+export const BLOCK_DIVIDER_DEFAULT_ORNAMENT = 'heart-center' as const
+
+/** Divider ornament 옵션 */
+export const BLOCK_DIVIDER_ORNAMENTS = [
+  'heart-center',
+  'diamond-center',
+  'leaves',
+  'line-dots',
+  'flourish',
+  'wave',
+  'star-center',
+  'double-line',
+] as const
+
+export type BlockDividerOrnamentId = (typeof BLOCK_DIVIDER_ORNAMENTS)[number]
+
+// ============================================
 // Typography Tokens
 // ============================================
 

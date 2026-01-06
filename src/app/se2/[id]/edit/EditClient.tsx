@@ -11,7 +11,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
-import type { EditorDocument, Block, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
+import type { EditorDocument, Block, BlockType, Element, StyleSystem, WeddingData } from '@/lib/super-editor-v2/schema/types'
 import { updateDocument as saveToServer, updateOgMetadata, uploadImage } from '@/lib/super-editor-v2/actions/document'
 import { toEditorDocument } from '@/lib/super-editor-v2/utils/document-adapter'
 import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/renderer/style-resolver'
@@ -28,6 +28,10 @@ import { EditModeToggle, type EditMode } from '@/lib/super-editor-v2/components/
 import { EditableCanvas } from '@/lib/super-editor-v2/components/editor/direct/editable-canvas'
 import { StyledElementRenderer } from '@/lib/super-editor-v2/components/editor/direct/styled-element-renderer'
 import { PresetSidebar } from '@/lib/super-editor-v2/components/editor/ui/preset-sidebar'
+import { MobileHeaderMenu } from '@/lib/super-editor-v2/components/editor/ui/mobile-header-menu'
+import { MobileBottomNav, type MobileView } from '@/lib/super-editor-v2/components/editor/ui/mobile-bottom-nav'
+import { useMediaQuery } from '@/lib/super-editor-v2/hooks/useMediaQuery'
+import { RequestPresetModal } from '@/components/landing/builder/RequestPresetModal'
 import { useVisibleBlock } from '@/lib/super-editor-v2/hooks/useVisibleBlock'
 import { getBlockPreset, type PresetElement } from '@/lib/super-editor-v2/presets/blocks'
 import {
@@ -107,6 +111,15 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   const [editMode, setEditMode] = useState<EditMode>('form')
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+
+  // 프리셋 요청 모달 상태
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
+  const [requestBlockType, setRequestBlockType] = useState<BlockType | null>(null)
+
+  // 모바일 반응형 상태
+  const [mobileView, setMobileView] = useState<MobileView>('edit')
+  const isMobile = useMediaQuery('(max-width: 767px)')
+
   const deviceMenuRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -124,10 +137,15 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     blockIds: enabledBlockIds,
   })
 
-  // 프리셋 사이드바용: 현재 보이는 블록 (에디터 패널에 영향 없음)
+  // 프리셋 사이드바용: 현재 보이는 블록 (데스크톱 - 스크롤 기반)
   const visibleBlock = useMemo(() => {
     return editorDoc.blocks.find(b => b.id === visibleBlockId)
   }, [editorDoc.blocks, visibleBlockId])
+
+  // 모바일 프리셋용: 현재 펼쳐진 블록 (expandedBlockId 기반)
+  const expandedBlock = useMemo(() => {
+    return editorDoc.blocks.find(b => b.id === expandedBlockId)
+  }, [editorDoc.blocks, expandedBlockId])
 
   // 디바이스 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -176,6 +194,21 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     }, 0)
     return () => clearTimeout(timer)
   }, [editMode])
+
+  // 모바일에서 블록 편집 시 해당 아코디언으로 스크롤
+  useEffect(() => {
+    if (!expandedBlockId || !isMobile) return
+
+    // DOM 업데이트 후 스크롤
+    const timer = setTimeout(() => {
+      const accordion = document.querySelector(`[data-accordion-block-id="${expandedBlockId}"]`)
+      if (accordion) {
+        accordion.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [expandedBlockId, isMobile])
 
   // 스타일 해석 및 CSS 변수 생성
   const resolvedStyle = useMemo(() => resolveStyle(editorDoc.style), [editorDoc.style])
@@ -322,6 +355,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     })
   }, [updateDocument])
 
+  // 프리셋 요청 모달 열기
+  const handleRequestPreset = useCallback((blockType: BlockType) => {
+    setRequestBlockType(blockType)
+    setIsRequestModalOpen(true)
+  }, [])
+
   // 이미지 업로드 (즉시 서버 업로드)
   const handleUploadImage = useCallback(async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -405,109 +444,250 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   }, [isDirty, isSaving, handleSave])
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--ivory-100)] text-[var(--text-primary)]">
+    <div className="h-screen flex flex-col bg-[var(--bg-warm)] text-[var(--text-primary)]">
       {/* 헤더 */}
-      <header className="flex-shrink-0 h-14 border-b border-[var(--sand-100)] bg-[var(--ivory-100)]/95 backdrop-blur-sm flex items-center justify-between px-4">
-        <div className="flex items-center gap-4">
+      <header className="flex-shrink-0 h-12 md:h-14 border-b border-[var(--warm-100)] bg-[var(--bg-warm)]/95 backdrop-blur-sm">
+        {/* 모바일 헤더 */}
+        <div className="flex md:hidden items-center justify-between px-3 h-full">
           <Link
             href="/"
-            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            className="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
-            ← 돌아가기
+            <ChevronLeftIcon className="w-5 h-5" />
           </Link>
-          <h1 className="font-medium text-[var(--text-primary)]">{editorDoc.meta.title}</h1>
-
-          {/* 저장 상태 표시 */}
-          <div className="flex items-center gap-2 text-xs">
-            {isSaving && (
-              <span className="text-[var(--sage-600)] flex items-center gap-1">
-                <LoadingSpinner className="w-3 h-3" />
-                저장 중...
-              </span>
-            )}
-            {!isSaving && isDirty && (
-              <span className="text-[var(--text-light)]">저장되지 않은 변경사항</span>
-            )}
-            {!isSaving && !isDirty && lastSaved && (
-              <span className="text-[var(--sage-500)]">
-                저장됨 {formatTime(lastSaved)}
-              </span>
-            )}
+          <h1 className="flex-1 text-center text-sm font-medium truncate px-2 text-[var(--text-primary)]">
+            {editorDoc.meta.title}
+          </h1>
+          <div className="flex items-center gap-1">
+            {/* 저장 버튼 (아이콘만) */}
+            <button
+              onClick={handleSave}
+              disabled={!isDirty || isSaving}
+              className={`
+                p-2 rounded-lg transition-colors
+                ${isDirty && !isSaving
+                  ? 'text-[var(--blush-500)]'
+                  : 'text-[var(--text-light)]'
+                }
+              `}
+            >
+              {isSaving ? (
+                <LoadingSpinner className="w-5 h-5" />
+              ) : (
+                <SaveIcon className="w-5 h-5" />
+              )}
+            </button>
+            {/* 더보기 메뉴 */}
+            <MobileHeaderMenu
+              previewUrl={`/se2/${dbDocument.id}/preview`}
+              publishUrl={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
+              isPaid={dbDocument.isPaid}
+              isDirty={isDirty}
+              onDiscard={() => setShowDiscardDialog(true)}
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* 변경사항 취소 버튼 */}
-          {isDirty && (
+        {/* 데스크톱 헤더 */}
+        <div className="hidden md:flex items-center justify-between px-4 h-full">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              ← 돌아가기
+            </Link>
+            <h1 className="font-medium text-[var(--text-primary)]">{editorDoc.meta.title}</h1>
+
+            {/* 저장 상태 표시 */}
+            <div className="flex items-center gap-2 text-xs">
+              {isSaving && (
+                <span className="text-[var(--blush-500)] flex items-center gap-1">
+                  <LoadingSpinner className="w-3 h-3" />
+                  저장 중...
+                </span>
+              )}
+              {!isSaving && isDirty && (
+                <span className="text-[var(--text-light)]">저장되지 않은 변경사항</span>
+              )}
+              {!isSaving && !isDirty && lastSaved && (
+                <span className="text-[var(--blush-400)]">
+                  저장됨 {formatTime(lastSaved)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* 변경사항 취소 버튼 */}
+            {isDirty && (
+              <button
+                onClick={() => setShowDiscardDialog(true)}
+                className="px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--warm-100)] transition-colors"
+              >
+                취소
+              </button>
+            )}
+
+            {/* 저장 버튼 */}
             <button
-              onClick={() => setShowDiscardDialog(true)}
-              className="px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--sand-100)] transition-colors"
+              onClick={handleSave}
+              disabled={!isDirty || isSaving}
+              className={`
+                px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+                flex items-center gap-2
+                ${isDirty && !isSaving
+                  ? 'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)]'
+                  : 'bg-[var(--warm-100)] text-[var(--text-light)] cursor-not-allowed'
+                }
+              `}
             >
-              취소
+              <SaveIcon className="w-4 h-4" />
+              저장
             </button>
-          )}
 
-          {/* 저장 버튼 */}
-          <button
-            onClick={handleSave}
-            disabled={!isDirty || isSaving}
-            className={`
-              px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
-              flex items-center gap-2
-              ${isDirty && !isSaving
-                ? 'bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)]'
-                : 'bg-[var(--sand-100)] text-[var(--text-light)] cursor-not-allowed'
-              }
-            `}
-          >
-            <SaveIcon className="w-4 h-4" />
-            저장
-          </button>
-
-          {/* TODO: AI 편집 기능 비활성화 - 추후 재활성화 시 주석 해제
-          <button
-            onClick={() => setShowAIPrompt(true)}
-            className="px-3 py-1.5 rounded-lg text-sm bg-[var(--sage-100)] text-[var(--sage-700)] hover:bg-[var(--sage-200)] transition-colors flex items-center gap-2"
-          >
-            <SparklesIcon className="w-4 h-4" />
-            AI 편집
-          </button>
-          */}
-
-          {/* 미리보기 링크 */}
-          <Link
-            href={`/se2/${dbDocument.id}/preview`}
-            target="_blank"
-            className="px-3 py-1.5 rounded-lg text-sm bg-white border border-[var(--sand-100)] text-[var(--text-primary)] hover:bg-[var(--ivory-50)] transition-colors"
-          >
-            미리보기
-          </Link>
-
-          {/* 결제 버튼 */}
-          {!dbDocument.isPaid && (
-            <a
-              href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
-              className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--sage-500)] text-white hover:bg-[var(--sage-600)] transition-colors flex items-center gap-2"
+            {/* 미리보기 링크 */}
+            <Link
+              href={`/se2/${dbDocument.id}/preview`}
+              target="_blank"
+              className="px-3 py-1.5 rounded-lg text-sm bg-white border border-[var(--warm-100)] text-[var(--text-primary)] hover:bg-[var(--warm-50)] transition-colors"
             >
-              <CreditCardIcon className="w-4 h-4" />
-              결제하기
-            </a>
-          )}
-          {dbDocument.isPaid && (
-            <span className="px-3 py-1.5 rounded-lg text-sm bg-green-50 text-green-600 flex items-center gap-2">
-              <CheckIcon className="w-4 h-4" />
-              결제 완료
-            </span>
-          )}
+              미리보기
+            </Link>
+
+            {/* 발행 버튼 */}
+            {!dbDocument.isPaid && (
+              <a
+                href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
+                className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)] transition-colors flex items-center gap-2"
+              >
+                <CreditCardIcon className="w-4 h-4" />
+                발행하기
+              </a>
+            )}
+            {dbDocument.isPaid && (
+              <span className="px-3 py-1.5 rounded-lg text-sm bg-green-50 text-green-600 flex items-center gap-2">
+                <CheckIcon className="w-4 h-4" />
+                발행 완료
+              </span>
+            )}
+          </div>
         </div>
       </header>
 
       {/* 메인 영역 */}
       <div className="flex-1 flex overflow-hidden">
+        {/* 모바일: 단일 패널 + 하단 내비게이션 */}
+        <div className={`md:hidden flex-1 flex flex-col overflow-hidden ${isMobile ? 'pb-14' : ''}`}>
+          {mobileView === 'edit' && (
+            <div className="flex-1 flex flex-col bg-white overflow-hidden">
+              {/* 탭 네비게이션 - 모바일용 (아이콘 + 작은 텍스트) */}
+              <div className="flex border-b border-[var(--warm-100)] flex-shrink-0">
+                {(['content', 'data', 'design', 'share'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`
+                      flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors
+                      ${activeTab === tab
+                        ? 'text-[var(--blush-500)] border-b-2 border-[var(--blush-400)]'
+                        : 'text-[var(--text-muted)]'
+                      }
+                    `}
+                  >
+                    {tab === 'content' && <ContentTabIcon className="w-5 h-5" />}
+                    {tab === 'data' && <DataTabIcon className="w-5 h-5" />}
+                    {tab === 'design' && <DesignTabIcon className="w-5 h-5" />}
+                    {tab === 'share' && <ShareTabIcon className="w-5 h-5" />}
+                    <span className="text-[10px]">
+                      {tab === 'content' && '콘텐츠'}
+                      {tab === 'data' && '데이터'}
+                      {tab === 'design' && '디자인'}
+                      {tab === 'share' && '공유'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* 탭 콘텐츠 */}
+              <div className="flex-1 overflow-y-auto">
+                {activeTab === 'content' && (
+                  <ContentTab
+                    document={editorDoc}
+                    expandedBlockId={expandedBlockId}
+                    visibleBlockId={expandedBlockId}
+                    onExpandedBlockChange={setExpandedBlockId}
+                    onBlocksChange={handleBlocksChange}
+                    onDataChange={handleDataChange}
+                    onUploadImage={handleUploadImage}
+                    onTabChange={(tab) => setActiveTab(tab)}
+                  />
+                )}
+                {activeTab === 'data' && (
+                  <DataTab
+                    document={editorDoc}
+                    onDataChange={handleDataChange}
+                    onUploadImage={handleUploadImage}
+                    expandedSection={expandedBlockId}
+                    onExpandedSectionChange={setExpandedBlockId}
+                  />
+                )}
+                {activeTab === 'design' && (
+                  <DesignTab
+                    style={editorDoc.style}
+                    onStyleChange={handleStyleChange}
+                  />
+                )}
+                {activeTab === 'share' && (
+                  <ShareTab
+                    documentId={dbDocument.id}
+                    defaultOg={defaultOg}
+                    og={og}
+                    onOgChange={handleOgChange}
+                    shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {mobileView === 'preview' && (
+            <MobilePreviewPanel
+              editorDoc={editorDoc}
+              resolvedStyle={resolvedStyle}
+              cssVariables={cssVariables}
+              editMode={editMode}
+              expandedBlockId={expandedBlockId}
+              selectedElementId={selectedElementId}
+              handleBlockSelect={handleBlockSelect}
+              handleElementSelect={handleElementSelect}
+              handleElementUpdate={handleElementUpdate}
+              handleBlockHeightChange={handleBlockHeightChange}
+              onEditBlock={(blockId) => {
+                setExpandedBlockId(blockId)
+                setMobileView('edit')
+                setActiveTab('content')
+              }}
+            />
+          )}
+
+          {mobileView === 'preset' && (
+            <div className="flex-1 overflow-y-auto bg-[var(--editor-bg)]">
+              <PresetSidebar
+                visibleBlock={expandedBlock ?? null}
+                onPresetChange={handlePresetChange}
+                onRequestPreset={handleRequestPreset}
+                variant="mobile"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* 데스크톱: 3-패널 레이아웃 */}
         {/* 에디터 패널 */}
-        <div className="w-[400px] flex-shrink-0 border-r border-[var(--sand-100)] bg-white flex flex-col">
-          {/* 탭 네비게이션 */}
-          <div className="flex border-b border-[var(--sand-100)]">
+        <div className="hidden md:flex w-[400px] flex-shrink-0 border-r border-[var(--warm-100)] bg-white flex-col">
+          {/* 탭 네비게이션 - 데스크톱용 */}
+          <div className="flex border-b border-[var(--warm-100)]">
             {(['content', 'data', 'design', 'share'] as const).map((tab) => (
               <button
                 key={tab}
@@ -515,7 +695,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 className={`
                   flex-1 py-3 text-sm font-medium transition-colors
                   ${activeTab === tab
-                    ? 'text-[var(--sage-600)] border-b-2 border-[var(--sage-500)]'
+                    ? 'text-[var(--blush-500)] border-b-2 border-[var(--blush-400)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   }
                 `}
@@ -569,12 +749,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           </div>
         </div>
 
-        {/* 프리뷰 + 프리셋 영역 */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* 프리뷰 + 프리셋 영역 (데스크톱만) */}
+        <div className="hidden md:flex flex-1 overflow-hidden">
           {/* 프리뷰 패널 */}
-          <div className="flex-1 flex flex-col bg-[var(--sand-100)]/50">
+          <div className="flex-1 flex flex-col bg-[var(--warm-100)]/50">
             {/* 디바이스 선택 바 + 모드 토글 */}
-            <div className="flex-shrink-0 h-12 border-b border-[var(--sand-100)] bg-white flex items-center justify-between px-4">
+            <div className="flex-shrink-0 h-12 border-b border-[var(--warm-100)] bg-white flex items-center justify-between px-4">
               {/* TODO: 직접 편집 모드 비활성화 - 추후 재활성화 시 주석 해제
               <EditModeToggle mode={editMode} onChange={handleEditModeChange} size="sm" />
               */}
@@ -583,7 +763,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               <div className="relative" ref={deviceMenuRef}>
                 <button
                   onClick={() => setShowDeviceMenu(!showDeviceMenu)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--ivory-50)] hover:bg-[var(--sand-100)] transition-colors text-sm text-[var(--text-primary)]"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--warm-50)] hover:bg-[var(--warm-100)] transition-colors text-sm text-[var(--text-primary)]"
                 >
                   <DevicePhoneIcon className="w-4 h-4" />
                   <span>{selectedDevice.name}</span>
@@ -591,7 +771,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                     {selectedDevice.width}×{selectedDevice.height}
                   </span>
                   {previewScale < 1 && (
-                    <span className="text-[var(--sage-600)] text-xs">
+                    <span className="text-[var(--blush-500)] text-xs">
                       {Math.round(previewScale * 100)}%
                     </span>
                   )}
@@ -599,7 +779,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 </button>
 
                 {showDeviceMenu && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-[var(--sand-100)] rounded-lg shadow-xl py-1 min-w-[200px] z-50">
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-[var(--warm-100)] rounded-lg shadow-xl py-1 min-w-[200px] z-50">
                     {DEVICE_PRESETS.map((device) => (
                       <button
                         key={device.id}
@@ -607,7 +787,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                           setSelectedDevice(device)
                           setShowDeviceMenu(false)
                         }}
-                        className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-[var(--ivory-50)] transition-colors ${selectedDevice.id === device.id ? 'text-[var(--sage-600)]' : 'text-[var(--text-primary)]'}`}
+                        className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-[var(--warm-50)] transition-colors ${selectedDevice.id === device.id ? 'text-[var(--blush-500)]' : 'text-[var(--text-primary)]'}`}
                       >
                         <span>{device.name}</span>
                         <span className="text-[var(--text-light)] text-xs">
@@ -704,9 +884,19 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           <PresetSidebar
             visibleBlock={visibleBlock ?? null}
             onPresetChange={handlePresetChange}
+            onRequestPreset={handleRequestPreset}
           />
         </div>
       </div>
+
+      {/* 모바일 하단 내비게이션 */}
+      {isMobile && (
+        <MobileBottomNav
+          activeView={mobileView}
+          onViewChange={setMobileView}
+          isDirty={isDirty}
+        />
+      )}
 
       {/* AI 프롬프트 모달 */}
       <FloatingPromptInput
@@ -720,7 +910,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       {/* 변경사항 취소 확인 다이얼로그 */}
       {showDiscardDialog && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white border border-[var(--sand-100)] rounded-xl p-6 max-w-sm mx-4 shadow-xl">
+          <div className="bg-white border border-[var(--warm-100)] rounded-xl p-6 max-w-sm mx-4 shadow-xl">
             <h3 className="text-lg font-medium mb-2 text-[var(--text-primary)]">변경사항을 취소하시겠습니까?</h3>
             <p className="text-[var(--text-muted)] text-sm mb-6">
               저장하지 않은 모든 변경사항이 삭제됩니다.
@@ -728,7 +918,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDiscardDialog(false)}
-                className="px-4 py-2 rounded-lg text-sm bg-[var(--sand-100)] hover:bg-[var(--sand-200)] text-[var(--text-primary)] transition-colors"
+                className="px-4 py-2 rounded-lg text-sm bg-[var(--warm-100)] hover:bg-[var(--warm-200)] text-[var(--text-primary)] transition-colors"
               >
                 계속 편집
               </button>
@@ -742,7 +932,222 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
           </div>
         </div>
       )}
+
+      {/* 프리셋 요청 모달 */}
+      <RequestPresetModal
+        open={isRequestModalOpen}
+        onOpenChange={setIsRequestModalOpen}
+        sectionType={requestBlockType}
+      />
     </div>
+  )
+}
+
+// ============================================
+// Mobile Preview Panel Component
+// ============================================
+
+interface MobilePreviewPanelProps {
+  editorDoc: EditorDocument
+  resolvedStyle: ReturnType<typeof resolveStyle>
+  cssVariables: Record<string, string>
+  editMode: EditMode
+  expandedBlockId: string | null
+  selectedElementId: string | null
+  handleBlockSelect: (blockId: string) => void
+  handleElementSelect: (elementId: string | null, blockId?: string) => void
+  handleElementUpdate: (blockId: string, elementId: string, updates: Partial<Element>) => void
+  handleBlockHeightChange: (blockId: string, height: number) => void
+  onEditBlock: (blockId: string) => void
+}
+
+function MobilePreviewPanel({
+  editorDoc,
+  resolvedStyle,
+  cssVariables,
+  editMode,
+  expandedBlockId,
+  selectedElementId,
+  handleBlockSelect,
+  handleElementSelect,
+  handleElementUpdate,
+  handleBlockHeightChange,
+  onEditBlock,
+}: MobilePreviewPanelProps) {
+  // 모바일 프리뷰는 화면 전체를 사용
+  const MOBILE_WIDTH = 375
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight - 48 - 56 - 56 : 667 // header + tabs + bottom nav
+
+  // 모바일 전용 스크롤 컨테이너 ref
+  const mobileScrollRef = useRef<HTMLDivElement>(null)
+
+  // 활성화된 블록 ID 목록
+  const enabledBlockIds = useMemo(
+    () => editorDoc.blocks.filter(b => b.enabled).map(b => b.id),
+    [editorDoc.blocks]
+  )
+
+  // 모바일 프리뷰 전용 visible block 감지
+  const { visibleBlockId } = useVisibleBlock({
+    containerRef: mobileScrollRef,
+    blockIds: enabledBlockIds,
+  })
+
+  // 현재 보이는 블록 정보
+  const visibleBlock = editorDoc.blocks.find(b => b.id === visibleBlockId)
+  const blockLabel = visibleBlock
+    ? BLOCK_TYPE_LABELS_MOBILE[visibleBlock.type] || visibleBlock.type
+    : null
+
+  return (
+    <div className="flex-1 flex flex-col bg-[var(--warm-100)]/50 overflow-hidden relative">
+      <div
+        ref={mobileScrollRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden"
+        style={{
+          ...cssVariables,
+          backgroundColor: 'var(--bg-page)',
+          fontFamily: 'var(--font-body)',
+          color: 'var(--fg-default)',
+        }}
+      >
+        <DocumentProvider
+          document={editorDoc}
+          style={resolvedStyle}
+          viewportOverride={{
+            width: MOBILE_WIDTH,
+            height: viewportHeight,
+          }}
+        >
+          {editMode === 'form' && (
+            <DocumentRenderer
+              document={editorDoc}
+              mode="edit"
+              onBlockClick={handleBlockSelect}
+              skipProvider
+            />
+          )}
+
+          {editMode === 'direct' && (
+            <EditableCanvas
+              document={editorDoc}
+              selectedBlockId={expandedBlockId}
+              selectedElementId={selectedElementId}
+              onElementSelect={handleElementSelect}
+              onElementUpdate={handleElementUpdate}
+              onBlockHeightChange={handleBlockHeightChange}
+              canvasWidth={MOBILE_WIDTH}
+              canvasHeight={viewportHeight}
+              showIdBadge
+              disableScroll
+              renderElement={(element, block) => (
+                <StyledElementRenderer element={element} block={block} />
+              )}
+            />
+          )}
+        </DocumentProvider>
+      </div>
+
+      {/* 플로팅 블록 표시기 - fixed로 화면 기준 위치 */}
+      {visibleBlock && blockLabel && (
+        <button
+          onClick={() => onEditBlock(visibleBlock.id)}
+          className="
+            fixed bottom-[120px] left-1/2 -translate-x-1/2 z-40
+            px-4 py-2 rounded-full
+            bg-white/95 backdrop-blur-sm
+            border border-[var(--warm-200)]
+            shadow-lg
+            flex items-center gap-2
+            text-sm font-medium text-[var(--text-primary)]
+            active:scale-95 transition-transform
+            md:hidden
+          "
+        >
+          <span className="text-base">{BLOCK_TYPE_ICONS_MOBILE[visibleBlock.type]}</span>
+          <span>{blockLabel}</span>
+          <span className="text-[var(--blush-500)]">편집 →</span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// 블록 타입별 한글 이름 (모바일용)
+const BLOCK_TYPE_LABELS_MOBILE: Record<string, string> = {
+  hero: '메인',
+  'greeting-parents': '인사말/혼주',
+  profile: '신랑신부 소개',
+  interview: '인터뷰',
+  calendar: '예식일시',
+  gallery: '갤러리',
+  rsvp: '참석 여부',
+  location: '오시는길',
+  notice: '공지사항',
+  account: '축의금',
+  message: '방명록',
+  wreath: '화환 안내',
+  ending: '엔딩',
+  contact: '연락처',
+  music: 'BGM',
+  loading: '로딩',
+  custom: '커스텀',
+}
+
+// 블록 타입별 아이콘 (모바일용)
+const BLOCK_TYPE_ICONS_MOBILE: Record<string, string> = {
+  hero: '🖼️',
+  'greeting-parents': '💌',
+  profile: '👤',
+  interview: '💬',
+  calendar: '📅',
+  gallery: '🎨',
+  rsvp: '✅',
+  location: '📍',
+  notice: '📢',
+  account: '💳',
+  message: '💬',
+  wreath: '💐',
+  ending: '🎬',
+  contact: '📞',
+  music: '🎵',
+  loading: '⏳',
+  custom: '🔧',
+}
+
+// ============================================
+// Tab Icons
+// ============================================
+
+function ContentTabIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  )
+}
+
+function DataTabIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  )
+}
+
+function DesignTabIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+    </svg>
+  )
+}
+
+function ShareTabIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+    </svg>
   )
 }
 
@@ -805,6 +1210,14 @@ function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  )
+}
+
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
     </svg>
   )
 }

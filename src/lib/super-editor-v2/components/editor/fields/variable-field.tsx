@@ -12,11 +12,13 @@
  * - BgmSelectorField: 배경음악 선택
  */
 
-import { useState, useCallback, useRef, type ChangeEvent } from 'react'
+import { useState, useCallback, useRef, useEffect, type ChangeEvent } from 'react'
 import type { VariablePath, WeddingData } from '../../../schema/types'
 import { isCustomVariablePath, getCustomVariableKey } from '../../../utils/binding-resolver'
 import { VARIABLE_FIELD_CONFIG } from '../../../config/variable-field-config'
+import { SUGGESTIBLE_FIELDS } from '../../../config/greeting-suggestions'
 import { LocationSearchField } from './location-search-field'
+import { SuggestionPanel } from './suggestion-panel'
 import { bgmPresets, getBgmCategories, type BgmCategory } from '../../../audio/bgm-presets'
 
 // ============================================
@@ -46,6 +48,9 @@ export function VariableField({
   onLocationChange,
   data,
 }: VariableFieldProps) {
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const fieldConfig = VARIABLE_FIELD_CONFIG[binding]
 
   // 라벨 결정: VARIABLE_FIELD_CONFIG 우선, 없으면 camelCase 변환 (custom 필드) 또는 binding 경로
@@ -70,9 +75,41 @@ export function VariableField({
   const type = fieldConfig?.type ?? 'text'
   const placeholder = fieldConfig?.placeholder
 
+  // 추천 버튼 표시 여부
+  const showSuggestionButton = type === 'textarea' && SUGGESTIBLE_FIELDS.has(binding)
+
+  // 추천 패널 열기
+  const handleOpenSuggestions = useCallback(() => {
+    if (buttonRef.current) {
+      setButtonRect(buttonRef.current.getBoundingClientRect())
+    }
+    setShowSuggestions(true)
+  }, [])
+
+  // 추천 패널 닫기
+  const handleCloseSuggestions = useCallback(() => {
+    setShowSuggestions(false)
+    setButtonRect(null)
+  }, [])
+
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-[var(--text-body)]">{label}</label>
+      {/* 라벨 + 추천 버튼 */}
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-[var(--text-body)]">{label}</label>
+        {showSuggestionButton && (
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={handleOpenSuggestions}
+            className="px-2 py-1 text-xs font-medium rounded-md
+              bg-[var(--blush-100)] text-[var(--blush-600)]
+              hover:bg-[var(--blush-200)] transition-colors"
+          >
+            추천 ✨
+          </button>
+        )}
+      </div>
 
       {type === 'text' && (
         <input
@@ -85,13 +122,28 @@ export function VariableField({
       )}
 
       {type === 'textarea' && (
-        <textarea
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
-        />
+        <>
+          <textarea
+            value={String(value ?? '')}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={4}
+            className="w-full px-3 py-2 bg-white border border-[var(--sand-100)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--sage-500)] resize-none"
+          />
+
+          {/* 추천 패널 (Portal로 body에 렌더링) */}
+          {showSuggestions && (
+            <SuggestionPanel
+              binding={binding}
+              anchorRect={buttonRect}
+              onSelect={(text) => {
+                onChange(text)
+                handleCloseSuggestions()
+              }}
+              onClose={handleCloseSuggestions}
+            />
+          )}
+        </>
       )}
 
       {type === 'date' && (

@@ -54,7 +54,7 @@ export function ValueProps() {
   const { saveAndCreateDocument, isCreating } = useSubwayBuilder()
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-[var(--ivory-50)]">
+    <section className="py-20 bg-gradient-to-b from-white to-[var(--bg-warm)]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
         <motion.div
@@ -64,12 +64,12 @@ export function ValueProps() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-[var(--sage-100)] text-[var(--sage-700)] text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-[var(--blush-100)] text-[var(--blush-600)] text-sm font-medium mb-4">
             왜 Maison de Letter인가요?
           </span>
           <h2
             className="text-3xl sm:text-4xl font-medium text-[var(--text-primary)] mb-4"
-            style={{ fontFamily: 'var(--font-heading, Noto Serif KR), serif' }}
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
             쉽고 빠르게, 아름답게
           </h2>
@@ -89,10 +89,10 @@ export function ValueProps() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="relative group"
             >
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--sand-100)] hover:shadow-md hover:border-[var(--sage-200)] transition-all duration-300">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--warm-100)] hover:shadow-md hover:border-[var(--blush-200)] transition-all duration-300">
                 {/* 아이콘 */}
-                <div className="w-14 h-14 rounded-xl bg-[var(--sage-100)] flex items-center justify-center mb-6 group-hover:bg-[var(--sage-200)] transition-colors">
-                  <prop.icon className="w-7 h-7 text-[var(--sage-600)]" />
+                <div className="w-14 h-14 rounded-xl bg-[var(--blush-100)] flex items-center justify-center mb-6 group-hover:bg-[var(--blush-200)] transition-colors">
+                  <prop.icon className="w-7 h-7 text-[var(--blush-500)]" />
                 </div>
 
                 {/* 텍스트 */}
@@ -115,13 +115,13 @@ export function ValueProps() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-4 px-8 py-6 rounded-2xl bg-white border border-[var(--sage-200)] shadow-sm">
+          <div className="inline-flex items-center gap-4 px-8 py-6 rounded-2xl bg-white border border-[var(--blush-200)] shadow-sm">
             <div className="text-left">
               <p className="text-sm text-[var(--text-muted)] mb-1">
                 프리미엄 청첩장
               </p>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-[var(--sage-600)]">
+                <span className="text-3xl font-bold text-[var(--blush-500)]">
                   $15
                 </span>
                 <span className="text-sm text-[var(--text-light)] line-through">
@@ -129,9 +129,9 @@ export function ValueProps() {
                 </span>
               </div>
             </div>
-            <div className="w-px h-12 bg-[var(--sand-200)]" />
+            <div className="w-px h-12 bg-[var(--warm-200)]" />
             <div className="text-left">
-              <p className="text-xs text-[var(--sage-600)] font-medium mb-1">
+              <p className="text-xs text-[var(--blush-500)] font-medium mb-1">
                 무료 기능
               </p>
               <p className="text-sm text-[var(--text-muted)]">
@@ -150,7 +150,7 @@ export function ValueProps() {
           className="text-center mb-12"
         >
           <Button
-            variant="sage"
+            variant="rose"
             size="lg"
             onClick={saveAndCreateDocument}
             disabled={isCreating}
@@ -187,7 +187,7 @@ export function ValueProps() {
               key={badge.text}
               className="flex items-center gap-2 text-sm text-[var(--text-light)]"
             >
-              <badge.icon className="w-4 h-4 text-[var(--sage-500)]" />
+              <badge.icon className="w-4 h-4 text-[var(--blush-400)]" />
               <span>{badge.text}</span>
             </div>
           ))}

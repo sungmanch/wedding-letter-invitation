@@ -148,7 +148,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#FFB6C1',
+  themeColor: '#DFA0AC', // Blush-400 (새 브랜드 컬러)
 }
 
 export default function RootLayout({
@@ -177,15 +177,20 @@ export default function RootLayout({
           type="text/css"
           href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css"
         />
-        {/* Pretendard - jsDelivr CDN */}
+        {/* Pretendard - jsDelivr CDN (Legacy) */}
         <link
           rel="stylesheet"
           as="style"
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
+        {/* 새 폰트: Cormorant Garamond, Playfair Display, DM Sans */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="font-sans min-h-screen bg-background text-foreground antialiased">
         <AuthProvider>
           <div className="wedding-desktop-container min-h-screen">{children}</div>
         </AuthProvider>

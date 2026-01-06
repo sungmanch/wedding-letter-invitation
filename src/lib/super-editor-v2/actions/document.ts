@@ -119,6 +119,71 @@ export async function listDocuments(): Promise<EditorDocumentV2[]> {
 }
 
 /**
+ * 사용자의 가장 최근 draft 문서 조회 (1개만)
+ * 사용자당 draft는 1개만 유지하는 정책
+ */
+export async function getUserDraft(): Promise<EditorDocumentV2 | null> {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    return null // 비로그인 상태는 null 반환
+  }
+
+  const draft = await db.query.editorDocumentsV2.findFirst({
+    where: and(
+      eq(editorDocumentsV2.userId, user.id),
+      eq(editorDocumentsV2.status, 'draft')
+    ),
+    orderBy: [desc(editorDocumentsV2.updatedAt)],
+  })
+
+  return draft ?? null
+}
+
+/**
+ * 기존 draft를 새 템플릿으로 덮어쓰기
+ * 사용자당 1개의 draft만 유지하는 정책을 위해 사용
+ */
+export async function replaceDraftWithTemplate(
+  draftId: string,
+  data: {
+    title?: string
+    blocks: Block[]
+    style: StyleSystem
+    animation: GlobalAnimation
+    weddingData: WeddingData
+  }
+): Promise<EditorDocumentV2 | null> {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
+  }
+
+  const [updated] = await db
+    .update(editorDocumentsV2)
+    .set({
+      title: data.title ?? '새 청첩장',
+      blocks: data.blocks,
+      style: data.style,
+      animation: data.animation,
+      data: data.weddingData,
+      updatedAt: new Date(),
+      documentVersion: sql`document_version + 1`,
+    })
+    .where(and(
+      eq(editorDocumentsV2.id, draftId),
+      eq(editorDocumentsV2.userId, user.id),
+      eq(editorDocumentsV2.status, 'draft')
+    ))
+    .returning()
+
+  return updated ?? null
+}
+
+/**
  * 문서 삭제
  */
 export async function deleteDocument(documentId: string): Promise<boolean> {
@@ -505,7 +570,10 @@ export async function restoreSnapshot(
       updatedAt: new Date(),
       documentVersion: sql`document_version + 1`,
     })
-    .where(eq(editorDocumentsV2.id, documentId))
+    .where(and(
+      eq(editorDocumentsV2.id, documentId),
+      eq(editorDocumentsV2.userId, user.id)
+    ))
     .returning()
 
   return updated ?? null
