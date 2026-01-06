@@ -393,19 +393,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     })
   }, [dbDocument.id])
 
-  // OG 업데이트 (즉시 서버 저장)
-  const handleOgChange = useCallback(async (newOg: OgMetadata) => {
+  // OG 업데이트 (로컬 상태만, 저장 버튼으로 서버 동기화)
+  const handleOgChange = useCallback((newOg: OgMetadata) => {
     setOg(newOg)
-    try {
-      await updateOgMetadata(dbDocument.id, {
-        ogTitle: newOg.title,
-        ogDescription: newOg.description,
-        ogImageUrl: newOg.imageUrl || undefined,
-      })
-    } catch (error) {
-      console.error('Failed to save OG:', error)
-    }
-  }, [dbDocument.id])
+    setOgDirty(true)
+  }, [])
 
   // OG 기본값
   const defaultOg = useMemo(() => {
@@ -417,10 +409,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     }
   }, [editorDoc.data])
 
-  // OG 이미지 스타일 변경 핸들러 (즉시 이미지 생성 및 미리보기 반영)
+  // OG 이미지 스타일 변경 핸들러 (이미지 생성 및 미리보기 반영, 서버 저장은 저장 버튼에서)
   const [isGeneratingOgImage, setIsGeneratingOgImage] = useState(false)
   const handleOgImageStyleChange = useCallback(async (style: OgImageStyle) => {
     setOgImageStyle(style)
+    setOgDirty(true)
 
     // custom 모드는 이미지 생성 안함
     if (style === 'custom') {
@@ -440,21 +433,15 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
       }
 
       if (ogBase64) {
-        // 업로드
+        // 업로드 (이미지는 미리 업로드하여 미리보기에 표시)
         const result = await uploadImage(dbDocument.id, {
           data: ogBase64,
           filename: 'og-image.jpg',
           mimeType: 'image/jpeg',
         })
         if (result.success && result.url) {
-          // OG 메타데이터 업데이트 (서버에도 즉시 저장)
-          const newOg = { ...og, imageUrl: result.url }
-          setOg(newOg)
-          await updateOgMetadata(dbDocument.id, {
-            ogTitle: newOg.title || undefined,
-            ogDescription: newOg.description || undefined,
-            ogImageUrl: result.url,
-          })
+          // 로컬 상태만 업데이트 (서버 저장은 저장 버튼에서)
+          setOg(prev => ({ ...prev, imageUrl: result.url ?? null }))
         }
       }
     } catch (error) {
@@ -462,7 +449,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     } finally {
       setIsGeneratingOgImage(false)
     }
-  }, [editorDoc.blocks, editorDoc.data, dbDocument.id, og])
+  }, [editorDoc.blocks, editorDoc.data, dbDocument.id])
 
   // AI 프롬프트 제출
   const handleAISubmit = useCallback(async (prompt: string) => {
@@ -473,73 +460,49 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 저장 핸들러
   const handleSave = useCallback(async () => {
     try {
-      // OG 이미지 스타일에 따라 이미지 생성
-      if (ogImageStyle === 'auto' || ogImageStyle === 'default' || ogImageStyle === 'celebration') {
-        try {
-          let ogBase64: string | null = null
-
-          if (ogImageStyle === 'auto') {
-            // Hero 이미지 크롭
-            ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
-          } else if (ogImageStyle === 'default') {
-            // 텍스트 기반 기본 이미지
-            ogBase64 = generateDefaultOgImage(editorDoc.data)
-          } else if (ogImageStyle === 'celebration') {
-            // 축하 빵빠레 이미지
-            ogBase64 = generateCelebrationOgImage(editorDoc.data)
-          }
-
-          if (ogBase64) {
-            // 업로드
-            const result = await uploadImage(dbDocument.id, {
-              data: ogBase64,
-              filename: 'og-image.jpg',
-              mimeType: 'image/jpeg',
-            })
-            if (result.success && result.url) {
-              // OG 메타데이터 업데이트
-              const newOg = { ...og, imageUrl: result.url }
-              setOg(newOg)
-              await updateOgMetadata(dbDocument.id, {
-                ogTitle: newOg.title || undefined,
-                ogDescription: newOg.description || undefined,
-                ogImageUrl: result.url,
-              })
-            }
-          }
-        } catch (ogError) {
-          console.warn('OG 이미지 생성 실패:', ogError)
-          // OG 생성 실패해도 저장은 계속 진행
-        }
+      // OG 메타데이터 저장 (변경된 경우)
+      if (ogDirty) {
+        await updateOgMetadata(dbDocument.id, {
+          ogTitle: og.title || undefined,
+          ogDescription: og.description || undefined,
+          ogImageUrl: og.imageUrl || undefined,
+        })
+        setOgDirty(false)
+        initialOgRef.current = og
       }
-      // ogImageStyle === 'custom'인 경우는 사용자가 직접 업로드한 이미지를 사용 (별도 처리 없음)
 
       await save()
     } catch (error) {
       console.error('Failed to save:', error)
       alert('저장에 실패했습니다. 다시 시도해주세요.')
     }
-  }, [save, ogImageStyle, editorDoc.blocks, editorDoc.data, dbDocument.id, og])
+  }, [save, ogDirty, og, dbDocument.id])
 
   // 변경사항 취소
   const handleDiscard = useCallback(() => {
     discardChanges()
+    // OG도 초기 상태로 복원
+    setOg(initialOgRef.current)
+    setOgDirty(false)
     setShowDiscardDialog(false)
   }, [discardChanges])
+
+  // 통합 dirty 상태 (문서 또는 OG 변경)
+  const hasChanges = isDirty || ogDirty
 
   // 키보드 단축키 (Cmd/Ctrl + S)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-        if (isDirty && !isSaving) {
+        if (hasChanges && !isSaving) {
           handleSave()
         }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isDirty, isSaving, handleSave])
+  }, [hasChanges, isSaving, handleSave])
 
   return (
     <div className="h-screen flex flex-col bg-[var(--bg-warm)] text-[var(--text-primary)]">
@@ -560,10 +523,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {/* 저장 버튼 */}
             <button
               onClick={handleSave}
-              disabled={!isDirty || isSaving}
+              disabled={!hasChanges || isSaving}
               className={`
                 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                ${isDirty && !isSaving
+                ${hasChanges && !isSaving
                   ? 'bg-[var(--blush-400)] text-white'
                   : 'text-[var(--text-light)]'
                 }
@@ -580,7 +543,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               previewUrl={`/se2/${dbDocument.id}/preview`}
               publishUrl={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
               isPaid={dbDocument.isPaid}
-              isDirty={isDirty}
+              isDirty={hasChanges}
               onDiscard={() => setShowDiscardDialog(true)}
             />
           </div>
@@ -605,10 +568,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                   저장 중...
                 </span>
               )}
-              {!isSaving && isDirty && (
+              {!isSaving && hasChanges && (
                 <span className="text-[var(--text-light)]">저장되지 않은 변경사항</span>
               )}
-              {!isSaving && !isDirty && lastSaved && (
+              {!isSaving && !hasChanges && lastSaved && (
                 <span className="text-[var(--blush-400)]">
                   저장됨 {formatTime(lastSaved)}
                 </span>
@@ -618,7 +581,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
 
           <div className="flex items-center gap-2">
             {/* 변경사항 취소 버튼 */}
-            {isDirty && (
+            {hasChanges && (
               <button
                 onClick={() => setShowDiscardDialog(true)}
                 className="px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--warm-100)] transition-colors"
@@ -630,11 +593,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {/* 저장 버튼 */}
             <button
               onClick={handleSave}
-              disabled={!isDirty || isSaving}
+              disabled={!hasChanges || isSaving}
               className={`
                 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
                 flex items-center gap-2
-                ${isDirty && !isSaving
+                ${hasChanges && !isSaving
                   ? 'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)]'
                   : 'bg-[var(--warm-100)] text-[var(--text-light)] cursor-not-allowed'
                 }
