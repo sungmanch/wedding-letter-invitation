@@ -20,7 +20,7 @@ import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-render
 import { ContentTab } from '@/lib/super-editor-v2/components/editor/tabs/content-tab'
 import { DataTab } from '@/lib/super-editor-v2/components/editor/tabs/data-tab'
 import { DesignTab } from '@/lib/super-editor-v2/components/editor/tabs/design-tab'
-import { ShareTab, type OgMetadata } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
+import { ShareTab, type OgMetadata, type OgImageStyle } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
 import { FloatingPromptInput } from '@/lib/super-editor-v2/components/editor/ai/prompt-input'
 import { useAIEdit } from '@/lib/super-editor-v2/hooks/useAIEdit'
 import { useLocalStorage } from '@/lib/super-editor-v2/hooks/useLocalStorage'
@@ -41,7 +41,7 @@ import {
 import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
-import { generateOgImageFromHero } from '@/lib/super-editor-v2/utils/og-image-generator'
+import { generateOgImageFromHero, generateDefaultOgImage } from '@/lib/super-editor-v2/utils/og-image-generator'
 
 // ============================================
 // Types
@@ -102,8 +102,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     imageUrl: dbDocument.ogImageUrl || null,
   }))
 
-  // OG 이미지 자동 생성 활성화 (기본값: true)
-  const [autoGenerateOgImage, setAutoGenerateOgImage] = useState(true)
+  // OG 이미지 스타일 (auto: Hero 크롭, default: 텍스트, custom: 직접 업로드)
+  const [ogImageStyle, setOgImageStyle] = useState<OgImageStyle>('auto')
 
   // UI 상태
   const [activeTab, setActiveTab] = useState<TabType>('content')
@@ -420,10 +420,19 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 저장 핸들러
   const handleSave = useCallback(async () => {
     try {
-      // OG 이미지 자동 생성
-      if (autoGenerateOgImage) {
+      // OG 이미지 스타일에 따라 이미지 생성
+      if (ogImageStyle === 'auto' || ogImageStyle === 'default') {
         try {
-          const ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
+          let ogBase64: string | null = null
+
+          if (ogImageStyle === 'auto') {
+            // Hero 이미지 크롭
+            ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
+          } else if (ogImageStyle === 'default') {
+            // 텍스트 기반 기본 이미지
+            ogBase64 = generateDefaultOgImage(editorDoc.data)
+          }
+
           if (ogBase64) {
             // 업로드
             const result = await uploadImage(dbDocument.id, {
@@ -443,17 +452,18 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             }
           }
         } catch (ogError) {
-          console.warn('OG 이미지 자동 생성 실패:', ogError)
+          console.warn('OG 이미지 생성 실패:', ogError)
           // OG 생성 실패해도 저장은 계속 진행
         }
       }
+      // ogImageStyle === 'custom'인 경우는 사용자가 직접 업로드한 이미지를 사용 (별도 처리 없음)
 
       await save()
     } catch (error) {
       console.error('Failed to save:', error)
       alert('저장에 실패했습니다. 다시 시도해주세요.')
     }
-  }, [save, autoGenerateOgImage, editorDoc.blocks, dbDocument.id, og])
+  }, [save, ogImageStyle, editorDoc.blocks, editorDoc.data, dbDocument.id, og])
 
   // 변경사항 취소
   const handleDiscard = useCallback(() => {
@@ -776,8 +786,8 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 og={og}
                 onOgChange={handleOgChange}
                 shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
-                autoGenerateOgImage={autoGenerateOgImage}
-                onAutoGenerateOgImageChange={setAutoGenerateOgImage}
+                ogImageStyle={ogImageStyle}
+                onOgImageStyleChange={setOgImageStyle}
               />
             )}
           </div>

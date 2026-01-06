@@ -19,6 +19,9 @@ export interface OgMetadata {
   imageUrl: string | null
 }
 
+/** OG 이미지 스타일 타입 */
+export type OgImageStyle = 'auto' | 'default' | 'custom'
+
 export interface ShareTabProps {
   /** 문서 ID */
   documentId: string
@@ -40,10 +43,10 @@ export interface ShareTabProps {
   onImageUpload?: (file: File) => Promise<string>
   /** 브랜치 여부 (true면 BranchManager 숨김) */
   isBranch?: boolean
-  /** OG 이미지 자동 생성 활성화 여부 */
-  autoGenerateOgImage?: boolean
-  /** OG 이미지 자동 생성 토글 콜백 */
-  onAutoGenerateOgImageChange?: (enabled: boolean) => void
+  /** OG 이미지 스타일 */
+  ogImageStyle?: OgImageStyle
+  /** OG 이미지 스타일 변경 콜백 */
+  onOgImageStyleChange?: (style: OgImageStyle) => void
   /** 추가 className */
   className?: string
 }
@@ -61,8 +64,8 @@ export function ShareTab({
   onGenerateShareUrl,
   onImageUpload,
   isBranch = false,
-  autoGenerateOgImage = true,
-  onAutoGenerateOgImageChange,
+  ogImageStyle = 'auto',
+  onOgImageStyleChange,
   className = '',
 }: ShareTabProps) {
   const [copySuccess, setCopySuccess] = useState(false)
@@ -159,65 +162,62 @@ export function ShareTab({
             </div>
 
             {/* OG 이미지 */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-[var(--text-secondary)]">
-                  대표 이미지
-                </label>
-                {/* 자동 생성 토글 */}
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <span className="text-xs text-[var(--text-muted)]">저장 시 자동 생성</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={autoGenerateOgImage}
-                    onClick={() => onAutoGenerateOgImageChange?.(!autoGenerateOgImage)}
-                    className={`relative w-9 h-5 rounded-full transition-colors ${
-                      autoGenerateOgImage ? 'bg-[var(--sage-500)]' : 'bg-[var(--sand-200)]'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                        autoGenerateOgImage ? 'left-[18px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </label>
-              </div>
-              <p className="text-xs text-[var(--text-light)] mb-2">
-                {autoGenerateOgImage
-                  ? '저장 시 Hero 이미지를 1200×630 비율로 자동 생성합니다.'
-                  : '권장 크기: 1200 x 630px (1.91:1 비율)'}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-[var(--text-secondary)]">
+                대표 이미지
+              </label>
+
+              {/* 스타일 선택 드롭다운 */}
+              <select
+                value={ogImageStyle}
+                onChange={(e) => onOgImageStyleChange?.(e.target.value as OgImageStyle)}
+                className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent"
+              >
+                <option value="auto">자동 생성 (Hero 이미지)</option>
+                <option value="default">기본 이미지 (이름 텍스트)</option>
+                <option value="custom">직접 업로드</option>
+              </select>
+
+              {/* 스타일별 설명 */}
+              <p className="text-xs text-[var(--text-light)]">
+                {ogImageStyle === 'auto' && '저장 시 Hero 이미지를 1200×630 비율로 자동 크롭합니다.'}
+                {ogImageStyle === 'default' && '저장 시 신랑❤️신부 텍스트가 있는 기본 이미지를 생성합니다.'}
+                {ogImageStyle === 'custom' && '직접 이미지를 업로드하세요. 권장: 1200×630px'}
               </p>
 
-              {og.imageUrl ? (
-                <div className="relative aspect-[1.91/1] bg-[var(--sand-100)] rounded-lg overflow-hidden border border-[var(--sand-200)]">
-                  <img src={og.imageUrl} alt="OG Preview" className="w-full h-full object-cover" />
-                  <button
-                    onClick={handleImageRemove}
-                    className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
-                  >
-                    <XIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full aspect-[1.91/1] flex flex-col items-center justify-center gap-2 bg-[var(--ivory-50)] border-2 border-dashed border-[var(--sand-200)] rounded-lg text-[var(--text-muted)] hover:bg-[var(--sand-100)] hover:border-[var(--sage-400)] transition-colors disabled:opacity-50"
-                >
-                  {uploading ? (
-                    <>
-                      <LoadingSpinner className="w-6 h-6" />
-                      <span className="text-sm">업로드 중...</span>
-                    </>
+              {/* 커스텀 모드일 때만 업로드 영역 표시 */}
+              {ogImageStyle === 'custom' && (
+                <>
+                  {og.imageUrl ? (
+                    <div className="relative aspect-[1.91/1] bg-[var(--sand-100)] rounded-lg overflow-hidden border border-[var(--sand-200)]">
+                      <img src={og.imageUrl} alt="OG Preview" className="w-full h-full object-cover" />
+                      <button
+                        onClick={handleImageRemove}
+                        className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+                      >
+                        <XIcon className="w-4 h-4" />
+                      </button>
+                    </div>
                   ) : (
-                    <>
-                      <ImageIcon className="w-8 h-8" />
-                      <span className="text-sm">이미지 업로드</span>
-                    </>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="w-full aspect-[1.91/1] flex flex-col items-center justify-center gap-2 bg-[var(--ivory-50)] border-2 border-dashed border-[var(--sand-200)] rounded-lg text-[var(--text-muted)] hover:bg-[var(--sand-100)] hover:border-[var(--sage-400)] transition-colors disabled:opacity-50"
+                    >
+                      {uploading ? (
+                        <>
+                          <LoadingSpinner className="w-6 h-6" />
+                          <span className="text-sm">업로드 중...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-8 h-8" />
+                          <span className="text-sm">이미지 업로드</span>
+                        </>
+                      )}
+                    </button>
                   )}
-                </button>
+                </>
               )}
 
               <input

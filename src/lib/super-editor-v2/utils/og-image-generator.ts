@@ -168,3 +168,48 @@ export async function generateOgImageFromHero(
     return null
   }
 }
+
+/**
+ * 기본 OG 이미지 생성 (텍스트 기반)
+ *
+ * 흰 배경에 "신랑이름 ❤️ 신부이름" 텍스트
+ */
+export function generateDefaultOgImage(data: WeddingData): string {
+  const canvas = document.createElement('canvas')
+  canvas.width = OG_WIDTH
+  canvas.height = OG_HEIGHT
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) {
+    throw new Error('Canvas context를 생성할 수 없습니다')
+  }
+
+  // 흰 배경
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fillRect(0, 0, OG_WIDTH, OG_HEIGHT)
+
+  // 이름 가져오기
+  const groomName = data.couple?.groom?.name || data.groom?.name || '신랑'
+  const brideName = data.couple?.bride?.name || data.bride?.name || '신부'
+
+  // 텍스트 설정
+  const text = `${groomName} ❤️ ${brideName}`
+
+  // 폰트 설정 (시스템 폰트 사용)
+  ctx.font = 'bold 72px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+
+  // 텍스트 색상 (부드러운 회색)
+  ctx.fillStyle = '#4A4A4A'
+
+  // 가운데 배치
+  ctx.fillText(text, OG_WIDTH / 2, OG_HEIGHT / 2)
+
+  // 하단에 작은 문구 추가
+  ctx.font = '28px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
+  ctx.fillStyle = '#9CA3AF'
+  ctx.fillText('결혼합니다', OG_WIDTH / 2, OG_HEIGHT / 2 + 80)
+
+  return canvas.toDataURL('image/jpeg', 0.9)
+}
