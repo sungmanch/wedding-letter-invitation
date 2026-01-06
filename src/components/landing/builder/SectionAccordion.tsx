@@ -13,6 +13,8 @@ import { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Check } from 'lucide-react'
 import { PresetThumbnail } from '../subway/PresetThumbnail'
+import { RequestPresetCard } from './RequestPresetCard'
+import { RequestPresetModal } from './RequestPresetModal'
 import {
   useSubwayBuilder,
   SECTION_ORDER,
@@ -66,6 +68,10 @@ export function SectionAccordion() {
     Set<SelectableSectionType>
   >(new Set())
 
+  // 프리셋 요청 모달 상태
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
+  const [requestSectionType, setRequestSectionType] = useState<SelectableSectionType | null>(null)
+
   // 섹션 토글
   const handleToggleSection = useCallback(
     (sectionType: SelectableSectionType) => {
@@ -99,24 +105,40 @@ export function SectionAccordion() {
     [setPreset]
   )
 
+  // 프리셋 요청 핸들러
+  const handleRequestPreset = useCallback((sectionType: SelectableSectionType) => {
+    setRequestSectionType(sectionType)
+    setIsRequestModalOpen(true)
+  }, [])
+
   return (
-    <div className="space-y-3">
-      {SECTION_ORDER.map((sectionType) => (
-        <AccordionItem
-          key={sectionType}
-          sectionType={sectionType}
-          isOpen={openSection === sectionType}
-          isExpanded={expandedSections.has(sectionType)}
-          selectedPresetId={state.selectedPresets[sectionType]}
-          cssVariables={state.cssVariables}
-          onToggle={() => handleToggleSection(sectionType)}
-          onToggleExpand={(e) => handleToggleExpand(sectionType, e)}
-          onSelectPreset={(presetId) =>
-            handleSelectPreset(sectionType, presetId)
-          }
-        />
-      ))}
-    </div>
+    <>
+      <div className="space-y-3">
+        {SECTION_ORDER.map((sectionType) => (
+          <AccordionItem
+            key={sectionType}
+            sectionType={sectionType}
+            isOpen={openSection === sectionType}
+            isExpanded={expandedSections.has(sectionType)}
+            selectedPresetId={state.selectedPresets[sectionType]}
+            cssVariables={state.cssVariables}
+            onToggle={() => handleToggleSection(sectionType)}
+            onToggleExpand={(e) => handleToggleExpand(sectionType, e)}
+            onSelectPreset={(presetId) =>
+              handleSelectPreset(sectionType, presetId)
+            }
+            onRequestPreset={() => handleRequestPreset(sectionType)}
+          />
+        ))}
+      </div>
+
+      {/* 프리셋 요청 모달 */}
+      <RequestPresetModal
+        open={isRequestModalOpen}
+        onOpenChange={setIsRequestModalOpen}
+        sectionType={requestSectionType}
+      />
+    </>
   )
 }
 
@@ -133,6 +155,7 @@ interface AccordionItemProps {
   onToggle: () => void
   onToggleExpand: (e: React.MouseEvent) => void
   onSelectPreset: (presetId: string) => void
+  onRequestPreset: () => void
 }
 
 function AccordionItem({
@@ -144,6 +167,7 @@ function AccordionItem({
   onToggle,
   onToggleExpand,
   onSelectPreset,
+  onRequestPreset,
 }: AccordionItemProps) {
   // 프리셋 목록
   const presets = useMemo(
@@ -248,6 +272,13 @@ function AccordionItem({
                     height={120}
                   />
                 ))}
+                {/* 프리셋 요청 카드 */}
+                <RequestPresetCard
+                  sectionType={sectionType}
+                  onClick={onRequestPreset}
+                  width={90}
+                  height={120}
+                />
               </div>
 
               {/* 더보기 버튼 */}

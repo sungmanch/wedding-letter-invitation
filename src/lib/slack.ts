@@ -160,3 +160,85 @@ export async function notifyRecommendationRequest(
 
   return await sendSlackNotification(message)
 }
+
+// 섹션 타입 한글 매핑
+const PRESET_SECTION_LABELS: Record<string, string> = {
+  hero: '대표사진',
+  'greeting-parents': '인사말',
+  calendar: '예식일시',
+  gallery: '갤러리',
+  location: '오시는길',
+  contact: '연락처',
+  account: '축의금 계좌',
+  message: '방명록',
+  rsvp: '참석 여부',
+  notice: '공지사항',
+  profile: '신랑신부 소개',
+  ending: '엔딩',
+  interview: '인터뷰',
+  wreath: '화환 안내',
+}
+
+export async function notifyPresetRequest(
+  request: {
+    sectionType: string
+    email: string
+    description: string
+  },
+  imageCount: number
+): Promise<boolean> {
+  const now = new Date().toLocaleString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  const message: SlackMessage = {
+    text: `✨ 새로운 프리셋 요청`,
+    blocks: [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: '✨ 새로운 프리셋 요청',
+        },
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: `*📋 섹션:*\n${PRESET_SECTION_LABELS[request.sectionType] || request.sectionType}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*📧 이메일:*\n${request.email}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*🖼️ 첨부 이미지:*\n${imageCount}장`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*⏰ 요청 시간:*\n${now}`,
+          },
+        ],
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*📝 요청 내용:*\n${request.description}`,
+        },
+      },
+      {
+        type: 'divider',
+      },
+    ],
+  }
+
+  return await sendSlackNotification(message)
+}
