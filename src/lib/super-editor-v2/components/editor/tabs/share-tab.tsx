@@ -40,6 +40,10 @@ export interface ShareTabProps {
   onImageUpload?: (file: File) => Promise<string>
   /** 브랜치 여부 (true면 BranchManager 숨김) */
   isBranch?: boolean
+  /** OG 이미지 자동 생성 활성화 여부 */
+  autoGenerateOgImage?: boolean
+  /** OG 이미지 자동 생성 토글 콜백 */
+  onAutoGenerateOgImageChange?: (enabled: boolean) => void
   /** 추가 className */
   className?: string
 }
@@ -57,6 +61,8 @@ export function ShareTab({
   onGenerateShareUrl,
   onImageUpload,
   isBranch = false,
+  autoGenerateOgImage = true,
+  onAutoGenerateOgImageChange,
   className = '',
 }: ShareTabProps) {
   const [copySuccess, setCopySuccess] = useState(false)
@@ -154,11 +160,34 @@ export function ShareTab({
 
             {/* OG 이미지 */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--text-secondary)]">
-                대표 이미지
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-[var(--text-secondary)]">
+                  대표 이미지
+                </label>
+                {/* 자동 생성 토글 */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <span className="text-xs text-[var(--text-muted)]">저장 시 자동 생성</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={autoGenerateOgImage}
+                    onClick={() => onAutoGenerateOgImageChange?.(!autoGenerateOgImage)}
+                    className={`relative w-9 h-5 rounded-full transition-colors ${
+                      autoGenerateOgImage ? 'bg-[var(--sage-500)]' : 'bg-[var(--sand-200)]'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                        autoGenerateOgImage ? 'left-[18px]' : 'left-0.5'
+                      }`}
+                    />
+                  </button>
+                </label>
+              </div>
               <p className="text-xs text-[var(--text-light)] mb-2">
-                권장 크기: 1200 x 630px (1.91:1 비율)
+                {autoGenerateOgImage
+                  ? '저장 시 Hero 이미지를 1200×630 비율로 자동 생성합니다.'
+                  : '권장 크기: 1200 x 630px (1.91:1 비율)'}
               </p>
 
               {og.imageUrl ? (
