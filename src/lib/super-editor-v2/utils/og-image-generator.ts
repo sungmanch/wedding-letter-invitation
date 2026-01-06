@@ -195,8 +195,8 @@ export function generateDefaultOgImage(data: WeddingData): string {
   // 텍스트 설정
   const text = `${groomName} ❤️ ${brideName}`
 
-  // 폰트 설정 (시스템 폰트 사용)
-  ctx.font = 'bold 72px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
+  // 폰트 설정 (시스템 폰트 사용) - 1.2배 크기
+  ctx.font = 'bold 86px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
 
@@ -207,9 +207,9 @@ export function generateDefaultOgImage(data: WeddingData): string {
   ctx.fillText(text, OG_WIDTH / 2, OG_HEIGHT / 2)
 
   // 하단에 작은 문구 추가
-  ctx.font = '28px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
+  ctx.font = '34px "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
   ctx.fillStyle = '#9CA3AF'
-  ctx.fillText('결혼합니다', OG_WIDTH / 2, OG_HEIGHT / 2 + 80)
+  ctx.fillText('결혼합니다', OG_WIDTH / 2, OG_HEIGHT / 2 + 96)
 
   return canvas.toDataURL('image/jpeg', 0.9)
 }
