@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Plus, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { listDocuments } from '@/lib/super-editor-v2/actions'
+import { listAllBranches } from '@/lib/super-editor-v2/actions/branch'
 import { InvitationTabs } from './InvitationTabs'
 import type {
   Block,
@@ -12,7 +13,7 @@ import type {
   WeddingData,
   GlobalAnimation,
 } from '@/lib/super-editor-v2/schema/types'
-import type { EditorDocumentV2 } from '@/lib/super-editor-v2/schema/db-schema'
+import type { EditorDocumentV2, EditorDocumentBranchV2 } from '@/lib/super-editor-v2/schema/db-schema'
 
 /** 요소가 유효한 SE2 요소인지 확인 */
 function isValidElement(el: Element): boolean {
@@ -64,37 +65,48 @@ export default async function MyInvitationsPage() {
     redirect('/login?redirect=/my/invitations')
   }
 
-  const allDocuments = await listDocuments()
+  const [allDocuments, allBranches] = await Promise.all([
+    listDocuments(),
+    listAllBranches(),
+  ])
 
   // 레거시 문서 필터링
   const documents = allDocuments.filter(isValidSE2Document)
 
+  // 브랜치를 parentDocumentId로 그룹핑
+  const branchesByDocId = allBranches.reduce((acc, branch) => {
+    const docId = branch.parentDocumentId
+    if (!acc[docId]) acc[docId] = []
+    acc[docId].push(branch)
+    return acc
+  }, {} as Record<string, EditorDocumentBranchV2[]>)
+
+  // 문서를 변환하는 헬퍼
+  const mapDocument = (doc: EditorDocumentV2) => ({
+    id: doc.id,
+    title: doc.title,
+    status: doc.status,
+    blocks: doc.blocks as Block[],
+    style: doc.style as StyleSystem,
+    data: doc.data as WeddingData,
+    animation: doc.animation as GlobalAnimation | null,
+    updatedAt: new Date(doc.updatedAt),
+    branches: (branchesByDocId[doc.id] || []).map((branch) => ({
+      id: branch.id,
+      title: branch.title,
+      status: branch.status,
+      updatedAt: new Date(branch.updatedAt),
+    })),
+  })
+
   // 상태별로 분류 (draft, building = 작성 중 / published = 발행됨)
   const publishedDocs = documents
     .filter((doc) => doc.status === 'published')
-    .map((doc) => ({
-      id: doc.id,
-      title: doc.title,
-      status: doc.status,
-      blocks: doc.blocks as Block[],
-      style: doc.style as StyleSystem,
-      data: doc.data as WeddingData,
-      animation: doc.animation as GlobalAnimation | null,
-      updatedAt: new Date(doc.updatedAt),
-    }))
+    .map(mapDocument)
 
   const draftDocs = documents
     .filter((doc) => doc.status === 'draft' || doc.status === 'building')
-    .map((doc) => ({
-      id: doc.id,
-      title: doc.title,
-      status: doc.status,
-      blocks: doc.blocks as Block[],
-      style: doc.style as StyleSystem,
-      data: doc.data as WeddingData,
-      animation: doc.animation as GlobalAnimation | null,
-      updatedAt: new Date(doc.updatedAt),
-    }))
+    .map(mapDocument)
 
   return (
     <main className="min-h-screen bg-[var(--ivory-100)]">

@@ -1,12 +1,12 @@
 'use client'
 
 /**
- * Branch Manager - 브랜치 관리 UI
+ * Branch Manager - 추가 디자인 관리 UI
  *
- * 원본 문서에서 브랜치 목록 표시 및 관리
- * - 브랜치 생성
- * - 브랜치 목록 표시
- * - 브랜치 편집/삭제
+ * 원본 문서에서 추가 디자인(버전) 목록 표시 및 관리
+ * - 새 버전 생성
+ * - 버전 목록 표시
+ * - 버전 편집/삭제
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -75,15 +75,15 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
       await loadBranches()
     } catch (error) {
       console.error('Failed to create branch:', error)
-      alert('브랜치 생성에 실패했습니다.')
+      alert('추가 디자인 생성에 실패했습니다.')
     } finally {
       setIsCreating(false)
     }
   }, [documentId, newBranchTitle, newBranchDescription, loadBranches])
 
-  // 브랜치 삭제
+  // 추가 디자인 삭제
   const handleDeleteBranch = useCallback(async (branchId: string) => {
-    if (!confirm('이 브랜치를 삭제하시겠습니까?')) return
+    if (!confirm('이 버전을 삭제하시겠습니까?')) return
 
     try {
       setDeletingId(branchId)
@@ -91,7 +91,7 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
       await loadBranches()
     } catch (error) {
       console.error('Failed to delete branch:', error)
-      alert('브랜치 삭제에 실패했습니다.')
+      alert('삭제에 실패했습니다.')
     } finally {
       setDeletingId(null)
     }
@@ -102,9 +102,9 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium text-[var(--text-primary)]">브랜치</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">추가 디자인</h3>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            같은 정보로 다른 디자인 버전을 만들어보세요
+            같은 정보로 다른 디자인을 만들어보세요
           </p>
         </div>
         <button
@@ -112,7 +112,7 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
           className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--sage-100)] text-[var(--sage-700)] hover:bg-[var(--sage-200)] transition-colors flex items-center gap-1.5"
         >
           <PlusIcon className="w-4 h-4" />
-          새 브랜치
+          새 버전
         </button>
       </div>
 
@@ -125,7 +125,7 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
         <div className="text-center py-8 bg-[var(--ivory-50)] border border-[var(--sand-100)] rounded-lg">
           <BranchIcon className="w-8 h-8 text-[var(--sand-300)] mx-auto mb-2" />
           <p className="text-sm text-[var(--text-muted)]">
-            아직 브랜치가 없습니다
+            아직 추가 디자인이 없습니다
           </p>
           <p className="text-xs text-[var(--text-light)] mt-1">
             신랑측/신부측 등 다른 디자인을 만들어보세요
@@ -144,18 +144,18 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
         </div>
       )}
 
-      {/* 브랜치 생성 모달 */}
+      {/* 추가 디자인 생성 모달 */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white border border-[var(--sand-100)] rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
             <h3 className="text-lg font-medium mb-4 text-[var(--text-primary)]">
-              새 브랜치 만들기
+              새 버전 만들기
             </h3>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
-                  브랜치 이름 *
+                  버전 이름 *
                 </label>
                 <input
                   type="text"
@@ -175,15 +175,15 @@ export function BranchManager({ documentId, className = '' }: BranchManagerProps
                   type="text"
                   value={newBranchDescription}
                   onChange={(e) => setNewBranchDescription(e.target.value)}
-                  placeholder="어떤 용도로 사용할 브랜치인지 메모"
+                  placeholder="어떤 용도로 사용할 버전인지 메모"
                   className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent"
                 />
               </div>
 
               <div className="bg-[var(--sage-50)] border border-[var(--sage-200)] rounded-lg p-3">
                 <p className="text-xs text-[var(--sage-700)]">
-                  <strong>참고:</strong> 브랜치는 현재 문서의 디자인을 복사하여 시작합니다.
-                  결혼 정보(신랑/신부 이름, 날짜 등)는 원본과 공유됩니다.
+                  <strong>참고:</strong> 현재 디자인을 복사하여 새 버전을 만듭니다.
+                  결혼 정보(신랑/신부 이름, 날짜 등)는 원본과 자동으로 동기화됩니다.
                 </p>
               </div>
             </div>

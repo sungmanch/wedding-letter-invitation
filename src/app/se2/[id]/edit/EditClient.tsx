@@ -511,7 +511,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         {/* 모바일 헤더 */}
         <div className="flex md:hidden items-center justify-between px-3 h-full">
           <Link
-            href="/"
+            href="/my/invitations"
             className="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             <ChevronLeftIcon className="w-5 h-5" />
@@ -553,7 +553,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <div className="hidden md:flex items-center justify-between px-4 h-full">
           <div className="flex items-center gap-4">
             <Link
-              href="/"
+              href="/my/invitations"
               className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
               ← 돌아가기
@@ -948,6 +948,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             visibleBlock={visibleBlock ?? null}
             onPresetChange={handlePresetChange}
             onRequestPreset={handleRequestPreset}
+            onCreateVersion={() => setActiveTab('share')}
           />
         </div>
       </div>

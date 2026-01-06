@@ -28,6 +28,8 @@ interface PresetSidebarProps {
   onRequestPreset?: (blockType: BlockType) => void
   /** 모바일 버전 (전체 너비) */
   variant?: 'sidebar' | 'mobile'
+  /** 추가 디자인 만들기 클릭 콜백 (원본 문서에서만 표시) */
+  onCreateVersion?: () => void
 }
 
 // ============================================
@@ -39,6 +41,7 @@ export function PresetSidebar({
   onPresetChange,
   onRequestPreset,
   variant = 'sidebar',
+  onCreateVersion,
 }: PresetSidebarProps) {
   // 현재 보이는 블록 타입의 프리셋 목록
   const presets = useMemo(() => {
@@ -57,6 +60,32 @@ export function PresetSidebar({
       ${isMobile ? 'w-full' : 'w-[280px] flex-shrink-0 border-l border-[var(--editor-border)]'}
       bg-[var(--editor-bg)] flex flex-col h-full
     `}>
+      {/* 추가 디자인 넛징 배너 (원본 문서에서만 표시) */}
+      {onCreateVersion && !isMobile && (
+        <button
+          onClick={onCreateVersion}
+          className="
+            flex-shrink-0 mx-3 mt-3 p-3 rounded-lg
+            bg-gradient-to-r from-[var(--sage-50)] to-[var(--blush-50)]
+            border border-[var(--sage-200)]
+            hover:border-[var(--sage-300)] hover:shadow-sm
+            transition-all text-left group
+          "
+        >
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg">✨</span>
+            <div>
+              <p className="text-sm font-medium text-[var(--text-primary)]">
+                다른 버전으로도 만들 수 있어요
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                신랑측/신부측 등 다르게 꾸며서 보내기
+              </p>
+            </div>
+          </div>
+        </button>
+      )}
+
       {/* 헤더 */}
       <div className="flex-shrink-0 p-4 border-b border-[var(--editor-border)]">
         <div className="flex items-center justify-between">

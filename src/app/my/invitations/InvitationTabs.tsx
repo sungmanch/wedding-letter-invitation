@@ -14,6 +14,13 @@ import type {
 // Types
 // ============================================
 
+export interface BranchSummary {
+  id: string
+  title: string
+  status: string
+  updatedAt: Date
+}
+
 interface InvitationDocument {
   id: string
   title: string
@@ -23,6 +30,7 @@ interface InvitationDocument {
   data: WeddingData
   animation: GlobalAnimation | null
   updatedAt: Date
+  branches: BranchSummary[]
 }
 
 interface InvitationTabsProps {
@@ -96,6 +104,7 @@ export function InvitationTabs({ publishedDocs, draftDocs }: InvitationTabsProps
               data={doc.data}
               animation={doc.animation}
               updatedAt={doc.updatedAt}
+              branches={doc.branches}
             />
           ))}
         </div>
