@@ -178,18 +178,26 @@ export function ShareTab({
                 className="w-full px-3 py-2 bg-white border border-[var(--sand-200)] rounded-lg text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sage-500)] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="auto">자동 생성 (Hero 이미지)</option>
-                <option value="default">기본 - 심플 (흰 배경)</option>
-                <option value="celebration">기본 - 축하 (빵빠레)</option>
+                <option value="default">기본 - 심플</option>
+                <option value="celebration">기본 - 축하</option>
                 <option value="custom">직접 업로드</option>
               </select>
 
               {/* 스타일별 설명 */}
               <p className="text-xs text-[var(--text-light)]">
                 {isGeneratingOgImage && '이미지를 생성하고 있습니다...'}
-                {!isGeneratingOgImage && ogImageStyle === 'auto' && '선택 즉시 Hero 이미지를 1200×630 비율로 자동 크롭합니다.'}
-                {!isGeneratingOgImage && ogImageStyle === 'default' && '깔끔한 흰 배경에 이름이 표시됩니다.'}
-                {!isGeneratingOgImage && ogImageStyle === 'celebration' && '축하 빵빠레와 함께 이름이 표시됩니다.'}
-                {!isGeneratingOgImage && ogImageStyle === 'custom' && '직접 이미지를 업로드하세요. 권장: 1200×630px'}
+                {!isGeneratingOgImage &&
+                  ogImageStyle === 'auto' &&
+                  '선택 즉시 Hero 이미지를 1200×630 비율로 자동 크롭합니다.'}
+                {!isGeneratingOgImage &&
+                  ogImageStyle === 'default' &&
+                  '깔끔한 흰 배경에 이름이 표시됩니다.'}
+                {!isGeneratingOgImage &&
+                  ogImageStyle === 'celebration' &&
+                  '축하 빵빠레와 함께 이름이 표시됩니다.'}
+                {!isGeneratingOgImage &&
+                  ogImageStyle === 'custom' &&
+                  '직접 이미지를 업로드하세요. 권장: 1200×630px'}
               </p>
 
               {/* 커스텀 모드일 때만 업로드 영역 표시 */}
@@ -197,7 +205,11 @@ export function ShareTab({
                 <>
                   {og.imageUrl ? (
                     <div className="relative aspect-[1.91/1] bg-[var(--sand-100)] rounded-lg overflow-hidden border border-[var(--sand-200)]">
-                      <img src={og.imageUrl} alt="OG Preview" className="w-full h-full object-cover" />
+                      <img
+                        src={og.imageUrl}
+                        alt="OG Preview"
+                        className="w-full h-full object-cover"
+                      />
                       <button
                         onClick={handleImageRemove}
                         className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"

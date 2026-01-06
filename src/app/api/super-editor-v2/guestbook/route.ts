@@ -8,10 +8,19 @@ import { createClient } from '@/lib/supabase/server'
 // POST: 방명록 메시지 작성
 // ============================================
 
+const COOKIE_NAME = 'guestbook_visitor_id'
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { documentId, name, message, cookieId } = body
+    const { documentId, name, message } = body
+
+    // cookieId: body > 쿠키 > 신규 발급
+    const existingCookieId = request.cookies.get(COOKIE_NAME)?.value
+    const cookieId = body.cookieId || existingCookieId
+    const isNewCookie = !cookieId
+    const finalCookieId = cookieId || crypto.randomUUID()
 
     // 유효성 검사
     if (!documentId) {
@@ -77,14 +86,28 @@ export async function POST(request: NextRequest) {
         documentId,
         name: name.trim(),
         message: message.trim(),
-        cookieId: cookieId || crypto.randomUUID(),
+        cookieId: finalCookieId,
       })
       .returning()
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: newMessage,
+      cookieId: finalCookieId,
     })
+
+    // 새 쿠키 발급 시 1년 유효기간으로 설정
+    if (isNewCookie) {
+      response.cookies.set(COOKIE_NAME, finalCookieId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: ONE_YEAR_SECONDS,
+        path: '/',
+      })
+    }
+
+    return response
   } catch {
     return NextResponse.json(
       { error: '방명록 저장 중 오류가 발생했습니다.' },
