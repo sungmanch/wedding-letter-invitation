@@ -52,12 +52,13 @@ AI 기반 개인화 청첩장 서비스입니다.
   - `SectionAccordion`에 프리셋 요청 카드 통합
 - **파일**: `preset-request.ts`, `RequestPresetCard.tsx`, `RequestPresetModal.tsx`
 - **TODO**: Supabase Storage `preset-request-images` 버킷 수동 생성 필요
-### 2026-01-06: OG 이미지 저장 시 자동 생성
-- **이유**: 카카오톡 공유 시 OG 이미지를 수동 설정하지 않아도 Hero 이미지 기반으로 자동 생성
+### 2026-01-07: OG 이미지 스타일 선택 기능
+- **이유**: 카카오톡 공유 시 OG 이미지를 다양한 방식으로 생성할 수 있도록 옵션 제공
 - **변경**:
-  - ShareTab에 '저장 시 자동 생성' 토글 추가 (기본값: ON)
-  - Canvas API로 Hero 이미지를 1200x630 비율 크롭
-  - 저장 버튼 클릭 시 자동으로 OG 이미지 업로드 및 메타데이터 업데이트
+  - ShareTab에 드롭다운 추가 (auto/default/custom)
+  - auto: Hero 이미지 1200x630 크롭 (기본값)
+  - default: 텍스트 기반 기본 이미지 (신랑❤️신부 + 흰 배경)
+  - custom: 직접 업로드
 - **파일**: `utils/og-image-generator.ts`, `share-tab.tsx`, `EditClient.tsx`
 
 ### 2026-01-06: 문서 브랜치 시스템 추가
