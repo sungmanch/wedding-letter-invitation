@@ -7,7 +7,6 @@
  */
 
 import { useState, useCallback, useRef, type ChangeEvent } from 'react'
-import { BranchManager } from '../ui/branch-manager'
 
 // ============================================
 // Types
@@ -23,8 +22,6 @@ export interface OgMetadata {
 export type OgImageStyle = 'auto' | 'default' | 'celebration' | 'custom'
 
 export interface ShareTabProps {
-  /** 문서 ID */
-  documentId: string
   /** OG 기본값 */
   defaultOg: {
     title: string
@@ -37,8 +34,6 @@ export interface ShareTabProps {
   onOgChange: (og: OgMetadata) => void
   /** 이미지 업로드 콜백 */
   onImageUpload?: (file: File) => Promise<string>
-  /** 브랜치 여부 (true면 BranchManager 숨김) */
-  isBranch?: boolean
   /** OG 이미지 스타일 */
   ogImageStyle?: OgImageStyle
   /** OG 이미지 스타일 변경 콜백 */
@@ -54,12 +49,10 @@ export interface ShareTabProps {
 // ============================================
 
 export function ShareTab({
-  documentId,
   defaultOg,
   og,
   onOgChange,
   onImageUpload,
-  isBranch = false,
   ogImageStyle = 'auto',
   onOgImageStyleChange,
   isGeneratingOgImage = false,
@@ -241,13 +234,6 @@ export function ShareTab({
             isLoading={isGeneratingOgImage}
           />
         </section>
-
-        {/* 브랜치 관리 (원본 문서에서만 표시) */}
-        {!isBranch && (
-          <section className="border-t border-[var(--sand-100)] pt-6">
-            <BranchManager documentId={documentId} />
-          </section>
-        )}
 
       </div>
     </div>

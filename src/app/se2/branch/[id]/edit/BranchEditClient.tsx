@@ -461,11 +461,9 @@ export function BranchEditClient({ branch }: BranchEditClientProps) {
             )}
             {activeTab === 'share' && (
               <ShareTab
-                documentId={branch.id}
                 defaultOg={defaultOg}
                 og={og}
                 onOgChange={handleOgChange}
-                isBranch
               />
             )}
           </div>

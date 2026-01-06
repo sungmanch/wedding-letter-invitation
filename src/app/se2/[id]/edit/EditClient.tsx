@@ -701,7 +701,6 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 )}
                 {activeTab === 'share' && (
                   <ShareTab
-                    documentId={dbDocument.id}
                     defaultOg={defaultOg}
                     og={og}
                     onOgChange={handleOgChange}
@@ -802,7 +801,6 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             )}
             {activeTab === 'share' && (
               <ShareTab
-                documentId={dbDocument.id}
                 defaultOg={defaultOg}
                 og={og}
                 onOgChange={handleOgChange}
