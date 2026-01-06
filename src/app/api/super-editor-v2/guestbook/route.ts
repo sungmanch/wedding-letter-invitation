@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         documentId,
         name: name.trim(),
         message: message.trim(),
-        cookieId: cookieId || null,
+        cookieId: cookieId || crypto.randomUUID(),
       })
       .returning()
 
