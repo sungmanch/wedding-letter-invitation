@@ -42,6 +42,23 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2026-01-07: 추가 디자인(브랜치) UX 개선
+- **이유**: 일반 사용자가 "브랜치" 개념을 이해하기 어려움, 기능 발견성 개선
+- **변경**:
+  - 용어 변경: "브랜치" → "추가 디자인", "새 브랜치" → "새 버전"
+  - 목록 페이지: InvitationCard에 추가 디자인 섹션 추가 (펼침/접힘)
+  - 편집 페이지: PresetSidebar 상단에 넛징 배너 추가 ("다른 버전으로도 만들 수 있어요")
+- **파일**: `InvitationCard.tsx`, `InvitationTabs.tsx`, `page.tsx`, `preset-sidebar.tsx`, `branch-manager.tsx`
+
+### 2026-01-07: RSVP 수집 정보 토글 설정
+- **이유**: 참석 가능/불가에 따라 다른 정보를 수집할 수 있도록 토글 옵션 제공
+- **변경**:
+  - RsvpConfig에 showPhone 필드 추가
+  - RSVP 모달: guestCount, mealOption, phone 설정 반영, 참석 가능 시에만 추가 옵션 표시
+  - 데이터 탭: RSVP 블록에 토글 설정 UI 추가 (연락처, 신랑측/신부측, 동반인원수, 버스탑승, 식사여부)
+- **파일**: `types.ts`, `rsvp-modal.tsx`, `data-tab.tsx`
+- **API**: 기존 API가 모든 필드 지원 (변경 없음)
+
 ### 2026-01-06: 프리셋 요청 기능 추가
 - **이유**: 오픈 베타 준비, 사용자가 원하는 프리셋 디자인 요청 기능
 - **변경**:
@@ -52,6 +69,24 @@ AI 기반 개인화 청첩장 서비스입니다.
   - `SectionAccordion`에 프리셋 요청 카드 통합
 - **파일**: `preset-request.ts`, `RequestPresetCard.tsx`, `RequestPresetModal.tsx`
 - **TODO**: Supabase Storage `preset-request-images` 버킷 수동 생성 필요
+### 2026-01-07: OG 이미지 스타일 선택 기능
+- **이유**: 카카오톡 공유 시 OG 이미지를 다양한 방식으로 생성할 수 있도록 옵션 제공
+- **변경**:
+  - ShareTab에 드롭다운 추가 (auto/default/custom)
+  - auto: Hero 이미지 1200x630 크롭 (기본값)
+  - default: 텍스트 기반 기본 이미지 (신랑❤️신부 + 흰 배경)
+  - custom: 직접 업로드
+- **파일**: `utils/og-image-generator.ts`, `share-tab.tsx`, `EditClient.tsx`
+
+### 2026-01-06: 문서 브랜치 시스템 추가
+- **이유**: 같은 결혼 정보(data)로 여러 디자인 버전 공유 (신랑측/신부측/친구용 등)
+- **변경**:
+  - `editor_document_branches_v2` 테이블 추가
+  - 브랜치 CRUD 서버 액션 (`actions/branch.ts`)
+  - 브랜치 편집 라우트 (`/se2/branch/[id]/edit`)
+  - BranchEditClient: data 읽기 전용, blocks/style만 편집 가능
+  - BranchManager: ShareTab에서 브랜치 목록/생성/삭제 관리
+- **파일**: `schema/db-schema.ts`, `actions/branch.ts`, `app/se2/branch/`, `components/editor/ui/branch-manager.tsx`
 
 ### 2026-01-04: SEO/AEO/GEO 최적화 기본 인프라
 - **이유**: 검색엔진 최적화 및 AI 검색 엔진(ChatGPT, Claude) 대응

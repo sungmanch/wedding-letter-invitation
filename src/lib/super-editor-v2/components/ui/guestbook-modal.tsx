@@ -108,8 +108,9 @@ export function GuestbookModal({
         }
       }
 
-      // 성공 시 모달 닫기
+      // 성공 시 모달 닫기 후 알림
       handleClose()
+      alert('방명록이 등록되었습니다. 감사합니다!')
     } catch (err) {
       setError(err instanceof Error ? err.message : '제출에 실패했습니다. 다시 시도해 주세요.')
     } finally {

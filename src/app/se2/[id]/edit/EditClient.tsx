@@ -20,7 +20,7 @@ import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-render
 import { ContentTab } from '@/lib/super-editor-v2/components/editor/tabs/content-tab'
 import { DataTab } from '@/lib/super-editor-v2/components/editor/tabs/data-tab'
 import { DesignTab } from '@/lib/super-editor-v2/components/editor/tabs/design-tab'
-import { ShareTab, type OgMetadata } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
+import { ShareTab, type OgMetadata, type OgImageStyle } from '@/lib/super-editor-v2/components/editor/tabs/share-tab'
 import { FloatingPromptInput } from '@/lib/super-editor-v2/components/editor/ai/prompt-input'
 import { useAIEdit } from '@/lib/super-editor-v2/hooks/useAIEdit'
 import { useLocalStorage } from '@/lib/super-editor-v2/hooks/useLocalStorage'
@@ -41,6 +41,7 @@ import {
 import type { ThemePresetId } from '@/lib/super-editor-v2/schema/types'
 import { nanoid } from 'nanoid'
 import { useEditorFonts } from '@/lib/super-editor-v2/hooks/useFontLoader'
+import { generateOgImageFromHero, generateDefaultOgImage, generateCelebrationOgImage } from '@/lib/super-editor-v2/utils/og-image-generator'
 
 // ============================================
 // Types
@@ -94,12 +95,21 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     },
   })
 
-  // OG 상태 (별도 관리 - 즉시 저장)
+  // OG 상태 (저장 버튼과 통합)
   const [og, setOg] = useState<OgMetadata>(() => ({
     title: dbDocument.ogTitle || '',
     description: dbDocument.ogDescription || '',
     imageUrl: dbDocument.ogImageUrl || null,
   }))
+  const [ogDirty, setOgDirty] = useState(false)
+  const initialOgRef = useRef<OgMetadata>({
+    title: dbDocument.ogTitle || '',
+    description: dbDocument.ogDescription || '',
+    imageUrl: dbDocument.ogImageUrl || null,
+  })
+
+  // OG 이미지 스타일 (auto: Hero 크롭, default: 텍스트, custom: 직접 업로드)
+  const [ogImageStyle, setOgImageStyle] = useState<OgImageStyle>('auto')
 
   // UI 상태
   const [activeTab, setActiveTab] = useState<TabType>('content')
@@ -383,19 +393,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     })
   }, [dbDocument.id])
 
-  // OG 업데이트 (즉시 서버 저장)
-  const handleOgChange = useCallback(async (newOg: OgMetadata) => {
+  // OG 업데이트 (로컬 상태만, 저장 버튼으로 서버 동기화)
+  const handleOgChange = useCallback((newOg: OgMetadata) => {
     setOg(newOg)
-    try {
-      await updateOgMetadata(dbDocument.id, {
-        ogTitle: newOg.title,
-        ogDescription: newOg.description,
-        ogImageUrl: newOg.imageUrl || undefined,
-      })
-    } catch (error) {
-      console.error('Failed to save OG:', error)
-    }
-  }, [dbDocument.id])
+    setOgDirty(true)
+  }, [])
 
   // OG 기본값
   const defaultOg = useMemo(() => {
@@ -407,6 +409,48 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
     }
   }, [editorDoc.data])
 
+  // OG 이미지 스타일 변경 핸들러 (이미지 생성 및 미리보기 반영, 서버 저장은 저장 버튼에서)
+  const [isGeneratingOgImage, setIsGeneratingOgImage] = useState(false)
+  const handleOgImageStyleChange = useCallback(async (style: OgImageStyle) => {
+    setOgImageStyle(style)
+    setOgDirty(true)
+
+    // custom 모드는 이미지 생성 안함
+    if (style === 'custom') {
+      return
+    }
+
+    setIsGeneratingOgImage(true)
+    try {
+      let ogBase64: string | null = null
+
+      if (style === 'auto') {
+        ogBase64 = await generateOgImageFromHero(editorDoc.blocks, editorDoc.data)
+      } else if (style === 'default') {
+        ogBase64 = generateDefaultOgImage(editorDoc.data)
+      } else if (style === 'celebration') {
+        ogBase64 = generateCelebrationOgImage(editorDoc.data)
+      }
+
+      if (ogBase64) {
+        // 업로드 (이미지는 미리 업로드하여 미리보기에 표시)
+        const result = await uploadImage(dbDocument.id, {
+          data: ogBase64,
+          filename: 'og-image.jpg',
+          mimeType: 'image/jpeg',
+        })
+        if (result.success && result.url) {
+          // 로컬 상태만 업데이트 (서버 저장은 저장 버튼에서)
+          setOg(prev => ({ ...prev, imageUrl: result.url ?? null }))
+        }
+      }
+    } catch (error) {
+      console.warn('OG 이미지 생성 실패:', error)
+    } finally {
+      setIsGeneratingOgImage(false)
+    }
+  }, [editorDoc.blocks, editorDoc.data, dbDocument.id])
+
   // AI 프롬프트 제출
   const handleAISubmit = useCallback(async (prompt: string) => {
     await aiEdit.edit(prompt, expandedBlockId ?? undefined)
@@ -416,41 +460,58 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 저장 핸들러
   const handleSave = useCallback(async () => {
     try {
+      // OG 메타데이터 저장 (변경된 경우)
+      if (ogDirty) {
+        await updateOgMetadata(dbDocument.id, {
+          ogTitle: og.title || undefined,
+          ogDescription: og.description || undefined,
+          ogImageUrl: og.imageUrl || undefined,
+        })
+        setOgDirty(false)
+        initialOgRef.current = og
+      }
+
       await save()
     } catch (error) {
       console.error('Failed to save:', error)
       alert('저장에 실패했습니다. 다시 시도해주세요.')
     }
-  }, [save])
+  }, [save, ogDirty, og, dbDocument.id])
 
   // 변경사항 취소
   const handleDiscard = useCallback(() => {
     discardChanges()
+    // OG도 초기 상태로 복원
+    setOg(initialOgRef.current)
+    setOgDirty(false)
     setShowDiscardDialog(false)
   }, [discardChanges])
+
+  // 통합 dirty 상태 (문서 또는 OG 변경)
+  const hasChanges = isDirty || ogDirty
 
   // 키보드 단축키 (Cmd/Ctrl + S)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-        if (isDirty && !isSaving) {
+        if (hasChanges && !isSaving) {
           handleSave()
         }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isDirty, isSaving, handleSave])
+  }, [hasChanges, isSaving, handleSave])
 
   return (
     <div className="h-screen flex flex-col bg-[var(--bg-warm)] text-[var(--text-primary)]">
       {/* 헤더 */}
-      <header className="flex-shrink-0 h-12 md:h-14 border-b border-[var(--warm-100)] bg-[var(--bg-warm)]/95 backdrop-blur-sm">
+      <header className="flex-shrink-0 h-12 md:h-14 border-b border-[var(--warm-100)] bg-[var(--bg-warm)]/95 backdrop-blur-sm relative z-40">
         {/* 모바일 헤더 */}
         <div className="flex md:hidden items-center justify-between px-3 h-full">
           <Link
-            href="/"
+            href="/my/invitations"
             className="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             <ChevronLeftIcon className="w-5 h-5" />
@@ -459,22 +520,22 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {editorDoc.meta.title}
           </h1>
           <div className="flex items-center gap-1">
-            {/* 저장 버튼 (아이콘만) */}
+            {/* 저장 버튼 */}
             <button
               onClick={handleSave}
-              disabled={!isDirty || isSaving}
+              disabled={!hasChanges || isSaving}
               className={`
-                p-2 rounded-lg transition-colors
-                ${isDirty && !isSaving
-                  ? 'text-[var(--blush-500)]'
+                px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+                ${hasChanges && !isSaving
+                  ? 'bg-[var(--blush-400)] text-white'
                   : 'text-[var(--text-light)]'
                 }
               `}
             >
               {isSaving ? (
-                <LoadingSpinner className="w-5 h-5" />
+                <LoadingSpinner className="w-4 h-4" />
               ) : (
-                <SaveIcon className="w-5 h-5" />
+                '저장'
               )}
             </button>
             {/* 더보기 메뉴 */}
@@ -482,7 +543,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               previewUrl={`/se2/${dbDocument.id}/preview`}
               publishUrl={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
               isPaid={dbDocument.isPaid}
-              isDirty={isDirty}
+              isDirty={hasChanges}
               onDiscard={() => setShowDiscardDialog(true)}
             />
           </div>
@@ -492,7 +553,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <div className="hidden md:flex items-center justify-between px-4 h-full">
           <div className="flex items-center gap-4">
             <Link
-              href="/"
+              href="/my/invitations"
               className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
               ← 돌아가기
@@ -507,10 +568,10 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                   저장 중...
                 </span>
               )}
-              {!isSaving && isDirty && (
+              {!isSaving && hasChanges && (
                 <span className="text-[var(--text-light)]">저장되지 않은 변경사항</span>
               )}
-              {!isSaving && !isDirty && lastSaved && (
+              {!isSaving && !hasChanges && lastSaved && (
                 <span className="text-[var(--blush-400)]">
                   저장됨 {formatTime(lastSaved)}
                 </span>
@@ -520,7 +581,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
 
           <div className="flex items-center gap-2">
             {/* 변경사항 취소 버튼 */}
-            {isDirty && (
+            {hasChanges && (
               <button
                 onClick={() => setShowDiscardDialog(true)}
                 className="px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--warm-100)] transition-colors"
@@ -532,11 +593,11 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {/* 저장 버튼 */}
             <button
               onClick={handleSave}
-              disabled={!isDirty || isSaving}
+              disabled={!hasChanges || isSaving}
               className={`
                 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
                 flex items-center gap-2
-                ${isDirty && !isSaving
+                ${hasChanges && !isSaving
                   ? 'bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)]'
                   : 'bg-[var(--warm-100)] text-[var(--text-light)] cursor-not-allowed'
                 }
@@ -640,11 +701,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                 )}
                 {activeTab === 'share' && (
                   <ShareTab
-                    documentId={dbDocument.id}
                     defaultOg={defaultOg}
                     og={og}
                     onOgChange={handleOgChange}
-                    shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
+                    ogImageStyle={ogImageStyle}
+                    onOgImageStyleChange={handleOgImageStyleChange}
+                    isGeneratingOgImage={isGeneratingOgImage}
                   />
                 )}
               </div>
@@ -739,11 +801,12 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             )}
             {activeTab === 'share' && (
               <ShareTab
-                documentId={dbDocument.id}
                 defaultOg={defaultOg}
                 og={og}
                 onOgChange={handleOgChange}
-                shareUrl={dbDocument.status === 'published' ? `/share/${dbDocument.id}` : null}
+                ogImageStyle={ogImageStyle}
+                onOgImageStyleChange={handleOgImageStyleChange}
+                isGeneratingOgImage={isGeneratingOgImage}
               />
             )}
           </div>
@@ -885,6 +948,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             visibleBlock={visibleBlock ?? null}
             onPresetChange={handlePresetChange}
             onRequestPreset={handleRequestPreset}
+            onCreateVersion={() => setActiveTab('share')}
           />
         </div>
       </div>
@@ -894,7 +958,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         <MobileBottomNav
           activeView={mobileView}
           onViewChange={setMobileView}
-          isDirty={isDirty}
+          isDirty={hasChanges}
         />
       )}
 

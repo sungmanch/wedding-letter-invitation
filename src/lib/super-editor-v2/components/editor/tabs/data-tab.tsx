@@ -9,7 +9,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react'
-import type { EditorDocument, Block, WeddingData, VariablePath } from '../../../schema/types'
+import type { EditorDocument, Block, WeddingData, VariablePath, RsvpConfig } from '../../../schema/types'
 import { FamilyTableField } from '../fields/family-table-field'
 import { LocationSearchField } from '../fields/location-search-field'
 import { VariableField } from '../fields/variable-field'
@@ -287,13 +287,20 @@ function BlockDataSection({
     return allFields.filter((field) => !isSharedField(field.binding))
   }, [block, data])
 
-  // 필드가 없으면 렌더링하지 않음
-  if (editableFields.length === 0) {
+  // RSVP 블록은 토글 설정이 있으므로 필드가 없어도 렌더링
+  const isRsvpBlock = block.type === 'rsvp'
+
+  // 필드가 없으면 렌더링하지 않음 (RSVP 제외)
+  if (editableFields.length === 0 && !isRsvpBlock) {
     return null
   }
 
   const icon = BLOCK_TYPE_ICONS[block.type] || '📄'
   const label = BLOCK_TYPE_LABELS[block.type] || block.type
+
+  // RSVP 토글 설정 항목 수 계산
+  const rsvpSettingCount = isRsvpBlock ? 5 : 0  // showPhone, showGuestCount, showMeal, showSide, showBusOption
+  const totalItemCount = editableFields.length + rsvpSettingCount
 
   return (
     <div className="border border-[var(--editor-border)] rounded-lg overflow-hidden">
@@ -305,13 +312,32 @@ function BlockDataSection({
       >
         <span className="text-lg">{icon}</span>
         <span className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]">{label}</span>
-        <span className="text-xs text-[var(--text-light)]">{editableFields.length}개 항목</span>
+        <span className="text-xs text-[var(--text-light)]">{totalItemCount}개 항목</span>
         <ChevronIcon className={`w-4 h-4 text-[var(--text-light)] transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
       {/* 콘텐츠 */}
       {expanded && (
         <div className="px-4 py-4 bg-[var(--editor-bg)] border-t border-[var(--editor-border)] space-y-4">
+          {/* RSVP 토글 설정 */}
+          {isRsvpBlock && (
+            <RsvpSettingsSection
+              rsvpConfig={data.rsvp}
+              onConfigChange={(newConfig) => {
+                // rsvp 전체 객체를 업데이트
+                const currentRsvp = data.rsvp || {}
+                const updatedRsvp = { ...currentRsvp, ...newConfig }
+                onFieldChange('rsvp.title' as VariablePath, updatedRsvp.title)
+                // 개별 필드로 업데이트 (nested 업데이트를 위해)
+                Object.entries(newConfig).forEach(([key, value]) => {
+                  // 직접 data.rsvp를 변경
+                })
+              }}
+              onFieldChange={onFieldChange}
+            />
+          )}
+
+          {/* 기존 편집 가능한 필드들 */}
           {editableFields.map((field) => (
             <VariableField
               key={field.binding}
@@ -326,6 +352,108 @@ function BlockDataSection({
         </div>
       )}
     </div>
+  )
+}
+
+// ============================================
+// RSVP Settings Section (RSVP 토글 설정)
+// ============================================
+
+interface RsvpSettingsSectionProps {
+  rsvpConfig?: RsvpConfig
+  onConfigChange: (config: Partial<RsvpConfig>) => void
+  onFieldChange: (path: VariablePath, value: unknown) => void
+}
+
+function RsvpSettingsSection({ rsvpConfig, onFieldChange }: RsvpSettingsSectionProps) {
+  const config = rsvpConfig || {}
+
+  // 토글 핸들러 (rsvp.showXXX 형태로 저장)
+  const handleToggle = (key: keyof RsvpConfig, value: boolean) => {
+    // WeddingData.rsvp 객체에 직접 업데이트
+    onFieldChange(`rsvp.${key}` as VariablePath, value)
+  }
+
+  return (
+    <div className="space-y-3 pb-4 border-b border-[var(--warm-200)]">
+      <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+        수집 정보 설정
+      </div>
+
+      <div className="space-y-2">
+        <ToggleItem
+          label="연락처"
+          description="참석자의 연락처를 수집합니다"
+          checked={config.showPhone ?? true}
+          onChange={(checked) => handleToggle('showPhone', checked)}
+        />
+
+        <ToggleItem
+          label="신랑측/신부측"
+          description="어느 측 하객인지 선택할 수 있습니다"
+          checked={config.showSide ?? true}
+          onChange={(checked) => handleToggle('showSide', checked)}
+        />
+
+        <ToggleItem
+          label="동반 인원수"
+          description="참석 가능 시 동반 인원수를 입력받습니다"
+          checked={config.showGuestCount ?? false}
+          onChange={(checked) => handleToggle('showGuestCount', checked)}
+        />
+
+        <ToggleItem
+          label="버스 탑승 여부"
+          description="참석 가능 시 전세버스 탑승 여부를 선택합니다"
+          checked={config.showBusOption ?? false}
+          onChange={(checked) => handleToggle('showBusOption', checked)}
+        />
+
+        <ToggleItem
+          label="식사 여부"
+          description="참석 가능 시 식사 여부를 선택합니다"
+          checked={config.showMeal ?? false}
+          onChange={(checked) => handleToggle('showMeal', checked)}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// Toggle Item (토글 스위치)
+// ============================================
+
+interface ToggleItemProps {
+  label: string
+  description?: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+}
+
+function ToggleItem({ label, description, checked, onChange }: ToggleItemProps) {
+  return (
+    <label className="flex items-start gap-3 cursor-pointer py-2">
+      {/* 토글 스위치 */}
+      <div className="relative flex-shrink-0 mt-0.5">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only peer"
+        />
+        <div className="w-9 h-5 bg-[var(--warm-200)] rounded-full peer-checked:bg-[var(--blush-400)] transition-colors" />
+        <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform" />
+      </div>
+
+      {/* 레이블 */}
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-[var(--text-primary)]">{label}</div>
+        {description && (
+          <div className="text-xs text-[var(--text-light)] mt-0.5">{description}</div>
+        )}
+      </div>
+    </label>
   )
 }
 

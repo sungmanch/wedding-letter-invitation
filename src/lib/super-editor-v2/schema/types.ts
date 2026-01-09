@@ -1112,11 +1112,12 @@ export interface RsvpConfig {
   title?: string
   titleEn?: string       // 영문 제목 (예: 'RSVP')
   description?: string
-  showGuestCount?: boolean  // 기본: true
-  showMeal?: boolean        // 기본: false
-  showMessage?: boolean     // 기본: true
-  showSide?: boolean
-  showBusOption?: boolean
+  showPhone?: boolean       // 기본: true (연락처 입력)
+  showGuestCount?: boolean  // 기본: false (동반인원 수)
+  showMeal?: boolean        // 기본: false (식사 여부)
+  showMessage?: boolean     // 기본: false (메모)
+  showSide?: boolean        // 기본: true (신랑측/신부측)
+  showBusOption?: boolean   // 기본: false (버스 탑승 여부)
   deadline?: string
   privacyPolicyUrl?: string
   privacyPolicyText?: string

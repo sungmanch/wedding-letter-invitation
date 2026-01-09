@@ -3,10 +3,11 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Calendar, Pencil, Share2, X, Copy, Check, Users, MoreVertical, Trash2 } from 'lucide-react'
+import { Calendar, Pencil, Share2, X, Copy, Check, Users, MoreVertical, Trash2, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { ResponseViewerModal } from './ResponseViewerModal'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { deleteDocument } from '@/lib/super-editor-v2/actions/document'
+import { createBranch } from '@/lib/super-editor-v2/actions/branch'
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
@@ -17,6 +18,7 @@ import type {
   GlobalAnimation,
   EditorDocument,
 } from '@/lib/super-editor-v2/schema/types'
+import type { BranchSummary } from './InvitationTabs'
 
 interface InvitationCardProps {
   id: string
@@ -27,6 +29,7 @@ interface InvitationCardProps {
   data: WeddingData
   animation: GlobalAnimation | null
   updatedAt: Date
+  branches: BranchSummary[]
 }
 
 const VIEWPORT_WIDTH = 375
@@ -41,6 +44,7 @@ export function InvitationCard({
   data,
   animation,
   updatedAt,
+  branches,
 }: InvitationCardProps) {
   const router = useRouter()
   const [showSharePopup, setShowSharePopup] = useState(false)
@@ -48,12 +52,31 @@ export function InvitationCard({
   const [showResponseModal, setShowResponseModal] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showBranches, setShowBranches] = useState(false)
+  const [isCreatingBranch, setIsCreatingBranch] = useState(false)
 
   const isPublished = status === 'published'
+  const hasBranches = branches.length > 0
 
   const handleDelete = async () => {
     await deleteDocument(id)
     router.refresh()
+  }
+
+  const handleCreateBranch = async () => {
+    try {
+      setIsCreatingBranch(true)
+      const newBranch = await createBranch(id, {
+        title: '새 버전',
+        copyLayout: true,
+      })
+      router.push(`/se2/branch/${newBranch.id}/edit`)
+    } catch (error) {
+      console.error('Failed to create branch:', error)
+      alert('추가 디자인 생성에 실패했습니다.')
+    } finally {
+      setIsCreatingBranch(false)
+    }
   }
 
   const shareUrl = typeof window !== 'undefined'
@@ -234,6 +257,80 @@ export function InvitationCard({
                 <Users className="h-3.5 w-3.5" />
                 RSVP·방명록
               </button>
+            )}
+          </div>
+
+          {/* 추가 디자인 섹션 */}
+          <div className="mt-4 pt-4 border-t border-[var(--sand-100)]">
+            <button
+              onClick={() => setShowBranches(!showBranches)}
+              className="w-full flex items-center justify-between text-sm text-[var(--text-muted)] hover:text-[var(--text-body)] transition-colors"
+            >
+              <span className="flex items-center gap-1.5">
+                <span>추가 디자인</span>
+                {hasBranches && (
+                  <span className="px-1.5 py-0.5 text-xs bg-[var(--sage-100)] text-[var(--sage-700)] rounded">
+                    {branches.length}
+                  </span>
+                )}
+              </span>
+              {showBranches ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </button>
+
+            {showBranches && (
+              <div className="mt-3 space-y-2">
+                {/* 브랜치 목록 */}
+                {branches.map((branch) => (
+                  <Link
+                    key={branch.id}
+                    href={`/se2/branch/${branch.id}/edit`}
+                    className="flex items-center justify-between p-2 rounded-lg bg-[var(--sand-50)] hover:bg-[var(--sand-100)] transition-colors"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[var(--sage-500)]">┗</span>
+                      <span className="text-sm text-[var(--text-body)] truncate">
+                        {branch.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {branch.status === 'published' && (
+                        <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded">
+                          발행됨
+                        </span>
+                      )}
+                      <Pencil className="h-3 w-3 text-[var(--text-muted)]" />
+                    </div>
+                  </Link>
+                ))}
+
+                {/* 새 버전 만들기 버튼 */}
+                <button
+                  onClick={handleCreateBranch}
+                  disabled={isCreatingBranch}
+                  className="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg border border-dashed border-[var(--sand-300)] text-sm text-[var(--text-muted)] hover:text-[var(--sage-600)] hover:border-[var(--sage-400)] hover:bg-[var(--sage-50)] transition-colors disabled:opacity-50"
+                >
+                  {isCreatingBranch ? (
+                    <span className="animate-pulse">생성 중...</span>
+                  ) : (
+                    <>
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>다른 디자인으로 공유하기</span>
+                    </>
+                  )}
+                </button>
+
+                {/* 안내 문구 */}
+                {!hasBranches && (
+                  <p className="text-xs text-[var(--text-light)] text-center mt-2">
+                    같은 정보로 다른 디자인을 만들어<br />
+                    신랑측/신부측에 따로 보내보세요
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </div>
