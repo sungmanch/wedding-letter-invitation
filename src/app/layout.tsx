@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/providers/AuthProvider'
 import { KakaoScript } from '@/components/KakaoScript'
+import { ClarityScript } from '@/components/ClarityScript'
 
 const BASE_URL = 'https://maisondeletter.com'
 
@@ -195,6 +196,7 @@ export default function RootLayout({
           <div className="wedding-desktop-container min-h-screen">{children}</div>
         </AuthProvider>
         <KakaoScript />
+        <ClarityScript />
       </body>
     </html>
   )
