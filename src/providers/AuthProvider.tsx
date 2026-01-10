@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { identifyClarity } from '@/components/ClarityScript'
 import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
@@ -25,6 +26,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
+
+        // Clarity 유저 매핑
+        if (user) {
+          identifyClarity(user.id, undefined, undefined, user.email || undefined)
+        }
 
         // 로그인 후 sessionStorage에 pendingEventId가 있으면 자동 claim
         if (user && typeof window !== 'undefined') {
@@ -55,6 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 인증 상태 변경 리스너 (전역에서 1개만)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+
+      // Clarity 유저 매핑
+      if (session?.user) {
+        identifyClarity(session.user.id, undefined, undefined, session.user.email || undefined)
+      }
 
       // 로그인 상태 변경 시에도 pendingEventId 체크
       if (session?.user && typeof window !== 'undefined') {
