@@ -49,8 +49,7 @@ export async function signUpWithEmail(
       }
     }
 
-    // Send Slack notification (don't block on failure)
-    notifyNewEmailSignup(
+    await notifyNewEmailSignup(
       data.user.id,
       email,
       name,

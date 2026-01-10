@@ -51,8 +51,7 @@ export async function GET(request: Request) {
       const isKakaoSignup = user.app_metadata?.provider === 'kakao'
 
       if (isNewUser && isKakaoSignup) {
-        // Don't await - don't block user redirect
-        notifyNewKakaoSignup(user.id, user.email, user.created_at).catch(console.error)
+        await notifyNewKakaoSignup(user.id, user.email, user.created_at).catch(console.error)
       }
 
       // Auto-claim event if eventId is in the redirect URL
