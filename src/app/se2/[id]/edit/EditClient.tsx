@@ -1038,26 +1038,39 @@ function MobilePreviewPanel({
   handleBlockHeightChange,
   onEditBlock,
 }: MobilePreviewPanelProps) {
-  // 모바일 프리뷰는 화면 전체를 사용
-  const MOBILE_WIDTH = 375
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight - 48 - 56 - 56 : 667 // header + tabs + bottom nav
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(375)
 
-  // 모바일 전용 스크롤 컨테이너 ref
-  const mobileScrollRef = useRef<HTMLDivElement>(null)
+  // header(48) + tabs(56) + bottom nav(56) = 160px
+  const MOBILE_CHROME_HEIGHT = 160
+  const viewportHeight = typeof window !== 'undefined'
+    ? window.innerHeight - MOBILE_CHROME_HEIGHT
+    : 667
 
-  // 활성화된 블록 ID 목록
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    setContainerWidth(container.clientWidth)
+
+    const resizeObserver = new ResizeObserver(() => {
+      setContainerWidth(container.clientWidth)
+    })
+    resizeObserver.observe(container)
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
   const enabledBlockIds = useMemo(
     () => editorDoc.blocks.filter(b => b.enabled).map(b => b.id),
     [editorDoc.blocks]
   )
 
-  // 모바일 프리뷰 전용 visible block 감지
   const { visibleBlockId } = useVisibleBlock({
-    containerRef: mobileScrollRef,
+    containerRef: scrollContainerRef,
     blockIds: enabledBlockIds,
   })
 
-  // 현재 보이는 블록 정보
   const visibleBlock = editorDoc.blocks.find(b => b.id === visibleBlockId)
   const blockLabel = visibleBlock
     ? BLOCK_TYPE_LABELS_MOBILE[visibleBlock.type] || visibleBlock.type
@@ -1066,7 +1079,7 @@ function MobilePreviewPanel({
   return (
     <div className="flex-1 flex flex-col bg-[var(--warm-100)]/50 overflow-hidden relative">
       <div
-        ref={mobileScrollRef}
+        ref={scrollContainerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden"
         style={{
           ...cssVariables,
@@ -1079,7 +1092,7 @@ function MobilePreviewPanel({
           document={editorDoc}
           style={resolvedStyle}
           viewportOverride={{
-            width: MOBILE_WIDTH,
+            width: containerWidth,
             height: viewportHeight,
           }}
         >
@@ -1100,7 +1113,7 @@ function MobilePreviewPanel({
               onElementSelect={handleElementSelect}
               onElementUpdate={handleElementUpdate}
               onBlockHeightChange={handleBlockHeightChange}
-              canvasWidth={MOBILE_WIDTH}
+              canvasWidth={containerWidth}
               canvasHeight={viewportHeight}
               showIdBadge
               disableScroll
