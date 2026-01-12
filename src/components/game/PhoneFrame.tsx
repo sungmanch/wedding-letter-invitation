@@ -53,6 +53,19 @@ export function PhoneFrame({
         }}
       />
 
+      {/* Screen top area (behind notch) - 노치 양쪽 배경 */}
+      <div
+        className="absolute"
+        style={{
+          top: bezelWidth,
+          left: bezelWidth,
+          width: contentWidth,
+          height: notchHeight,
+          background: 'var(--bg-pure)',
+          borderRadius: '20px 20px 0 0',
+        }}
+      />
+
       {/* Notch */}
       <div
         className="absolute left-1/2 -translate-x-1/2"
@@ -71,23 +84,19 @@ export function PhoneFrame({
         />
       </div>
 
-      {/* Screen content area - 노치 영역 포함하여 전체 화면으로 확장 */}
+      {/* Screen content area - 노치 아래에서 시작 */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: bezelWidth,
+          top: bezelWidth + notchHeight,
           left: bezelWidth,
           width: contentWidth,
-          height: height - bezelWidth - bottomBezel,
-          borderRadius: '20px 20px 20px 20px',
+          height: height - bezelWidth - notchHeight - bottomBezel,
+          borderRadius: '0 0 20px 20px',
           background: 'var(--bg-pure)',
         }}
       >
-        {/* 상단 패딩으로 노치 영역 확보 */}
-        <div
-          className="w-full h-full overflow-y-auto scrollbar-blush"
-          style={{ paddingTop: notchHeight }}
-        >
+        <div className="w-full h-full overflow-y-auto scrollbar-blush">
           {children}
         </div>
       </div>
