@@ -223,6 +223,7 @@ function MiniBlockRendererInner({
           height: blockHeight,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
+          pointerEvents: 'none', // 썸네일 내부 클릭 이벤트 비활성화 (갤러리 라이트박스 방지)
           ...cssVariables,
         }}
       >
