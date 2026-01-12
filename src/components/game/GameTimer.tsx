@@ -25,8 +25,8 @@ export function GameTimer({
     <div className="flex items-center justify-between w-full max-w-md mx-auto mb-4 px-4">
       {/* 타이머 */}
       <div className="flex items-center gap-2">
-        <Clock className="w-5 h-5 text-stone-500" />
-        <span className="text-lg font-mono font-semibold text-stone-700">
+        <Clock className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+        <span className="text-lg font-mono font-semibold" style={{ color: 'var(--text-body)' }}>
           {formatTime(elapsedTime)}
         </span>
       </div>
@@ -38,8 +38,8 @@ export function GameTimer({
           animate={{ scale: 1, opacity: 1 }}
           className="text-center"
         >
-          <p className="text-sm text-stone-500">카드를 외우세요!</p>
-          <p className="text-2xl font-bold text-rose-500">{previewCountdown}</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>카드를 외우세요!</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--blush-500)' }}>{previewCountdown}</p>
         </motion.div>
       )}
 
@@ -47,12 +47,12 @@ export function GameTimer({
       <div className="flex items-center gap-4">
         {/* 실수 횟수 */}
         <div className="flex items-center gap-1">
-          <AlertCircle className="w-4 h-4 text-red-400" />
-          <span className="text-sm text-stone-600">{mistakes}</span>
+          <AlertCircle className="w-4 h-4" style={{ color: 'var(--blush-400)' }} />
+          <span className="text-sm" style={{ color: 'var(--text-body)' }}>{mistakes}</span>
         </div>
 
         {/* 매칭 진행률 */}
-        <div className="text-sm text-stone-600">
+        <div className="text-sm" style={{ color: 'var(--text-body)' }}>
           {matchedPairs}/{totalPairs}
         </div>
       </div>

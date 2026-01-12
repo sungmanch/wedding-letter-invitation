@@ -46,14 +46,14 @@ export function MemoryGame() {
   }, [phase])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-stone-100 py-8 px-4">
+    <div className="min-h-screen py-8 px-4" style={{ background: 'linear-gradient(to bottom, var(--bg-warm), var(--warm-100))' }}>
       <div className="max-w-3xl mx-auto">
         {/* 헤더 */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-stone-800 mb-2">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             웨딩 카드 짝 맞추기
           </h1>
-          <p className="text-sm text-stone-500">
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             같은 섹션의 카드를 찾아 짝을 맞춰보세요!
           </p>
         </div>
@@ -68,7 +68,7 @@ export function MemoryGame() {
               exit={{ opacity: 0 }}
               className="text-center py-20"
             >
-              <p className="text-stone-600 mb-6">
+              <p className="mb-6" style={{ color: 'var(--text-body)' }}>
                 14가지 청첩장 섹션의 짝을 맞춰보세요!<br />
                 빠르게 맞출수록 높은 점수를 받을 수 있어요.
               </p>
@@ -76,7 +76,8 @@ export function MemoryGame() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={startGame}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-rose-500 text-white rounded-full font-semibold shadow-lg hover:bg-rose-600 transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-4 text-white rounded-full font-semibold shadow-lg transition-colors"
+                style={{ background: 'var(--blush-500)' }}
               >
                 <Play className="w-5 h-5" />
                 게임 시작
@@ -110,7 +111,8 @@ export function MemoryGame() {
               <div className="text-center mt-6">
                 <button
                   onClick={resetGame}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-stone-500 hover:text-stone-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 transition-colors"
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   <RotateCcw className="w-4 h-4" />
                   다시 시작

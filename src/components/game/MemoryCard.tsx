@@ -50,13 +50,13 @@ export function MemoryCard({
           className="absolute inset-0 rounded-lg shadow-md flex items-center justify-center"
           style={{
             backfaceVisibility: 'hidden',
-            background: 'linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%)',
-            border: '1px solid #d6d3d1',
+            background: 'linear-gradient(135deg, var(--bg-warm) 0%, var(--warm-200) 100%)',
+            border: '1px solid var(--border-default)',
           }}
         >
           <div className="text-center">
-            <div className="text-xs font-medium text-stone-400">Maison de</div>
-            <div className="text-sm font-semibold text-stone-500">Letter</div>
+            <div className="text-xs font-medium" style={{ color: 'var(--text-light)' }}>Maison de</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--blush-500)' }}>Letter</div>
           </div>
         </div>
 
@@ -87,12 +87,13 @@ export function MemoryCard({
       <AnimatePresence>
         {status === 'matched' && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center bg-green-500/20 rounded-lg"
+            className="absolute inset-0 flex items-center justify-center rounded-lg"
+            style={{ background: 'rgba(223, 160, 172, 0.2)' }}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--blush-500)' }}>
               <Check className="w-5 h-5 text-white" />
             </div>
           </motion.div>

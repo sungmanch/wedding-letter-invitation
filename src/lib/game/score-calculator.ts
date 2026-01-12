@@ -86,14 +86,18 @@ export function formatTime(ms: number): string {
 }
 
 /**
- * 등급에 따른 색상
+ * 등급에 따른 색상 (브랜드 팔레트 기반)
+ * - S: Gold (특별한 느낌)
+ * - A: Blush-600 (브랜드 primary)
+ * - B: Blush-400 (브랜드 accent)
+ * - C: Gray (neutral)
  */
 export function getGradeColor(grade: ScoreGrade): string {
   switch (grade) {
-    case 'S': return '#FFD700'  // Gold
-    case 'A': return '#C0C0C0'  // Silver
-    case 'B': return '#CD7F32'  // Bronze
-    case 'C': return '#808080'  // Gray
+    case 'S': return '#C9A962'  // WKW Gold (브랜드 골드)
+    case 'A': return '#BE6B7C'  // Blush-600
+    case 'B': return '#DFA0AC'  // Blush-400
+    case 'C': return '#999999'  // Text-light
   }
 }
 

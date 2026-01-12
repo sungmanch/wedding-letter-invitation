@@ -54,11 +54,11 @@ export function GameResult({
             {scoreResult.grade}
           </span>
         </div>
-        <p className="text-2xl font-bold text-stone-800 mb-1">
+        <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
           {scoreResult.score.toLocaleString()}점
         </p>
-        <p className="text-stone-600">{getGradeMessage(scoreResult.grade)}</p>
-        <div className="flex justify-center gap-4 mt-2 text-sm text-stone-500">
+        <p style={{ color: 'var(--text-body)' }}>{getGradeMessage(scoreResult.grade)}</p>
+        <div className="flex justify-center gap-4 mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
           <span>시간: {formatTime(scoreResult.timeSeconds * 1000)}</span>
           <span>실수: {scoreResult.mistakes}회</span>
         </div>
@@ -80,13 +80,13 @@ export function GameResult({
           animate={{ opacity: 1 }}
           className="mb-8"
         >
-          <p className="text-sm text-stone-600 mb-4">
+          <p className="text-sm mb-4" style={{ color: 'var(--text-body)' }}>
             이렇게 섹션을 조합해서 나만의 청첩장을 만들 수 있어요!
           </p>
 
           {/* 미니 청첩장 프리뷰 (세로 스크롤) */}
           <div className="flex justify-center">
-            <div className="w-[200px] h-[400px] bg-white rounded-xl shadow-lg overflow-y-auto border">
+            <div className="w-[200px] h-[400px] rounded-xl shadow-lg overflow-y-auto" style={{ background: 'var(--bg-pure)', border: '1px solid var(--border-default)' }}>
               {orderedPresets.slice(0, 6).map((preset, index) => (
                 <motion.div
                   key={preset.preset.id}
@@ -115,14 +115,16 @@ export function GameResult({
       >
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-rose-500 text-white rounded-full font-semibold hover:bg-rose-600 transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 text-white rounded-full font-semibold transition-colors"
+          style={{ background: 'var(--blush-500)' }}
         >
           내 청첩장 만들기
           <ArrowRight className="w-4 h-4" />
         </Link>
         <button
           onClick={onRestart}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-stone-300 text-stone-600 rounded-full font-semibold hover:bg-stone-50 transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors"
+          style={{ border: '1px solid var(--border-default)', color: 'var(--text-body)', background: 'var(--bg-pure)' }}
         >
           <RotateCcw className="w-4 h-4" />
           다시 하기
