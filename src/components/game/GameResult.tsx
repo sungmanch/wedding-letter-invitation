@@ -35,11 +35,13 @@ export function GameResult({
   const isMobile = useMediaQuery(BREAKPOINTS.mobile)
   const isTablet = useMediaQuery(BREAKPOINTS.tablet)
 
+  // PhoneFrame 내부 스크롤 영역에 맞춰 블록 높이 계산
+  // 6개 블록이 스크롤 가능하도록 blockHeight를 적절히 설정
   const previewConfig = isMobile
-    ? { phoneWidth: 240, phoneHeight: 480, blockWidth: 224, blockHeight: 130 }
+    ? { phoneWidth: 240, phoneHeight: 480, blockWidth: 224, blockHeight: 100 }
     : isTablet
-      ? { phoneWidth: 300, phoneHeight: 600, blockWidth: 284, blockHeight: 150 }
-      : { phoneWidth: 340, phoneHeight: 680, blockWidth: 324, blockHeight: 160 }
+      ? { phoneWidth: 300, phoneHeight: 600, blockWidth: 284, blockHeight: 120 }
+      : { phoneWidth: 340, phoneHeight: 680, blockWidth: 324, blockHeight: 140 }
 
   const { phoneWidth, phoneHeight, blockWidth, blockHeight } = previewConfig
 

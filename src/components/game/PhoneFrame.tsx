@@ -21,7 +21,8 @@ export function PhoneFrame({
   const bottomBezel = 16
 
   const contentWidth = width - (bezelWidth * 2)
-  const contentHeight = height - notchHeight - bottomBezel
+  // bezelWidth(top) + notchHeight + bottomBezel를 제외한 높이
+  const contentHeight = height - bezelWidth - notchHeight - bottomBezel
 
   return (
     <div
