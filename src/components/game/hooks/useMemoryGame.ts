@@ -10,6 +10,7 @@ import {
   createGameCards,
   shuffleCards,
   type GameCard,
+  type GamePreset,
 } from '@/lib/game/preset-selector'
 import { calculateScore, type ScoreResult } from '@/lib/game/score-calculator'
 import { useGameTimer } from './useGameTimer'
@@ -30,6 +31,7 @@ export interface UseMemoryGameReturn {
   totalPairs: number
   elapsedTime: number
   scoreResult: ScoreResult | null
+  matchedPresets: GamePreset[]
 
   startGame: () => void
   selectCard: (cardId: number) => void
@@ -43,6 +45,7 @@ export function useMemoryGame(): UseMemoryGameReturn {
   const [matchedPairs, setMatchedPairs] = useState(0)
   const [totalPairs, setTotalPairs] = useState(0)
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
+  const [matchedPresets, setMatchedPresets] = useState<GamePreset[]>([])
 
   const timer = useGameTimer()
   const selectedCardsRef = useRef<number[]>([])
@@ -52,6 +55,9 @@ export function useMemoryGame(): UseMemoryGameReturn {
   const startGame = useCallback(() => {
     // 1. 랜덤 프리셋 선택
     const presets = selectRandomPresets()
+
+    // 매칭된 프리셋 저장 (결과 화면에서 사용)
+    setMatchedPresets(presets)
 
     // 2. 카드 생성 (각 프리셋 2장씩)
     const gameCards = createGameCards(presets)
@@ -182,6 +188,7 @@ export function useMemoryGame(): UseMemoryGameReturn {
     setMatchedPairs(0)
     setTotalPairs(0)
     setScoreResult(null)
+    setMatchedPresets([])
     timer.reset()
     selectedCardsRef.current = []
     isProcessingRef.current = false
@@ -195,6 +202,7 @@ export function useMemoryGame(): UseMemoryGameReturn {
     totalPairs,
     elapsedTime: timer.elapsedTime,
     scoreResult,
+    matchedPresets,
 
     startGame,
     selectCard,

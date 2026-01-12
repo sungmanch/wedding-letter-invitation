@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Play, RotateCcw } from 'lucide-react'
 import { GameBoard } from './GameBoard'
 import { GameTimer } from './GameTimer'
+import { GameResult } from './GameResult'
 import { useMemoryGame } from './hooks/useMemoryGame'
 
 export function MemoryGame() {
@@ -16,6 +17,7 @@ export function MemoryGame() {
     totalPairs,
     elapsedTime,
     scoreResult,
+    matchedPresets,
     startGame,
     selectCard,
     resetGame,
@@ -124,53 +126,13 @@ export function MemoryGame() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-center py-20"
+              className="py-8"
             >
-              <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto">
-                <h2 className="text-3xl font-bold text-stone-800 mb-4">
-                  게임 완료!
-                </h2>
-
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <p className="text-sm text-stone-500 mb-1">최종 점수</p>
-                    <p className="text-4xl font-bold text-rose-500">{scoreResult.score}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <p className="text-xs text-stone-500">소요 시간</p>
-                      <p className="text-lg font-semibold text-stone-700">
-                        {Math.floor(scoreResult.timeSeconds / 60)}분 {scoreResult.timeSeconds % 60}초
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-stone-500">실수 횟수</p>
-                      <p className="text-lg font-semibold text-stone-700">{scoreResult.mistakes}회</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg p-4">
-                    <p className="text-sm text-stone-600 mb-1">획득 등급</p>
-                    <p className="text-5xl font-bold text-rose-600 mb-2">{scoreResult.grade}</p>
-                    {scoreResult.discountPercent > 0 && (
-                      <p className="text-sm font-semibold text-rose-600">
-                        {scoreResult.discountPercent}% 할인 쿠폰 획득!
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={resetGame}
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-rose-500 text-white rounded-full font-semibold shadow-lg hover:bg-rose-600 transition-colors"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  다시 도전
-                </motion.button>
-              </div>
+              <GameResult
+                scoreResult={scoreResult}
+                matchedPresets={matchedPresets}
+                onRestart={resetGame}
+              />
             </motion.div>
           )}
         </AnimatePresence>
