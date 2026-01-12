@@ -1,7 +1,7 @@
 import React from 'react'
 import { redirect } from 'next/navigation'
 import { Polar } from '@polar-sh/sdk'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import Link from 'next/link'
 import { db } from '@/lib/db'
 import { editorDocumentsV2 } from '@/lib/super-editor-v2/schema/db-schema'
@@ -140,18 +140,28 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
           .where(eq(gameDiscountCodes.polarDiscountId, discountId))
           .limit(1)
 
-        if (discountRecord && !discountRecord.used) {
-          // 할인코드 사용 처리
-          await db
+        if (discountRecord) {
+          // 할인코드 사용 처리 (atomic update로 race condition 방지)
+          const [updated] = await db
             .update(gameDiscountCodes)
             .set({
               used: true,
               usedAt: new Date(),
               userId: document.userId,
             })
-            .where(eq(gameDiscountCodes.id, discountRecord.id))
+            .where(
+              and(
+                eq(gameDiscountCodes.id, discountRecord.id),
+                eq(gameDiscountCodes.used, false)
+              )
+            )
+            .returning()
 
-          console.log('Discount code marked as used:', discountRecord.code)
+          if (updated) {
+            console.log('Discount code marked as used:', discountRecord.code)
+          } else {
+            console.warn('Discount code already used:', discountRecord.code)
+          }
         }
       }
     } catch (discountError) {
