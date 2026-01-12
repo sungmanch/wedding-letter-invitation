@@ -11,8 +11,9 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, forwardRef } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronDown, Sparkles } from 'lucide-react'
+import { ChevronDown, Sparkles, Gamepad2, ArrowRight } from 'lucide-react'
 import { Button, Badge } from '@/components/ui'
+import Link from 'next/link'
 import { MiniHeroRenderer, MiniBlockRenderer } from '../subway/MiniBlockRenderer'
 import { TEMPLATE_IDS } from '../subway/SubwayBuilderContext'
 import { PaperInvitationModal } from './PaperInvitationModal'
@@ -195,6 +196,18 @@ export function HeroSection() {
                 Beta
               </Badge>
             </button>
+
+            {/* 게임하고 할인받기 버튼 */}
+            <Link
+              href="/game/memory"
+              className="group flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--blush-200)] bg-gradient-to-r from-[var(--warm-100)] to-[var(--blush-100)] hover:from-[var(--blush-100)] hover:to-[var(--blush-200)] hover:border-[var(--blush-300)] transition-all"
+            >
+              <Gamepad2 className="w-4 h-4 text-[var(--blush-500)]" />
+              <span className="text-sm text-[var(--text-body)] group-hover:text-[var(--blush-600)]">
+                게임하고 최대 50% 할인받기
+              </span>
+              <ArrowRight className="w-3 h-3 text-[var(--blush-400)] group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </motion.div>
 
           {/* Paper Invitation Modal */}
