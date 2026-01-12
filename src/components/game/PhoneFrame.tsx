@@ -21,8 +21,6 @@ export function PhoneFrame({
   const bottomBezel = 16
 
   const contentWidth = width - (bezelWidth * 2)
-  // bezelWidth(top) + notchHeight + bottomBezel를 제외한 높이
-  const contentHeight = height - bezelWidth - notchHeight - bottomBezel
 
   return (
     <div
@@ -73,19 +71,23 @@ export function PhoneFrame({
         />
       </div>
 
-      {/* Screen content area */}
+      {/* Screen content area - 노치 영역 포함하여 전체 화면으로 확장 */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: bezelWidth + notchHeight,
+          top: bezelWidth,
           left: bezelWidth,
           width: contentWidth,
-          height: contentHeight,
-          borderRadius: '0 0 20px 20px',
+          height: height - bezelWidth - bottomBezel,
+          borderRadius: '20px 20px 20px 20px',
           background: 'var(--bg-pure)',
         }}
       >
-        <div className="w-full h-full overflow-y-auto scrollbar-blush">
+        {/* 상단 패딩으로 노치 영역 확보 */}
+        <div
+          className="w-full h-full overflow-y-auto scrollbar-blush"
+          style={{ paddingTop: notchHeight }}
+        >
           {children}
         </div>
       </div>
