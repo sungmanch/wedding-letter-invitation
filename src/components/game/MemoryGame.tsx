@@ -47,7 +47,7 @@ export function MemoryGame() {
 
   return (
     <div className="min-h-screen py-8 px-4" style={{ background: 'linear-gradient(to bottom, var(--bg-warm), var(--warm-100))' }}>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* 헤더 */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>

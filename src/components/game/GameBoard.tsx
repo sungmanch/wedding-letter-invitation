@@ -23,14 +23,14 @@ export function GameBoard({
   disabled,
   columns = 7,
 }: GameBoardProps) {
-  // 카드 크기 계산 (화면에 맞게)
-  const cardWidth = 75
-  const cardHeight = 110
-  const gap = 8
+  // 카드 크기 (7열 2행에 맞게 크게)
+  const cardWidth = 120
+  const cardHeight = 180
+  const gap = 12
 
   return (
     <motion.div
-      className="flex justify-center"
+      className="flex justify-center overflow-x-auto px-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
