@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.1",
+    "@esbuild/darwin-arm64": "^0.27.2",
     "@google/generative-ai": "^0.21.0",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.2",
