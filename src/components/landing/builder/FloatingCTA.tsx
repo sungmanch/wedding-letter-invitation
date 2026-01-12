@@ -9,9 +9,10 @@
  * - Safe area 대응
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Loader2, Eye } from 'lucide-react'
+import { ArrowRight, Loader2, Eye, Gamepad2, X } from 'lucide-react'
+import Link from 'next/link'
 import { useSubwayBuilder } from '../subway/SubwayBuilderContext'
 import { MiniHeroRenderer } from '../subway/MiniBlockRenderer'
 
@@ -26,6 +27,20 @@ interface FloatingCTAProps {
 export function FloatingCTA({ className = '' }: FloatingCTAProps) {
   const { state, saveAndCreateDocument, isCreating } = useSubwayBuilder()
   const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [showGameBanner, setShowGameBanner] = useState(true)
+
+  // sessionStorage에서 배너 닫힘 상태 복원
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem('game-banner-dismissed')
+    if (dismissed === 'true') {
+      setShowGameBanner(false)
+    }
+  }, [])
+
+  const dismissGameBanner = () => {
+    setShowGameBanner(false)
+    sessionStorage.setItem('game-banner-dismissed', 'true')
+  }
 
   return (
     <>
@@ -44,6 +59,41 @@ export function FloatingCTA({ className = '' }: FloatingCTAProps) {
         `}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
+        {/* 게임 배너 - 플로팅 바 위에 표시 */}
+        <AnimatePresence>
+          {showGameBanner && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="relative bg-gradient-to-r from-[var(--blush-400)] to-[var(--blush-500)]">
+                <Link
+                  href="/game/memory"
+                  className="flex items-center justify-center gap-2 px-4 py-2 text-white text-xs font-medium"
+                >
+                  <Gamepad2 className="w-3.5 h-3.5" />
+                  <span>청첩장 섹션 맞추고 50% 할인!</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    dismissGameBanner()
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
+                  aria-label="배너 닫기"
+                >
+                  <X className="w-3.5 h-3.5 text-white/80 hover:text-white" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex items-center gap-3 px-4 py-3">
           {/* 미니 프리뷰 */}
           <button

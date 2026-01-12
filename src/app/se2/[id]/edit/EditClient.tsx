@@ -490,6 +490,13 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
   // 통합 dirty 상태 (문서 또는 OG 변경)
   const hasChanges = isDirty || ogDirty
 
+  // 체크아웃 URL 생성 (할인코드는 Polar 결제창에서 직접 입력)
+  const checkoutUrl = useMemo(() => {
+    const baseUrl = 'https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16'
+    const metadata = encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))
+    return `${baseUrl}?metadata=${metadata}`
+  }, [dbDocument.id])
+
   // 키보드 단축키 (Cmd/Ctrl + S)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -541,7 +548,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {/* 더보기 메뉴 */}
             <MobileHeaderMenu
               previewUrl={`/se2/${dbDocument.id}/preview`}
-              publishUrl={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
+              publishUrl={checkoutUrl}
               isPaid={dbDocument.isPaid}
               isDirty={hasChanges}
               onDiscard={() => setShowDiscardDialog(true)}
@@ -619,7 +626,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
             {/* 발행 버튼 */}
             {!dbDocument.isPaid && (
               <a
-                href={`https://buy.polar.sh/polar_cl_NJWntD9C7kMuqIB70Nw1JFxJ5CBcRHBIaA0yq3l3w16?metadata=${encodeURIComponent(JSON.stringify({ documentId: dbDocument.id }))}`}
+                href={checkoutUrl}
                 className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--blush-400)] text-white hover:bg-[var(--blush-500)] transition-colors flex items-center gap-2"
               >
                 <CreditCardIcon className="w-4 h-4" />
@@ -1314,3 +1321,4 @@ function CheckIcon({ className }: { className?: string }) {
     </svg>
   )
 }
+

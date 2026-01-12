@@ -1,38 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { nanoid } from 'nanoid'
+import { customAlphabet } from 'nanoid'
+import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { gameDiscountCodes } from '@/lib/db/game-schema'
-import { eq, and } from 'drizzle-orm'
+import { createPolarDiscount } from '@/lib/game/polar-discount'
+
+// Polar.sh는 하이픈/언더스코어를 지원하지 않음 - 영숫자만 사용
+const generateCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6)
+
+// ============================================
+// Response Helpers
+// ============================================
+
+function errorResponse(message: string, status: number): NextResponse {
+  return NextResponse.json({ error: message }, { status })
+}
+
+function badRequest(message: string): NextResponse {
+  return errorResponse(message, 400)
+}
+
+function serverError(message: string): NextResponse {
+  return errorResponse(message, 500)
+}
+
+// ============================================
+// Validation Helpers
+// ============================================
+
+type DiscountCodeValidation =
+  | { valid: false; error: string }
+  | { valid: true; discount: typeof gameDiscountCodes.$inferSelect }
+
+async function validateDiscountCode(code: string): Promise<DiscountCodeValidation> {
+  const discount = await db.query.gameDiscountCodes.findFirst({
+    where: eq(gameDiscountCodes.code, code),
+  })
+
+  if (!discount) {
+    return { valid: false, error: 'Invalid code' }
+  }
+
+  if (new Date() > discount.expiresAt) {
+    return { valid: false, error: 'Expired code' }
+  }
+
+  if (discount.used) {
+    return { valid: false, error: 'Code already used' }
+  }
+
+  return { valid: true, discount }
+}
+
+// ============================================
+// API Handlers
+// ============================================
 
 // 할인코드 생성 API
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json()
     const { score, grade, discountPercent } = body
 
     // 유효성 검사
     if (typeof score !== 'number' || !grade || typeof discountPercent !== 'number') {
-      return NextResponse.json(
-        { error: 'Invalid parameters' },
-        { status: 400 }
-      )
+      return badRequest('Invalid parameters')
     }
 
     // B등급 미만은 할인코드 없음
     if (discountPercent <= 0) {
-      return NextResponse.json(
-        { error: 'No discount available for this grade' },
-        { status: 400 }
-      )
+      return badRequest('No discount available for this grade')
     }
 
     // 할인코드 생성 (고유한 코드 보장)
-    let code: string
+    let code: string = ''
     let attempts = 0
     const maxAttempts = 10
 
     while (attempts < maxAttempts) {
-      code = `WEDDING-${nanoid(6).toUpperCase()}`
+      code = `WEDDING${generateCode()}`
 
       // 코드 중복 확인
       const existing = await db.query.gameDiscountCodes.findFirst({
@@ -46,25 +92,47 @@ export async function POST(request: NextRequest) {
     }
 
     if (attempts >= maxAttempts) {
-      return NextResponse.json(
-        { error: 'Failed to generate unique code' },
-        { status: 500 }
-      )
+      return serverError('Failed to generate unique code')
     }
 
     // 만료일 계산 (7일 후)
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7)
 
+    // Polar.sh에 할인 코드 생성
+    let polarDiscountId: string | null = null
+    let polarSyncStatus: 'pending' | 'synced' | 'failed' = 'pending'
+    let polarSyncError: string | null = null
+
+    const polarResult = await createPolarDiscount({
+      code,
+      discountPercent,
+      expiresAt,
+      name: `메모리게임 ${grade}등급 ${discountPercent}% 할인`,
+    })
+
+    if (polarResult.success) {
+      polarDiscountId = polarResult.polarDiscountId
+      polarSyncStatus = 'synced'
+    } else {
+      // Polar 연동 실패해도 로컬 코드는 생성 (graceful degradation)
+      polarSyncStatus = 'failed'
+      polarSyncError = polarResult.error
+      console.warn('Polar discount sync failed, continuing with local code:', polarResult.error)
+    }
+
     // DB에 저장
     const [inserted] = await db.insert(gameDiscountCodes).values({
-      code: code!,
+      code,
       discountPercent,
       score,
       grade,
       expiresAt,
       userId: null, // 비로그인 사용자
       used: false,
+      polarDiscountId,
+      polarSyncStatus,
+      polarSyncError,
     }).returning()
 
     return NextResponse.json({
@@ -72,57 +140,31 @@ export async function POST(request: NextRequest) {
       discountPercent: inserted.discountPercent,
       grade: inserted.grade,
       expiresAt: inserted.expiresAt.toISOString(),
+      polarSynced: polarSyncStatus === 'synced',
     })
   } catch (error) {
     console.error('Error creating discount code:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return serverError('Internal server error')
   }
 }
 
 // 할인코드 검증 API
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Code parameter is required' },
-        { status: 400 }
-      )
+      return badRequest('Code parameter is required')
     }
 
-    // DB에서 코드 검증
-    const discount = await db.query.gameDiscountCodes.findFirst({
-      where: eq(gameDiscountCodes.code, code),
-    })
+    const validation = await validateDiscountCode(code)
 
-    if (!discount) {
-      return NextResponse.json({
-        valid: false,
-        error: 'Invalid code',
-      })
+    if (!validation.valid) {
+      return NextResponse.json({ valid: false, error: validation.error })
     }
 
-    // 만료 확인
-    if (new Date() > discount.expiresAt) {
-      return NextResponse.json({
-        valid: false,
-        error: 'Expired code',
-      })
-    }
-
-    // 사용 여부 확인
-    if (discount.used) {
-      return NextResponse.json({
-        valid: false,
-        error: 'Code already used',
-      })
-    }
-
+    const { discount } = validation
     return NextResponse.json({
       valid: true,
       discountPercent: discount.discountPercent,
@@ -132,52 +174,25 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error validating discount code:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return serverError('Internal server error')
   }
 }
 
 // 할인코드 사용 처리 API
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json()
     const { code, userId } = body
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Code is required' },
-        { status: 400 }
-      )
+      return badRequest('Code is required')
     }
 
-    // DB에서 코드 조회
-    const discount = await db.query.gameDiscountCodes.findFirst({
-      where: eq(gameDiscountCodes.code, code),
-    })
+    const validation = await validateDiscountCode(code)
 
-    if (!discount) {
-      return NextResponse.json(
-        { error: 'Invalid code' },
-        { status: 404 }
-      )
-    }
-
-    // 만료 확인
-    if (new Date() > discount.expiresAt) {
-      return NextResponse.json(
-        { error: 'Expired code' },
-        { status: 400 }
-      )
-    }
-
-    // 이미 사용됨
-    if (discount.used) {
-      return NextResponse.json(
-        { error: 'Code already used' },
-        { status: 400 }
-      )
+    if (!validation.valid) {
+      const status = validation.error === 'Invalid code' ? 404 : 400
+      return errorResponse(validation.error, status)
     }
 
     // 사용 처리
@@ -197,9 +212,6 @@ export async function PATCH(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error using discount code:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return serverError('Internal server error')
   }
 }

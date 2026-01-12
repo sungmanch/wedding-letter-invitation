@@ -24,3 +24,12 @@ export {
   DISCOUNT_CODE_VALIDITY_DAYS,
   type DiscountInfo,
 } from './discount-code'
+
+export {
+  createPolarDiscount,
+  deletePolarDiscount,
+  getPolarDiscount,
+  buildCheckoutUrlWithDiscount,
+  type CreatePolarDiscountParams,
+  type CreatePolarDiscountResult,
+} from './polar-discount'

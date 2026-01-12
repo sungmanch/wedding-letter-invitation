@@ -33,9 +33,9 @@ const GRADE_THRESHOLDS = {
 
 // 등급별 할인율
 const DISCOUNT_BY_GRADE: Record<ScoreGrade, number> = {
-  S: 30,  // 30%
-  A: 20,  // 20%
-  B: 10,  // 10%
+  S: 50,  // 50%
+  A: 30,  // 30%
+  B: 20,  // 20%
   C: 0,   // 0%
 }
 
