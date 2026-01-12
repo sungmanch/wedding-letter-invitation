@@ -69,7 +69,7 @@ export function MemoryGame() {
               className="text-center py-20"
             >
               <p className="mb-6" style={{ color: 'var(--text-body)' }}>
-                14가지 청첩장 섹션의 짝을 맞춰보세요!<br />
+                7가지 청첩장 섹션의 짝을 맞춰보세요!<br />
                 빠르게 맞출수록 높은 점수를 받을 수 있어요.
               </p>
               <motion.button

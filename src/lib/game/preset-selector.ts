@@ -10,22 +10,16 @@ import {
   type BlockPreset,
 } from '@/lib/super-editor-v2/presets/blocks'
 
-// 게임에서 사용할 섹션 타입들 (14개)
+// 게임에서 사용할 섹션 타입들 (7개 - 시각적으로 구분이 잘 되는 섹션만)
+// 14개는 너무 어렵고, 텍스트 위주 섹션은 비슷해 보여서 제외
 export const GAME_SECTION_TYPES: BlockType[] = [
-  'hero',
-  'gallery',
-  'greeting-parents',
-  'profile',
-  'calendar',
-  'rsvp',
-  'notice',
-  'location',
-  'account',
-  'message',
-  'contact',
-  'interview',
-  'ending',
-  'wreath',
+  'hero',       // 큰 이미지 + 제목
+  'gallery',    // 사진 그리드
+  'profile',    // 신랑신부 프로필
+  'calendar',   // 달력/날짜
+  'location',   // 지도
+  'account',    // 계좌 카드
+  'ending',     // 마무리 이미지
 ]
 
 // 섹션 타입별 한글 이름
