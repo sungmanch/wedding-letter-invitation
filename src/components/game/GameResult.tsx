@@ -5,6 +5,9 @@ import { motion } from 'framer-motion'
 import { Trophy, ArrowRight, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { MiniBlockRenderer } from '@/components/landing/subway/MiniBlockRenderer'
+import { PhoneFrame } from './PhoneFrame'
+import { Confetti } from './Confetti'
+import { useMediaQuery, BREAKPOINTS } from '@/lib/super-editor-v2/hooks/useMediaQuery'
 import type { ScoreResult } from '@/lib/game/score-calculator'
 import type { GamePreset } from '@/lib/game/preset-selector'
 import {
@@ -26,10 +29,29 @@ export function GameResult({
   onRestart,
 }: GameResultProps) {
   const [showInvitation, setShowInvitation] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(true)
+
+  // 반응형 프리뷰 크기
+  const isMobile = useMediaQuery(BREAKPOINTS.mobile)
+  const isTablet = useMediaQuery(BREAKPOINTS.tablet)
+
+  const previewConfig = isMobile
+    ? { phoneWidth: 240, phoneHeight: 480, blockWidth: 224, blockHeight: 130 }
+    : isTablet
+      ? { phoneWidth: 300, phoneHeight: 600, blockWidth: 284, blockHeight: 150 }
+      : { phoneWidth: 340, phoneHeight: 680, blockWidth: 324, blockHeight: 160 }
+
+  const { phoneWidth, phoneHeight, blockWidth, blockHeight } = previewConfig
 
   // 결과 표시 후 청첩장 애니메이션 시작
   useEffect(() => {
     const timer = setTimeout(() => setShowInvitation(true), 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Confetti 3초 후 중지
+  useEffect(() => {
+    const timer = setTimeout(() => setShowConfetti(false), 3000)
     return () => clearTimeout(timer)
   }, [])
 
@@ -38,6 +60,9 @@ export function GameResult({
 
   return (
     <div className="text-center">
+      {/* Confetti 축하 효과 */}
+      <Confetti show={showConfetti} particleCount={25} />
+
       {/* 점수 및 등급 */}
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
@@ -80,28 +105,28 @@ export function GameResult({
           animate={{ opacity: 1 }}
           className="mb-8"
         >
-          <p className="text-sm mb-4" style={{ color: 'var(--text-body)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-body)' }}>
             이렇게 섹션을 조합해서 나만의 청첩장을 만들 수 있어요!
           </p>
 
-          {/* 미니 청첩장 프리뷰 (세로 스크롤) */}
+          {/* Phone Frame 미니 청첩장 프리뷰 */}
           <div className="flex justify-center">
-            <div className="w-[200px] h-[400px] rounded-xl shadow-lg overflow-y-auto" style={{ background: 'var(--bg-pure)', border: '1px solid var(--border-default)' }}>
+            <PhoneFrame width={phoneWidth} height={phoneHeight}>
               {orderedPresets.slice(0, 6).map((preset, index) => (
                 <motion.div
                   key={preset.preset.id}
-                  initial={{ y: -50, opacity: 0 }}
+                  initial={{ y: -30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.15, type: 'spring' }}
+                  transition={{ delay: 0.5 + index * 0.15, type: 'spring' }}
                 >
                   <MiniBlockRenderer
                     presetId={preset.preset.id}
-                    width={200}
-                    height={120}
+                    width={blockWidth}
+                    height={blockHeight}
                   />
                 </motion.div>
               ))}
-            </div>
+            </PhoneFrame>
           </div>
         </motion.div>
       )}

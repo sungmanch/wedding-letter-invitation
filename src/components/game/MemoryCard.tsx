@@ -1,8 +1,9 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check } from 'lucide-react'
+import { Check, Heart } from 'lucide-react'
 import { MiniBlockRenderer } from '@/components/landing/subway/MiniBlockRenderer'
+import { MatchSparkles } from './MatchSparkles'
 import type { GameCard } from '@/lib/game/preset-selector'
 
 interface MemoryCardProps {
@@ -45,18 +46,54 @@ export function MemoryCard({
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.5, type: 'spring', stiffness: 300, damping: 30 }}
       >
-        {/* 뒷면 (기본 상태) */}
+        {/* 뒷면 (기본 상태) - Art Deco Design */}
         <div
-          className="absolute inset-0 rounded-lg shadow-md flex items-center justify-center"
+          className="absolute inset-0 rounded-lg shadow-lg card-back-pattern card-back-grain flex items-center justify-center"
           style={{
             backfaceVisibility: 'hidden',
-            background: 'linear-gradient(135deg, var(--bg-warm) 0%, var(--warm-200) 100%)',
-            border: '1px solid var(--border-default)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+            border: '1px solid var(--warm-300)',
           }}
         >
-          <div className="text-center">
-            <div className="text-xs font-medium" style={{ color: 'var(--text-light)' }}>Maison de</div>
-            <div className="text-sm font-semibold" style={{ color: 'var(--blush-500)' }}>Letter</div>
+          {/* Inner frame */}
+          <div className="card-back-frame" />
+
+          {/* Corner decorations */}
+          <div className="card-back-corner card-back-corner--tl" />
+          <div className="card-back-corner card-back-corner--tr" />
+          <div className="card-back-corner card-back-corner--bl" />
+          <div className="card-back-corner card-back-corner--br" />
+
+          {/* Center logo */}
+          <div className="card-back-logo">
+            {/* Wedding card icon */}
+            <div
+              className="w-8 h-10 mx-auto mb-2 rounded-sm flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(180deg, var(--warm-100) 0%, var(--warm-200) 100%)',
+                border: '1px solid var(--wkw-gold)',
+                boxShadow: '0 2px 8px rgba(201, 169, 98, 0.2)',
+              }}
+            >
+              <Heart
+                style={{ color: 'var(--blush-400)', width: 14, height: 14 }}
+                strokeWidth={1.5}
+                fill="var(--blush-200)"
+              />
+            </div>
+
+            <div
+              className="text-[10px] tracking-widest uppercase"
+              style={{ color: 'var(--wkw-gold)' }}
+            >
+              Maison de
+            </div>
+            <div
+              className="text-sm font-semibold tracking-wide"
+              style={{ color: 'var(--blush-500)' }}
+            >
+              Letter
+            </div>
           </div>
         </div>
 
@@ -83,20 +120,26 @@ export function MemoryCard({
         </div>
       </motion.div>
 
-      {/* 매칭 완료 체크마크 */}
+      {/* 매칭 완료 효과 */}
       <AnimatePresence>
         {status === 'matched' && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center rounded-lg"
-            style={{ background: 'rgba(223, 160, 172, 0.2)' }}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--blush-500)' }}>
-              <Check className="w-5 h-5 text-white" />
-            </div>
-          </motion.div>
+          <>
+            {/* Sparkle particles */}
+            <MatchSparkles show={true} count={5} />
+
+            {/* Check mark overlay */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center rounded-lg"
+              style={{ background: 'rgba(223, 160, 172, 0.2)' }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--blush-500)' }}>
+                <Check className="w-5 h-5 text-white" />
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.div>
