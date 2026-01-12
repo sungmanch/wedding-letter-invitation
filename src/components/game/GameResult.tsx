@@ -117,8 +117,8 @@ export function GameResult({
               {orderedPresets.slice(0, 6).map((preset, index) => (
                 <motion.div
                   key={preset.preset.id}
-                  initial={{ y: -30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 + index * 0.15, type: 'spring' }}
                 >
                   <MiniBlockRenderer
