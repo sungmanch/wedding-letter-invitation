@@ -120,6 +120,20 @@
       "when": 1767714344495,
       "tag": "0016_crazy_mockingbird",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1768217966696,
+      "tag": "0017_oval_chronomancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1768224419819,
+      "tag": "0018_pretty_joystick",
+      "breakpoints": true
     }
   ]
 }

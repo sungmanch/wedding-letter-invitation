@@ -781,3 +781,122 @@ body {
   opacity: 0.6;
   filter: grayscale(0.2);
 }
+
+/* ==========================================
+   Memory Game Card Back - Art Deco Design
+   ========================================== */
+
+/* Art Deco geometric pattern background */
+.card-back-pattern {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--warm-50) 0%,
+    var(--bg-warm) 50%,
+    var(--warm-100) 100%
+  );
+  overflow: hidden;
+}
+
+/* Diamond grid overlay */
+.card-back-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(45deg, var(--wkw-gold) 1px, transparent 1px),
+    linear-gradient(-45deg, var(--wkw-gold) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.08;
+}
+
+/* Inner frame border */
+.card-back-frame {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--wkw-gold);
+  border-radius: 4px;
+  opacity: 0.4;
+}
+
+/* Corner decorations */
+.card-back-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--wkw-gold);
+  opacity: 0.6;
+}
+
+.card-back-corner--tl {
+  top: 4px;
+  left: 4px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.card-back-corner--tr {
+  top: 4px;
+  right: 4px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.card-back-corner--bl {
+  bottom: 4px;
+  left: 4px;
+  border-right: none;
+  border-top: none;
+}
+
+.card-back-corner--br {
+  bottom: 4px;
+  right: 4px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Center logo container */
+.card-back-logo {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+/* Subtle grain texture */
+.card-back-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ==========================================
+   Blush Theme Scrollbar (Game Preview)
+   ========================================== */
+
+.scrollbar-blush {
+  scrollbar-width: thin;
+  scrollbar-color: var(--blush-300) transparent;
+}
+
+.scrollbar-blush::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-blush::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-blush::-webkit-scrollbar-thumb {
+  background-color: var(--blush-200);
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.scrollbar-blush::-webkit-scrollbar-thumb:hover {
+  background-color: var(--blush-400);
+}

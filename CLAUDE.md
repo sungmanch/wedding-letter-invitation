@@ -57,6 +57,30 @@ AI 기반 개인화 청첩장 서비스입니다.
 
 ## 변경 이력
 
+### 2026-01-13: 메모리 게임 UX 개선 + 에디터 할인코드 UI 제거
+- **이유**:
+  1. 에디터의 할인코드 입력 UI는 불필요 (Polar 결제창에서 직접 입력 가능)
+  2. 게임 시작 페이지가 너무 밋밋함 → 일러스트 + 규칙 설명 추가
+- **변경**:
+  - `EditClient.tsx`: 할인코드 상태변수, 검증 함수, UI 모두 제거. checkoutUrl 단순화
+  - `MemoryGame.tsx`: 게임 시작 화면 디자인 개선
+    - 3장 겹친 카드 일러스트 (Art Deco 스타일, 회전 애니메이션)
+    - 게임 규칙 3단계 설명 (아이콘 + 텍스트)
+    - S/A/B 등급별 할인율 미리보기
+    - Stagger 페이드인 애니메이션
+- **할인코드 유효기간**: 7일 (`DISCOUNT_CODE_VALIDITY_DAYS = 7`) - 변경 없음
+
+### 2026-01-12: 메모리 게임 할인코드 Polar.sh 연동
+- **이유**: 메모리 게임에서 발급된 할인코드가 실제 결제에 적용되지 않는 문제 해결
+- **변경**:
+  - Polar SDK 래퍼 함수 추가 (`polar-discount.ts`)
+  - DB 스키마에 `polarDiscountId`, `polarSyncStatus`, `polarSyncError` 필드 추가
+  - 할인코드 생성 시 Polar.sh에 동시 생성 (graceful degradation 지원)
+  - 에디터에 할인코드 입력 UI 추가 (검증 → 체크아웃 URL에 `?discount_code=` 추가)
+  - 결제 완료 시 할인코드 사용 처리
+- **파일**: `polar-discount.ts`, `game-schema.ts`, `/api/game/discount/route.ts`, `EditClient.tsx`, `/checkout/success/page.tsx`
+- **환경변수**: `POLAR_PRODUCT_ID` (선택)
+
 ### 2026-01-07: 추가 디자인(브랜치) UX 개선
 - **이유**: 일반 사용자가 "브랜치" 개념을 이해하기 어려움, 기능 발견성 개선
 - **변경**:
