@@ -71,6 +71,8 @@ export interface SubwayBuilderState {
   selectedPresets: SelectedPresets
   /** 테마에서 추출한 CSS 변수 */
   cssVariables: Record<string, string>
+  /** 스크롤할 대상 섹션 (아코디언 클릭 시 프리뷰 스크롤용) */
+  activeSectionForScroll: SelectableSectionType | null
 }
 
 /** 액션 타입 */
@@ -82,6 +84,10 @@ type SubwayBuilderAction =
   | {
       type: 'SET_PRESET'
       payload: { sectionType: SelectableSectionType; presetId: string }
+    }
+  | {
+      type: 'SET_ACTIVE_SECTION_FOR_SCROLL'
+      payload: SelectableSectionType | null
     }
   | { type: 'RESET' }
 
@@ -95,6 +101,8 @@ interface SubwayBuilderContextValue {
   saveAndCreateDocument: () => Promise<void>
   /** 문서 생성 중 상태 */
   isCreating: boolean
+  /** 프리뷰 스크롤 대상 섹션 설정 (아코디언 클릭 시 호출) */
+  setActiveSectionForScroll: (sectionType: SelectableSectionType | null) => void
 }
 
 // ============================================
@@ -141,6 +149,7 @@ const INITIAL_STATE: SubwayBuilderState = {
   selectedTemplateId: 'unique1',
   selectedPresets: DEFAULT_PRESETS,
   cssVariables: getInitialCssVariables(),
+  activeSectionForScroll: null,
 }
 
 // ============================================
@@ -261,6 +270,12 @@ function subwayBuilderReducer(
           ...state.selectedPresets,
           [action.payload.sectionType]: action.payload.presetId,
         },
+      }
+
+    case 'SET_ACTIVE_SECTION_FOR_SCROLL':
+      return {
+        ...state,
+        activeSectionForScroll: action.payload,
       }
 
     case 'RESET':
@@ -429,6 +444,14 @@ export function SubwayBuilderProvider({
     dispatch({ type: 'RESET' })
   }, [])
 
+  // 프리뷰 스크롤 대상 섹션 설정
+  const setActiveSectionForScroll = useCallback(
+    (sectionType: SelectableSectionType | null) => {
+      dispatch({ type: 'SET_ACTIVE_SECTION_FOR_SCROLL', payload: sectionType })
+    },
+    []
+  )
+
   // 선택 상태를 저장하고 문서 생성 시도
   const saveAndCreateDocument = useCallback(async () => {
     setIsCreating(true)
@@ -546,8 +569,9 @@ export function SubwayBuilderProvider({
       reset,
       saveAndCreateDocument,
       isCreating,
+      setActiveSectionForScroll,
     }),
-    [state, setTemplate, setPreset, reset, saveAndCreateDocument, isCreating]
+    [state, setTemplate, setPreset, reset, saveAndCreateDocument, isCreating, setActiveSectionForScroll]
   )
 
   // DraftExistsModal에 전달할 draft 데이터 변환

@@ -52,25 +52,34 @@ function PresetThumbnailInner({
   const ref = useRef<HTMLDivElement>(null)
 
   // Intersection Observer로 뷰포트 진입 감지
+  // 아코디언 애니메이션(200ms) 완료 후 observer 설정해야 정상 감지됨
   useEffect(() => {
     const element = ref.current
     if (!element) return
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-          observer.disconnect() // 한 번 보이면 계속 렌더링
-        }
-      },
-      {
-        rootMargin: '100px', // 미리 로드
-        threshold: 0,
-      }
-    )
+    let observer: IntersectionObserver | null = null
 
-    observer.observe(element)
-    return () => observer.disconnect()
+    // 아코디언 애니메이션 완료 대기 (250ms)
+    const timer = setTimeout(() => {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsInView(true)
+            observer?.disconnect()
+          }
+        },
+        {
+          rootMargin: '100px',
+          threshold: 0,
+        }
+      )
+      observer.observe(element)
+    }, 250)
+
+    return () => {
+      clearTimeout(timer)
+      observer?.disconnect()
+    }
   }, [])
 
   return (

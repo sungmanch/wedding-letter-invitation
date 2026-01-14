@@ -8,12 +8,12 @@
  * - 선택된 템플릿+섹션 실시간 반영
  */
 
-import { useMemo, memo } from 'react'
+import { useMemo, memo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DocumentRenderer } from '@/lib/super-editor-v2/renderer/document-renderer'
 import { resolveStyle, styleToCSSVariables } from '@/lib/super-editor-v2/renderer/style-resolver'
 import type { EditorDocument, Block, ThemePresetId, Element, SizeMode } from '@/lib/super-editor-v2/schema/types'
-import { useSubwayBuilder, SECTION_ORDER } from '../subway/SubwayBuilderContext'
+import { useSubwayBuilder, SECTION_ORDER, type SelectableSectionType } from '../subway/SubwayBuilderContext'
 import {
   DEFAULT_STYLE_SYSTEM,
   getSampleWeddingDataForTemplate,
@@ -74,11 +74,67 @@ function createBlockFromPresetData(presetId: string): Block | null {
 }
 
 // ============================================
+// Helpers for scroll position
+// ============================================
+
+/**
+ * 섹션 타입에 해당하는 블록 인덱스 반환
+ * - hero: 0
+ * - greeting-parents: 1
+ * - calendar: 2
+ * - gallery: 3
+ */
+function getSectionBlockIndex(sectionType: SelectableSectionType): number {
+  if (sectionType === 'hero') return 0
+  const sectionIndex = SECTION_ORDER.indexOf(sectionType as typeof SECTION_ORDER[number])
+  return sectionIndex >= 0 ? sectionIndex + 1 : -1
+}
+
+/**
+ * 특정 섹션까지의 누적 높이 계산 (스크롤 위치용)
+ * @param blocks 전체 블록 배열
+ * @param targetIndex 대상 블록 인덱스
+ * @param viewportHeight 기준 뷰포트 높이 (px)
+ * @returns 누적 높이 (px)
+ */
+function calculateScrollPosition(
+  blocks: Block[],
+  targetIndex: number,
+  viewportHeight: number
+): number {
+  let total = 0
+
+  for (let i = 0; i < targetIndex && i < blocks.length; i++) {
+    const block = blocks[i]
+    if (typeof block.height === 'number') {
+      // vh → px 변환
+      total += (block.height / 100) * viewportHeight
+    } else if (block.height && typeof block.height === 'object') {
+      const sizeMode = block.height as SizeMode
+      if (sizeMode.type === 'fixed') {
+        if (sizeMode.unit === 'vh') {
+          total += (sizeMode.value / 100) * viewportHeight
+        } else {
+          total += sizeMode.value
+        }
+      } else {
+        total += viewportHeight * 0.5
+      }
+    } else {
+      total += viewportHeight * 0.5
+    }
+  }
+
+  return total
+}
+
+// ============================================
 // Component
 // ============================================
 
 function StickyPreviewInner() {
-  const { state } = useSubwayBuilder()
+  const { state, setActiveSectionForScroll } = useSubwayBuilder()
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // 프리뷰 문서 생성
   const document = useMemo<EditorDocument | null>(() => {
@@ -158,6 +214,51 @@ function StickyPreviewInner() {
   const ORIGINAL_HEIGHT = 844
 
   const scale = frameWidth / ORIGINAL_WIDTH
+
+  // 아코디언 클릭 시 프리뷰 스크롤
+  useEffect(() => {
+    const activeSection = state.activeSectionForScroll
+    if (!activeSection || !scrollRef.current || !document) return
+
+    const targetIndex = getSectionBlockIndex(activeSection)
+    if (targetIndex < 0) return
+
+    // 실제 DOM 요소의 위치를 사용하여 정확한 스크롤 위치 계산
+    const targetBlock = document.blocks[targetIndex]
+    if (!targetBlock) return
+
+    // data-block-id 속성으로 실제 렌더링된 블록 요소 찾기
+    const blockElement = scrollRef.current.querySelector(
+      `[data-block-id="${targetBlock.id}"]`
+    ) as HTMLElement | null
+
+    if (blockElement) {
+      // 실제 DOM 요소의 offsetTop 사용 (이미 스케일 적용된 값)
+      scrollRef.current.scrollTo({
+        top: blockElement.offsetTop,
+        behavior: 'smooth',
+      })
+    } else {
+      // fallback: 계산된 높이 사용
+      const scrollY = calculateScrollPosition(
+        document.blocks,
+        targetIndex,
+        ORIGINAL_HEIGHT
+      )
+      scrollRef.current.scrollTo({
+        top: scrollY * scale,
+        behavior: 'smooth',
+      })
+    }
+
+    // 스크롤 애니메이션 완료 후 상태 초기화 (350ms 지연)
+    // 즉시 호출하면 연속 re-render로 IntersectionObserver가 리셋되어 프리셋 프리뷰가 안 보임
+    const timer = setTimeout(() => {
+      setActiveSectionForScroll(null)
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [state.activeSectionForScroll, document, scale, setActiveSectionForScroll])
 
   // 문서의 총 높이 계산
   const totalContentHeight = useMemo(() => {
@@ -240,6 +341,7 @@ function StickyPreviewInner() {
             showNotch={true}
             showHomeIndicator={true}
             scrollable={true}
+            scrollRef={scrollRef}
           >
             {/* 스크롤 영역 - 스케일된 콘텐츠 높이만큼 확보 */}
             <div

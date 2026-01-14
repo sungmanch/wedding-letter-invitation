@@ -27,6 +27,8 @@ export interface PhoneFrameProps {
   frameColor?: string
   /** 스크롤 가능 여부 (기본: true) */
   scrollable?: boolean
+  /** 스크롤 컨테이너에 대한 ref (프로그래매틱 스크롤용) */
+  scrollRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export function PhoneFrame({
@@ -38,6 +40,7 @@ export function PhoneFrame({
   showHomeIndicator = true,
   frameColor = 'var(--sand-200)',
   scrollable = true,
+  scrollRef,
 }: PhoneFrameProps) {
   // 에디터 스타일: 검은 프레임 + 노치 오버레이
   const framePadding = 12
@@ -67,7 +70,10 @@ export function PhoneFrame({
           style={{ borderRadius: screenRadius }}
         >
           {scrollable ? (
-            <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide">
+            <div
+              ref={scrollRef}
+              className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide"
+            >
               {children}
             </div>
           ) : (
