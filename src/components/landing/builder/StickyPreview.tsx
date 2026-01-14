@@ -233,14 +233,9 @@ function StickyPreviewInner() {
     ) as HTMLElement | null
 
     if (blockElement) {
-      // getBoundingClientRect로 실제 렌더링된 위치 계산
-      // offsetTop은 offsetParent 기준이라 스케일된 컨테이너 내부 값이 됨
-      const containerRect = scrollRef.current.getBoundingClientRect()
-      const blockRect = blockElement.getBoundingClientRect()
-      const currentScrollTop = scrollRef.current.scrollTop
-
-      // 현재 스크롤 위치 + (블록 위치 - 컨테이너 위치) = 목표 스크롤 위치
-      const targetScrollTop = currentScrollTop + (blockRect.top - containerRect.top)
+      // offsetTop은 스케일 적용 전 원본 좌표 반환
+      // 스크롤 컨테이너는 scaledContentHeight 기준이므로 scale 보정 필요
+      const targetScrollTop = blockElement.offsetTop * scale
 
       scrollRef.current.scrollTo({
         top: targetScrollTop,

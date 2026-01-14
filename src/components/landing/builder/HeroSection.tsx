@@ -119,9 +119,9 @@ export function HeroSection() {
           >
             <div className="relative bg-[var(--warm-100)] border border-[var(--warm-300)] rounded-2xl px-4 py-3 shadow-md transition-shadow hover:shadow-lg">
               <p className="text-sm sm:text-base text-[var(--text-body)] leading-relaxed">
-                "여기 인트로는 이쁜데
+                "<span className="text-rose-400 font-medium">OO업체</span> 인트로는 이쁜데
                 <br />
-                <span className="text-rose-400 font-medium">포토앨범 형식</span>이 별로야.."
+                <span className="text-rose-400 font-medium">갤러리 디자인</span>이 별로야.."
               </p>
               {/* 말풍선 꼬리 */}
               <div className="absolute -bottom-2 left-6 w-4 h-4 bg-[var(--warm-100)] border-r border-b border-[var(--warm-300)] transform rotate-45" />
@@ -138,9 +138,9 @@ export function HeroSection() {
           >
             <div className="relative bg-[var(--blush-100)] border border-[var(--blush-300)] rounded-2xl px-4 py-3 shadow-md transition-shadow hover:shadow-lg">
               <p className="text-sm sm:text-base text-[var(--text-body)] leading-relaxed">
-                "아, 여기 <span className="text-teal-400 font-medium">인터뷰 섹션</span>이
+                "아, 그냥 <span className="text-teal-400 font-medium">내가 원하는 디자인</span>으로
                 <br />
-                마음에 드는데..?"
+                만들고 싶은데.."
               </p>
               {/* 말풍선 꼬리 */}
               <div className="absolute -bottom-2 right-6 w-4 h-4 bg-[var(--blush-100)] border-r border-b border-[var(--blush-300)] transform rotate-45" />
@@ -158,9 +158,9 @@ export function HeroSection() {
               className="text-xl sm:text-2xl lg:text-3xl font-medium text-[var(--text-primary)] leading-snug"
               style={{ fontFamily: 'var(--font-display), serif' }}
             >
-              꽃다발 구성하듯,
+              결혼식만큼,
               <br />
-              <span className="text-[var(--blush-500)]">원하는 섹션만</span> 골라 담으세요.
+              <span className="text-[var(--blush-500)]">청첩장도 특별해야</span> 하니까.
             </p>
           </motion.div>
 

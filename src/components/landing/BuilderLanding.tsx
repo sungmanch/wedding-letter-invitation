@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react'
 import { SubwayBuilderProvider } from './subway'
 import { HeroSection } from './builder/HeroSection'
 import { BuilderSection } from './builder/BuilderSection'
-import { ValueProps } from './builder/ValueProps'
+import { FAQSection } from './builder/FAQSection'
 import { FloatingCTA } from './builder/FloatingCTA'
 
 // ============================================
@@ -43,8 +43,8 @@ export function BuilderLanding() {
         {/* Section 2: Builder (템플릿+섹션 선택 + Sticky 프리뷰) */}
         <BuilderSection />
 
-        {/* Section 3: Value Props (Trust Signals) */}
-        <ValueProps />
+        {/* Section 3: FAQ */}
+        <FAQSection />
 
         {/* 플로팅 CTA (모바일) */}
         {showFloatingCTA && (
