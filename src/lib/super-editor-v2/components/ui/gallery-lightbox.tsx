@@ -265,7 +265,8 @@ export function GalleryLightbox({
     overflow: 'hidden',
     cursor: images.length > 1 ? 'grab' : 'default',
     userSelect: 'none',
-    touchAction: 'pan-y pinch-zoom',
+    touchAction: 'pan-y', // 핀치 확대 방지
+    WebkitTouchCallout: 'none', // iOS 길게누르기 방지
     display: 'flex',
     alignItems: 'center',
   }
@@ -323,6 +324,7 @@ export function GalleryLightbox({
           onClose()
         }
       }}
+      onContextMenu={(e) => e.preventDefault()} // 우클릭 방지
       role="dialog"
       aria-modal="true"
       aria-label="이미지 뷰어"

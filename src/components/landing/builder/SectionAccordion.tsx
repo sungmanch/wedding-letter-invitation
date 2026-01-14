@@ -60,7 +60,7 @@ const SECTION_DESCRIPTIONS: Record<SelectableSectionType, string> = {
 // ============================================
 
 export function SectionAccordion() {
-  const { state, setPreset } = useSubwayBuilder()
+  const { state, setPreset, setActiveSectionForScroll } = useSubwayBuilder()
   const [openSection, setOpenSection] = useState<SelectableSectionType | null>(
     'hero'
   )
@@ -75,9 +75,15 @@ export function SectionAccordion() {
   // 섹션 토글
   const handleToggleSection = useCallback(
     (sectionType: SelectableSectionType) => {
+      const willOpen = openSection !== sectionType
       setOpenSection((prev) => (prev === sectionType ? null : sectionType))
+
+      // 아코디언이 열릴 때만 프리뷰 스크롤 트리거
+      if (willOpen) {
+        setActiveSectionForScroll(sectionType)
+      }
     },
-    []
+    [openSection, setActiveSectionForScroll]
   )
 
   // 더보기 토글
