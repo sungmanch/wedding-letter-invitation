@@ -4,16 +4,18 @@
  * Section Combiner Preview
  *
  * 핵심 가치 "섹션별 조합"을 3초만에 전달
- * 디자인: 슬롯머신 스타일 - 각 섹션이 독립적으로 스핀
+ * 디자인: 세로 탭 방식 - 모바일 세로 스크롤 패턴에 최적화
  *
  * 핵심 시각화:
- * 1. 3개의 수평 슬롯 (인트로, 인사말, 갤러리)
- * 2. 각 슬롯이 순차적으로 스핀하며 다른 옵션 표시
- * 3. "각 섹션을 원하는 대로 조합" 메시지
+ * 1. 3개의 탭 헤더 (인트로, 인사말, 갤러리)
+ * 2. 선택된 탭의 프리셋이 250px 높이로 충분히 표시
+ * 3. 각 탭 내에서 프리셋 자동 순환 + 수동 터치 전환
+ * 4. 하단에 조합 공식 표시
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MiniBlockRenderer, MiniHeroRenderer } from '../../subway/MiniBlockRenderer'
 import { useSubwayBuilder } from '../../subway/SubwayBuilderContext'
 
@@ -38,9 +40,9 @@ const SECTION_OPTIONS: Record<SectionType, { id: string; label: string }[]> = {
     { id: 'greeting-parents-ribbon', label: '리본' },
   ],
   gallery: [
-    { id: 'gallery-square-3col', label: '3열 정방형' },
-    { id: 'gallery-square-2col', label: '2열 정방형' },
-    { id: 'gallery-rect-3col', label: '3열 세로형' },
+    { id: 'gallery-square-3col', label: '3열 그리드' },
+    { id: 'gallery-square-2col', label: '2열 그리드' },
+    { id: 'gallery-rect-3col', label: '세로형' },
     { id: 'gallery-mixed', label: '믹스' },
   ],
 }
@@ -66,277 +68,226 @@ const SECTION_ORDER: SectionType[] = ['intro', 'greeting', 'gallery']
 export function SectionCombinerPreview() {
   const { state } = useSubwayBuilder()
 
+  // 현재 활성 탭
+  const [activeTab, setActiveTab] = useState<SectionType>('intro')
   // 각 섹션의 현재 선택 인덱스
   const [indices, setIndices] = useState({ intro: 0, greeting: 0, gallery: 0 })
-  // 현재 스핀 중인 섹션
-  const [spinningSection, setSpinningSection] = useState<SectionType | null>(null)
+  // 자동 순환 일시 정지 (터치 시)
+  const [isPaused, setIsPaused] = useState(false)
 
-  // 자동 스핀 애니메이션
+  // 다음 프리셋으로 이동
+  const goNext = useCallback(() => {
+    setIndices((prev) => ({
+      ...prev,
+      [activeTab]: (prev[activeTab] + 1) % SECTION_OPTIONS[activeTab].length,
+    }))
+  }, [activeTab])
+
+  // 이전 프리셋으로 이동
+  const goPrev = useCallback(() => {
+    setIndices((prev) => ({
+      ...prev,
+      [activeTab]:
+        (prev[activeTab] - 1 + SECTION_OPTIONS[activeTab].length) %
+        SECTION_OPTIONS[activeTab].length,
+    }))
+  }, [activeTab])
+
+  // 자동 순환 (탭 + 프리셋)
   useEffect(() => {
-    let sectionIdx = 0
-    let intervalId: ReturnType<typeof setInterval>
+    if (isPaused) return
 
-    const spinCycle = () => {
-      const section = SECTION_ORDER[sectionIdx]
-      setSpinningSection(section)
+    const interval = setInterval(() => {
+      setIndices((prev) => {
+        const currentOptions = SECTION_OPTIONS[activeTab]
+        const nextIndex = (prev[activeTab] + 1) % currentOptions.length
 
-      // 스핀 후 다음 옵션으로 변경
-      setTimeout(() => {
-        setIndices((prev) => ({
-          ...prev,
-          [section]: (prev[section] + 1) % SECTION_OPTIONS[section].length,
-        }))
-        setSpinningSection(null)
+        // 프리셋이 한 바퀴 돌면 다음 탭으로
+        if (nextIndex === 0) {
+          const currentTabIdx = SECTION_ORDER.indexOf(activeTab)
+          const nextTab = SECTION_ORDER[(currentTabIdx + 1) % SECTION_ORDER.length]
+          setActiveTab(nextTab)
+        }
 
-        // 다음 섹션으로
-        sectionIdx = (sectionIdx + 1) % SECTION_ORDER.length
-      }, 600)
-    }
+        return { ...prev, [activeTab]: nextIndex }
+      })
+    }, 2000)
 
-    // 초기 딜레이 후 시작
-    const initialDelay = setTimeout(() => {
-      spinCycle()
-      intervalId = setInterval(spinCycle, 1800)
-    }, 1000)
+    return () => clearInterval(interval)
+  }, [activeTab, isPaused])
 
-    return () => {
-      clearTimeout(initialDelay)
-      if (intervalId) clearInterval(intervalId)
-    }
+  // 터치 시 일시 정지 후 5초 뒤 재시작
+  const handleInteraction = useCallback(() => {
+    setIsPaused(true)
+    const timeout = setTimeout(() => setIsPaused(false), 5000)
+    return () => clearTimeout(timeout)
   }, [])
 
-  return (
-    <div className="relative w-full max-w-[320px] mx-auto">
-      {/* 메인 슬롯 머신 UI */}
-      <div className="relative">
-        {/* 글로우 배경 */}
-        <div
-          className="absolute -inset-4 rounded-3xl blur-3xl opacity-20"
-          style={{
-            background: `conic-gradient(from 0deg, ${SECTION_COLORS.intro}, ${SECTION_COLORS.greeting}, ${SECTION_COLORS.gallery}, ${SECTION_COLORS.intro})`,
-          }}
-        />
+  const currentOptions = SECTION_OPTIONS[activeTab]
+  const currentIndex = indices[activeTab]
+  const currentOption = currentOptions[currentIndex]
 
-        {/* 슬롯 컨테이너 */}
-        <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl border border-[var(--warm-200)] shadow-2xl overflow-hidden">
-          {/* 3개의 슬롯 행 */}
-          <div className="flex flex-col">
-            {SECTION_ORDER.map((section, idx) => (
-              <SlotRow
+  return (
+    <div className="relative w-full max-w-[340px] mx-auto">
+      {/* 글로우 배경 */}
+      <div
+        className="absolute -inset-3 rounded-3xl blur-2xl opacity-15"
+        style={{
+          background: `linear-gradient(135deg, ${SECTION_COLORS[activeTab]}, ${SECTION_COLORS[activeTab]}50)`,
+        }}
+      />
+
+      {/* 메인 컨테이너 */}
+      <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl border border-[var(--warm-200)] shadow-xl overflow-hidden">
+        {/* 탭 헤더 */}
+        <div className="flex border-b border-[var(--warm-200)]">
+          {SECTION_ORDER.map((section) => {
+            const isActive = activeTab === section
+            return (
+              <button
                 key={section}
-                section={section}
-                options={SECTION_OPTIONS[section]}
-                currentIndex={indices[section]}
-                isSpinning={spinningSection === section}
-                cssVariables={state.cssVariables}
-                isLast={idx === SECTION_ORDER.length - 1}
+                onClick={() => {
+                  setActiveTab(section)
+                  handleInteraction()
+                }}
+                className={`
+                  flex-1 py-3 text-xs font-semibold tracking-wide
+                  transition-all duration-300 relative
+                  ${isActive ? 'text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'}
+                `}
+                style={{
+                  backgroundColor: isActive ? SECTION_COLORS[section] : 'transparent',
+                }}
+              >
+                {SECTION_LABELS[section]}
+                {/* 선택된 프리셋 표시 */}
+                {!isActive && (
+                  <span className="block text-[10px] font-normal mt-0.5 opacity-70">
+                    {SECTION_OPTIONS[section][indices[section]].label}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* 프리뷰 영역 */}
+        <div
+          className="relative overflow-hidden"
+          style={{ height: 220 }}
+          onTouchStart={handleInteraction}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${activeTab}-${currentOption.id}`}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0"
+            >
+              {activeTab === 'intro' ? (
+                <MiniHeroRenderer
+                  templateId={currentOption.id}
+                  cssVariables={state.cssVariables}
+                  width={340}
+                  height={220}
+                />
+              ) : (
+                <MiniBlockRenderer
+                  presetId={currentOption.id}
+                  cssVariables={state.cssVariables}
+                  width={340}
+                  height={220}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* 좌우 네비게이션 */}
+          <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none">
+            <button
+              onClick={() => {
+                goPrev()
+                handleInteraction()
+              }}
+              className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center pointer-events-auto active:scale-95 transition-transform"
+            >
+              <ChevronLeft className="w-4 h-4 text-white" />
+            </button>
+            <button
+              onClick={() => {
+                goNext()
+                handleInteraction()
+              }}
+              className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center pointer-events-auto active:scale-95 transition-transform"
+            >
+              <ChevronRight className="w-4 h-4 text-white" />
+            </button>
+          </div>
+
+          {/* 현재 프리셋 라벨 */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+            <motion.span
+              key={currentOption.label}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs font-medium"
+            >
+              {currentOption.label}
+            </motion.span>
+          </div>
+
+          {/* 프리셋 인디케이터 */}
+          <div className="absolute bottom-3 right-3 flex gap-1">
+            {currentOptions.map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentIndex ? 'bg-white w-3' : 'bg-white/40'
+                }`}
               />
             ))}
           </div>
         </div>
       </div>
 
-      {/* 조합 공식 - 인터랙티브 라벨 */}
-      <div className="mt-5 flex items-center justify-center gap-1.5">
+      {/* 조합 공식 */}
+      <div className="mt-4 flex items-center justify-center gap-1.5">
         {SECTION_ORDER.map((section, idx) => (
-          <motion.div key={section} className="flex items-center gap-1.5">
+          <div key={section} className="flex items-center gap-1.5">
             <motion.div
               animate={{
-                scale: spinningSection === section ? 1.15 : 1,
-                y: spinningSection === section ? -3 : 0,
+                scale: activeTab === section ? 1.1 : 1,
               }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               className="relative"
             >
               <span
                 className={`
-                  px-2.5 py-1 rounded-lg text-[11px] font-semibold
+                  px-2 py-0.5 rounded-md text-[10px] font-medium
                   transition-all duration-300
-                  ${spinningSection === section ? 'text-white shadow-lg' : 'text-[var(--text-body)]'}
+                  ${activeTab === section ? 'text-white shadow-md' : 'text-[var(--text-body)] bg-[var(--warm-100)]'}
                 `}
                 style={{
-                  backgroundColor:
-                    spinningSection === section ? SECTION_COLORS[section] : 'var(--warm-100)',
+                  backgroundColor: activeTab === section ? SECTION_COLORS[section] : undefined,
                 }}
               >
-                {SECTION_LABELS[section]}
+                {SECTION_OPTIONS[section][indices[section]].label}
               </span>
-              {/* 현재 선택 표시 (작은 라벨) */}
-              <AnimatePresence>
-                {spinningSection !== section && (
-                  <motion.span
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-[var(--text-muted)] whitespace-nowrap"
-                  >
-                    {SECTION_OPTIONS[section][indices[section]].label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
             </motion.div>
             {idx < SECTION_ORDER.length - 1 && (
-              <span className="text-[var(--text-muted)] text-sm font-light">+</span>
+              <span className="text-[var(--text-muted)] text-xs">+</span>
             )}
-          </motion.div>
+          </div>
         ))}
-        <span className="text-[var(--text-muted)] text-sm font-light ml-1">=</span>
-        <motion.span
-          className="text-xl ml-1"
-          animate={{
-            scale: spinningSection ? [1, 1.1, 1] : 1,
-            rotate: spinningSection ? [0, 5, -5, 0] : 0,
-          }}
-          transition={{ duration: 0.4 }}
-        >
-          💌
-        </motion.span>
+        <span className="text-[var(--text-muted)] text-xs ml-0.5">=</span>
+        <span className="text-base ml-0.5">💌</span>
       </div>
 
       {/* 핵심 메시지 */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 text-center"
-      >
-        <p className="text-sm text-[var(--text-body)]">
-          <span className="font-medium text-[var(--blush-500)]">각 섹션</span>을
-          <span className="font-medium text-[var(--blush-500)]"> 원하는 대로</span> 조합하세요
-        </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
-          인트로는 A업체 스타일, 갤러리는 B업체 스타일로!
-        </p>
-      </motion.div>
-    </div>
-  )
-}
-
-// ============================================
-// Slot Row Component
-// ============================================
-
-interface SlotRowProps {
-  section: SectionType
-  options: { id: string; label: string }[]
-  currentIndex: number
-  isSpinning: boolean
-  cssVariables: Record<string, string>
-  isLast: boolean
-}
-
-function SlotRow({
-  section,
-  options,
-  currentIndex,
-  isSpinning,
-  cssVariables,
-  isLast,
-}: SlotRowProps) {
-  const currentOption = options[currentIndex]
-
-  // 섹션별 높이
-  const heights: Record<SectionType, number> = {
-    intro: 100,
-    greeting: 70,
-    gallery: 80,
-  }
-
-  const height = heights[section]
-
-  return (
-    <div className="relative">
-      {/* 섹션 라벨 (왼쪽 사이드바) */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-14 flex items-center justify-center z-10"
-        style={{ backgroundColor: SECTION_COLORS[section] + '15' }}
-      >
-        <span
-          className="text-[10px] font-bold -rotate-90 whitespace-nowrap tracking-wider"
-          style={{ color: SECTION_COLORS[section] }}
-        >
-          {SECTION_LABELS[section]}
-        </span>
-      </div>
-
-      {/* 슬롯 윈도우 */}
-      <div className="relative ml-14 overflow-hidden" style={{ height }}>
-        <AnimatePresence mode="popLayout">
-          <motion.div
-            key={currentOption.id}
-            initial={{ y: -height, opacity: 0.5 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: height, opacity: 0.5 }}
-            transition={{
-              type: 'spring',
-              stiffness: 350,
-              damping: 35,
-            }}
-            className="absolute inset-0"
-          >
-            {/* 렌더링된 프리뷰 */}
-            <div className="w-full h-full relative">
-              {section === 'intro' ? (
-                <MiniHeroRenderer
-                  templateId={currentOption.id}
-                  cssVariables={cssVariables}
-                  width={260}
-                  height={height}
-                />
-              ) : (
-                <MiniBlockRenderer
-                  presetId={currentOption.id}
-                  cssVariables={cssVariables}
-                  width={260}
-                  height={height}
-                />
-              )}
-
-              {/* 옵션 라벨 (오른쪽 하단) */}
-              <div className="absolute bottom-1.5 right-2 z-10">
-                <span className="px-1.5 py-0.5 rounded bg-black/60 text-[9px] text-white font-medium backdrop-blur-sm">
-                  {currentOption.label}
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* 스핀 중일 때 스캔라인 효과 */}
-        <AnimatePresence>
-          {isSpinning && (
-            <motion.div
-              initial={{ y: '-100%' }}
-              animate={{ y: '100%' }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: 'linear' }}
-              className="absolute inset-0 z-20 pointer-events-none"
-              style={{
-                background: `linear-gradient(180deg, transparent 0%, ${SECTION_COLORS[section]}30 50%, transparent 100%)`,
-              }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* 활성 표시 (오른쪽 바) */}
-        <AnimatePresence>
-          {isSpinning && (
-            <motion.div
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              exit={{ scaleY: 0 }}
-              className="absolute right-0 top-0 bottom-0 w-1 z-30"
-              style={{
-                backgroundColor: SECTION_COLORS[section],
-                transformOrigin: 'center',
-              }}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* 구분선 */}
-      {!isLast && <div className="absolute bottom-0 left-14 right-0 h-px bg-[var(--warm-200)]" />}
+      <p className="mt-3 text-center text-xs text-[var(--text-muted)]">
+        <span className="text-[var(--blush-500)] font-medium">탭</span>을 눌러 각 섹션을 탐색해보세요
+      </p>
     </div>
   )
 }
