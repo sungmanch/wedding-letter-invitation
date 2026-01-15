@@ -202,7 +202,7 @@ function MiniBlockRendererInner({
 
   // 정렬을 위한 오프셋 (상단 10% 위치)
   const offsetX = (width - scaledWidth) / 2
-  const offsetY = (height - scaledHeight) * 0.1 // 상단 근처
+  const offsetY = (height - scaledHeight) * 0.001 // 상단 근처
 
   return (
     <div

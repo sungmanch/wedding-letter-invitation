@@ -262,9 +262,9 @@ export function SectionCombinerPreview() {
       </div>
 
       {/* 조합 공식 */}
-      <div className="mt-4 flex items-center justify-center gap-1.5">
+      <div className="mt-5 flex items-center justify-center gap-2">
         {SECTION_ORDER.map((section, idx) => (
-          <div key={section} className="flex items-center gap-1.5">
+          <div key={section} className="flex items-center gap-2">
             <motion.div
               animate={{
                 scale: activeTab === section ? 1.1 : 1,
@@ -273,7 +273,7 @@ export function SectionCombinerPreview() {
             >
               <span
                 className={`
-                  px-2 py-0.5 rounded-md text-[10px] font-medium
+                  px-3 py-1 rounded-lg text-xs font-medium
                   transition-all duration-300
                   ${activeTab === section ? 'text-white shadow-md' : 'text-[var(--text-body)] bg-[var(--warm-100)]'}
                 `}
@@ -285,16 +285,16 @@ export function SectionCombinerPreview() {
               </span>
             </motion.div>
             {idx < SECTION_ORDER.length - 1 && (
-              <span className="text-[var(--text-muted)] text-xs">+</span>
+              <span className="text-[var(--text-muted)] text-sm font-light">+</span>
             )}
           </div>
         ))}
-        <span className="text-[var(--text-muted)] text-xs ml-0.5">=</span>
-        <span className="text-base ml-0.5">💌</span>
+        <span className="text-[var(--text-muted)] text-sm font-light ml-1">=</span>
+        <span className="text-xl ml-1">💌</span>
       </div>
 
       {/* 핵심 메시지 */}
-      <p className="mt-3 text-center text-xs text-[var(--text-muted)]">
+      <p className="mt-4 text-center text-sm text-[var(--text-muted)]">
         <span className="text-[var(--blush-500)] font-medium">탭</span>을 눌러 각 섹션을 탐색해보세요
       </p>
     </div>
