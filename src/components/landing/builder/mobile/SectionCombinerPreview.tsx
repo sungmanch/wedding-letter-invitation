@@ -174,7 +174,7 @@ export function SectionCombinerPreview() {
         {/* 프리뷰 영역 */}
         <div
           className="relative overflow-hidden"
-          style={{ height: 220 }}
+          style={{ height: 660 }}
           onTouchStart={handleInteraction}
         >
           <AnimatePresence mode="wait">
@@ -191,14 +191,14 @@ export function SectionCombinerPreview() {
                   templateId={currentOption.id}
                   cssVariables={state.cssVariables}
                   width={340}
-                  height={220}
+                  height={660}
                 />
               ) : (
                 <MiniBlockRenderer
                   presetId={currentOption.id}
                   cssVariables={state.cssVariables}
                   width={340}
-                  height={220}
+                  height={660}
                 />
               )}
             </motion.div>
