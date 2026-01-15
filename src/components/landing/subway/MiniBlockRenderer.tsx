@@ -200,9 +200,9 @@ function MiniBlockRendererInner({
   const scaledWidth = ORIGINAL_WIDTH * scale
   const scaledHeight = blockHeight * scale
 
-  // 중앙 정렬을 위한 오프셋
+  // 정렬을 위한 오프셋 (시각적 중심 = 40% 위치)
   const offsetX = (width - scaledWidth) / 2
-  const offsetY = (height - scaledHeight) / 2
+  const offsetY = (height - scaledHeight) * 0.35 // 위쪽으로 편향
 
   return (
     <div
@@ -322,9 +322,9 @@ export function MiniHeroRenderer({
   const scaledWidth = ORIGINAL_WIDTH * scale
   const scaledHeight = ORIGINAL_HEIGHT * scale
 
-  // 중앙 정렬을 위한 오프셋
+  // 정렬을 위한 오프셋 (시각적 중심 = 35% 위치)
   const offsetX = (width - scaledWidth) / 2
-  const offsetY = (height - scaledHeight) / 2
+  const offsetY = (height - scaledHeight) * 0.35 // 위쪽으로 편향
 
   if (!document) {
     return (
