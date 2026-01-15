@@ -9,7 +9,7 @@
  * - 섹션별 조합 가치를 슬롯머신 애니메이션으로 전달
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ChevronRight, Gamepad2, ArrowRight, Layers, Palette, Grid3X3 } from 'lucide-react'
 import Link from 'next/link'
@@ -44,6 +44,7 @@ const VALUE_PROPS = [
 
 export function MobileLanding() {
   const [isWizardOpen, setIsWizardOpen] = useState(false)
+  const [showFloatingCTA, setShowFloatingCTA] = useState(false)
 
   const openWizard = useCallback(() => {
     setIsWizardOpen(true)
@@ -51,6 +52,17 @@ export function MobileLanding() {
 
   const closeWizard = useCallback(() => {
     setIsWizardOpen(false)
+  }, [])
+
+  // 스크롤 위치에 따라 플로팅 CTA 표시
+  useEffect(() => {
+    const handleScroll = () => {
+      // 400px 이상 스크롤 시 표시
+      setShowFloatingCTA(window.scrollY > 400)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
@@ -188,23 +200,33 @@ export function MobileLanding() {
           </div>
         </section>
 
-        {/* Bottom CTA (Fixed) */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/95 to-transparent">
-          <button
-            onClick={openWizard}
-            className="
-              w-full h-12
-              bg-[var(--blush-400)] hover:bg-[var(--blush-500)]
-              text-white font-medium text-sm
-              rounded-xl shadow-md
-              flex items-center justify-center gap-2
-              transition-all duration-300 active:scale-[0.98]
-            "
-          >
-            지금 바로 시작하기
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+        {/* Bottom CTA (Fixed) - 스크롤 후 표시 */}
+        <AnimatePresence>
+          {showFloatingCTA && (
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/95 to-transparent"
+            >
+              <button
+                onClick={openWizard}
+                className="
+                  w-full h-12
+                  bg-[var(--blush-400)] hover:bg-[var(--blush-500)]
+                  text-white font-medium text-sm
+                  rounded-xl shadow-md
+                  flex items-center justify-center gap-2
+                  transition-all duration-300 active:scale-[0.98]
+                "
+              >
+                지금 바로 시작하기
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Wizard Modal */}

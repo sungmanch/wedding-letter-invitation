@@ -61,6 +61,13 @@ const SECTION_COLORS: Record<SectionType, string> = {
 
 const SECTION_ORDER: SectionType[] = ['intro', 'greeting', 'gallery']
 
+/** 섹션별 프리뷰 높이 (인트로는 길고, 인사말/갤러리는 짧음) */
+const SECTION_HEIGHTS: Record<SectionType, number> = {
+  intro: 560,
+  greeting: 420,
+  gallery: 480,
+}
+
 // ============================================
 // Main Component
 // ============================================
@@ -126,6 +133,7 @@ export function SectionCombinerPreview() {
   const currentOptions = SECTION_OPTIONS[activeTab]
   const currentIndex = indices[activeTab]
   const currentOption = currentOptions[currentIndex]
+  const currentHeight = SECTION_HEIGHTS[activeTab]
 
   return (
     <div className="relative w-full max-w-[340px] mx-auto">
@@ -172,9 +180,10 @@ export function SectionCombinerPreview() {
         </div>
 
         {/* 프리뷰 영역 */}
-        <div
+        <motion.div
           className="relative overflow-hidden"
-          style={{ height: 660 }}
+          animate={{ height: currentHeight }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
           onTouchStart={handleInteraction}
         >
           <AnimatePresence mode="wait">
@@ -184,21 +193,21 @@ export function SectionCombinerPreview() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0"
+              className="absolute inset-0 flex items-center justify-center"
             >
               {activeTab === 'intro' ? (
                 <MiniHeroRenderer
                   templateId={currentOption.id}
                   cssVariables={state.cssVariables}
                   width={340}
-                  height={660}
+                  height={currentHeight}
                 />
               ) : (
                 <MiniBlockRenderer
                   presetId={currentOption.id}
                   cssVariables={state.cssVariables}
                   width={340}
-                  height={660}
+                  height={currentHeight}
                 />
               )}
             </motion.div>
@@ -249,7 +258,7 @@ export function SectionCombinerPreview() {
               />
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* 조합 공식 */}
