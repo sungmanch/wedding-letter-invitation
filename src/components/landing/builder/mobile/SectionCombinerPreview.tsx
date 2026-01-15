@@ -65,7 +65,7 @@ const SECTION_ORDER: SectionType[] = ['intro', 'greeting', 'gallery']
 const SECTION_HEIGHTS: Record<SectionType, number> = {
   intro: 560,
   greeting: 420,
-  gallery: 540,
+  gallery: 420,
 }
 
 // ============================================
