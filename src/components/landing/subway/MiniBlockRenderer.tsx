@@ -200,9 +200,9 @@ function MiniBlockRendererInner({
   const scaledWidth = ORIGINAL_WIDTH * scale
   const scaledHeight = blockHeight * scale
 
-  // 중앙 정렬을 위한 오프셋
+  // 정렬을 위한 오프셋 (상단 10% 위치)
   const offsetX = (width - scaledWidth) / 2
-  const offsetY = (height - scaledHeight) / 2
+  const offsetY = (height - scaledHeight) * 0.001 // 상단 근처
 
   return (
     <div
@@ -313,8 +313,18 @@ export function MiniHeroRenderer({
   const ORIGINAL_WIDTH = 375
   const ORIGINAL_HEIGHT = 667
 
-  // 컨테이너에 맞는 스케일 계산 (width 기준)
-  const scale = width / ORIGINAL_WIDTH
+  // 컨테이너에 맞는 스케일 계산 (width, height 둘 다 고려)
+  const scaleX = width / ORIGINAL_WIDTH
+  const scaleY = height / ORIGINAL_HEIGHT
+  const scale = Math.min(scaleX, scaleY)
+
+  // 스케일된 후의 실제 크기
+  const scaledWidth = ORIGINAL_WIDTH * scale
+  const scaledHeight = ORIGINAL_HEIGHT * scale
+
+  // 정렬을 위한 오프셋 (상단 10% 위치)
+  const offsetX = (width - scaledWidth) / 2
+  const offsetY = (height - scaledHeight) * 0.1 // 상단 근처
 
   if (!document) {
     return (
@@ -331,16 +341,16 @@ export function MiniHeroRenderer({
     <div
       className={`relative overflow-hidden ${className}`}
       style={{
-        width: '100%',
-        height: '100%',
+        width,
+        height,
         backgroundColor: cssVariables['--bg-page'] || '#ffffff',
       }}
     >
       <div
         style={{
           position: 'absolute',
-          left: 0,
-          top: 0,
+          left: offsetX,
+          top: offsetY,
           width: ORIGINAL_WIDTH,
           height: ORIGINAL_HEIGHT,
           transform: `scale(${scale})`,

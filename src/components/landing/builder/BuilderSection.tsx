@@ -24,7 +24,7 @@ export function BuilderSection() {
   return (
     <section
       id="builder-section"
-      className="relative py-20 lg:py-32 bg-[var(--bg-warm)]"
+      className="relative py-20 lg:py-32 pb-48 lg:pb-32 bg-[var(--bg-warm)]"
     >
       {/* 배경 */}
       <div className="absolute inset-0 pointer-events-none">
