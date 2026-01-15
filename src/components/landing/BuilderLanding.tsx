@@ -7,33 +7,20 @@
  * - Hero: 감정적 Hook + Stacked Cards 애니메이션
  * - Builder: 템플릿+섹션 선택 + Sticky 프리뷰
  * - Value Props: Trust Signals
- * - CTA: 하단 고정 (모바일 플로팅)
+ * - CTA: 하단 고정 (모바일: 드래그 가능한 프리뷰 시트)
  */
 
-import { useState, useEffect } from 'react'
 import { SubwayBuilderProvider } from './subway'
 import { HeroSection } from './builder/HeroSection'
 import { BuilderSection } from './builder/BuilderSection'
 import { FAQSection } from './builder/FAQSection'
-import { FloatingCTA } from './builder/FloatingCTA'
+import { MobilePreviewSheet } from './builder/mobile'
 
 // ============================================
 // Component
 // ============================================
 
 export function BuilderLanding() {
-  const [showFloatingCTA, setShowFloatingCTA] = useState(false)
-
-  // 스크롤 시 플로팅 CTA 표시 (모바일)
-  useEffect(() => {
-    const handleScroll = () => {
-      // Hero 섹션을 지나면 플로팅 CTA 표시
-      setShowFloatingCTA(window.scrollY > 600)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
   return (
     <SubwayBuilderProvider>
       <main className="relative min-h-screen bg-[var(--ivory-50)]">
@@ -46,12 +33,8 @@ export function BuilderLanding() {
         {/* Section 3: FAQ */}
         <FAQSection />
 
-        {/* 플로팅 CTA (모바일) */}
-        {showFloatingCTA && (
-          <div className="lg:hidden">
-            <FloatingCTA />
-          </div>
-        )}
+        {/* 모바일 프리뷰 시트 (드래그 가능한 하단 시트) */}
+        <MobilePreviewSheet />
       </main>
     </SubwayBuilderProvider>
   )
