@@ -6,6 +6,7 @@
  * - MobileTemplateSwiper: 템플릿 스와이프 선택
  * - MobileSectionSwiper: 섹션 프리셋 스와이프 선택
  * - MobileCardStack: 선택한 섹션 시각화
+ * - SectionCombinerPreview: 섹션 조합 슬롯머신 프리뷰
  */
 
 export { MobilePreviewSheet } from './MobilePreviewSheet'
@@ -15,3 +16,4 @@ export { MobileTemplateSwiper } from './MobileTemplateSwiper'
 export { MobileSectionSwiper } from './MobileSectionSwiper'
 export { MobileCardStack } from './MobileCardStack'
 export { MobileLanding } from './MobileLanding'
+export { SectionCombinerPreview } from './SectionCombinerPreview'

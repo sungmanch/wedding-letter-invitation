@@ -6,16 +6,15 @@
  * 모바일 전용 랜딩 페이지 (데스크탑과 완전 분리)
  * - 풀스크린 히어로 with CTA
  * - 위저드 버튼으로 빌더 경험 시작
- * - 섹션별 조합 가치를 스택 애니메이션으로 전달
+ * - 섹션별 조합 가치를 슬롯머신 애니메이션으로 전달
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ChevronRight, Gamepad2, ArrowRight, Layers, Palette, Grid3X3 } from 'lucide-react'
 import Link from 'next/link'
 import { MobileBuilderWizard } from './MobileBuilderWizard'
-import { MiniHeroRenderer } from '../../subway/MiniBlockRenderer'
-import { useSubwayBuilder, TEMPLATE_IDS } from '../../subway/SubwayBuilderContext'
+import { SectionCombinerPreview } from './SectionCombinerPreview'
 
 // ============================================
 // Constants
@@ -45,7 +44,6 @@ const VALUE_PROPS = [
 
 export function MobileLanding() {
   const [isWizardOpen, setIsWizardOpen] = useState(false)
-  const { state } = useSubwayBuilder()
 
   const openWizard = useCallback(() => {
     setIsWizardOpen(true)
@@ -60,7 +58,7 @@ export function MobileLanding() {
       {/* 메인 랜딩 */}
       <div className="min-h-[100svh] flex flex-col bg-[var(--ivory-50)]">
         {/* Hero Section */}
-        <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
+        <section className="flex-1 flex flex-col items-center justify-center px-4 py-6 relative overflow-hidden">
           {/* 배경 */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-pure)] via-[var(--bg-warm)] to-[var(--blush-50)]" />
@@ -68,16 +66,18 @@ export function MobileLanding() {
           </div>
 
           {/* 콘텐츠 */}
-          <div className="relative z-10 text-center max-w-sm mx-auto">
+          <div className="relative z-10 w-full max-w-sm mx-auto">
             {/* 배지 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--blush-100)] text-[var(--blush-600)] text-xs font-medium mb-6"
+              className="text-center mb-4"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--blush-400)]" />
-              셀프 모바일 청첩장
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--blush-100)] text-[var(--blush-600)] text-xs font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--blush-400)]" />
+                셀프 모바일 청첩장
+              </span>
             </motion.div>
 
             {/* 헤드라인 */}
@@ -85,7 +85,7 @@ export function MobileLanding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-2xl font-medium text-[var(--text-primary)] leading-tight mb-3"
+              className="text-2xl font-medium text-[var(--text-primary)] leading-tight mb-2 text-center"
               style={{ fontFamily: 'var(--font-display), serif' }}
             >
               결혼식만큼,
@@ -93,24 +93,24 @@ export function MobileLanding() {
               <span className="text-[var(--blush-500)]">청첩장도 특별해야</span> 하니까.
             </motion.h1>
 
-            {/* 서브 헤드라인 */}
+            {/* 서브 헤드라인 - 더 짧게 */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-sm text-[var(--text-muted)] mb-8"
+              className="text-sm text-[var(--text-muted)] mb-6 text-center"
             >
               섹션별로 골라서 나만의 청첩장을 조합하세요
             </motion.p>
 
-            {/* 스택드 카드 프리뷰 */}
+            {/* 섹션 조합 프리뷰 - 슬롯머신 스타일 */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="relative mb-8"
+              className="mb-6"
             >
-              <StackedCardsPreview />
+              <SectionCombinerPreview />
             </motion.div>
 
             {/* Primary CTA */}
@@ -118,7 +118,7 @@ export function MobileLanding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="space-y-3"
+              className="space-y-2.5"
             >
               <button
                 onClick={openWizard}
@@ -136,7 +136,7 @@ export function MobileLanding() {
                 <ChevronRight className="w-5 h-5" />
               </button>
 
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-[var(--text-muted)] text-center">
                 카드 등록 없이 무료 체험 · 3분 완성
               </p>
             </motion.div>
@@ -146,7 +146,7 @@ export function MobileLanding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-6"
+              className="mt-4"
             >
               <Link
                 href="/game/memory"
@@ -160,9 +160,7 @@ export function MobileLanding() {
                 "
               >
                 <Gamepad2 className="w-4 h-4 text-[var(--blush-500)]" />
-                <span className="text-sm text-[var(--text-body)]">
-                  게임하고 최대 50% 할인받기
-                </span>
+                <span className="text-sm text-[var(--text-body)]">게임하고 최대 50% 할인받기</span>
                 <ArrowRight className="w-3 h-3 text-[var(--blush-400)]" />
               </Link>
             </motion.div>
@@ -170,7 +168,7 @@ export function MobileLanding() {
         </section>
 
         {/* Value Props */}
-        <section className="px-4 py-8 bg-white/50">
+        <section className="px-4 py-6 bg-white/50">
           <div className="flex justify-center gap-4">
             {VALUE_PROPS.map((prop, index) => (
               <motion.div
@@ -211,85 +209,8 @@ export function MobileLanding() {
 
       {/* Wizard Modal */}
       <AnimatePresence>
-        {isWizardOpen && (
-          <MobileBuilderWizard isOpen={isWizardOpen} onClose={closeWizard} />
-        )}
+        {isWizardOpen && <MobileBuilderWizard isOpen={isWizardOpen} onClose={closeWizard} />}
       </AnimatePresence>
     </>
-  )
-}
-
-// ============================================
-// Stacked Cards Preview
-// ============================================
-
-function StackedCardsPreview() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const { state } = useSubwayBuilder()
-
-  // 자동 순환
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % TEMPLATE_IDS.length)
-    }, 2500)
-    return () => clearInterval(interval)
-  }, [])
-
-  // 표시할 카드들 (현재 + 앞뒤)
-  const visibleCards = useMemo(() => {
-    const cards = []
-    for (let i = -1; i <= 1; i++) {
-      const index = (currentIndex + i + TEMPLATE_IDS.length) % TEMPLATE_IDS.length
-      cards.push({
-        templateId: TEMPLATE_IDS[index],
-        offset: i,
-      })
-    }
-    return cards
-  }, [currentIndex])
-
-  return (
-    <div className="relative w-[200px] h-[320px] mx-auto">
-      {visibleCards.map(({ templateId, offset }) => (
-        <motion.div
-          key={templateId}
-          animate={{
-            x: offset * 30,
-            scale: offset === 0 ? 1 : 0.85,
-            opacity: offset === 0 ? 1 : 0.6,
-            rotateY: offset * -10,
-            zIndex: offset === 0 ? 10 : 5,
-          }}
-          transition={{
-            type: 'spring',
-            stiffness: 300,
-            damping: 30,
-          }}
-          className="absolute top-0 left-0 w-[160px] h-[284px] rounded-2xl overflow-hidden border-2 border-white shadow-xl"
-          style={{
-            left: '50%',
-            marginLeft: '-80px',
-          }}
-        >
-          <MiniHeroRenderer
-            templateId={templateId}
-            cssVariables={state.cssVariables}
-            width={160}
-            height={284}
-          />
-        </motion.div>
-      ))}
-
-      {/* 조합 공식 힌트 */}
-      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 text-xs text-[var(--text-muted)]">
-        <span className="px-2 py-0.5 rounded bg-[var(--blush-100)] text-[var(--blush-600)]">인트로</span>
-        <span>+</span>
-        <span className="px-2 py-0.5 rounded bg-[var(--warm-100)] text-[var(--text-muted)]">인사말</span>
-        <span>+</span>
-        <span className="px-2 py-0.5 rounded bg-[var(--warm-100)] text-[var(--text-muted)]">갤러리</span>
-        <span>=</span>
-        <span className="text-[var(--blush-500)]">💌</span>
-      </div>
-    </div>
   )
 }
