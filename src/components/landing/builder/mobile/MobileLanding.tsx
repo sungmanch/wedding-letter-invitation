@@ -9,12 +9,13 @@
  * - 섹션별 조합 가치를 슬롯머신 애니메이션으로 전달
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ChevronRight, Gamepad2, ArrowRight, Layers, Palette, Grid3X3 } from 'lucide-react'
 import Link from 'next/link'
 import { MobileBuilderWizard } from './MobileBuilderWizard'
 import { SectionCombinerPreview } from './SectionCombinerPreview'
+import { MobileFAQSection } from './MobileFAQSection'
 
 // ============================================
 // Constants
@@ -45,6 +46,8 @@ const VALUE_PROPS = [
 export function MobileLanding() {
   const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [showFloatingCTA, setShowFloatingCTA] = useState(false)
+  const [isFooterVisible, setIsFooterVisible] = useState(false)
+  const footerSentinelRef = useRef<HTMLDivElement>(null)
 
   const openWizard = useCallback(() => {
     setIsWizardOpen(true)
@@ -57,7 +60,7 @@ export function MobileLanding() {
   // 스크롤 위치에 따라 플로팅 CTA 표시
   useEffect(() => {
     const handleScroll = () => {
-      // 400px 이상 스크롤 시 표시
+      // 400px 이상 스크롤 시 표시 (Footer가 보이지 않을 때만)
       setShowFloatingCTA(window.scrollY > 400)
     }
 
@@ -65,12 +68,28 @@ export function MobileLanding() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Footer 영역 감지 (IntersectionObserver)
+  useEffect(() => {
+    const sentinel = footerSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFooterVisible(entry.isIntersecting)
+      },
+      { threshold: 0 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       {/* 메인 랜딩 */}
-      <div className="min-h-[100svh] flex flex-col bg-[var(--ivory-50)]">
+      <div className="flex flex-col bg-[var(--ivory-50)]">
         {/* Hero Section */}
-        <section className="flex-1 flex flex-col items-center justify-center px-4 py-6 relative overflow-hidden">
+        <section className="min-h-[85svh] flex flex-col items-center justify-center px-4 py-6 relative overflow-hidden">
           {/* 배경 */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-pure)] via-[var(--bg-warm)] to-[var(--blush-50)]" />
@@ -200,9 +219,15 @@ export function MobileLanding() {
           </div>
         </section>
 
-        {/* Bottom CTA (Fixed) - 스크롤 후 표시 */}
+        {/* FAQ Section */}
+        <MobileFAQSection />
+
+        {/* Footer Sentinel - Footer 영역 감지용 */}
+        <div ref={footerSentinelRef} className="h-1" aria-hidden="true" />
+
+        {/* Bottom CTA (Fixed) - 스크롤 후 표시, Footer 보이면 숨김 */}
         <AnimatePresence>
-          {showFloatingCTA && (
+          {showFloatingCTA && !isFooterVisible && (
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
