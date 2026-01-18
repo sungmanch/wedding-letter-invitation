@@ -216,6 +216,7 @@ export interface ImageProps {
   objectFit: 'cover' | 'contain' | 'fill'
   overlay?: string  // 이미지 위 오버레이 색상
   filter?: string   // CSS filter (예: 'grayscale(100%) brightness(0.9)')
+  fallbackSrc?: string  // 이미지가 없을 때 기본 이미지 경로
 }
 
 export interface ShapeProps {
@@ -296,8 +297,9 @@ export type VariablePath =
   | 'wedding.date' | 'wedding.time'
 
   // ─── 자동 계산 (__HIDDEN__) ───
-  | 'wedding.dateDisplay' | 'wedding.dateDot' | 'wedding.dateMonthDay' | 'wedding.timeDisplay' | 'wedding.dday'
-  | 'wedding.year' | 'wedding.month' | 'wedding.day' | 'wedding.weekday'
+  | 'wedding.dateDisplay' | 'wedding.dateDot' | 'wedding.dateDotWithDay' | 'wedding.dateMonthDay'
+  | 'wedding.timeDisplay' | 'wedding.timeDisplayEn' | 'wedding.timeDisplayEnLower' | 'wedding.dday'
+  | 'wedding.year' | 'wedding.month' | 'wedding.day' | 'wedding.weekday' | 'wedding.weekdayEn'
   | 'wedding.weekdayMinus2' | 'wedding.weekdayMinus1' | 'wedding.weekdayPlus1' | 'wedding.weekdayPlus2'
   | 'wedding.dayMinus2' | 'wedding.dayMinus1' | 'wedding.dayPlus1' | 'wedding.dayPlus2'
   | 'countdown.days' | 'countdown.hours' | 'countdown.minutes' | 'countdown.seconds'
@@ -586,10 +588,11 @@ export interface TextStyle {
   fontFamily?: string
   fontSize?: number | string  // number(px) 또는 CSS 변수 'var(--text-xl)'
   fontWeight?: number
+  fontStyle?: 'normal' | 'italic'
   color?: string
   textAlign?: 'left' | 'center' | 'right'
   lineHeight?: number
-  letterSpacing?: number
+  letterSpacing?: number | string  // number(em) 또는 CSS 단위 문자열 '2rem'
   textShadow?: string
   // 세로 쓰기용 (vertical-rl)
   writingMode?: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr'

@@ -27,6 +27,8 @@ export interface DataTabProps {
   document: EditorDocument
   /** 데이터 업데이트 콜백 */
   onDataChange?: (data: WeddingData) => void
+  /** 블록 업데이트 콜백 */
+  onBlocksChange?: (blocks: Block[]) => void
   /** 이미지 업로드 핸들러 */
   onUploadImage?: (file: File) => Promise<string>
   /** 펼쳐진 섹션 ID */
@@ -44,6 +46,7 @@ export interface DataTabProps {
 export function DataTab({
   document,
   onDataChange,
+  onBlocksChange,
   onUploadImage,
   expandedSection,
   onExpandedSectionChange,
@@ -114,6 +117,94 @@ export function DataTab({
     [expanded, setExpanded]
   )
 
+  // 날짜/시간 표시 언어 감지
+  const dateTimeLocale = useMemo(() => {
+    for (const block of document.blocks) {
+      for (const element of block.elements) {
+        // TextProps만 format 속성이 있음
+        const format = element.props?.type === 'text'
+          ? (element.props as { format?: string }).format
+          : undefined
+        const binding = element.binding as string | undefined
+
+        // 영어 바인딩이 있으면 'en' (모든 영어 변형 포함)
+        if (format?.includes('weekdayEn}') || format?.includes('timeDisplayEn}') || format?.includes('timeDisplayEnLower}') ||
+            binding?.includes('weekdayEn') || binding?.includes('timeDisplayEn') || binding?.includes('timeDisplayEnLower')) {
+          return 'en'
+        }
+        // 한국어 바인딩이 있으면 'ko' (영어가 아닌 weekday 또는 timeDisplay)
+        // weekday}와 weekdayEn}를 구분하기 위해 정확히 매칭
+        if ((format?.includes('{wedding.weekday}') || format?.includes('{wedding.timeDisplay}')) ||
+            binding === 'wedding.weekday' || binding === 'wedding.timeDisplay') {
+          return 'ko'
+        }
+      }
+    }
+    return 'ko' // 기본값
+  }, [document.blocks])
+
+  // 날짜/시간 언어 변경
+  const handleDateTimeLocaleChange = useCallback((locale: 'ko' | 'en') => {
+    console.log('[DateTimeLocale] Changing to:', locale, 'onBlocksChange:', !!onBlocksChange)
+    if (!onBlocksChange) {
+      console.warn('[DateTimeLocale] onBlocksChange is not provided!')
+      return
+    }
+
+    // 한국어 → 영어 매핑
+    const koToEn: Record<string, string> = {
+      'wedding.weekday': 'wedding.weekdayEn',
+      'wedding.timeDisplay': 'wedding.timeDisplayEn',
+    }
+    // 영어 → 한국어 매핑 (모든 영어 변형 포함)
+    const enToKo: Record<string, string> = {
+      'wedding.weekdayEn': 'wedding.weekday',
+      'wedding.timeDisplayEn': 'wedding.timeDisplay',
+      'wedding.timeDisplayEnLower': 'wedding.timeDisplay', // 소문자 영어 변형도 포함
+    }
+    const mapping = locale === 'en' ? koToEn : enToKo
+
+    const newBlocks = document.blocks.map(block => ({
+      ...block,
+      elements: block.elements.map(element => {
+        let newElement = { ...element }
+
+        // binding 변환
+        if (element.binding && mapping[element.binding as string]) {
+          newElement = { ...newElement, binding: mapping[element.binding as string] as typeof element.binding }
+        }
+
+        // format 문자열 내 바인딩 변환 (TextProps만)
+        // format은 "{wedding.weekdayEn}" 형태이므로 중괄호 포함해서 매칭
+        if (element.props?.type === 'text') {
+          const textProps = element.props as { format?: string; type: 'text' }
+          if (textProps.format) {
+            let newFormat = textProps.format
+            for (const [from, to] of Object.entries(mapping)) {
+              // {wedding.weekdayEn} → {wedding.weekday} 형태로 변환
+              const pattern = `\\{${from.replace(/\./g, '\\.')}\\}`
+              newFormat = newFormat.replace(new RegExp(pattern, 'g'), `{${to}}`)
+            }
+            if (newFormat !== textProps.format) {
+              newElement = {
+                ...newElement,
+                props: { ...element.props, format: newFormat } as typeof element.props
+              }
+            }
+          }
+        }
+
+        return newElement
+      })
+    }))
+
+    console.log('[DateTimeLocale] Updated blocks:', newBlocks.map(b => ({
+      id: b.id,
+      elements: b.elements.map(e => ({ id: e.id, binding: e.binding, format: (e.props as { format?: string })?.format }))
+    })))
+    onBlocksChange(newBlocks)
+  }, [document.blocks, onBlocksChange])
+
   return (
     <div className={`flex flex-col p-4 space-y-4 ${className}`}>
       {/* ============================================ */}
@@ -171,6 +262,36 @@ export function DataTab({
               onChange={(e) => handleFieldChange('wedding.time', e.target.value)}
               className="w-full px-3 py-2 bg-white border border-[var(--warm-200)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--blush-400)]"
             />
+          </FieldRow>
+
+          <FieldRow label="날짜/시간 표시">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleDateTimeLocaleChange('ko')}
+                className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${
+                  dateTimeLocale === 'ko'
+                    ? 'bg-[var(--blush-500)] text-white border-[var(--blush-500)]'
+                    : 'bg-white text-[var(--warm-600)] border-[var(--warm-200)] hover:border-[var(--blush-300)]'
+                }`}
+              >
+                한국어
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDateTimeLocaleChange('en')}
+                className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${
+                  dateTimeLocale === 'en'
+                    ? 'bg-[var(--blush-500)] text-white border-[var(--blush-500)]'
+                    : 'bg-white text-[var(--warm-600)] border-[var(--warm-200)] hover:border-[var(--blush-300)]'
+                }`}
+              >
+                English
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-[var(--warm-400)]">
+              {dateTimeLocale === 'ko' ? '(토) 오후 2시' : '(SAT) PM 2:00'}
+            </p>
           </FieldRow>
         </div>
       </SharedSection>

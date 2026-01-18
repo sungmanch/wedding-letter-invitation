@@ -48,6 +48,7 @@ export function resolveBinding(
 /**
  * 경로로 객체에서 값 가져오기
  * 점(.) 표기법 지원: 'groom.name', 'venue.coordinates.lat'
+ * 커스텀 줄 인덱스 지원: 'custom.heroQuote.0' (줄바꿈으로 분리된 텍스트의 첫번째 줄)
  */
 export function getValueByPath(
   data: WeddingData,
@@ -57,6 +58,25 @@ export function getValueByPath(
   // Computed 필드 처리
   if (isComputedField(path)) {
     return resolveComputedField(data, path, options)
+  }
+
+  // 커스텀 필드 줄 인덱스 처리: custom.heroQuote.0, custom.heroQuote.1 등
+  const customLineMatch = path.match(/^custom\.(\w+)\.(\d+)$/)
+  if (customLineMatch) {
+    const [, fieldName, lineIndexStr] = customLineMatch
+    const lineIndex = parseInt(lineIndexStr, 10)
+    const fullText = data.custom?.[fieldName]
+    // 필드가 존재하면 (사용자가 수정함) 해당 줄이 없어도 빈 문자열 반환
+    // 이렇게 하면 element.value fallback이 사용되지 않음
+    if (fullText !== undefined) {
+      if (typeof fullText === 'string') {
+        const lines = fullText.split('\n')
+        return lines[lineIndex]?.trim() ?? ''
+      }
+      return ''
+    }
+    // 필드가 없으면 undefined 반환 → element.value fallback 사용
+    return undefined
   }
 
   const parts = path.split('.')
@@ -121,14 +141,18 @@ const COMPUTED_FIELDS = [
   // 날짜/시간 표시
   'wedding.dateDisplay',
   'wedding.dateDot',  // YYYY.MM.DD 형식
+  'wedding.dateDotWithDay',  // YYYY.MM.DD(sat) 형식
   'wedding.dateMonthDay',  // MM.DD 형식
   'wedding.timeDisplay',
+  'wedding.timeDisplayEn',  // PM 1:30 형식
+  'wedding.timeDisplayEnLower',  // pm 1:30 형식 (소문자)
   'wedding.dday',
   // 날짜 분해 필드
   'wedding.year',
   'wedding.month',
   'wedding.day',
   'wedding.weekday',  // dayOfWeek → weekday로 rename
+  'wedding.weekdayEn',  // SAT, SUN 형식
   // 날짜 오프셋 (±2일 범위)
   'wedding.weekdayMinus2',
   'wedding.weekdayMinus1',
@@ -180,11 +204,20 @@ function resolveComputedField(
     case 'wedding.dateDot':
       return formatDateDot(dateStr)  // YYYY.MM.DD 형식
 
+    case 'wedding.dateDotWithDay':
+      return formatDateDotWithDay(dateStr)  // YYYY.MM.DD(sat) 형식
+
     case 'wedding.dateMonthDay':
       return formatDateMonthDay(dateStr)  // MM.DD 형식
 
     case 'wedding.timeDisplay':
       return formatTime(data.wedding?.time)
+
+    case 'wedding.timeDisplayEn':
+      return formatTimeEn(data.wedding?.time)
+
+    case 'wedding.timeDisplayEnLower':
+      return formatTimeEnLower(data.wedding?.time)
 
     case 'wedding.dday':
       return calculateDday(dateStr)
@@ -201,6 +234,9 @@ function resolveComputedField(
     case 'wedding.weekday':
     case 'wedding.dayOfWeek':  // Legacy 호환
       return getDayOfWeek(dateStr)
+
+    case 'wedding.weekdayEn':
+      return getDayOfWeekEn(dateStr)
 
     // 요일 오프셋 (-2, -1, +1, +2)
     case 'wedding.weekdayMinus2':
@@ -416,6 +452,20 @@ export function formatDateMonthDay(dateStr: string): string {
 }
 
 /**
+ * YYYY.MM.DD(sat) 형식으로 날짜 포맷
+ */
+export function formatDateDotWithDay(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  const dayOfWeek = days[date.getDay()]
+  return `${year}.${month}.${day}(${dayOfWeek})`
+}
+
+/**
  * 일 반환
  */
 export function getDay(dateStr: string): string {
@@ -502,6 +552,45 @@ export function formatTime(timeStr: string): string {
   return `${period} ${displayHours}시 ${minutes}분`
 }
 
+/**
+ * 시간 포맷팅 (영어)
+ * @param timeStr HH:mm 형식 (14:00)
+ */
+export function formatTimeEn(timeStr: string): string {
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  const period = hours < 12 ? 'AM' : 'PM'
+  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+
+  if (minutes === 0) {
+    return `${period} ${displayHours}:00`
+  }
+  return `${period} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+}
+
+/**
+ * 시간 포맷팅 (영어 소문자) - pm 1:30 형식
+ * @param timeStr HH:mm 형식 (14:00)
+ */
+export function formatTimeEnLower(timeStr: string): string {
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  const period = hours < 12 ? 'am' : 'pm'
+  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+
+  if (minutes === 0) {
+    return `${period} ${displayHours}:00`
+  }
+  return `${period} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+}
+
+/**
+ * 요일 반환 (영어)
+ */
+export function getDayOfWeekEn(dateStr: string): string {
+  const date = new Date(dateStr)
+  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+  return days[date.getDay()]
+}
+
 // ============================================
 // Validation
 // ============================================
@@ -525,8 +614,9 @@ export function isValidVariablePath(path: string): path is VariablePath {
     'wedding.date', 'wedding.time',
 
     // ─── 자동 계산 (__HIDDEN__) ───
-    'wedding.dateDisplay', 'wedding.dateDot', 'wedding.timeDisplay', 'wedding.dday',
-    'wedding.year', 'wedding.month', 'wedding.day', 'wedding.weekday',
+    'wedding.dateDisplay', 'wedding.dateDot', 'wedding.dateDotWithDay', 'wedding.dateMonthDay',
+    'wedding.timeDisplay', 'wedding.timeDisplayEn', 'wedding.timeDisplayEnLower', 'wedding.dday',
+    'wedding.year', 'wedding.month', 'wedding.day', 'wedding.weekday', 'wedding.weekdayEn',
     'wedding.weekdayMinus2', 'wedding.weekdayMinus1', 'wedding.weekdayPlus1', 'wedding.weekdayPlus2',
     'wedding.dayMinus2', 'wedding.dayMinus1', 'wedding.dayPlus1', 'wedding.dayPlus2',
     'countdown.days', 'countdown.hours', 'countdown.minutes', 'countdown.seconds',

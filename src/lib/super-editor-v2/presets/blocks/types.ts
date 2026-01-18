@@ -184,6 +184,12 @@ export interface BlockPreset {
   /** Default elements for this preset */
   defaultElements?: PresetElement[]
 
+  /** Default data to merge into WeddingData when preset is applied */
+  defaultData?: {
+    custom?: Record<string, string>
+    [key: string]: unknown
+  }
+
   /** Special components used in this variant */
   specialComponents?: readonly string[]
 

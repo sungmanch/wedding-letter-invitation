@@ -22,7 +22,7 @@ const ELEMENTS: PresetElement[] = [
     height: 100,
     zIndex: 0,
     binding: 'photos.main',
-    props: { type: 'image', objectFit: 'cover' },
+    props: { type: 'image', objectFit: 'cover', fallbackSrc: '/examples/wedding_images/new_asset_1.png' },
   },
   // "WEDDING INVITATION" 라벨
   {
@@ -37,12 +37,12 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-body)',
+        fontFamily: '"Baskervville", "Baskerville", "Georgia", serif',
         fontSize: 12,
         fontWeight: 400,
         color: '#000000',
         textAlign: 'center',
-        letterSpacing: 0.25,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -51,17 +51,17 @@ const ELEMENTS: PresetElement[] = [
     id: 'hero-title',
     type: 'text',
     x: 10,
-    y: 43,
+    y: 37,
     width: 80,
-    height: 12,
+    height: 10,
     zIndex: 1,
     value: 'WEDDING\nDAY',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-heading)',
-        fontSize: 40,
-        fontWeight: 600,
+        fontFamily: '"Libre Bodoni", "Didot", "Georgia", serif',
+        fontSize: 28,
+        fontWeight: 300,
         color: '#000000',
         textAlign: 'center',
         lineHeight: 1.2,
@@ -81,12 +81,12 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-body)',
+        fontFamily: '"Hakgyoansim Badasseugi", "Apple SD Gothic Neo", sans-serif',
         fontSize: 16,
-        fontWeight: 400,
+        fontWeight: 700,
         color: '#000000',
         textAlign: 'center',
-        letterSpacing: 0.25,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -105,7 +105,7 @@ const ELEMENTS: PresetElement[] = [
     },
     style: {
       text: {
-        fontFamily: 'var(--font-heading)',
+        fontFamily: '"Hakgyoansim Badasseugi", "Apple SD Gothic Neo", sans-serif',
         fontSize: 16,
         fontWeight: 400,
         color: '#000000',
@@ -118,7 +118,7 @@ const ELEMENTS: PresetElement[] = [
     id: 'hero-message',
     type: 'text',
     x: 10,
-    y: 92,
+    y: 90,
     width: 80,
     height: 3,
     zIndex: 1,
@@ -126,7 +126,7 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-heading)',
+        fontFamily: '"Hakgyoansim Badasseugi", "Apple SD Gothic Neo", sans-serif',
         fontSize: 14,
         fontWeight: 400,
         color: '#000000',

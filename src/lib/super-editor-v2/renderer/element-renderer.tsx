@@ -68,9 +68,17 @@ export function ElementRenderer({
   const resolvedValue = useMemo(() => {
     if (element.binding) {
       const value = resolveBinding(data, element.binding)
-      // 바인딩 값이 비어있으면 fallback 바인딩 사용
-      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
-        return resolveBinding(data, element.bindingFallback)
+      // 바인딩 값이 null/undefined면 fallback 사용
+      // 빈 문자열('')은 유효한 값으로 취급 (사용자가 비웠을 수 있음)
+      if (value === null || value === undefined) {
+        if (element.bindingFallback) {
+          const fallbackValue = resolveBinding(data, element.bindingFallback)
+          if (fallbackValue !== null && fallbackValue !== undefined) {
+            return fallbackValue
+          }
+        }
+        // bindingFallback도 없거나 비어있으면 element.value 사용
+        return element.value ?? (element as { content?: string }).content
       }
       return value
     }
@@ -228,6 +236,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           objectFit={(props as ImageProps).objectFit}
           overlay={(props as ImageProps).overlay}
           filter={(props as ImageProps).filter}
+          fallbackSrc={(props as ImageProps).fallbackSrc}
           style={element.style}
           editable={editable}
         />
@@ -566,9 +575,16 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
   const resolvedValue = useMemo(() => {
     if (element.binding) {
       const value = resolveBinding(data, element.binding)
-      // 바인딩 값이 비어있으면 fallback 바인딩 사용
-      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
-        return resolveBinding(data, element.bindingFallback)
+      // 바인딩 값이 없으면 fallback 바인딩 사용 (빈 문자열은 유효한 값)
+      if (value === null || value === undefined) {
+        if (element.bindingFallback) {
+          const fallbackValue = resolveBinding(data, element.bindingFallback)
+          if (fallbackValue !== null && fallbackValue !== undefined) {
+            return fallbackValue
+          }
+        }
+        // bindingFallback도 없으면 element.value 사용
+        return element.value ?? (element as { content?: string }).content
       }
       return value
     }

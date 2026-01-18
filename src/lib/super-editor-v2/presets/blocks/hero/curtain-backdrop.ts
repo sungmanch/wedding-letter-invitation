@@ -13,7 +13,7 @@ import type { BlockPreset, PresetElement } from '../types'
 import { HERO_HEIGHT } from './_shared'
 
 const ELEMENTS: PresetElement[] = [
-  // 배경 이미지 (커튼 텍스처)
+  // 배경 이미지 (커튼 텍스처) - 고정 이미지, 바인딩 없음
   {
     id: 'hero-bg',
     type: 'image',
@@ -22,8 +22,7 @@ const ELEMENTS: PresetElement[] = [
     width: 100,
     height: 100,
     zIndex: 0,
-    binding: 'photos.main',
-    props: { type: 'image', objectFit: 'cover' },
+    props: { type: 'image', objectFit: 'cover', fallbackSrc: '/examples/wedding_images/new_asset_2.png' },
   },
   // 메인 웨딩 사진 (세로 직사각형)
   {
@@ -34,8 +33,8 @@ const ELEMENTS: PresetElement[] = [
     width: 75,
     height: 70,
     zIndex: 1,
-    binding: 'couple.photo',
-    props: { type: 'image', objectFit: 'cover' },
+    binding: 'photos.main',
+    props: { type: 'image', objectFit: 'cover', fallbackSrc: '/examples/wedding_images/new_asset_2_1.png' },
   },
   // "WEDDING" 타이틀
   {
@@ -46,16 +45,16 @@ const ELEMENTS: PresetElement[] = [
     width: 70,
     height: 6,
     zIndex: 2,
-    value: 'WEDDING',
+    value: 'Wedding',
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-display)',
+        fontFamily: 'Rock Salt, cursive',
         fontSize: 32,
         fontWeight: 400,
         color: '#FFFFFF',
         textAlign: 'center',
-        letterSpacing: 0.3,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -70,16 +69,16 @@ const ELEMENTS: PresetElement[] = [
     zIndex: 2,
     props: {
       type: 'text',
-      format: '{groom.name}, {bride.name}',
+      format: '{couple.groom.nameEn}, {couple.bride.nameEn}',
     },
     style: {
       text: {
-        fontFamily: 'var(--font-display)',
-        fontSize: 18,
+        fontFamily: 'Rock Salt, cursive',
+        fontSize: 12,
         fontWeight: 400,
         color: '#FFFFFF',
         textAlign: 'center',
-        letterSpacing: 0.15,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -96,12 +95,12 @@ const ELEMENTS: PresetElement[] = [
     props: { type: 'text' },
     style: {
       text: {
-        fontFamily: 'var(--font-display)',
-        fontSize: 24,
+        fontFamily: 'Rock Salt, cursive',
+        fontSize: 14,
         fontWeight: 400,
         color: '#FFFFFF',
         textAlign: 'center',
-        letterSpacing: 0.1,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -118,9 +117,8 @@ export const HERO_CURTAIN_BACKDROP: BlockPreset = {
   complexity: 'medium',
   bindings: [
     'photos.main',
-    'couple.photo',
-    'couple.groom.name',
-    'couple.bride.name',
+    'couple.groom.nameEn',
+    'couple.bride.nameEn',
     'wedding.dateDot',
   ],
   defaultHeight: HERO_HEIGHT,

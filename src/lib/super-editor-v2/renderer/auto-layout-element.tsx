@@ -212,6 +212,7 @@ function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpa
           src={value as string}
           objectFit={(props as ImageProps).objectFit}
           overlay={(props as ImageProps).overlay}
+          fallbackSrc={(props as ImageProps).fallbackSrc}
           style={element.style}
           editable={editable}
         />

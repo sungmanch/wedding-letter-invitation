@@ -85,6 +85,7 @@ export function TextElement({
       }
 
       if (style.fontWeight) css.fontWeight = style.fontWeight
+      if (style.fontStyle) css.fontStyle = style.fontStyle
       if (style.color) css.color = style.color
       if (style.textAlign) css.textAlign = style.textAlign
       if (style.lineHeight) css.lineHeight = style.lineHeight

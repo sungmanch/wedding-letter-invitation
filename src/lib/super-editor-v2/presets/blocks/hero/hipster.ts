@@ -28,7 +28,7 @@ const ELEMENTS: PresetElement[] = [
     height: 100,
     zIndex: 0,
     binding: 'photos.main',
-    props: { type: 'image', objectFit: 'cover' },
+    props: { type: 'image', objectFit: 'cover', fallbackSrc: '/examples/wedding_images/new_asset_3.png' },
   },
   // 커플 이름 (좌측 하단, 작은 크기)
   {
@@ -46,11 +46,11 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: FONT_FAMILY,
-        fontSize: 14,
+        fontSize: 11,
         fontWeight: 800,
         color: ACCENT_COLOR,
         textAlign: 'left',
-        letterSpacing: 3,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -68,12 +68,12 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: FONT_FAMILY,
-        fontSize: 52,
+        fontSize: 36,
         fontWeight: 800,
         color: ACCENT_COLOR,
         textAlign: 'left',
-        lineHeight: 0.95,
-        letterSpacing: -1,
+        lineHeight: 1.2,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -91,11 +91,11 @@ const ELEMENTS: PresetElement[] = [
     style: {
       text: {
         fontFamily: FONT_FAMILY,
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: 800,
         color: ACCENT_COLOR,
         textAlign: 'left',
-        letterSpacing: 1,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -110,16 +110,16 @@ const ELEMENTS: PresetElement[] = [
     zIndex: 2,
     props: {
       type: 'text',
-      format: '({wedding.weekday}) {wedding.timeDisplay}',
+      format: '({wedding.weekdayEn}) {wedding.timeDisplayEn}',
     },
     style: {
       text: {
         fontFamily: FONT_FAMILY,
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: 800,
         color: ACCENT_COLOR,
         textAlign: 'left',
-        letterSpacing: 1,
+        letterSpacing: '0.25em',
       },
     },
   },
@@ -139,8 +139,8 @@ export const HERO_HIPSTER: BlockPreset = {
     'couple.bride.nameEn',
     'couple.groom.nameEn',
     'wedding.dateDot',
-    'wedding.weekday',
-    'wedding.timeDisplay',
+    'wedding.weekdayEn',
+    'wedding.timeDisplayEn',
   ],
   defaultHeight: HERO_HEIGHT,
   layout: undefined,
