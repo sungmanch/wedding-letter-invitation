@@ -17,6 +17,12 @@ export interface FontStack {
   readonly fallback: string
   readonly googleFonts?: readonly string[] // Google Fonts 로드용 이름
   readonly sizeScale?: number // 폰트 크기 보정 계수 (기본 1.0)
+  // 폰트 출처 명시 (라이선스 요구사항)
+  readonly credit?: {
+    readonly text: string       // 출처 표시 텍스트 (예: "강원도교육청")
+    readonly url?: string       // 출처 링크 (선택)
+    readonly required: boolean  // true: 필수, false: 권장
+  }
 }
 
 export interface TypographyPreset {
@@ -73,6 +79,24 @@ const FONT_STACKS = {
     googleFonts: ['Cinzel:400,500,600,700'],
     sizeScale: 0.90, // 대문자만, 크게 렌더링됨
   },
+  baskervville: {
+    family: ['Baskervville', 'Baskerville', 'Georgia', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Baskervville:400,500,600,700'],
+    sizeScale: 1.0,
+  },
+  bodoniModaSc: {
+    family: ['Bodoni Moda SC', 'Didot', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Bodoni Moda SC:400,500,600,700,800,900'],
+    sizeScale: 0.95, // SC(Small Caps)는 약간 크게 렌더링됨
+  },
+  libreBodoni: {
+    family: ['Libre Bodoni', 'Didot', 'Georgia', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Libre Bodoni:400,500,600,700'],
+    sizeScale: 1.0,
+  },
 
   // ─── 영문 산세리프 ───
   montserrat: {
@@ -106,6 +130,24 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: ['Alex Brush:400'],
     sizeScale: 1.15,
+  },
+  nothingYouCouldDo: {
+    family: ['Nothing You Could Do', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Nothing You Could Do:400'],
+    sizeScale: 1.1, // 손글씨 스타일, 약간 작게 렌더링됨
+  },
+  rockSalt: {
+    family: ['Rock Salt', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Rock Salt:400'],
+    sizeScale: 1.15, // 펠트펜 손글씨, 작게 렌더링됨
+  },
+  swankyAndMooMoo: {
+    family: ['Swanky and Moo Moo', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Swanky and Moo Moo:400'],
+    sizeScale: 1.0, // 넓은 손글씨
   },
 
   // ─── 한글 명조 ───
@@ -154,6 +196,71 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: ['Nanum Brush Script:400'],
     sizeScale: 1.1,
+  },
+
+  // ─── KBL 폰트 (로컬) ───
+  kblCourt: {
+    family: ['KBL Court', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 0.95, // 굵은 폰트, 약간 크게 렌더링됨
+  },
+  kblJump: {
+    family: ['KBL Jump', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0,
+  },
+  kblJumpCondensed: {
+    family: ['KBL Jump Condensed', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.05, // Condensed 폰트, 좁은 폭
+  },
+  kblJumpExtended: {
+    family: ['KBL Jump Extended', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 0.95, // Extended 폰트, 넓은 폭
+  },
+
+  // ─── 강원교육 폰트 (로컬) ───
+  gangwonEduModu: {
+    family: ['Gangwon Edu Modu', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // Light(300), Bold(700) 지원
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
+  },
+  gangwonEduSaeum: {
+    family: ['Gangwon Edu Saeum', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // 손글씨 스타일
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
+  },
+  gangwonEduTeunteun: {
+    family: ['Gangwon Edu Teunteun', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 0.95, // 굵은 둥근 스타일
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
+  },
+  gangwonEduHyunok: {
+    family: ['Gangwon Edu Hyunok', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // 선생님 손글씨 스타일
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
+  },
+
+  // ─── 학교안심 폰트 (로컬) ───
+  hakgyoansimBadasseugi: {
+    family: ['Hakgyoansim Badasseugi', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // Light(300), Bold(700) 지원
+    credit: { text: '한국교육학술정보원', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
   },
 } as const
 
@@ -516,14 +623,20 @@ export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
   'Pinyon Script': 1.25,
   'Alex Brush': 1.15,
   'The Nautigal': 1.20,
+  'Nothing You Could Do': 1.1,
+  'Rock Salt': 1.15,
+  'Swanky and Moo Moo': 1.0,
   // 영문 표준
   'Dancing Script': 1.0,
   'Montserrat': 1.0,
   'Inter': 1.0,
+  'Baskervville': 1.0,
+  'Libre Bodoni': 1.0,
   // 영문 크게 렌더링
   'Playfair Display': 0.95,
   'Poppins': 0.95,
   'Cinzel': 0.90,
+  'Bodoni Moda SC': 0.95,
   'Cormorant Garamond': 1.05,
   // 한글 표준
   'Pretendard': 1.0,
@@ -534,4 +647,16 @@ export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
   // 한글 약간 크게
   'NanumSquare': 0.95,
   'Nanum Brush Script': 1.1,
+  // KBL 폰트 (로컬)
+  'KBL Court': 0.95,
+  'KBL Jump': 1.0,
+  'KBL Jump Condensed': 1.05,
+  'KBL Jump Extended': 0.95,
+  // 강원교육 폰트 (로컬)
+  'Gangwon Edu Modu': 1.0,
+  'Gangwon Edu Saeum': 1.0,
+  'Gangwon Edu Teunteun': 0.95,
+  'Gangwon Edu Hyunok': 1.0,
+  // 학교안심 폰트 (로컬)
+  'Hakgyoansim Badasseugi': 1.0,
 }

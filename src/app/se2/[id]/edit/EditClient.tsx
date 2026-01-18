@@ -357,10 +357,28 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
         }
       }
 
+      // defaultData가 있으면 data에 머지 (빈 값이면 default로 채움)
+      let newData = prev.data
+      if (preset.defaultData?.custom) {
+        const mergedCustom: Record<string, string> = { ...prev.data.custom }
+        for (const [key, defaultValue] of Object.entries(preset.defaultData.custom)) {
+          const existingValue = prev.data.custom?.[key]
+          // 필드가 없거나 빈 문자열이면 default 값 사용
+          if (existingValue === undefined || existingValue.trim() === '') {
+            mergedCustom[key] = defaultValue
+          }
+        }
+        newData = {
+          ...prev.data,
+          custom: mergedCustom,
+        }
+      }
+
       return {
         ...prev,
         blocks: newBlocks,
         style: newStyle,
+        data: newData,
       }
     })
   }, [updateDocument])
@@ -695,6 +713,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
                   <DataTab
                     document={editorDoc}
                     onDataChange={handleDataChange}
+                    onBlocksChange={handleBlocksChange}
                     onUploadImage={handleUploadImage}
                     expandedSection={expandedBlockId}
                     onExpandedSectionChange={setExpandedBlockId}
@@ -795,6 +814,7 @@ export function EditClient({ document: dbDocument }: EditClientProps) {
               <DataTab
                 document={editorDoc}
                 onDataChange={handleDataChange}
+                onBlocksChange={handleBlocksChange}
                 onUploadImage={handleUploadImage}
                 expandedSection={expandedBlockId}
                 onExpandedSectionChange={setExpandedBlockId}

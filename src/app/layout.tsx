@@ -169,7 +169,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Calistoga&family=Inknut+Antiqua:wght@300;400;500;600;700&family=Kodchasan:wght@200;300;400;500;600;700&family=Alata&family=Bangers&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=The+Nautigal:wght@400;700&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Calistoga&family=Inknut+Antiqua:wght@300;400;500;600;700&family=Kodchasan:wght@200;300;400;500;600;700&family=Alata&family=Bangers&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=The+Nautigal:wght@400;700&family=Nothing+You+Could+Do&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&display=swap"
           rel="stylesheet"
         />
         {/* NanumSquare - jsDelivr CDN */}

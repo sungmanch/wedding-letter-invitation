@@ -23,6 +23,7 @@ import type {
   CalendarProps,
   GroupProps,
   GradientValue,
+  WeddingData,
 } from '../schema/types'
 import { useDocument } from '../context/document-context'
 import { resolveBinding } from '../utils/binding-resolver'
@@ -139,6 +140,7 @@ export function AutoLayoutElement({
         editable={editable}
         galleryExpanded={galleryExpanded}
         onExpandGallery={onExpandGallery}
+        data={data}
       />
     </div>
   )
@@ -154,6 +156,7 @@ interface ElementTypeRendererProps {
   editable: boolean
   galleryExpanded?: boolean
   onExpandGallery?: () => void
+  data: WeddingData
 }
 
 /**
@@ -169,7 +172,7 @@ function isHugMode(element: Element): boolean {
   return widthIsHug || heightIsHug
 }
 
-function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpandGallery }: ElementTypeRendererProps) {
+function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpandGallery, data }: ElementTypeRendererProps) {
   const props = element.props
   const elementType = element.type || props?.type
   const hugMode = isHugMode(element)
@@ -206,16 +209,23 @@ function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpa
         />
       )
 
-    case 'image':
+    case 'image': {
+      // srcTemplate이 있으면 interpolate로 URL 생성
+      const imageProps = props as ImageProps
+      const imageSrc = imageProps.srcTemplate
+        ? interpolate(imageProps.srcTemplate, data)
+        : (value as string)
       return (
         <ImageElement
-          src={value as string}
-          objectFit={(props as ImageProps).objectFit}
-          overlay={(props as ImageProps).overlay}
+          src={imageSrc}
+          objectFit={imageProps.objectFit}
+          overlay={imageProps.overlay}
+          fallbackSrc={imageProps.fallbackSrc}
           style={element.style}
           editable={editable}
         />
       )
+    }
 
     case 'shape':
       return (
@@ -280,6 +290,7 @@ function ElementTypeRenderer({ element, value, editable, galleryExpanded, onExpa
           showDday={(props as CalendarProps).showDday}
           highlightColor={(props as CalendarProps).highlightColor}
           markerType={(props as CalendarProps).markerType}
+          imageStyle={(props as CalendarProps).imageStyle}
           style={element.style}
         />
       )
@@ -590,6 +601,7 @@ function AbsoluteChildElement({ element, editable }: AbsoluteChildElementProps) 
         element={element}
         value={formattedValue}
         editable={editable}
+        data={data}
       />
     </div>
   )

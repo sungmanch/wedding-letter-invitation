@@ -61,11 +61,15 @@ export const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
   // 날짜/시간 파생 필드
   'wedding.dateDisplay',
   'wedding.timeDisplay',
+  'wedding.timeDisplayEn',
+  'wedding.timeDisplayEnLower',
   'wedding.dday',
   'wedding.month',
   'wedding.day',
   'wedding.weekday',
+  'wedding.weekdayEn',
   'wedding.dateDot',
+  'wedding.dateDotWithDay',
   'wedding.dateMonthDay',
   'wedding.year',
   // 캘린더 파생 필드 (전후 요일/일)
@@ -100,11 +104,15 @@ export const HIDDEN_VARIABLE_PATHS: Set<string> = new Set([
 export const DERIVED_TO_INPUT_MAP: Record<string, VariablePath> = {
   'wedding.dateDisplay': 'wedding.date',
   'wedding.timeDisplay': 'wedding.time',
+  'wedding.timeDisplayEn': 'wedding.time',
+  'wedding.timeDisplayEnLower': 'wedding.time',
   'wedding.dday': 'wedding.date',
   'wedding.month': 'wedding.date',
   'wedding.day': 'wedding.date',
   'wedding.weekday': 'wedding.date',
+  'wedding.weekdayEn': 'wedding.date',
   'wedding.dateDot': 'wedding.date',
+  'wedding.dateDotWithDay': 'wedding.date',
   'wedding.dateMonthDay': 'wedding.date',
   'wedding.year': 'wedding.date',
   // 캘린더 전후 요일/일
@@ -321,6 +329,9 @@ export const VARIABLE_FIELD_CONFIG: Partial<Record<VariablePath, FieldConfig>> =
   // 엔딩 인용문 (custom.* - 프리셋 특화 필드)
   'custom.quoteText': { label: '인용문', type: 'textarea', placeholder: '"우리는 매일 시간을 여행한다..."' },
   'custom.quoteSource': { label: '인용문 출처', type: 'text', placeholder: '- 영화 「어바웃 타임」 중' },
+
+  // 히어로 캐치프레이즈 (wind-memory 프리셋) - 줄바꿈으로 구분
+  'custom.heroQuote': { label: '캐치프레이즈', type: 'textarea', placeholder: 'Two hearts,\nOne love,\nForever.' },
 }
 
 // ============================================

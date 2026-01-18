@@ -6,7 +6,7 @@
 @import url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css');
 
 /* Google Fonts - 제목 및 강조용 */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=Rock+Salt&family=Swanky+and+Moo+Moo&display=swap');
 
 /* Legacy - NanumSquare (하위 호환) */
 @import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
@@ -38,6 +38,102 @@
   font-family: 'Sonpyeonji';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_05@1.0/Handletter.woff') format('woff');
   font-weight: normal;
+  font-display: swap;
+}
+
+/* KBL Court - Extra Bold */
+@font-face {
+  font-family: 'KBL Court';
+  src: url('/fonts/KBLCourt_EB.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* KBL Jump - Regular */
+@font-face {
+  font-family: 'KBL Jump';
+  src: url('/fonts/KBLJump_R.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* KBL Jump - Bold */
+@font-face {
+  font-family: 'KBL Jump';
+  src: url('/fonts/KBLJump_B.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* KBL Jump Condensed - Extra Bold */
+@font-face {
+  font-family: 'KBL Jump Condensed';
+  src: url('/fonts/KBLJump_EB_Condensed.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* KBL Jump Extended - Extra Bold */
+@font-face {
+  font-family: 'KBL Jump Extended';
+  src: url('/fonts/KBLJump_EB_Extended.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* 강원교육모두 - Light */
+@font-face {
+  font-family: 'Gangwon Edu Modu';
+  src: url('/fonts/강원교육모두 Light.woff') format('woff');
+  font-weight: 300;
+  font-display: swap;
+}
+
+/* 강원교육모두 - Bold */
+@font-face {
+  font-family: 'Gangwon Edu Modu';
+  src: url('/fonts/강원교육모두 Bold.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* 강원교육새음 */
+@font-face {
+  font-family: 'Gangwon Edu Saeum';
+  src: url('/fonts/강원교육새음.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* 강원교육튼튼 */
+@font-face {
+  font-family: 'Gangwon Edu Teunteun';
+  src: url('/fonts/강원교육튼튼.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* 강원교육현옥샘 */
+@font-face {
+  font-family: 'Gangwon Edu Hyunok';
+  src: url('/fonts/강원교육현옥샘.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* 학교안심 받아쓰기 - Light */
+@font-face {
+  font-family: 'Hakgyoansim Badasseugi';
+  src: url('/fonts/Hakgyoansim-Badasseugi-L.woff') format('woff');
+  font-weight: 300;
+  font-display: swap;
+}
+
+/* 학교안심 받아쓰기 - Bold */
+@font-face {
+  font-family: 'Hakgyoansim Badasseugi';
+  src: url('/fonts/Hakgyoansim-Badasseugi-B.woff') format('woff');
+  font-weight: 700;
   font-display: swap;
 }
 

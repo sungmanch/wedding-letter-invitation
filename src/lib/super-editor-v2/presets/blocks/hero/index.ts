@@ -14,6 +14,11 @@ import { HERO_MINIMAL_OVERLAY } from './minimal-overlay'
 import { HERO_DARK_ROMANTIC } from './dark-romantic'
 import { HERO_BRIGHT_CASUAL } from './bright-casual'
 import { HERO_MONOCHROME_BOLD } from './monochrome-bold'
+import { HERO_MINIMAL_CLASSIC } from './minimal-classic'
+import { HERO_CURTAIN_BACKDROP } from './curtain-backdrop'
+import { HERO_HIPSTER } from './hipster'
+import { HERO_WIND_MEMORY } from './wind-memory'
+import { HERO_SOCCER_STYLE } from './soccer-style'
 
 // ============================================
 // Type Exports
@@ -26,6 +31,11 @@ export type HeroPresetId =
   | 'hero-dark-romantic'
   | 'hero-bright-casual'
   | 'hero-monochrome-bold'
+  | 'hero-minimal-classic'
+  | 'hero-curtain-backdrop'
+  | 'hero-hipster'
+  | 'hero-wind-memory'
+  | 'hero-soccer-style'
 
 // ============================================
 // Preset Registry
@@ -38,6 +48,11 @@ export const HERO_PRESETS: Record<HeroPresetId, BlockPreset> = {
   'hero-dark-romantic': HERO_DARK_ROMANTIC,
   'hero-bright-casual': HERO_BRIGHT_CASUAL,
   'hero-monochrome-bold': HERO_MONOCHROME_BOLD,
+  'hero-minimal-classic': HERO_MINIMAL_CLASSIC,
+  'hero-curtain-backdrop': HERO_CURTAIN_BACKDROP,
+  'hero-hipster': HERO_HIPSTER,
+  'hero-wind-memory': HERO_WIND_MEMORY,
+  'hero-soccer-style': HERO_SOCCER_STYLE,
 }
 
 // ============================================

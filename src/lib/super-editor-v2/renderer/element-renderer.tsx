@@ -24,6 +24,7 @@ import type {
   GroupProps,
   GradientValue,
   SizeMode,
+  WeddingData,
 } from '../schema/types'
 import { useDocument } from '../context/document-context'
 import { useBlock } from '../context/block-context'
@@ -68,9 +69,17 @@ export function ElementRenderer({
   const resolvedValue = useMemo(() => {
     if (element.binding) {
       const value = resolveBinding(data, element.binding)
-      // 바인딩 값이 비어있으면 fallback 바인딩 사용
-      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
-        return resolveBinding(data, element.bindingFallback)
+      // 바인딩 값이 null/undefined면 fallback 사용
+      // 빈 문자열('')은 유효한 값으로 취급 (사용자가 비웠을 수 있음)
+      if (value === null || value === undefined) {
+        if (element.bindingFallback) {
+          const fallbackValue = resolveBinding(data, element.bindingFallback)
+          if (fallbackValue !== null && fallbackValue !== undefined) {
+            return fallbackValue
+          }
+        }
+        // bindingFallback도 없거나 비어있으면 element.value 사용
+        return element.value ?? (element as { content?: string }).content
       }
       return value
     }
@@ -172,6 +181,7 @@ export function ElementRenderer({
         element={element}
         value={formattedValue}
         editable={editable}
+        data={data}
       />
     </div>
   )
@@ -185,9 +195,10 @@ interface ElementTypeRendererProps {
   element: Element
   value: unknown
   editable: boolean
+  data: WeddingData
 }
 
-function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
+function ElementTypeRenderer({ element, value, editable, data }: ElementTypeRendererProps) {
   const props = element.props
   // element.type을 우선 사용, props.type은 fallback
   const elementType = element.type || props?.type
@@ -221,17 +232,24 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         />
       )
 
-    case 'image':
+    case 'image': {
+      // srcTemplate이 있으면 interpolate로 URL 생성
+      const imageProps = props as ImageProps
+      const imageSrc = imageProps.srcTemplate
+        ? interpolate(imageProps.srcTemplate, data)
+        : (value as string)
       return (
         <ImageElement
-          src={value as string}
-          objectFit={(props as ImageProps).objectFit}
-          overlay={(props as ImageProps).overlay}
-          filter={(props as ImageProps).filter}
+          src={imageSrc}
+          objectFit={imageProps.objectFit}
+          overlay={imageProps.overlay}
+          filter={imageProps.filter}
+          fallbackSrc={imageProps.fallbackSrc}
           style={element.style}
           editable={editable}
         />
       )
+    }
 
     case 'shape':
       return (
@@ -293,6 +311,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           showDday={(props as CalendarProps).showDday}
           highlightColor={(props as CalendarProps).highlightColor}
           markerType={(props as CalendarProps).markerType}
+          imageStyle={(props as CalendarProps).imageStyle}
           style={element.style}
         />
       )
@@ -566,9 +585,16 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
   const resolvedValue = useMemo(() => {
     if (element.binding) {
       const value = resolveBinding(data, element.binding)
-      // 바인딩 값이 비어있으면 fallback 바인딩 사용
-      if ((value === null || value === undefined || value === '') && element.bindingFallback) {
-        return resolveBinding(data, element.bindingFallback)
+      // 바인딩 값이 없으면 fallback 바인딩 사용 (빈 문자열은 유효한 값)
+      if (value === null || value === undefined) {
+        if (element.bindingFallback) {
+          const fallbackValue = resolveBinding(data, element.bindingFallback)
+          if (fallbackValue !== null && fallbackValue !== undefined) {
+            return fallbackValue
+          }
+        }
+        // bindingFallback도 없으면 element.value 사용
+        return element.value ?? (element as { content?: string }).content
       }
       return value
     }
@@ -619,17 +645,23 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
           />
         )
 
-      case 'image':
+      case 'image': {
+        // srcTemplate이 있으면 interpolate로 URL 생성
+        const imageProps = props as ImageProps
+        const imageSrc = imageProps.srcTemplate
+          ? interpolate(imageProps.srcTemplate, data)
+          : (value as string)
         return (
           <ImageElement
-            src={value as string}
-            objectFit={(props as ImageProps).objectFit}
-            overlay={(props as ImageProps).overlay}
-            filter={(props as ImageProps).filter}
+            src={imageSrc}
+            objectFit={imageProps.objectFit}
+            overlay={imageProps.overlay}
+            filter={imageProps.filter}
             style={element.style}
             editable={editable}
           />
         )
+      }
 
       case 'shape':
         return (

@@ -19,6 +19,7 @@ export interface ImageElementProps {
   objectFit?: 'cover' | 'contain' | 'fill'
   overlay?: string
   filter?: string  // CSS filter (예: 'grayscale(100%) brightness(0.9)')
+  fallbackSrc?: string  // 이미지가 없을 때 기본 이미지 경로
   style?: ElementStyle
   editable?: boolean
   className?: string
@@ -33,6 +34,7 @@ export function ImageElement({
   objectFit = 'cover',
   overlay,
   filter,
+  fallbackSrc,
   style,
   editable = false,
   className = '',
@@ -40,16 +42,20 @@ export function ImageElement({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
+  // URL 유효성 검사 함수
+  const isValidSrc = (value: string | null | undefined): value is string => {
+    if (!value || typeof value !== 'string') return false
+    return value.startsWith('/') || value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:')
+  }
+
   // src 정규화: 배열인 경우 첫 번째 항목 사용, 유효한 URL인지 확인
   const src = useMemo(() => {
     const rawSrc = Array.isArray(srcProp) ? srcProp[0] : srcProp
-    if (!rawSrc || typeof rawSrc !== 'string') return null
-    // 상대 경로 또는 유효한 URL 형식인지 확인
-    if (rawSrc.startsWith('/') || rawSrc.startsWith('http://') || rawSrc.startsWith('https://') || rawSrc.startsWith('data:')) {
-      return rawSrc
-    }
+    if (isValidSrc(rawSrc)) return rawSrc
+    // src가 없거나 유효하지 않으면 fallback 사용
+    if (isValidSrc(fallbackSrc)) return fallbackSrc
     return null
-  }, [srcProp])
+  }, [srcProp, fallbackSrc])
 
   // 컨테이너 스타일
   const containerStyle = useMemo<CSSProperties>(() => ({

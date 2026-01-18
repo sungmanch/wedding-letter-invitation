@@ -76,6 +76,12 @@ export function extractEditableFields(block: Block, data: WeddingData): Editable
     // Computed field는 source field로 변환 (wedding.timeDisplay → wedding.time)
     finalBinding = getEditableBinding(finalBinding)
 
+    // 커스텀 줄 인덱스 바인딩 통합: custom.heroQuote.0 → custom.heroQuote
+    const customLineMatch = finalBinding.match(/^(custom\.\w+)\.\d+$/)
+    if (customLineMatch) {
+      finalBinding = customLineMatch[1] as VariablePath
+    }
+
     // 같은 바인딩은 한 번만 표시
     if (seenBindings.has(finalBinding)) return
     seenBindings.add(finalBinding)

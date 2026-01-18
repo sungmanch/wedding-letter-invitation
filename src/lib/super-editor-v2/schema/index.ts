@@ -289,6 +289,8 @@ export const SAMPLE_WEDDING_DATA: WeddingData = {
   custom: {
     quoteText: '"우리는 매일 시간을 여행한다..."',
     quoteSource: '- 영화 「어바웃 타임」 중',
+    // wind-memory 프리셋용 캐치프레이즈 (줄바꿈으로 구분)
+    heroQuote: 'Two hearts,\nOne love,\nForever.',
   },
 
   // ═══ Legacy 호환 ═══
