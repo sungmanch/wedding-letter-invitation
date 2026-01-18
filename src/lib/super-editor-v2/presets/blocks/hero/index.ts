@@ -15,6 +15,7 @@ import { HERO_DARK_ROMANTIC } from './dark-romantic'
 import { HERO_BRIGHT_CASUAL } from './bright-casual'
 import { HERO_MONOCHROME_BOLD } from './monochrome-bold'
 import { HERO_MINIMAL_CLASSIC } from './minimal-classic'
+import { HERO_CURTAIN_BACKDROP } from './curtain-backdrop'
 
 // ============================================
 // Type Exports
@@ -28,6 +29,7 @@ export type HeroPresetId =
   | 'hero-bright-casual'
   | 'hero-monochrome-bold'
   | 'hero-minimal-classic'
+  | 'hero-curtain-backdrop'
 
 // ============================================
 // Preset Registry
@@ -41,6 +43,7 @@ export const HERO_PRESETS: Record<HeroPresetId, BlockPreset> = {
   'hero-bright-casual': HERO_BRIGHT_CASUAL,
   'hero-monochrome-bold': HERO_MONOCHROME_BOLD,
   'hero-minimal-classic': HERO_MINIMAL_CLASSIC,
+  'hero-curtain-backdrop': HERO_CURTAIN_BACKDROP,
 }
 
 // ============================================

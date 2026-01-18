@@ -191,6 +191,32 @@ const FONT_STACKS = {
     googleFonts: ['Nanum Brush Script:400'],
     sizeScale: 1.1,
   },
+
+  // ─── KBL 폰트 (로컬) ───
+  kblCourt: {
+    family: ['KBL Court', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 0.95, // 굵은 폰트, 약간 크게 렌더링됨
+  },
+  kblJump: {
+    family: ['KBL Jump', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0,
+  },
+  kblJumpCondensed: {
+    family: ['KBL Jump Condensed', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.05, // Condensed 폰트, 좁은 폭
+  },
+  kblJumpExtended: {
+    family: ['KBL Jump Extended', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 0.95, // Extended 폰트, 넓은 폭
+  },
 } as const
 
 // ============================================
@@ -576,4 +602,9 @@ export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
   // 한글 약간 크게
   'NanumSquare': 0.95,
   'Nanum Brush Script': 1.1,
+  // KBL 폰트 (로컬)
+  'KBL Court': 0.95,
+  'KBL Jump': 1.0,
+  'KBL Jump Condensed': 1.05,
+  'KBL Jump Extended': 0.95,
 }

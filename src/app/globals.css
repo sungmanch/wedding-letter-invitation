@@ -41,6 +41,46 @@
   font-display: swap;
 }
 
+/* KBL Court - Extra Bold */
+@font-face {
+  font-family: 'KBL Court';
+  src: url('/fonts/KBLCourt_EB.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* KBL Jump - Regular */
+@font-face {
+  font-family: 'KBL Jump';
+  src: url('/fonts/KBLJump_R.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* KBL Jump - Bold */
+@font-face {
+  font-family: 'KBL Jump';
+  src: url('/fonts/KBLJump_B.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* KBL Jump Condensed - Extra Bold */
+@font-face {
+  font-family: 'KBL Jump Condensed';
+  src: url('/fonts/KBLJump_EB_Condensed.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* KBL Jump Extended - Extra Bold */
+@font-face {
+  font-family: 'KBL Jump Extended';
+  src: url('/fonts/KBLJump_EB_Extended.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
 :root {
   /* ==========================================
      NEW: Clean Modern Palette (2025 Redesign)
