@@ -81,6 +81,46 @@
   font-display: swap;
 }
 
+/* 강원교육모두 - Light */
+@font-face {
+  font-family: 'Gangwon Edu Modu';
+  src: url('/fonts/강원교육모두 Light.woff') format('woff');
+  font-weight: 300;
+  font-display: swap;
+}
+
+/* 강원교육모두 - Bold */
+@font-face {
+  font-family: 'Gangwon Edu Modu';
+  src: url('/fonts/강원교육모두 Bold.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* 강원교육새음 */
+@font-face {
+  font-family: 'Gangwon Edu Saeum';
+  src: url('/fonts/강원교육새음.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* 강원교육튼튼 */
+@font-face {
+  font-family: 'Gangwon Edu Teunteun';
+  src: url('/fonts/강원교육튼튼.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* 강원교육현옥샘 */
+@font-face {
+  font-family: 'Gangwon Edu Hyunok';
+  src: url('/fonts/강원교육현옥샘.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   /* ==========================================
      NEW: Clean Modern Palette (2025 Redesign)

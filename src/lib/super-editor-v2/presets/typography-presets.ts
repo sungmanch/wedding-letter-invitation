@@ -217,6 +217,32 @@ const FONT_STACKS = {
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 0.95, // Extended 폰트, 넓은 폭
   },
+
+  // ─── 강원교육 폰트 (로컬) ───
+  gangwonEduModu: {
+    family: ['Gangwon Edu Modu', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // Light(300), Bold(700) 지원
+  },
+  gangwonEduSaeum: {
+    family: ['Gangwon Edu Saeum', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // 손글씨 스타일
+  },
+  gangwonEduTeunteun: {
+    family: ['Gangwon Edu Teunteun', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 0.95, // 굵은 둥근 스타일
+  },
+  gangwonEduHyunok: {
+    family: ['Gangwon Edu Hyunok', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // 선생님 손글씨 스타일
+  },
 } as const
 
 // ============================================
@@ -607,4 +633,9 @@ export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
   'KBL Jump': 1.0,
   'KBL Jump Condensed': 1.05,
   'KBL Jump Extended': 0.95,
+  // 강원교육 폰트 (로컬)
+  'Gangwon Edu Modu': 1.0,
+  'Gangwon Edu Saeum': 1.0,
+  'Gangwon Edu Teunteun': 0.95,
+  'Gangwon Edu Hyunok': 1.0,
 }
