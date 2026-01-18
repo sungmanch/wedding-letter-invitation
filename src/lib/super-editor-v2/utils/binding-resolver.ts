@@ -425,7 +425,7 @@ export function getYear(dateStr: string): string {
 export function getMonth(dateStr: string): string {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return ''
-  return String(date.getMonth() + 1).padStart(2, '0')
+  return String(date.getMonth() + 1)  // padStart 제거 - 이미지 파일명이 1.png, 2.png 형식
 }
 
 /**

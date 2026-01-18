@@ -24,6 +24,7 @@ import type {
   GroupProps,
   GradientValue,
   SizeMode,
+  WeddingData,
 } from '../schema/types'
 import { useDocument } from '../context/document-context'
 import { useBlock } from '../context/block-context'
@@ -180,6 +181,7 @@ export function ElementRenderer({
         element={element}
         value={formattedValue}
         editable={editable}
+        data={data}
       />
     </div>
   )
@@ -193,9 +195,10 @@ interface ElementTypeRendererProps {
   element: Element
   value: unknown
   editable: boolean
+  data: WeddingData
 }
 
-function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererProps) {
+function ElementTypeRenderer({ element, value, editable, data }: ElementTypeRendererProps) {
   const props = element.props
   // element.type을 우선 사용, props.type은 fallback
   const elementType = element.type || props?.type
@@ -229,18 +232,24 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
         />
       )
 
-    case 'image':
+    case 'image': {
+      // srcTemplate이 있으면 interpolate로 URL 생성
+      const imageProps = props as ImageProps
+      const imageSrc = imageProps.srcTemplate
+        ? interpolate(imageProps.srcTemplate, data)
+        : (value as string)
       return (
         <ImageElement
-          src={value as string}
-          objectFit={(props as ImageProps).objectFit}
-          overlay={(props as ImageProps).overlay}
-          filter={(props as ImageProps).filter}
-          fallbackSrc={(props as ImageProps).fallbackSrc}
+          src={imageSrc}
+          objectFit={imageProps.objectFit}
+          overlay={imageProps.overlay}
+          filter={imageProps.filter}
+          fallbackSrc={imageProps.fallbackSrc}
           style={element.style}
           editable={editable}
         />
       )
+    }
 
     case 'shape':
       return (
@@ -302,6 +311,7 @@ function ElementTypeRenderer({ element, value, editable }: ElementTypeRendererPr
           showDday={(props as CalendarProps).showDday}
           highlightColor={(props as CalendarProps).highlightColor}
           markerType={(props as CalendarProps).markerType}
+          imageStyle={(props as CalendarProps).imageStyle}
           style={element.style}
         />
       )
@@ -635,17 +645,23 @@ function GroupChildElement({ element, editable }: GroupChildElementProps) {
           />
         )
 
-      case 'image':
+      case 'image': {
+        // srcTemplate이 있으면 interpolate로 URL 생성
+        const imageProps = props as ImageProps
+        const imageSrc = imageProps.srcTemplate
+          ? interpolate(imageProps.srcTemplate, data)
+          : (value as string)
         return (
           <ImageElement
-            src={value as string}
-            objectFit={(props as ImageProps).objectFit}
-            overlay={(props as ImageProps).overlay}
-            filter={(props as ImageProps).filter}
+            src={imageSrc}
+            objectFit={imageProps.objectFit}
+            overlay={imageProps.overlay}
+            filter={imageProps.filter}
             style={element.style}
             editable={editable}
           />
         )
+      }
 
       case 'shape':
         return (

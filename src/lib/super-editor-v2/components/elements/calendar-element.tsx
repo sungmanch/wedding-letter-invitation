@@ -4,11 +4,20 @@
  * Calendar Element - 캘린더 요소
  *
  * 결혼식 날짜를 표시하는 미니 캘린더
+ * imageStyle이 설정되면 이미지 기반 캘린더를 사용
  */
 
 import { useMemo, type CSSProperties } from 'react'
+import Image from 'next/image'
 import type { ElementStyle } from '../../schema/types'
 import { calculateDday, getDayOfWeek } from '../../utils/binding-resolver'
+import {
+  getMonthImagePath,
+  getDateImagePath,
+  getWeekdayImagePath,
+  getStyleConfig,
+  WEEKDAYS_EN,
+} from '@/components/ui/image-calendar'
 
 // ============================================
 // Types
@@ -22,6 +31,7 @@ export interface CalendarElementProps {
   highlightColor?: string
   highlightTextColor?: string // 하이라이트된 날짜의 텍스트 색상
   markerType?: 'circle' | 'heart' // 날짜 선택 마커 타입
+  imageStyle?: number // 이미지 캘린더 스타일 (1-11)
   style?: ElementStyle
   className?: string
 }
@@ -57,6 +67,7 @@ export function CalendarElement({
   highlightColor = 'var(--accent-default)',
   highlightTextColor,
   markerType = 'circle',
+  imageStyle,
   style,
   className = '',
 }: CalendarElementProps) {
@@ -162,6 +173,142 @@ export function CalendarElement({
 
   const DAYS = ['일', '월', '화', '수', '목', '금', '토']
 
+  // 이미지 스타일이 설정된 경우 이미지 기반 캘린더 렌더링
+  if (imageStyle) {
+    const styleConfig = getStyleConfig(imageStyle)
+
+    return (
+      <div className={`se2-calendar-element se2-calendar-element--image ${className}`} style={containerStyle}>
+        {/* 월 헤더 이미지 */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginBottom: '16px',
+            height: '40px',
+          }}
+        >
+          <Image
+            src={getMonthImagePath(imageStyle, dateInfo.month, styleConfig.monthExt)}
+            alt={`${dateInfo.month}월`}
+            width={200}
+            height={40}
+            style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+          />
+        </div>
+
+        {/* 요일 헤더 (이미지) */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '2px',
+            width: '100%',
+            maxWidth: '280px',
+            marginBottom: '4px',
+          }}
+        >
+          {WEEKDAYS_EN.map((day) => (
+            <div
+              key={day}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '20px',
+              }}
+            >
+              <Image
+                src={getWeekdayImagePath(imageStyle, day)}
+                alt={day}
+                width={32}
+                height={16}
+                style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* 이미지 달력 그리드 */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '2px',
+            width: '100%',
+            maxWidth: '280px',
+          }}
+        >
+          {calendarGrid.map((d, i) => {
+            const isSelected = d === dateInfo.day
+
+            if (d === null) {
+              return <div key={i} style={{ aspectRatio: '1' }} />
+            }
+
+            return (
+              <div
+                key={i}
+                style={{
+                  aspectRatio: '1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '2px',
+                  position: 'relative',
+                  borderRadius: isSelected ? '50%' : 0,
+                  backgroundColor: isSelected ? highlightColor : 'transparent',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Image
+                  src={getDateImagePath(imageStyle, d, styleConfig.dateExt)}
+                  alt={String(d)}
+                  width={28}
+                  height={28}
+                  style={{
+                    objectFit: 'contain',
+                    width: '100%',
+                    height: '100%',
+                    filter: isSelected ? 'brightness(0) invert(1)' : 'none',
+                  }}
+                />
+              </div>
+            )
+          })}
+        </div>
+
+        {/* D-day */}
+        {showDday && (
+          <div
+            style={{
+              marginTop: '16px',
+              fontSize: 'var(--text-xl)',
+              fontWeight: 600,
+              color: highlightColor,
+            }}
+          >
+            {dateInfo.dday}
+          </div>
+        )}
+
+        {/* 예식일 요일 */}
+        {showFooter && (
+          <div
+            style={{
+              marginTop: '4px',
+              fontSize: 'var(--text-sm)',
+              color: 'var(--fg-muted)',
+            }}
+          >
+            {dateInfo.year}년 {dateInfo.month}월 {dateInfo.day}일 {dateInfo.dayOfWeek}요일
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // 기본 텍스트 기반 캘린더
   return (
     <div className={`se2-calendar-element ${className}`} style={containerStyle}>
       {/* 헤더: 년월 */}
