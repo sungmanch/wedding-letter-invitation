@@ -253,6 +253,15 @@ const FONT_STACKS = {
     sizeScale: 1.0, // 선생님 손글씨 스타일
     credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
   },
+
+  // ─── 학교안심 폰트 (로컬) ───
+  hakgyoansimBadasseugi: {
+    family: ['Hakgyoansim Badasseugi', 'Apple SD Gothic Neo', 'sans-serif'],
+    fallback: 'sans-serif',
+    googleFonts: [], // 로컬 폰트 - globals.css @font-face
+    sizeScale: 1.0, // Light(300), Bold(700) 지원
+    credit: { text: '한국교육학술정보원', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
+  },
 } as const
 
 // ============================================
@@ -648,4 +657,6 @@ export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
   'Gangwon Edu Saeum': 1.0,
   'Gangwon Edu Teunteun': 0.95,
   'Gangwon Edu Hyunok': 1.0,
+  // 학교안심 폰트 (로컬)
+  'Hakgyoansim Badasseugi': 1.0,
 }

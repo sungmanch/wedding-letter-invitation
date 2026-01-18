@@ -121,6 +121,22 @@
   font-display: swap;
 }
 
+/* 학교안심 받아쓰기 - Light */
+@font-face {
+  font-family: 'Hakgyoansim Badasseugi';
+  src: url('/fonts/Hakgyoansim-Badasseugi-L.woff') format('woff');
+  font-weight: 300;
+  font-display: swap;
+}
+
+/* 학교안심 받아쓰기 - Bold */
+@font-face {
+  font-family: 'Hakgyoansim Badasseugi';
+  src: url('/fonts/Hakgyoansim-Badasseugi-B.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   /* ==========================================
      NEW: Clean Modern Palette (2025 Redesign)
