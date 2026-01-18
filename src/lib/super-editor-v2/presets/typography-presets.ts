@@ -17,6 +17,12 @@ export interface FontStack {
   readonly fallback: string
   readonly googleFonts?: readonly string[] // Google Fonts 로드용 이름
   readonly sizeScale?: number // 폰트 크기 보정 계수 (기본 1.0)
+  // 폰트 출처 명시 (라이선스 요구사항)
+  readonly credit?: {
+    readonly text: string       // 출처 표시 텍스트 (예: "강원도교육청")
+    readonly url?: string       // 출처 링크 (선택)
+    readonly required: boolean  // true: 필수, false: 권장
+  }
 }
 
 export interface TypographyPreset {
@@ -224,24 +230,28 @@ const FONT_STACKS = {
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 1.0, // Light(300), Bold(700) 지원
+    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
   },
   gangwonEduSaeum: {
     family: ['Gangwon Edu Saeum', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 1.0, // 손글씨 스타일
+    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
   },
   gangwonEduTeunteun: {
     family: ['Gangwon Edu Teunteun', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 0.95, // 굵은 둥근 스타일
+    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
   },
   gangwonEduHyunok: {
     family: ['Gangwon Edu Hyunok', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 1.0, // 선생님 손글씨 스타일
+    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
   },
 } as const
 
