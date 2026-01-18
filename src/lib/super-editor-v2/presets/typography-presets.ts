@@ -230,28 +230,28 @@ const FONT_STACKS = {
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 1.0, // Light(300), Bold(700) 지원
-    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
   },
   gangwonEduSaeum: {
     family: ['Gangwon Edu Saeum', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 1.0, // 손글씨 스타일
-    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
   },
   gangwonEduTeunteun: {
     family: ['Gangwon Edu Teunteun', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 0.95, // 굵은 둥근 스타일
-    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
   },
   gangwonEduHyunok: {
     family: ['Gangwon Edu Hyunok', 'Apple SD Gothic Neo', 'sans-serif'],
     fallback: 'sans-serif',
     googleFonts: [], // 로컬 폰트 - globals.css @font-face
     sizeScale: 1.0, // 선생님 손글씨 스타일
-    credit: { text: '강원특별자치도교육청', url: 'https://www.gwe.go.kr', required: false },
+    credit: { text: '강원특별자치도교육청', url: 'https://copyright.keris.or.kr/wft/fntDwnld', required: false },
   },
 } as const
 
