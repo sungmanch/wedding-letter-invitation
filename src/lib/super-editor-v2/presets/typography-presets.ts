@@ -73,6 +73,24 @@ const FONT_STACKS = {
     googleFonts: ['Cinzel:400,500,600,700'],
     sizeScale: 0.90, // 대문자만, 크게 렌더링됨
   },
+  baskervville: {
+    family: ['Baskervville', 'Baskerville', 'Georgia', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Baskervville:400,500,600,700'],
+    sizeScale: 1.0,
+  },
+  bodoniModaSc: {
+    family: ['Bodoni Moda SC', 'Didot', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Bodoni Moda SC:400,500,600,700,800,900'],
+    sizeScale: 0.95, // SC(Small Caps)는 약간 크게 렌더링됨
+  },
+  libreBodoni: {
+    family: ['Libre Bodoni', 'Didot', 'Georgia', 'serif'],
+    fallback: 'serif',
+    googleFonts: ['Libre Bodoni:400,500,600,700'],
+    sizeScale: 1.0,
+  },
 
   // ─── 영문 산세리프 ───
   montserrat: {
@@ -106,6 +124,24 @@ const FONT_STACKS = {
     fallback: 'cursive',
     googleFonts: ['Alex Brush:400'],
     sizeScale: 1.15,
+  },
+  nothingYouCouldDo: {
+    family: ['Nothing You Could Do', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Nothing You Could Do:400'],
+    sizeScale: 1.1, // 손글씨 스타일, 약간 작게 렌더링됨
+  },
+  rockSalt: {
+    family: ['Rock Salt', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Rock Salt:400'],
+    sizeScale: 1.15, // 펠트펜 손글씨, 작게 렌더링됨
+  },
+  swankyAndMooMoo: {
+    family: ['Swanky and Moo Moo', 'cursive'],
+    fallback: 'cursive',
+    googleFonts: ['Swanky and Moo Moo:400'],
+    sizeScale: 1.0, // 넓은 손글씨
   },
 
   // ─── 한글 명조 ───
@@ -516,14 +552,20 @@ export const FONT_SIZE_SCALE_TABLE: Record<string, number> = {
   'Pinyon Script': 1.25,
   'Alex Brush': 1.15,
   'The Nautigal': 1.20,
+  'Nothing You Could Do': 1.1,
+  'Rock Salt': 1.15,
+  'Swanky and Moo Moo': 1.0,
   // 영문 표준
   'Dancing Script': 1.0,
   'Montserrat': 1.0,
   'Inter': 1.0,
+  'Baskervville': 1.0,
+  'Libre Bodoni': 1.0,
   // 영문 크게 렌더링
   'Playfair Display': 0.95,
   'Poppins': 0.95,
   'Cinzel': 0.90,
+  'Bodoni Moda SC': 0.95,
   'Cormorant Garamond': 1.05,
   // 한글 표준
   'Pretendard': 1.0,

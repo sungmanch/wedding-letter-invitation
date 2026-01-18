@@ -14,6 +14,7 @@ import { HERO_MINIMAL_OVERLAY } from './minimal-overlay'
 import { HERO_DARK_ROMANTIC } from './dark-romantic'
 import { HERO_BRIGHT_CASUAL } from './bright-casual'
 import { HERO_MONOCHROME_BOLD } from './monochrome-bold'
+import { HERO_MINIMAL_CLASSIC } from './minimal-classic'
 
 // ============================================
 // Type Exports
@@ -26,6 +27,7 @@ export type HeroPresetId =
   | 'hero-dark-romantic'
   | 'hero-bright-casual'
   | 'hero-monochrome-bold'
+  | 'hero-minimal-classic'
 
 // ============================================
 // Preset Registry
@@ -38,6 +40,7 @@ export const HERO_PRESETS: Record<HeroPresetId, BlockPreset> = {
   'hero-dark-romantic': HERO_DARK_ROMANTIC,
   'hero-bright-casual': HERO_BRIGHT_CASUAL,
   'hero-monochrome-bold': HERO_MONOCHROME_BOLD,
+  'hero-minimal-classic': HERO_MINIMAL_CLASSIC,
 }
 
 // ============================================
